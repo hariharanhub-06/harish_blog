@@ -19,14 +19,19 @@ export default function HMSnacksPage() {
     const [modalQuantity, setModalQuantity] = useState(1);
 
     useEffect(() => {
-        // Fetch products from API (will implement later)
-        // For now, use mock data
-        const mockProducts = [
-            { id: '1', name: 'Premium Butter Murukku', category: 'Savories', pricePerKg: 480, imageUrl: 'https://images.unsplash.com/photo-1601050630325-a13f01968870?q=80&w=800', description: 'Homemade butter murukku made with traditional 5th generation recipe.', stock: 50 },
-            { id: '2', name: 'Special Mysore Pak', category: 'Sweets', pricePerKg: 650, imageUrl: 'https://images.unsplash.com/photo-1589119908995-c6837fa14848?q=80&w=800', description: 'Melt-in-your-mouth ghee Mysore Pak.', stock: 30 },
-            { id: '3', name: 'Kara Boondi', category: 'Savories', pricePerKg: 320, imageUrl: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?q=80&w=800', description: 'Crispy and spicy gram flour boondi.', stock: 100 },
-        ];
-        setProducts(mockProducts);
+        const fetchProducts = async () => {
+            try {
+                const res = await fetch('/api/snacks/products');
+                if (res.ok) {
+                    const data = await res.json();
+                    setProducts(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch products:', error);
+            }
+        };
+
+        fetchProducts();
 
     }, []);
 
