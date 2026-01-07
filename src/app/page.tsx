@@ -1,4 +1,5 @@
 import { db } from "@/db"; // Database entry point
+export const dynamic = "force-dynamic";
 import { profiles, projects, experience, education } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Code, Briefcase, Award, User, Star } from "lucide-react";
