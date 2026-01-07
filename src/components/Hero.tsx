@@ -93,10 +93,11 @@ export default function Hero({ profile }: HeroProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-lg md:text-xl text-secondary max-w-3xl mb-12 leading-relaxed font-medium"
+                className="text-lg md:text-xl text-gray-900 max-w-3xl mb-12 leading-relaxed font-bold"
+                style={{ textShadow: '0 2px 4px rgba(255,255,255,0.8)' }}
             >
-                Hi, I&apos;m <span className="text-gray-900 font-bold">{profile.name}</span>.
-                <span className="block mt-2 opacity-80">{profile.headline}</span>
+                Hi, I&apos;m <span className="text-gray-900 font-black">{profile.name}</span>.
+                <span className="block mt-2 text-gray-800 font-semibold">{profile.headline}</span>
             </motion.p>
 
             <motion.div
