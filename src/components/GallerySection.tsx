@@ -46,19 +46,19 @@ export default function GallerySection({ items }: GallerySectionProps) {
                 <div className="w-16 h-1.5 bg-pink-500 rounded-full"></div>
             </div>
 
-            <div className="relative h-[350px] md:h-[500px] flex items-center justify-center">
+            <div className="relative h-[400px] md:h-[650px] flex items-center justify-center">
                 {/* Navigation Arrows */}
                 {items.length > 1 && (
                     <>
                         <button
                             onClick={handlePrev}
-                            className="absolute left-4 z-50 bg-white/90 backdrop-blur-md shadow-2xl p-4 rounded-full text-gray-900 hover:bg-white transition-all hover:scale-110 active:scale-95"
+                            className="absolute left-0 md:left-4 z-50 bg-white/90 backdrop-blur-md shadow-2xl p-4 rounded-full text-gray-900 hover:bg-white transition-all hover:scale-110 active:scale-95"
                         >
                             <ChevronLeft size={24} />
                         </button>
                         <button
                             onClick={handleNext}
-                            className="absolute right-4 z-50 bg-white/90 backdrop-blur-md shadow-2xl p-4 rounded-full text-gray-900 hover:bg-white transition-all hover:scale-110 active:scale-95"
+                            className="absolute right-0 md:right-4 z-50 bg-white/90 backdrop-blur-md shadow-2xl p-4 rounded-full text-gray-900 hover:bg-white transition-all hover:scale-110 active:scale-95"
                         >
                             <ChevronRight size={24} />
                         </button>
@@ -66,7 +66,7 @@ export default function GallerySection({ items }: GallerySectionProps) {
                 )}
 
                 {/* 3D Carousel Container */}
-                <div className="relative w-full max-w-4xl h-full flex items-center justify-center">
+                <div className="relative w-full max-w-6xl h-full flex items-center justify-center">
                     <AnimatePresence initial={false}>
                         {displayIndices.map((offset) => {
                             const index = getIndex(offset);
@@ -81,23 +81,23 @@ export default function GallerySection({ items }: GallerySectionProps) {
                                     initial={{
                                         opacity: 0,
                                         scale: 0.6,
-                                        x: offset * 300,
+                                        x: offset * 400,
                                         zIndex: 0
                                     }}
                                     animate={{
-                                        opacity: isCenter ? 1 : 0.4,
-                                        scale: isCenter ? 1 : 0.75,
-                                        x: offset * (typeof window !== 'undefined' && window.innerWidth < 768 ? 120 : 250),
+                                        opacity: isCenter ? 1 : 0.45,
+                                        scale: isCenter ? 1 : 0.8,
+                                        x: offset * (typeof window !== 'undefined' && window.innerWidth < 768 ? 140 : 350),
                                         zIndex: isCenter ? 30 : 10,
-                                        rotateY: offset * 15,
+                                        rotateY: offset * 20,
                                     }}
                                     exit={{
                                         opacity: 0,
                                         scale: 0.6,
-                                        x: offset * -300
+                                        x: offset * -400
                                     }}
-                                    transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-                                    className="absolute w-[85%] md:w-[60%] aspect-video rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20 group cursor-pointer"
+                                    transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
+                                    className="absolute w-[90%] md:w-[75%] aspect-video rounded-[3rem] overflow-hidden shadow-2xl shadow-black/30 group cursor-pointer"
                                     style={{
                                         filter: isCenter ? "none" : "blur(1px) grayscale(20%)",
                                     }}
