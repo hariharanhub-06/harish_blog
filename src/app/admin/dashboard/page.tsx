@@ -21,6 +21,7 @@ import ProjectsModule from "@/components/admin/ProjectsModule";
 import TimelineModule from "@/components/admin/TimelineModule";
 import MessagesModule from "@/components/admin/MessagesModule";
 import GalleryModule from "@/components/admin/GalleryModule";
+import OverviewModule from "@/components/admin/OverviewModule";
 
 type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "gallery";
 
@@ -28,6 +29,19 @@ export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<Tab>("overview");
+
+    // Sync tab with URL hash for persistence on refresh
+    useEffect(() => {
+        const hash = window.location.hash.replace('#', '') as Tab;
+        if (hash && ["overview", "profile", "projects", "timeline", "messages", "gallery"].includes(hash)) {
+            setActiveTab(hash);
+        }
+    }, []);
+
+    const handleTabChange = (tab: Tab) => {
+        setActiveTab(tab);
+        window.location.hash = tab;
+    };
 
     useEffect(() => {
         if (!loading && !user) {
@@ -59,48 +73,7 @@ export default function AdminDashboard() {
             case "timeline": return <TimelineModule />;
             case "messages": return <MessagesModule />;
             case "gallery": return <GalleryModule />;
-            default: return (
-                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {[
-                            { label: "Site Visitors", value: "1,2k", icon: User, color: "text-blue-600", bg: "bg-blue-50" },
-                            { label: "Live Projects", value: "12", icon: Layout, color: "text-purple-600", bg: "bg-purple-50" },
-                            { label: "Unread Messages", value: "4", icon: MessageSquare, color: "text-amber-600", bg: "bg-amber-50" },
-                        ].map((stat) => (
-                            <div key={stat.label} className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden group">
-                                <div className="absolute -bottom-6 -right-6 text-gray-50 group-hover:text-gray-100 transition-colors">
-                                    <stat.icon size={120} />
-                                </div>
-                                <p className="text-secondary text-xs font-black uppercase tracking-widest mb-2 relative z-10">{stat.label}</p>
-                                <h3 className="text-4xl font-black text-gray-900 relative z-10">{stat.value}</h3>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-8">
-                        {menuItems.filter(i => i.id !== 'overview').map((item) => (
-                            <button
-                                key={item.id}
-                                onClick={() => setActiveTab(item.id as Tab)}
-                                className="group flex items-center justify-between p-8 bg-white rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all hover:-translate-y-1 text-left"
-                            >
-                                <div className="flex items-center space-x-8">
-                                    <div className={`${item.color} p-6 rounded-[2rem] text-white shadow-xl group-hover:scale-110 transition-transform`}>
-                                        <item.icon size={28} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-2xl font-black text-gray-900 group-hover:text-primary transition-colors">{item.title}</h3>
-                                        <p className="text-secondary font-medium mt-1">Manage your {item.title.toLowerCase()}</p>
-                                    </div>
-                                </div>
-                                <div className="bg-gray-50 p-4 rounded-2xl text-gray-300 group-hover:bg-primary/10 group-hover:text-primary transition-all">
-                                    <ChevronRight size={24} />
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
+            default: return <OverviewModule />;
         }
     };
 
@@ -119,7 +92,7 @@ export default function AdminDashboard() {
                     {menuItems.map((item) => (
                         <button
                             key={item.id}
-                            onClick={() => setActiveTab(item.id as Tab)}
+                            onClick={() => handleTabChange(item.id as Tab)}
                             className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm transition-all ${activeTab === item.id
                                 ? "bg-primary text-white shadow-xl shadow-primary/20"
                                 : "text-secondary hover:bg-gray-50 hover:text-primary"

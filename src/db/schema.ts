@@ -123,3 +123,12 @@ export const gallery = pgTable("gallery", {
   imageUrl: text("image_url").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const visitorAnalytics = pgTable("visitor_analytics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  page: text("page").notNull(),
+  visitorId: text("visitor_id"), // Unique session/user ID
+  timestamp: timestamp("timestamp").defaultNow(),
+  userAgent: text("user_agent"),
+  referrer: text("referrer"),
+});
