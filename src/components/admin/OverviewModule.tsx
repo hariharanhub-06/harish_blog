@@ -8,7 +8,8 @@ import {
     TrendingUp,
     Calendar,
     Phone,
-    ArrowRight
+    ArrowRight,
+    Search
 } from "lucide-react";
 import {
     LineChart,
@@ -25,6 +26,13 @@ import {
 export default function OverviewModule() {
     const [analytics, setAnalytics] = useState<any[]>([]);
     const [recentMessages, setRecentMessages] = useState<any[]>([]);
+
+    // Date Range State
+    const [dateRange, setDateRange] = useState({
+        start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        end: new Date().toISOString().split('T')[0]
+    });
+
     const [stats, setStats] = useState({
         totalViews: 0,
         totalVisitors: 0,
@@ -32,37 +40,67 @@ export default function OverviewModule() {
     });
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [analyticsRes, messagesRes] = await Promise.all([
-                    fetch("/api/analytics"),
-                    fetch("/api/admin/messages")
-                ]);
-
-                if (analyticsRes.ok) {
-                    const data = await analyticsRes.json();
-                    setAnalytics(data.reverse()); // Chronological for graph
-
-                    const views = data.reduce((acc: number, curr: any) => acc + curr.views, 0);
-                    const visitors = data.reduce((acc: number, curr: any) => acc + curr.visitors, 0);
-                    setStats(prev => ({ ...prev, totalViews: views, totalVisitors: visitors }));
-                }
-
-                if (messagesRes.ok) {
-                    const data = await messagesRes.json();
-                    setRecentMessages(data.slice(0, 5));
-                    setStats(prev => ({ ...prev, unreadMessages: data.filter((m: any) => m.status === 'Fresh').length }));
-                }
-            } catch (err) {
-                console.error("Failed to fetch dashboard data", err);
-            }
-        };
-
         fetchData();
-    }, []);
+    }, [dateRange]);
+
+    const fetchData = async () => {
+        try {
+            const [analyticsRes, messagesRes] = await Promise.all([
+                fetch(`/api/analytics?start=${dateRange.start}&end=${dateRange.end}`),
+                fetch("/api/admin/messages")
+            ]);
+
+            if (analyticsRes.ok) {
+                const data = await analyticsRes.json();
+                setAnalytics(data.reverse()); // Chronological for graph
+
+                const views = data.reduce((acc: number, curr: any) => acc + curr.views, 0);
+                const visitors = data.reduce((acc: number, curr: any) => acc + curr.visitors, 0);
+                setStats(prev => ({ ...prev, totalViews: views, totalVisitors: visitors }));
+            }
+
+            if (messagesRes.ok) {
+                const data = await messagesRes.json();
+                setRecentMessages(data.slice(0, 5));
+                setStats(prev => ({ ...prev, unreadMessages: data.filter((m: any) => m.status === 'Fresh').length }));
+            }
+        } catch (err) {
+            console.error("Failed to fetch dashboard data", err);
+        }
+    };
 
     return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Analytics and Controls */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                        <TrendingUp className="text-primary" /> Analytics Overview
+                    </h2>
+                    <p className="text-secondary font-medium mt-1">Track your performance and inquiries</p>
+                </div>
+
+                <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex items-center gap-2 px-3">
+                        <Calendar size={14} className="text-secondary" />
+                        <span className="text-[10px] font-black uppercase text-secondary">Date Range</span>
+                    </div>
+                    <input
+                        type="date"
+                        value={dateRange.start}
+                        onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                        className="bg-gray-50 border-0 rounded-xl text-xs font-bold px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    <span className="text-gray-300">to</span>
+                    <input
+                        type="date"
+                        value={dateRange.end}
+                        onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                        className="bg-gray-50 border-0 rounded-xl text-xs font-bold px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                </div>
+            </div>
+
             {/* Header Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden group">
@@ -92,16 +130,7 @@ export default function OverviewModule() {
 
             {/* Analytics Graph */}
             <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
-                <div className="flex justify-between items-center mb-10">
-                    <div>
-                        <h3 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-                            <TrendingUp className="text-primary" /> Visitor Analytics
-                        </h3>
-                        <p className="text-secondary font-medium mt-1">Traffic trends for the last 30 days</p>
-                    </div>
-                </div>
-
-                <div className="h-[400px] w-full">
+                <div className="h-[400px] w-full mt-6">
                     {analytics.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={analytics}>

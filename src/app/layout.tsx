@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 
@@ -36,6 +37,7 @@ export default function RootLayout({
         <AuthProvider>
           <ClientLayout>
             {children}
+            <Analytics />
           </ClientLayout>
         </AuthProvider>
       </body>
