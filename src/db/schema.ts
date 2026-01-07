@@ -132,3 +132,41 @@ export const visitorAnalytics = pgTable("visitor_analytics", {
   userAgent: text("user_agent"),
   referrer: text("referrer"),
 });
+
+// HM Snacks - Products Table
+export const snackProducts = pgTable("snack_products", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description"),
+  category: text("category").notNull(), // Savories, Sweets, etc.
+  imageUrl: text("image_url"),
+  pricePerKg: integer("price_per_kg").notNull(), // Store in paisa or cents? Let's use actual rupees for simplicity or integer for safer math.
+  stock: integer("stock").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// HM Snacks - Orders Table
+export const snackOrders = pgTable("snack_orders", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orderId: text("order_id").notNull().unique(), // Human readable order ID (e.g. HMS-1001)
+  customerName: text("customer_name").notNull(),
+  customerMobile: text("customer_mobile").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  address: text("address").notNull(),
+  pincode: text("pincode").notNull(),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  country: text("country").notNull(),
+  items: jsonb("items").notNull(), // Array of {productId, name, imageUrl, quantity (in kg), price}
+  totalAmount: integer("total_amount").notNull(),
+  shippingCost: integer("shipping_cost").default(0),
+  paymentMethod: text("payment_method").default("UPI"), // 'UPI'
+  paymentId: text("payment_id"), // Stores UTR for UPI
+  shipmentId: text("shipment_id"), // Stores Tracking Number
+  courierName: text("courier_name"), // Stores Courier Name (e.g. DTDC, Shiprocket)
+  status: text("status").default("Pending Verification"), // Pending Verification, Payment Confirmed, Parcel Prepared, Shipping, Delivered, Cancel
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});

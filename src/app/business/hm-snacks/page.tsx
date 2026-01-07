@@ -1,0 +1,355 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingCart, Heart, Share2, Clock, X, Minus, Plus, Package } from "lucide-react";
+import { useCart } from "@/context/CartContext";
+import { Tilt } from "@/components/Tilt";
+
+// Category Tabs
+const CATEGORIES = ["All", "Savories", "Sweets", "Spices", "Ready to Eat"];
+
+export default function HMSnacksPage() {
+    const { addToCart, toggleWishlist, isInWishlist } = useCart();
+    const [products, setProducts] = useState<any[]>([]);
+    const [activeCategory, setActiveCategory] = useState("All");
+
+    const [selectedProduct, setSelectedProduct] = useState<any>(null);
+    const [modalQuantity, setModalQuantity] = useState(1);
+
+    useEffect(() => {
+        // Fetch products from API (will implement later)
+        // For now, use mock data
+        const mockProducts = [
+            { id: '1', name: 'Premium Butter Murukku', category: 'Savories', pricePerKg: 480, imageUrl: 'https://images.unsplash.com/photo-1601050630325-a13f01968870?q=80&w=800', description: 'Homemade butter murukku made with traditional 5th generation recipe.', stock: 50 },
+            { id: '2', name: 'Special Mysore Pak', category: 'Sweets', pricePerKg: 650, imageUrl: 'https://images.unsplash.com/photo-1589119908995-c6837fa14848?q=80&w=800', description: 'Melt-in-your-mouth ghee Mysore Pak.', stock: 30 },
+            { id: '3', name: 'Kara Boondi', category: 'Savories', pricePerKg: 320, imageUrl: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?q=80&w=800', description: 'Crispy and spicy gram flour boondi.', stock: 100 },
+        ];
+        setProducts(mockProducts);
+
+    }, []);
+
+    const filteredProducts = activeCategory === "All"
+        ? products
+        : products.filter(p => p.category === activeCategory);
+
+    const openModal = (product: any) => {
+        setSelectedProduct(product);
+        setModalQuantity(1);
+    };
+
+    return (
+        <div className="min-h-screen bg-[#fafafa]">
+            {/* Hero Section */}
+            <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
+                <Image
+                    src="https://images.unsplash.com/photo-1505253304499-671c55fb57fe?q=80&w=2000"
+                    fill
+                    className="object-cover brightness-50"
+                    alt="Snacks Hero"
+                    priority
+                />
+                <div className="relative z-10 text-center px-6">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="inline-block px-4 py-1.5 bg-pink-500/20 backdrop-blur-md rounded-full text-pink-400 text-[10px] font-black uppercase tracking-[0.3em] mb-6 border border-pink-500/30"
+                    >
+                        Established Since 1920
+                    </motion.div>
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-5xl md:text-8xl font-black text-white mb-6 tracking-tighter"
+                    >
+                        Taste the <br /> <span className="text-pink-500 italic">Tradition.</span>
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto font-medium"
+                    >
+                        We are the 5th generation taking our ancestral gourmet recipes to the worldwide stage. Authentic, pure, and filled with love.
+                    </motion.p>
+                </div>
+            </section>
+
+            {/* About Section */}
+            <section className="container mx-auto px-6 py-24">
+                <div className="grid lg:grid-cols-2 gap-16 items-center">
+                    <div className="relative group">
+                        <div className="absolute -inset-4 bg-pink-100/50 rounded-[3rem] -z-10 group-hover:scale-105 transition-transform duration-700" />
+                        <div className="relative aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl">
+                            <Image
+                                src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000"
+                                fill
+                                className="object-cover"
+                                alt="Heritage"
+                            />
+                        </div>
+                        <div className="absolute -bottom-8 -right-8 bg-white p-8 rounded-3xl shadow-xl hidden md:block max-w-[240px]">
+                            <div className="flex items-center space-x-3 mb-2">
+                                <div className="p-2 bg-pink-50 text-pink-500 rounded-lg"><Clock size={18} /></div>
+                                <span className="text-xs font-black uppercase tracking-widest text-gray-400">Since 1920</span>
+                            </div>
+                            <p className="text-sm font-bold text-gray-900">5 Generations of Master Craftsmanship.</p>
+                        </div>
+                    </div>
+                    <div className="space-y-8">
+                        <div className="flex items-center space-x-4">
+                            <div className="w-12 h-1 bg-pink-500 rounded-full" />
+                            <span className="text-pink-500 font-black uppercase tracking-[0.3em] text-xs">Our Heritage</span>
+                        </div>
+                        <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight leading-none">
+                            Taking Forward a <br /> <span className="text-pink-500 italic">Century</span> of Flavor.
+                        </h2>
+                        <div className="space-y-6 text-gray-500 font-medium text-lg leading-relaxed">
+                            <p>
+                                What started as a small kitchen experiment in 1920 has now blossomed into a global mission. We take pride in being the 5th generation to carry forward the legacy of HM Snacks.
+                            </p>
+                            <p>
+                                Our recipes haven&apos;t changed because perfection doesn&apos;t need to. Every murukku, ہر sweets, and special spice blend is crafted using the same techniques our great-grandparents mastered, now enhanced with modern hygiene standards and global shipping through our partners.
+                            </p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6 pt-4">
+                            <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                                <div className="text-3xl font-black text-pink-500 mb-1">100%</div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Pure Ghee & Oil</div>
+                            </div>
+                            <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                                <div className="text-3xl font-black text-pink-500 mb-1">Global</div>
+                                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Worldwide Delivery</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Products Section */}
+            <section id="products" className="container mx-auto px-6 py-24 border-t border-gray-100">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+                    <div className="space-y-4">
+                        <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight">Our <span className="text-pink-500 italic">Collection</span></h2>
+                        <p className="text-gray-400 font-medium max-w-lg">Order the freshest snacks, delivered globally. Minimum order starts from 250g (1/4 Kg).</p>
+                    </div>
+
+                    {/* Category Tabs */}
+                    <div className="flex flex-wrap gap-2">
+                        {CATEGORIES.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setActiveCategory(cat)}
+                                className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${activeCategory === cat
+                                    ? "bg-pink-500 text-white shadow-lg shadow-pink-200"
+                                    : "bg-white text-gray-400 hover:text-pink-500 border border-gray-100"
+                                    }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                    {filteredProducts.map((product) => (
+                        <Tilt key={product.id} options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
+                            <div
+                                onClick={() => openModal(product)}
+                                className="group bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
+                            >
+                                {/* Image Holder */}
+                                <div className="relative h-72 overflow-hidden">
+                                    <Image
+                                        src={product.imageUrl}
+                                        alt={product.name}
+                                        fill
+                                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                    />
+                                    {/* Badges */}
+                                    <div className="absolute top-6 left-6 flex flex-col gap-2">
+                                        <span className="bg-white/90 backdrop-blur-md text-gray-900 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+                                            {product.category}
+                                        </span>
+                                    </div>
+                                    {/* Action Float Buttons */}
+                                    <div className="absolute top-6 right-6 flex flex-col gap-3 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-xl transition-all ${isInWishlist(product.id) ? "bg-pink-500 text-white" : "bg-white text-gray-900 hover:bg-pink-500 hover:text-white"
+                                                }`}
+                                        >
+                                            <Heart size={18} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="w-10 h-10 bg-white text-gray-900 rounded-xl flex items-center justify-center hover:bg-primary hover:text-white shadow-xl transition-all"
+                                        >
+                                            <Share2 size={18} />
+                                        </button>
+                                    </div>
+                                    {/* Quick View Overlay Text */}
+                                    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center pb-6">
+                                        <span className="text-white text-xs font-black uppercase tracking-widest border border-white/50 px-4 py-2 rounded-full backdrop-blur-sm">Click for Big View</span>
+                                    </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-8 flex flex-col flex-grow">
+                                    <h3 className="text-2xl font-black text-gray-900 mb-2 group-hover:text-pink-500 transition-colors">
+                                        {product.name}
+                                    </h3>
+                                    <p className="text-gray-400 text-sm font-medium line-clamp-2 mb-6">
+                                        {product.description}
+                                    </p>
+
+                                    <div className="mt-auto space-y-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Price per Kg</span>
+                                                <span className="text-2xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
+                                            </div>
+                                            <div className={`p-2 rounded-lg text-xs font-black uppercase tracking-widest flex items-center gap-2 ${product.stock > 0 ? "text-emerald-500 bg-emerald-50" : "text-rose-500 bg-rose-50"}`}>
+                                                <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${product.stock > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
+                                                {product.stock > 0 ? "In Stock" : "Not Available"}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); addToCart(product, 0.25); }}
+                                                className="bg-white border-2 border-gray-100 text-gray-900 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
+                                            >
+                                                <span>Buy ¼ Kg</span>
+                                                <span className="text-[10px] mt-1 text-gray-400 font-bold">₹{(product.pricePerKg / 4).toFixed(0)}</span>
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); addToCart(product, 1); }}
+                                                className="bg-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <ShoppingCart size={14} />
+                                                Add 1 Kg
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Tilt>
+                    ))}
+                </div>
+            </section>
+
+            {/* Global Partners */}
+            <section className="bg-gray-900 py-20">
+                <div className="container mx-auto px-6">
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-12 opacity-40 grayscale hover:grayscale-0 transition-all">
+                        <div className="flex items-center gap-4">
+                            <Package className="text-white" size={32} />
+                            <span className="text-white text-3xl font-black tracking-tighter">Shiprocket</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Product Modal */}
+            <AnimatePresence>
+                {selectedProduct && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedProduct(null)}
+                            className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 50 }}
+                            className="relative bg-white w-full max-w-5xl rounded-[3rem] overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]"
+                        >
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setSelectedProduct(null)}
+                                className="absolute top-6 right-6 z-20 p-3 bg-white/50 backdrop-blur-md hover:bg-white rounded-full transition-all text-gray-900"
+                            >
+                                <X size={24} />
+                            </button>
+
+                            {/* Image Side */}
+                            <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-gray-100">
+                                <Image
+                                    src={selectedProduct.imageUrl}
+                                    alt={selectedProduct.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+
+                            {/* Details Side */}
+                            <div className="flex flex-col w-full md:w-1/2 p-8 md:p-12 overflow-y-auto">
+                                <div className="mb-8">
+                                    <span className="inline-block px-3 py-1 bg-pink-50 text-pink-500 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
+                                        {selectedProduct.category}
+                                    </span>
+                                    <h2 className="text-4xl font-black text-gray-900 mb-4 leading-tight">{selectedProduct.name}</h2>
+                                    <p className="text-gray-500 font-medium leading-relaxed">
+                                        {selectedProduct.description}
+                                    </p>
+                                </div>
+
+                                <div className="mt-auto space-y-8">
+                                    <div className="flex items-end justify-between border-b border-gray-100 pb-8">
+                                        <div>
+                                            <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Total Price</p>
+                                            <p className="text-4xl font-black text-gray-900 italic tracking-tighter">
+                                                ₹{Math.ceil(selectedProduct.pricePerKg * modalQuantity)}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-4 bg-gray-50 px-4 py-2 rounded-2xl">
+                                            <button
+                                                onClick={() => setModalQuantity(prev => Math.max(0.25, prev - 0.25))}
+                                                className="p-2 hover:text-pink-500 transition-colors"
+                                            >
+                                                <Minus size={20} />
+                                            </button>
+                                            <span className="w-12 text-center font-black text-lg">{modalQuantity}Kg</span>
+                                            <button
+                                                onClick={() => setModalQuantity(prev => prev + 0.25)}
+                                                className="p-2 hover:text-pink-500 transition-colors"
+                                            >
+                                                <Plus size={20} />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-4">
+                                        <button
+                                            onClick={() => {
+                                                addToCart(selectedProduct, modalQuantity);
+                                                setSelectedProduct(null);
+                                            }}
+                                            className="flex-1 bg-gray-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-pink-500 transition-all shadow-xl flex items-center justify-center gap-3"
+                                        >
+                                            <ShoppingCart size={18} /> Add to Cart
+                                        </button>
+                                        <button
+                                            onClick={() => toggleWishlist(selectedProduct.id)}
+                                            className={`p-5 rounded-2xl border-2 transition-all ${isInWishlist(selectedProduct.id)
+                                                ? "bg-pink-50 border-pink-50 text-pink-500"
+                                                : "border-gray-100 hover:border-pink-500 text-gray-400 hover:text-pink-500"}`}
+                                        >
+                                            <Heart size={24} fill={isInWishlist(selectedProduct.id) ? "currentColor" : "none"} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}

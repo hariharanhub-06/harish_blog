@@ -13,9 +13,9 @@ import {
     Loader2,
     ChevronRight,
     Home,
-    Image as ImageIcon,
-    Menu,
     X,
+    Menu,
+    Image as ImageIcon
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -24,8 +24,12 @@ import TimelineModule from "@/components/admin/TimelineModule";
 import MessagesModule from "@/components/admin/MessagesModule";
 import GalleryModule from "@/components/admin/GalleryModule";
 import OverviewModule from "@/components/admin/OverviewModule";
+import SnacksProductModule from "@/components/admin/SnacksProductModule";
+import SnacksOrdersModule from "@/components/admin/SnacksOrdersModule";
+import SnacksOverviewModule from "@/components/admin/SnacksOverviewModule";
+import { ShoppingBag, Package, PieChart } from "lucide-react";
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "gallery";
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "gallery" | "snacks-overview" | "snacks-products" | "snacks-orders";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -36,7 +40,8 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        if (hash && ["overview", "profile", "projects", "timeline", "messages", "gallery"].includes(hash)) {
+        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "gallery", "snacks-overview", "snacks-products", "snacks-orders"];
+        if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
     }, []);
@@ -68,6 +73,10 @@ export default function AdminDashboard() {
         { id: "gallery", title: "Gallery", icon: ImageIcon, color: "bg-pink-500" },
         { id: "timeline", title: "Timeline", icon: Briefcase, color: "bg-amber-600" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500" },
+        { id: "divider", title: "BUSINESS SECTION", icon: null, color: "" },
+        { id: "snacks-overview", title: "Snacks Overview", icon: PieChart, color: "bg-pink-600" },
+        { id: "snacks-products", title: "Snack Inventory", icon: Package, color: "bg-pink-500" },
+        { id: "snacks-orders", title: "Snack Orders", icon: ShoppingBag, color: "bg-pink-400" },
     ];
 
     const renderContent = () => {
@@ -77,6 +86,9 @@ export default function AdminDashboard() {
             case "timeline": return <TimelineModule />;
             case "messages": return <MessagesModule />;
             case "gallery": return <GalleryModule />;
+            case "snacks-products": return <SnacksProductModule />;
+            case "snacks-orders": return <SnacksOrdersModule />;
+            case "snacks-overview": return <SnacksOverviewModule />;
             default: return <OverviewModule />;
         }
     };
@@ -92,19 +104,28 @@ export default function AdminDashboard() {
                     </Link>
                 </div>
 
-                <nav className="flex-1 px-6 space-y-2 mt-10">
+                <nav className="flex-1 px-6 space-y-2 mt-10 overflow-y-auto pb-10">
                     {menuItems.map((item) => (
-                        <button
-                            key={item.id}
-                            onClick={() => handleTabChange(item.id as Tab)}
-                            className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm transition-all ${activeTab === item.id
-                                ? "bg-primary text-white shadow-xl shadow-primary/20"
-                                : "text-secondary hover:bg-gray-50 hover:text-primary"
-                                }`}
-                        >
-                            <item.icon size={20} />
-                            <span>{item.title}</span>
-                        </button>
+                        item.id === "divider" ? (
+                            <div key={item.id} className="px-6 pt-8 pb-2">
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">{item.title}</span>
+                            </div>
+                        ) : (
+                            <button
+                                key={item.id}
+                                onClick={() => handleTabChange(item.id as Tab)}
+                                className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm transition-all ${activeTab === item.id
+                                    ? "bg-primary text-white shadow-xl shadow-primary/20"
+                                    : "text-secondary hover:bg-gray-50 hover:text-primary"
+                                    }`}
+                            >
+                                {item.icon && (() => {
+                                    const IconComponent = item.icon;
+                                    return <IconComponent size={20} />;
+                                })()}
+                                <span>{item.title}</span>
+                            </button>
+                        )
                     ))}
                 </nav>
 
@@ -165,19 +186,28 @@ export default function AdminDashboard() {
                             </button>
                         </div>
 
-                        <nav className="flex-1 px-6 space-y-2 mt-4">
+                        <nav className="flex-1 px-6 space-y-2 mt-4 overflow-y-auto pb-10">
                             {menuItems.map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => handleTabChange(item.id as Tab)}
-                                    className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm transition-all ${activeTab === item.id
-                                        ? "bg-primary text-white shadow-xl shadow-primary/20"
-                                        : "text-secondary hover:bg-gray-50 hover:text-primary"
-                                        }`}
-                                >
-                                    <item.icon size={20} />
-                                    <span>{item.title}</span>
-                                </button>
+                                item.id === "divider" ? (
+                                    <div key={item.id} className="px-6 pt-8 pb-2">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">{item.title}</span>
+                                    </div>
+                                ) : (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => handleTabChange(item.id as Tab)}
+                                        className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm transition-all ${activeTab === item.id
+                                            ? "bg-primary text-white shadow-xl shadow-primary/20"
+                                            : "text-secondary hover:bg-gray-50 hover:text-primary"
+                                            }`}
+                                    >
+                                        {item.icon && (() => {
+                                            const IconComponent = item.icon;
+                                            return <IconComponent size={20} />;
+                                        })()}
+                                        <span>{item.title}</span>
+                                    </button>
+                                )
                             ))}
                         </nav>
 

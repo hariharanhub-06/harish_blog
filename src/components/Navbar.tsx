@@ -45,12 +45,39 @@ export default function Navbar() {
                         </Link>
                     ))}
                     <div className="ml-4 pl-4 border-l border-gray-200 flex gap-3">
-                        <Link
-                            href="/business"
-                            className="bg-gray-100 text-gray-900 px-6 py-2.5 rounded-xl hover:bg-gray-200 transition-all font-bold text-sm shadow-sm border border-gray-200"
-                        >
-                            Business
-                        </Link>
+                        {/* Business Dropdown */}
+                        <div className="relative group">
+                            <button
+                                className="bg-gray-100 text-gray-900 px-6 py-2.5 rounded-xl transition-all font-bold text-sm shadow-sm border border-gray-200 flex items-center gap-2 group-hover:bg-gray-200"
+                            >
+                                Business
+                                <motion.div
+                                    animate={{ rotate: 0 }}
+                                    className="group-hover:rotate-180 transition-transform"
+                                >
+                                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </motion.div>
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            <div className="absolute top-full left-0 mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-[60]">
+                                <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2">
+                                    <Link
+                                        href="/business/hm-snacks"
+                                        className="flex items-center space-x-3 p-3 rounded-xl hover:bg-primary/5 transition-all group/item"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center text-pink-500 font-black text-xs">HM</div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-black text-gray-900 group-hover/item:text-primary">HM Snacks</span>
+                                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Gourmet Shop</span>
+                                        </div>
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+
                         <Link
                             href="#contact"
                             className="bg-primary text-white px-6 py-2.5 rounded-xl hover:bg-blue-800 transition-all font-bold text-sm shadow-lg shadow-primary/20"
@@ -92,11 +119,12 @@ export default function Navbar() {
                             ))}
                             <div className="flex flex-col gap-2 mt-2">
                                 <Link
-                                    href="/business"
-                                    className="w-full bg-gray-100 text-gray-900 text-center py-4 rounded-xl font-black shadow-sm border border-gray-200"
+                                    href="/business/hm-snacks"
+                                    className="w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-xl font-black shadow-sm border border-gray-100 flex items-center justify-between"
                                     onClick={() => setIsOpen(false)}
                                 >
-                                    Business
+                                    <span>HM Snacks</span>
+                                    <span className="text-[10px] bg-pink-500 text-white px-2 py-0.5 rounded-lg">SHOP</span>
                                 </Link>
                                 <Link
                                     href="#contact"
