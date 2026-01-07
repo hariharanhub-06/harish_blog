@@ -85,24 +85,26 @@ export default function OverviewModule() {
                     <p className="text-secondary font-medium mt-1">Track your performance and inquiries</p>
                 </div>
 
-                <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="flex flex-wrap items-center gap-2 md:gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm w-full md:w-auto">
                     <div className="flex items-center gap-2 px-3">
                         <Calendar size={14} className="text-secondary" />
                         <span className="text-[10px] font-black uppercase text-secondary">Date Range</span>
                     </div>
-                    <input
-                        type="date"
-                        value={dateRange.start}
-                        onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                        className="bg-gray-50 border-0 rounded-xl text-xs font-bold px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                    <span className="text-gray-300">to</span>
-                    <input
-                        type="date"
-                        value={dateRange.end}
-                        onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                        className="bg-gray-50 border-0 rounded-xl text-xs font-bold px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
-                    />
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <input
+                            type="date"
+                            value={dateRange.start}
+                            onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                            className="bg-gray-50 border-0 rounded-xl text-xs font-bold px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 flex-1 sm:flex-none"
+                        />
+                        <span className="text-gray-300">to</span>
+                        <input
+                            type="date"
+                            value={dateRange.end}
+                            onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                            className="bg-gray-50 border-0 rounded-xl text-xs font-bold px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 flex-1 sm:flex-none"
+                        />
+                    </div>
                 </div>
             </div>
 
