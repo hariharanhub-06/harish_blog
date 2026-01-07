@@ -69,10 +69,10 @@ export default function MainContent({ profile, stats, projects, experiences, edu
     ].sort((a, b) => (b.order || 0) - (a.order || 0));
 
     return (
-        <div className="flex flex-col gap-32 pb-32">
+        <div className="flex flex-col gap-16 pb-16">
             {/* Stats Section */}
             <section className="container mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {stats.map((stat: any, i: number) => {
                         const Icon = iconMap[stat.icon] || User;
                         const colors = [
@@ -85,16 +85,16 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                         return (
                             <CardWrapper key={i} index={i}>
-                                <div className="group p-8 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:border-white transition-all duration-500 overflow-hidden relative h-full">
-                                    <span className="absolute -bottom-4 -right-2 text-9xl font-black text-gray-50 group-hover:text-gray-100 transition-colors -z-10">
+                                <div className="group p-6 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:border-white transition-all duration-500 overflow-hidden relative h-full">
+                                    <span className="absolute -bottom-4 -right-2 text-8xl font-black text-gray-50 group-hover:text-gray-100 transition-colors -z-10">
                                         {String(stat.value).replace('+', '')}
                                     </span>
 
-                                    <div className={`${color.bg} ${color.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform`}>
-                                        <Icon size={28} />
+                                    <div className={`${color.bg} ${color.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform`}>
+                                        <Icon size={24} />
                                     </div>
-                                    <h3 className="text-4xl font-black text-gray-900 mb-2">{stat.value}</h3>
-                                    <p className="text-secondary text-xs font-black uppercase tracking-widest leading-none">{stat.label}</p>
+                                    <h3 className="text-3xl font-black text-gray-900 mb-2">{stat.value}</h3>
+                                    <p className="text-secondary text-[10px] font-black uppercase tracking-widest leading-none">{stat.label}</p>
                                 </div>
                             </CardWrapper>
                         );
@@ -103,7 +103,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
             </section>
 
             {/* About Section */}
-            <section id="about" className="container mx-auto px-6 scroll-mt-32">
+            <section id="about" className="container mx-auto px-6 scroll-mt-20">
                 <AboutHero
                     name={profile.name}
                     about={profile.about}
@@ -112,13 +112,13 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                     experience={profile.stats?.find((s: any) => s.label === "Years Experience")?.value || "3+"}
                 />
 
-                <div className="mt-32">
-                    <div className="text-center mb-20">
-                        <h2 className="text-4xl md:text-6xl font-black mb-4 tracking-tight uppercase">Career Timeline</h2>
-                        <div className="w-24 h-2 bg-primary mx-auto rounded-full"></div>
+                <div className="mt-16">
+                    <div className="text-center mb-10">
+                        <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight uppercase">Career Timeline</h2>
+                        <div className="w-20 h-2 bg-primary mx-auto rounded-full"></div>
                     </div>
 
-                    <div className="relative space-y-8 md:space-y-12">
+                    <div className="relative space-y-6 md:space-y-8">
                         <div className="absolute left-8 top-0 bottom-0 w-1 bg-gray-100 hidden md:block" />
 
                         {timeline.map((item, i) => (
@@ -155,9 +155,9 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                         </div>
                                     </div>
 
-                                    <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all">
+                                    <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all">
                                         {/* Desktop Header */}
-                                        <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                        <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                                             <div>
                                                 <h3 className="text-2xl font-black text-gray-900">
                                                     {item.displayType === 'experience' ? item.role : item.displayType === 'education' ? item.degree : item.role}
@@ -182,10 +182,10 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                             </span>
                                         </div>
 
-                                        <p className="text-secondary text-base md:text-lg leading-relaxed font-normal line-clamp-3 md:line-clamp-2">
+                                        <p className="text-secondary text-base leading-relaxed font-normal line-clamp-3 md:line-clamp-2">
                                             {item.displayType === 'experience' ? item.description : item.displayType === 'education' ? item.details : item.description}
                                         </p>
-                                        <div className="mt-6 flex items-center text-primary font-black text-xs md:text-sm uppercase tracking-widest gap-2 group-hover:gap-4 transition-all">
+                                        <div className="mt-4 flex items-center text-primary font-black text-xs md:text-sm uppercase tracking-widest gap-2 group-hover:gap-4 transition-all">
                                             <span>Read More</span>
                                             <ArrowRight size={16} />
                                         </div>
@@ -198,23 +198,23 @@ export default function MainContent({ profile, stats, projects, experiences, edu
             </section>
 
             {/* Projects Section */}
-            <section id="portfolio" className="container mx-auto px-6 scroll-mt-32">
-                <div className="flex flex-col items-center mb-20">
-                    <h2 className="text-4xl md:text-6xl font-black mb-4 tracking-tight uppercase">Featured Projects</h2>
-                    <div className="w-24 h-2 bg-accent rounded-full"></div>
-                    <p className="mt-8 text-secondary text-lg max-w-2xl text-center font-medium">
+            <section id="portfolio" className="container mx-auto px-6 scroll-mt-20">
+                <div className="flex flex-col items-center mb-10">
+                    <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight uppercase">Featured Projects</h2>
+                    <div className="w-20 h-2 bg-accent rounded-full"></div>
+                    <p className="mt-6 text-secondary text-base max-w-2xl text-center font-medium">
                         Building digital products that combine stunning design with robust business logic.
                     </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {projects.map((project, i) => (
                         <CardWrapper key={project.id} index={i}>
                             <div
                                 className="group flex flex-col h-full bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer"
                                 onClick={() => setSelectedItem({ data: project, type: "project" })}
                             >
-                                <div className="relative h-64 overflow-hidden">
+                                <div className="relative h-56 overflow-hidden">
                                     {project.thumbnail ? (
                                         <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                                     ) : (
@@ -229,17 +229,17 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                     </div>
                                 </div>
 
-                                <div className="p-10 flex flex-col flex-grow text-left">
-                                    <div className="flex flex-wrap gap-2 mb-6">
+                                <div className="p-8 flex flex-col flex-grow text-left">
+                                    <div className="flex flex-wrap gap-2 mb-4">
                                         {project.technologies?.slice(0, 3).map((tech: string) => (
                                             <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-primary bg-blue-50 px-3 py-1 rounded-md">{tech}</span>
                                         ))}
                                     </div>
 
-                                    <h3 className="text-2xl font-black mb-4 group-hover:text-primary transition-colors">{project.title}</h3>
-                                    <p className="text-secondary text-base leading-relaxed mb-8 line-clamp-2">{project.description}</p>
+                                    <h3 className="text-xl font-black mb-3 group-hover:text-primary transition-colors">{project.title}</h3>
+                                    <p className="text-secondary text-sm leading-relaxed mb-6 line-clamp-2">{project.description}</p>
 
-                                    <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
+                                    <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
                                         <span className="text-primary font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
                                             View Case Study <ArrowRight size={14} />
                                         </span>
@@ -256,36 +256,58 @@ export default function MainContent({ profile, stats, projects, experiences, edu
             </section>
 
             {/* Contact Section */}
-            <section id="contact" className="container mx-auto px-6 scroll-mt-32">
-                <div className="bg-primary rounded-[3rem] md:rounded-[4rem] p-8 md:p-32 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
+            <section id="contact" className="container mx-auto px-6 scroll-mt-20">
+                <div className="bg-primary rounded-[3rem] p-8 md:p-16 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
                     <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-                    <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center text-left">
-                        <div className="space-y-8 md:space-y-12">
-                            <h2 className="text-4xl md:text-7xl font-black text-white leading-tight tracking-tighter">
+                    <div className="grid lg:grid-cols-2 gap-10 items-center text-left">
+                        <div className="space-y-8">
+                            <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tighter">
                                 Let&apos;s Build <br /> Something <span className="text-accent italic">Extraordinary</span> Together.
                             </h2>
-                            <p className="text-white/70 text-lg md:text-xl leading-relaxed max-w-xl">
+                            <p className="text-white/70 text-lg leading-relaxed max-w-xl">
                                 I assist startups and established businesses in building scalable digital identities and automated workflows.
                             </p>
 
-                            <div className="flex flex-col gap-6">
-                                <div className="flex items-center space-x-6">
-                                    <div className="bg-white/10 p-4 rounded-2xl text-accent border border-white/10">
-                                        <Mail size={24} />
+                            <div className="flex flex-col gap-4">
+                                <a href="mailto:hariharanjeyaramoorthy@gmail.com" className="flex items-center space-x-4 group">
+                                    <div className="bg-white/10 p-3 rounded-2xl text-accent border border-white/10 group-hover:bg-white/20 transition-colors">
+                                        <Mail size={20} />
                                     </div>
-                                    <p className="text-lg md:text-xl font-bold text-white break-all">{profile.email || 'hariharan@example.com'}</p>
-                                </div>
-                                <div className="flex items-center space-x-6">
-                                    <div className="bg-white/10 p-4 rounded-2xl text-blue-400 border border-white/10">
-                                        <Linkedin size={24} />
+                                    <p className="text-lg font-bold text-white break-all">hariharanjeyaramoorthy@gmail.com</p>
+                                </a>
+
+                                <a href="https://wa.me/919042387152" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
+                                    <div className="bg-white/10 p-3 rounded-2xl text-green-400 border border-white/10 group-hover:bg-white/20 transition-colors">
+                                        <Phone size={20} />
                                     </div>
-                                    <p className="text-lg md:text-xl font-bold text-white">LinkedIn Profile</p>
-                                </div>
+                                    <p className="text-lg font-bold text-white">+91 90423 87152</p>
+                                </a>
+
+                                <a href="https://www.linkedin.com/in/hari-haran-jeyaramamoorthy/" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
+                                    <div className="bg-white/10 p-3 rounded-2xl text-blue-400 border border-white/10 group-hover:bg-white/20 transition-colors">
+                                        <Linkedin size={20} />
+                                    </div>
+                                    <p className="text-lg font-bold text-white">LinkedIn</p>
+                                </a>
+
+                                <a href="https://www.instagram.com/_mr_vibrant/" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
+                                    <div className="bg-white/10 p-3 rounded-2xl text-pink-400 border border-white/10 group-hover:bg-white/20 transition-colors">
+                                        <div className="w-5 h-5 flex items-center justify-center font-black">IG</div>
+                                    </div>
+                                    <p className="text-lg font-bold text-white">Instagram</p>
+                                </a>
+
+                                <a href="https://www.facebook.com/profile.php?id=61573749598737" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
+                                    <div className="bg-white/10 p-3 rounded-2xl text-blue-600 border border-white/10 group-hover:bg-white/20 transition-colors">
+                                        <div className="w-5 h-5 flex items-center justify-center font-black">FB</div>
+                                    </div>
+                                    <p className="text-lg font-bold text-white">Facebook</p>
+                                </a>
                             </div>
                         </div>
 
-                        <div className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl relative">
+                        <div className="bg-white p-6 md:p-10 rounded-[2rem] shadow-2xl relative">
                             {contactStatus === "success" ? (
                                 <div className="py-12 flex flex-col items-center text-center animate-in fade-in zoom-in duration-500">
                                     <div className="bg-green-50 text-green-600 p-8 rounded-full mb-8">
