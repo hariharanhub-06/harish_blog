@@ -107,17 +107,17 @@ export default function Hero({ profile }: HeroProps) {
                 className="flex flex-col sm:flex-row gap-5"
             >
                 <Link
-                    href="/portfolio"
+                    href="#portfolio"
                     className="group bg-primary text-white px-10 py-5 rounded-2xl font-black text-lg hover:bg-blue-800 transition-all flex items-center justify-center space-x-3 shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-1"
                 >
-                    <span>Explore My Work</span>
+                    <span>Project Features</span>
                     <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
-                    href="/contact"
+                    href="#contact"
                     className="bg-white text-gray-900 border-2 border-gray-100 px-10 py-5 rounded-2xl font-black text-lg hover:border-primary/20 hover:bg-gray-50 transition-all text-center flex items-center justify-center shadow-sm hover:shadow-lg"
                 >
-                    Let&apos;s Talk
+                    Contact Form
                 </Link>
             </motion.div>
         </section>
