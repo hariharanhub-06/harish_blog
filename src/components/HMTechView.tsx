@@ -100,8 +100,10 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                     variants={staggerContainer}
                     className="relative z-10 text-center max-w-6xl mx-auto space-y-10"
                 >
-                    <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-8 py-3 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-white font-bold text-sm tracking-[0.2em] uppercase mb-4 hover:bg-white/10 transition-colors shadow-2xl">
-                        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    <motion.div variants={fadeInUp} className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-white font-bold text-lg tracking-[0.15em] uppercase mb-4 hover:bg-white/10 transition-colors shadow-2xl">
+                        <div className="relative w-8 h-8">
+                            <Image src="/hm-tech-logo.png" alt="HM Tech Logo" fill className="object-contain" />
+                        </div>
                         HM Tech
                     </motion.div>
 
