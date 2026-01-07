@@ -233,8 +233,8 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         variants={fadeInUp}
                         className="text-center mb-20"
                     >
-                        <span className="text-pink-400 font-bold tracking-[0.2em] uppercase text-sm">Work</span>
-                        <h2 className="text-5xl md:text-7xl font-black text-white tracking-tight">Selected Projects</h2>
+                        <span className="text-pink-500 font-extrabold tracking-[0.3em] uppercase text-sm drop-shadow-md">WORK</span>
+                        <h2 className="text-6xl md:text-8xl font-black text-white mt-4 tracking-tighter drop-shadow-2xl">Selected Projects</h2>
                     </motion.div>
 
                     <motion.div
