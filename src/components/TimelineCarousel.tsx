@@ -152,24 +152,30 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
                                     {/* Card Content */}
                                     <div className="bg-white p-6 md:p-8 md:pl-24 rounded-[2rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all">
                                         {/* Desktop Header */}
-                                        <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                                        <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4">
                                             <div>
                                                 <h3 className="text-2xl font-black text-gray-900">{item[title]}</h3>
                                                 <p className="text-primary font-bold text-lg">{item[subtitle]}</p>
                                             </div>
                                             <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-xl text-sm">
                                                 <Calendar size={16} />
-                                                <span>{item[period]}</span>
+                                                <span>{(() => {
+                                                    const p = item[period] || "";
+                                                    const years = p.match(/\b20\d{2}\b/g);
+                                                    return years ? years.join(' - ') : p;
+                                                })()}</span>
                                             </div>
                                         </div>
 
                                         {/* Mobile Date */}
-                                        <div className="md:hidden flex items-center gap-2 text-secondary font-bold text-xs bg-gray-50 p-2 rounded-lg w-fit mb-4">
+                                        <div className="md:hidden flex items-center gap-2 text-secondary font-bold text-xs bg-gray-50 p-2 rounded-lg w-fit">
                                             <Calendar size={14} />
-                                            <span>{item[period]}</span>
+                                            <span>{(() => {
+                                                const p = item[period] || "";
+                                                const years = p.match(/\b20\d{2}\b/g);
+                                                return years ? years.join(' - ') : p;
+                                            })()}</span>
                                         </div>
-
-                                        <p className="text-secondary text-base leading-relaxed font-normal line-clamp-3 md:line-clamp-2">{item[description]}</p>
                                     </div>
                                 </div>
                             </CardWrapper>

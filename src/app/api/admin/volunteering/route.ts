@@ -14,15 +14,17 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
-        if (body.id) {
-            await db.update(volunteering).set(body).where(eq(volunteering.id, body.id));
+        const data = await req.json();
+        console.log("Volunteering POST data:", data);
+        if (data.id) {
+            await db.update(volunteering).set(data).where(eq(volunteering.id, data.id));
         } else {
-            await db.insert(volunteering).values(body);
+            await db.insert(volunteering).values(data);
         }
         return NextResponse.json({ success: true });
     } catch (error) {
-        return NextResponse.json({ error: "Failed to save data" }, { status: 500 });
+        console.error("Volunteering POST error:", error);
+        return NextResponse.json({ error: String(error) }, { status: 500 });
     }
 }
 

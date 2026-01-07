@@ -11,13 +11,19 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-    const data = await req.json();
-    if (data.id) {
-        await db.update(education).set(data).where(eq(education.id, data.id));
-    } else {
-        await db.insert(education).values(data);
+    try {
+        const data = await req.json();
+        console.log("Education POST data:", data);
+        if (data.id) {
+            await db.update(education).set(data).where(eq(education.id, data.id));
+        } else {
+            await db.insert(education).values(data);
+        }
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Education POST error:", error);
+        return NextResponse.json({ error: String(error) }, { status: 500 });
     }
-    return NextResponse.json({ success: true });
 }
 
 export async function DELETE(req: Request) {
