@@ -1,4 +1,4 @@
-import { db } from "@/db";
+import { db } from "@/db"; // Database entry point
 import { profiles, projects, experience, education } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Code, Briefcase, Award, User, Star } from "lucide-react";
