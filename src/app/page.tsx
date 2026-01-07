@@ -41,7 +41,8 @@ export default async function Home() {
         <Hero profile={{
           name: profile.name,
           headline: profile.headline,
-          avatarUrl: profile.avatarUrl
+          avatarUrl: profile.avatarUrl,
+          heroImageUrl: (profile as any).heroImageUrl
         }} />
       </section>
 

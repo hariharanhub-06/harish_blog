@@ -9,6 +9,7 @@ export const profiles = pgTable("profiles", {
   email: text("email"),
   location: text("location"),
   avatarUrl: text("avatar_url"),
+  heroImageUrl: text("hero_image_url"),
   socialLinks: jsonb("social_links").default({
     linkedin: "",
     github: "",

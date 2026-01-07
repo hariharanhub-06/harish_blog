@@ -10,6 +10,7 @@ interface HeroProps {
         name: string;
         headline: string | null;
         avatarUrl: string | null;
+        heroImageUrl: string | null;
     };
 }
 
@@ -17,9 +18,17 @@ export default function Hero({ profile }: HeroProps) {
     return (
         <section className="relative container mx-auto px-6 pt-24 pb-32 flex flex-col items-center text-center overflow-hidden">
             {/* Background decorative elements */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full -z-10 blur-[120px] opacity-10 pointer-events-none">
-                <div className="absolute top-10 left-10 w-72 h-72 bg-primary rounded-full" />
-                <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent rounded-full" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-full -z-10 blur-[100px] opacity-20 pointer-events-none">
+                {profile.heroImageUrl ? (
+                    <div className="absolute inset-0 scale-110">
+                        <Image src={profile.heroImageUrl} alt="Background" fill className="object-cover opacity-30" />
+                    </div>
+                ) : (
+                    <>
+                        <div className="absolute top-10 left-10 w-72 h-72 bg-primary rounded-full" />
+                        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent rounded-full" />
+                    </>
+                )}
             </div>
 
             <motion.div
