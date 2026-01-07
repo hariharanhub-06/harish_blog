@@ -13,7 +13,7 @@ const config: Config = {
                 secondary: "#64748b", // Slate Gray
                 accent: "#f59e0b", // Amber
                 background: "#f8fafc", // Light Gray
-                text: "1f2937", // Dark Gray
+                text: "#1f2937", // Dark Gray
             },
             fontFamily: {
                 sans: ["Inter", "Poppins", "ui-sans-serif", "system-ui"],
