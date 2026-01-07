@@ -14,10 +14,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
-        const data = await req.json();
+        const body = await req.json();
+        const { id, ...data } = body;
         console.log("Volunteering POST data:", data);
-        if (data.id) {
-            await db.update(volunteering).set(data).where(eq(volunteering.id, data.id));
+        if (id) {
+            await db.update(volunteering).set(data).where(eq(volunteering.id, id));
         } else {
             await db.insert(volunteering).values(data);
         }

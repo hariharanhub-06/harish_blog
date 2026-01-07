@@ -307,7 +307,7 @@ export default function TimelineModule() {
                                         className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
                                     />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 md:col-span-2">
                                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Period (Ex: 2021 - Present)</label>
                                     <input
                                         required
@@ -317,15 +317,6 @@ export default function TimelineModule() {
                                             const field = activeTab === "experience" || activeTab === "volunteering" ? "duration" : "period";
                                             setEditing({ ...editing, [field]: e.target.value })
                                         }}
-                                        className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Display Order</label>
-                                    <input
-                                        type="number"
-                                        value={editing.order}
-                                        onChange={(e) => setEditing({ ...editing, order: parseInt(e.target.value) })}
                                         className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
                                     />
                                 </div>

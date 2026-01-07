@@ -127,54 +127,28 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
                         <div key={i} className="min-w-full md:min-w-[500px] lg:min-w-[600px]">
                             <CardWrapper index={i}>
                                 <div
-                                    className="relative group cursor-pointer h-full"
+                                    className="relative group cursor-pointer h-full flex flex-col"
                                     onClick={() => {
                                         onItemClick(item);
                                         resetInactivityTimer();
                                     }}
                                 >
-                                    {/* Icon */}
-                                    <div className={`absolute -left-8 top-0 w-16 h-16 ${colorClass} rounded-2xl hidden md:flex items-center justify-center text-white shadow-xl z-10 group-hover:scale-110 transition-transform`}>
-                                        <Icon size={28} />
-                                    </div>
-
-                                    {/* Mobile Icon & Header */}
-                                    <div className="md:hidden flex items-center mb-4 gap-4">
-                                        <div className={`w-14 h-14 shrink-0 ${colorClass} rounded-2xl flex items-center justify-center text-white shadow-lg`}>
-                                            <Icon size={24} />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-black text-gray-900 leading-tight">{item[title]}</h3>
-                                            <p className="text-primary font-bold text-sm mt-1">{item[subtitle]}</p>
-                                        </div>
-                                    </div>
-
                                     {/* Card Content */}
-                                    <div className="bg-white p-6 md:p-8 md:pl-24 rounded-[2rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all">
-                                        {/* Desktop Header */}
-                                        <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                            <div>
-                                                <h3 className="text-2xl font-black text-gray-900">{item[title]}</h3>
-                                                <p className="text-primary font-bold text-lg">{item[subtitle]}</p>
+                                    <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all flex flex-col flex-1 h-full">
+                                        {/* Header */}
+                                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-4">
+                                            <div className="flex-1">
+                                                <h3 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-2">{item[title]}</h3>
+                                                <p className="text-primary font-bold text-lg md:text-xl">{item[subtitle]}</p>
                                             </div>
-                                            <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-xl text-sm">
-                                                <Calendar size={16} />
+                                            <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-2xl text-sm w-fit shrink-0">
+                                                <Calendar size={18} />
                                                 <span>{(() => {
                                                     const p = item[period] || "";
                                                     const years = p.match(/\b20\d{2}\b/g);
                                                     return years ? years.join(' - ') : p;
                                                 })()}</span>
                                             </div>
-                                        </div>
-
-                                        {/* Mobile Date */}
-                                        <div className="md:hidden flex items-center gap-2 text-secondary font-bold text-xs bg-gray-50 p-2 rounded-lg w-fit">
-                                            <Calendar size={14} />
-                                            <span>{(() => {
-                                                const p = item[period] || "";
-                                                const years = p.match(/\b20\d{2}\b/g);
-                                                return years ? years.join(' - ') : p;
-                                            })()}</span>
                                         </div>
                                     </div>
                                 </div>
