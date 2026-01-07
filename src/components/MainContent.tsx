@@ -117,7 +117,15 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                             <div className="w-20 h-2 bg-blue-500 mx-auto rounded-full"></div>
                         </div>
                         <TimelineCarousel
-                            items={experiences.sort((a, b) => (b.order || 0) - (a.order || 0))}
+                            items={[...experiences].sort((a, b) => {
+                                const getYear = (p: string) => {
+                                    if (!p) return 0;
+                                    if (p.includes("Present")) return 9999;
+                                    const years = p.match(/\b20\d{2}\b/g);
+                                    return years ? Math.max(...years.map(Number)) : 0;
+                                };
+                                return getYear(b.duration) - getYear(a.duration) || (b.order || 0) - (a.order || 0);
+                            })}
                             type="experience"
                             onItemClick={(item) => setSelectedItem({ data: item, type: 'experience' })}
                             colorClass="bg-blue-500"
@@ -134,7 +142,15 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                             <div className="w-20 h-2 bg-amber-500 mx-auto rounded-full"></div>
                         </div>
                         <TimelineCarousel
-                            items={educations.sort((a, b) => (b.order || 0) - (a.order || 0))}
+                            items={[...educations].sort((a, b) => {
+                                const getYear = (p: string) => {
+                                    if (!p) return 0;
+                                    if (p.includes("Present")) return 9999;
+                                    const years = p.match(/\b20\d{2}\b/g);
+                                    return years ? Math.max(...years.map(Number)) : 0;
+                                };
+                                return getYear(b.period) - getYear(a.period) || (b.order || 0) - (a.order || 0);
+                            })}
                             type="education"
                             onItemClick={(item) => setSelectedItem({ data: item, type: 'education' })}
                             colorClass="bg-amber-500"
@@ -151,7 +167,15 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                             <div className="w-20 h-2 bg-teal-500 mx-auto rounded-full"></div>
                         </div>
                         <TimelineCarousel
-                            items={volunteerings.sort((a, b) => (b.order || 0) - (a.order || 0))}
+                            items={[...volunteerings].sort((a, b) => {
+                                const getYear = (p: string) => {
+                                    if (!p) return 0;
+                                    if (p.includes("Present")) return 9999;
+                                    const years = p.match(/\b20\d{2}\b/g);
+                                    return years ? Math.max(...years.map(Number)) : 0;
+                                };
+                                return getYear(b.duration) - getYear(a.duration) || (b.order || 0) - (a.order || 0);
+                            })}
                             type="volunteering"
                             onItemClick={(item) => setSelectedItem({ data: item, type: 'volunteering' })}
                             colorClass="bg-teal-500"

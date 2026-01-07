@@ -12,10 +12,12 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
-        const data = await req.json();
-        console.log("Experience POST data:", data);
-        if (data.id) {
-            await db.update(experience).set(data).where(eq(experience.id, data.id));
+        const body = await req.json();
+        console.log("Experience POST body:", body);
+        const { id, createdAt, ...data } = body;
+
+        if (id) {
+            await db.update(experience).set(data).where(eq(experience.id, id));
         } else {
             await db.insert(experience).values(data);
         }
