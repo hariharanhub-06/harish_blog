@@ -17,8 +17,7 @@ import {
     Check
 } from "lucide-react";
 import Link from "next/link";
-import { storage } from "@/lib/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+// Removed client-side firebase storage imports to bypass CORS via server-side upload
 import Image from "next/image";
 
 export default function AdminProjects() {
@@ -79,12 +78,22 @@ export default function AdminProjects() {
         setUploading(true);
         try {
             const file = e.target.files[0];
-            const storageRef = ref(storage, `projects/${Date.now()}_${file.name}`);
-            await uploadBytes(storageRef, file);
-            const url = await getDownloadURL(storageRef);
-            setEditing({ ...editing, thumbnail: url });
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("path", "projects");
+
+            const res = await fetch("/api/admin/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) throw new Error("Upload failed");
+
+            const data = await res.json();
+            setEditing({ ...editing, thumbnail: data.url });
         } catch (error) {
             console.error(error);
+            alert("Thumbnail upload failed");
         } finally {
             setUploading(false);
         }

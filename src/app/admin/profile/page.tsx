@@ -3,8 +3,7 @@
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { storage } from "@/lib/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+// Removed client-side firebase storage imports to bypass CORS via server-side upload
 import { Camera, Save, ArrowLeft, Loader2, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -38,13 +37,22 @@ export default function AdminProfile() {
         setUploading(true);
         try {
             const file = e.target.files[0];
-            const storageRef = ref(storage, `profile/${Date.now()}_${file.name}`);
-            await uploadBytes(storageRef, file);
-            const url = await getDownloadURL(storageRef);
-            setProfile({ ...profile, avatarUrl: url });
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("path", "profile");
+
+            const res = await fetch("/api/admin/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) throw new Error("Upload failed");
+
+            const data = await res.json();
+            setProfile({ ...profile, avatarUrl: data.url });
         } catch (error) {
             console.error("Upload failed", error);
-            alert("Image upload failed");
+            alert("Image upload failed. Please try again.");
         } finally {
             setUploading(false);
         }
