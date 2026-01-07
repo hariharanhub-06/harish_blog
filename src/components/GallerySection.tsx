@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Image from "next/image";
 
@@ -11,6 +11,8 @@ interface GallerySectionProps {
 
 export default function GallerySection({ items }: GallerySectionProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const dragX = useMotionValue(0);
 
     const handleNext = () => {
         setCurrentIndex((prev) => (prev + 1) % items.length);
@@ -21,15 +23,29 @@ export default function GallerySection({ items }: GallerySectionProps) {
     };
 
     useEffect(() => {
-        const timer = setInterval(handleNext, 5000);
+        const timer = setInterval(() => {
+            if (!isDragging) handleNext();
+        }, 5000);
         return () => clearInterval(timer);
-    }, [items.length]);
+    }, [items.length, isDragging]);
 
     if (items.length === 0) return null;
 
-    // Helper to get consistent indices for the 3-item display
     const getIndex = (offset: number) => {
         return (currentIndex + offset + items.length) % items.length;
+    };
+
+    const onDragEnd = (event: any, info: any) => {
+        const threshold = 100;
+        const velocity = info.velocity.x;
+        const offset = info.offset.x;
+
+        if (offset < -threshold || velocity < -500) {
+            handleNext();
+        } else if (offset > threshold || velocity > 500) {
+            handlePrev();
+        }
+        setIsDragging(false);
     };
 
     const displayIndices = [-1, 0, 1];
@@ -66,7 +82,7 @@ export default function GallerySection({ items }: GallerySectionProps) {
                 )}
 
                 {/* 3D Carousel Container */}
-                <div className="relative w-full max-w-6xl h-full flex items-center justify-center">
+                <div className="relative w-full max-w-6xl h-full flex items-center justify-center cursor-grab active:cursor-grabbing">
                     <AnimatePresence initial={false}>
                         {displayIndices.map((offset) => {
                             const index = getIndex(offset);
@@ -78,6 +94,14 @@ export default function GallerySection({ items }: GallerySectionProps) {
                             return (
                                 <motion.div
                                     key={`${item.id}-${offset}`}
+                                    drag={isCenter ? "x" : false}
+                                    dragConstraints={{ left: 0, right: 0 }}
+                                    onDragStart={() => setIsDragging(true)}
+                                    onDragEnd={onDragEnd}
+                                    style={{
+                                        x: isCenter ? dragX : undefined,
+                                        filter: isCenter ? "none" : "blur(1px) grayscale(20%)",
+                                    }}
                                     initial={{
                                         opacity: 0,
                                         scale: 0.6,
@@ -97,17 +121,14 @@ export default function GallerySection({ items }: GallerySectionProps) {
                                         x: offset * -400
                                     }}
                                     transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
-                                    className="absolute w-[90%] md:w-[75%] aspect-video rounded-[3rem] overflow-hidden shadow-2xl shadow-black/30 group cursor-pointer"
-                                    style={{
-                                        filter: isCenter ? "none" : "blur(1px) grayscale(20%)",
-                                    }}
-                                    onClick={() => !isCenter && setCurrentIndex(index)}
+                                    className="absolute w-[90%] md:w-[75%] aspect-video rounded-[3rem] overflow-hidden shadow-2xl shadow-black/30 group"
+                                    onClick={() => !isCenter && !isDragging && setCurrentIndex(index)}
                                 >
                                     <Image
                                         src={item.imageUrl}
                                         alt={item.title}
                                         fill
-                                        className="object-cover"
+                                        className="object-cover select-none pointer-events-none"
                                         priority={isCenter}
                                         unoptimized
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
@@ -118,7 +139,7 @@ export default function GallerySection({ items }: GallerySectionProps) {
 
                                     {/* Content Overlay */}
                                     {isCenter && (
-                                        <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-left pointer-events-none">
+                                        <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-left pointer-events-none select-none">
                                             <motion.h3
                                                 initial={{ y: 20, opacity: 0 }}
                                                 animate={{ y: 0, opacity: 1 }}
