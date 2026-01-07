@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, User, Briefcase, FileText, Mail, Home } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -11,16 +12,11 @@ const navLinks = [
 ];
 
 export default function Navbar() {
-    const [isOpen, setIsOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
+    const pathname = usePathname();
+    const isSnacksPage = pathname?.startsWith("/business/hm-snacks");
+    const isTechPage = pathname?.startsWith("/business/hm-tech");
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-        };
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+    // ... scroll logic ...
 
     return (
         <nav
@@ -28,10 +24,24 @@ export default function Navbar() {
         >
             <div className={`container mx-auto max-w-7xl h-16 rounded-2xl flex justify-between items-center transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-xl border border-gray-100 px-8" : "bg-transparent px-4"
                 }`}>
-                <Link href="/" className="text-2xl font-bold tracking-tight">
-                    <span className="text-primary">Hari</span>
-                    <span className="text-gray-900 font-black">Haran</span>
-                    <span className="text-accent underline decoration-4 decoration-accent/30 underline-offset-4">.</span>
+                <Link href="/" className="flex items-center gap-3 text-2xl font-bold tracking-tight">
+                    {/* Dynamic Business Logo */}
+                    {isSnacksPage && (
+                        <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/20 shadow-md">
+                            <Image src="/hm-snacks-logo.png" alt="HM Snacks" fill className="object-cover" />
+                        </div>
+                    )}
+                    {isTechPage && (
+                        <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/20 shadow-md bg-white/10 p-1">
+                            <Image src="/hm-tech-logo.png" alt="HM Tech" fill className="object-contain" />
+                        </div>
+                    )}
+
+                    <div className="flex items-baseline">
+                        <span className={`${(isSnacksPage || isTechPage) ? "text-white" : "text-primary"}`}>Hari</span>
+                        <span className={`${(isSnacksPage || isTechPage) ? "text-white" : "text-gray-900"} font-black`}>Haran</span>
+                        <span className="text-accent underline decoration-4 decoration-accent/30 underline-offset-4">.</span>
+                    </div>
                 </Link>
 
                 {/* Desktop Menu */}

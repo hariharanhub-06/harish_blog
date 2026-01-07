@@ -57,17 +57,7 @@ export default function HMSnacksPage() {
                 />
                 <div className="relative z-10 text-center px-6">
                     <div className="flex flex-col items-center">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5 }}
-                            className="flex items-center gap-4 mb-8 bg-white/10 backdrop-blur-md px-8 py-4 rounded-3xl border border-white/20"
-                        >
-                            <div className="relative w-16 h-16">
-                                <Image src="/hm-snacks-logo.png" alt="HM Snacks Logo" fill className="object-contain" />
-                            </div>
-                            <span className="text-3xl md:text-5xl font-black text-white tracking-tighter">HMSnacks</span>
-                        </motion.div>
+                        {/* Brand Logo Block Removed */}
 
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
