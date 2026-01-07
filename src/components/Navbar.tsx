@@ -71,7 +71,7 @@ export default function Navbar() {
                                         <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center text-pink-500 font-black text-xs">HM</div>
                                         <div className="flex flex-col">
                                             <span className="text-sm font-black text-gray-900 group-hover/item:text-primary">HM Snacks</span>
-                                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Gourmet Shop</span>
+                                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Tradition Taste</span>
                                         </div>
                                     </Link>
                                 </div>
