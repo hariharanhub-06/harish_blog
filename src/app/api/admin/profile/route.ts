@@ -21,6 +21,7 @@ export async function POST(req: Request) {
             email: data.email,
             location: data.location,
             avatarUrl: data.avatarUrl,
+            heroImageUrl: data.heroImageUrl,
             socialLinks: data.socialLinks,
             updatedAt: new Date(),
         }).where(eq(profiles.id, existing.id));
