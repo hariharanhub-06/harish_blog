@@ -1,7 +1,5 @@
 "use client";
 
-import { useAuth } from "@/lib/auth-context";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
     Plus,
@@ -11,18 +9,13 @@ import {
     Github,
     Save,
     X,
-    ArrowLeft,
     Loader2,
     Image as ImageIcon,
     Check
 } from "lucide-react";
-import Link from "next/link";
-// Removed client-side firebase storage imports to bypass CORS via server-side upload
 import Image from "next/image";
 
-export default function AdminProjects() {
-    const { user, loading } = useAuth();
-    const router = useRouter();
+export default function ProjectsModule() {
     const [projects, setProjects] = useState<any[]>([]);
     const [editing, setEditing] = useState<any>(null);
     const [fetching, setFetching] = useState(true);
@@ -30,12 +23,8 @@ export default function AdminProjects() {
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
-        if (!loading && !user) {
-            router.push("/admin/login");
-        } else if (user) {
-            fetchProjects();
-        }
-    }, [user, loading, router]);
+        fetchProjects();
+    }, []);
 
     const fetchProjects = async () => {
         setFetching(true);
@@ -99,70 +88,62 @@ export default function AdminProjects() {
         }
     };
 
-    if (loading || fetching) {
+    if (fetching) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="flex items-center justify-center p-20">
                 <Loader2 className="w-12 h-12 text-primary animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="container mx-auto px-6 py-12">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-                <div>
-                    <Link href="/admin/dashboard" className="text-secondary hover:text-primary flex items-center space-x-2 font-black transition-colors mb-4 uppercase tracking-widest text-xs">
-                        <ArrowLeft size={16} />
-                        <span>Dashboard</span>
-                    </Link>
-                    <h1 className="text-4xl font-black text-gray-900 tracking-tight">Project Portfolio</h1>
-                </div>
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-black text-gray-900">Portfolio Items</h2>
                 {!editing && (
                     <button
                         onClick={() => setEditing({ title: "", description: "", technologies: [], featured: false, order: 0 })}
-                        className="flex items-center space-x-2 bg-primary text-white font-black px-8 py-4 rounded-2xl hover:shadow-2xl hover:shadow-primary/30 transition-all hover:-translate-y-1"
+                        className="flex items-center space-x-2 bg-primary text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
                     >
                         <Plus size={20} />
-                        <span>Add New Project</span>
+                        <span>Add Project</span>
                     </button>
                 )}
             </div>
 
             {editing ? (
-                <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-8 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-8 md:p-12">
                     <div className="flex justify-between items-center mb-10">
-                        <h2 className="text-2xl font-black">{editing.id ? "Edit Project" : "New Project"}</h2>
+                        <h3 className="text-xl font-black">{editing.id ? "Edit Project" : "New Project"}</h3>
                         <button onClick={() => setEditing(null)} className="text-secondary hover:text-red-500 transition-colors">
                             <X size={28} />
                         </button>
                     </div>
 
                     <form onSubmit={handleSave} className="space-y-8">
-                        <div className="grid md:grid-cols-2 gap-8">
+                        <div className="grid md:grid-cols-2 gap-12">
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black uppercase tracking-widest text-gray-400">Project Title</label>
+                                    <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Title</label>
                                     <input
                                         required
                                         type="text"
                                         value={editing.title}
                                         onChange={(e) => setEditing({ ...editing, title: e.target.value })}
-                                        placeholder="E.g. Portfolio Hub"
                                         className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black uppercase tracking-widest text-gray-400">Description</label>
+                                    <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Description</label>
                                     <textarea
                                         required
-                                        rows={4}
+                                        rows={5}
                                         value={editing.description}
                                         onChange={(e) => setEditing({ ...editing, description: e.target.value })}
-                                        placeholder="Project details..."
                                         className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold"
                                     />
                                 </div>
-                                <div className="flex items-center space-x-4 p-5 bg-gray-50 rounded-2xl cursor-pointer">
+                                <div className="flex items-center space-x-4 p-5 bg-gray-50 rounded-2xl">
                                     <input
                                         type="checkbox"
                                         id="featured"
@@ -176,7 +157,7 @@ export default function AdminProjects() {
 
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black uppercase tracking-widest text-gray-400">Thumbnail Image</label>
+                                    <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Snapshot</label>
                                     <div className="relative group aspect-video bg-gray-100 rounded-[2rem] overflow-hidden border-2 border-dashed border-gray-200 flex items-center justify-center">
                                         {editing.thumbnail ? (
                                             <Image src={editing.thumbnail} alt="Preview" fill className="object-cover" />
@@ -193,7 +174,7 @@ export default function AdminProjects() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <label className="text-xs font-black uppercase tracking-widest text-gray-400">Live URL</label>
+                                        <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Live URL</label>
                                         <input
                                             type="url"
                                             value={editing.liveUrl || ""}
@@ -202,7 +183,7 @@ export default function AdminProjects() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-xs font-black uppercase tracking-widest text-gray-400">Repo URL</label>
+                                        <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Repo URL</label>
                                         <input
                                             type="url"
                                             value={editing.repoUrl || ""}
@@ -216,7 +197,7 @@ export default function AdminProjects() {
 
                         <button
                             disabled={saving || uploading}
-                            className="w-full bg-primary text-white py-6 rounded-[2rem] font-black text-xl flex items-center justify-center space-x-3 shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all disabled:opacity-50"
+                            className="w-full bg-primary text-white py-6 rounded-[2rem] font-black text-xl flex items-center justify-center space-x-3 shadow-2xl transition-all disabled:opacity-50"
                         >
                             {saving ? <Loader2 className="animate-spin" /> : <Save size={24} />}
                             <span>Save Project</span>
@@ -233,13 +214,10 @@ export default function AdminProjects() {
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-primary/10 font-black text-4xl">{project.title.charAt(0)}</div>
                                 )}
-                                {project.featured && (
-                                    <div className="absolute top-4 right-4 bg-accent text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Featured</div>
-                                )}
                             </div>
                             <h3 className="text-xl font-black mb-2">{project.title}</h3>
                             <p className="text-secondary text-sm mb-6 line-clamp-2">{project.description}</p>
-                            <div className="flex justify-between items-center border-t border-gray-50 pt-6">
+                            <div className="flex justify-between items-center pt-6 border-t border-gray-50">
                                 <div className="flex space-x-2">
                                     <button
                                         onClick={() => setEditing(project)}
@@ -253,10 +231,6 @@ export default function AdminProjects() {
                                     >
                                         <Trash2 size={18} />
                                     </button>
-                                </div>
-                                <div className="flex space-x-2">
-                                    {project.liveUrl && <ExternalLink size={16} className="text-gray-300" />}
-                                    {project.repoUrl && <Github size={16} className="text-gray-300" />}
                                 </div>
                             </div>
                         </div>

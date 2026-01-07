@@ -1,27 +1,17 @@
 "use client";
 
-import { useAuth } from "@/lib/auth-context";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-// Removed client-side firebase storage imports to bypass CORS via server-side upload
-import { Camera, Save, ArrowLeft, Loader2, User } from "lucide-react";
-import Link from "next/link";
+import { Camera, Save, Loader2, User } from "lucide-react";
 import Image from "next/image";
 
-export default function AdminProfile() {
-    const { user, loading } = useAuth();
-    const router = useRouter();
+export default function ProfileModule() {
     const [profile, setProfile] = useState<any>(null);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
-        if (!loading && !user) {
-            router.push("/admin/login");
-        } else if (user) {
-            fetchProfile();
-        }
-    }, [user, loading, router]);
+        fetchProfile();
+    }, []);
 
     const fetchProfile = async () => {
         const res = await fetch("/api/admin/profile");
@@ -69,7 +59,6 @@ export default function AdminProfile() {
             });
             if (res.ok) {
                 alert("Profile updated successfully!");
-                router.push("/admin/dashboard");
             }
         } catch (error) {
             console.error("Save failed", error);
@@ -78,26 +67,16 @@ export default function AdminProfile() {
         }
     };
 
-    if (loading || !profile) {
+    if (!profile) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="flex items-center justify-center p-20">
                 <Loader2 className="w-12 h-12 text-primary animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="container mx-auto px-6 py-12 max-w-4xl">
-            <div className="mb-12 flex justify-between items-center">
-                <div>
-                    <Link href="/admin/dashboard" className="text-secondary hover:text-primary flex items-center space-x-2 font-black transition-colors mb-4 uppercase tracking-widest text-xs">
-                        <ArrowLeft size={16} />
-                        <span>Dashboard</span>
-                    </Link>
-                    <h1 className="text-4xl font-black text-gray-900 tracking-tight">Edit Profile</h1>
-                </div>
-            </div>
-
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-8 md:p-12">
                 <form onSubmit={handleSave} className="space-y-12">
                     {/* Avatar Section */}
@@ -215,5 +194,5 @@ export default function AdminProfile() {
                 </form>
             </div>
         </div>
-    );
+    )
 }
