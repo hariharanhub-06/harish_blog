@@ -30,7 +30,7 @@ export default function SnacksNavbar() {
                     <span className="text-3xl font-black tracking-tighter text-gray-900 leading-none">
                         HM<span className="text-pink-500 italic">Snacks</span>
                     </span>
-                    <span className="text-[8px] font-black uppercase tracking-[0.4em] text-pink-500/60 mt-1">Gourmet Traditions</span>
+                    <span className="text-[8px] font-black uppercase tracking-[0.4em] text-pink-500/60 mt-1">Tradition Taste</span>
                 </Link>
 
                 {/* Right Actions */}
