@@ -170,7 +170,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                 </div>
             </section>
 
-            {/* Travel Route (Bus Journey) */}
+            {/* Process / Journey Section (Digital Circuit) */}
             <section className="py-32 px-6 relative z-10 overflow-hidden">
                 <div className="container mx-auto max-w-6xl relative">
                     <motion.div
@@ -181,100 +181,84 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         className="text-center mb-32 relative z-20"
                     >
                         <span className="text-blue-400 font-bold tracking-[0.2em] uppercase text-sm">Process</span>
-                        <h2 className="text-5xl md:text-7xl font-black mt-4 tracking-tight text-white">The Journey</h2>
+                        <h2 className="text-5xl md:text-7xl font-black mt-4 tracking-tight text-white">The <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Flow</span></h2>
                     </motion.div>
 
                     <div className="relative">
-                        {/* Winding Road SVG */}
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[300px] md:w-[600px] pointer-events-none opacity-40">
-                            <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 600 1200">
-                                <motion.path
-                                    d="M 300 0 C 300 100 100 200 100 300 S 500 400 500 500 S 100 600 100 700 S 500 800 500 900 S 300 1100 300 1200"
-                                    fill="none"
-                                    stroke="url(#roadGradient)"
-                                    strokeWidth="8"
-                                    strokeLinecap="round"
-                                    initial={{ pathLength: 0 }}
-                                    whileInView={{ pathLength: 1 }}
-                                    viewport={{ once: true }} // Animate only once
-                                    transition={{ duration: 2.5, ease: "easeInOut" }}
-                                />
-                                <defs>
-                                    <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0" />
-                                        <stop offset="20%" stopColor="#3b82f6" />
-                                        <stop offset="80%" stopColor="#a855f7" />
-                                        <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                        </div>
+                        {/* Digital Circuit Line (Center) */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[40px] md:w-[100px] pointer-events-none z-0">
+                            {/* Glowing Core Line */}
+                            <div className="absolute inset-x-0 top-0 bottom-0 w-[2px] mx-auto bg-gradient-to-b from-blue-500/20 via-purple-500/50 to-blue-500/20 blur-sm"></div>
+                            <div className="absolute inset-x-0 top-0 bottom-0 w-[1px] mx-auto bg-gradient-to-b from-blue-400/10 via-white/50 to-blue-400/10"></div>
 
-                        {/* Moving Bus */}
-                        {/* Note: True scroll-linked path animation requires complex motion value mapping. 
-                            For this implementation, we will use a simplified sticky bus or timed animation 
-                            as true scroll path following is complex in standard Framer Motion without custom hooks.
-                            We will use a central floating bus that 'travels' as elements move up. */}
-                        {/* Moving Bus */}
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] md:w-[600px] h-full pointer-events-none z-50 overflow-visible hidden md:block">
+                            {/* Moving Data Packet */}
                             <motion.div
-                                initial={{ offsetDistance: "0%" }}
-                                whileInView={{ offsetDistance: "100%" }}
-                                viewport={{ once: true }} // Animate once when in view
+                                className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-20 bg-gradient-to-b from-transparent via-cyan-400 to-transparent blur-md z-10"
+                                animate={{
+                                    top: ["0%", "100%"],
+                                    opacity: [0, 1, 1, 0]
+                                }}
                                 transition={{
-                                    duration: 10, // Takes 10 seconds to drive down
-                                    ease: "easeInOut"
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: "linear",
+                                    repeatDelay: 0.5
                                 }}
-                                style={{
-                                    offsetPath: "path('M 300 0 C 300 100 100 200 100 300 S 500 400 500 500 S 100 600 100 700 S 500 800 500 900 S 300 1100 300 1200')",
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0
+                            />
+                            <motion.div
+                                className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-10 bg-white z-20"
+                                animate={{
+                                    top: ["0%", "100%"]
                                 }}
-                                className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-[0_0_50px_rgba(234,179,8,0.6)] border-2 border-white/50"
-                            >
-                                <motion.div
-                                    animate={{ rotate: [-2, 2, -2] }}
-                                    transition={{ duration: 0.5, repeat: Infinity }}
-                                >
-                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-black/80">
-                                        <path d="M8 6v6" />
-                                        <path d="M15 6v6" />
-                                        <path d="M2 12h19.6" />
-                                        <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" />
-                                        <circle cx="7" cy="18" r="2" />
-                                        <path d="M9 18h5" />
-                                        <circle cx="17" cy="18" r="2" />
-                                    </svg>
-                                </motion.div>
-                            </motion.div>
+                                transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: "linear",
+                                    repeatDelay: 0.5
+                                }}
+                            />
                         </div>
 
-                        {/* Steps along the road */}
-                        <div className="space-y-32 relative z-10 pt-20">
+                        {/* Steps (Server Nodes) */}
+                        <div className="space-y-24 relative z-10 pt-10">
                             {steps.map((step, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
-                                    viewport={{ once: true, margin: "-100px" }}
-                                    transition={{ duration: 0.8, delay: 0.2 }}
-                                    className={`flex items-center ${index % 2 === 0 ? 'justify-start md:justify-start' : 'justify-end md:justify-end'} relative`}
-                                >
-                                    {/* Stop Sign / Marker */}
-                                    <div className={`absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center ${index % 2 === 0 ? 'md:-translate-x-[200px]' : 'md:translate-x-[200px]'}`}>
-                                        <div className="w-4 h-4 bg-white rounded-full shadow-[0_0_10px_white] animate-pulse"></div>
-                                        <div className="h-20 w-[1px] bg-gradient-to-b from-white/50 to-transparent"></div>
+                                <div key={index} className={`flex items-center ${index % 2 === 0 ? 'justify-start md:justify-end md:pr-16' : 'justify-end md:justify-start md:pl-16'} relative`}>
+
+                                    {/* Central Node Marker (Absolute Center) */}
+                                    <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
+                                        <div className="w-6 h-6 rounded-full bg-[#050505] border-2 border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.5)] z-20 flex items-center justify-center">
+                                            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                                        </div>
+                                        {/* Connector Line to Card */}
+                                        <div className={`hidden md:block absolute top-1/2 -translate-y-1/2 w-16 h-[1px] bg-blue-500/30 ${index % 2 === 0 ? 'right-full bg-gradient-to-l' : 'left-full bg-gradient-to-r'} from-blue-500 to-transparent`}></div>
                                     </div>
 
                                     {/* Content Card */}
-                                    <div className={`w-full md:w-[40%] ${index % 2 === 0 ? 'md:pr-20' : 'md:pl-20'}`}>
-                                        <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] hover:border-blue-500/50 hover:bg-white/10 transition-all duration-300 shadow-2xl group">
-                                            <div className="mb-4 text-xs font-black text-blue-500 uppercase tracking-widest">Stop {index + 1}</div>
-                                            <h3 className="text-2xl md:text-3xl font-bold text-white group-hover:text-blue-300 transition-colors">{step}</h3>
+                                    <motion.div
+                                        initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+                                        whileInView={{ opacity: 1, x: 0 }}
+                                        viewport={{ once: true, margin: "-50px" }}
+                                        whileHover={{ scale: 1.02 }}
+                                        className={`w-[calc(50%-20px)] md:w-[45%] relative group ${index % 2 === 0 ? 'mr-auto md:mr-0' : 'ml-auto md:ml-0'}`}
+                                    >
+                                        <div className="absolute inset-0 bg-blue-500/5 rounded-2xl blur-xl group-hover:bg-blue-500/10 transition-colors"></div>
+                                        <div className="relative p-6 md:p-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl hover:border-blue-500/50 transition-all duration-300">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="text-[10px] font-mono text-blue-400 uppercase tracking-widest">
+                                                    Node_0{index + 1}
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    <div className="w-1 h-1 bg-white/20 rounded-full"></div>
+                                                    <div className="w-1 h-1 bg-white/20 rounded-full"></div>
+                                                    <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
+                                                </div>
+                                            </div>
+                                            <h3 className="text-xl md:text-2xl font-bold text-white group-hover:text-blue-200 transition-colors font-mono">
+                                                {step}
+                                            </h3>
                                         </div>
-                                    </div>
-                                </motion.div>
+                                    </motion.div>
+                                </div>
                             ))}
                         </div>
                     </div>
