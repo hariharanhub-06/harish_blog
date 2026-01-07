@@ -12,6 +12,7 @@ import CardWrapper from "@/components/CardWrapper";
 import DetailModal from "@/components/DetailModal";
 import AboutHero from "@/components/AboutHero";
 import TimelineCarousel from "@/components/TimelineCarousel";
+import GallerySection from "@/components/GallerySection";
 import Image from "next/image";
 
 interface MainContentProps {
@@ -21,9 +22,10 @@ interface MainContentProps {
     experiences: any[];
     educations: any[];
     volunteerings: any[];
+    galleryItems: any[];
 }
 
-export default function MainContent({ profile, stats, projects, experiences, educations, volunteerings }: MainContentProps) {
+export default function MainContent({ profile, stats, projects, experiences, educations, volunteerings, galleryItems }: MainContentProps) {
     const [selectedItem, setSelectedItem] = useState<{ data: any, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
     const [contactStatus, setContactStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
@@ -66,7 +68,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
 
     return (
-        <div className="flex flex-col gap-16 pb-16">
+        <div className="flex flex-col gap-12 pb-8">
             {/* Stats Section */}
             <section className="container mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -242,6 +244,11 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                     ))}
                 </div>
             </section>
+
+            {/* Gallery Section */}
+            {galleryItems && galleryItems.length > 0 && (
+                <GallerySection items={galleryItems} />
+            )}
 
             {/* Contact Section */}
             <section id="contact" className="container mx-auto px-6 scroll-mt-20">

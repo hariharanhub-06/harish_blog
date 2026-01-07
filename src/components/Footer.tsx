@@ -4,11 +4,13 @@ import { Linkedin, Github, Twitter, Instagram } from "lucide-react";
 const socialLinks = [
     { name: "LinkedIn", href: "https://www.linkedin.com/in/hari-haran-jeyaramamoorthy/", icon: Linkedin },
     { name: "GitHub", href: "https://github.com/startup-digi-3119", icon: Github },
+    { name: "Instagram", href: "https://www.instagram.com/_mr_vibrant/", icon: Instagram },
+    { name: "Twitter", href: "https://x.com/HariHaranJ_31", icon: Twitter },
 ];
 
 export default function Footer() {
     return (
-        <footer className="bg-white border-t border-gray-100 py-12">
+        <footer className="bg-white border-t border-gray-100 py-10">
             <div className="container mx-auto px-6">
                 <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0">
                     <div>
