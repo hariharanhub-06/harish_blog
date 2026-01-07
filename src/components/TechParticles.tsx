@@ -15,7 +15,7 @@ export default function TechParticles() {
         let height = canvas.height = window.innerHeight;
 
         const particles: Particle[] = [];
-        const particleCount = 60; // DNA strands count
+        const particleCount = 80; // Increased count for full page
         const connectionDistance = 150;
 
         class Particle {
@@ -28,8 +28,8 @@ export default function TechParticles() {
             constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
+                this.vx = (Math.random() - 0.5) * 0.3; // Slower movement
+                this.vy = (Math.random() - 0.5) * 0.3;
                 this.size = Math.random() * 2;
             }
 
@@ -45,7 +45,7 @@ export default function TechParticles() {
                 if (!ctx) return;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = "rgba(64, 100, 255, 0.5)"; // Blue tech color
+                ctx.fillStyle = "rgba(100, 149, 237, 0.4)"; // Cornflower blue
                 ctx.fill();
             }
         }
@@ -62,7 +62,6 @@ export default function TechParticles() {
                 p.update();
                 p.draw();
 
-                // Draw connections (DNA / Network effect)
                 for (let j = index + 1; j < particles.length; j++) {
                     const p2 = particles[j];
                     const dx = p.x - p2.x;
@@ -71,7 +70,7 @@ export default function TechParticles() {
 
                     if (distance < connectionDistance) {
                         ctx.beginPath();
-                        ctx.strokeStyle = `rgba(64, 100, 255, ${0.15 * (1 - distance / connectionDistance)})`;
+                        ctx.strokeStyle = `rgba(100, 149, 237, ${0.1 * (1 - distance / connectionDistance)})`;
                         ctx.lineWidth = 1;
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(p2.x, p2.y);
@@ -95,10 +94,27 @@ export default function TechParticles() {
     }, []);
 
     return (
-        <canvas
-            ref={canvasRef}
-            className="absolute inset-0 pointer-events-none z-0"
-            style={{ opacity: 0.6 }} // Subtle overlay
-        />
+        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+            {/* Optional Video Background - User can add a video file here */}
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover opacity-30"
+            >
+                {/* Placeholder src - User should add 'tech-bg.mp4' to public folder */}
+                <source src="/tech-bg.mp4" type="video/mp4" />
+            </video>
+
+            {/* Fallback/Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/90 via-slate-900/80 to-slate-900/95"></div>
+
+            {/* Particles Layer */}
+            <canvas
+                ref={canvasRef}
+                className="absolute inset-0 w-full h-full"
+            />
+        </div>
     );
 }
