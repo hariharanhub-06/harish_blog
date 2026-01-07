@@ -7,10 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
     { name: "Home", href: "/", icon: Home },
-    { name: "About", href: "/#about", icon: User },
-    { name: "Portfolio", href: "/#portfolio", icon: Briefcase },
-    { name: "Blog", href: "/#blog", icon: FileText },
-    { name: "Contact", href: "/#contact", icon: Mail },
 ];
 
 export default function Navbar() {
