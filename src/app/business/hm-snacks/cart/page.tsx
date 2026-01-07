@@ -177,49 +177,72 @@ export default function CartPage() {
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100 animate-in slide-in-from-left duration-500">
-                            <h2 className="text-2xl font-black mb-10 flex items-center gap-4">
-                                <div className="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center"><MapPin size={24} /></div>
+                        <div className="bg-gradient-to-br from-white via-pink-50/30 to-white p-10 rounded-[3rem] shadow-xl border border-pink-100/50 animate-in slide-in-from-left duration-500 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-pink-100/20 to-transparent rounded-full blur-3xl -translate-y-32 translate-x-32"></div>
+                            <h2 className="text-2xl font-black mb-10 flex items-center gap-4 relative z-10">
+                                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-pink-200"><MapPin size={24} /></div>
                                 Delivery Information
                             </h2>
-                            <form className="space-y-6">
+                            <form className="space-y-6 relative z-10">
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Full Name</label>
-                                        <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">WhatsApp Mobile</label>
-                                        <input required type="tel" value={formData.mobile} onChange={e => setFormData({ ...formData, mobile: e.target.value })} className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Email Address</label>
-                                    <input required type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Detailed Address</label>
-                                    <textarea required rows={3} value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold" />
-                                </div>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Pincode</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-pink-500 ml-2 flex items-center gap-2">
+                                            <User size={12} /> Full Name
+                                        </label>
                                         <div className="relative">
-                                            <input required maxLength={6} type="text" value={formData.pincode} onChange={handlePincodeChange} className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold" />
-                                            {isPincodeLoading && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-pink-500" />}
+                                            <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full bg-white/80 border-2 border-pink-100 rounded-2xl pl-12 pr-5 py-5 focus:ring-2 focus:ring-pink-500 focus:border-pink-300 transition-all font-bold text-gray-900 placeholder-gray-300" placeholder="Your full name" />
+                                            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-400" size={20} />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">City</label>
-                                        <input readOnly value={formData.city} className="w-full bg-gray-100 border-0 rounded-2xl p-5 font-bold" />
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-pink-500 ml-2 flex items-center gap-2">
+                                            <MessageCircle size={12} /> WhatsApp Mobile
+                                        </label>
+                                        <div className="relative">
+                                            <input required type="tel" value={formData.mobile} onChange={e => setFormData({ ...formData, mobile: e.target.value })} className="w-full bg-white/80 border-2 border-pink-100 rounded-2xl pl-12 pr-5 py-5 focus:ring-2 focus:ring-pink-500 focus:border-pink-300 transition-all font-bold text-gray-900 placeholder-gray-300" placeholder="+91 XXXXX XXXXX" />
+                                            <MessageCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-400" size={20} />
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">State</label>
-                                        <input readOnly value={formData.state} className="w-full bg-gray-100 border-0 rounded-2xl p-5 font-bold" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-pink-500 ml-2 flex items-center gap-2">
+                                        <Mail size={12} /> Email Address
+                                    </label>
+                                    <div className="relative">
+                                        <input required type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="w-full bg-white/80 border-2 border-pink-100 rounded-2xl pl-12 pr-5 py-5 focus:ring-2 focus:ring-pink-500 focus:border-pink-300 transition-all font-bold text-gray-900 placeholder-gray-300" placeholder="you@example.com" />
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-400" size={20} />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Country</label>
-                                        <input readOnly value={formData.country} className="w-full bg-gray-100 border-0 rounded-2xl p-5 font-bold" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-pink-500 ml-2 flex items-center gap-2">
+                                        <Home size={12} /> Detailed Address
+                                    </label>
+                                    <div className="relative">
+                                        <textarea required rows={3} value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} className="w-full bg-white/80 border-2 border-pink-100 rounded-2xl pl-12 pr-5 py-5 focus:ring-2 focus:ring-pink-500 focus:border-pink-300 transition-all font-bold text-gray-900 placeholder-gray-300" placeholder="House no, Street, Landmark..." />
+                                        <Home className="absolute left-4 top-6 text-pink-400" size={20} />
+                                    </div>
+                                </div>
+                                <div className="p-6 bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl border border-pink-100">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-pink-500 ml-2">Pincode</label>
+                                            <div className="relative">
+                                                <input required maxLength={6} type="text" value={formData.pincode} onChange={handlePincodeChange} className="w-full bg-white border-0 rounded-xl pl-3 pr-10 py-4 focus:ring-2 focus:ring-pink-500 transition-all font-bold shadow-sm" />
+                                                {isPincodeLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-pink-500" />}
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-purple-500 ml-2">City</label>
+                                            <input readOnly value={formData.city} className="w-full bg-purple-50/50 border-0 rounded-xl px-3 py-4 font-bold text-purple-900" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-purple-500 ml-2">State</label>
+                                            <input readOnly value={formData.state} className="w-full bg-purple-50/50 border-0 rounded-xl px-3 py-4 font-bold text-purple-900" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-purple-500 ml-2">Country</label>
+                                            <input readOnly value={formData.country} className="w-full bg-purple-50/50 border-0 rounded-xl px-3 py-4 font-bold text-purple-900" />
+                                        </div>
                                     </div>
                                 </div>
                             </form>
