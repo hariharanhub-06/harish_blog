@@ -81,7 +81,11 @@ export default function ProjectsModule() {
                     canvas.height = height;
 
                     const ctx = canvas.getContext("2d");
-                    ctx?.drawImage(img, 0, 0, width, height);
+                    if (ctx) {
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = "high";
+                        ctx.drawImage(img, 0, 0, width, height);
+                    }
 
                     const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
                     resolve(dataUrl);
@@ -185,7 +189,7 @@ export default function ProjectsModule() {
                                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Snapshot</label>
                                     <div className="relative group aspect-video bg-gray-100 rounded-[2rem] overflow-hidden border-2 border-dashed border-gray-200 flex items-center justify-center">
                                         {editing.thumbnail ? (
-                                            <Image src={editing.thumbnail} alt="Preview" fill className="object-cover" />
+                                            <Image src={editing.thumbnail} alt="Preview" fill className="object-cover" unoptimized />
                                         ) : (
                                             <ImageIcon size={48} className="text-gray-300" />
                                         )}
@@ -235,7 +239,7 @@ export default function ProjectsModule() {
                         <div key={project.id} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
                             <div className="relative h-48 bg-gray-50 rounded-[2rem] mb-6 overflow-hidden">
                                 {project.thumbnail ? (
-                                    <Image src={project.thumbnail} alt={project.title} fill className="object-cover" />
+                                    <Image src={project.thumbnail} alt={project.title} fill className="object-cover" unoptimized />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-primary/10 font-black text-4xl">{project.title.charAt(0)}</div>
                                 )}

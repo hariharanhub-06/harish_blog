@@ -109,6 +109,8 @@ export default function GallerySection({ items }: GallerySectionProps) {
                                         fill
                                         className="object-cover"
                                         priority={isCenter}
+                                        unoptimized
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
                                     />
 
                                     {/* Overlay Gradient */}
