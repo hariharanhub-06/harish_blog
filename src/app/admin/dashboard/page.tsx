@@ -120,9 +120,9 @@ export default function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 lg:ml-80 w-full overflow-x-hidden">
-                <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-6 md:px-10 py-6">
-                    <div className="flex justify-between items-center">
+            <main className="flex-1 lg:ml-80 w-full overflow-x-hidden min-h-screen bg-gray-50/20">
+                <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40">
+                    <div className="max-w-7xl mx-auto px-6 md:px-10 py-6 flex justify-between items-center">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setIsMobileMenuOpen(true)}
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
                     </div>
                 </header>
 
-                <div className="p-6 md:p-10 max-w-7xl mx-auto">
+                <div className="p-6 md:p-10 max-w-7xl mx-auto w-full">
                     {renderContent()}
                 </div>
             </main>
