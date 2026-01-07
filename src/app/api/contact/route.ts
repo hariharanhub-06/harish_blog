@@ -19,7 +19,7 @@ export async function POST(req: Request) {
             socialMedia: body.socialMedia,
             subject: body.subject || "No Subject",
             message: body.message,
-            category: "Not Determined",
+            category: body.category || "Not Determined",
             status: "Fresh"
         });
 

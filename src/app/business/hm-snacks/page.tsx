@@ -304,6 +304,81 @@ export default function HMSnacksPage() {
                 </div>
             </section>
 
+            {/* Contact Support Section */}
+            <section id="contact" className="py-24 bg-white">
+                <div className="container mx-auto px-6">
+                    <div className="max-w-4xl mx-auto bg-gray-50 rounded-[3rem] p-8 md:p-16 shadow-lg border border-gray-100">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">Get in <span className="text-pink-500 italic">Touch</span></h2>
+                            <p className="text-gray-400 font-medium">Have a question or bulk order query? Reach out to us.</p>
+                        </div>
+
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            const form = e.target as HTMLFormElement;
+                            const formData = new FormData(form);
+                            const data = {
+                                name: formData.get("name"),
+                                mobile: formData.get("mobile"),
+                                email: formData.get("email"),
+                                message: formData.get("message"),
+                                category: "HM Snack"
+                            };
+
+                            const btn = form.querySelector("button");
+                            if (btn) {
+                                btn.disabled = true;
+                                btn.innerText = "Sending...";
+                            }
+
+                            try {
+                                const res = await fetch("/api/contact", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify(data)
+                                });
+
+                                if (res.ok) {
+                                    alert("Message sent successfully!");
+                                    form.reset();
+                                } else {
+                                    alert("Failed to send message. Please try again.");
+                                }
+                            } catch (err) {
+                                alert("Something went wrong.");
+                            } finally {
+                                if (btn) {
+                                    btn.disabled = false;
+                                    btn.innerText = "Send Message";
+                                }
+                            }
+                        }} className="space-y-6">
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Name</label>
+                                    <input required name="name" type="text" placeholder="John Doe" className="w-full bg-white border-0 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile No</label>
+                                    <input required name="mobile" type="tel" placeholder="+91 98765 43210" className="w-full bg-white border-0 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm" />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mail Id</label>
+                                <input required name="email" type="email" placeholder="john@example.com" className="w-full bg-white border-0 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Comments</label>
+                                <textarea required name="message" rows={4} placeholder="Your message here..." className="w-full bg-white border-0 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm resize-none" />
+                            </div>
+                            <button type="submit" className="w-full bg-pink-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-pink-600 transition-all shadow-xl shadow-pink-200">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
             {/* Product Modal */}
             <AnimatePresence>
                 {selectedProduct && (
