@@ -6,7 +6,7 @@ import {
     ArrowRight, Code, Briefcase, Award, User,
     MapPin, Calendar, Mail, Phone, Send,
     CheckCircle2, Star, Github, ExternalLink,
-    GraduationCap
+    GraduationCap, Linkedin
 } from "lucide-react";
 import CardWrapper from "@/components/CardWrapper";
 import DetailModal from "@/components/DetailModal";
