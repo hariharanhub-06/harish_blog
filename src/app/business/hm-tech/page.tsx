@@ -52,13 +52,13 @@ export default async function HMTechPage() {
     ];
 
     return (
-        <main className="min-h-screen bg-slate-50 overflow-x-hidden pt-20">
-            {/* Hero Section */}
-            <section className="relative min-h-[90vh] flex items-center justify-center p-6 overflow-hidden bg-black">
-                <div className="absolute inset-0 z-0">
-                    {/* Particles Canvas */}
-                    <TechParticles />
+        <main className="min-h-screen bg-black overflow-x-hidden pt-20 text-white">
+            {/* Global Background Animation */}
+            <TechParticles />
 
+            {/* Hero Section */}
+            <section className="relative min-h-[90vh] flex items-center justify-center p-6 overflow-hidden bg-transparent">
+                <div className="absolute inset-0 z-0">
                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-900/40 via-black to-black animate-gradient"></div>
                     <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
                 </div>
@@ -88,7 +88,7 @@ export default async function HMTechPage() {
             </section>
 
             {/* Services Grid */}
-            <section id="services" className="py-32 px-6 relative z-10 bg-slate-50">
+            <section id="services" className="py-32 px-6 relative z-10 bg-transparent">
                 <div className="container mx-auto max-w-7xl">
                     <div className="text-center mb-20 space-y-4">
                         <span className="text-blue-600 font-black tracking-widest uppercase text-sm">Our Capabilities</span>
@@ -113,7 +113,7 @@ export default async function HMTechPage() {
             </section>
 
             {/* Travel Route (Process) */}
-            <section className="py-32 px-6 bg-black text-white relative overflow-hidden">
+            <section className="py-32 px-6 bg-transparent text-white relative overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] mix-blend-screen animate-pulse"></div>
                     <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[100px] mix-blend-screen animate-pulse animation-delay-2000"></div>
@@ -135,7 +135,8 @@ export default async function HMTechPage() {
                                     {/* Content */}
                                     <div className="flex-1 ml-24 md:ml-0 md:px-16">
                                         <div className={`p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] hover:bg-white/10 hover:border-blue-500/50 transition-all duration-300 ${index % 2 === 0 ? 'md:text-left' : 'md:text-right'} group-hover:transform group-hover:scale-105`}>
-                                            <span className="text-6xl font-black text-white/5 absolute -top-6 right-6 select-none">{String(index + 1).padStart(2, '0')}</span>
+                                            {/* Number removed as requested */}
+                                            {/* <span className="text-6xl font-black text-white/5 absolute -top-6 right-6 select-none">{String(index + 1).padStart(2, '0')}</span> */}
                                             <h3 className="text-2xl md:text-3xl font-bold relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 group-hover:from-blue-400 group-hover:to-purple-400 transition-all">{step}</h3>
                                         </div>
                                     </div>
@@ -155,7 +156,7 @@ export default async function HMTechPage() {
             </section>
 
             {/* Projects Gallery */}
-            <section className="py-32 px-6 bg-slate-50">
+            <section className="py-32 px-6 bg-transparent">
                 <div className="container mx-auto max-w-7xl">
                     <div className="text-center mb-20">
                         <span className="text-blue-600 font-black tracking-widest uppercase text-sm">Portfolio</span>
@@ -201,7 +202,7 @@ export default async function HMTechPage() {
             </section>
 
             {/* Contact Form */}
-            <section id="contact" className="py-32 px-6 bg-white relative overflow-hidden">
+            <section id="contact" className="py-32 px-6 bg-transparent relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-50"></div>
                 <div className="container mx-auto max-w-5xl relative z-10">
                     <div className="bg-white rounded-[3.5rem] p-8 md:p-20 shadow-2xl shadow-blue-900/10 border border-gray-100 relative overflow-hidden">
