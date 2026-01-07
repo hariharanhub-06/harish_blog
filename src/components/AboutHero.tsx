@@ -10,9 +10,10 @@ interface AboutHeroProps {
     about: string;
     location: string;
     imageUrl?: string;
+    experience?: string;
 }
 
-export default function AboutHero({ name, about, location, imageUrl }: AboutHeroProps) {
+export default function AboutHero({ name, about, location, imageUrl, experience = "3+" }: AboutHeroProps) {
     return (
         <div className="grid lg:grid-cols-2 gap-20 items-center">
             <motion.div
@@ -35,7 +36,7 @@ export default function AboutHero({ name, about, location, imageUrl }: AboutHero
                     </div>
                     <div className="flex items-center space-x-2 text-accent font-black bg-amber-50 px-4 py-2 rounded-xl">
                         <Briefcase size={18} />
-                        <span>3+ Years Experience</span>
+                        <span>{experience} Years Experience</span>
                     </div>
                 </div>
             </motion.div>
