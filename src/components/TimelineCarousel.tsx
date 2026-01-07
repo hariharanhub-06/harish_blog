@@ -36,6 +36,8 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
         resetInactivityTimer();
     };
 
+    // Auto-scroll removed as per user request
+    /*
     const startAutoScroll = () => {
         if (autoScrollRef.current) clearInterval(autoScrollRef.current);
         autoScrollRef.current = setInterval(() => {
@@ -65,6 +67,13 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
             if (inactivityRef.current) clearTimeout(inactivityRef.current);
         };
     }, [items.length]);
+    */
+
+    // Minimal replacement to keep handlers valid if used elsewhere, or just remove usage.
+    // The handlers handleNext/handlePrev called resetInactivityTimer. I should clean that up too.
+
+    const stopAutoScroll = () => { }; // No-op
+    const resetInactivityTimer = () => { }; // No-op
 
     const onDragEnd = (event: any, info: any) => {
         const threshold = 100;
