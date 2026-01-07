@@ -15,6 +15,12 @@ export const profiles = pgTable("profiles", {
     twitter: "",
     instagram: "",
   }),
+  stats: jsonb("stats").default([
+    { label: "Years Experience", value: "3+", icon: "Briefcase" },
+    { label: "Projects Completed", value: "10+", icon: "Code" },
+    { label: "Clubs Led", value: "5+", icon: "Award" },
+    { label: "Colleges Partnered", value: "42", icon: "User" },
+  ]),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 

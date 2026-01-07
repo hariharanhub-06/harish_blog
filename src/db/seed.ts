@@ -13,12 +13,19 @@ async function seed() {
         bio: "Versatile professional with expertise in management, soft skills training, coding, and career consulting.",
         about: "I specialize in leading, managing, and mentoring individuals and teams to achieve professional goals. I integrate technology with business solutions and am passionate about empowering people, fostering growth, and driving innovation.",
         location: "Tamil Nadu, India",
+        avatarUrl: "/hari_photo.png",
         socialLinks: {
             linkedin: "https://www.linkedin.com/in/hari-haran-jeyaramamoorthy/",
             github: "https://github.com/startup-digi-3119",
             twitter: "",
             instagram: "",
         },
+        stats: [
+            { label: "Years Experience", value: "3+", icon: "Briefcase" },
+            { label: "Projects Completed", value: "10+", icon: "Code" },
+            { label: "Clubs Led", value: "5+", icon: "Award" },
+            { label: "Colleges Partnered", value: "42", icon: "User" },
+        ],
     });
 
     // Seed Experience
