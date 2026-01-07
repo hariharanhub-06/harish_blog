@@ -50,10 +50,17 @@ export default function SnacksProductModule() {
 
             console.log("Saving product:", { url, method, data: editing });
 
+            // Convert empty strings to numbers for database compatibility
+            const sanitizedData = {
+                ...editing,
+                pricePerKg: typeof editing.pricePerKg === "string" && editing.pricePerKg === "" ? 0 : parseFloat(editing.pricePerKg as any) || 0,
+                stock: typeof editing.stock === "string" && editing.stock === "" ? 0 : parseInt(editing.stock as any) || 0,
+            };
+
             const res = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(editing),
+                body: JSON.stringify(sanitizedData),
             });
 
             const data = await res.json();
@@ -143,7 +150,7 @@ export default function SnacksProductModule() {
                 </div>
                 {!editing && (
                     <button
-                        onClick={() => setEditing({ name: "", description: "", category: "Savories", pricePerKg: 0, stock: 0, isActive: true })}
+                        onClick={() => setEditing({ name: "", description: "", category: "Savories", pricePerKg: "", stock: "", isActive: true })}
                         className="flex items-center space-x-2 bg-pink-500 text-white font-black px-8 py-4 rounded-[2rem] hover:shadow-2xl transition-all"
                     >
                         <Plus size={20} />
@@ -253,7 +260,7 @@ export default function SnacksProductModule() {
                                             required
                                             type="number"
                                             value={editing.pricePerKg}
-                                            onChange={(e) => setEditing({ ...editing, pricePerKg: parseFloat(e.target.value) || 0 })}
+                                            onChange={(e) => setEditing({ ...editing, pricePerKg: e.target.value === "" ? "" : parseFloat(e.target.value) || "" })}
                                             className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
                                         />
                                     </div>
@@ -263,7 +270,7 @@ export default function SnacksProductModule() {
                                             required
                                             type="number"
                                             value={editing.stock}
-                                            onChange={(e) => setEditing({ ...editing, stock: parseInt(e.target.value) || 0 })}
+                                            onChange={(e) => setEditing({ ...editing, stock: e.target.value === "" ? "" : parseInt(e.target.value) || "" })}
                                             className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
                                         />
                                     </div>
