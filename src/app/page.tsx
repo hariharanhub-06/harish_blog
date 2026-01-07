@@ -21,9 +21,13 @@ export default async function Home() {
   const volunteerings = await db.query.volunteering.findMany({
     orderBy: [desc(volunteering.order)],
   });
-  const galleryItems = await db.query.gallery.findMany({
-    orderBy: [desc(gallery.createdAt)],
-  });
+  let galleryItems: any[] = [];
+  try {
+    galleryItems = await db.select().from(gallery).orderBy(desc(gallery.createdAt));
+  } catch (error) {
+    console.error("Gallery fetch failed:", error);
+    // Continue without gallery items if it fails
+  }
 
   const defaultProfile = {
     name: "Hari Haran Jeyaramamoorthy",
