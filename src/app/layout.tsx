@@ -25,6 +25,7 @@ export const metadata: Metadata = {
 };
 
 import ClientLayout from "@/components/ClientLayout";
+import { CartProvider } from "@/context/CartContext";
 
 export default function RootLayout({
   children,
@@ -35,10 +36,12 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased text-text`}>
         <AuthProvider>
-          <ClientLayout>
-            {children}
-            <Analytics />
-          </ClientLayout>
+          <CartProvider>
+            <ClientLayout>
+              {children}
+              <Analytics />
+            </ClientLayout>
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

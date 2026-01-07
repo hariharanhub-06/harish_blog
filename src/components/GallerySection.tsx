@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion, useMotionValue } from "framer-motion";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Image from "next/image";
 import { Tilt } from "./Tilt";
@@ -11,175 +11,145 @@ interface GallerySectionProps {
 }
 
 export default function GallerySection({ items }: GallerySectionProps) {
-    const [currentIndex, setCurrentIndex] = useState(0);
+
+    // Triple the items to create a seamless infinite loop
+    const duplicatedItems = [...items, ...items, ...items];
+    const [currentIndex, setCurrentIndex] = useState(items.length); // Start at the middle set
     const [isHovered, setIsHovered] = useState(false);
-    const dragX = useMotionValue(0);
+    const containerRef = useRef<HTMLDivElement>(null);
     const autoScrollRef = useRef<NodeJS.Timeout | null>(null);
-    const inactivityRef = useRef<NodeJS.Timeout | null>(null);
 
-    const handleNext = () => {
-        setCurrentIndex((prev) => (prev + 1) % items.length);
-        resetInactivityTimer();
-    };
+    const slideWidth = typeof window !== 'undefined' && window.innerWidth < 768 ? 90 : (window.innerWidth < 1024 ? 50 : 33.33);
 
-    const handlePrev = () => {
-        setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
-        resetInactivityTimer();
-    };
+    const handleNext = useCallback(() => {
+        setCurrentIndex((prev) => prev + 1);
+    }, []);
 
-    const startAutoScroll = () => {
-        if (autoScrollRef.current) clearInterval(autoScrollRef.current);
-        autoScrollRef.current = setInterval(() => {
-            setCurrentIndex((prev) => (prev + 1) % items.length);
-        }, 2000); // 2s auto swipe
-    };
+    const handlePrev = useCallback(() => {
+        setCurrentIndex((prev) => prev - 1);
+    }, []);
 
-    const stopAutoScroll = () => {
-        if (autoScrollRef.current) {
-            clearInterval(autoScrollRef.current);
-            autoScrollRef.current = null;
+    // Jump back to the middle set when reaching the boundaries to keep it infinite
+    useEffect(() => {
+        if (currentIndex >= items.length * 2) {
+            const timer = setTimeout(() => {
+                setCurrentIndex(currentIndex - items.length);
+            }, 300); // Wait for transition
+            return () => clearTimeout(timer);
         }
-    };
+        if (currentIndex < items.length) {
+            const timer = setTimeout(() => {
+                setCurrentIndex(currentIndex + items.length);
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [currentIndex, items.length]);
 
-    const resetInactivityTimer = () => {
+    const stopAutoScroll = useCallback(() => {
+        if (autoScrollRef.current) clearInterval(autoScrollRef.current);
+    }, []);
+
+    const startAutoScroll = useCallback(() => {
         stopAutoScroll();
-        if (inactivityRef.current) clearTimeout(inactivityRef.current);
-        inactivityRef.current = setTimeout(() => {
-            startAutoScroll();
-        }, 5000); // 5s silence before auto
-    };
+        autoScrollRef.current = setInterval(() => {
+            handleNext();
+        }, 3000);
+    }, [handleNext, stopAutoScroll]);
 
     useEffect(() => {
-        startAutoScroll();
-        return () => {
-            stopAutoScroll();
-            if (inactivityRef.current) clearTimeout(inactivityRef.current);
-        };
-    }, [items.length]);
-
-    const onDragEnd = (event: any, info: any) => {
-        const threshold = 100;
-        const velocity = info.velocity.x;
-        const offset = info.offset.x;
-
-        if (offset < -threshold || velocity < -500) {
-            handleNext();
-        } else if (offset > threshold || velocity > 500) {
-            handlePrev();
-        }
-    };
+        if (!isHovered) startAutoScroll();
+        return () => stopAutoScroll();
+    }, [isHovered, startAutoScroll, stopAutoScroll]);
 
     if (items.length === 0) return null;
 
     return (
-        <section id="gallery" className="container mx-auto px-6 scroll-mt-20 overflow-hidden">
-            <div className="flex flex-col items-center mb-12">
+        <section id="gallery" className="container mx-auto px-6 scroll-mt-20 overflow-hidden py-20">
+            <div className="flex flex-col items-center mb-16">
                 <div className="flex items-center gap-4 mb-4">
                     <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase">Moment Gallery</h2>
                     <div className="bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-primary/20">
                         {items.length} Snaps
                     </div>
                 </div>
-                <div className="w-16 h-1.5 bg-pink-500 rounded-full"></div>
+                <div className="w-20 h-2 bg-pink-500 rounded-full"></div>
             </div>
 
             <div
-                className="relative group"
-                onMouseEnter={() => {
-                    setIsHovered(true);
-                    stopAutoScroll();
-                    if (inactivityRef.current) clearTimeout(inactivityRef.current);
-                }}
-                onMouseLeave={() => {
-                    setIsHovered(false);
-                    resetInactivityTimer();
-                }}
+                className="relative"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
             >
                 {/* Navigation Arrows */}
-                {items.length > 1 && (
-                    <>
-                        <button
-                            onClick={handlePrev}
-                            className={`absolute -left-4 top-1/2 -translate-y-1/2 z-20 bg-white shadow-2xl p-4 rounded-full text-gray-900 hover:bg-gray-50 transition-all ${isHovered ? 'opacity-100' : 'opacity-0'
-                                }`}
-                        >
-                            <ChevronLeft size={24} />
-                        </button>
-                        <button
-                            onClick={handleNext}
-                            className={`absolute -right-4 top-1/2 -translate-y-1/2 z-20 bg-white shadow-2xl p-4 rounded-full text-gray-900 hover:bg-gray-50 transition-all ${isHovered ? 'opacity-100' : 'opacity-0'
-                                }`}
-                        >
-                            <ChevronRight size={24} />
-                        </button>
-                    </>
-                )}
+                <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-30 pointer-events-none">
+                    <button
+                        onClick={handlePrev}
+                        className="w-14 h-14 bg-white/90 backdrop-blur-md shadow-2xl rounded-full flex items-center justify-center text-gray-900 hover:bg-white hover:scale-110 transition-all pointer-events-auto"
+                    >
+                        <ChevronLeft size={28} />
+                    </button>
+                    <button
+                        onClick={handleNext}
+                        className="w-14 h-14 bg-white/90 backdrop-blur-md shadow-2xl rounded-full flex items-center justify-center text-gray-900 hover:bg-white hover:scale-110 transition-all pointer-events-auto"
+                    >
+                        <ChevronRight size={28} />
+                    </button>
+                </div>
 
                 {/* Carousel Container */}
-                <div className="relative overflow-visible">
+                <div className="relative overflow-visible px-4">
                     <motion.div
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
-                        style={{ x: dragX }}
-                        onDragStart={stopAutoScroll}
-                        onDragEnd={onDragEnd}
                         animate={{
-                            x: `-${currentIndex * (typeof window !== 'undefined' && window.innerWidth < 768 ? 90 : 33.33)}%`
+                            x: `-${currentIndex * slideWidth}%`,
                         }}
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="flex gap-6 md:gap-8 cursor-grab active:cursor-grabbing px-2"
+                        transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                        className="flex gap-6 md:gap-8"
                     >
-                        {items.map((item, i) => (
-                            <Tilt
+                        {duplicatedItems.map((item, i) => (
+                            <div
                                 key={i}
-                                options={{ max: 15, speed: 400, glare: true, "max-glare": 0.4 }}
-                                className="min-w-[85%] md:min-w-[45%] lg:min-w-[30%] aspect-square relative rounded-[2.5rem] overflow-hidden shadow-xl border border-gray-100 flex-shrink-0 select-none cursor-pointer"
+                                className="min-w-[85%] md:min-w-[45%] lg:min-w-[30%] aspect-[4/5] md:aspect-square relative flex-shrink-0"
                             >
-                                <Image
-                                    src={item.imageUrl}
-                                    alt={item.title}
-                                    fill
-                                    className="object-cover"
-                                    unoptimized
-                                    sizes="(max-width: 768px) 85vw, (max-width: 1200px) 45vw, 30vw"
-                                />
-
-                                {/* Overlay Gradient */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
-
-                                {/* Content Overlay */}
-                                <div className="absolute bottom-6 left-6 right-6 text-left z-20">
-                                    <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight drop-shadow-lg line-clamp-2">
-                                        {item.title}
-                                    </h3>
-                                    <p className="flex items-center gap-2 text-white/90 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 w-fit">
-                                        <MapPin size={12} className="text-pink-400" />
-                                        {item.location}
-                                    </p>
-                                </div>
-                            </Tilt>
+                                <Tilt
+                                    options={{ max: 15, speed: 400, glare: true, "max-glare": 0.4 }}
+                                    className="w-full h-full relative rounded-[2.5rem] overflow-hidden shadow-xl border border-white/20 select-none cursor-pointer"
+                                >
+                                    <Image
+                                        src={item.imageUrl}
+                                        alt={item.title}
+                                        fill
+                                        className="object-cover transition-transform duration-700 hover:scale-110"
+                                        unoptimized
+                                        sizes="(max-width: 768px) 85vw, (max-width: 1200px) 45vw, 30vw"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                                    <div className="absolute bottom-8 left-8 right-8 text-left z-20">
+                                        <h3 className="text-xl md:text-2xl font-black text-white mb-3 tracking-tight drop-shadow-xl line-clamp-2">
+                                            {item.title}
+                                        </h3>
+                                        <p className="flex items-center gap-2 text-white/95 text-[10px] font-black uppercase tracking-widest px-4 py-2 bg-white/15 backdrop-blur-xl rounded-2xl border border-white/20 w-fit">
+                                            <MapPin size={12} className="text-pink-400" />
+                                            {item.location}
+                                        </p>
+                                    </div>
+                                </Tilt>
+                            </div>
                         ))}
                     </motion.div>
                 </div>
             </div>
 
-            {/* Pagination Indicators */}
-            {items.length > 1 && (
-                <div className="flex justify-center gap-2 mt-8 md:mt-12">
-                    {items.map((_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => {
-                                setCurrentIndex(i);
-                                resetInactivityTimer();
-                            }}
-                            className={`h-1.5 rounded-full transition-all duration-500 ${i === currentIndex ? 'bg-pink-500 w-10' : 'bg-gray-200 w-3 hover:bg-gray-300'
-                                }`}
-                            aria-label={`Go to slide ${i + 1}`}
-                        />
-                    ))}
-                </div>
-            )}
+            {/* Pagination - only for visible items subset */}
+            <div className="flex justify-center gap-3 mt-16">
+                {items.map((_, i) => (
+                    <button
+                        key={i}
+                        onClick={() => setCurrentIndex(i + items.length)}
+                        className={`h-2 rounded-full transition-all duration-500 ${(currentIndex % items.length) === i ? 'bg-pink-500 w-12' : 'bg-gray-200 w-3 hover:bg-gray-300'
+                            }`}
+                    />
+                ))}
+            </div>
         </section>
     );
 }
