@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShoppingCart, Heart, Menu, X, ArrowLeft } from "lucide-react";
+import { ShoppingCart, Heart, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 
@@ -23,11 +23,7 @@ export default function SnacksNavbar() {
         <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4`}>
             <div className={`container mx-auto max-w-7xl h-20 rounded-3xl flex justify-between items-center transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl shadow-2xl border border-white/50 px-10" : "bg-white/40 backdrop-blur-md px-6 border border-white/20"}`}>
 
-                {/* Back to Portfolio Link */}
-                <Link href="/" className="hidden lg:flex items-center space-x-2 text-gray-400 hover:text-primary transition-colors text-xs font-black uppercase tracking-widest group">
-                    <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-                    <span>Portfolio</span>
-                </Link>
+
 
                 {/* Logo */}
                 <Link href="/business/hm-snacks" className="flex flex-col items-center">
@@ -91,10 +87,7 @@ export default function SnacksNavbar() {
                                 <span className="bg-pink-500 text-white px-3 py-1 rounded-full text-xs">{wishlist.length}</span>
                             </Link>
                             <Link href="/business/hm-snacks/track" onClick={() => setIsOpen(false)} className="text-2xl font-black text-gray-900">Track Order</Link>
-                            <Link href="/" onClick={() => setIsOpen(false)} className="text-sm font-black uppercase tracking-widest text-gray-400 pt-6 border-t border-gray-50 flex items-center space-x-2">
-                                <ArrowLeft size={14} />
-                                <span>Back to Portfolio</span>
-                            </Link>
+
                         </div>
                     </motion.div>
                 )}
