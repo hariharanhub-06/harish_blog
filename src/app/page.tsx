@@ -1,6 +1,6 @@
 import { db } from "@/db"; // Database entry point
 export const dynamic = "force-dynamic";
-import { profiles, projects, experience, education } from "@/db/schema";
+import { profiles, projects, experience, education, volunteering } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Code, Briefcase, Award, User, Star } from "lucide-react";
 import Hero from "@/components/Hero";
@@ -17,6 +17,9 @@ export default async function Home() {
   });
   const educations = await db.query.education.findMany({
     orderBy: [desc(education.order)],
+  });
+  const volunteerings = await db.query.volunteering.findMany({
+    orderBy: [desc(volunteering.order)],
   });
 
   const defaultProfile = {
@@ -53,6 +56,7 @@ export default async function Home() {
         projects={allProjects}
         experiences={experiences}
         educations={educations}
+        volunteerings={volunteerings}
       />
     </div>
   );

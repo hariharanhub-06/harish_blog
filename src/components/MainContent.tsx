@@ -6,7 +6,7 @@ import {
     ArrowRight, Code, Briefcase, Award, User,
     MapPin, Calendar, Mail, Phone, Send,
     CheckCircle2, Star, Github, ExternalLink,
-    GraduationCap, Linkedin
+    GraduationCap, Linkedin, HeartHandshake
 } from "lucide-react";
 import CardWrapper from "@/components/CardWrapper";
 import DetailModal from "@/components/DetailModal";
@@ -19,10 +19,11 @@ interface MainContentProps {
     projects: any[];
     experiences: any[];
     educations: any[];
+    volunteerings: any[];
 }
 
-export default function MainContent({ profile, stats, projects, experiences, educations }: MainContentProps) {
-    const [selectedItem, setSelectedItem] = useState<{ data: any, type: "project" | "experience" | "education" } | null>(null);
+export default function MainContent({ profile, stats, projects, experiences, educations, volunteerings }: MainContentProps) {
+    const [selectedItem, setSelectedItem] = useState<{ data: any, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
     const [contactStatus, setContactStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
     const iconMap: any = { Briefcase, Code, Award, User };
@@ -34,8 +35,12 @@ export default function MainContent({ profile, stats, projects, experiences, edu
         const formData = new FormData(e.currentTarget);
         const data = {
             name: formData.get("name"),
-            email: formData.get("email"),
-            subject: "Portfolio Contact Form", // Or add a subject field if you want
+            company: formData.get("company"),
+            email: formData.get("email"), // Mail ID
+            mobile: formData.get("mobile"),
+            website: formData.get("website"),
+            socialMedia: formData.get("socialMedia"),
+            subject: "Portfolio Contact Form",
             message: formData.get("message"),
         };
 
@@ -59,7 +64,8 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
     const timeline = [
         ...experiences.map(exp => ({ ...exp, displayType: 'experience' as const })),
-        ...educations.map(edu => ({ ...edu, displayType: 'education' as const }))
+        ...educations.map(edu => ({ ...edu, displayType: 'education' as const })),
+        ...(volunteerings || []).map(vol => ({ ...vol, displayType: 'volunteering' as const }))
     ].sort((a, b) => (b.order || 0) - (a.order || 0));
 
     return (
@@ -112,29 +118,74 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                         <div className="w-24 h-2 bg-primary mx-auto rounded-full"></div>
                     </div>
 
-                    <div className="relative space-y-12">
+                    <div className="relative space-y-8 md:space-y-12">
                         <div className="absolute left-8 top-0 bottom-0 w-1 bg-gray-100 hidden md:block" />
 
-                        {timeline.slice(0, 4).map((item, i) => (
+                        {timeline.map((item, i) => (
                             <CardWrapper key={i} index={i}>
                                 <div className="relative md:pl-24 group cursor-pointer" onClick={() => setSelectedItem({ data: item, type: item.displayType })}>
-                                    <div className={`absolute left-0 md:left-4 top-0 w-16 h-16 ${item.displayType === 'experience' ? 'bg-blue-500' : 'bg-amber-500'} rounded-2xl flex items-center justify-center text-white shadow-xl z-10 group-hover:scale-110 transition-transform`}>
-                                        {item.displayType === 'experience' ? <Briefcase size={28} /> : <GraduationCap size={28} />}
+                                    <div className={`
+                                        hidden md:flex absolute left-0 md:left-4 top-0 w-16 h-16
+                                        ${item.displayType === 'experience' ? 'bg-blue-500' : item.displayType === 'education' ? 'bg-amber-500' : 'bg-teal-500'}
+                                        rounded-2xl items-center justify-center text-white shadow-xl z-10 group-hover:scale-110 transition-transform
+                                    `}>
+                                        {item.displayType === 'experience' ? <Briefcase size={28} /> :
+                                            item.displayType === 'education' ? <GraduationCap size={28} /> :
+                                                <HeartHandshake size={28} />}
                                     </div>
 
-                                    <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all">
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                    {/* Mobile: Top Icon + Header */}
+                                    <div className="md:hidden flex items-center mb-4 gap-4">
+                                        <div className={`
+                                            w-14 h-14 shrink-0
+                                            ${item.displayType === 'experience' ? 'bg-blue-500' : item.displayType === 'education' ? 'bg-amber-500' : 'bg-teal-500'}
+                                            rounded-2xl flex items-center justify-center text-white shadow-lg
+                                        `}>
+                                            {item.displayType === 'experience' ? <Briefcase size={24} /> :
+                                                item.displayType === 'education' ? <GraduationCap size={24} /> :
+                                                    <HeartHandshake size={24} />}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-gray-900 leading-tight">
+                                                {item.displayType === 'experience' ? item.role : item.displayType === 'education' ? item.degree : item.role}
+                                            </h3>
+                                            <p className="text-primary font-bold text-sm mt-1">
+                                                {item.displayType === 'experience' ? item.company : item.displayType === 'education' ? item.institution : item.organization}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all">
+                                        {/* Desktop Header */}
+                                        <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                                             <div>
-                                                <h3 className="text-2xl font-black text-gray-900">{item.displayType === 'experience' ? item.role : item.degree}</h3>
-                                                <p className="text-primary font-bold text-lg">{item.displayType === 'experience' ? item.company : item.institution}</p>
+                                                <h3 className="text-2xl font-black text-gray-900">
+                                                    {item.displayType === 'experience' ? item.role : item.displayType === 'education' ? item.degree : item.role}
+                                                </h3>
+                                                <p className="text-primary font-bold text-lg">
+                                                    {item.displayType === 'experience' ? item.company : item.displayType === 'education' ? item.institution : item.organization}
+                                                </p>
                                             </div>
                                             <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-xl text-sm">
                                                 <Calendar size={16} />
-                                                <span>{item.displayType === 'experience' ? item.duration : item.period}</span>
+                                                <span>
+                                                    {item.displayType === 'experience' ? item.duration : item.displayType === 'education' ? item.period : item.duration}
+                                                </span>
                                             </div>
                                         </div>
-                                        <p className="text-secondary text-lg leading-relaxed font-normal line-clamp-2">{item.displayType === 'experience' ? item.description : item.details}</p>
-                                        <div className="mt-6 flex items-center text-primary font-black text-sm uppercase tracking-widest gap-2 group-hover:gap-4 transition-all">
+
+                                        {/* Mobile Date */}
+                                        <div className="md:hidden flex items-center gap-2 text-secondary font-bold text-xs bg-gray-50 p-2 rounded-lg w-fit mb-4">
+                                            <Calendar size={14} />
+                                            <span>
+                                                {item.displayType === 'experience' ? item.duration : item.displayType === 'education' ? item.period : item.duration}
+                                            </span>
+                                        </div>
+
+                                        <p className="text-secondary text-base md:text-lg leading-relaxed font-normal line-clamp-3 md:line-clamp-2">
+                                            {item.displayType === 'experience' ? item.description : item.displayType === 'education' ? item.details : item.description}
+                                        </p>
+                                        <div className="mt-6 flex items-center text-primary font-black text-xs md:text-sm uppercase tracking-widest gap-2 group-hover:gap-4 transition-all">
                                             <span>Read More</span>
                                             <ArrowRight size={16} />
                                         </div>
@@ -206,15 +257,15 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
             {/* Contact Section */}
             <section id="contact" className="container mx-auto px-6 scroll-mt-32">
-                <div className="bg-primary rounded-[4rem] p-12 md:p-32 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
+                <div className="bg-primary rounded-[3rem] md:rounded-[4rem] p-8 md:p-32 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
                     <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-                    <div className="grid lg:grid-cols-2 gap-20 items-center text-left">
-                        <div className="space-y-12">
+                    <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center text-left">
+                        <div className="space-y-8 md:space-y-12">
                             <h2 className="text-4xl md:text-7xl font-black text-white leading-tight tracking-tighter">
                                 Let&apos;s Build <br /> Something <span className="text-accent italic">Extraordinary</span> Together.
                             </h2>
-                            <p className="text-white/70 text-xl leading-relaxed max-w-xl">
+                            <p className="text-white/70 text-lg md:text-xl leading-relaxed max-w-xl">
                                 I assist startups and established businesses in building scalable digital identities and automated workflows.
                             </p>
 
@@ -223,18 +274,18 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                     <div className="bg-white/10 p-4 rounded-2xl text-accent border border-white/10">
                                         <Mail size={24} />
                                     </div>
-                                    <p className="text-xl font-bold text-white">{profile.email || 'hariharan@example.com'}</p>
+                                    <p className="text-lg md:text-xl font-bold text-white break-all">{profile.email || 'hariharan@example.com'}</p>
                                 </div>
                                 <div className="flex items-center space-x-6">
                                     <div className="bg-white/10 p-4 rounded-2xl text-blue-400 border border-white/10">
                                         <Linkedin size={24} />
                                     </div>
-                                    <p className="text-xl font-bold text-white">LinkedIn Profile</p>
+                                    <p className="text-lg md:text-xl font-bold text-white">LinkedIn Profile</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl relative">
+                        <div className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl relative">
                             {contactStatus === "success" ? (
                                 <div className="py-12 flex flex-col items-center text-center animate-in fade-in zoom-in duration-500">
                                     <div className="bg-green-50 text-green-600 p-8 rounded-full mb-8">
@@ -247,22 +298,40 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                     </button>
                                 </div>
                             ) : (
-                                <form className="space-y-6" onSubmit={handleContactSubmit}>
+                                <form className="space-y-4 md:space-y-6" onSubmit={handleContactSubmit}>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Your Identity</label>
-                                        <input name="name" required placeholder="Name or Organization" className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Name</label>
+                                        <input name="name" required placeholder="Your Name or Organization" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Contact Method</label>
-                                        <input name="email" required type="email" placeholder="Email Address" className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Company Name <span className="text-gray-300 lowercase text-[9px]">(optional)</span></label>
+                                        <input name="company" placeholder="Ex: Acme Corp" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mail ID</label>
+                                        <input name="email" required type="email" placeholder="example@email.com" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile Number</label>
+                                        <input name="mobile" required type="tel" placeholder="+91 98765 43210" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Website <span className="text-gray-300 lowercase text-[9px]">(opt)</span></label>
+                                            <input name="website" placeholder="https://" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-sm" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Social Media <span className="text-gray-300 lowercase text-[9px]">(opt)</span></label>
+                                            <input name="socialMedia" placeholder="@handle" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-sm" />
+                                        </div>
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Message</label>
-                                        <textarea name="message" required rows={4} placeholder="How can I help you grow?" className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                        <textarea name="message" required rows={4} placeholder="How can I help you grow?" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
                                     </div>
                                     <button
                                         disabled={contactStatus === "loading"}
-                                        className="w-full bg-primary text-white py-6 rounded-[2rem] font-black text-xl flex items-center justify-center space-x-3 shadow-xl hover:shadow-primary/30 transition-all disabled:opacity-50"
+                                        className="w-full bg-primary text-white py-5 md:py-6 rounded-[2rem] font-black text-lg md:text-xl flex items-center justify-center space-x-3 shadow-xl hover:shadow-primary/30 transition-all disabled:opacity-50"
                                     >
                                         {contactStatus === "loading" ? <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <span>Start Conversation</span>}
                                     </button>
