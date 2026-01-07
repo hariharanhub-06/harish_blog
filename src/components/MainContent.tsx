@@ -30,8 +30,31 @@ export default function MainContent({ profile, stats, projects, experiences, edu
     const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setContactStatus("loading");
-        // Simulate API call
-        setTimeout(() => setContactStatus("success"), 2000);
+
+        const formData = new FormData(e.currentTarget);
+        const data = {
+            name: formData.get("name"),
+            email: formData.get("email"),
+            subject: "Portfolio Contact Form", // Or add a subject field if you want
+            message: formData.get("message"),
+        };
+
+        try {
+            const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+
+            if (res.ok) {
+                setContactStatus("success");
+            } else {
+                setContactStatus("error");
+            }
+        } catch (error) {
+            console.error("Contact form error:", error);
+            setContactStatus("error");
+        }
     };
 
     const timeline = [
@@ -226,15 +249,15 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                 <form className="space-y-6" onSubmit={handleContactSubmit}>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Your Identity</label>
-                                        <input required placeholder="Name or Organization" className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                        <input name="name" required placeholder="Name or Organization" className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Contact Method</label>
-                                        <input required type="email" placeholder="Email Address" className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                        <input name="email" required type="email" placeholder="Email Address" className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Message</label>
-                                        <textarea required rows={4} placeholder="How can I help you grow?" className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                        <textarea name="message" required rows={4} placeholder="How can I help you grow?" className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
                                     </div>
                                     <button
                                         disabled={contactStatus === "loading"}
