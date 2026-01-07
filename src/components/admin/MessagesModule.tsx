@@ -21,6 +21,7 @@ export default function MessagesModule() {
     const [fetching, setFetching] = useState(true);
     const [viewing, setViewing] = useState<any>(null);
     const [editing, setEditing] = useState<any>(null);
+    const [updating, setUpdating] = useState(false);
 
     // Default Options
     const defaultCategories = [
@@ -62,18 +63,29 @@ export default function MessagesModule() {
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
+        setUpdating(true);
         try {
             const res = await fetch("/api/admin/messages", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(editing),
+                body: JSON.stringify({
+                    id: editing.id,
+                    category: editing.category,
+                    status: editing.status
+                }),
             });
             if (res.ok) {
                 setEditing(null);
                 fetchMessages();
+            } else {
+                const err = await res.json();
+                alert(`Error: ${err.error || "Failed to update"}`);
             }
         } catch (error) {
             console.error(error);
+            alert("An unexpected error occurred");
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -305,8 +317,13 @@ export default function MessagesModule() {
                                 )}
                             </div>
 
-                            <button type="submit" className="w-full bg-primary text-white py-4 rounded-2xl font-black text-lg shadow-xl hover:shadow-2xl transition-all">
-                                Save Updates
+                            <button
+                                type="submit"
+                                disabled={updating}
+                                className="w-full bg-primary text-white py-4 rounded-2xl font-black text-lg shadow-xl hover:shadow-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {updating && <Loader2 className="w-5 h-5 animate-spin" />}
+                                <span>{updating ? "Saving..." : "Save Updates"}</span>
                             </button>
                         </form>
                     </div>

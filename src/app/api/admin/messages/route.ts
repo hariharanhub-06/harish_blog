@@ -23,14 +23,14 @@ export async function DELETE(req: Request) {
 export async function PUT(req: Request) {
     try {
         const body = await req.json();
-        const { id, ...updates } = body;
+        const { id, category, status } = body;
 
         if (!id) {
             return NextResponse.json({ error: "Missing ID" }, { status: 400 });
         }
 
         await db.update(contactSubmissions)
-            .set(updates)
+            .set({ category, status })
             .where(eq(contactSubmissions.id, id));
 
         return NextResponse.json({ success: true });
