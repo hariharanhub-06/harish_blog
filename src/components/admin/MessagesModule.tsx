@@ -50,6 +50,12 @@ export default function MessagesModule() {
 
     useEffect(() => {
         fetchMessages();
+
+        const interval = setInterval(() => {
+            fetchMessages(true);
+        }, 3000);
+
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -63,14 +69,23 @@ export default function MessagesModule() {
         setFilteredMessages(filtered);
     }, [filterCategory, filterStatus, messages]);
 
-    const fetchMessages = async () => {
-        setFetching(true);
-        const res = await fetch("/api/admin/messages");
-        if (res.ok) {
-            const data = await res.json();
-            setMessages(data);
+    const fetchMessages = async (silent = false) => {
+        if (!silent) setFetching(true);
+        try {
+            const res = await fetch("/api/admin/messages");
+            if (res.ok) {
+                const data = await res.json();
+
+                // Only update if data has changed to prevent UI flicker
+                // Simple length check + ID check of first item is a cheap heuristic
+                // But React state diffing should handle it mostly fine.
+                // To be safe, let's just update.
+                setMessages(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch messages", error);
         }
-        setFetching(false);
+        if (!silent) setFetching(false);
     };
 
     const handleDelete = async (id: string) => {
@@ -156,7 +171,7 @@ export default function MessagesModule() {
                 {filteredMessages.map((msg) => (
                     <div
                         key={msg.id}
-                        className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col xl:flex-row items-start xl:items-center gap-6 xl:gap-10 hover:border-primary/20 relative group overflow-hidden"
+                        className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col xl:flex-row items-start xl:items-center gap-6 xl:gap-10 hover:border-primary/20 relative group"
                     >
                         <div className="flex items-center gap-5 shrink-0 min-w-0 md:min-w-[240px]">
                             <div className="w-14 h-14 md:w-16 md:h-16 rounded-3xl bg-gray-50 text-primary flex items-center justify-center font-black text-xl shrink-0 group-hover:scale-110 transition-transform">
@@ -177,13 +192,13 @@ export default function MessagesModule() {
                         <div className="flex flex-wrap items-center gap-4 md:gap-8 w-full xl:w-auto">
                             <div className="min-w-[140px]">
                                 <span className="text-[10px] font-black uppercase tracking-[0.1em] text-secondary/50 block mb-1">Category</span>
-                                <span className="text-xs font-bold text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">{msg.category || 'Inquiry'}</span>
+                                <span className="text-xs font-bold text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 whitespace-nowrap">{msg.category || 'Inquiry'}</span>
                             </div>
 
                             <div>
                                 <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest inline-block border ${msg.status === 'Fresh' ? 'bg-green-50 text-green-600 border-green-100' :
-                                        msg.status === 'RNR' ? 'bg-red-50 text-red-500 border-red-100' :
-                                            'bg-gray-50 text-gray-400 border-gray-100'
+                                    msg.status === 'RNR' ? 'bg-red-50 text-red-500 border-red-100' :
+                                        'bg-gray-50 text-gray-400 border-gray-100'
                                     }`}>
                                     {msg.status || 'Fresh'}
                                 </span>
