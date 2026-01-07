@@ -247,15 +247,15 @@ export default function CartPage() {
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black uppercase tracking-widest text-purple-500 ml-2">City</label>
-                                            <input readOnly value={formData.city} className="w-full bg-purple-50/50 border-0 rounded-xl px-3 py-4 font-bold text-purple-900" />
+                                            <input value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} className="w-full bg-white border-2 border-purple-100 rounded-xl px-3 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-purple-500 outline-none transition-all" />
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black uppercase tracking-widest text-purple-500 ml-2">State</label>
-                                            <input readOnly value={formData.state} className="w-full bg-purple-50/50 border-0 rounded-xl px-3 py-4 font-bold text-purple-900" />
+                                            <input value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value })} className="w-full bg-white border-2 border-purple-100 rounded-xl px-3 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-purple-500 outline-none transition-all" />
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black uppercase tracking-widest text-purple-500 ml-2">Country</label>
-                                            <input readOnly value={formData.country} className="w-full bg-purple-50/50 border-0 rounded-xl px-3 py-4 font-bold text-purple-900" />
+                                            <input value={formData.country} onChange={e => setFormData({ ...formData, country: e.target.value })} className="w-full bg-white border-2 border-purple-100 rounded-xl px-3 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-purple-500 outline-none transition-all" />
                                         </div>
                                     </div>
                                 </div>
@@ -280,9 +280,6 @@ export default function CartPage() {
                                 <span className="flex items-center gap-2 italic">Shipping (Private Courier) <Truck size={14} className="text-pink-500" /></span>
                                 <span>{shipping === 0 ? "FREE" : `₹${shipping}`}</span>
                             </div>
-                            {shipping > 0 && (
-                                <p className="text-[9px] font-black text-pink-500/60 uppercase tracking-widest pt-2">Add ₹{999 - subtotal} more for FREE shipping!</p>
-                            )}
                             <div className="pt-6 border-t border-gray-100 flex justify-between items-end">
                                 <div className="flex flex-col">
                                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total payable</span>
