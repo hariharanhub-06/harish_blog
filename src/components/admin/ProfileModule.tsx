@@ -21,41 +21,60 @@ export default function ProfileModule() {
         }
     };
 
+    // Helper to compress image before setting as Base64
+    const compressImage = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = document.createElement("img");
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const MAX_WIDTH = 1200; // Reasonable max width for web
+                    const scaleSize = MAX_WIDTH / img.width;
+                    const width = scaleSize < 1 ? MAX_WIDTH : img.width;
+                    const height = scaleSize < 1 ? img.height * scaleSize : img.height;
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext("2d");
+                    ctx?.drawImage(img, 0, 0, width, height);
+
+                    // Compress to JPEG with 0.7 quality
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+                    resolve(dataUrl);
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (err) => reject(err);
+        });
+    };
+
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero') => {
         if (!e.target.files?.[0]) return;
-
         setUploading(true);
+
         try {
             const file = e.target.files[0];
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("path", "profile");
-
-            const res = await fetch("/api/admin/upload", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!res.ok) {
-                const errorData = await res.text();
-                // Try to parse JSON error if possible
-                try {
-                    const jsonError = JSON.parse(errorData);
-                    throw new Error(jsonError.error || jsonError.debug || "Upload failed");
-                } catch {
-                    throw new Error(errorData || "Upload failed");
-                }
+            // Check file size (limit to 5MB before compression)
+            if (file.size > 5 * 1024 * 1024) {
+                alert("File is too large. Please select an image under 5MB.");
+                setUploading(false);
+                return;
             }
 
-            const data = await res.json();
+            const base64 = await compressImage(file);
+
             if (type === 'avatar') {
-                setProfile({ ...profile, avatarUrl: data.url });
+                setProfile({ ...profile, avatarUrl: base64 });
             } else {
-                setProfile({ ...profile, heroImageUrl: data.url });
+                setProfile({ ...profile, heroImageUrl: base64 });
             }
-        } catch (error: any) {
-            console.error("Upload failed", error);
-            alert(`Image upload failed: ${error.message}`);
+        } catch (error) {
+            console.error("Image processing failed", error);
+            alert("Failed to process image. Please try another file.");
         } finally {
             setUploading(false);
         }
