@@ -17,7 +17,8 @@ import {
     Mail,
     MapPin,
     CreditCard,
-    ArrowRight
+    ArrowRight,
+    Trash2
 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -57,6 +58,21 @@ export default function SnacksOrdersModule() {
             return;
         }
         await updateStatus(orderId, newStatus);
+    };
+
+    const handleDeleteOrder = async (orderId: string) => {
+        if (!confirm("Are you sure? This will permanently delete the order from the database.")) return;
+
+        const res = await fetch(`/api/snacks/orders/${orderId}`, {
+            method: "DELETE",
+        });
+
+        if (res.ok) {
+            setSelectedOrder(null);
+            fetchOrders();
+        } else {
+            alert("Failed to delete order");
+        }
     };
 
     const updateStatus = async (orderId: string, newStatus: string, extraData = {}) => {
@@ -344,7 +360,7 @@ export default function SnacksOrdersModule() {
                                                 <p className="text-xs font-bold text-gray-400">Qty: {item.quantity} Kg</p>
                                             </div>
                                             <div className="text-right">
-                                                <span className="text-lg font-black text-gray-900 italic">₹{item.price * item.quantity}</span>
+                                                <span className="text-lg font-black text-gray-900 italic">₹{Math.ceil(item.pricePerKg * item.quantity)}</span>
                                             </div>
                                         </div>
                                     ))}
@@ -353,19 +369,28 @@ export default function SnacksOrdersModule() {
                         </div>
 
                         {/* Modal Footer - Status Actions */}
-                        <div className="p-8 bg-[#fafafa] border-t border-gray-100 flex flex-wrap gap-3">
-                            {STATUSES.filter(s => s !== "All").map(s => (
-                                <button
-                                    key={s}
-                                    onClick={() => handleUpdateStatus(selectedOrder.id, s)}
-                                    className={`flex-grow py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedOrder.status === s
-                                        ? "bg-gray-900 text-white shadow-xl scale-105"
-                                        : "bg-white text-gray-400 border border-gray-200 hover:border-gray-900 hover:text-gray-900"
-                                        }`}
-                                >
-                                    {s}
-                                </button>
-                            ))}
+                        <div className="p-8 bg-[#fafafa] border-t border-gray-100 flex flex-wrap gap-3 items-center">
+                            <div className="flex flex-wrap gap-3 flex-grow">
+                                {STATUSES.filter(s => s !== "All").map(s => (
+                                    <button
+                                        key={s}
+                                        onClick={() => handleUpdateStatus(selectedOrder.id, s)}
+                                        className={`px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedOrder.status === s
+                                            ? "bg-gray-900 text-white shadow-xl scale-105"
+                                            : "bg-white text-gray-400 border border-gray-200 hover:border-gray-900 hover:text-gray-900"
+                                            }`}
+                                    >
+                                        {s}
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => handleDeleteOrder(selectedOrder.id)}
+                                className="p-4 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-2xl transition-all border border-rose-100 ml-auto"
+                                title="Delete Order"
+                            >
+                                <Trash2 size={24} />
+                            </button>
                         </div>
                     </motion.div>
                 </div>

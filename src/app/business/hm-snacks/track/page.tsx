@@ -148,7 +148,7 @@ export default function TrackOrderPage() {
                                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Qty: {item.quantity} Kg</p>
                                         </div>
                                         <div className="ml-auto">
-                                            <span className="font-black text-gray-900 italic">₹{Math.ceil(item.price * item.quantity)}</span>
+                                            <span className="font-black text-gray-900 italic">₹{Math.ceil(item.pricePerKg * item.quantity)}</span>
                                         </div>
                                     </div>
                                 ))}
