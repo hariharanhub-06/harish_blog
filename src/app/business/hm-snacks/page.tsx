@@ -246,14 +246,60 @@ export default function HMSnacksPage() {
                 </div>
             </section>
 
-            {/* Global Partners */}
-            <section className="bg-gray-900 py-20">
-                <div className="container mx-auto px-6">
-                    <div className="flex flex-col md:flex-row items-center justify-center gap-12 opacity-40 grayscale hover:grayscale-0 transition-all">
-                        <div className="flex items-center gap-4">
-                            <Package className="text-white" size={32} />
-                            <span className="text-white text-3xl font-black tracking-tighter">Shiprocket</span>
+            {/* Brand Values / Taglines */}
+            <section className="bg-gray-950 py-24 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-pink-500/5 to-transparent pointer-events-none" />
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="grid md:grid-cols-3 gap-16 md:gap-8">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="text-center group"
+                        >
+                            <div className="text-white text-3xl md:text-4xl font-black italic mb-3 tracking-tight group-hover:text-pink-500 transition-colors duration-500">
+                                Crunch with Purpose
+                            </div>
+                            <div className="h-1 w-12 bg-pink-500/30 mx-auto rounded-full group-hover:w-24 transition-all duration-500" />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="text-center group"
+                        >
+                            <div className="text-white text-3xl md:text-4xl font-black italic mb-3 tracking-tight group-hover:text-pink-500 transition-colors duration-500">
+                                Hygienic Bites
+                            </div>
+                            <div className="h-1 w-12 bg-pink-500/30 mx-auto rounded-full group-hover:w-24 transition-all duration-500" />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className="text-center group"
+                        >
+                            <div className="text-white text-3xl md:text-4xl font-black italic mb-3 tracking-tight group-hover:text-pink-500 transition-colors duration-500">
+                                Taste Tradition
+                            </div>
+                            <div className="h-1 w-12 bg-pink-500/30 mx-auto rounded-full group-hover:w-24 transition-all duration-500" />
+                        </motion.div>
+                    </div>
+
+                    {/* Partner Credit (Subtle) */}
+                    <div className="mt-20 flex justify-center items-center gap-6 opacity-20 grayscale scale-75 md:scale-90">
+                        <div className="flex items-center gap-2 text-white">
+                            <Package size={20} />
+                            <span className="font-bold text-lg">Shiprocket</span>
                         </div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                        <span className="text-white font-bold text-lg">Razorpay</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                        <span className="text-white font-bold text-lg">ImageKit</span>
                     </div>
                 </div>
             </section>
