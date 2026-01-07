@@ -95,19 +95,20 @@ export default function AdminProfile() {
                     {/* Avatar Section */}
                     <div className="flex flex-col items-center">
                         <div className="relative group">
-                            <div className="w-48 h-48 rounded-[2.5rem] overflow-hidden border-8 border-gray-50 shadow-inner bg-gray-100 flex items-center justify-center relative">
+                            <div className="w-48 h-48 rounded-full overflow-hidden border-8 border-gray-50 shadow-inner bg-gray-100 flex items-center justify-center relative">
                                 {profile.avatarUrl ? (
                                     <Image src={profile.avatarUrl} alt="Avatar" fill className="object-cover" />
                                 ) : (
                                     <User size={64} className="text-gray-300" />
                                 )}
                                 {uploading && (
-                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-[2rem]">
-                                        <Loader2 className="text-white animate-spin" />
+                                    <div className="absolute inset-0 bg-primary/60 backdrop-blur-sm flex flex-col items-center justify-center rounded-full text-white">
+                                        <Loader2 className="animate-spin mb-2" size={32} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Uploading...</span>
                                     </div>
                                 )}
                             </div>
-                            <label className="absolute bottom-2 right-2 bg-primary text-white p-4 rounded-2xl cursor-pointer hover:bg-blue-800 transition-all shadow-xl hover:scale-110 active:scale-95">
+                            <label className="absolute bottom-2 right-2 bg-primary text-white p-4 rounded-full cursor-pointer hover:bg-blue-800 transition-all shadow-xl hover:scale-110 active:scale-95 border-4 border-white">
                                 <Camera size={20} />
                                 <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                             </label>
