@@ -87,19 +87,11 @@ export default function HMTechView({ projects }: HMTechViewProps) {
 
             {/* Hero Section */}
             <section className="relative min-h-[90vh] flex items-center justify-center p-6 overflow-hidden">
-                {/* Video Background */}
-                <div className="absolute inset-0 z-0">
-                    <video
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-full object-cover opacity-60"
-                        // Using the Spline video URL provided by user
-                        src="https://cdn.spline.design/_assets/_videos/usecase-4.mp4"
-                    />
+                {/* Particle Background */}
+                <div className="absolute inset-0 z-0 bg-[#050505]">
+                    <TechParticles />
                     {/* Dark Overlay for Text Readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/50"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/30"></div>
                 </div>
 
                 <motion.div
