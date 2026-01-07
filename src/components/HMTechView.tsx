@@ -213,28 +213,38 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                             For this implementation, we will use a simplified sticky bus or timed animation 
                             as true scroll path following is complex in standard Framer Motion without custom hooks.
                             We will use a central floating bus that 'travels' as elements move up. */}
-                        <div className="sticky top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 mb-96 pointer-events-none hidden md:block">
+                        {/* Moving Bus */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] md:w-[600px] h-full pointer-events-none z-50 overflow-visible hidden md:block">
                             <motion.div
-                                animate={{
-                                    y: [0, 20, 0],
-                                    rotate: [0, -5, 5, 0]
-                                }}
+                                initial={{ offsetDistance: "0%" }}
+                                whileInView={{ offsetDistance: "100%" }}
+                                viewport={{ once: true }} // Animate once when in view
                                 transition={{
-                                    duration: 4,
-                                    repeat: Infinity,
+                                    duration: 10, // Takes 10 seconds to drive down
                                     ease: "easeInOut"
                                 }}
-                                className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(234,179,8,0.4)] border-2 border-white/20"
+                                style={{
+                                    offsetPath: "path('M 300 0 C 300 100 100 200 100 300 S 500 400 500 500 S 100 600 100 700 S 500 800 500 900 S 300 1100 300 1200')",
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0
+                                }}
+                                className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-[0_0_50px_rgba(234,179,8,0.6)] border-2 border-white/50"
                             >
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-black">
-                                    <path d="M8 6v6" />
-                                    <path d="M15 6v6" />
-                                    <path d="M2 12h19.6" />
-                                    <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" />
-                                    <circle cx="7" cy="18" r="2" />
-                                    <path d="M9 18h5" />
-                                    <circle cx="17" cy="18" r="2" />
-                                </svg>
+                                <motion.div
+                                    animate={{ rotate: [-2, 2, -2] }}
+                                    transition={{ duration: 0.5, repeat: Infinity }}
+                                >
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-black/80">
+                                        <path d="M8 6v6" />
+                                        <path d="M15 6v6" />
+                                        <path d="M2 12h19.6" />
+                                        <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" />
+                                        <circle cx="7" cy="18" r="2" />
+                                        <path d="M9 18h5" />
+                                        <circle cx="17" cy="18" r="2" />
+                                    </svg>
+                                </motion.div>
                             </motion.div>
                         </div>
 
