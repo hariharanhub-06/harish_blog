@@ -35,6 +35,7 @@ export async function PUT(req: Request) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        return NextResponse.json({ error: "Update failed" }, { status: 500 });
+        console.error("PUT /api/admin/messages error:", error);
+        return NextResponse.json({ error: String(error) }, { status: 500 });
     }
 }
