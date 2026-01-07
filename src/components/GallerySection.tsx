@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Image from "next/image";
 
@@ -11,47 +11,75 @@ interface GallerySectionProps {
 
 export default function GallerySection({ items }: GallerySectionProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [isDragging, setIsDragging] = useState(false);
-    const dragX = useMotionValue(0);
+    const [isHovered, setIsHovered] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const autoScrollRef = useRef<NodeJS.Timeout | null>(null);
+    const inactivityRef = useRef<NodeJS.Timeout | null>(null);
+
+    const scrollToIndex = (index: number) => {
+        if (containerRef.current) {
+            const containerWidth = containerRef.current.offsetWidth;
+            const scrollWidth = containerRef.current.scrollWidth;
+            const itemWidth = scrollWidth / items.length;
+
+            containerRef.current.scrollTo({
+                left: itemWidth * index,
+                behavior: 'smooth'
+            });
+            setCurrentIndex(index);
+        }
+    };
 
     const handleNext = () => {
-        setCurrentIndex((prev) => (prev + 1) % items.length);
+        const nextIndex = (currentIndex + 1) % items.length;
+        scrollToIndex(nextIndex);
+        resetInactivityTimer();
     };
 
     const handlePrev = () => {
-        setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+        const prevIndex = (currentIndex - 1 + items.length) % items.length;
+        scrollToIndex(prevIndex);
+        resetInactivityTimer();
+    };
+
+    const startAutoScroll = () => {
+        if (autoScrollRef.current) clearInterval(autoScrollRef.current);
+        autoScrollRef.current = setInterval(() => {
+            setCurrentIndex((prev) => {
+                const next = (prev + 1) % items.length;
+                scrollToIndex(next);
+                return next;
+            });
+        }, 3000);
+    };
+
+    const stopAutoScroll = () => {
+        if (autoScrollRef.current) {
+            clearInterval(autoScrollRef.current);
+            autoScrollRef.current = null;
+        }
+    };
+
+    const resetInactivityTimer = () => {
+        stopAutoScroll();
+        if (inactivityRef.current) clearTimeout(inactivityRef.current);
+        inactivityRef.current = setTimeout(() => {
+            startAutoScroll();
+        }, 5000);
     };
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            if (!isDragging) handleNext();
-        }, 5000);
-        return () => clearInterval(timer);
-    }, [items.length, isDragging]);
+        startAutoScroll();
+        return () => {
+            stopAutoScroll();
+            if (inactivityRef.current) clearTimeout(inactivityRef.current);
+        };
+    }, [items.length]);
 
     if (items.length === 0) return null;
 
-    const getIndex = (offset: number) => {
-        return (currentIndex + offset + items.length) % items.length;
-    };
-
-    const onDragEnd = (event: any, info: any) => {
-        const threshold = 100;
-        const velocity = info.velocity.x;
-        const offset = info.offset.x;
-
-        if (offset < -threshold || velocity < -500) {
-            handleNext();
-        } else if (offset > threshold || velocity > 500) {
-            handlePrev();
-        }
-        setIsDragging(false);
-    };
-
-    const displayIndices = [-1, 0, 1];
-
     return (
-        <section id="gallery" className="container mx-auto px-6 scroll-mt-20 overflow-hidden">
+        <section id="gallery" className="container mx-auto px-6 scroll-mt-20">
             <div className="flex flex-col items-center mb-12">
                 <div className="flex items-center gap-4 mb-4">
                     <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase">Moment Gallery</h2>
@@ -62,121 +90,91 @@ export default function GallerySection({ items }: GallerySectionProps) {
                 <div className="w-16 h-1.5 bg-pink-500 rounded-full"></div>
             </div>
 
-            <div className="relative h-[400px] md:h-[650px] flex items-center justify-center">
+            <div
+                className="relative group"
+                onMouseEnter={() => {
+                    setIsHovered(true);
+                    resetInactivityTimer();
+                }}
+                onMouseLeave={() => setIsHovered(false)}
+            >
                 {/* Navigation Arrows */}
                 {items.length > 1 && (
                     <>
                         <button
                             onClick={handlePrev}
-                            className="absolute left-0 md:left-4 z-50 bg-white/90 backdrop-blur-md shadow-2xl p-4 rounded-full text-gray-900 hover:bg-white transition-all hover:scale-110 active:scale-95"
+                            className={`absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white shadow-2xl p-4 rounded-full text-gray-900 hover:bg-gray-50 transition-all ${isHovered ? 'opacity-100' : 'opacity-0'
+                                }`}
                         >
                             <ChevronLeft size={24} />
                         </button>
                         <button
                             onClick={handleNext}
-                            className="absolute right-0 md:right-4 z-50 bg-white/90 backdrop-blur-md shadow-2xl p-4 rounded-full text-gray-900 hover:bg-white transition-all hover:scale-110 active:scale-95"
+                            className={`absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-white shadow-2xl p-4 rounded-full text-gray-900 hover:bg-gray-50 transition-all ${isHovered ? 'opacity-100' : 'opacity-0'
+                                }`}
                         >
                             <ChevronRight size={24} />
                         </button>
                     </>
                 )}
 
-                {/* 3D Carousel Container */}
-                <div className="relative w-full max-w-6xl h-full flex items-center justify-center cursor-grab active:cursor-grabbing">
-                    <AnimatePresence initial={false}>
-                        {displayIndices.map((offset) => {
-                            const index = getIndex(offset);
-                            const item = items[index];
-                            if (!item) return null;
+                {/* Carousel Container */}
+                <div
+                    ref={containerRef}
+                    className="overflow-hidden cursor-grab active:cursor-grabbing"
+                    onMouseDown={resetInactivityTimer}
+                >
+                    <div className="flex gap-6 md:gap-8 transition-transform duration-500 ease-in-out">
+                        {items.map((item, i) => (
+                            <div
+                                key={i}
+                                className="min-w-[85%] md:min-w-[45%] lg:min-w-[30%] aspect-square relative rounded-[2.5rem] overflow-hidden shadow-xl border border-gray-100 flex-shrink-0"
+                            >
+                                <Image
+                                    src={item.imageUrl}
+                                    alt={item.title}
+                                    fill
+                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                    unoptimized
+                                    sizes="(max-width: 768px) 85vw, (max-width: 1200px) 45vw, 30vw"
+                                />
 
-                            const isCenter = offset === 0;
+                                {/* Overlay Gradient */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
 
-                            return (
-                                <motion.div
-                                    key={`${item.id}-${offset}`}
-                                    drag={isCenter ? "x" : false}
-                                    dragConstraints={{ left: 0, right: 0 }}
-                                    onDragStart={() => setIsDragging(true)}
-                                    onDragEnd={onDragEnd}
-                                    style={{
-                                        x: isCenter ? dragX : undefined,
-                                        filter: isCenter ? "none" : "blur(1px) grayscale(20%)",
-                                    }}
-                                    initial={{
-                                        opacity: 0,
-                                        scale: 0.6,
-                                        x: offset * 400,
-                                        zIndex: 0
-                                    }}
-                                    animate={{
-                                        opacity: isCenter ? 1 : 0.45,
-                                        scale: isCenter ? 1 : 0.8,
-                                        x: offset * (typeof window !== 'undefined' && window.innerWidth < 768 ? 140 : 350),
-                                        zIndex: isCenter ? 30 : 10,
-                                        rotateY: offset * 20,
-                                    }}
-                                    exit={{
-                                        opacity: 0,
-                                        scale: 0.6,
-                                        x: offset * -400
-                                    }}
-                                    transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
-                                    className="absolute w-[90%] md:w-[75%] aspect-video rounded-[3rem] overflow-hidden shadow-2xl shadow-black/30 group"
-                                    onClick={() => !isCenter && !isDragging && setCurrentIndex(index)}
-                                >
-                                    <Image
-                                        src={item.imageUrl}
-                                        alt={item.title}
-                                        fill
-                                        className="object-cover select-none pointer-events-none"
-                                        priority={isCenter}
-                                        unoptimized
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-                                    />
-
-                                    {/* Overlay Gradient */}
-                                    <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition-opacity duration-500 ${isCenter ? 'opacity-100' : 'opacity-0'}`} />
-
-                                    {/* Content Overlay */}
-                                    {isCenter && (
-                                        <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-left pointer-events-none select-none">
-                                            <motion.h3
-                                                initial={{ y: 20, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                className="text-xl md:text-3xl font-black text-white mb-2 tracking-tight drop-shadow-lg"
-                                            >
-                                                {item.title}
-                                            </motion.h3>
-                                            <motion.p
-                                                initial={{ y: 20, opacity: 0 }}
-                                                animate={{ y: 0, opacity: 1 }}
-                                                transition={{ delay: 0.1 }}
-                                                className="flex items-center gap-2 text-white/90 text-[10px] md:text-xs font-black uppercase tracking-widest px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 w-fit"
-                                            >
-                                                <MapPin size={14} className="text-pink-400" />
-                                                {item.location}
-                                            </motion.p>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            );
-                        })}
-                    </AnimatePresence>
+                                {/* Content Overlay */}
+                                <div className="absolute bottom-6 left-6 right-6 text-left pointer-events-none">
+                                    <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight drop-shadow-lg line-clamp-2">
+                                        {item.title}
+                                    </h3>
+                                    <p className="flex items-center gap-2 text-white/90 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 w-fit">
+                                        <MapPin size={12} className="text-pink-400" />
+                                        {item.location}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* Pagination / Dots */}
-            <div className="flex justify-center gap-2 mt-8 md:mt-12">
-                {items.map((_, i) => (
-                    <button
-                        key={i}
-                        onClick={() => setCurrentIndex(i)}
-                        className={`h-1.5 rounded-full transition-all duration-500 ${i === currentIndex ? 'bg-pink-500 w-10' : 'bg-gray-200 w-3 hover:bg-gray-300'
-                            }`}
-                        aria-label={`Go to slide ${i + 1}`}
-                    />
-                ))}
-            </div>
+            {/* Pagination Indicators */}
+            {items.length > 1 && (
+                <div className="flex justify-center gap-2 mt-8 md:mt-12">
+                    {items.map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => {
+                                scrollToIndex(i);
+                                resetInactivityTimer();
+                            }}
+                            className={`h-1.5 rounded-full transition-all duration-500 ${i === currentIndex ? 'bg-pink-500 w-10' : 'bg-gray-200 w-3 hover:bg-gray-300'
+                                }`}
+                            aria-label={`Go to slide ${i + 1}`}
+                        />
+                    ))}
+                </div>
+            )}
         </section>
     );
 }
