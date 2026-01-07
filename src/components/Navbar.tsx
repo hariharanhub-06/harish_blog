@@ -16,7 +16,16 @@ export default function Navbar() {
     const isSnacksPage = pathname?.startsWith("/business/hm-snacks");
     const isTechPage = pathname?.startsWith("/business/hm-tech");
 
-    // ... scroll logic ...
+    const [scrolled, setScrolled] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     return (
         <nav
