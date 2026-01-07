@@ -78,15 +78,11 @@ export default function HMTechView({ projects }: HMTechViewProps) {
     ];
 
     return (
-        <main className="min-h-screen bg-[#050505] overflow-x-hidden pt-20 text-white selection:bg-purple-500/30 font-sans">
-            {/* Ambient Background Glow */}
-            <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-900/20 blur-[150px] rounded-full animate-pulse"></div>
-                <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-900/20 blur-[150px] rounded-full animate-pulse animation-delay-2000"></div>
-            </div>
+        <main className="min-h-screen bg-white overflow-x-hidden pt-20 font-sans">
+            {/* removed global glow */}
 
             {/* Hero Section */}
-            <section className="relative min-h-[90vh] flex items-center justify-center p-6 overflow-hidden">
+            <section className="relative min-h-[90vh] flex items-center justify-center p-6 overflow-hidden bg-[#050505]">
                 {/* Particle Background */}
                 <div className="absolute inset-0 z-0 bg-[#050505]">
                     <TechParticles />
@@ -101,9 +97,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                     className="relative z-10 text-center max-w-6xl mx-auto space-y-10"
                 >
                     <motion.div variants={fadeInUp} className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-white font-bold text-lg tracking-[0.15em] uppercase mb-4 hover:bg-white/10 transition-colors shadow-2xl">
-                        <div className="relative w-8 h-8">
-                            <Image src="/hm-tech-logo.png" alt="HM Tech Logo" fill className="object-contain" />
-                        </div>
+                        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                         HM Tech
                     </motion.div>
 
@@ -129,8 +123,12 @@ export default function HMTechView({ projects }: HMTechViewProps) {
             </section>
 
             {/* Services Grid */}
-            <section id="services" className="py-20 px-6 relative z-10">
-                <div className="container mx-auto max-w-7xl">
+            {/* Services Grid (White Theme) */}
+            <section id="services" className="py-20 px-6 relative z-10 bg-white">
+                {/* Blob Animation */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full blur-[100px] pointer-events-none animate-pulse"></div>
+
+                <div className="container mx-auto max-w-7xl relative z-10">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -138,9 +136,9 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         variants={fadeInUp}
                         className="text-center mb-24 space-y-6"
                     >
-                        <span className="text-purple-400 font-bold tracking-[0.2em] uppercase text-sm">Capabilities</span>
-                        <h2 className="text-5xl md:text-7xl font-black text-white tracking-tight">Our Expertise</h2>
-                        <p className="text-xl text-gray-400 font-medium max-w-2xl mx-auto">
+                        <span className="text-purple-600 font-bold tracking-[0.2em] uppercase text-sm">Capabilities</span>
+                        <h2 className="text-5xl md:text-7xl font-black text-gray-900 tracking-tight">Our Expertise</h2>
+                        <p className="text-xl text-gray-500 font-medium max-w-2xl mx-auto">
                             High-impact digital solutions tailored to your unique business needs.
                         </p>
                     </motion.div>
@@ -156,14 +154,14 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                             <motion.div
                                 key={index}
                                 variants={scaleIn}
-                                className="group p-10 bg-white/[0.03] backdrop-blur-sm rounded-[2rem] border border-white/[0.05] hover:border-purple-500/30 hover:bg-white/[0.08] transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
+                                className="group p-10 bg-gray-50 rounded-[2rem] border border-gray-100 hover:border-purple-500/30 hover:bg-white hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
                             >
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-colors"></div>
-                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-800 to-black border border-white/10 text-white flex items-center justify-center mb-8 group-hover:scale-110 group-hover:border-purple-500/50 transition-all duration-500 shadow-2xl">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl group-hover:bg-purple-500/10 transition-colors"></div>
+                                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 text-gray-900 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:text-purple-600 shadow-md transition-all duration-500">
                                     <service.icon size={32} strokeWidth={1.5} />
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-purple-400 transition-colors">{service.title}</h3>
-                                <p className="text-gray-400 font-medium leading-relaxed group-hover:text-gray-300">{service.desc}</p>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-purple-600 transition-colors">{service.title}</h3>
+                                <p className="text-gray-500 font-medium leading-relaxed group-hover:text-gray-600">{service.desc}</p>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -171,7 +169,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
             </section>
 
             {/* Process / Journey Section (Digital Circuit) */}
-            <section className="py-20 px-6 relative z-10 overflow-hidden">
+            <section className="py-20 px-6 relative z-10 overflow-hidden bg-[#050505]">
                 {/* Particle Background for Flow Section */}
                 <div className="absolute inset-0 z-0 bg-[#050505]">
                     <TechParticles />
@@ -272,8 +270,11 @@ export default function HMTechView({ projects }: HMTechViewProps) {
             </section>
 
             {/* Projects Gallery */}
-            <section className="py-20 px-6 relative z-10">
-                <div className="container mx-auto max-w-7xl">
+            {/* Projects Gallery (White Theme) */}
+            <section className="py-20 px-6 relative z-10 bg-white">
+                <div className="absolute left-0 bottom-0 w-[500px] h-[500px] bg-pink-200/40 rounded-full blur-[100px] pointer-events-none animate-pulse"></div>
+
+                <div className="container mx-auto max-w-7xl relative z-10">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -281,9 +282,9 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         variants={fadeInUp}
                         className="text-center mb-20"
                     >
-                        <span className="text-pink-500 font-extrabold tracking-[0.3em] uppercase text-sm drop-shadow-md">PORTFOLIO</span>
-                        <h2 className="text-6xl md:text-8xl font-black text-white mt-4 tracking-tighter drop-shadow-2xl">Projects Done</h2>
-                        <p className="text-xl md:text-2xl text-gray-400 font-medium mt-6 tracking-wide">Selected works from our portfolio</p>
+                        <span className="text-pink-600 font-extrabold tracking-[0.3em] uppercase text-sm drop-shadow-sm">PORTFOLIO</span>
+                        <h2 className="text-6xl md:text-8xl font-black text-gray-900 mt-4 tracking-tighter">Projects Done</h2>
+                        <p className="text-xl md:text-2xl text-gray-500 font-medium mt-6 tracking-wide">Selected works from our portfolio</p>
                     </motion.div>
 
                     <motion.div
@@ -297,7 +298,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                             <motion.div
                                 key={project.id}
                                 variants={scaleIn}
-                                className="group bg-[#0A0A0A] rounded-[2rem] overflow-hidden border border-white/5 hover:border-pink-500/30 transition-all duration-500 flex flex-col hover:-translate-y-2 hover:shadow-2xl"
+                                className="group bg-gray-50 rounded-[2rem] overflow-hidden border border-gray-100 hover:border-pink-500/30 transition-all duration-500 flex flex-col hover:-translate-y-2 hover:shadow-2xl"
                             >
                                 <div className="relative h-64 overflow-hidden">
                                     {project.thumbnail ? (
@@ -305,24 +306,24 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                                             src={project.thumbnail}
                                             alt={project.title}
                                             fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 group-hover:opacity-100"
+                                            className="object-cover group-hover:scale-105 transition-transform duration-700"
                                         />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-800 bg-gray-900">
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">
                                             <Layout size={40} />
                                         </div>
                                     )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-80"></div>
-                                    <div className="absolute bottom-4 left-4 flex gap-2 flex-wrap">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                    <div className="absolute bottom-4 left-4 flex gap-2 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity">
                                         {project.technologies?.slice(0, 3).map((tech: string, i: number) => (
-                                            <span key={i} className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] text-white font-bold border border-white/5 uppercase tracking-wide">{tech}</span>
+                                            <span key={i} className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] text-white font-bold border border-white/10 uppercase tracking-wide">{tech}</span>
                                         ))}
                                     </div>
                                 </div>
                                 <div className="p-8 flex-1 flex flex-col">
-                                    <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-pink-400 transition-colors">{project.title}</h3>
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-pink-500 transition-colors">{project.title}</h3>
                                     <p className="text-gray-500 font-medium text-sm line-clamp-3 mb-8 flex-1 leading-relaxed">{project.description}</p>
-                                    <a href={project.liveUrl || project.repoUrl || "#"} target="_blank" className="inline-flex items-center gap-2 text-white font-bold uppercase tracking-widest text-xs hover:text-pink-400 transition-all">
+                                    <a href={project.liveUrl || project.repoUrl || "#"} target="_blank" className="inline-flex items-center gap-2 text-gray-900 font-bold uppercase tracking-widest text-xs hover:text-pink-500 transition-all">
                                         View Case Study <ArrowRight size={14} />
                                     </a>
                                 </div>
@@ -332,56 +333,97 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                 </div>
             </section>
 
-            {/* Contact Form */}
-            <section id="contact" className="py-20 px-6 relative overflow-hidden">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+            {/* Contact Form (White Theme) */}
+            <section id="contact" className="py-20 px-6 relative overflow-hidden bg-white">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-200/40 via-purple-200/40 to-pink-200/40 rounded-full blur-[100px] pointer-events-none"></div>
                 <div className="container mx-auto max-w-4xl relative z-10">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={fadeInUp}
-                        className="bg-white/[0.02] backdrop-blur-2xl rounded-[3rem] p-8 md:p-16 border border-white/10 shadow-2xl relative overflow-hidden"
+                        className="bg-white/80 backdrop-blur-2xl rounded-[3rem] p-8 md:p-16 border border-gray-100 shadow-2xl relative overflow-hidden"
                     >
                         <div className="text-center mb-12">
                             <span className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white mb-6 shadow-lg shadow-purple-500/20">
                                 <Send size={28} />
                             </span>
-                            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">Let's Build the Future</h2>
-                            <p className="text-gray-400">Get a response within 24 hours.</p>
+                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">Let's Build the Future</h2>
+                            <p className="text-gray-500">Get a response within 24 hours.</p>
                         </div>
 
-                        <form action="/api/contact" method="POST" className="space-y-6">
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            const form = e.target as HTMLFormElement;
+                            const formData = new FormData(form);
+                            const data = {
+                                name: formData.get("name"),
+                                mobile: formData.get("mobile"),
+                                email: formData.get("email"),
+                                website: formData.get("website"),
+                                message: formData.get("message"),
+                                category: "HM Tech"
+                            };
+
+                            const btn = form.querySelector("button");
+                            if (btn) {
+                                btn.disabled = true;
+                                btn.innerText = "Sending...";
+                            }
+
+                            try {
+                                const res = await fetch("/api/contact", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify(data)
+                                });
+
+                                if (res.ok) {
+                                    alert("Message sent successfully!");
+                                    form.reset();
+                                } else {
+                                    alert("Failed to send message. Please try again.");
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                alert("Something went wrong.");
+                            } finally {
+                                if (btn) {
+                                    btn.disabled = false;
+                                    btn.innerText = "Send Request";
+                                }
+                            }
+                        }} className="space-y-6">
                             <input type="hidden" name="category" value="HM Tech" />
 
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 pl-4">Name</label>
-                                    <input required name="name" type="text" placeholder="John Doe" className="w-full bg-black/50 border border-white/10 focus:border-purple-500 focus:bg-black/80 rounded-2xl p-4 text-white placeholder:text-gray-700 outline-none transition-all" />
+                                    <input required name="name" type="text" placeholder="John Doe" className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white rounded-2xl p-4 text-gray-900 placeholder:text-gray-400 outline-none transition-all" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 pl-4">Mobile</label>
-                                    <input required name="mobile" type="tel" placeholder="+91 00000 00000" className="w-full bg-black/50 border border-white/10 focus:border-purple-500 focus:bg-black/80 rounded-2xl p-4 text-white placeholder:text-gray-700 outline-none transition-all" />
+                                    <input required name="mobile" type="tel" placeholder="+91 00000 00000" className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white rounded-2xl p-4 text-gray-900 placeholder:text-gray-400 outline-none transition-all" />
                                 </div>
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 pl-4">Email</label>
-                                    <input required name="email" type="email" placeholder="john@example.com" className="w-full bg-black/50 border border-white/10 focus:border-purple-500 focus:bg-black/80 rounded-2xl p-4 text-white placeholder:text-gray-700 outline-none transition-all" />
+                                    <input required name="email" type="email" placeholder="john@example.com" className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white rounded-2xl p-4 text-gray-900 placeholder:text-gray-400 outline-none transition-all" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 pl-4">Website</label>
-                                    <input name="website" type="url" placeholder="https://" className="w-full bg-black/50 border border-white/10 focus:border-purple-500 focus:bg-black/80 rounded-2xl p-4 text-white placeholder:text-gray-700 outline-none transition-all" />
+                                    <input name="website" type="url" placeholder="https://" className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white rounded-2xl p-4 text-gray-900 placeholder:text-gray-400 outline-none transition-all" />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 pl-4">Requirement</label>
-                                <textarea required name="message" rows={4} placeholder="Tell us about your project..." className="w-full bg-black/50 border border-white/10 focus:border-purple-500 focus:bg-black/80 rounded-2xl p-4 text-white placeholder:text-gray-700 outline-none transition-all resize-none" />
+                                <textarea required name="message" rows={4} placeholder="Tell us about your project..." className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white rounded-2xl p-4 text-gray-900 placeholder:text-gray-400 outline-none transition-all resize-none" />
                             </div>
 
-                            <button type="submit" className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
+                            <button type="submit" className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-purple-600 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
                                 Send Request
                             </button>
                         </form>
@@ -391,3 +433,4 @@ export default function HMTechView({ projects }: HMTechViewProps) {
         </main>
     );
 }
+
