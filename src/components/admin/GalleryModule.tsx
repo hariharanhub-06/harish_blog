@@ -70,7 +70,7 @@ export default function GalleryModule() {
                 img.src = event.target?.result as string;
                 img.onload = () => {
                     const canvas = document.createElement("canvas");
-                    const MAX_WIDTH = 1200;
+                    const MAX_WIDTH = 2400;
                     const scaleSize = MAX_WIDTH / img.width;
                     const width = scaleSize < 1 ? MAX_WIDTH : img.width;
                     const height = scaleSize < 1 ? img.height * scaleSize : img.height;
@@ -81,7 +81,7 @@ export default function GalleryModule() {
                     const ctx = canvas.getContext("2d");
                     ctx?.drawImage(img, 0, 0, width, height);
 
-                    const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
                     resolve(dataUrl);
                 };
                 img.onerror = (err) => reject(err);
