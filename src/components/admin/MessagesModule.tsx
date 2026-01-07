@@ -305,7 +305,7 @@ export default function MessagesModule() {
                                 )}
                             </div>
 
-                            <button className="w-full bg-primary text-white py-4 rounded-2xl font-black text-lg shadow-xl hover:shadow-2xl transition-all">
+                            <button type="submit" className="w-full bg-primary text-white py-4 rounded-2xl font-black text-lg shadow-xl hover:shadow-2xl transition-all">
                                 Save Updates
                             </button>
                         </form>
