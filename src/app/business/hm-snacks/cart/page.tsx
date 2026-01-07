@@ -183,6 +183,16 @@ export default function CartPage() {
                     ) : (
                         <div className="bg-gradient-to-br from-white via-pink-50/30 to-white p-10 rounded-[3rem] shadow-xl border border-pink-100/50 animate-in slide-in-from-left duration-500 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-pink-100/20 to-transparent rounded-full blur-3xl -translate-y-32 translate-x-32"></div>
+
+                            {/* Back to Cart Button */}
+                            <button
+                                onClick={() => setStep(1)}
+                                className="mb-6 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-pink-500 hover:text-pink-600 transition-colors group"
+                            >
+                                <ArrowRight size={16} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
+                                <span>Edit Cart Items</span>
+                            </button>
+
                             <h2 className="text-2xl font-black mb-10 flex items-center gap-4 relative z-10">
                                 <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-pink-200"><MapPin size={24} /></div>
                                 Delivery Information
