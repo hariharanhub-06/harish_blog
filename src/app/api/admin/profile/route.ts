@@ -24,6 +24,7 @@ export async function POST(req: Request) {
             heroImageUrl: data.heroImageUrl,
             aboutImageUrl: data.aboutImageUrl,
             socialLinks: data.socialLinks,
+            stats: data.stats,
             updatedAt: new Date(),
         }).where(eq(profiles.id, existing.id));
     } else {

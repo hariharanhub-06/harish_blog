@@ -29,9 +29,9 @@ export default function Hero({ profile }: HeroProps) {
                             className="object-cover opacity-60"
                             priority
                         />
-                        {/* Gradient overlay for text readability (Subtle) */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/10 to-white/60" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/30" />
+                        {/* Gradient overlay for text readability (Very Minimal) */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/40" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10" />
                     </>
                 ) : (
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-full blur-[100px] opacity-20">
