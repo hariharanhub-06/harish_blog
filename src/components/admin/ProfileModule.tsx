@@ -52,7 +52,7 @@ export default function ProfileModule() {
         });
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero') => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero' | 'about') => {
         if (!e.target.files?.[0]) return;
         setUploading(true);
 
@@ -69,8 +69,10 @@ export default function ProfileModule() {
 
             if (type === 'avatar') {
                 setProfile({ ...profile, avatarUrl: base64 });
-            } else {
+            } else if (type === 'hero') {
                 setProfile({ ...profile, heroImageUrl: base64 });
+            } else {
+                setProfile({ ...profile, aboutImageUrl: base64 });
             }
         } catch (error) {
             console.error("Image processing failed", error);
@@ -112,7 +114,7 @@ export default function ProfileModule() {
             <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-8 md:p-12">
                 <form onSubmit={handleSave} className="space-y-12">
                     {/* Images Section */}
-                    <div className="grid md:grid-cols-2 gap-12">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {/* Avatar Section */}
                         <div className="flex flex-col items-center space-y-6">
                             <div className="relative group">
@@ -158,6 +160,29 @@ export default function ProfileModule() {
                                 </label>
                             </div>
                             <p className="text-secondary text-sm font-bold uppercase tracking-widest text-center">Hero Background Picture</p>
+                        </div>
+
+                        {/* About Image Section */}
+                        <div className="flex flex-col items-center space-y-6">
+                            <div className="relative group">
+                                <div className="w-48 h-48 rounded-full overflow-hidden border-8 border-gray-50 shadow-inner bg-gray-100 flex items-center justify-center relative">
+                                    {profile.aboutImageUrl ? (
+                                        <Image src={profile.aboutImageUrl} alt="About" fill className="object-cover" />
+                                    ) : (
+                                        <User size={64} className="text-gray-300" />
+                                    )}
+                                    {uploading && (
+                                        <div className="absolute inset-0 bg-primary/60 backdrop-blur-sm flex flex-col items-center justify-center rounded-full text-white">
+                                            <Loader2 className="animate-spin mb-2" size={32} />
+                                        </div>
+                                    )}
+                                </div>
+                                <label className="absolute bottom-2 right-2 bg-indigo-600 text-white p-4 rounded-full cursor-pointer hover:bg-indigo-700 transition-all shadow-xl hover:scale-110 active:scale-95 border-4 border-white">
+                                    <Camera size={20} />
+                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'about')} />
+                                </label>
+                            </div>
+                            <p className="text-secondary text-sm font-bold uppercase tracking-widest text-center">About Section Picture</p>
                         </div>
                     </div>
 
