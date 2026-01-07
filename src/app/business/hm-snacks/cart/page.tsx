@@ -43,8 +43,75 @@ export default function CartPage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderConfirmed, setOrderConfirmed] = useState<any>(null);
 
+    const [shipping, setShipping] = useState(0);
+
+    // Shipping Rates Configuration
+    const SHIPPING_RATES: Record<string, number> = {
+        "Tamil Nadu": 40,
+        "Kerala": 80,
+        "Andhra Pradesh": 90,
+        "Arunachal Pradesh": 90,
+        "Assam": 90,
+        "Bihar": 90,
+        "Karnataka": 90,
+        "Manipur": 90,
+        "Chhattisgarh": 200,
+        "Goa": 200,
+        "Gujarat": 200,
+        "Haryana": 200,
+        "Himachal Pradesh": 200,
+        "Jharkhand": 200,
+        "Madhya Pradesh": 200,
+        "Maharashtra": 200,
+        "Meghalaya": 200,
+        "Mizoram": 200,
+        "Nagaland": 200,
+        "Odisha": 200,
+        "Punjab": 200,
+        "Rajasthan": 200,
+        "Sikkim": 200,
+        "Telangana": 200,
+        "Uttar Pradesh": 200,
+        "Uttarakhand": 200,
+        "West Bengal": 200
+    };
+
     const subtotal = cart.reduce((acc, item) => acc + (item.pricePerKg * item.quantity), 0);
-    const shipping = subtotal > 999 ? 0 : 80; // Free shipping over 999
+    const totalWeight = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+    // Calculate Shipping Effect
+    useEffect(() => {
+        let ratePerKg = 200; // Default fallback for India
+        const isAbroad = formData.country.trim().toLowerCase() !== "india";
+
+        if (isAbroad) {
+            ratePerKg = 2000;
+        } else if (formData.state) {
+            // Find rate by state name (case insensitive matching)
+            const stateKey = Object.keys(SHIPPING_RATES).find(key =>
+                key.toLowerCase() === formData.state.toLowerCase()
+            );
+            if (stateKey) {
+                ratePerKg = SHIPPING_RATES[stateKey];
+            }
+        }
+
+        // Formula: (Rate * Weight) + 40 (Hidden Packaging)
+        // We assume minimum shipping weight of 1kg for calculation if weight is less? 
+        // Or proportional? User said "Cost/1kg". Usually implies proportional or per step.
+        // Let's do straight multiplication for now: rate * weight. 
+        // If weight < 1kg, should we charge for 1kg? "Cost/1kg" usually implies a base rate.
+        // Let's use Math.ceil(weight) to charge per started Kg, or just proportional?
+        // Given it's courier, it's often per 500g or 1kg steps. 
+        // Let's safe-side it: proportional but effectively per kg rate.
+
+        const baseShipping = ratePerKg * totalWeight;
+        const packagingCharge = 40;
+
+        setShipping(Math.ceil(baseShipping + packagingCharge));
+
+    }, [formData.state, formData.country, totalWeight]);
+
     const total = subtotal + shipping;
 
     const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
