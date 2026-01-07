@@ -15,11 +15,13 @@ const socialLinks = [
 export default function Footer() {
     const pathname = usePathname();
     const isSnacksPage = pathname?.startsWith("/business/hm-snacks");
+    const isTechPage = pathname?.startsWith("/business/hm-tech");
+    const isSpecialPage = isSnacksPage || isTechPage;
 
     return (
         <footer className="bg-white border-t border-gray-100 py-10">
             <div className="container mx-auto px-6">
-                {!isSnacksPage && (
+                {!isSpecialPage && (
                     <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 mb-12">
                         <div>
                             <Link href="/" className="text-2xl font-bold text-primary">
@@ -46,7 +48,7 @@ export default function Footer() {
                     </div>
                 )}
 
-                <div className={`${!isSnacksPage ? "border-t border-gray-50 pt-8" : ""} flex flex-col items-center text-center text-sm text-secondary`}>
+                <div className={`${!isSpecialPage ? "border-t border-gray-50 pt-8" : ""} flex flex-col items-center text-center text-sm text-secondary`}>
                     <p>© {new Date().getFullYear()} Hari Haran Jeyaramamoorthy. All rights reserved.</p>
                 </div>
             </div>
