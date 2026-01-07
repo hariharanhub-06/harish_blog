@@ -12,17 +12,26 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "No file provided" }, { status: 400 });
         }
 
-        // Convert File to ArrayBuffer for firebase uploadBytes
+        // Check if storage is initialized with a bucket
+        if (!storage.app.options.storageBucket) {
+            return NextResponse.json({ error: "Firebase Storage bucket not configured. Check your environment variables." }, { status: 500 });
+        }
+
+        // Convert File to Uint8Array for firebase uploadBytes (more reliable in Node.js)
         const arrayBuffer = await file.arrayBuffer();
+        const buffer = new Uint8Array(arrayBuffer);
         const storageRef = ref(storage, `${path}/${Date.now()}_${file.name}`);
 
-        // Upload to Firebase Storage (Server-side, so no CORS issues)
-        await uploadBytes(storageRef, arrayBuffer);
+        // Upload to Firebase Storage
+        await uploadBytes(storageRef, buffer);
         const url = await getDownloadURL(storageRef);
 
         return NextResponse.json({ url });
     } catch (error: any) {
-        console.error("Upload error:", error);
-        return NextResponse.json({ error: error.message || "Upload failed" }, { status: 500 });
+        console.error("Critical Upload failure:", error);
+        return NextResponse.json({
+            error: error.message || "Internal Upload Error",
+            debug: "Ensure NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET is set correctly."
+        }, { status: 500 });
     }
 }
