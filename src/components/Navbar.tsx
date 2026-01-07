@@ -44,7 +44,13 @@ export default function Navbar() {
                             {link.name}
                         </Link>
                     ))}
-                    <div className="ml-4 pl-4 border-l border-gray-200">
+                    <div className="ml-4 pl-4 border-l border-gray-200 flex gap-3">
+                        <Link
+                            href="/business"
+                            className="bg-gray-100 text-gray-900 px-6 py-2.5 rounded-xl hover:bg-gray-200 transition-all font-bold text-sm shadow-sm border border-gray-200"
+                        >
+                            Business
+                        </Link>
                         <Link
                             href="#contact"
                             className="bg-primary text-white px-6 py-2.5 rounded-xl hover:bg-blue-800 transition-all font-bold text-sm shadow-lg shadow-primary/20"
@@ -84,13 +90,22 @@ export default function Navbar() {
                                     <span>{link.name}</span>
                                 </Link>
                             ))}
-                            <Link
-                                href="#contact"
-                                className="w-full bg-primary text-white text-center py-4 rounded-xl font-black mt-4 shadow-lg shadow-primary/20"
-                                onClick={() => setIsOpen(false)}
-                            >
-                                Hire Me
-                            </Link>
+                            <div className="flex flex-col gap-2 mt-2">
+                                <Link
+                                    href="/business"
+                                    className="w-full bg-gray-100 text-gray-900 text-center py-4 rounded-xl font-black shadow-sm border border-gray-200"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    Business
+                                </Link>
+                                <Link
+                                    href="#contact"
+                                    className="w-full bg-primary text-white text-center py-4 rounded-xl font-black shadow-lg shadow-primary/20"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    Hire Me
+                                </Link>
+                            </div>
                         </div>
                     </motion.div>
                 )}
