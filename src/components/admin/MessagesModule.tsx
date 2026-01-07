@@ -171,7 +171,7 @@ export default function MessagesModule() {
                 {filteredMessages.map((msg) => (
                     <div
                         key={msg.id}
-                        className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col xl:flex-row items-start xl:items-center gap-6 xl:gap-10 hover:border-primary/20 relative group"
+                        className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col xl:flex-row items-start xl:items-center gap-6 xl:gap-10 hover:border-primary/20 relative group flex-wrap"
                     >
                         <div className="flex items-center gap-5 shrink-0 min-w-0 md:min-w-[240px]">
                             <div className="w-14 h-14 md:w-16 md:h-16 rounded-3xl bg-gray-50 text-primary flex items-center justify-center font-black text-xl shrink-0 group-hover:scale-110 transition-transform">
@@ -209,7 +209,7 @@ export default function MessagesModule() {
                             <p className="text-sm text-gray-500 font-medium line-clamp-2 italic px-4 py-3 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 group-hover:bg-white transition-colors">&quot;{msg.message}&quot;</p>
                         </div>
 
-                        <div className="flex items-center gap-3 w-full sm:w-auto mt-4 xl:mt-0 pt-6 xl:pt-0 border-t xl:border-0 border-gray-50 flex-wrap sm:flex-nowrap">
+                        <div className="flex items-center gap-3 w-full sm:w-auto mt-4 xl:mt-0 pt-6 xl:pt-0 border-t xl:border-0 border-gray-50 flex-wrap justify-end ml-auto">
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setViewing(msg)}
