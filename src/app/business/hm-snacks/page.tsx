@@ -356,20 +356,20 @@ export default function HMSnacksPage() {
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Name</label>
-                                    <input required name="name" type="text" placeholder="John Doe" className="w-full bg-white border-0 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm" />
+                                    <input required name="name" type="text" placeholder="John Doe" className="w-full bg-white border border-gray-200 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm outline-none" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile No</label>
-                                    <input required name="mobile" type="tel" placeholder="+91 98765 43210" className="w-full bg-white border-0 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm" />
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile Number</label>
+                                    <input required name="mobile" type="tel" placeholder="+91 98765 43210" className="w-full bg-white border border-gray-200 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm outline-none" />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mail Id</label>
-                                <input required name="email" type="email" placeholder="john@example.com" className="w-full bg-white border-0 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm" />
+                                <input required name="email" type="email" placeholder="john@example.com" className="w-full bg-white border border-gray-200 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm outline-none" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Comments</label>
-                                <textarea required name="message" rows={4} placeholder="Your message here..." className="w-full bg-white border-0 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm resize-none" />
+                                <textarea required name="message" rows={4} placeholder="Your message here..." className="w-full bg-white border border-gray-200 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm resize-none outline-none" />
                             </div>
                             <button type="submit" className="w-full bg-pink-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-pink-600 transition-all shadow-xl shadow-pink-200">
                                 Send Message
