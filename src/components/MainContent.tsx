@@ -352,7 +352,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile Number</label>
-                                        <input name="mobile" required type="tel" placeholder="+91 98765 43210" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                        <input name="mobile" required type="tel" placeholder="+91 90423 87152" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
