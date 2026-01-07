@@ -13,10 +13,13 @@ export async function PATCH(
 
         console.log("PATCH /api/snacks/products/[id]:", { id, body });
 
+        // Filter out system-managed fields that shouldn't be updated
+        const { id: bodyId, createdAt, updatedAt: bodyUpdatedAt, ...updateData } = body;
+
         const [updated] = await db
             .update(snackProducts)
             .set({
-                ...body,
+                ...updateData,
                 updatedAt: new Date(),
             })
             .where(eq(snackProducts.id, id))
