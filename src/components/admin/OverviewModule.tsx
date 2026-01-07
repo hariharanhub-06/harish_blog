@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import {
     User,
     MessageSquare,
-    Browser as Globe,
+    Globe,
     TrendingUp,
     Calendar,
     Phone,
