@@ -11,6 +11,8 @@ export async function PATCH(
         const body = await req.json();
         const { id } = await params;
 
+        console.log("PATCH /api/snacks/products/[id]:", { id, body });
+
         const [updated] = await db
             .update(snackProducts)
             .set({
@@ -20,10 +22,14 @@ export async function PATCH(
             .where(eq(snackProducts.id, id))
             .returning();
 
+        console.log("Product updated successfully:", updated);
         return NextResponse.json(updated);
     } catch (error) {
         console.error("Update product error:", error);
-        return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
+        return NextResponse.json({
+            error: "Failed to update product",
+            details: error instanceof Error ? error.message : String(error)
+        }, { status: 500 });
     }
 }
 

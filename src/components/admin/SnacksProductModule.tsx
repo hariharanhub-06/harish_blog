@@ -48,17 +48,27 @@ export default function SnacksProductModule() {
             const url = editing.id ? `/api/snacks/products/${editing.id}` : "/api/snacks/products";
             const method = editing.id ? "PATCH" : "POST";
 
+            console.log("Saving product:", { url, method, data: editing });
+
             const res = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(editing),
             });
+
+            const data = await res.json();
+
             if (res.ok) {
+                console.log("Product saved successfully:", data);
                 setEditing(null);
                 fetchProducts();
+            } else {
+                console.error("Save failed:", data);
+                alert(`Failed to save product: ${data.error || "Unknown error"}`);
             }
         } catch (error) {
-            console.error(error);
+            console.error("Save error:", error);
+            alert(`Failed to save product: ${error instanceof Error ? error.message : "Unknown error"}`);
         } finally {
             setSaving(false);
         }
