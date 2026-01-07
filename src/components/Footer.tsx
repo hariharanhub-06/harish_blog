@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Linkedin, Github, Twitter, Instagram } from "lucide-react";
+import { Linkedin, Instagram, Facebook, Mail, Phone as WhatsApp } from "lucide-react";
 
 const socialLinks = [
+    { name: "WhatsApp", href: "https://wa.me/919042387152", icon: WhatsApp },
     { name: "LinkedIn", href: "https://www.linkedin.com/in/hari-haran-jeyaramamoorthy/", icon: Linkedin },
-    { name: "GitHub", href: "https://github.com/startup-digi-3119", icon: Github },
     { name: "Instagram", href: "https://www.instagram.com/_mr_vibrant/", icon: Instagram },
-    { name: "Twitter", href: "https://x.com/HariHaranJ_31", icon: Twitter },
+    { name: "Facebook", href: "https://www.facebook.com/profile.php?id=61573749598737", icon: Facebook },
+    { name: "Mail", href: "mailto:hariharanjeyaramoorthy@gmail.com", icon: Mail },
 ];
 
 export default function Footer() {
