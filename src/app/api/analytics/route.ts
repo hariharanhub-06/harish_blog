@@ -22,18 +22,27 @@ export async function POST(req: Request) {
     }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
-        // Aggregate page views by day for the last 30 days
-        const stats = await db.select({
+        const { searchParams } = new URL(req.url);
+        const start = searchParams.get("start");
+        const end = searchParams.get("end");
+
+        let query = db.select({
             date: sql<string>`DATE(${visitorAnalytics.timestamp})`,
             views: sql<number>`count(*)::int`,
             visitors: sql<number>`count(distinct ${visitorAnalytics.visitorId})::int`
         })
-            .from(visitorAnalytics)
+            .from(visitorAnalytics) as any;
+
+        if (start && end) {
+            query = query.where(sql`${visitorAnalytics.timestamp} >= ${start} AND ${visitorAnalytics.timestamp} <= ${end}`);
+        }
+
+        const stats = await query
             .groupBy(sql`DATE(${visitorAnalytics.timestamp})`)
             .orderBy(desc(sql`DATE(${visitorAnalytics.timestamp})`))
-            .limit(30);
+            .limit(90);
 
         return NextResponse.json(stats);
     } catch (error) {
