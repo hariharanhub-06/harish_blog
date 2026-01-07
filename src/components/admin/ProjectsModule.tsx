@@ -62,27 +62,52 @@ export default function ProjectsModule() {
         if (res.ok) fetchProjects();
     };
 
+    // Helper to compress image before setting as Base64
+    const compressImage = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = document.createElement("img");
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const MAX_WIDTH = 1200;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    const width = scaleSize < 1 ? MAX_WIDTH : img.width;
+                    const height = scaleSize < 1 ? img.height * scaleSize : img.height;
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext("2d");
+                    ctx?.drawImage(img, 0, 0, width, height);
+
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+                    resolve(dataUrl);
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (err) => reject(err);
+        });
+    };
+
     const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.[0]) return;
         setUploading(true);
         try {
             const file = e.target.files[0];
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("path", "projects");
+            if (file.size > 5 * 1024 * 1024) {
+                alert("File is too large. Please select an image under 5MB.");
+                setUploading(false);
+                return;
+            }
 
-            const res = await fetch("/api/admin/upload", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!res.ok) throw new Error("Upload failed");
-
-            const data = await res.json();
-            setEditing({ ...editing, thumbnail: data.url });
+            const base64 = await compressImage(file);
+            setEditing({ ...editing, thumbnail: base64 });
         } catch (error) {
             console.error(error);
-            alert("Thumbnail upload failed");
+            alert("Thumbnail processing failed");
         } finally {
             setUploading(false);
         }
