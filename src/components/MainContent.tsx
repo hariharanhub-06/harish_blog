@@ -112,7 +112,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
             {/* Infinite Skill Carousel */}
             <div className="py-2 border-y border-gray-50 bg-white/50 backdrop-blur-sm">
                 <InfiniteCarousel
-                    speed={60}
+                    speed={120}
                     items={SKILLS.map(skill => (
                         <span key={skill} className="text-sm font-black uppercase tracking-[0.3em] text-gray-400/60 hover:text-primary transition-colors cursor-default select-none">
                             {skill}
