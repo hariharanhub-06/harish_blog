@@ -168,46 +168,100 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                 </div>
             </section>
 
-            {/* Travel Route (Process) */}
-            <section className="py-32 px-6 relative z-10">
-                <div className="container mx-auto max-w-6xl">
+            {/* Travel Route (Bus Journey) */}
+            <section className="py-32 px-6 relative z-10 overflow-hidden">
+                <div className="container mx-auto max-w-6xl relative">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={fadeInUp}
-                        className="text-center mb-32"
+                        className="text-center mb-32 relative z-20"
                     >
                         <span className="text-blue-400 font-bold tracking-[0.2em] uppercase text-sm">Process</span>
                         <h2 className="text-5xl md:text-7xl font-black mt-4 tracking-tight text-white">The Journey</h2>
                     </motion.div>
 
                     <div className="relative">
-                        <motion.div
-                            initial={{ height: 0 }}
-                            whileInView={{ height: "100%" }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1.5, ease: "easeInOut" }}
-                            className="absolute left-8 md:left-1/2 top-0 w-[2px] bg-gradient-to-b from-transparent via-blue-500 to-transparent md:-translate-x-1/2 opacity-30"
-                        ></motion.div>
+                        {/* Winding Road SVG */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[300px] md:w-[600px] pointer-events-none opacity-40">
+                            <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 600 1200">
+                                <motion.path
+                                    d="M 300 0 C 300 100 100 200 100 300 S 500 400 500 500 S 100 600 100 700 S 500 800 500 900 S 300 1100 300 1200"
+                                    fill="none"
+                                    stroke="url(#roadGradient)"
+                                    strokeWidth="8"
+                                    strokeLinecap="round"
+                                    initial={{ pathLength: 0 }}
+                                    whileInView={{ pathLength: 1 }}
+                                    viewport={{ once: true }} // Animate only once
+                                    transition={{ duration: 2.5, ease: "easeInOut" }}
+                                />
+                                <defs>
+                                    <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0" />
+                                        <stop offset="20%" stopColor="#3b82f6" />
+                                        <stop offset="80%" stopColor="#a855f7" />
+                                        <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
 
-                        <div className="space-y-24">
+                        {/* Moving Bus */}
+                        {/* Note: True scroll-linked path animation requires complex motion value mapping. 
+                            For this implementation, we will use a simplified sticky bus or timed animation 
+                            as true scroll path following is complex in standard Framer Motion without custom hooks.
+                            We will use a central floating bus that 'travels' as elements move up. */}
+                        <div className="sticky top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 mb-96 pointer-events-none hidden md:block">
+                            <motion.div
+                                animate={{
+                                    y: [0, 20, 0],
+                                    rotate: [0, -5, 5, 0]
+                                }}
+                                transition={{
+                                    duration: 4,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                                className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(234,179,8,0.4)] border-2 border-white/20"
+                            >
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-black">
+                                    <path d="M8 6v6" />
+                                    <path d="M15 6v6" />
+                                    <path d="M2 12h19.6" />
+                                    <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" />
+                                    <circle cx="7" cy="18" r="2" />
+                                    <path d="M9 18h5" />
+                                    <circle cx="17" cy="18" r="2" />
+                                </svg>
+                            </motion.div>
+                        </div>
+
+                        {/* Steps along the road */}
+                        <div className="space-y-32 relative z-10 pt-20">
                             {steps.map((step, index) => (
                                 <motion.div
                                     key={index}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
                                     viewport={{ once: true, margin: "-100px" }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className={`relative flex items-center ${index % 2 === 0 ? 'md:flex-row-reverse' : ''} group`}
+                                    transition={{ duration: 0.8, delay: 0.2 }}
+                                    className={`flex items-center ${index % 2 === 0 ? 'justify-start md:justify-start' : 'justify-end md:justify-end'} relative`}
                                 >
-                                    <div className="flex-1 ml-24 md:ml-0 md:px-24">
-                                        <div className={`p-8 bg-black border border-white/10 rounded-2xl hover:border-blue-500/50 transition-all duration-300 ${index % 2 === 0 ? 'md:text-left' : 'md:text-right'} group-hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]`}>
-                                            <h3 className="text-2xl md:text-3xl font-bold text-gray-200 group-hover:text-white transition-colors">{step}</h3>
+                                    {/* Stop Sign / Marker */}
+                                    <div className={`absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center ${index % 2 === 0 ? 'md:-translate-x-[200px]' : 'md:translate-x-[200px]'}`}>
+                                        <div className="w-4 h-4 bg-white rounded-full shadow-[0_0_10px_white] animate-pulse"></div>
+                                        <div className="h-20 w-[1px] bg-gradient-to-b from-white/50 to-transparent"></div>
+                                    </div>
+
+                                    {/* Content Card */}
+                                    <div className={`w-full md:w-[40%] ${index % 2 === 0 ? 'md:pr-20' : 'md:pl-20'}`}>
+                                        <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] hover:border-blue-500/50 hover:bg-white/10 transition-all duration-300 shadow-2xl group">
+                                            <div className="mb-4 text-xs font-black text-blue-500 uppercase tracking-widest">Stop {index + 1}</div>
+                                            <h3 className="text-2xl md:text-3xl font-bold text-white group-hover:text-blue-300 transition-colors">{step}</h3>
                                         </div>
                                     </div>
-                                    <div className="absolute left-8 md:left-1/2 w-4 h-4 md:-ml-2 rounded-full bg-black border-[2px] border-blue-500 z-20 group-hover:scale-150 transition-transform duration-300 box-content"></div>
-                                    <div className="flex-1 hidden md:block"></div>
                                 </motion.div>
                             ))}
                         </div>
