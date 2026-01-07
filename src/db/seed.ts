@@ -1,3 +1,5 @@
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
 import { db } from "./index";
 import { profiles, experience, education, skills, projects } from "./schema";
 
