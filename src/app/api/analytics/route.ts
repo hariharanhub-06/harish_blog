@@ -28,18 +28,17 @@ export async function GET(req: Request) {
         const start = searchParams.get("start");
         const end = searchParams.get("end");
 
-        let query = db.select({
+        const whereClause = start && end
+            ? sql`DATE(${visitorAnalytics.timestamp}) >= ${start} AND DATE(${visitorAnalytics.timestamp}) <= ${end}`
+            : sql`TRUE`;
+
+        const stats = await db.select({
             date: sql<string>`DATE(${visitorAnalytics.timestamp})`,
             views: sql<number>`count(*)::int`,
             visitors: sql<number>`count(distinct ${visitorAnalytics.visitorId})::int`
         })
-            .from(visitorAnalytics) as any;
-
-        if (start && end) {
-            query = query.where(sql`${visitorAnalytics.timestamp} >= ${start} AND ${visitorAnalytics.timestamp} <= ${end}`);
-        }
-
-        const stats = await query
+            .from(visitorAnalytics)
+            .where(whereClause)
             .groupBy(sql`DATE(${visitorAnalytics.timestamp})`)
             .orderBy(desc(sql`DATE(${visitorAnalytics.timestamp})`))
             .limit(90);
@@ -50,6 +49,7 @@ export async function GET(req: Request) {
             count: sql<number>`count(*)::int`
         })
             .from(visitorAnalytics)
+            .where(whereClause)
             .groupBy(visitorAnalytics.page)
             .orderBy(desc(sql`count(*)`))
             .limit(5);
@@ -60,6 +60,7 @@ export async function GET(req: Request) {
             count: sql<number>`count(*)::int`
         })
             .from(visitorAnalytics)
+            .where(whereClause)
             .groupBy(visitorAnalytics.referrer)
             .orderBy(desc(sql`count(*)`))
             .limit(5);
