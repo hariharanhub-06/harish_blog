@@ -3,13 +3,16 @@
 import { motion } from "framer-motion";
 import { MapPin, Briefcase } from "lucide-react";
 
+import Image from "next/image";
+
 interface AboutHeroProps {
     name: string;
     about: string;
     location: string;
+    imageUrl?: string;
 }
 
-export default function AboutHero({ name, about, location }: AboutHeroProps) {
+export default function AboutHero({ name, about, location, imageUrl }: AboutHeroProps) {
     return (
         <div className="grid lg:grid-cols-2 gap-20 items-center">
             <motion.div
@@ -44,18 +47,30 @@ export default function AboutHero({ name, about, location }: AboutHeroProps) {
                 transition={{ duration: 0.8 }}
                 className="relative"
             >
-                <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-full relative overflow-hidden flex items-center justify-center p-12 shadow-inner">
-                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white/80 to-transparent pointer-events-none" />
-                    <div className="text-primary font-black text-[12vw] opacity-20">{name.split(' ').map(n => n[0]).join('')}</div>
+                <div className="aspect-square bg-gradient-to-br from-primary/10 to-accent/10 rounded-full relative overflow-hidden flex items-center justify-center p-12 shadow-inner group">
+                    {imageUrl ? (
+                        <div className="absolute inset-2 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                            <Image src={imageUrl} alt="About" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white/80 to-transparent pointer-events-none" />
+                            <div className="text-primary font-black text-[12vw] opacity-20">{name.split(' ').map(n => n[0]).join('')}</div>
+                        </>
+                    )}
 
-                    <div className="absolute top-10 right-0 glass p-6 rounded-3xl shadow-xl animate-bounce-slow">
-                        <p className="text-xs font-black uppercase text-secondary mb-1 tracking-widest">Colleges</p>
-                        <p className="text-2xl font-black text-primary">42+</p>
-                    </div>
-                    <div className="absolute bottom-10 left-0 glass p-6 rounded-3xl shadow-xl animate-bounce-slow-delayed">
-                        <p className="text-xs font-black uppercase text-secondary mb-1 tracking-widest">Team size</p>
-                        <p className="text-2xl font-black text-accent">17</p>
-                    </div>
+                    {!imageUrl && (
+                        <>
+                            <div className="absolute top-10 right-0 glass p-6 rounded-3xl shadow-xl animate-bounce-slow">
+                                <p className="text-xs font-black uppercase text-secondary mb-1 tracking-widest">Colleges</p>
+                                <p className="text-2xl font-black text-primary">42+</p>
+                            </div>
+                            <div className="absolute bottom-10 left-0 glass p-6 rounded-3xl shadow-xl animate-bounce-slow-delayed">
+                                <p className="text-xs font-black uppercase text-secondary mb-1 tracking-widest">Team size</p>
+                                <p className="text-2xl font-black text-accent">17</p>
+                            </div>
+                        </>
+                    )}
                 </div>
             </motion.div>
         </div>

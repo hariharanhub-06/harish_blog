@@ -79,6 +79,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                     name={profile.name}
                     about={profile.about}
                     location={profile.location}
+                    imageUrl={profile.aboutImageUrl}
                 />
 
                 <div className="mt-32">
