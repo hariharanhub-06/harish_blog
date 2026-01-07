@@ -152,72 +152,78 @@ export default function MessagesModule() {
             </div>
 
             {/* Message List (Spacious Rows) */}
-            <div className="space-y-4">
+            <div className="space-y-6">
                 {filteredMessages.map((msg) => (
                     <div
                         key={msg.id}
-                        className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row items-start md:items-center gap-6 hover:border-primary/20"
+                        className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col xl:flex-row items-start xl:items-center gap-6 xl:gap-10 hover:border-primary/20 relative group overflow-hidden"
                     >
-                        <div className="flex items-center gap-5 md:w-1/4">
-                            <div className="w-14 h-14 rounded-2xl bg-gray-50 text-primary flex items-center justify-center font-black text-xl shrink-0">
+                        <div className="flex items-center gap-5 shrink-0 min-w-0 md:min-w-[240px]">
+                            <div className="w-14 h-14 md:w-16 md:h-16 rounded-3xl bg-gray-50 text-primary flex items-center justify-center font-black text-xl shrink-0 group-hover:scale-110 transition-transform">
                                 {msg.name.charAt(0)}
                             </div>
                             <div className="min-w-0">
-                                <h3 className="font-black text-gray-900 truncate">{msg.name}</h3>
-                                <div className="flex items-center gap-2 text-primary font-bold text-xs mt-1">
-                                    <Phone size={12} className="shrink-0" />
+                                <h3 className="font-black text-gray-900 truncate text-lg">{msg.name}</h3>
+                                <div className="flex items-center gap-2 text-primary font-bold text-sm mt-1">
+                                    <Phone size={14} className="shrink-0" />
                                     <span>{msg.mobile}</span>
                                 </div>
-                                <span className="text-[10px] font-bold text-secondary/40 block mt-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-secondary/40 block mt-2">
                                     {new Date(msg.createdAt).toLocaleDateString()}
-                                </span  >
+                                </span>
                             </div>
                         </div>
 
-                        <div className="md:w-1/4">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-secondary/50 block mb-1">Inquiry Category</span>
-                            <span className="text-xs font-bold text-gray-700">{msg.category || 'Not Determined'}</span>
+                        <div className="flex flex-wrap items-center gap-4 md:gap-8 w-full xl:w-auto">
+                            <div className="min-w-[140px]">
+                                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-secondary/50 block mb-1">Category</span>
+                                <span className="text-xs font-bold text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">{msg.category || 'Inquiry'}</span>
+                            </div>
+
+                            <div>
+                                <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest inline-block border ${msg.status === 'Fresh' ? 'bg-green-50 text-green-600 border-green-100' :
+                                        msg.status === 'RNR' ? 'bg-red-50 text-red-500 border-red-100' :
+                                            'bg-gray-50 text-gray-400 border-gray-100'
+                                    }`}>
+                                    {msg.status || 'Fresh'}
+                                </span>
+                            </div>
                         </div>
 
-                        <div className="md:w-1/6">
-                            <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest inline-block ${msg.status === 'Fresh' ? 'bg-green-50 text-green-600 border border-green-100' :
-                                    msg.status === 'RNR' ? 'bg-red-50 text-red-500 border border-red-100' :
-                                        'bg-gray-50 text-gray-500 border border-gray-100'
-                                }`}>
-                                {msg.status || 'Fresh'}
-                            </span>
+                        <div className="flex-1 min-w-0 w-full overflow-hidden">
+                            <p className="text-sm text-gray-500 font-medium line-clamp-2 italic px-4 py-3 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 group-hover:bg-white transition-colors">&quot;{msg.message}&quot;</p>
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-500 font-medium truncate italic">&quot;{msg.message}&quot;</p>
-                        </div>
+                        <div className="flex items-center gap-3 w-full sm:w-auto mt-4 xl:mt-0 pt-6 xl:pt-0 border-t xl:border-0 border-gray-50 flex-wrap sm:flex-nowrap">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setViewing(msg)}
+                                    className="p-3 bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-2xl transition-all shadow-sm active:scale-95"
+                                >
+                                    <Eye size={20} />
+                                </button>
+                                <a
+                                    href={`https://wa.me/${msg.mobile?.replace(/\D/g, '')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-3 bg-gray-50 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-2xl transition-all shadow-sm active:scale-95"
+                                >
+                                    <MessageCircle size={20} />
+                                </a>
+                            </div>
 
-                        <div className="flex items-center gap-2 mt-4 md:mt-0">
-                            <button
-                                onClick={() => setViewing(msg)}
-                                className="p-3 bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all"
-                            >
-                                <Eye size={18} />
-                            </button>
-                            <a
-                                href={`https://wa.me/${msg.mobile?.replace(/\D/g, '')}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-3 bg-gray-50 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-xl transition-all"
-                            >
-                                <MessageCircle size={18} />
-                            </a>
                             <button
                                 onClick={() => setEditing(msg)}
-                                className="px-4 py-2.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2"
+                                className="flex-1 sm:flex-none px-6 py-3 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-2xl transition-all font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm shadow-amber-100/50 active:scale-95"
                             >
-                                <Edit3 size={14} /> Update
+                                <Edit3 size={16} /> Update
                             </button>
+
                             <button
                                 onClick={() => handleDelete(msg.id)}
-                                className="p-3 bg-red-50 text-red-300 hover:bg-red-500 hover:text-white rounded-xl transition-all"
+                                className="p-3 bg-red-50 text-red-200 hover:bg-red-500 hover:text-white rounded-2xl transition-all shadow-sm active:scale-95"
                             >
-                                <Trash2 size={18} />
+                                <Trash2 size={20} />
                             </button>
                         </div>
                     </div>
