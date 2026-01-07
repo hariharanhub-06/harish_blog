@@ -36,18 +36,7 @@ export default function TechNavbar() {
 
                 {/* Right Actions */}
                 <div className="flex items-center space-x-2 md:space-x-8">
-                    {/* Desktop Links */}
-                    <div className="hidden md:flex items-center gap-6">
-                        {navLinks.map(link => (
-                            <Link
-                                key={link.name}
-                                href={link.href}
-                                className="text-sm font-bold text-gray-600 hover:text-blue-600 transition-colors uppercase tracking-wider"
-                            >
-                                {link.name}
-                            </Link>
-                        ))}
-                    </div>
+                    {/* Desktop Links (Removed) */}
 
                     <Link
                         href="#contact"
@@ -73,18 +62,7 @@ export default function TechNavbar() {
                         className="absolute top-28 left-6 right-6 bg-white/95 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl border border-gray-100 p-8 md:hidden overflow-hidden origin-top"
                     >
                         <div className="flex flex-col space-y-2">
-                            {navLinks.map(link => (
-                                <Link
-                                    key={link.name}
-                                    href={link.href}
-                                    onClick={() => setIsOpen(false)}
-                                    className="p-4 rounded-2xl hover:bg-gray-50 text-xl font-black text-gray-900 flex justify-between items-center group"
-                                >
-                                    {link.name}
-                                    <span className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">→</span>
-                                </Link>
-                            ))}
-                            <div className="h-px bg-gray-100 my-2"></div>
+                            {/* Links removed as per request */}
                             <Link
                                 href="#contact"
                                 onClick={() => setIsOpen(false)}
