@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export function InfiniteCarousel({
     items,
-    speed = 40,
+    speed = 120,
     className = "",
 }: {
     items: React.ReactNode[];
