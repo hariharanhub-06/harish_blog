@@ -70,7 +70,7 @@ export default function GalleryModule() {
                 img.src = event.target?.result as string;
                 img.onload = () => {
                     const canvas = document.createElement("canvas");
-                    const MAX_WIDTH = 2400;
+                    const MAX_WIDTH = 1920; // 1080p Standard Width
                     const scaleSize = MAX_WIDTH / img.width;
                     const width = scaleSize < 1 ? MAX_WIDTH : img.width;
                     const height = scaleSize < 1 ? img.height * scaleSize : img.height;
