@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { MagneticButton } from "./MagneticButton";
+import { Tilt } from "./Tilt";
 
 interface HeroProps {
     profile: {
@@ -26,7 +28,7 @@ export default function Hero({ profile }: HeroProps) {
                             src={profile.heroImageUrl}
                             alt="Background"
                             fill
-                            className="object-cover opacity-60"
+                            className="object-cover opacity-20"
                             priority
                         />
                         {/* Gradient overlay for text readability (Very Minimal) */}
@@ -62,16 +64,17 @@ export default function Hero({ profile }: HeroProps) {
                     {/* Glowing background ring */}
                     <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-125" />
 
-                    <div className="relative w-40 h-40 md:w-56 md:h-56 rounded-full overflow-hidden border-8 border-white shadow-[0_20px_50px_rgba(30,64,175,0.2)] group transition-all duration-500 hover:scale-105 active:scale-95">
-                        <Image
-                            src={profile.avatarUrl}
-                            alt={profile.name}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                            priority
-                        />
-                    </div>
-                    {/* Interactive badge */}
+                    <Tilt options={{ max: 15, speed: 400, glare: true, "max-glare": 0.3 }} className="relative z-10">
+                        <div className="relative w-40 h-40 md:w-56 md:h-56 rounded-full overflow-hidden border-8 border-white shadow-[0_20px_50px_rgba(30,64,175,0.2)] group transition-all duration-500">
+                            <Image
+                                src={profile.avatarUrl}
+                                alt={profile.name}
+                                fill
+                                className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                priority
+                            />
+                        </div>
+                    </Tilt>
                 </motion.div>
             )}
 
@@ -106,19 +109,24 @@ export default function Hero({ profile }: HeroProps) {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="flex flex-col sm:flex-row gap-5"
             >
-                <Link
-                    href="#portfolio"
-                    className="group bg-primary text-white px-10 py-5 rounded-2xl font-black text-lg hover:bg-blue-800 transition-all flex items-center justify-center space-x-3 shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-1"
-                >
-                    <span>Explore My Work</span>
-                    <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                    href="#contact"
-                    className="bg-white text-gray-900 border-2 border-gray-100 px-10 py-5 rounded-2xl font-black text-lg hover:border-primary/20 hover:bg-gray-50 transition-all text-center flex items-center justify-center shadow-sm hover:shadow-lg"
-                >
-                    Let&apos;s Talk
-                </Link>
+                <MagneticButton strength={25}>
+                    <Link
+                        href="#portfolio"
+                        className="group bg-primary text-white px-10 py-5 rounded-2xl font-black text-lg hover:bg-blue-800 transition-all flex items-center justify-center space-x-3 shadow-xl shadow-primary/25 hover:shadow-primary/40"
+                    >
+                        <span>Explore My Work</span>
+                        <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                </MagneticButton>
+
+                <MagneticButton strength={25}>
+                    <Link
+                        href="#contact"
+                        className="bg-white text-gray-900 border-2 border-gray-100 px-10 py-5 rounded-2xl font-black text-lg hover:border-primary/20 hover:bg-gray-50 transition-all text-center flex items-center justify-center shadow-sm hover:shadow-lg"
+                    >
+                        Let&apos;s Talk
+                    </Link>
+                </MagneticButton>
             </motion.div>
         </section>
     );

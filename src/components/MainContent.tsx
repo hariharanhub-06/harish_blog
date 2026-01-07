@@ -14,6 +14,8 @@ import AboutHero from "@/components/AboutHero";
 import TimelineCarousel from "@/components/TimelineCarousel";
 import GallerySection from "@/components/GallerySection";
 import Image from "next/image";
+import { InfiniteCarousel } from "./InfiniteCarousel";
+import { Tilt } from "./Tilt";
 
 interface MainContentProps {
     profile: any;
@@ -24,6 +26,12 @@ interface MainContentProps {
     volunteerings: any[];
     galleryItems: any[];
 }
+
+const SKILLS = [
+    "Next.js", "React", "Typescript", "Tailwind CSS", "Node.js",
+    "PostgreSQL", "Prisma", "Drizzle", "Framer Motion", "Three.js",
+    "Digital Marketing", "Automation", "CRM Solutions", "Brand Identity"
+];
 
 export default function MainContent({ profile, stats, projects, experiences, educations, volunteerings, galleryItems }: MainContentProps) {
     const [selectedItem, setSelectedItem] = useState<{ data: any, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
@@ -100,6 +108,18 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                     })}
                 </div>
             </section>
+
+            {/* Infinite Skill Carousel */}
+            <div className="py-2 border-y border-gray-50 bg-white/50 backdrop-blur-sm">
+                <InfiniteCarousel
+                    speed={60}
+                    items={SKILLS.map(skill => (
+                        <span key={skill} className="text-sm font-black uppercase tracking-[0.3em] text-gray-400/60 hover:text-primary transition-colors cursor-default select-none">
+                            {skill}
+                        </span>
+                    ))}
+                />
+            </div>
 
             {/* About Section */}
             <section id="about" className="container mx-auto px-6 scroll-mt-20">
@@ -200,46 +220,48 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {projects.map((project, i) => (
                         <CardWrapper key={project.id} index={i}>
-                            <div
-                                className="group flex flex-col h-full bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer"
-                                onClick={() => setSelectedItem({ data: project, type: "project" })}
-                            >
-                                <div className="relative h-56 overflow-hidden">
-                                    {project.thumbnail ? (
-                                        <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
-                                    ) : (
-                                        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                                            <span className="text-primary font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
-                                        </div>
-                                    )}
-                                    <div className="absolute top-4 right-4 flex gap-2">
-                                        {project.featured && (
-                                            <span className="bg-accent text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Featured</span>
+                            <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }} className="h-full">
+                                <div
+                                    className="group flex flex-col h-full bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
+                                    onClick={() => setSelectedItem({ data: project, type: "project" })}
+                                >
+                                    <div className="relative h-56 overflow-hidden">
+                                        {project.thumbnail ? (
+                                            <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                                        ) : (
+                                            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                                                <span className="text-primary font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
+                                            </div>
                                         )}
-                                    </div>
-                                </div>
-
-                                <div className="p-8 flex flex-col flex-grow text-left">
-                                    <div className="flex flex-wrap gap-2 mb-4">
-                                        {project.technologies?.slice(0, 3).map((tech: string) => (
-                                            <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-primary bg-blue-50 px-3 py-1 rounded-md">{tech}</span>
-                                        ))}
+                                        <div className="absolute top-4 right-4 flex gap-2">
+                                            {project.featured && (
+                                                <span className="bg-accent text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Featured</span>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    <h3 className="text-xl font-black mb-3 group-hover:text-primary transition-colors">{project.title}</h3>
-                                    <p className="text-secondary text-sm leading-relaxed mb-6 line-clamp-2">{project.description}</p>
+                                    <div className="p-8 flex flex-col flex-grow text-left">
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            {project.technologies?.slice(0, 3).map((tech: string) => (
+                                                <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-primary bg-blue-50 px-3 py-1 rounded-md">{tech}</span>
+                                            ))}
+                                        </div>
 
-                                    <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
-                                        <span className="text-primary font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
-                                            View Case Study <ArrowRight size={14} />
-                                        </span>
-                                        <div className="flex gap-3">
-                                            {project.liveUrl && <ExternalLink size={16} className="text-gray-300" />}
-                                            {project.repoUrl && <Github size={16} className="text-gray-300" />}
+                                        <h3 className="text-xl font-black mb-3 group-hover:text-primary transition-colors">{project.title}</h3>
+                                        <p className="text-secondary text-sm leading-relaxed mb-6 line-clamp-2">{project.description}</p>
+
+                                        <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                                            <span className="text-primary font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
+                                                View Case Study <ArrowRight size={14} />
+                                            </span>
+                                            <div className="flex gap-3">
+                                                {project.liveUrl && <ExternalLink size={16} className="text-gray-300" />}
+                                                {project.repoUrl && <Github size={16} className="text-gray-300" />}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Tilt>
                         </CardWrapper>
                     ))}
                 </div>
