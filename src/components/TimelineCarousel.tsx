@@ -5,6 +5,7 @@ import { motion, useMotionValue } from "framer-motion";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import CardWrapper from "@/components/CardWrapper";
 import { LucideIcon } from "lucide-react";
+import { Tilt } from "./Tilt";
 
 interface TimelineCarouselProps {
     items: any[];
@@ -140,24 +141,26 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
                                     }}
                                 >
                                     {/* Card Content */}
-                                    <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all flex flex-col flex-1 h-full w-full pointer-events-none md:pointer-events-auto">
-                                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-4">
-                                            <div className="flex-1">
-                                                <h3 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-2">{item[title]}</h3>
-                                                <p className="text-primary font-bold text-lg md:text-xl">{item[subtitle]}</p>
-                                            </div>
-                                            <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-2xl text-sm w-fit shrink-0">
-                                                <Calendar size={18} />
-                                                <span>{(() => {
-                                                    const p = item[period] || "";
-                                                    const years = p.match(/\b20\d{2}\b/g);
-                                                    if (!years) return p;
-                                                    const uniqueYears = Array.from(new Set(years));
-                                                    return uniqueYears.join(' - ');
-                                                })()}</span>
+                                    <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }} className="h-full w-full">
+                                        <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all flex flex-col flex-1 h-full w-full pointer-events-none md:pointer-events-auto">
+                                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-4">
+                                                <div className="flex-1">
+                                                    <h3 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-2">{item[title]}</h3>
+                                                    <p className="text-primary font-bold text-lg md:text-xl">{item[subtitle]}</p>
+                                                </div>
+                                                <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-2xl text-sm w-fit shrink-0">
+                                                    <Calendar size={18} />
+                                                    <span>{(() => {
+                                                        const p = item[period] || "";
+                                                        const years = p.match(/\b20\d{2}\b/g);
+                                                        if (!years) return p;
+                                                        const uniqueYears = Array.from(new Set(years));
+                                                        return uniqueYears.join(' - ');
+                                                    })()}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Tilt>
                                 </div>
                             </CardWrapper>
                         </div>

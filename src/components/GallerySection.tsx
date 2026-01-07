@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, useMotionValue } from "framer-motion";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import Image from "next/image";
+import { Tilt } from "./Tilt";
 
 interface GallerySectionProps {
     items: any[];
@@ -129,9 +130,10 @@ export default function GallerySection({ items }: GallerySectionProps) {
                         className="flex gap-6 md:gap-8 cursor-grab active:cursor-grabbing px-2"
                     >
                         {items.map((item, i) => (
-                            <div
+                            <Tilt
                                 key={i}
-                                className="min-w-[85%] md:min-w-[45%] lg:min-w-[30%] aspect-square relative rounded-[2.5rem] overflow-hidden shadow-xl border border-gray-100 flex-shrink-0 select-none pointer-events-none"
+                                options={{ max: 15, speed: 400, glare: true, "max-glare": 0.4 }}
+                                className="min-w-[85%] md:min-w-[45%] lg:min-w-[30%] aspect-square relative rounded-[2.5rem] overflow-hidden shadow-xl border border-gray-100 flex-shrink-0 select-none cursor-pointer"
                             >
                                 <Image
                                     src={item.imageUrl}
@@ -146,7 +148,7 @@ export default function GallerySection({ items }: GallerySectionProps) {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
 
                                 {/* Content Overlay */}
-                                <div className="absolute bottom-6 left-6 right-6 text-left">
+                                <div className="absolute bottom-6 left-6 right-6 text-left z-20">
                                     <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight drop-shadow-lg line-clamp-2">
                                         {item.title}
                                     </h3>
@@ -155,7 +157,7 @@ export default function GallerySection({ items }: GallerySectionProps) {
                                         {item.location}
                                     </p>
                                 </div>
-                            </div>
+                            </Tilt>
                         ))}
                     </motion.div>
                 </div>
