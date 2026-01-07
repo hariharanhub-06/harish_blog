@@ -72,15 +72,6 @@ export default function Hero({ profile }: HeroProps) {
                         />
                     </div>
                     {/* Interactive badge */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 1 }}
-                        className="absolute bottom-4 -right-4 bg-accent text-white font-black px-4 py-2 rounded-xl shadow-lg border-2 border-white text-sm flex items-center space-x-2"
-                    >
-                        <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                        <span>Available Now</span>
-                    </motion.div>
                 </motion.div>
             )}
 

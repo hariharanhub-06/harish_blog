@@ -62,11 +62,62 @@ export default function MainContent({ profile, stats, projects, experiences, edu
         }
     };
 
-    const timeline = [
-        ...experiences.map(exp => ({ ...exp, displayType: 'experience' as const })),
-        ...educations.map(edu => ({ ...edu, displayType: 'education' as const })),
-        ...(volunteerings || []).map(vol => ({ ...vol, displayType: 'volunteering' as const }))
-    ].sort((a, b) => (b.order || 0) - (a.order || 0));
+
+    const renderTimelineItem = (item: any, type: 'experience' | 'education' | 'volunteering', i: number) => {
+        const colorClass = type === 'experience' ? 'bg-blue-500' : type === 'education' ? 'bg-amber-500' : 'bg-teal-500';
+        const Icon = type === 'experience' ? Briefcase : type === 'education' ? GraduationCap : HeartHandshake;
+        const title = type === 'experience' ? item.role : type === 'education' ? item.degree : item.role;
+        const subtitle = type === 'experience' ? item.company : type === 'education' ? item.institution : item.organization;
+        const period = type === 'education' ? item.period : item.duration;
+        const description = type === 'education' ? item.details : item.description;
+
+        return (
+            <CardWrapper key={i} index={i}>
+                <div className="relative md:pl-24 group cursor-pointer" onClick={() => setSelectedItem({ data: item, type })}>
+                    <div className={`hidden md:flex absolute left-0 md:left-4 top-0 w-16 h-16 ${colorClass} rounded-2xl items-center justify-center text-white shadow-xl z-10 group-hover:scale-110 transition-transform`}>
+                        <Icon size={28} />
+                    </div>
+
+                    {/* Mobile: Top Icon + Header */}
+                    <div className="md:hidden flex items-center mb-4 gap-4">
+                        <div className={`w-14 h-14 shrink-0 ${colorClass} rounded-2xl flex items-center justify-center text-white shadow-lg`}>
+                            <Icon size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-black text-gray-900 leading-tight">{title}</h3>
+                            <p className="text-primary font-bold text-sm mt-1">{subtitle}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all">
+                        {/* Desktop Header */}
+                        <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                            <div>
+                                <h3 className="text-2xl font-black text-gray-900">{title}</h3>
+                                <p className="text-primary font-bold text-lg">{subtitle}</p>
+                            </div>
+                            <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-xl text-sm">
+                                <Calendar size={16} />
+                                <span>{period}</span>
+                            </div>
+                        </div>
+
+                        {/* Mobile Date */}
+                        <div className="md:hidden flex items-center gap-2 text-secondary font-bold text-xs bg-gray-50 p-2 rounded-lg w-fit mb-4">
+                            <Calendar size={14} />
+                            <span>{period}</span>
+                        </div>
+
+                        <p className="text-secondary text-base leading-relaxed font-normal line-clamp-3 md:line-clamp-2">{description}</p>
+                        <div className="mt-4 flex items-center text-primary font-black text-xs md:text-sm uppercase tracking-widest gap-2 group-hover:gap-4 transition-all">
+                            <span>Read More</span>
+                            <ArrowRight size={16} />
+                        </div>
+                    </div>
+                </div>
+            </CardWrapper>
+        );
+    };
 
     return (
         <div className="flex flex-col gap-16 pb-16">
@@ -112,89 +163,47 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                     experience={profile.stats?.find((s: any) => s.label === "Years Experience")?.value || "3+"}
                 />
 
-                <div className="mt-16">
-                    <div className="text-center mb-10">
-                        <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight uppercase">Career Timeline</h2>
-                        <div className="w-20 h-2 bg-primary mx-auto rounded-full"></div>
+                {/* Professional Experience Section */}
+                {experiences.length > 0 && (
+                    <div className="mt-16">
+                        <div className="text-center mb-10">
+                            <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight uppercase">Professional Experience</h2>
+                            <div className="w-20 h-2 bg-blue-500 mx-auto rounded-full"></div>
+                        </div>
+                        <div className="relative space-y-6 md:space-y-8">
+                            <div className="absolute left-8 top-0 bottom-0 w-1 bg-gray-100 hidden md:block" />
+                            {experiences.sort((a, b) => (b.order || 0) - (a.order || 0)).map((exp, i) => renderTimelineItem(exp, 'experience', i))}
+                        </div>
                     </div>
+                )}
 
-                    <div className="relative space-y-6 md:space-y-8">
-                        <div className="absolute left-8 top-0 bottom-0 w-1 bg-gray-100 hidden md:block" />
-
-                        {timeline.map((item, i) => (
-                            <CardWrapper key={i} index={i}>
-                                <div className="relative md:pl-24 group cursor-pointer" onClick={() => setSelectedItem({ data: item, type: item.displayType })}>
-                                    <div className={`
-                                        hidden md:flex absolute left-0 md:left-4 top-0 w-16 h-16
-                                        ${item.displayType === 'experience' ? 'bg-blue-500' : item.displayType === 'education' ? 'bg-amber-500' : 'bg-teal-500'}
-                                        rounded-2xl items-center justify-center text-white shadow-xl z-10 group-hover:scale-110 transition-transform
-                                    `}>
-                                        {item.displayType === 'experience' ? <Briefcase size={28} /> :
-                                            item.displayType === 'education' ? <GraduationCap size={28} /> :
-                                                <HeartHandshake size={28} />}
-                                    </div>
-
-                                    {/* Mobile: Top Icon + Header */}
-                                    <div className="md:hidden flex items-center mb-4 gap-4">
-                                        <div className={`
-                                            w-14 h-14 shrink-0
-                                            ${item.displayType === 'experience' ? 'bg-blue-500' : item.displayType === 'education' ? 'bg-amber-500' : 'bg-teal-500'}
-                                            rounded-2xl flex items-center justify-center text-white shadow-lg
-                                        `}>
-                                            {item.displayType === 'experience' ? <Briefcase size={24} /> :
-                                                item.displayType === 'education' ? <GraduationCap size={24} /> :
-                                                    <HeartHandshake size={24} />}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-black text-gray-900 leading-tight">
-                                                {item.displayType === 'experience' ? item.role : item.displayType === 'education' ? item.degree : item.role}
-                                            </h3>
-                                            <p className="text-primary font-bold text-sm mt-1">
-                                                {item.displayType === 'experience' ? item.company : item.displayType === 'education' ? item.institution : item.organization}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all">
-                                        {/* Desktop Header */}
-                                        <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                                            <div>
-                                                <h3 className="text-2xl font-black text-gray-900">
-                                                    {item.displayType === 'experience' ? item.role : item.displayType === 'education' ? item.degree : item.role}
-                                                </h3>
-                                                <p className="text-primary font-bold text-lg">
-                                                    {item.displayType === 'experience' ? item.company : item.displayType === 'education' ? item.institution : item.organization}
-                                                </p>
-                                            </div>
-                                            <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-xl text-sm">
-                                                <Calendar size={16} />
-                                                <span>
-                                                    {item.displayType === 'experience' ? item.duration : item.displayType === 'education' ? item.period : item.duration}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Mobile Date */}
-                                        <div className="md:hidden flex items-center gap-2 text-secondary font-bold text-xs bg-gray-50 p-2 rounded-lg w-fit mb-4">
-                                            <Calendar size={14} />
-                                            <span>
-                                                {item.displayType === 'experience' ? item.duration : item.displayType === 'education' ? item.period : item.duration}
-                                            </span>
-                                        </div>
-
-                                        <p className="text-secondary text-base leading-relaxed font-normal line-clamp-3 md:line-clamp-2">
-                                            {item.displayType === 'experience' ? item.description : item.displayType === 'education' ? item.details : item.description}
-                                        </p>
-                                        <div className="mt-4 flex items-center text-primary font-black text-xs md:text-sm uppercase tracking-widest gap-2 group-hover:gap-4 transition-all">
-                                            <span>Read More</span>
-                                            <ArrowRight size={16} />
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardWrapper>
-                        ))}
+                {/* Education Section */}
+                {educations.length > 0 && (
+                    <div className="mt-16">
+                        <div className="text-center mb-10">
+                            <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight uppercase">Education</h2>
+                            <div className="w-20 h-2 bg-amber-500 mx-auto rounded-full"></div>
+                        </div>
+                        <div className="relative space-y-6 md:space-y-8">
+                            <div className="absolute left-8 top-0 bottom-0 w-1 bg-gray-100 hidden md:block" />
+                            {educations.sort((a, b) => (b.order || 0) - (a.order || 0)).map((edu, i) => renderTimelineItem(edu, 'education', i))}
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {/* Volunteering Section */}
+                {volunteerings && volunteerings.length > 0 && (
+                    <div className="mt-16">
+                        <div className="text-center mb-10">
+                            <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight uppercase">Volunteering</h2>
+                            <div className="w-20 h-2 bg-teal-500 mx-auto rounded-full"></div>
+                        </div>
+                        <div className="relative space-y-6 md:space-y-8">
+                            <div className="absolute left-8 top-0 bottom-0 w-1 bg-gray-100 hidden md:block" />
+                            {volunteerings.sort((a, b) => (b.order || 0) - (a.order || 0)).map((vol, i) => renderTimelineItem(vol, 'volunteering', i))}
+                        </div>
+                    </div>
+                )}
             </section>
 
             {/* Projects Section */}
@@ -257,7 +266,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
             {/* Contact Section */}
             <section id="contact" className="container mx-auto px-6 scroll-mt-20">
-                <div className="bg-primary rounded-[3rem] p-8 md:p-16 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
+                <div className="bg-primary rounded-[3rem] p-8 md:p-12 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
                     <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
                     <div className="grid lg:grid-cols-2 gap-10 items-center text-left">
