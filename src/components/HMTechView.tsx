@@ -129,7 +129,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
             </section>
 
             {/* Services Grid */}
-            <section id="services" className="py-32 px-6 relative z-10">
+            <section id="services" className="py-20 px-6 relative z-10">
                 <div className="container mx-auto max-w-7xl">
                     <motion.div
                         initial="hidden"
@@ -171,8 +171,14 @@ export default function HMTechView({ projects }: HMTechViewProps) {
             </section>
 
             {/* Process / Journey Section (Digital Circuit) */}
-            <section className="py-32 px-6 relative z-10 overflow-hidden">
-                <div className="container mx-auto max-w-6xl relative">
+            <section className="py-20 px-6 relative z-10 overflow-hidden">
+                {/* Particle Background for Flow Section */}
+                <div className="absolute inset-0 z-0 bg-[#050505]">
+                    <TechParticles />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/90"></div>
+                </div>
+
+                <div className="container mx-auto max-w-6xl relative z-10">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -266,7 +272,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
             </section>
 
             {/* Projects Gallery */}
-            <section className="py-32 px-6 relative z-10">
+            <section className="py-20 px-6 relative z-10">
                 <div className="container mx-auto max-w-7xl">
                     <motion.div
                         initial="hidden"
@@ -275,8 +281,9 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         variants={fadeInUp}
                         className="text-center mb-20"
                     >
-                        <span className="text-pink-500 font-extrabold tracking-[0.3em] uppercase text-sm drop-shadow-md">WORK</span>
-                        <h2 className="text-6xl md:text-8xl font-black text-white mt-4 tracking-tighter drop-shadow-2xl">Selected Projects</h2>
+                        <span className="text-pink-500 font-extrabold tracking-[0.3em] uppercase text-sm drop-shadow-md">PORTFOLIO</span>
+                        <h2 className="text-6xl md:text-8xl font-black text-white mt-4 tracking-tighter drop-shadow-2xl">Projects Done</h2>
+                        <p className="text-xl md:text-2xl text-gray-400 font-medium mt-6 tracking-wide">Selected works from our portfolio</p>
                     </motion.div>
 
                     <motion.div
@@ -326,7 +333,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
             </section>
 
             {/* Contact Form */}
-            <section id="contact" className="py-32 px-6 relative overflow-hidden">
+            <section id="contact" className="py-20 px-6 relative overflow-hidden">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-full blur-[100px] pointer-events-none"></div>
                 <div className="container mx-auto max-w-4xl relative z-10">
                     <motion.div

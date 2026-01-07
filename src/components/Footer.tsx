@@ -19,7 +19,7 @@ export default function Footer() {
     const isSpecialPage = isSnacksPage || isTechPage;
 
     return (
-        <footer className="bg-white border-t border-gray-100 py-10">
+        <footer className={`${isSpecialPage ? "bg-black/20 border-white/5 backdrop-blur-lg" : "bg-white border-gray-100"} border-t py-10 transition-colors duration-300`}>
             <div className="container mx-auto px-6">
                 {!isSpecialPage && (
                     <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 mb-12">
@@ -48,7 +48,7 @@ export default function Footer() {
                     </div>
                 )}
 
-                <div className={`${!isSpecialPage ? "border-t border-gray-50 pt-8" : ""} flex flex-col items-center text-center text-sm text-secondary`}>
+                <div className={`${!isSpecialPage ? "border-t border-gray-50 pt-8" : ""} flex flex-col items-center text-center text-sm ${isSpecialPage ? "text-white/60" : "text-secondary"}`}>
                     <p>© {new Date().getFullYear()} Hari Haran Jeyaramamoorthy. All rights reserved.</p>
                 </div>
             </div>
