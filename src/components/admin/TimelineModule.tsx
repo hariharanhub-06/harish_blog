@@ -60,9 +60,15 @@ export default function TimelineModule() {
             if (res.ok) {
                 setEditing(null);
                 fetchTimeline();
+                alert("Saved successfully!");
+            } else {
+                const errorData = await res.json();
+                console.error("Save failure:", errorData);
+                alert(`Failed to save: ${errorData.error || "Unknown error"}`);
             }
         } catch (error) {
-            console.error(error);
+            console.error("Save error:", error);
+            alert("An error occurred while saving. Please check the console.");
         } finally {
             setSaving(false);
         }
