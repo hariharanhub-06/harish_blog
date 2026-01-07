@@ -17,7 +17,11 @@ import {
     Loader2,
     CheckCircle2,
     QrCode,
-    Smartphone
+    Smartphone,
+    User,
+    MessageCircle,
+    Mail,
+    Home
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
