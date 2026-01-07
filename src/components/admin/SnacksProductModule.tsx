@@ -243,7 +243,7 @@ export default function SnacksProductModule() {
                                             required
                                             type="number"
                                             value={editing.pricePerKg}
-                                            onChange={(e) => setEditing({ ...editing, pricePerKg: e.target.value })}
+                                            onChange={(e) => setEditing({ ...editing, pricePerKg: parseFloat(e.target.value) || 0 })}
                                             className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
                                         />
                                     </div>
@@ -253,7 +253,7 @@ export default function SnacksProductModule() {
                                             required
                                             type="number"
                                             value={editing.stock}
-                                            onChange={(e) => setEditing({ ...editing, stock: e.target.value })}
+                                            onChange={(e) => setEditing({ ...editing, stock: parseInt(e.target.value) || 0 })}
                                             className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
                                         />
                                     </div>
