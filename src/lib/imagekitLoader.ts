@@ -8,8 +8,15 @@ export default function imageKitLoader({ src, width, quality }: { src: string; w
     }
 
     const paramsString = params.join(",");
-    const [urlEnd, ...rest] = src.split("?").reverse();
-    const urlBase = rest.reverse().join("?");
 
-    return `${urlBase}?tr=${paramsString}`;
+    // Check if the URL already has parameters
+    if (src.includes("?tr=")) {
+        return `${src},${paramsString}`;
+    }
+
+    // Split at existing query params if any
+    const [urlBase, existingQuery] = src.split("?");
+    const queryJoin = existingQuery ? `&${existingQuery}` : "";
+
+    return `${urlBase}?tr=${paramsString}${queryJoin}`;
 }
