@@ -26,3 +26,20 @@ export async function PATCH(
         return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
     }
 }
+
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id } = await params;
+
+        await db.delete(snackOrders).where(eq(snackOrders.id, id));
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Delete order error:", error);
+        return NextResponse.json({ error: "Failed to delete order" }, { status: 500 });
+    }
+}
+
