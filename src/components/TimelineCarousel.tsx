@@ -122,19 +122,19 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
                 className="overflow-hidden px-12"
                 onMouseDown={resetInactivityTimer}
             >
-                <div className="flex gap-6 md:gap-8">
+                <div className="flex gap-6 md:gap-8 items-stretch">
                     {items.map((item, i) => (
-                        <div key={i} className="min-w-full md:min-w-[500px] lg:min-w-[600px]">
+                        <div key={i} className="min-w-full md:min-w-[500px] lg:min-w-[600px] flex">
                             <CardWrapper index={i}>
                                 <div
-                                    className="relative group cursor-pointer h-full flex flex-col"
+                                    className="relative group cursor-pointer h-full flex flex-col w-full"
                                     onClick={() => {
                                         onItemClick(item);
                                         resetInactivityTimer();
                                     }}
                                 >
                                     {/* Card Content */}
-                                    <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all flex flex-col flex-1 h-full">
+                                    <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all flex flex-col flex-1 h-full w-full">
                                         {/* Header */}
                                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-4">
                                             <div className="flex-1">
@@ -146,7 +146,9 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
                                                 <span>{(() => {
                                                     const p = item[period] || "";
                                                     const years = p.match(/\b20\d{2}\b/g);
-                                                    return years ? years.join(' - ') : p;
+                                                    if (!years) return p;
+                                                    const uniqueYears = Array.from(new Set(years));
+                                                    return uniqueYears.join(' - ');
                                                 })()}</span>
                                             </div>
                                         </div>

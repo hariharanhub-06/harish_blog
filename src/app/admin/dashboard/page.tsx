@@ -13,14 +13,16 @@ import {
     Loader2,
     ChevronRight,
     Home,
+    Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
 import ProjectsModule from "@/components/admin/ProjectsModule";
 import TimelineModule from "@/components/admin/TimelineModule";
 import MessagesModule from "@/components/admin/MessagesModule";
+import GalleryModule from "@/components/admin/GalleryModule";
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages";
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "gallery";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -45,6 +47,7 @@ export default function AdminDashboard() {
         { id: "overview", title: "Dashboard", icon: Home, color: "bg-blue-500" },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500" },
         { id: "projects", title: "Portfolio", icon: Layout, color: "bg-purple-500" },
+        { id: "gallery", title: "Gallery", icon: ImageIcon, color: "bg-pink-500" },
         { id: "timeline", title: "Timeline", icon: Briefcase, color: "bg-amber-600" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500" },
     ];
@@ -55,6 +58,7 @@ export default function AdminDashboard() {
             case "projects": return <ProjectsModule />;
             case "timeline": return <TimelineModule />;
             case "messages": return <MessagesModule />;
+            case "gallery": return <GalleryModule />;
             default: return (
                 <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -117,8 +121,8 @@ export default function AdminDashboard() {
                             key={item.id}
                             onClick={() => setActiveTab(item.id as Tab)}
                             className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm transition-all ${activeTab === item.id
-                                    ? "bg-primary text-white shadow-xl shadow-primary/20"
-                                    : "text-secondary hover:bg-gray-50 hover:text-primary"
+                                ? "bg-primary text-white shadow-xl shadow-primary/20"
+                                : "text-secondary hover:bg-gray-50 hover:text-primary"
                                 }`}
                         >
                             <item.icon size={20} />

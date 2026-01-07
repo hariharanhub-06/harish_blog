@@ -115,3 +115,11 @@ export const volunteering = pgTable("volunteering", {
   description: text("description"),
   order: integer("order").default(0),
 });
+
+export const gallery = pgTable("gallery", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  location: text("location").notNull(),
+  imageUrl: text("image_url").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
