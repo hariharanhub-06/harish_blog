@@ -40,19 +40,28 @@ export default function Hero({ profile }: HeroProps) {
                     transition={{ duration: 0.8, type: "spring" }}
                     className="relative mb-12"
                 >
-                    <div className="relative w-40 h-40 md:w-56 md:h-56 rounded-[3rem] overflow-hidden border-8 border-white shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
+                    {/* Glowing background ring */}
+                    <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-125" />
+
+                    <div className="relative w-40 h-40 md:w-56 md:h-56 rounded-full overflow-hidden border-8 border-white shadow-[0_20px_50px_rgba(30,64,175,0.2)] group transition-all duration-500 hover:scale-105 active:scale-95">
                         <Image
                             src={profile.avatarUrl}
                             alt={profile.name}
                             fill
-                            className="object-cover"
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
                             priority
                         />
                     </div>
-                    {/* Decorative tag */}
-                    <div className="absolute -bottom-4 -right-4 bg-accent text-white font-black px-4 py-2 rounded-xl shadow-lg -rotate-6 text-sm">
-                        Expert
-                    </div>
+                    {/* Interactive badge */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 1 }}
+                        className="absolute bottom-4 -right-4 bg-accent text-white font-black px-4 py-2 rounded-xl shadow-lg border-2 border-white text-sm flex items-center space-x-2"
+                    >
+                        <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                        <span>Available Now</span>
+                    </motion.div>
                 </motion.div>
             )}
 
