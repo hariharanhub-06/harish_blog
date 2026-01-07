@@ -36,7 +36,16 @@ export default function ProfileModule() {
                 body: formData,
             });
 
-            if (!res.ok) throw new Error("Upload failed");
+            if (!res.ok) {
+                const errorData = await res.text();
+                // Try to parse JSON error if possible
+                try {
+                    const jsonError = JSON.parse(errorData);
+                    throw new Error(jsonError.error || jsonError.debug || "Upload failed");
+                } catch {
+                    throw new Error(errorData || "Upload failed");
+                }
+            }
 
             const data = await res.json();
             if (type === 'avatar') {
@@ -44,9 +53,9 @@ export default function ProfileModule() {
             } else {
                 setProfile({ ...profile, heroImageUrl: data.url });
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Upload failed", error);
-            alert("Image upload failed. Please try again.");
+            alert(`Image upload failed: ${error.message}`);
         } finally {
             setUploading(false);
         }
