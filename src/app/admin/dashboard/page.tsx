@@ -6,36 +6,32 @@ import { useEffect, useState } from "react";
 import {
     User,
     Briefcase,
-    Code,
+    Layout,
     MessageSquare,
     LogOut,
-    Settings,
-    ChevronRight,
-    TrendingUp,
-    Layout,
     ExternalLink,
     Loader2,
-    PieChart
+    ChevronRight,
+    Home,
 } from "lucide-react";
 import Link from "next/link";
+import ProfileModule from "@/components/admin/ProfileModule";
+import ProjectsModule from "@/components/admin/ProjectsModule";
+import TimelineModule from "@/components/admin/TimelineModule";
+import MessagesModule from "@/components/admin/MessagesModule";
+
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
     const router = useRouter();
+    const [activeTab, setActiveTab] = useState<Tab>("overview");
 
     useEffect(() => {
         if (!loading && !user) {
             router.push("/admin/login");
         }
     }, [user, loading, router]);
-
-    const menuItems = [
-        { title: "Profile Info", desc: "Update your bio, photo, and title", icon: User, color: "bg-blue-500", href: "/admin/profile" },
-        { title: "Portfolio", desc: "Manage your projects and case studies", icon: Layout, color: "bg-purple-500", href: "/admin/projects" },
-        { title: "Career Timeline", desc: "Update your work and education", icon: Briefcase, color: "bg-amber-600", href: "/admin/timeline" },
-        { title: "Technical Skills", desc: "proficiency and categories", icon: Code, color: "bg-emerald-500", href: "/admin/skills" },
-        { title: "Messages", desc: "Review contact form submissions", icon: MessageSquare, color: "bg-indigo-500", href: "/admin/messages" },
-    ];
 
     if (loading || !user) {
         return (
@@ -45,79 +41,125 @@ export default function AdminDashboard() {
         );
     }
 
-    return (
-        <div className="container mx-auto px-6 py-12 max-w-6xl">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16">
-                <div>
-                    <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-2 italic">
-                        Admin <span className="text-primary not-italic">Dashboard</span>.
-                    </h1>
-                    <p className="text-secondary font-medium uppercase tracking-widest text-xs">Logged in as {user.email}</p>
+    const menuItems = [
+        { id: "overview", title: "Dashboard", icon: Home, color: "bg-blue-500" },
+        { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500" },
+        { id: "projects", title: "Portfolio", icon: Layout, color: "bg-purple-500" },
+        { id: "timeline", title: "Timeline", icon: Briefcase, color: "bg-amber-600" },
+        { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500" },
+    ];
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case "profile": return <ProfileModule />;
+            case "projects": return <ProjectsModule />;
+            case "timeline": return <TimelineModule />;
+            case "messages": return <MessagesModule />;
+            default: return (
+                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {[
+                            { label: "Site Visitors", value: "1,2k", icon: User, color: "text-blue-600", bg: "bg-blue-50" },
+                            { label: "Live Projects", value: "12", icon: Layout, color: "text-purple-600", bg: "bg-purple-50" },
+                            { label: "Unread Messages", value: "4", icon: MessageSquare, color: "text-amber-600", bg: "bg-amber-50" },
+                        ].map((stat) => (
+                            <div key={stat.label} className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden group">
+                                <div className="absolute -bottom-6 -right-6 text-gray-50 group-hover:text-gray-100 transition-colors">
+                                    <stat.icon size={120} />
+                                </div>
+                                <p className="text-secondary text-xs font-black uppercase tracking-widest mb-2 relative z-10">{stat.label}</p>
+                                <h3 className="text-4xl font-black text-gray-900 relative z-10">{stat.value}</h3>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {menuItems.filter(i => i.id !== 'overview').map((item) => (
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveTab(item.id as Tab)}
+                                className="group flex items-center justify-between p-8 bg-white rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all hover:-translate-y-1 text-left"
+                            >
+                                <div className="flex items-center space-x-8">
+                                    <div className={`${item.color} p-6 rounded-[2rem] text-white shadow-xl group-hover:scale-110 transition-transform`}>
+                                        <item.icon size={28} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-black text-gray-900 group-hover:text-primary transition-colors">{item.title}</h3>
+                                        <p className="text-secondary font-medium mt-1">Manage your {item.title.toLowerCase()}</p>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-50 p-4 rounded-2xl text-gray-300 group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                                    <ChevronRight size={24} />
+                                </div>
+                            </button>
+                        ))}
+                    </div>
                 </div>
-                <div className="flex space-x-4">
-                    <Link href="/" target="_blank" className="flex items-center space-x-2 bg-white border border-gray-100 p-4 rounded-2xl shadow-sm hover:shadow-lg transition-all font-black text-sm">
-                        <ExternalLink size={18} />
-                        <span>View Site</span>
+            );
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50 flex">
+            {/* Sidebar */}
+            <aside className="w-80 bg-white border-r border-gray-100 hidden lg:flex flex-col fixed inset-y-0">
+                <div className="p-10">
+                    <Link href="/" className="text-2xl font-bold tracking-tight">
+                        <span className="text-primary">Admin</span>
+                        <span className="text-gray-900 font-black">Panel</span>
                     </Link>
+                </div>
+
+                <nav className="flex-1 px-6 space-y-2 mt-10">
+                    {menuItems.map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id as Tab)}
+                            className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm transition-all ${activeTab === item.id
+                                    ? "bg-primary text-white shadow-xl shadow-primary/20"
+                                    : "text-secondary hover:bg-gray-50 hover:text-primary"
+                                }`}
+                        >
+                            <item.icon size={20} />
+                            <span>{item.title}</span>
+                        </button>
+                    ))}
+                </nav>
+
+                <div className="p-6 border-t border-gray-50">
                     <button
                         onClick={() => logout()}
-                        className="flex items-center space-x-2 bg-red-50 text-red-500 p-4 rounded-2xl hover:bg-red-500 hover:text-white transition-all font-black text-sm"
+                        className="w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm text-red-500 hover:bg-red-50 transition-all"
                     >
-                        <LogOut size={18} />
+                        <LogOut size={20} />
                         <span>Logout</span>
                     </button>
                 </div>
-            </div>
+            </aside>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                {[
-                    { label: "Site Visitors", value: "1,2k", icon: TrendingUp, color: "text-blue-600" },
-                    { label: "Live Projects", value: "12", icon: Briefcase, color: "text-purple-600" },
-                    { label: "Unread Messages", value: "4", icon: MessageSquare, color: "text-amber-600" },
-                ].map((stat) => (
-                    <div key={stat.label} className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden group">
-                        <div className="absolute -bottom-6 -right-6 text-gray-50 group-hover:text-gray-100 transition-colors">
-                            <stat.icon size={120} />
+            {/* Main Content */}
+            <main className="flex-1 lg:ml-80">
+                <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-10 py-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">
+                            {activeTab === 'overview' ? 'Command Center' : activeTab}
+                        </h2>
+                        <div className="flex items-center space-x-6">
+                            <Link href="/" target="_blank" className="text-secondary hover:text-primary transition-colors">
+                                <ExternalLink size={20} />
+                            </Link>
+                            <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center font-black text-primary">
+                                {user.email?.charAt(0).toUpperCase()}
+                            </div>
                         </div>
-                        <p className="text-secondary text-xs font-black uppercase tracking-widest mb-2 relative z-10">{stat.label}</p>
-                        <h3 className="text-4xl font-black text-gray-900 relative z-10">{stat.value}</h3>
                     </div>
-                ))}
-            </div>
+                </header>
 
-            {/* Management Modules */}
-            <div className="grid md:grid-cols-2 gap-8">
-                {menuItems.map((item) => (
-                    <Link
-                        key={item.title}
-                        href={item.href}
-                        className="group flex items-center justify-between p-8 bg-white rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all hover:-translate-y-1"
-                    >
-                        <div className="flex items-center space-x-8">
-                            <div className={`${item.color} p-6 rounded-[2rem] text-white shadow-xl group-hover:scale-110 transition-transform`}>
-                                <item.icon size={28} />
-                            </div>
-                            <div>
-                                <h3 className="text-2xl font-black text-gray-900 group-hover:text-primary transition-colors">{item.title}</h3>
-                                <p className="text-secondary font-medium mt-1">{item.desc}</p>
-                            </div>
-                        </div>
-                        <div className="bg-gray-50 p-4 rounded-2xl text-gray-300 group-hover:bg-primary/10 group-hover:text-primary transition-all">
-                            <ChevronRight size={24} />
-                        </div>
-                    </Link>
-                ))}
-            </div>
-
-            <div className="mt-20 p-12 bg-gray-50 rounded-[3rem] text-center">
-                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-                    <Settings size={28} className="text-secondary animate-spin-slow" />
+                <div className="p-10 max-w-6xl mx-auto">
+                    {renderContent()}
                 </div>
-                <h2 className="text-2xl font-black mb-4">Advanced Settings</h2>
-                <p className="text-secondary max-w-md mx-auto mb-8 font-medium">Configure database connections, API keys, and deployment webhooks for your portfolio.</p>
-                <button className="bg-white px-8 py-4 rounded-2xl font-black text-sm shadow-sm hover:shadow-lg transition-all border border-gray-100">Configure Environment</button>
-            </div>
+            </main>
         </div>
     );
 }

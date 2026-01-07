@@ -7,10 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
     { name: "Home", href: "/", icon: Home },
-    { name: "About", href: "/about", icon: User },
-    { name: "Portfolio", href: "/portfolio", icon: Briefcase },
-    { name: "Resume", href: "/resume", icon: FileText },
-    { name: "Contact", href: "/contact", icon: Mail },
+    { name: "About", href: "/#about", icon: User },
+    { name: "Portfolio", href: "/#portfolio", icon: Briefcase },
+    { name: "Blog", href: "/#blog", icon: FileText },
+    { name: "Contact", href: "/#contact", icon: Mail },
 ];
 
 export default function Navbar() {
@@ -50,7 +50,7 @@ export default function Navbar() {
                     ))}
                     <div className="ml-4 pl-4 border-l border-gray-200">
                         <Link
-                            href="/contact"
+                            href="#contact"
                             className="bg-primary text-white px-6 py-2.5 rounded-xl hover:bg-blue-800 transition-all font-bold text-sm shadow-lg shadow-primary/20"
                         >
                             Hire Me
@@ -89,7 +89,7 @@ export default function Navbar() {
                                 </Link>
                             ))}
                             <Link
-                                href="/contact"
+                                href="#contact"
                                 className="w-full bg-primary text-white text-center py-4 rounded-xl font-black mt-4 shadow-lg shadow-primary/20"
                                 onClick={() => setIsOpen(false)}
                             >
