@@ -36,6 +36,7 @@ export default function MessagesModule() {
         "Web Development",
         "Graphic or Poster Designing",
         "Education Training purpose",
+        "HM Snack",
         "Not Determined"
     ];
 
