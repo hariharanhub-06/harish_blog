@@ -290,17 +290,7 @@ export default function HMSnacksPage() {
                         </motion.div>
                     </div>
 
-                    {/* Partner Credit (Subtle) */}
-                    <div className="mt-20 flex justify-center items-center gap-6 opacity-20 grayscale scale-75 md:scale-90">
-                        <div className="flex items-center gap-2 text-white">
-                            <Package size={20} />
-                            <span className="font-bold text-lg">Shiprocket</span>
-                        </div>
-                        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                        <span className="text-white font-bold text-lg">Razorpay</span>
-                        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                        <span className="text-white font-bold text-lg">ImageKit</span>
-                    </div>
+
                 </div>
             </section>
 
