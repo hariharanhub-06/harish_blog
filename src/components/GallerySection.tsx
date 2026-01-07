@@ -30,7 +30,7 @@ export default function GallerySection({ items }: GallerySectionProps) {
         if (autoScrollRef.current) clearInterval(autoScrollRef.current);
         autoScrollRef.current = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % items.length);
-        }, 4000);
+        }, 2000); // 2s auto swipe
     };
 
     const stopAutoScroll = () => {
@@ -45,7 +45,7 @@ export default function GallerySection({ items }: GallerySectionProps) {
         if (inactivityRef.current) clearTimeout(inactivityRef.current);
         inactivityRef.current = setTimeout(() => {
             startAutoScroll();
-        }, 5000);
+        }, 5000); // 5s silence before auto
     };
 
     useEffect(() => {
@@ -86,9 +86,13 @@ export default function GallerySection({ items }: GallerySectionProps) {
                 className="relative group"
                 onMouseEnter={() => {
                     setIsHovered(true);
+                    stopAutoScroll();
+                    if (inactivityRef.current) clearTimeout(inactivityRef.current);
+                }}
+                onMouseLeave={() => {
+                    setIsHovered(false);
                     resetInactivityTimer();
                 }}
-                onMouseLeave={() => setIsHovered(false)}
             >
                 {/* Navigation Arrows */}
                 {items.length > 1 && (
@@ -116,6 +120,7 @@ export default function GallerySection({ items }: GallerySectionProps) {
                         drag="x"
                         dragConstraints={{ left: 0, right: 0 }}
                         style={{ x: dragX }}
+                        onDragStart={stopAutoScroll}
                         onDragEnd={onDragEnd}
                         animate={{
                             x: `-${currentIndex * (typeof window !== 'undefined' && window.innerWidth < 768 ? 90 : 33.33)}%`
