@@ -33,6 +33,9 @@ export default function OverviewModule() {
         end: new Date().toISOString().split('T')[0]
     });
 
+    const [topPages, setTopPages] = useState<any[]>([]);
+    const [topReferrers, setTopReferrers] = useState<any[]>([]);
+
     const [stats, setStats] = useState({
         totalViews: 0,
         totalVisitors: 0,
@@ -52,10 +55,12 @@ export default function OverviewModule() {
 
             if (analyticsRes.ok) {
                 const data = await analyticsRes.json();
-                setAnalytics(data.reverse()); // Chronological for graph
+                setAnalytics(data.stats.reverse()); // Chronological for graph
+                setTopPages(data.topPages || []);
+                setTopReferrers(data.topReferrers || []);
 
-                const views = data.reduce((acc: number, curr: any) => acc + curr.views, 0);
-                const visitors = data.reduce((acc: number, curr: any) => acc + curr.visitors, 0);
+                const views = data.stats.reduce((acc: number, curr: any) => acc + curr.views, 0);
+                const visitors = data.stats.reduce((acc: number, curr: any) => acc + curr.visitors, 0);
                 setStats(prev => ({ ...prev, totalViews: views, totalVisitors: visitors }));
             }
 
@@ -186,6 +191,37 @@ export default function OverviewModule() {
                             <p className="text-secondary font-black uppercase tracking-widest text-sm">Waiting for traffic data...</p>
                         </div>
                     )}
+                </div>
+            </div>
+
+            {/* Top Pages and Referrers */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+                    <h3 className="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
+                        <Globe className="text-blue-500" /> Top Pages
+                    </h3>
+                    <div className="space-y-4">
+                        {topPages.map((page, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                                <span className="text-sm font-bold text-gray-700 truncate max-w-[200px]">{page.page}</span>
+                                <span className="text-xs font-black text-primary bg-white px-3 py-1 rounded-lg shadow-sm">{page.count} views</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+                    <h3 className="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
+                        <Search className="text-purple-500" /> Top Referrers
+                    </h3>
+                    <div className="space-y-4">
+                        {topReferrers.map((ref, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                                <span className="text-sm font-bold text-gray-700 truncate max-w-[200px]">{ref.referrer}</span>
+                                <span className="text-xs font-black text-primary bg-white px-3 py-1 rounded-lg shadow-sm">{ref.count} visits</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 

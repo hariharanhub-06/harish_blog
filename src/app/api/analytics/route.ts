@@ -44,7 +44,27 @@ export async function GET(req: Request) {
             .orderBy(desc(sql`DATE(${visitorAnalytics.timestamp})`))
             .limit(90);
 
-        return NextResponse.json(stats);
+        // Fetch Top Pages
+        const topPages = await db.select({
+            page: visitorAnalytics.page,
+            count: sql<number>`count(*)::int`
+        })
+            .from(visitorAnalytics)
+            .groupBy(visitorAnalytics.page)
+            .orderBy(desc(sql`count(*)`))
+            .limit(5);
+
+        // Fetch Top Referrers
+        const topReferrers = await db.select({
+            referrer: visitorAnalytics.referrer,
+            count: sql<number>`count(*)::int`
+        })
+            .from(visitorAnalytics)
+            .groupBy(visitorAnalytics.referrer)
+            .orderBy(desc(sql`count(*)`))
+            .limit(5);
+
+        return NextResponse.json({ stats, topPages, topReferrers });
     } catch (error) {
         console.error("Analytics fetch error:", error);
         return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
