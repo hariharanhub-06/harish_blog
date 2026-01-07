@@ -103,6 +103,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                     about={profile.about}
                     location={profile.location}
                     imageUrl={profile.aboutImageUrl}
+                    experience={profile.stats?.find((s: any) => s.label === "Years Experience")?.value || "3+"}
                 />
 
                 <div className="mt-32">
