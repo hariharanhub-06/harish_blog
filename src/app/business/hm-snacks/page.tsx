@@ -21,7 +21,7 @@ export default function HMSnacksPage() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const res = await fetch('/api/snacks/products');
+                const res = await fetch('/api/snacks/products?activeOnly=true');
                 if (res.ok) {
                     const data = await res.json();
                     setProducts(data);
@@ -56,13 +56,23 @@ export default function HMSnacksPage() {
                     priority
                 />
                 <div className="relative z-10 text-center px-6">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-block px-4 py-1.5 bg-pink-500/20 backdrop-blur-md rounded-full text-pink-400 text-[10px] font-black uppercase tracking-[0.3em] mb-6 border border-pink-500/30"
-                    >
-                        Established Since 1920
-                    </motion.div>
+                    <div className="flex flex-col items-center">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="inline-block px-4 py-1.5 bg-pink-500/20 backdrop-blur-md rounded-full text-pink-400 text-[10px] font-black uppercase tracking-[0.3em] border border-pink-500/30"
+                        >
+                            Established Since 1920
+                        </motion.div>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="mt-3 text-[9px] font-black uppercase tracking-[0.4em] text-gray-400/80"
+                        >
+                            Small Scale ➜ Big Scale
+                        </motion.div>
+                    </div>
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -89,7 +99,7 @@ export default function HMSnacksPage() {
                         <div className="absolute -inset-4 bg-pink-100/50 rounded-[3rem] -z-10 group-hover:scale-105 transition-transform duration-700" />
                         <div className="relative aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl">
                             <Image
-                                src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000"
+                                src="/images/business/hm-snacks/heritage-shelf.jpg"
                                 fill
                                 className="object-cover"
                                 alt="Heritage"
