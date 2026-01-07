@@ -19,3 +19,22 @@ export async function DELETE(req: Request) {
     }
     return NextResponse.json({ success: false }, { status: 400 });
 }
+
+export async function PUT(req: Request) {
+    try {
+        const body = await req.json();
+        const { id, ...updates } = body;
+
+        if (!id) {
+            return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+        }
+
+        await db.update(contactSubmissions)
+            .set(updates)
+            .where(eq(contactSubmissions.id, id));
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        return NextResponse.json({ error: "Update failed" }, { status: 500 });
+    }
+}

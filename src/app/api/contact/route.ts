@@ -6,16 +6,21 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
-        // Validation could go here
-        if (!body.name || !body.email || !body.message) {
+        if (!body.name || !body.email || !body.mobile || !body.message) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
         await db.insert(contactSubmissions).values({
             name: body.name,
+            company: body.company,
             email: body.email,
-            subject: body.subject || "No Subject", // Default subject if missing
+            mobile: body.mobile,
+            website: body.website,
+            socialMedia: body.socialMedia,
+            subject: body.subject || "No Subject",
             message: body.message,
+            category: "Not Determined",
+            status: "Fresh"
         });
 
         return NextResponse.json({ success: true });

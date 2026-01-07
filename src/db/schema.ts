@@ -95,8 +95,23 @@ export const achievements = pgTable("achievements", {
 export const contactSubmissions = pgTable("contact_submissions", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
+  company: text("company"),
+  mobile: text("mobile").notNull(),
   email: text("email").notNull(),
+  website: text("website"),
+  socialMedia: text("social_media"),
+  category: text("category").default("Not Determined"),
+  status: text("status").default("Fresh"),
   subject: text("subject"),
   message: text("message").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const volunteering = pgTable("volunteering", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  role: text("role").notNull(),
+  organization: text("organization").notNull(),
+  duration: text("duration"),
+  description: text("description"),
+  order: integer("order").default(0),
 });

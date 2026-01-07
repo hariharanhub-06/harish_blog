@@ -10,6 +10,7 @@ import {
     Loader2,
     Briefcase,
     GraduationCap,
+    HeartHandshake, // Use HeartHandshake for Volunteering
     Calendar,
     ArrowUp,
     ArrowDown
@@ -18,10 +19,11 @@ import {
 export default function TimelineModule() {
     const [experiences, setExperiences] = useState<any[]>([]);
     const [educations, setEducations] = useState<any[]>([]);
+    const [volunteerings, setVolunteerings] = useState<any[]>([]); // New state
     const [editing, setEditing] = useState<any>(null);
     const [fetching, setFetching] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState<"experience" | "education">("experience");
+    const [activeTab, setActiveTab] = useState<"experience" | "education" | "volunteering">("experience"); // Added volunteering
 
     useEffect(() => {
         fetchTimeline();
@@ -29,13 +31,15 @@ export default function TimelineModule() {
 
     const fetchTimeline = async () => {
         setFetching(true);
-        const [expRes, eduRes] = await Promise.all([
+        const [expRes, eduRes, volRes] = await Promise.all([
             fetch("/api/admin/experience"),
-            fetch("/api/admin/education")
+            fetch("/api/admin/education"),
+            fetch("/api/admin/volunteering") // Fetch volunteering
         ]);
 
         if (expRes.ok) setExperiences(await expRes.json());
         if (eduRes.ok) setEducations(await eduRes.json());
+        if (volRes.ok) setVolunteerings(await volRes.json());
         setFetching(false);
     };
 
@@ -43,7 +47,11 @@ export default function TimelineModule() {
         e.preventDefault();
         setSaving(true);
         try {
-            const endpoint = activeTab === "experience" ? "/api/admin/experience" : "/api/admin/education";
+            let endpoint = "";
+            if (activeTab === "experience") endpoint = "/api/admin/experience";
+            else if (activeTab === "education") endpoint = "/api/admin/education";
+            else endpoint = "/api/admin/volunteering";
+
             const res = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -60,9 +68,13 @@ export default function TimelineModule() {
         }
     };
 
-    const handleDelete = async (id: string, type: "experience" | "education") => {
+    const handleDelete = async (id: string, type: "experience" | "education" | "volunteering") => {
         if (!confirm("Are you sure?")) return;
-        const endpoint = type === "experience" ? "/api/admin/experience" : "/api/admin/education";
+        let endpoint = "";
+        if (type === "experience") endpoint = "/api/admin/experience";
+        else if (type === "education") endpoint = "/api/admin/education";
+        else endpoint = "/api/admin/volunteering";
+
         const res = await fetch(`${endpoint}?id=${id}`, { method: "DELETE" });
         if (res.ok) fetchTimeline();
     };
@@ -74,8 +86,6 @@ export default function TimelineModule() {
             </div>
         );
     }
-
-    const currentItems = activeTab === "experience" ? experiences : educations;
 
     return (
         <div className="space-y-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -189,13 +199,70 @@ export default function TimelineModule() {
                 </div>
             </div>
 
+            <div className="border-t border-gray-200" />
+
+            {/* Volunteering Section */}
+            <div className="space-y-8">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <h2 className="text-3xl font-black text-gray-900 flex items-center gap-3">
+                        <div className="bg-teal-50 p-3 rounded-2xl text-teal-600"><HeartHandshake size={24} /></div>
+                        Volunteering / Rotaract
+                    </h2>
+                    <button
+                        onClick={() => {
+                            setActiveTab("volunteering");
+                            setEditing({ role: "", organization: "", duration: "", description: "", order: 0 });
+                        }}
+                        className="flex items-center space-x-2 bg-teal-600 text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
+                    >
+                        <Plus size={20} />
+                        <span>Add Volunteering</span>
+                    </button>
+                </div>
+
+                <div className="space-y-4">
+                    {volunteerings.map((item) => (
+                        <div key={item.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 className="text-xl font-black">{item.role}</h3>
+                                <p className="text-secondary font-bold">{item.organization}</p>
+                                <p className="text-xs font-black uppercase tracking-widest text-secondary/60 mt-1">{item.duration}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                                <button
+                                    onClick={() => {
+                                        setActiveTab("volunteering");
+                                        setEditing(item);
+                                    }}
+                                    className="p-3 bg-gray-50 text-secondary rounded-xl hover:bg-primary hover:text-white transition-all"
+                                >
+                                    <Edit3 size={18} />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(item.id, "volunteering")}
+                                    className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                    {volunteerings.length === 0 && (
+                        <div className="text-center py-12 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+                            <p className="text-secondary font-black uppercase tracking-widest opacity-50">No volunteering entries</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+
             {/* Edit Modal / Form Overlay */}
             {editing && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 md:p-10 animate-in fade-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center mb-8">
                             <h3 className="text-2xl font-black">
-                                {editing.id ? "Edit" : "New"} {activeTab === "experience" ? "Experience" : "Education"}
+                                {editing.id ? "Edit" : "New"} {activeTab === "experience" ? "Experience" : activeTab === "education" ? "Education" : "Volunteering"}
                             </h3>
                             <button onClick={() => setEditing(null)} className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full transition-colors">
                                 <X size={24} />
@@ -206,25 +273,31 @@ export default function TimelineModule() {
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">
-                                        {activeTab === "experience" ? "Role / Title" : "Degree / Certificate"}
+                                        {activeTab === "experience" ? "Role / Title" : activeTab === "education" ? "Degree / Certificate" : "Role / Position"}
                                     </label>
                                     <input
                                         required
                                         type="text"
-                                        value={activeTab === "experience" ? editing.role : editing.degree}
-                                        onChange={(e) => setEditing({ ...editing, [activeTab === "experience" ? "role" : "degree"]: e.target.value })}
+                                        value={activeTab === "experience" ? editing.role : activeTab === "education" ? editing.degree : editing.role}
+                                        onChange={(e) => {
+                                            const field = activeTab === "experience" || activeTab === "volunteering" ? "role" : "degree";
+                                            setEditing({ ...editing, [field]: e.target.value })
+                                        }}
                                         className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">
-                                        {activeTab === "experience" ? "Company / Org" : "Institution / University"}
+                                        {activeTab === "experience" ? "Company / Org" : activeTab === "education" ? "Institution / University" : "Organization / Club"}
                                     </label>
                                     <input
                                         required
                                         type="text"
-                                        value={activeTab === "experience" ? editing.company : editing.institution}
-                                        onChange={(e) => setEditing({ ...editing, [activeTab === "experience" ? "company" : "institution"]: e.target.value })}
+                                        value={activeTab === "experience" ? editing.company : activeTab === "education" ? editing.institution : editing.organization}
+                                        onChange={(e) => {
+                                            const field = activeTab === "experience" ? "company" : activeTab === "education" ? "institution" : "organization";
+                                            setEditing({ ...editing, [field]: e.target.value })
+                                        }}
                                         className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
                                     />
                                 </div>
@@ -233,8 +306,11 @@ export default function TimelineModule() {
                                     <input
                                         required
                                         type="text"
-                                        value={activeTab === "experience" ? editing.duration : editing.period}
-                                        onChange={(e) => setEditing({ ...editing, [activeTab === "experience" ? "duration" : "period"]: e.target.value })}
+                                        value={activeTab === "experience" ? editing.duration : activeTab === "education" ? editing.period : editing.duration}
+                                        onChange={(e) => {
+                                            const field = activeTab === "experience" || activeTab === "volunteering" ? "duration" : "period";
+                                            setEditing({ ...editing, [field]: e.target.value })
+                                        }}
                                         className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
                                     />
                                 </div>
@@ -254,8 +330,11 @@ export default function TimelineModule() {
                                 <textarea
                                     required
                                     rows={5}
-                                    value={activeTab === "experience" ? editing.description : editing.details}
-                                    onChange={(e) => setEditing({ ...editing, [activeTab === "experience" ? "description" : "details"]: e.target.value })}
+                                    value={activeTab === "experience" ? editing.description : activeTab === "education" ? editing.details : editing.description}
+                                    onChange={(e) => {
+                                        const field = activeTab === "experience" || activeTab === "volunteering" ? "description" : "details";
+                                        setEditing({ ...editing, [field]: e.target.value })
+                                    }}
                                     className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
                                 />
                             </div>

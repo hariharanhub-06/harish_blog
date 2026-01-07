@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Github, Calendar, MapPin, Briefcase, GraduationCap } from "lucide-react";
+import { X, ExternalLink, Github, Calendar, MapPin, Briefcase, GraduationCap, HeartHandshake } from "lucide-react";
 import Image from "next/image";
 import { useEffect } from "react";
 
@@ -9,7 +9,7 @@ interface DetailModalProps {
     isOpen: boolean;
     onClose: () => void;
     data: any;
-    type: "project" | "experience" | "education";
+    type: "project" | "experience" | "education" | "volunteering";
 }
 
 export default function DetailModal({ isOpen, onClose, data, type }: DetailModalProps) {
@@ -26,6 +26,40 @@ export default function DetailModal({ isOpen, onClose, data, type }: DetailModal
     }, [isOpen]);
 
     if (!data) return null;
+
+    const getColor = (t: string) => {
+        if (t === 'experience') return 'bg-blue-500';
+        if (t === 'education') return 'bg-amber-500';
+        return 'bg-teal-500';
+    };
+
+    const getIcon = (t: string) => {
+        if (t === 'experience') return <Briefcase size={32} />;
+        if (t === 'education') return <GraduationCap size={32} />;
+        return <HeartHandshake size={32} />;
+    };
+
+    const getTitle = (t: string, d: any) => {
+        if (t === 'experience') return d.role;
+        if (t === 'education') return d.degree;
+        return d.role;
+    };
+
+    const getSubtitle = (t: string, d: any) => {
+        if (t === 'experience') return d.company;
+        if (t === 'education') return d.institution;
+        return d.organization;
+    };
+
+    const getPeriod = (t: string, d: any) => {
+        if (t === 'education') return d.period;
+        return d.duration;
+    };
+
+    const getDescription = (t: string, d: any) => {
+        if (t === 'education') return d.details;
+        return d.description;
+    };
 
     return (
         <AnimatePresence>
@@ -57,7 +91,7 @@ export default function DetailModal({ isOpen, onClose, data, type }: DetailModal
                         </button>
 
                         <div className="overflow-y-auto custom-scrollbar">
-                            {type === "project" && (
+                            {type === "project" ? (
                                 <div className="flex flex-col">
                                     <div className="relative h-64 md:h-96 w-full">
                                         {data.thumbnail ? (
@@ -98,17 +132,15 @@ export default function DetailModal({ isOpen, onClose, data, type }: DetailModal
                                         </div>
                                     </div>
                                 </div>
-                            )}
-
-                            {(type === "experience" || type === "education") && (
+                            ) : (
                                 <div className="p-8 md:p-16">
                                     <div className="flex flex-col md:flex-row md:items-center gap-6 mb-12">
-                                        <div className={`w-20 h-20 rounded-3xl ${type === 'experience' ? 'bg-blue-500' : 'bg-amber-500'} flex items-center justify-center text-white shadow-xl flex-shrink-0`}>
-                                            {type === 'experience' ? <Briefcase size={32} /> : <GraduationCap size={32} />}
+                                        <div className={`w-20 h-20 rounded-3xl ${getColor(type)} flex items-center justify-center text-white shadow-xl flex-shrink-0`}>
+                                            {getIcon(type)}
                                         </div>
                                         <div>
-                                            <h2 className="text-4xl font-black text-gray-900 mb-2">{type === 'experience' ? data.role : data.degree}</h2>
-                                            <p className="text-xl font-bold text-primary">{type === 'experience' ? data.company : data.institution}</p>
+                                            <h2 className="text-4xl font-black text-gray-900 mb-2">{getTitle(type, data)}</h2>
+                                            <p className="text-xl font-bold text-primary">{getSubtitle(type, data)}</p>
                                         </div>
                                     </div>
 
@@ -117,7 +149,7 @@ export default function DetailModal({ isOpen, onClose, data, type }: DetailModal
                                             <Calendar className="text-primary" size={24} />
                                             <div>
                                                 <p className="text-xs font-black uppercase text-secondary tracking-widest">Period</p>
-                                                <p className="text-lg font-bold text-gray-900">{type === 'experience' ? data.duration : data.period}</p>
+                                                <p className="text-lg font-bold text-gray-900">{getPeriod(type, data)}</p>
                                             </div>
                                         </div>
                                         <div className="bg-gray-50 p-6 rounded-3xl flex items-center space-x-4">
@@ -132,7 +164,7 @@ export default function DetailModal({ isOpen, onClose, data, type }: DetailModal
                                     <div className="prose prose-lg max-w-none text-secondary">
                                         <h3 className="text-gray-900 font-black mb-4">Description & Achievements</h3>
                                         <p className="whitespace-pre-wrap leading-relaxed">
-                                            {type === 'experience' ? data.description : data.details}
+                                            {getDescription(type, data)}
                                         </p>
                                     </div>
                                 </div>
