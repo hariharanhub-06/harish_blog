@@ -360,7 +360,7 @@ export default function HMSnacksPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile Number</label>
-                                    <input required name="mobile" type="tel" placeholder="+91 98765 43210" className="w-full bg-white border border-gray-200 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm outline-none" />
+                                    <input required name="mobile" type="tel" placeholder="+91 90423 87152" className="w-full bg-white border border-gray-200 rounded-2xl p-4 font-bold text-gray-900 focus:ring-2 focus:ring-pink-500 transition-all shadow-sm outline-none" />
                                 </div>
                             </div>
                             <div className="space-y-2">

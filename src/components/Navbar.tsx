@@ -74,6 +74,16 @@ export default function Navbar() {
                                             <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Tradition Taste</span>
                                         </div>
                                     </Link>
+                                    <Link
+                                        href="/business/hm-tech"
+                                        className="flex items-center space-x-3 p-3 rounded-xl hover:bg-primary/5 transition-all group/item mt-1"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 font-black text-xs">HT</div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-black text-gray-900 group-hover/item:text-primary">HM Tech</span>
+                                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Test Design</span>
+                                        </div>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -125,6 +135,14 @@ export default function Navbar() {
                                 >
                                     <span>HM Snacks</span>
                                     <span className="text-[10px] bg-pink-500 text-white px-2 py-0.5 rounded-lg">SHOP</span>
+                                </Link>
+                                <Link
+                                    href="/business/hm-tech"
+                                    className="w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-xl font-black shadow-sm border border-gray-100 flex items-center justify-between"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <span>HM Tech</span>
+                                    <span className="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-lg">TECH</span>
                                 </Link>
                                 <Link
                                     href="#contact"
