@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { AuthProvider } from "@/lib/auth-context";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -25,6 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
+import ClientLayout from "@/components/ClientLayout";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,11 +34,9 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased text-text`}>
         <AuthProvider>
-          <Navbar />
-          <main className="min-h-screen pt-20">
+          <ClientLayout>
             {children}
-          </main>
-          <Footer />
+          </ClientLayout>
         </AuthProvider>
       </body>
     </html>
