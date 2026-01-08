@@ -186,6 +186,7 @@ export default function HMSnacksPage() {
                                         src={`${product.imageUrl}${product.imageUrl.includes('?') ? '&' : '?'}tr=f-auto,q-80`}
                                         alt={product.name}
                                         fill
+                                        unoptimized
                                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                     {/* Badges */}
