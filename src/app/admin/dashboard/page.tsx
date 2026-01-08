@@ -36,6 +36,7 @@ export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<Tab>("overview");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
 
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
@@ -47,7 +48,11 @@ export default function AdminDashboard() {
 
         // Fetch initial unread count
         fetchUnreadCount();
-        const interval = setInterval(fetchUnreadCount, 10000); // Poll every 10s
+        fetchPendingOrders();
+        const interval = setInterval(() => {
+            fetchUnreadCount();
+            fetchPendingOrders();
+        }, 10000); // Poll every 10s
         return () => clearInterval(interval);
     }, []);
 
@@ -57,6 +62,18 @@ export default function AdminDashboard() {
             if (res.ok) {
                 const data = await res.json();
                 setUnreadCount(data.filter((m: any) => m.status === 'Fresh').length);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const fetchPendingOrders = async () => {
+        try {
+            const res = await fetch("/api/admin/snacks/orders");
+            if (res.ok) {
+                const data = await res.json();
+                setPendingOrdersCount(data.filter((o: any) => o.status === 'Pending' || o.status === 'Processing').length);
             }
         } catch (err) {
             console.error(err);
@@ -142,6 +159,11 @@ export default function AdminDashboard() {
                                 {item.id === "messages" && unreadCount > 0 && (
                                     <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">
                                         {unreadCount}
+                                    </span>
+                                )}
+                                {item.id === "snacks-orders" && pendingOrdersCount > 0 && (
+                                    <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">
+                                        {pendingOrdersCount}
                                     </span>
                                 )}
                             </button>
