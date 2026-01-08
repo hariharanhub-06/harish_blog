@@ -79,7 +79,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
     ];
 
     return (
-        <main className="min-h-screen bg-white overflow-x-hidden pt-20 font-sans">
+        <div className="min-h-screen bg-white relative z-0 overflow-x-hidden pt-20 font-sans">
             {/* removed global glow */}
 
             {/* Hero Section */}
@@ -431,7 +431,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                     </motion.div>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }
 

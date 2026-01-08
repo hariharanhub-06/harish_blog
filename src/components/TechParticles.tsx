@@ -94,7 +94,7 @@ export default function TechParticles() {
     }, []);
 
     return (
-        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
             {/* Optional Video Background - User can add a video file here */}
             <video
                 autoPlay

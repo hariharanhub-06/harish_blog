@@ -12,10 +12,16 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://harishblog.fyi'), // Replace with actual domain when known
   title: "Hari Haran Jeyaramamoorthy | Web Developer & Business Consultant",
   description: "Professional portfolio of Hari Haran Jeyaramamoorthy, featuring web development projects, Career journey, and technical insights.",
   icons: {
-    icon: "/hh-gold-logo.png",
+    icon: [
+      { url: "/hh-gold-logo.png" },
+      { url: "/hh-gold-logo.png", sizes: "32x32" },
+    ],
+    shortcut: "/hh-gold-logo.png",
+    apple: "/hh-gold-logo.png",
   },
   openGraph: {
     title: "Hari Haran Jeyaramamoorthy Portfolio",
