@@ -152,7 +152,7 @@ export default function HMSnacksPage() {
             <section id="products" className="container mx-auto px-6 py-24 border-t border-gray-100">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
                     <div className="space-y-4">
-                        <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight">Our <span className="text-pink-500 italic">Collection</span></h2>
+                        <h2 className="text-2xl md:text-6xl font-black text-gray-900 tracking-tight">Our <span className="text-pink-500 italic">Collection</span></h2>
                         <p className="text-gray-400 font-medium max-w-lg">Order the freshest snacks, delivered globally. Minimum order starts from 250g (1/4 Kg).</p>
                     </div>
 
@@ -173,12 +173,12 @@ export default function HMSnacksPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-4 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
+                <div className="grid grid-cols-4 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-6">
                     {filteredProducts.map((product) => (
                         <Tilt key={product.id} options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
                             <div
                                 onClick={() => openModal(product)}
-                                className="group bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
+                                className="group bg-white rounded-xl md:rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
                             >
                                 {/* Image Holder */}
                                 <div className="relative h-24 md:h-72 overflow-hidden">
