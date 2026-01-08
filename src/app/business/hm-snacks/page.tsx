@@ -181,14 +181,20 @@ export default function HMSnacksPage() {
                                 className="group bg-white rounded-xl md:rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
                             >
                                 {/* Image Holder */}
-                                <div className="relative h-40 md:h-72 overflow-hidden">
-                                    <Image
-                                        src={`${product.imageUrl}${product.imageUrl.includes('?') ? '&' : '?'}tr=f-auto,q-80`}
-                                        alt={product.name}
-                                        fill
-                                        unoptimized
-                                        className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                    />
+                                <div className="relative h-40 md:h-72 overflow-hidden bg-gray-50 flex items-center justify-center">
+                                    {product.imageUrl ? (
+                                        <Image
+                                            src={product.imageUrl}
+                                            alt={product.name}
+                                            fill
+                                            unoptimized
+                                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-pink-100 font-black text-4xl italic px-4 text-center">
+                                            {product.name.charAt(0)}
+                                        </div>
+                                    )}
                                     {/* Badges */}
                                     <div className="absolute top-1 left-1 md:top-6 md:left-6 flex flex-col gap-1">
                                         <span className="bg-white/90 backdrop-blur-md text-gray-900 text-[6px] md:text-[10px] font-black px-1.5 py-0.5 md:px-3 md:py-1.5 rounded-full uppercase tracking-widest shadow-lg">
@@ -470,13 +476,20 @@ export default function HMSnacksPage() {
                             </button>
 
                             {/* Image Side */}
-                            <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-gray-100">
-                                <Image
-                                    src={`${selectedProduct.imageUrl}${selectedProduct.imageUrl.includes('?') ? '&' : '?'}tr=f-avif,q-80`}
-                                    alt={selectedProduct.name}
-                                    fill
-                                    className="object-cover"
-                                />
+                            <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-gray-100 flex items-center justify-center">
+                                {selectedProduct.imageUrl ? (
+                                    <Image
+                                        src={selectedProduct.imageUrl}
+                                        alt={selectedProduct.name}
+                                        fill
+                                        unoptimized
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <div className="text-pink-100 font-black text-9xl italic">
+                                        {selectedProduct.name.charAt(0)}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Details Side */}
