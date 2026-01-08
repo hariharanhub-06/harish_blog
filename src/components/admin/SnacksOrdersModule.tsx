@@ -194,7 +194,7 @@ export default function SnacksOrdersModule() {
                         />
                     </div>
                     <button
-                        onClick={fetchOrders}
+                        onClick={() => fetchOrders(0)}
                         className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all"
                     >
                         Search
