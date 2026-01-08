@@ -357,10 +357,10 @@ export default function SnacksOrdersModule() {
                                             </div>
                                             <div className="flex-grow">
                                                 <h5 className="font-black text-gray-900">{item.name}</h5>
-                                                <p className="text-xs font-bold text-gray-400">Qty: {item.quantity} Kg</p>
+                                                <p className="text-xs font-bold text-gray-400">Qty: {item.quantity} {item.unit || 'Kg'}</p>
                                             </div>
                                             <div className="text-right">
-                                                <span className="text-lg font-black text-gray-900 italic">₹{Math.ceil(item.pricePerKg * item.quantity)}</span>
+                                                <span className="text-lg font-black text-gray-900 italic">₹{Math.ceil((item.price || item.pricePerKg) * item.quantity)}</span>
                                             </div>
                                         </div>
                                     ))}

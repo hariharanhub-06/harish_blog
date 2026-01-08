@@ -76,8 +76,8 @@ export default function CartPage() {
         "West Bengal": 200
     };
 
-    const subtotal = cart.reduce((acc, item) => acc + (item.pricePerKg * item.quantity), 0);
-    const totalWeight = cart.reduce((acc, item) => acc + item.quantity, 0);
+    const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const totalWeight = cart.reduce((acc, item) => acc + (item.unit === "Kg" ? item.quantity : 0.1), 0); // Assuming 0.1kg per batch of pieces for shipping if not specified
 
     // Calculate Shipping Effect
     useEffect(() => {
@@ -230,19 +230,40 @@ export default function CartPage() {
                                     </div>
                                     <div className="flex-grow text-center sm:text-left">
                                         <h3 className="text-2xl font-black text-gray-900 mb-1">{item.name}</h3>
-                                        <p className="text-xs font-black uppercase tracking-widest text-pink-500 mb-4">{item.category}</p>
+                                        <div className="flex items-center justify-center sm:justify-start gap-2 mb-4">
+                                            <span className="text-xs font-black uppercase tracking-widest text-pink-500">{item.category}</span>
+                                            <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                                            <span className="text-xs font-black text-gray-400">₹{item.price} / {item.unit}</span>
+                                        </div>
                                         <div className="flex items-center justify-center sm:justify-start gap-4">
                                             <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-1 px-3">
-                                                <button onClick={() => updateQuantity(item.id, item.quantity - 0.25)} className="p-2 hover:text-pink-500 disabled:opacity-30" disabled={item.quantity <= 0.25}><Minus size={16} /></button>
-                                                <span className="w-16 text-center font-black text-sm italic">{item.quantity} Kg</span>
-                                                <button onClick={() => updateQuantity(item.id, item.quantity + 0.25)} className="p-2 hover:text-pink-500"><Plus size={16} /></button>
+                                                <button
+                                                    onClick={() => {
+                                                        const step = item.unit === "Kg" ? 0.25 : 5;
+                                                        updateQuantity(item.id, item.quantity - step, item.unit);
+                                                    }}
+                                                    className="p-2 hover:text-pink-500 disabled:opacity-30"
+                                                    disabled={item.unit === "Kg" ? item.quantity <= 0.25 : item.quantity <= 10}
+                                                >
+                                                    <Minus size={16} />
+                                                </button>
+                                                <span className="w-20 text-center font-black text-sm italic">{item.quantity} {item.unit}</span>
+                                                <button
+                                                    onClick={() => {
+                                                        const step = item.unit === "Kg" ? 0.25 : 5;
+                                                        updateQuantity(item.id, item.quantity + step, item.unit);
+                                                    }}
+                                                    className="p-2 hover:text-pink-500"
+                                                >
+                                                    <Plus size={16} />
+                                                </button>
                                             </div>
                                             <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-rose-500 transition-colors p-2"><Trash2 size={20} /></button>
                                         </div>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total</p>
-                                        <p className="text-3xl font-black text-gray-900 italic">₹{Math.ceil(item.pricePerKg * item.quantity)}</p>
+                                        <p className="text-3xl font-black text-gray-900 italic">₹{Math.ceil(item.price * item.quantity)}</p>
                                     </div>
                                 </div>
                             ))}

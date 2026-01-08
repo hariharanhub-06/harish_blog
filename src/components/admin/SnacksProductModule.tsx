@@ -53,7 +53,8 @@ export default function SnacksProductModule() {
             // Convert empty strings to numbers for database compatibility
             const sanitizedData = {
                 ...editing,
-                pricePerKg: typeof editing.pricePerKg === "string" && editing.pricePerKg === "" ? 0 : parseFloat(editing.pricePerKg as any) || 0,
+                pricePerKg: typeof editing.pricePerKg === "string" && editing.pricePerKg === "" ? null : parseFloat(editing.pricePerKg as any) || 0,
+                pricePerPiece: typeof editing.pricePerPiece === "string" && editing.pricePerPiece === "" ? null : parseInt(editing.pricePerPiece as any) || 0,
                 stock: typeof editing.stock === "string" && editing.stock === "" ? 0 : parseInt(editing.stock as any) || 0,
             };
 
@@ -265,12 +266,21 @@ export default function SnacksProductModule() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Stock (In Kg)</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Stock (In Kg / Units)</label>
                                         <input
                                             required
                                             type="number"
                                             value={editing.stock}
                                             onChange={(e) => setEditing({ ...editing, stock: e.target.value === "" ? "" : parseInt(e.target.value) || "" })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Price per Piece (₹) <span className="text-gray-300 lowercase text-[9px]">(optional)</span></label>
+                                        <input
+                                            type="number"
+                                            value={editing.pricePerPiece || ""}
+                                            onChange={(e) => setEditing({ ...editing, pricePerPiece: e.target.value === "" ? "" : parseInt(e.target.value) || "" })}
                                             className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
                                         />
                                     </div>
@@ -303,15 +313,25 @@ export default function SnacksProductModule() {
                             </div>
 
                             <h3 className="text-lg font-black mb-1 line-clamp-1">{product.name}</h3>
-                            <div className="flex items-center gap-2 mb-4">
-                                <span className="text-xl font-black text-gray-900">₹{product.pricePerKg}</span>
-                                <span className="text-[9px] font-bold text-gray-400">per Kg</span>
+                            <div className="flex flex-col gap-1 mb-4">
+                                {product.pricePerKg && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xl font-black text-gray-900">₹{product.pricePerKg}</span>
+                                        <span className="text-[9px] font-bold text-gray-400 lowercase">per Kg</span>
+                                    </div>
+                                )}
+                                {product.pricePerPiece && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xl font-black text-pink-500">₹{product.pricePerPiece}</span>
+                                        <span className="text-[9px] font-bold text-gray-400 lowercase">per Piece</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl mb-6">
                                 <div className="flex items-center gap-2">
                                     <Package size={14} className="text-gray-400" />
-                                    <span className={`text-xs font-black ${product.stock < 10 ? "text-rose-500" : "text-gray-900"}`}>{product.stock} Kg</span>
+                                    <span className={`text-xs font-black ${product.stock < 10 ? "text-rose-500" : "text-gray-900"}`}>{product.stock} {product.pricePerKg ? 'Kg' : 'Units'}</span>
                                 </div>
                                 <button
                                     onClick={() => toggleStatus(product)}

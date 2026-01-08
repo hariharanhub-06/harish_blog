@@ -37,10 +37,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { name, description, category, imageUrl, pricePerKg, stock, isActive } = body;
+        const { name, description, category, imageUrl, pricePerKg, pricePerPiece, stock, isActive } = body;
 
-        if (!name || !category || !pricePerKg) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        if (!name || !category || (!pricePerKg && !pricePerPiece)) {
+            return NextResponse.json({ error: "Missing required fields (Name, Category, and at least one price)" }, { status: 400 });
         }
 
         const [product] = await db.insert(snackProducts).values({
@@ -48,7 +48,8 @@ export async function POST(req: NextRequest) {
             description,
             category,
             imageUrl,
-            pricePerKg: parseInt(pricePerKg),
+            pricePerKg: pricePerKg ? parseInt(pricePerKg) : null,
+            pricePerPiece: pricePerPiece ? parseInt(pricePerPiece) : null,
             stock: parseInt(stock || 0),
             isActive: isActive ?? true,
         }).returning();
