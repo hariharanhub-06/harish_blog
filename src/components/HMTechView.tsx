@@ -79,11 +79,11 @@ export default function HMTechView({ projects }: HMTechViewProps) {
     ];
 
     return (
-        <div className="min-h-screen bg-white relative z-0 overflow-x-hidden pt-20 font-sans">
+        <div className="min-h-screen bg-[#030303] relative z-0 overflow-x-hidden font-sans">
             {/* removed global glow */}
 
             {/* Hero Section */}
-            <section className="relative min-h-[90vh] flex items-center justify-center p-6 overflow-hidden bg-[#030303]">
+            <section className="relative min-h-[90vh] flex items-center justify-center p-6 overflow-hidden bg-[#030303] pt-32 md:pt-20">
                 {/* Particle Background */}
                 <div className="absolute inset-0 z-0">
                     <DNAParticles />
@@ -227,7 +227,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         {/* Steps (Server Nodes) */}
                         <div className="space-y-24 relative z-10 pt-10">
                             {steps.map((step, index) => (
-                                <div key={index} className={`flex items-center ${index % 2 === 0 ? 'justify-start md:justify-end md:pr-16' : 'justify-end md:justify-start md:pl-16'} relative`}>
+                                <div key={index} className={`flex flex-col md:flex-row items-center ${index % 2 === 0 ? 'md:justify-end md:pr-16' : 'md:justify-start md:pl-16'} relative`}>
 
                                     {/* Central Node Marker (Absolute Center) */}
                                     <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
@@ -244,7 +244,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true, margin: "-50px" }}
                                         whileHover={{ scale: 1.02 }}
-                                        className={`w-[calc(50%-20px)] md:w-[45%] relative group ${index % 2 === 0 ? 'mr-auto md:mr-0' : 'ml-auto md:ml-0'}`}
+                                        className={`w-full md:w-[45%] relative group ${index % 2 === 0 ? 'md:mr-auto' : 'md:ml-auto'} mt-12 md:mt-0`}
                                     >
                                         <div className="absolute inset-0 bg-blue-500/5 rounded-2xl blur-xl group-hover:bg-blue-500/10 transition-colors"></div>
                                         <div className="relative p-6 md:p-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl hover:border-blue-500/50 transition-all duration-300">

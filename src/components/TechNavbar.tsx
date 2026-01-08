@@ -59,9 +59,9 @@ export default function TechNavbar() {
                         initial={{ opacity: 0, y: -20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        className="absolute top-28 left-6 right-6 bg-white/95 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl border border-gray-100 p-8 md:hidden overflow-hidden origin-top"
+                        className="absolute top-28 left-6 right-6 bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 p-8 md:hidden overflow-hidden origin-top z-50"
                     >
-                        <div className="flex flex-col space-y-2">
+                        <div className="flex flex-col space-y-2 bg-white">
                             {/* Links removed as per request */}
                             <Link
                                 href="#contact"

@@ -76,34 +76,40 @@ export default function GallerySection({ items }: GallerySectionProps) {
             </div>
 
             <div
-                className="relative"
+                className="relative group/gallery"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
                 {/* Navigation Arrows */}
-                <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-30 pointer-events-none">
+                <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-2 md:px-4 z-30 pointer-events-none">
                     <button
                         onClick={handlePrev}
-                        className="w-14 h-14 bg-white/90 backdrop-blur-md shadow-2xl rounded-full flex items-center justify-center text-gray-900 hover:bg-white hover:scale-110 transition-all pointer-events-auto"
+                        className="w-10 h-10 md:w-14 md:h-14 bg-white/90 backdrop-blur-md shadow-2xl rounded-full flex items-center justify-center text-gray-900 hover:bg-white hover:scale-110 transition-all pointer-events-auto opacity-100 md:opacity-0 md:group-hover/gallery:opacity-100"
                     >
-                        <ChevronLeft size={28} />
+                        <ChevronLeft size={24} />
                     </button>
                     <button
                         onClick={handleNext}
-                        className="w-14 h-14 bg-white/90 backdrop-blur-md shadow-2xl rounded-full flex items-center justify-center text-gray-900 hover:bg-white hover:scale-110 transition-all pointer-events-auto"
+                        className="w-10 h-10 md:w-14 md:h-14 bg-white/90 backdrop-blur-md shadow-2xl rounded-full flex items-center justify-center text-gray-900 hover:bg-white hover:scale-110 transition-all pointer-events-auto opacity-100 md:opacity-0 md:group-hover/gallery:opacity-100"
                     >
-                        <ChevronRight size={28} />
+                        <ChevronRight size={24} />
                     </button>
                 </div>
 
-                {/* Carousel Container */}
                 <div className="relative overflow-visible px-4">
                     <motion.div
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        onDragEnd={(e, info) => {
+                            const threshold = 50;
+                            if (info.offset.x < -threshold) handleNext();
+                            else if (info.offset.x > threshold) handlePrev();
+                        }}
                         animate={{
                             x: `-${currentIndex * slideWidth}%`,
                         }}
                         transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                        className="flex gap-6 md:gap-8"
+                        className="flex gap-4 md:gap-8 cursor-grab active:cursor-grabbing"
                     >
                         {duplicatedItems.map((item, i) => (
                             <div
@@ -122,13 +128,13 @@ export default function GallerySection({ items }: GallerySectionProps) {
                                         unoptimized
                                         sizes="(max-width: 768px) 85vw, (max-width: 1200px) 45vw, 30vw"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                                    <div className="absolute bottom-8 left-8 right-8 text-left z-20">
-                                        <h3 className="text-xl md:text-2xl font-black text-white mb-3 tracking-tight drop-shadow-xl line-clamp-2">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent" />
+                                    <div className="absolute bottom-6 left-6 right-6 text-left z-20">
+                                        <h3 className="text-lg md:text-2xl font-black text-white mb-2 tracking-tight drop-shadow-xl line-clamp-2 leading-tight">
                                             {item.title}
                                         </h3>
-                                        <p className="flex items-center gap-2 text-white/95 text-[10px] font-black uppercase tracking-widest px-4 py-2 bg-white/15 backdrop-blur-xl rounded-2xl border border-white/20 w-fit">
-                                            <MapPin size={12} className="text-pink-400" />
+                                        <p className="flex items-center gap-2 text-white/95 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 bg-white/10 backdrop-blur-xl rounded-xl border border-white/10 w-fit">
+                                            <MapPin size={10} className="text-pink-400" />
                                             {item.location}
                                         </p>
                                     </div>
