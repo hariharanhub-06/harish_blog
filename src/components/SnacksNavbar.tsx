@@ -74,9 +74,9 @@ export default function SnacksNavbar() {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="absolute top-28 left-6 right-6 bg-white/95 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl border border-gray-100 p-8 md:hidden overflow-hidden"
+                        className="absolute top-28 left-6 right-6 bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 p-8 md:hidden overflow-hidden z-50 transition-colors"
                     >
-                        <div className="flex flex-col space-y-6">
+                        <div className="flex flex-col space-y-6 bg-white">
                             <Link href="/business/hm-snacks" onClick={() => setIsOpen(false)} className="text-2xl font-black text-gray-900">Home</Link>
                             <Link href="/business/hm-snacks/cart" onClick={() => setIsOpen(false)} className="text-2xl font-black text-gray-900 flex justify-between">
                                 Cart

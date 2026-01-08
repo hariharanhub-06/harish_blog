@@ -92,7 +92,7 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
 
     return (
         <div
-            className="relative overflow-hidden"
+            className="relative overflow-visible pb-12 md:pb-0"
             onMouseEnter={() => {
                 setIsHovered(true);
                 stopAutoScroll();
@@ -134,13 +134,13 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
                     onDragStart={stopAutoScroll}
                     onDragEnd={onDragEnd}
                     animate={{
-                        x: `-${currentIndex * (typeof window !== 'undefined' && window.innerWidth < 768 ? 100 : 50)}%`
+                        x: `-${currentIndex * (typeof window !== 'undefined' && window.innerWidth < 768 ? 85 : 50)}%`
                     }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     className="flex gap-6 md:gap-8 cursor-grab active:cursor-grabbing"
                 >
                     {items.map((item, i) => (
-                        <div key={i} className="min-w-full md:min-w-[50%] flex flex-shrink-0 select-none">
+                        <div key={i} className="min-w-[85%] md:min-w-[50%] flex flex-shrink-0 select-none">
                             <CardWrapper index={i}>
                                 <div
                                     className="relative group h-full flex flex-col w-full"
@@ -157,7 +157,7 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
                                                     <h3 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-2">{item[title]}</h3>
                                                     <p className="text-primary font-bold text-lg md:text-xl">{item[subtitle]}</p>
                                                 </div>
-                                                <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-2xl text-sm w-fit shrink-0">
+                                                <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-2xl text-sm w-fit shrink-0 mt-2 md:mt-0">
                                                     <Calendar size={18} />
                                                     <span>{(() => {
                                                         const p = item[period] || "";
@@ -168,6 +168,8 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
                                                     })()}</span>
                                                 </div>
                                             </div>
+                                            {/* Extra spacing for mobile to avoid clipping if title is long */}
+                                            <div className="md:hidden h-2" />
                                         </div>
                                     </Tilt>
                                 </div>

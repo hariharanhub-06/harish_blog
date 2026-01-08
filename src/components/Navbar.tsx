@@ -138,9 +138,9 @@ export default function Navbar() {
                         initial={{ opacity: 0, y: -20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        className="absolute top-24 left-6 right-6 bg-white rounded-2xl shadow-2xl overflow-hidden md:hidden border border-gray-100"
+                        className="absolute top-24 left-6 right-6 bg-white rounded-2xl shadow-2xl overflow-hidden md:hidden border border-gray-100 z-50 transition-colors"
                     >
-                        <div className="flex flex-col p-4 space-y-1">
+                        <div className="flex flex-col p-4 space-y-1 bg-white">
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
@@ -155,23 +155,33 @@ export default function Navbar() {
                             <div className="flex flex-col gap-2 mt-2">
                                 <Link
                                     href="/business/hm-snacks"
-                                    className="w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-xl font-black shadow-sm border border-gray-100 flex items-center justify-between"
+                                    className="w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-xl font-black shadow-sm border border-gray-100 flex items-center justify-between hover:bg-gray-100 transition-colors"
                                     onClick={() => setIsOpen(false)}
                                 >
-                                    <span>HM Snacks</span>
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
+                                            <Image src="/hm-snacks-logo.png" alt="HM Snacks" fill className="object-contain" />
+                                        </div>
+                                        <span>HM Snacks</span>
+                                    </div>
                                     <span className="text-[10px] bg-pink-500 text-white px-2 py-0.5 rounded-lg">SHOP</span>
                                 </Link>
                                 <Link
                                     href="/business/hm-tech"
-                                    className="w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-xl font-black shadow-sm border border-gray-100 flex items-center justify-between"
+                                    className="w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-xl font-black shadow-sm border border-gray-100 flex items-center justify-between hover:bg-gray-100 transition-colors"
                                     onClick={() => setIsOpen(false)}
                                 >
-                                    <span>HM Tech</span>
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
+                                            <Image src="/hm-tech-logo.png" alt="HM Tech" fill className="object-contain" />
+                                        </div>
+                                        <span>HM Tech</span>
+                                    </div>
                                     <span className="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-lg">TECH</span>
                                 </Link>
                                 <Link
                                     href="#contact"
-                                    className="w-full bg-primary text-white text-center py-4 rounded-xl font-black shadow-lg shadow-primary/20"
+                                    className="w-full bg-primary text-white text-center py-4 rounded-xl font-black shadow-lg shadow-primary/20 hover:bg-blue-800 transition-all"
                                     onClick={() => setIsOpen(false)}
                                 >
                                     Hire Me
