@@ -175,6 +175,15 @@ export default function CartPage() {
     const handlePlaceOrder = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        const requiredFields = ['name', 'mobile', 'email', 'address', 'pincode', 'city', 'state', 'country'];
+        const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]?.toString().trim());
+
+        if (missingFields.length > 0) {
+            alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+            setStep(2); // Ensure we are on the form step
+            return;
+        }
+
         if (!formData.utr || formData.utr.length < 8) {
             alert("Please enter a valid UPI Transaction ID (UTR)");
             return;

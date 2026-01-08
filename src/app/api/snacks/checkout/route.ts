@@ -8,6 +8,11 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { items, customer, subtotal, shippingCost, discountAmount, couponCode, totalAmount, paymentMethod, utr } = body;
 
+        // 0. Server-side validation
+        if (!customer.name || !customer.mobile || !customer.address || !customer.pincode || !customer.city || !customer.state || !customer.country || !utr) {
+            return NextResponse.json({ error: "Missing mandatory fields" }, { status: 400 });
+        }
+
         // 1. Create a unique Order ID
         const orderId = `HMS-${Math.floor(Date.now() / 1000)}`;
 
