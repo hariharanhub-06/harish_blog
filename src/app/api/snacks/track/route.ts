@@ -31,7 +31,8 @@ export async function GET(req: NextRequest) {
             createdAt: order.createdAt,
             items: order.items, // Customers want to see what they ordered
             shipmentId: order.shipmentId, // For reference
-            totalAmount: order.totalAmount
+            totalAmount: order.totalAmount,
+            cancelReason: order.cancelReason
         };
 
         return NextResponse.json(safeOrder);
