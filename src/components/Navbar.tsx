@@ -29,9 +29,9 @@ export default function Navbar() {
 
     return (
         <nav
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4`}
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 py-3`}
         >
-            <div className={`container mx-auto max-w-7xl h-16 rounded-2xl flex justify-between items-center transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-xl border border-gray-100 px-8" : "bg-transparent px-4"
+            <div className={`container mx-auto max-w-7xl h-14 rounded-2xl flex justify-between items-center transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-xl border border-gray-100 px-6" : "bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 px-4"
                 }`}>
                 <Link href="/" className="flex items-center gap-3 text-2xl font-bold tracking-tight">
                     {/* Dynamic Business Logo */}
