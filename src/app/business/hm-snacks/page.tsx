@@ -228,15 +228,28 @@ export default function HMSnacksPage() {
                                     <div className="mt-auto space-y-6">
                                         <div className="flex items-center justify-between">
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Price per Kg</span>
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                                    {product.pricePerKg ? "Price per Kg" : "Price per Piece"}
+                                                </span>
                                                 <div className="flex items-center gap-2">
-                                                    {product.offerPricePerKg ? (
-                                                        <>
-                                                            <span className="text-2xl font-black text-pink-500 italic">₹{product.offerPricePerKg}</span>
-                                                            <span className="text-sm font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
-                                                        </>
+                                                    {product.pricePerKg ? (
+                                                        product.offerPricePerKg ? (
+                                                            <>
+                                                                <span className="text-2xl font-black text-pink-500 italic">₹{product.offerPricePerKg}</span>
+                                                                <span className="text-sm font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
+                                                            </>
+                                                        ) : (
+                                                            <span className="text-2xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
+                                                        )
                                                     ) : (
-                                                        <span className="text-2xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
+                                                        product.offerPricePerPiece ? (
+                                                            <>
+                                                                <span className="text-2xl font-black text-pink-500 italic">₹{product.offerPricePerPiece}</span>
+                                                                <span className="text-sm font-bold text-gray-300 line-through">₹{product.pricePerPiece}</span>
+                                                            </>
+                                                        ) : (
+                                                            <span className="text-2xl font-black text-gray-900 italic">₹{product.pricePerPiece}</span>
+                                                        )
                                                     )}
                                                 </div>
                                             </div>
@@ -247,28 +260,57 @@ export default function HMSnacksPage() {
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-3">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const price = product.offerPricePerKg || product.pricePerKg;
-                                                    addToCart({ ...product, price }, 0.25);
-                                                }}
-                                                className="bg-white border-2 border-gray-100 text-gray-900 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
-                                            >
-                                                <span>Buy ¼ Kg</span>
-                                                <span className="text-[10px] mt-1 text-gray-400 font-bold">₹{((product.offerPricePerKg || product.pricePerKg) / 4).toFixed(0)}</span>
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const price = product.offerPricePerKg || product.pricePerKg;
-                                                    addToCart({ ...product, price }, 1);
-                                                }}
-                                                className="bg-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <ShoppingCart size={14} />
-                                                Add 1 Kg
-                                            </button>
+                                            {product.pricePerKg ? (
+                                                <>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const price = product.offerPricePerKg || product.pricePerKg;
+                                                            addToCart({ ...product, price, unit: "Kg" }, 0.25);
+                                                        }}
+                                                        className="bg-white border-2 border-gray-100 text-gray-900 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
+                                                    >
+                                                        <span>Buy ¼ Kg</span>
+                                                        <span className="text-[10px] mt-1 text-gray-400 font-bold">₹{((product.offerPricePerKg || product.pricePerKg) / 4).toFixed(0)}</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const price = product.offerPricePerKg || product.pricePerKg;
+                                                            addToCart({ ...product, price, unit: "Kg" }, 1);
+                                                        }}
+                                                        className="bg-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+                                                    >
+                                                        <ShoppingCart size={14} />
+                                                        Add 1 Kg
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const price = product.offerPricePerPiece || product.pricePerPiece;
+                                                            addToCart({ ...product, price, unit: "Pcs" }, 10);
+                                                        }}
+                                                        className="bg-white border-2 border-gray-100 text-gray-900 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
+                                                    >
+                                                        <span>Buy 10 Pcs</span>
+                                                        <span className="text-[10px] mt-1 text-gray-400 font-bold">₹{((product.offerPricePerPiece || product.pricePerPiece) * 10).toFixed(0)}</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const price = product.offerPricePerPiece || product.pricePerPiece;
+                                                            addToCart({ ...product, price, unit: "Pcs" }, 25);
+                                                        }}
+                                                        className="bg-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+                                                    >
+                                                        <ShoppingCart size={14} />
+                                                        Add 25 Pcs
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
