@@ -16,7 +16,10 @@ import {
     X,
     Menu,
     Image as ImageIcon,
-    Ticket
+    Ticket,
+    ShoppingBag,
+    Package,
+    PieChart
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -28,7 +31,7 @@ import SnacksProductModule from "@/components/admin/SnacksProductModule";
 import SnacksOrdersModule from "@/components/admin/SnacksOrdersModule";
 import SnacksOverviewModule from "@/components/admin/SnacksOverviewModule";
 import CouponsModule from "@/components/admin/CouponsModule";
-import { ShoppingBag, Package, PieChart, Ticket } from "lucide-react";
+
 
 type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons";
 
