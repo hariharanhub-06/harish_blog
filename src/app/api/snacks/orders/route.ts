@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { snackOrders, snackProducts } from "@/db/schema";
-import { eq, desc, and, or, ilike, sql } from "drizzle-orm";
+import { eq, desc, and, or, ilike, sql, count } from "drizzle-orm";
 
 // GET all orders with filters and pagination
 export async function GET(req: NextRequest) {
