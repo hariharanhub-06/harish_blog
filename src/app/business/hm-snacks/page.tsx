@@ -170,7 +170,7 @@ export default function HMSnacksPage() {
                     </div>
                 </div>
 
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {filteredProducts.map((product) => (
                         <Tilt key={product.id} options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
                             <div
