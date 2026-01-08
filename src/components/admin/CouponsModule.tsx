@@ -201,6 +201,12 @@ export default function CouponsModule() {
                                         {coupon.isActive ? 'Active' : 'Inactive'}
                                     </span>
                                 </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-gray-400 font-bold uppercase tracking-wider">Total Used</span>
+                                    <span className="font-black text-gray-900 bg-gray-50 px-3 py-1 rounded-lg">
+                                        {coupon.usageCount || 0} times
+                                    </span>
+                                </div>
                             </div>
 
                             <div className="flex justify-between items-center pt-6 border-t border-gray-50">
