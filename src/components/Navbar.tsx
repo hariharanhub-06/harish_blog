@@ -31,7 +31,9 @@ export default function Navbar() {
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 py-3`}
         >
-            <div className={`container mx-auto max-w-7xl h-14 rounded-2xl flex justify-between items-center transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-xl border border-gray-100 px-6" : "bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 px-4"
+            <div className={`container mx-auto max-w-7xl h-14 rounded-2xl flex justify-between items-center transition-all duration-300 ${scrolled
+                ? (isTechPage ? "bg-black/90 backdrop-blur-md shadow-2xl border border-white/10 px-6" : "bg-white/95 backdrop-blur-md shadow-xl border border-gray-100 px-6")
+                : (isTechPage ? "bg-white/5 backdrop-blur-sm border border-white/10 px-4" : "bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 px-4")
                 }`}>
                 <Link href="/" className="flex items-center gap-3 text-2xl font-bold tracking-tight">
                     {/* Dynamic Business Logo */}
@@ -48,8 +50,8 @@ export default function Navbar() {
                     )}
 
                     <div className="flex items-baseline">
-                        <span className={`${(isSnacksPage || isTechPage) ? "text-white" : "text-primary"}`}>Hari</span>
-                        <span className={`${(isSnacksPage || isTechPage) ? "text-white" : "text-gray-900"} font-black`}>Haran</span>
+                        <span className={`${isTechPage ? "text-white" : (isSnacksPage ? "text-pink-500" : "text-primary")}`}>Hari</span>
+                        <span className={`${isTechPage ? "text-white" : "text-gray-900"} font-black`}>Haran</span>
                         <span className="text-accent underline decoration-4 decoration-accent/30 underline-offset-4">.</span>
                     </div>
                 </Link>
@@ -60,7 +62,7 @@ export default function Navbar() {
                         <Link
                             key={link.name}
                             href={link.href}
-                            className="px-4 py-2 text-gray-900 hover:text-primary font-bold text-sm transition-all rounded-lg hover:bg-primary/5"
+                            className={`px-4 py-2 font-bold text-sm transition-all rounded-lg hover:bg-primary/5 ${isTechPage ? "text-white/80 hover:text-white" : "text-gray-900 hover:text-primary"}`}
                         >
                             {link.name}
                         </Link>
@@ -69,7 +71,7 @@ export default function Navbar() {
                         {/* Business Dropdown */}
                         <div className="relative group">
                             <button
-                                className="bg-gray-100 text-gray-900 px-6 py-2.5 rounded-xl transition-all font-bold text-sm shadow-sm border border-gray-200 flex items-center gap-2 group-hover:bg-gray-200"
+                                className={`px-6 py-2.5 rounded-xl transition-all font-bold text-sm shadow-sm border flex items-center gap-2 ${isTechPage ? "bg-white/10 text-white border-white/10 hover:bg-white/20" : "bg-gray-100 text-gray-900 border-gray-200 hover:bg-gray-200"}`}
                             >
                                 Business
                                 <motion.div
@@ -118,10 +120,10 @@ export default function Navbar() {
                         </div>
 
                         <Link
-                            href="#contact"
-                            className="bg-primary text-white px-6 py-2.5 rounded-xl hover:bg-blue-800 transition-all font-bold text-sm shadow-lg shadow-primary/20"
+                            href={isSnacksPage || isTechPage ? "#contact" : "/#contact"}
+                            className={`${isTechPage ? "bg-white text-black hover:bg-gray-200" : "bg-primary text-white hover:bg-blue-800"} px-6 py-2.5 rounded-xl transition-all font-bold text-sm shadow-lg ${(isSnacksPage || isTechPage) ? "shadow-white/5" : "shadow-primary/20"}`}
                         >
-                            Hire Me
+                            {isSnacksPage || isTechPage ? "Hire Us" : "Hire Me"}
                         </Link>
                     </div>
                 </div>
@@ -142,17 +144,17 @@ export default function Navbar() {
                         initial={{ opacity: 0, y: -20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        className="absolute top-24 left-6 right-6 bg-white rounded-2xl shadow-2xl overflow-hidden md:hidden border border-gray-100 z-50 transition-colors"
+                        className={`absolute top-24 left-6 right-6 rounded-2xl shadow-2xl overflow-hidden md:hidden border transition-all z-50 ${isTechPage ? "bg-black/95 border-white/10" : "bg-white border-gray-100"}`}
                     >
-                        <div className="flex flex-col p-4 space-y-1 bg-white">
+                        <div className={`flex flex-col p-4 space-y-1 ${isTechPage ? "bg-black/95" : "bg-white"}`}>
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
                                     href={link.href}
-                                    className="flex items-center space-x-3 text-secondary hover:text-primary p-4 text-base font-bold rounded-xl hover:bg-primary/5 transition-all"
+                                    className={`flex items-center space-x-3 p-4 text-base font-bold rounded-xl transition-all ${isTechPage ? "text-white/80 hover:text-white hover:bg-white/5" : "text-secondary hover:text-primary hover:bg-primary/5"}`}
                                     onClick={() => setIsOpen(false)}
                                 >
-                                    <link.icon size={18} className="text-primary/60" />
+                                    <link.icon size={18} className={isTechPage ? "text-blue-400/60" : "text-primary/60"} />
                                     <span>{link.name}</span>
                                 </Link>
                             ))}
@@ -161,7 +163,7 @@ export default function Navbar() {
                                     href="/business/hm-snacks"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-xl font-black shadow-sm border border-gray-100 flex items-center justify-between hover:bg-gray-100 transition-colors"
+                                    className={`w-full px-6 py-4 rounded-xl font-black shadow-sm border flex items-center justify-between transition-colors ${isTechPage ? "bg-white/5 text-white border-white/10 hover:bg-white/10" : "bg-gray-50 text-gray-900 border-gray-100 hover:bg-gray-100"}`}
                                     onClick={() => setIsOpen(false)}
                                 >
                                     <div className="flex items-center gap-3">
@@ -176,7 +178,7 @@ export default function Navbar() {
                                     href="/business/hm-tech"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-xl font-black shadow-sm border border-gray-100 flex items-center justify-between hover:bg-gray-100 transition-colors"
+                                    className={`w-full px-6 py-4 rounded-xl font-black shadow-sm border flex items-center justify-between transition-colors ${isTechPage ? "bg-white/5 text-white border-white/10 hover:bg-white/10" : "bg-gray-50 text-gray-900 border-gray-100 hover:bg-gray-100"}`}
                                     onClick={() => setIsOpen(false)}
                                 >
                                     <div className="flex items-center gap-3">
@@ -188,11 +190,11 @@ export default function Navbar() {
                                     <span className="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-lg">TECH</span>
                                 </Link>
                                 <Link
-                                    href="#contact"
-                                    className="w-full bg-primary text-white text-center py-4 rounded-xl font-black shadow-lg shadow-primary/20 hover:bg-blue-800 transition-all"
+                                    href={isSnacksPage || isTechPage ? "#contact" : "/#contact"}
+                                    className={`w-full text-center py-4 rounded-xl font-black shadow-lg transition-all ${isTechPage ? "bg-white text-black hover:bg-gray-200 shadow-white/5" : "bg-primary text-white hover:bg-blue-800 shadow-primary/20"}`}
                                     onClick={() => setIsOpen(false)}
                                 >
-                                    Hire Me
+                                    {isSnacksPage || isTechPage ? "Hire Us" : "Hire Me"}
                                 </Link>
                             </div>
                         </div>
