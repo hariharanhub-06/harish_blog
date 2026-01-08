@@ -265,10 +265,6 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                 </div>
             </section>
 
-            {/* Gallery Section */}
-            {galleryItems && galleryItems.length > 0 && (
-                <GallerySection items={galleryItems} />
-            )}
 
             {/* Contact Section */}
             <section id="contact" className="container mx-auto px-6 scroll-mt-20">

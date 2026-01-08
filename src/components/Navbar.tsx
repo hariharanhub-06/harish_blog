@@ -87,6 +87,8 @@ export default function Navbar() {
                                 <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2">
                                     <Link
                                         href="/business/hm-snacks"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="flex items-center space-x-3 p-3 rounded-xl hover:bg-primary/5 transition-all group/item"
                                     >
                                         <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
@@ -99,6 +101,8 @@ export default function Navbar() {
                                     </Link>
                                     <Link
                                         href="/business/hm-tech"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="flex items-center space-x-3 p-3 rounded-xl hover:bg-primary/5 transition-all group/item mt-1"
                                     >
                                         <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
@@ -155,6 +159,8 @@ export default function Navbar() {
                             <div className="flex flex-col gap-2 mt-2">
                                 <Link
                                     href="/business/hm-snacks"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-xl font-black shadow-sm border border-gray-100 flex items-center justify-between hover:bg-gray-100 transition-colors"
                                     onClick={() => setIsOpen(false)}
                                 >
@@ -168,6 +174,8 @@ export default function Navbar() {
                                 </Link>
                                 <Link
                                     href="/business/hm-tech"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="w-full bg-gray-50 text-gray-900 px-6 py-4 rounded-xl font-black shadow-sm border border-gray-100 flex items-center justify-between hover:bg-gray-100 transition-colors"
                                     onClick={() => setIsOpen(false)}
                                 >
