@@ -174,3 +174,13 @@ export const snackOrders = pgTable("snack_orders", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// HM Snacks - Coupons Table
+export const coupons = pgTable("coupons", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: text("code").notNull().unique(), // e.g., 'SAVE10', 'WELCOME50'
+  discountValue: integer("discount_value").notNull(), // 10 or 50
+  discountType: text("discount_type").notNull(), // 'percentage' or 'fixed'
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});

@@ -16,6 +16,7 @@ import {
     EyeOff
 } from "lucide-react";
 import Image from "next/image";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 
 const CATEGORIES = ["Savories", "Sweets", "Spices", "Ready to Eat"];
 
@@ -137,10 +138,12 @@ export default function SnacksProductModule() {
         setUploading(true);
         try {
             const file = e.target.files[0];
-            const base64 = await compressImage(file);
-            setEditing({ ...editing, imageUrl: base64 });
+            // Upload to ImageKit CDN (snacks folder) with AVIF optimization
+            const imagekitUrl = await uploadToImageKit(file, 'snacks');
+            setEditing({ ...editing, imageUrl: imagekitUrl });
         } catch (error) {
             console.error(error);
+            alert("Failed to upload image. Please try again.");
         } finally {
             setUploading(false);
         }

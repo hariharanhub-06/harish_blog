@@ -3,7 +3,7 @@ import { projects } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import HMTechView from "@/components/HMTechView";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Cache for 5 minutes
 
 export default async function HMTechPage() {
     // Fetch Projects using Server Component functionality

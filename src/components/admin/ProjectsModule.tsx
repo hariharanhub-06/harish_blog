@@ -14,6 +14,7 @@ import {
     Check
 } from "lucide-react";
 import Image from "next/image";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 
 export default function ProjectsModule() {
     const [projects, setProjects] = useState<any[]>([]);
@@ -101,17 +102,18 @@ export default function ProjectsModule() {
         setUploading(true);
         try {
             const file = e.target.files[0];
-            if (file.size > 5 * 1024 * 1024) {
-                alert("File is too large. Please select an image under 5MB.");
+            if (file.size > 10 * 1024 * 1024) {
+                alert("File is too large. Please select an image under 10MB.");
                 setUploading(false);
                 return;
             }
 
-            const base64 = await compressImage(file);
-            setEditing({ ...editing, thumbnail: base64 });
+            // Upload to ImageKit CDN (projects folder) with AVIF optimization
+            const imagekitUrl = await uploadToImageKit(file, 'projects');
+            setEditing({ ...editing, thumbnail: imagekitUrl });
         } catch (error) {
             console.error(error);
-            alert("Thumbnail processing failed");
+            alert("Thumbnail upload failed. Please try again.");
         } finally {
             setUploading(false);
         }
