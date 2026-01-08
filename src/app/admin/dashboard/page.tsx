@@ -36,6 +36,7 @@ export default function AdminDashboard() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<Tab>("overview");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
@@ -44,7 +45,24 @@ export default function AdminDashboard() {
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
+
+        // Fetch initial unread count
+        fetchUnreadCount();
+        const interval = setInterval(fetchUnreadCount, 10000); // Poll every 10s
+        return () => clearInterval(interval);
     }, []);
+
+    const fetchUnreadCount = async () => {
+        try {
+            const res = await fetch("/api/admin/messages");
+            if (res.ok) {
+                const data = await res.json();
+                setUnreadCount(data.filter((m: any) => m.status === 'Fresh').length);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const handleTabChange = (tab: Tab) => {
         setActiveTab(tab);
@@ -123,7 +141,12 @@ export default function AdminDashboard() {
                                     const IconComponent = item.icon;
                                     return <IconComponent size={20} />;
                                 })()}
-                                <span>{item.title}</span>
+                                <span className="flex-1 text-left">{item.title}</span>
+                                {item.id === "messages" && unreadCount > 0 && (
+                                    <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">
+                                        {unreadCount}
+                                    </span>
+                                )}
                             </button>
                         )
                     ))}
