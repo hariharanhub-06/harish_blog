@@ -128,9 +128,15 @@ export default function TrackOrderPage() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="text-center py-8">
-                                <AlertCircle size={48} className="mx-auto text-red-200 mb-4" />
-                                <p className="text-gray-500 font-medium">This order has been cancelled.</p>
+                            <div className="text-center py-8 bg-red-50 rounded-3xl border border-red-100 p-8 space-y-4">
+                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-lg">
+                                    <AlertCircle size={32} className="text-red-500" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-black text-gray-900 tracking-tighter uppercase italic">Order Cancelled</h3>
+                                    <p className="text-gray-500 font-medium italic">Reason: "{order.cancelReason || "Not specified"}"</p>
+                                </div>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest pt-4 border-t border-red-100">If you have already paid, our team will process your refund shortly.</p>
                             </div>
                         )}
 
