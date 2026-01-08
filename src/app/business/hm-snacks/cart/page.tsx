@@ -233,7 +233,17 @@ export default function CartPage() {
                                         <div className="flex items-center justify-center sm:justify-start gap-2 mb-4">
                                             <span className="text-xs font-black uppercase tracking-widest text-pink-500">{item.category}</span>
                                             <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                                            <span className="text-xs font-black text-gray-400">₹{item.price} / {item.unit}</span>
+                                            <div className="flex items-center gap-2">
+                                                {item.originalPrice ? (
+                                                    <>
+                                                        <span className="text-xs font-black text-pink-500">₹{item.price}</span>
+                                                        <span className="text-[10px] font-bold text-gray-300 line-through">₹{item.originalPrice}</span>
+                                                    </>
+                                                ) : (
+                                                    <span className="text-xs font-black text-gray-400">₹{item.price}</span>
+                                                )}
+                                                <span className="text-xs font-black text-gray-400">/ {item.unit}</span>
+                                            </div>
                                         </div>
                                         <div className="flex items-center justify-center sm:justify-start gap-4">
                                             <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-1 px-3">
@@ -263,7 +273,12 @@ export default function CartPage() {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total</p>
-                                        <p className="text-3xl font-black text-gray-900 italic">₹{Math.ceil(item.price * item.quantity)}</p>
+                                        <div className="flex flex-col items-end">
+                                            <p className="text-3xl font-black text-gray-900 italic">₹{Math.ceil(item.price * item.quantity)}</p>
+                                            {item.originalPrice && (
+                                                <p className="text-xs font-bold text-gray-300 line-through">₹{Math.ceil(item.originalPrice * item.quantity)}</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

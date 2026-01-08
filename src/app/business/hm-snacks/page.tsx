@@ -229,7 +229,16 @@ export default function HMSnacksPage() {
                                         <div className="flex items-center justify-between">
                                             <div className="flex flex-col">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Price per Kg</span>
-                                                <span className="text-2xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
+                                                <div className="flex items-center gap-2">
+                                                    {product.offerPricePerKg ? (
+                                                        <>
+                                                            <span className="text-2xl font-black text-pink-500 italic">₹{product.offerPricePerKg}</span>
+                                                            <span className="text-sm font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-2xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div className={`p-2 rounded-lg text-xs font-black uppercase tracking-widest flex items-center gap-2 ${product.stock > 0 ? "text-emerald-500 bg-emerald-50" : "text-rose-500 bg-rose-50"}`}>
                                                 <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${product.stock > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
@@ -239,14 +248,22 @@ export default function HMSnacksPage() {
 
                                         <div className="grid grid-cols-2 gap-3">
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); addToCart(product, 0.25); }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const price = product.offerPricePerKg || product.pricePerKg;
+                                                    addToCart({ ...product, price }, 0.25);
+                                                }}
                                                 className="bg-white border-2 border-gray-100 text-gray-900 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
                                             >
                                                 <span>Buy ¼ Kg</span>
-                                                <span className="text-[10px] mt-1 text-gray-400 font-bold">₹{(product.pricePerKg / 4).toFixed(0)}</span>
+                                                <span className="text-[10px] mt-1 text-gray-400 font-bold">₹{((product.offerPricePerKg || product.pricePerKg) / 4).toFixed(0)}</span>
                                             </button>
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); addToCart(product, 1); }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const price = product.offerPricePerKg || product.pricePerKg;
+                                                    addToCart({ ...product, price }, 1);
+                                                }}
                                                 className="bg-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
                                             >
                                                 <ShoppingCart size={14} />
@@ -459,9 +476,18 @@ export default function HMSnacksPage() {
                                     <div className="flex items-end justify-between border-b border-gray-100 pb-8">
                                         <div>
                                             <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Total Price</p>
-                                            <p className="text-4xl font-black text-gray-900 italic tracking-tighter">
-                                                ₹{Math.ceil((modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece) * modalQuantity)}
-                                            </p>
+                                            <div className="flex items-center gap-3">
+                                                <p className="text-4xl font-black text-gray-900 italic tracking-tighter">
+                                                    ₹{Math.ceil((modalUnit === "kg"
+                                                        ? (selectedProduct.offerPricePerKg || selectedProduct.pricePerKg)
+                                                        : (selectedProduct.offerPricePerPiece || selectedProduct.pricePerPiece)) * modalQuantity)}
+                                                </p>
+                                                {((modalUnit === "kg" && selectedProduct.offerPricePerKg) || (modalUnit === "pc" && selectedProduct.offerPricePerPiece)) && (
+                                                    <p className="text-lg font-bold text-gray-300 line-through mt-1">
+                                                        ₹{Math.ceil((modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece) * modalQuantity)}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-4 bg-gray-50 px-4 py-2 rounded-2xl">
                                             <button
@@ -497,9 +523,11 @@ export default function HMSnacksPage() {
                                     <div className="flex gap-4">
                                         <button
                                             onClick={() => {
+                                                const basePrice = modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece;
+                                                const offerPrice = modalUnit === "kg" ? selectedProduct.offerPricePerKg : selectedProduct.offerPricePerPiece;
                                                 const finalProduct = {
                                                     ...selectedProduct,
-                                                    price: modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece,
+                                                    price: offerPrice || basePrice,
                                                     unit: modalUnit === "kg" ? "Kg" : "Pcs"
                                                 };
                                                 addToCart(finalProduct, modalQuantity);
