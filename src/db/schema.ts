@@ -140,7 +140,8 @@ export const snackProducts = pgTable("snack_products", {
   description: text("description"),
   category: text("category").notNull(), // Savories, Sweets, etc.
   imageUrl: text("image_url"),
-  pricePerKg: integer("price_per_kg").notNull(), // Store in paisa or cents? Let's use actual rupees for simplicity or integer for safer math.
+  pricePerKg: integer("price_per_kg"),
+  pricePerPiece: integer("price_per_piece"),
   stock: integer("stock").default(0),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),

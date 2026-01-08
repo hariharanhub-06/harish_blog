@@ -17,6 +17,7 @@ export default function HMSnacksPage() {
 
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [modalQuantity, setModalQuantity] = useState(1);
+    const [modalUnit, setModalUnit] = useState<"kg" | "pc">("kg");
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -41,7 +42,9 @@ export default function HMSnacksPage() {
 
     const openModal = (product: any) => {
         setSelectedProduct(product);
-        setModalQuantity(1);
+        const hasKg = !!product.pricePerKg;
+        setModalUnit(hasKg ? "kg" : "pc");
+        setModalQuantity(hasKg ? 1 : 10);
     };
 
     return (
@@ -429,23 +432,61 @@ export default function HMSnacksPage() {
                                 </div>
 
                                 <div className="mt-auto space-y-8">
+                                    {/* Unit Toggle if both prices exist */}
+                                    {selectedProduct.pricePerKg && selectedProduct.pricePerPiece && (
+                                        <div className="flex p-1 bg-gray-100 rounded-2xl w-fit">
+                                            <button
+                                                onClick={() => {
+                                                    setModalUnit("kg");
+                                                    setModalQuantity(1);
+                                                }}
+                                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${modalUnit === "kg" ? "bg-white text-pink-500 shadow-sm" : "text-gray-400"}`}
+                                            >
+                                                By Weight (Kg)
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setModalUnit("pc");
+                                                    setModalQuantity(10);
+                                                }}
+                                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${modalUnit === "pc" ? "bg-white text-pink-500 shadow-sm" : "text-gray-400"}`}
+                                            >
+                                                By Pieces
+                                            </button>
+                                        </div>
+                                    )}
+
                                     <div className="flex items-end justify-between border-b border-gray-100 pb-8">
                                         <div>
                                             <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Total Price</p>
                                             <p className="text-4xl font-black text-gray-900 italic tracking-tighter">
-                                                ₹{Math.ceil(selectedProduct.pricePerKg * modalQuantity)}
+                                                ₹{Math.ceil((modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece) * modalQuantity)}
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-4 bg-gray-50 px-4 py-2 rounded-2xl">
                                             <button
-                                                onClick={() => setModalQuantity(prev => Math.max(0.25, prev - 0.25))}
+                                                onClick={() => {
+                                                    if (modalUnit === "kg") {
+                                                        setModalQuantity(prev => Math.max(0.25, prev - 0.25));
+                                                    } else {
+                                                        setModalQuantity(prev => Math.max(10, prev - 5));
+                                                    }
+                                                }}
                                                 className="p-2 hover:text-pink-500 transition-colors"
                                             >
                                                 <Minus size={20} />
                                             </button>
-                                            <span className="w-12 text-center font-black text-lg">{modalQuantity}Kg</span>
+                                            <span className="w-16 text-center font-black text-lg">
+                                                {modalQuantity}{modalUnit === "kg" ? "Kg" : " Pcs"}
+                                            </span>
                                             <button
-                                                onClick={() => setModalQuantity(prev => prev + 0.25)}
+                                                onClick={() => {
+                                                    if (modalUnit === "kg") {
+                                                        setModalQuantity(prev => prev + 0.25);
+                                                    } else {
+                                                        setModalQuantity(prev => prev + 5);
+                                                    }
+                                                }}
                                                 className="p-2 hover:text-pink-500 transition-colors"
                                             >
                                                 <Plus size={20} />
@@ -456,7 +497,12 @@ export default function HMSnacksPage() {
                                     <div className="flex gap-4">
                                         <button
                                             onClick={() => {
-                                                addToCart(selectedProduct, modalQuantity);
+                                                const finalProduct = {
+                                                    ...selectedProduct,
+                                                    price: modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece,
+                                                    unit: modalUnit === "kg" ? "Kg" : "Pcs"
+                                                };
+                                                addToCart(finalProduct, modalQuantity);
                                                 setSelectedProduct(null);
                                             }}
                                             className="flex-1 bg-gray-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-pink-500 transition-all shadow-xl flex items-center justify-center gap-3"
