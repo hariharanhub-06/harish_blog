@@ -28,7 +28,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <main className={`min-h-screen ${!isAdmin ? "pt-24 md:pt-28" : ""}`}>
                 {children}
             </main>
-            {!isAdmin && <Footer />}
+            {!isAdmin && <Footer minimal={(isSnacksPage || isTechPage)} />}
         </>
     );
 }
