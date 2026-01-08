@@ -5,6 +5,8 @@ export const metadata: Metadata = {
     description: "Cutting-edge digital solutions and tech consulting.",
     icons: {
         icon: "/hm-tech-logo.png",
+        shortcut: "/hm-tech-logo.png",
+        apple: "/hm-tech-logo.png",
     },
 };
 

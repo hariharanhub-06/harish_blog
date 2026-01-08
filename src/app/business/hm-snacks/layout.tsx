@@ -5,6 +5,8 @@ export const metadata: Metadata = {
     description: "Authentic traditional snacks from HM Snacks.",
     icons: {
         icon: "/hm-snacks-logo.png",
+        shortcut: "/hm-snacks-logo.png",
+        apple: "/hm-snacks-logo.png",
     },
 };
 
