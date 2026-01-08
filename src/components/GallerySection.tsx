@@ -86,7 +86,7 @@ export default function GallerySection({ items }: GallerySectionProps) {
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent" />
                                     <div className="absolute bottom-6 left-6 right-6 text-left z-20">
-                                        <h3 className="text-lg md:text-2xl font-black text-white mb-2 tracking-tight drop-shadow-xl line-clamp-2 leading-tight">
+                                        <h3 className="text-sm md:text-2xl font-black text-white mb-1.5 tracking-tight drop-shadow-xl line-clamp-1 leading-none uppercase">
                                             {item.title}
                                         </h3>
                                         <p className="flex items-center gap-2 text-white/95 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 bg-white/10 backdrop-blur-xl rounded-xl border border-white/10 w-fit">

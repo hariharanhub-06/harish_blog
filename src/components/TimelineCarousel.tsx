@@ -97,7 +97,9 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
                                         <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all flex flex-col flex-1 h-full w-full">
                                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
                                                 <div className="flex-1 min-w-0">
-                                                    <h3 className="text-xl md:text-3xl font-black text-gray-900 leading-tight mb-2 break-words">{item[title]}</h3>
+                                                    <h3 className="text-sm md:text-3xl font-black text-gray-900 leading-tight mb-1 break-words uppercase tracking-tight">
+                                                        {item[title]}
+                                                    </h3>
                                                     <p className="text-primary font-bold text-base md:text-xl break-words">{item[subtitle]}</p>
                                                 </div>
                                                 <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-3 py-1.5 rounded-xl text-xs w-fit shrink-0">

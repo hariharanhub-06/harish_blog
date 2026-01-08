@@ -173,7 +173,7 @@ export default function HMSnacksPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-4 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                     {filteredProducts.map((product) => (
                         <Tilt key={product.id} options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
                             <div
@@ -181,7 +181,7 @@ export default function HMSnacksPage() {
                                 className="group bg-white rounded-xl md:rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
                             >
                                 {/* Image Holder */}
-                                <div className="relative h-24 md:h-72 overflow-hidden">
+                                <div className="relative h-40 md:h-72 overflow-hidden">
                                     <Image
                                         src={product.imageUrl}
                                         alt={product.name}
@@ -218,7 +218,7 @@ export default function HMSnacksPage() {
 
                                 {/* Content */}
                                 <div className="p-2 md:p-8 flex flex-col flex-grow">
-                                    <h3 className="text-[10px] md:text-2xl font-black text-gray-900 mb-0.5 md:mb-2 group-hover:text-pink-500 transition-colors line-clamp-1">
+                                    <h3 className="text-xs md:text-2xl font-black text-gray-900 mb-0.5 md:mb-2 group-hover:text-pink-500 transition-colors line-clamp-1 leading-tight uppercase tracking-tight">
                                         {product.name}
                                     </h3>
                                     <p className="hidden md:block text-gray-400 text-sm font-medium line-clamp-2 mb-6">
@@ -253,8 +253,8 @@ export default function HMSnacksPage() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className={`p-1 md:p-2 rounded-lg text-[6px] md:text-xs font-black uppercase tracking-widest flex items-center gap-0.5 md:gap-2 ${product.stock > 0 ? "text-emerald-500 bg-emerald-50" : "text-rose-500 bg-rose-50"}`}>
-                                                <div className={`w-0.5 h-0.5 md:w-1.5 md:h-1.5 rounded-full animate-pulse ${product.stock > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
+                                            <div className={`p-1.5 md:p-2 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center gap-1 md:gap-2 ${product.stock > 0 ? "text-emerald-500 bg-emerald-50" : "text-rose-500 bg-rose-50"}`}>
+                                                <div className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full animate-pulse ${product.stock > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
                                                 {product.stock > 0 ? "In" : "Out"}
                                             </div>
                                         </div>
