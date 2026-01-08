@@ -32,7 +32,9 @@ export default function SnacksOrdersModule() {
     const [statusFilter, setStatusFilter] = useState("All");
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [showShippingModal, setShowShippingModal] = useState(false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
     const [shippingData, setShippingData] = useState({ courier: "", tracking: "" });
+    const [cancelReason, setCancelReason] = useState("");
 
     const fetchOrders = useCallback(async () => {
         setFetching(true);
@@ -55,6 +57,10 @@ export default function SnacksOrdersModule() {
     const handleUpdateStatus = async (orderId: string, newStatus: string) => {
         if (newStatus === "Shipping") {
             setShowShippingModal(true);
+            return;
+        }
+        if (newStatus === "Cancel") {
+            setShowCancelModal(true);
             return;
         }
         await updateStatus(orderId, newStatus);
@@ -101,6 +107,15 @@ export default function SnacksOrdersModule() {
         });
     };
 
+    const submitCancel = async () => {
+        if (!selectedOrder) return;
+        await updateStatus(selectedOrder.id, "Cancel", {
+            cancelReason: cancelReason
+        });
+        setShowCancelModal(false);
+        setCancelReason("");
+    };
+
     const sendWhatsAppUpdate = () => {
         if (!selectedOrder) return;
 
@@ -113,6 +128,11 @@ export default function SnacksOrdersModule() {
 
         if (selectedOrder.status === "Payment Confirmed") {
             message += `\n\nWe have received your payment of ₹${selectedOrder.totalAmount}. We will pack it shortly!`;
+        }
+
+        if (selectedOrder.status === "Cancel") {
+            message += `\n\nUnfortunately, your order has been cancelled.\nReason: *${selectedOrder.cancelReason || "Not specified"}*`;
+            message += `\n\nIf you have already paid, our team will process your refund shortly.`;
         }
 
         const encodedMsg = encodeURIComponent(message);
@@ -326,6 +346,12 @@ export default function SnacksOrdersModule() {
                                             <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Tracking Info</span>
                                             <span className="text-xs font-black text-gray-900 tracking-tight font-mono">{selectedOrder.shipmentId || "UNASSIGNED"}</span>
                                         </div>
+                                        {selectedOrder.status === "Cancel" && (
+                                            <div className="pt-4 border-t border-rose-100">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 block mb-1">Cancellation Reason</span>
+                                                <p className="text-xs font-bold text-gray-600 bg-rose-50 p-3 rounded-xl border border-rose-100">{selectedOrder.cancelReason || "No reason provided."}</p>
+                                            </div>
+                                        )}
                                         <div className="pt-6 border-t border-gray-200">
                                             <div className="flex justify-between items-end">
                                                 <div className="flex flex-col">
@@ -435,6 +461,47 @@ export default function SnacksOrdersModule() {
                                     className="px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs bg-gray-900 text-white hover:bg-pink-500 disabled:opacity-50 transition-all"
                                 >
                                     Confirm Shipment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Cancel Reason Modal */}
+            {showCancelModal && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white p-10 rounded-[2.5rem] w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95">
+                        <h3 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-3">
+                            <XCircle className="text-rose-500" /> Cancel Order
+                        </h3>
+                        <p className="text-gray-500 font-medium mb-6 italic text-sm">Please provide a reason for cancelling this order. This will be visible to the customer in their WhatsApp update.</p>
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Cancellation Reason</label>
+                                <textarea
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    placeholder="e.g. Out of stock, Delivery area not covered, etc."
+                                    rows={4}
+                                    className="w-full bg-gray-50 border-0 rounded-2xl p-4 font-bold resize-none focus:ring-2 focus:ring-rose-500 transition-all font-sans"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 pt-4">
+                                <button
+                                    onClick={() => {
+                                        setShowCancelModal(false);
+                                        setCancelReason("");
+                                    }}
+                                    className="px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs text-gray-500 hover:bg-gray-100"
+                                >
+                                    Dismiss
+                                </button>
+                                <button
+                                    onClick={submitCancel}
+                                    disabled={!cancelReason}
+                                    className="px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-50 transition-all shadow-lg shadow-rose-200"
+                                >
+                                    Cancel Order
                                 </button>
                             </div>
                         </div>
