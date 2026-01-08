@@ -322,7 +322,9 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                                     </div>
                                 </div>
                                 <div className="p-8 flex-1 flex flex-col">
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-pink-500 transition-colors">{project.title}</h3>
+                                    <h3 className="text-[10px] md:text-2xl font-black text-gray-900 mb-1 group-hover:text-pink-500 transition-colors uppercase tracking-tight leading-none line-clamp-1">
+                                        {project.title}
+                                    </h3>
                                     <p className="text-gray-500 font-medium text-sm line-clamp-3 mb-8 flex-1 leading-relaxed">{project.description}</p>
                                     <a href={project.liveUrl || project.repoUrl || "#"} target="_blank" className="inline-flex items-center gap-2 text-gray-900 font-bold uppercase tracking-widest text-xs hover:text-pink-500 transition-all">
                                         View Case Study <ArrowRight size={14} />
