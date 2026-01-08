@@ -151,7 +151,7 @@ export default function SnacksProductModule() {
                 </div>
                 {!editing && (
                     <button
-                        onClick={() => setEditing({ name: "", description: "", category: "Savories", pricePerKg: "", stock: "", isActive: true })}
+                        onClick={() => setEditing({ name: "", description: "", category: "Savories", pricePerKg: "", pricePerPiece: "", stock: "", isActive: true })}
                         className="flex items-center space-x-2 bg-pink-500 text-white font-black px-8 py-4 rounded-[2rem] hover:shadow-2xl transition-all"
                     >
                         <Plus size={20} />
@@ -254,24 +254,13 @@ export default function SnacksProductModule() {
                                         </label>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Price per Kg (₹)</label>
                                         <input
-                                            required
                                             type="number"
                                             value={editing.pricePerKg}
                                             onChange={(e) => setEditing({ ...editing, pricePerKg: e.target.value === "" ? "" : parseFloat(e.target.value) || "" })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Stock (In Kg / Units)</label>
-                                        <input
-                                            required
-                                            type="number"
-                                            value={editing.stock}
-                                            onChange={(e) => setEditing({ ...editing, stock: e.target.value === "" ? "" : parseInt(e.target.value) || "" })}
                                             className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
                                         />
                                     </div>
@@ -281,6 +270,16 @@ export default function SnacksProductModule() {
                                             type="number"
                                             value={editing.pricePerPiece || ""}
                                             onChange={(e) => setEditing({ ...editing, pricePerPiece: e.target.value === "" ? "" : parseInt(e.target.value) || "" })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
+                                        />
+                                    </div>
+                                    <div className="space-y-2 sm:col-span-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Available Stock <span className="text-gray-300 lowercase text-[9px]">(Kg or Units)</span></label>
+                                        <input
+                                            required
+                                            type="number"
+                                            value={editing.stock}
+                                            onChange={(e) => setEditing({ ...editing, stock: e.target.value === "" ? "" : parseInt(e.target.value) || "" })}
                                             className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
                                         />
                                     </div>
