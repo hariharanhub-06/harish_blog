@@ -18,7 +18,7 @@ interface HeroProps {
 
 export default function Hero({ profile }: HeroProps) {
     return (
-        <section className="relative container mx-auto px-6 pt-24 pb-32 flex flex-col items-center text-center overflow-hidden">
+        <section className="relative container mx-auto px-6 pt-28 md:pt-32 pb-24 md:pb-32 flex flex-col items-center text-center overflow-hidden">
             {/* Background decorative elements */}
             {/* Background Image */}
             <div className="absolute inset-0 -z-10 pointer-events-none">

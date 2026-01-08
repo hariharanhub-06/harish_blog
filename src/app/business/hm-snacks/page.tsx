@@ -304,10 +304,10 @@ export default function HMSnacksPage() {
                                                             const price = product.offerPricePerPiece || product.pricePerPiece;
                                                             addToCart({ ...product, price, unit: "Pcs" }, 25);
                                                         }}
-                                                        className="bg-primary text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+                                                        className="bg-primary text-white py-4 rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-tight md:tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1.5 md:gap-2 px-2"
                                                     >
-                                                        <ShoppingCart size={14} />
-                                                        Add 25 Pcs
+                                                        <ShoppingCart size={14} className="shrink-0" />
+                                                        <span className="whitespace-nowrap">Add 25 Pcs</span>
                                                     </button>
                                                 </>
                                             )}

@@ -133,10 +133,10 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                 {/* Professional Experience Section */}
                 {experiences.length > 0 && (
-                    <div className="mt-16">
-                        <div className="text-center mb-10">
-                            <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight uppercase">Professional Experience</h2>
-                            <div className="w-20 h-2 bg-blue-500 mx-auto rounded-full"></div>
+                    <div className="mt-12 md:mt-16">
+                        <div className="text-center mb-10 px-4">
+                            <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase break-words px-2 leading-tight">Professional Experience</h2>
+                            <div className="w-16 md:w-20 h-1.5 md:h-2 bg-blue-500 mx-auto rounded-full"></div>
                         </div>
                         <TimelineCarousel
                             items={[...experiences].sort((a, b) => {
@@ -158,10 +158,10 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                 {/* Education Section */}
                 {educations.length > 0 && (
-                    <div className="mt-16">
-                        <div className="text-center mb-10">
-                            <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight uppercase">Education</h2>
-                            <div className="w-20 h-2 bg-amber-500 mx-auto rounded-full"></div>
+                    <div className="mt-12 md:mt-16">
+                        <div className="text-center mb-10 px-4">
+                            <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase break-words px-2 leading-tight">Education</h2>
+                            <div className="w-16 md:w-20 h-1.5 md:h-2 bg-amber-500 mx-auto rounded-full"></div>
                         </div>
                         <TimelineCarousel
                             items={[...educations].sort((a, b) => {
@@ -183,10 +183,10 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                 {/* Volunteering Section */}
                 {volunteerings && volunteerings.length > 0 && (
-                    <div className="mt-16">
-                        <div className="text-center mb-10">
-                            <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight uppercase">Volunteering</h2>
-                            <div className="w-20 h-2 bg-teal-500 mx-auto rounded-full"></div>
+                    <div className="mt-12 md:mt-16">
+                        <div className="text-center mb-10 px-4">
+                            <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase break-words px-2 leading-tight">Volunteering</h2>
+                            <div className="w-16 md:w-20 h-1.5 md:h-2 bg-teal-500 mx-auto rounded-full"></div>
                         </div>
                         <TimelineCarousel
                             items={[...volunteerings].sort((a, b) => {
