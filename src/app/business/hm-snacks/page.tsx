@@ -10,14 +10,6 @@ import { Tilt } from "@/components/Tilt";
 // Category Tabs
 const CATEGORIES = ["All", "Savories", "Sweets", "Spices", "Ready to Eat"];
 
-export const metadata = {
-    title: "HM Snacks | Tradition Taste",
-    description: "Authentic traditional snacks from HM Snacks.",
-    icons: {
-        icon: "/hm-snacks-logo.png",
-    },
-};
-
 export default function HMSnacksPage() {
     const { addToCart, toggleWishlist, isInWishlist } = useCart();
     const [products, setProducts] = useState<any[]>([]);
