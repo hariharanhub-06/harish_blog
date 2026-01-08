@@ -12,7 +12,6 @@ import CardWrapper from "@/components/CardWrapper";
 import DetailModal from "@/components/DetailModal";
 import AboutHero from "@/components/AboutHero";
 import TimelineCarousel from "@/components/TimelineCarousel";
-import GallerySection from "@/components/GallerySection";
 import Image from "next/image";
 import { InfiniteCarousel } from "./InfiniteCarousel";
 import { Tilt } from "./Tilt";
@@ -24,7 +23,6 @@ interface MainContentProps {
     experiences: any[];
     educations: any[];
     volunteerings: any[];
-    galleryItems: any[];
 }
 
 const SKILLS = [
@@ -33,7 +31,7 @@ const SKILLS = [
     "Digital Marketing", "Automation", "CRM Solutions", "Brand Identity"
 ];
 
-export default function MainContent({ profile, stats, projects, experiences, educations, volunteerings, galleryItems }: MainContentProps) {
+export default function MainContent({ profile, stats, projects, experiences, educations, volunteerings }: MainContentProps) {
     const [selectedItem, setSelectedItem] = useState<{ data: any, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
     const [contactStatus, setContactStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 

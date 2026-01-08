@@ -22,14 +22,13 @@ import ProfileModule from "@/components/admin/ProfileModule";
 import ProjectsModule from "@/components/admin/ProjectsModule";
 import TimelineModule from "@/components/admin/TimelineModule";
 import MessagesModule from "@/components/admin/MessagesModule";
-import GalleryModule from "@/components/admin/GalleryModule";
 import OverviewModule from "@/components/admin/OverviewModule";
 import SnacksProductModule from "@/components/admin/SnacksProductModule";
 import SnacksOrdersModule from "@/components/admin/SnacksOrdersModule";
 import SnacksOverviewModule from "@/components/admin/SnacksOverviewModule";
 import { ShoppingBag, Package, PieChart } from "lucide-react";
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "gallery" | "snacks-overview" | "snacks-products" | "snacks-orders";
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -41,7 +40,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "gallery", "snacks-overview", "snacks-products", "snacks-orders"];
+        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -88,7 +87,6 @@ export default function AdminDashboard() {
         { id: "overview", title: "Dashboard", icon: Home, color: "bg-blue-500" },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500" },
         { id: "projects", title: "Portfolio", icon: Layout, color: "bg-purple-500" },
-        { id: "gallery", title: "Gallery", icon: ImageIcon, color: "bg-pink-500" },
         { id: "timeline", title: "Timeline", icon: Briefcase, color: "bg-amber-600" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500" },
         { id: "divider", title: "BUSINESS SECTION", icon: null, color: "" },
@@ -103,7 +101,6 @@ export default function AdminDashboard() {
             case "projects": return <ProjectsModule />;
             case "timeline": return <TimelineModule />;
             case "messages": return <MessagesModule />;
-            case "gallery": return <GalleryModule />;
             case "snacks-products": return <SnacksProductModule />;
             case "snacks-orders": return <SnacksOrdersModule />;
             case "snacks-overview": return <SnacksOverviewModule />;
