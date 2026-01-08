@@ -84,7 +84,7 @@ export default function SnacksProductModule() {
                 fetchProducts();
             } else {
                 console.error("Save failed:", data);
-                alert(`Failed to save product: ${data.error || "Unknown error"}`);
+                alert(`Failed to save product: ${data.error || "Unknown error"}${data.details ? `\n\nDetails: ${data.details}` : ""}`);
             }
         } catch (error) {
             console.error("Save error:", error);
