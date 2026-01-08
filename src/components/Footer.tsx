@@ -14,8 +14,8 @@ const socialLinks = [
 export default function Footer({ minimal = false }: { minimal?: boolean }) {
     if (minimal) {
         return (
-            <footer className="bg-white border-t border-gray-50 py-8">
-                <div className="container mx-auto px-6 text-center text-sm text-secondary">
+            <footer className="bg-white border-t border-gray-50 py-8 relative z-50 overflow-hidden">
+                <div className="container mx-auto px-6 text-center text-sm text-secondary relative z-10 text-gray-500">
                     <p>© {new Date().getFullYear()} Hari Haran Jeyaramamoorthy. All rights reserved.</p>
                 </div>
             </footer>
@@ -23,7 +23,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
     }
 
     return (
-        <footer className="bg-white border-t border-gray-100 py-10 transition-colors duration-300">
+        <footer className="bg-white border-t border-gray-100 py-10 transition-colors duration-300 relative z-50">
             <div className="container mx-auto px-6">
                 <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 mb-12">
                     <div>
