@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import TechParticles from "@/components/TechParticles";
+import DNAParticles from "@/components/DNAParticles";
 import { motion } from "framer-motion";
 
 interface HMTechViewProps {
@@ -82,12 +83,12 @@ export default function HMTechView({ projects }: HMTechViewProps) {
             {/* removed global glow */}
 
             {/* Hero Section */}
-            <section className="relative min-h-[90vh] flex items-center justify-center p-6 overflow-hidden bg-[#050505]">
+            <section className="relative min-h-[90vh] flex items-center justify-center p-6 overflow-hidden bg-[#030303]">
                 {/* Particle Background */}
-                <div className="absolute inset-0 z-0 bg-[#050505]">
-                    <TechParticles />
+                <div className="absolute inset-0 z-0">
+                    <DNAParticles />
                     {/* Dark Overlay for Text Readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/30"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#030303]/80 via-transparent to-[#030303]"></div>
                 </div>
 
                 <motion.div
@@ -101,7 +102,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         HM Tech
                     </motion.div>
 
-                    <motion.h1 variants={fadeInUp} className="text-6xl md:text-9xl font-black text-white tracking-tighter leading-[0.9] drop-shadow-2xl mix-blend-overlay">
+                    <motion.h1 variants={fadeInUp} className="text-6xl md:text-9xl font-black text-white tracking-tighter leading-[0.9] drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                         Digital <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">Evolution</span>
                     </motion.h1>
@@ -154,10 +155,10 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                             <motion.div
                                 key={index}
                                 variants={scaleIn}
-                                className="group p-10 bg-gray-50 rounded-[2rem] border border-gray-100 hover:border-purple-500/30 hover:bg-white hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
+                                className="group p-10 bg-white rounded-[2rem] border border-gray-100 hover:border-purple-500/30 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
                             >
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl group-hover:bg-purple-500/10 transition-colors"></div>
-                                <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 text-gray-900 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:text-purple-600 shadow-md transition-all duration-500">
+                                <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 text-gray-900 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:text-purple-600 shadow-sm transition-all duration-500">
                                     <service.icon size={32} strokeWidth={1.5} />
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-purple-600 transition-colors">{service.title}</h3>
