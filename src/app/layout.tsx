@@ -14,6 +14,9 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Hari Haran Jeyaramamoorthy | Web Developer & Business Consultant",
   description: "Professional portfolio of Hari Haran Jeyaramamoorthy, featuring web development projects, Career journey, and technical insights.",
+  icons: {
+    icon: "/hh-gold-logo.png",
+  },
   openGraph: {
     title: "Hari Haran Jeyaramamoorthy Portfolio",
     description: "Web/App Developer | Business Consultant | Job Placement Expert",
