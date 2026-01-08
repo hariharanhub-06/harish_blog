@@ -183,7 +183,7 @@ export default function HMSnacksPage() {
                                 {/* Image Holder */}
                                 <div className="relative h-40 md:h-72 overflow-hidden">
                                     <Image
-                                        src={`${product.imageUrl}${product.imageUrl.includes('?') ? '&' : '?'}tr=f-avif,q-80`}
+                                        src={`${product.imageUrl}${product.imageUrl.includes('?') ? '&' : '?'}tr=f-auto,q-80`}
                                         alt={product.name}
                                         fill
                                         className="object-cover group-hover:scale-110 transition-transform duration-700"
