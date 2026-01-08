@@ -173,7 +173,7 @@ export default function HMSnacksPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                <div className="grid grid-cols-4 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
                     {filteredProducts.map((product) => (
                         <Tilt key={product.id} options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
                             <div
@@ -181,7 +181,7 @@ export default function HMSnacksPage() {
                                 className="group bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
                             >
                                 {/* Image Holder */}
-                                <div className="relative h-48 md:h-72 overflow-hidden">
+                                <div className="relative h-24 md:h-72 overflow-hidden">
                                     <Image
                                         src={product.imageUrl}
                                         alt={product.name}
@@ -189,8 +189,8 @@ export default function HMSnacksPage() {
                                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                     {/* Badges */}
-                                    <div className="absolute top-3 left-3 md:top-6 md:left-6 flex flex-col gap-2">
-                                        <span className="bg-white/90 backdrop-blur-md text-gray-900 text-[8px] md:text-[10px] font-black px-2 py-1 md:px-3 md:py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+                                    <div className="absolute top-1 left-1 md:top-6 md:left-6 flex flex-col gap-1">
+                                        <span className="bg-white/90 backdrop-blur-md text-gray-900 text-[6px] md:text-[10px] font-black px-1.5 py-0.5 md:px-3 md:py-1.5 rounded-full uppercase tracking-widest shadow-lg">
                                             {product.category}
                                         </span>
                                     </div>
@@ -217,49 +217,49 @@ export default function HMSnacksPage() {
                                 </div>
 
                                 {/* Content */}
-                                <div className="p-4 md:p-8 flex flex-col flex-grow">
-                                    <h3 className="text-lg md:text-2xl font-black text-gray-900 mb-1 md:mb-2 group-hover:text-pink-500 transition-colors line-clamp-1">
+                                <div className="p-2 md:p-8 flex flex-col flex-grow">
+                                    <h3 className="text-[10px] md:text-2xl font-black text-gray-900 mb-0.5 md:mb-2 group-hover:text-pink-500 transition-colors line-clamp-1">
                                         {product.name}
                                     </h3>
-                                    <p className="text-gray-400 text-[10px] md:text-sm font-medium line-clamp-1 md:line-clamp-2 mb-4 md:mb-6">
+                                    <p className="hidden md:block text-gray-400 text-sm font-medium line-clamp-2 mb-6">
                                         {product.description}
                                     </p>
 
                                     <div className="mt-auto space-y-6">
                                         <div className="flex items-center justify-between">
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                                    {product.pricePerKg ? "Price per Kg" : "Price per Piece"}
+                                                <span className="text-[6px] md:text-[10px] font-black uppercase tracking-[0.05em] md:tracking-widest text-gray-400">
+                                                    {product.pricePerKg ? "Per Kg" : "Per Pc"}
                                                 </span>
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-1">
                                                     {product.pricePerKg ? (
                                                         product.offerPricePerKg ? (
                                                             <>
-                                                                <span className="text-lg md:text-2xl font-black text-pink-500 italic">₹{product.offerPricePerKg}</span>
-                                                                <span className="text-[10px] md:text-sm font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
+                                                                <span className="text-xs md:text-2xl font-black text-pink-500 italic">₹{product.offerPricePerKg}</span>
+                                                                <span className="text-[8px] md:text-sm font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
                                                             </>
                                                         ) : (
-                                                            <span className="text-lg md:text-2xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
+                                                            <span className="text-xs md:text-2xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
                                                         )
                                                     ) : (
                                                         product.offerPricePerPiece ? (
                                                             <>
-                                                                <span className="text-lg md:text-2xl font-black text-pink-500 italic">₹{product.offerPricePerPiece}</span>
-                                                                <span className="text-[10px] md:text-sm font-bold text-gray-300 line-through">₹{product.pricePerPiece}</span>
+                                                                <span className="text-xs md:text-2xl font-black text-pink-500 italic">₹{product.offerPricePerPiece}</span>
+                                                                <span className="text-[8px] md:text-sm font-bold text-gray-300 line-through">₹{product.pricePerPiece}</span>
                                                             </>
                                                         ) : (
-                                                            <span className="text-lg md:text-2xl font-black text-gray-900 italic">₹{product.pricePerPiece}</span>
+                                                            <span className="text-xs md:text-2xl font-black text-gray-900 italic">₹{product.pricePerPiece}</span>
                                                         )
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className={`p-1.5 md:p-2 rounded-lg text-[8px] md:text-xs font-black uppercase tracking-widest flex items-center gap-1 md:gap-2 ${product.stock > 0 ? "text-emerald-500 bg-emerald-50" : "text-rose-500 bg-rose-50"}`}>
-                                                <div className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full animate-pulse ${product.stock > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
-                                                {product.stock > 0 ? "Stock" : "Out"}
+                                            <div className={`p-1 md:p-2 rounded-lg text-[6px] md:text-xs font-black uppercase tracking-widest flex items-center gap-0.5 md:gap-2 ${product.stock > 0 ? "text-emerald-500 bg-emerald-50" : "text-rose-500 bg-rose-50"}`}>
+                                                <div className={`w-0.5 h-0.5 md:w-1.5 md:h-1.5 rounded-full animate-pulse ${product.stock > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
+                                                {product.stock > 0 ? "In" : "Out"}
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-2 gap-1 md:gap-3">
                                             {product.pricePerKg ? (
                                                 <>
                                                     <button
@@ -268,10 +268,10 @@ export default function HMSnacksPage() {
                                                             const price = product.offerPricePerKg || product.pricePerKg;
                                                             addToCart({ ...product, price, unit: "Kg" }, 0.25);
                                                         }}
-                                                        className="bg-white border-2 border-gray-100 text-gray-900 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
+                                                        className="bg-white border md:border-2 border-gray-100 text-gray-900 py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[7px] md:text-xs uppercase tracking-tight md:tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
                                                     >
                                                         <span>Buy ¼ Kg</span>
-                                                        <span className="text-[8px] md:text-[10px] mt-1 text-gray-400 font-bold">₹{((product.offerPricePerKg || product.pricePerKg) / 4).toFixed(0)}</span>
+                                                        <span className="text-[6px] md:text-[10px] mt-0.5 md:mt-1 text-gray-400 font-bold">₹{((product.offerPricePerKg || product.pricePerKg) / 4).toFixed(0)}</span>
                                                     </button>
                                                     <button
                                                         onClick={(e) => {
@@ -279,9 +279,9 @@ export default function HMSnacksPage() {
                                                             const price = product.offerPricePerKg || product.pricePerKg;
                                                             addToCart({ ...product, price, unit: "Kg" }, 1);
                                                         }}
-                                                        className="bg-primary text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1 md:gap-2"
+                                                        className="bg-primary text-white py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[8px] md:text-xs uppercase tracking-tight md:tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1 md:gap-2 px-1"
                                                     >
-                                                        <ShoppingCart size={12} className="md:w-3.5 md:h-3.5" />
+                                                        <ShoppingCart size={8} className="md:w-3.5 md:h-3.5 hidden md:block" />
                                                         Add 1 Kg
                                                     </button>
                                                 </>
@@ -293,10 +293,10 @@ export default function HMSnacksPage() {
                                                             const price = product.offerPricePerPiece || product.pricePerPiece;
                                                             addToCart({ ...product, price, unit: "Pcs" }, 10);
                                                         }}
-                                                        className="bg-white border-2 border-gray-100 text-gray-900 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
+                                                        className="bg-white border md:border-2 border-gray-100 text-gray-900 py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[7px] md:text-xs uppercase tracking-tight md:tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
                                                     >
                                                         <span>Buy 10 Pcs</span>
-                                                        <span className="text-[10px] mt-1 text-gray-400 font-bold">₹{((product.offerPricePerPiece || product.pricePerPiece) * 10).toFixed(0)}</span>
+                                                        <span className="text-[6px] md:text-[10px] mt-0.5 md:mt-1 text-gray-400 font-bold">₹{((product.offerPricePerPiece || product.pricePerPiece) * 10).toFixed(0)}</span>
                                                     </button>
                                                     <button
                                                         onClick={(e) => {
@@ -304,9 +304,9 @@ export default function HMSnacksPage() {
                                                             const price = product.offerPricePerPiece || product.pricePerPiece;
                                                             addToCart({ ...product, price, unit: "Pcs" }, 25);
                                                         }}
-                                                        className="bg-primary text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-tight md:tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1 md:gap-2 px-1 md:px-2"
+                                                        className="bg-primary text-white py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[8px] md:text-xs uppercase tracking-tight md:tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1 md:gap-2 px-1"
                                                     >
-                                                        <ShoppingCart size={12} className="md:w-3.5 md:h-3.5 shrink-0" />
+                                                        <ShoppingCart size={8} className="md:w-3.5 md:h-3.5 hidden md:block shrink-0" />
                                                         <span className="whitespace-nowrap">Add 25 Pcs</span>
                                                     </button>
                                                 </>
