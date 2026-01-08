@@ -1,12 +1,26 @@
 import { db } from "@/db";
-import { coupons } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { coupons, snackOrders } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-// GET all coupons
+// GET all coupons with usage counts
 export async function GET() {
     try {
-        const data = await db.select().from(coupons).orderBy(desc(coupons.createdAt));
+        const data = await db
+            .select({
+                id: coupons.id,
+                code: coupons.code,
+                discountValue: coupons.discountValue,
+                discountType: coupons.discountType,
+                isActive: coupons.isActive,
+                createdAt: coupons.createdAt,
+                usageCount: sql<number>`count(${snackOrders.id})`.mapWith(Number)
+            })
+            .from(coupons)
+            .leftJoin(snackOrders, eq(coupons.code, snackOrders.couponCode))
+            .groupBy(coupons.id)
+            .orderBy(desc(coupons.createdAt));
+
         return NextResponse.json(data);
     } catch (error) {
         console.error("GET /api/admin/coupons error:", error);
