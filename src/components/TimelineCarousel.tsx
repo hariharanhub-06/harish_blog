@@ -86,23 +86,23 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
                     className="flex cursor-grab active:cursor-grabbing"
                 >
                     {items.map((item, i) => (
-                        <div key={i} className="w-full md:min-w-[50%] flex-shrink-0 flex px-4 md:px-4 select-none">
+                        <div key={i} className="w-full flex-shrink-0 flex justify-center px-4 select-none">
                             <CardWrapper index={i}>
                                 <div
                                     className="relative group h-full flex flex-col w-full"
                                     onClick={() => onItemClick(item)}
                                 >
                                     {/* Card Content */}
-                                    <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }} className="h-full w-full">
-                                        <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all flex flex-col flex-1 h-full w-full">
-                                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="text-sm md:text-3xl font-black text-gray-900 leading-tight mb-1 break-words uppercase tracking-tight">
+                                    <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }} className="h-full w-full max-w-2xl mx-auto">
+                                        <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm group-hover:shadow-2xl transition-all flex flex-col flex-1 h-full w-full items-center text-center">
+                                            <div className="flex flex-col items-center gap-6 mb-4">
+                                                <div className="flex flex-col items-center">
+                                                    <h3 className="text-xl md:text-3xl font-black text-gray-900 leading-tight mb-2 break-words uppercase tracking-tight">
                                                         {item[title]}
                                                     </h3>
                                                     <p className="text-primary font-bold text-base md:text-xl break-words">{item[subtitle]}</p>
                                                 </div>
-                                                <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-3 py-1.5 rounded-xl text-xs w-fit shrink-0">
+                                                <div className="flex items-center space-x-2 text-secondary font-black bg-gray-50 px-4 py-2 rounded-xl text-xs w-fit shrink-0">
                                                     <Calendar size={14} />
                                                     <span>{(() => {
                                                         const p = item[period] || "";
