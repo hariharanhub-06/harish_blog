@@ -52,15 +52,23 @@ export default function SnacksProductModule() {
             const sanitizedData = {
                 ...editing,
                 pricePerKg: editing.pricePoints?.find((p: any) => p.unit === "Kg")?.value || null,
+                offerPricePerKg: editing.pricePoints?.find((p: any) => p.unit === "Kg")?.offerValue || null,
                 pricePerPiece: editing.pricePoints?.find((p: any) => p.unit === "Pcs")?.value || null,
+                offerPricePerPiece: editing.pricePoints?.find((p: any) => p.unit === "Pcs")?.offerValue || null,
                 stock: typeof editing.stock === "string" && editing.stock === "" ? 0 : parseFloat(editing.stock as any) || 0,
             };
 
             // Convert empty strings/nulls to proper values
-            if (sanitizedData.pricePerKg === "") sanitizedData.pricePerKg = null;
-            if (sanitizedData.pricePerPiece === "") sanitizedData.pricePerPiece = null;
-            if (sanitizedData.pricePerKg) sanitizedData.pricePerKg = parseFloat(sanitizedData.pricePerKg);
-            if (sanitizedData.pricePerPiece) sanitizedData.pricePerPiece = parseInt(sanitizedData.pricePerPiece);
+            const normalizeField = (val: any, isFloat = false) => {
+                if (val === "" || val === null || val === undefined) return null;
+                return isFloat ? parseFloat(val) : parseInt(val);
+            };
+
+            sanitizedData.pricePerKg = normalizeField(sanitizedData.pricePerKg, true);
+            sanitizedData.offerPricePerKg = normalizeField(sanitizedData.offerPricePerKg, true);
+            sanitizedData.pricePerPiece = normalizeField(sanitizedData.pricePerPiece);
+            sanitizedData.offerPricePerPiece = normalizeField(sanitizedData.offerPricePerPiece);
+            sanitizedData.stock = parseFloat(sanitizedData.stock as any);
 
             const res = await fetch(url, {
                 method,
@@ -274,7 +282,7 @@ export default function SnacksProductModule() {
                                                     type="button"
                                                     onClick={() => setEditing({
                                                         ...editing,
-                                                        pricePoints: [...editing.pricePoints, { value: "", unit: editing.pricePoints[0].unit === "Kg" ? "Pcs" : "Kg" }]
+                                                        pricePoints: [...editing.pricePoints, { value: "", offerValue: "", unit: editing.pricePoints[0].unit === "Kg" ? "Pcs" : "Kg" }]
                                                     })}
                                                     className="ml-4 text-[9px] font-black uppercase text-pink-500 hover:text-pink-600 transition-colors"
                                                 >
@@ -286,46 +294,63 @@ export default function SnacksProductModule() {
 
                                     <div className="space-y-3">
                                         {editing.pricePoints?.map((p: any, idx: number) => (
-                                            <div key={idx} className="group flex gap-3 items-center animate-in fade-in slide-in-from-right duration-300">
-                                                <div className="relative flex-grow">
-                                                    <input
-                                                        type="number"
-                                                        placeholder="Enter price"
-                                                        value={p.value}
-                                                        onChange={(e) => {
-                                                            const newPoints = [...editing.pricePoints];
-                                                            newPoints[idx].value = e.target.value;
-                                                            setEditing({ ...editing, pricePoints: newPoints });
-                                                        }}
-                                                        className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
-                                                    />
+                                            <div key={idx} className="group animate-in fade-in slide-in-from-right duration-300">
+                                                <div className="flex gap-3 items-center">
+                                                    <div className="relative flex-grow">
+                                                        <span className="absolute left-4 top-2 text-[8px] font-black text-gray-400 uppercase tracking-widest">Regular Price</span>
+                                                        <input
+                                                            type="number"
+                                                            placeholder="0.00"
+                                                            value={p.value}
+                                                            onChange={(e) => {
+                                                                const newPoints = [...editing.pricePoints];
+                                                                newPoints[idx].value = e.target.value;
+                                                                setEditing({ ...editing, pricePoints: newPoints });
+                                                            }}
+                                                            className="w-full bg-gray-50 border-0 rounded-2xl pt-6 pb-3 px-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-lg"
+                                                        />
+                                                    </div>
+                                                    <div className="relative flex-grow">
+                                                        <span className="absolute left-4 top-2 text-[8px] font-black text-pink-500 uppercase tracking-widest">Offer Price (Optional)</span>
+                                                        <input
+                                                            type="number"
+                                                            placeholder="0.00"
+                                                            value={p.offerValue}
+                                                            onChange={(e) => {
+                                                                const newPoints = [...editing.pricePoints];
+                                                                newPoints[idx].offerValue = e.target.value;
+                                                                setEditing({ ...editing, pricePoints: newPoints });
+                                                            }}
+                                                            className="w-full bg-pink-50/30 border-0 rounded-2xl pt-6 pb-3 px-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-lg text-pink-500 placeholder:text-pink-200"
+                                                        />
+                                                    </div>
+                                                    <div className="relative">
+                                                        <select
+                                                            value={p.unit}
+                                                            onChange={(e) => {
+                                                                const newPoints = [...editing.pricePoints];
+                                                                newPoints[idx].unit = e.target.value;
+                                                                setEditing({ ...editing, pricePoints: newPoints });
+                                                            }}
+                                                            className="appearance-none bg-gray-900 text-white px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-pink-500 border-0 cursor-pointer hover:bg-pink-500 transition-all"
+                                                        >
+                                                            <option value="Kg">Kg</option>
+                                                            <option value="Pcs">Unit</option>
+                                                        </select>
+                                                    </div>
+                                                    {editing.pricePoints.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setEditing({
+                                                                ...editing,
+                                                                pricePoints: editing.pricePoints.filter((_: any, i: number = 0) => i !== idx)
+                                                            })}
+                                                            className="p-3 text-gray-300 hover:text-rose-500 transition-colors"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    )}
                                                 </div>
-                                                <div className="relative">
-                                                    <select
-                                                        value={p.unit}
-                                                        onChange={(e) => {
-                                                            const newPoints = [...editing.pricePoints];
-                                                            newPoints[idx].unit = e.target.value;
-                                                            setEditing({ ...editing, pricePoints: newPoints });
-                                                        }}
-                                                        className="appearance-none bg-gray-900 text-white px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-pink-500 border-0 cursor-pointer hover:bg-pink-500 transition-all"
-                                                    >
-                                                        <option value="Kg">Kg</option>
-                                                        <option value="Pcs">Unit</option>
-                                                    </select>
-                                                </div>
-                                                {editing.pricePoints.length > 1 && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setEditing({
-                                                            ...editing,
-                                                            pricePoints: editing.pricePoints.filter((_: any, i: number) => i !== idx)
-                                                        })}
-                                                        className="p-3 text-gray-300 hover:text-rose-500 transition-colors"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -372,13 +397,27 @@ export default function SnacksProductModule() {
                             <div className="flex flex-col gap-1 mb-4">
                                 {product.pricePerKg && (
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xl font-black text-gray-900">₹{product.pricePerKg}</span>
+                                        {product.offerPricePerKg ? (
+                                            <>
+                                                <span className="text-xl font-black text-pink-500">₹{product.offerPricePerKg}</span>
+                                                <span className="text-sm font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
+                                            </>
+                                        ) : (
+                                            <span className="text-xl font-black text-gray-900">₹{product.pricePerKg}</span>
+                                        )}
                                         <span className="text-[9px] font-bold text-gray-400 lowercase">per Kg</span>
                                     </div>
                                 )}
                                 {product.pricePerPiece && (
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xl font-black text-pink-500">₹{product.pricePerPiece}</span>
+                                        {product.offerPricePerPiece ? (
+                                            <>
+                                                <span className="text-xl font-black text-pink-500">₹{product.offerPricePerPiece}</span>
+                                                <span className="text-sm font-bold text-gray-300 line-through">₹{product.pricePerPiece}</span>
+                                            </>
+                                        ) : (
+                                            <span className="text-xl font-black text-pink-500">₹{product.pricePerPiece}</span>
+                                        )}
                                         <span className="text-[9px] font-bold text-gray-400 lowercase">per Piece</span>
                                     </div>
                                 )}
@@ -401,9 +440,9 @@ export default function SnacksProductModule() {
                                 <button
                                     onClick={() => {
                                         const pts = [];
-                                        if (product.pricePerKg) pts.push({ value: product.pricePerKg, unit: "Kg" });
-                                        if (product.pricePerPiece) pts.push({ value: product.pricePerPiece, unit: "Pcs" });
-                                        if (pts.length === 0) pts.push({ value: "", unit: "Kg" });
+                                        if (product.pricePerKg) pts.push({ value: product.pricePerKg, offerValue: product.offerPricePerKg || "", unit: "Kg" });
+                                        if (product.pricePerPiece) pts.push({ value: product.pricePerPiece, offerValue: product.offerPricePerPiece || "", unit: "Pcs" });
+                                        if (pts.length === 0) pts.push({ value: "", offerValue: "", unit: "Kg" });
                                         setEditing({ ...product, pricePoints: pts });
                                     }}
                                     className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-all"

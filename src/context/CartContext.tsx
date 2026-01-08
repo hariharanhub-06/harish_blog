@@ -10,6 +10,7 @@ export interface CartItem {
     imageUrl: string;
     quantity: number;
     category: string;
+    originalPrice?: number;
 }
 
 interface CartContextType {
@@ -47,7 +48,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const addToCart = (product: any, quantity: number, unit?: "Kg" | "Pcs") => {
         const finalUnit = unit || product.unit || (product.pricePerKg ? "Kg" : "Pcs");
-        const finalPrice = product.price || (finalUnit === "Kg" ? product.pricePerKg : product.pricePerPiece);
+        const basePrice = finalUnit === "Kg" ? product.pricePerKg : product.pricePerPiece;
+        const offerPrice = finalUnit === "Kg" ? product.offerPricePerKg : product.offerPricePerPiece;
+
+        const finalPrice = product.price || offerPrice || basePrice;
+        const originalPrice = product.originalPrice || (offerPrice ? basePrice : undefined);
 
         setCart(prev => {
             const existing = prev.find(item => item.id === product.id && item.unit === finalUnit);
@@ -65,7 +70,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 unit: finalUnit,
                 imageUrl: product.imageUrl,
                 quantity: quantity,
-                category: product.category
+                category: product.category,
+                originalPrice: originalPrice
             }];
         });
     };

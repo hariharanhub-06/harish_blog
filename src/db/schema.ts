@@ -141,7 +141,9 @@ export const snackProducts = pgTable("snack_products", {
   category: text("category").notNull(), // Savories, Sweets, etc.
   imageUrl: text("image_url"),
   pricePerKg: integer("price_per_kg"),
+  offerPricePerKg: integer("offer_price_per_kg"),
   pricePerPiece: integer("price_per_piece"),
+  offerPricePerPiece: integer("offer_price_per_piece"),
   stock: integer("stock").default(0),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
