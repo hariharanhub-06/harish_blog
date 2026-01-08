@@ -22,7 +22,8 @@ export default function SnacksOverviewModule() {
         revenue: 0,
         ordersByStatus: {},
         lowStock: [],
-        outOfStockCount: 0
+        outOfStockCount: 0,
+        couponStats: []
     });
     const [fetching, setFetching] = useState(true);
     const [dateRange, setDateRange] = useState({
@@ -37,16 +38,16 @@ export default function SnacksOverviewModule() {
     const fetchStats = async () => {
         setFetching(true);
         try {
-            // In a real app, we'd have a specific analytics API. 
-            // For now, let's fetch orders and products to calculate.
-            const [ordersRes, productsRes] = await Promise.all([
+            const [ordersRes, productsRes, couponsRes] = await Promise.all([
                 fetch(`/api/snacks/orders?fromDate=${dateRange.from}&toDate=${dateRange.to}`),
-                fetch("/api/snacks/products")
+                fetch("/api/snacks/products"),
+                fetch("/api/admin/coupons")
             ]);
 
-            if (ordersRes.ok && productsRes.ok) {
-                const orders = await ordersRes.json();
+            if (ordersRes.ok && productsRes.ok && couponsRes.ok) {
+                const { orders } = await ordersRes.json();
                 const products = await productsRes.json();
+                const couponsData = await couponsRes.json();
 
                 const revenue = orders
                     .filter((o: any) => o.status !== "Cancel")
@@ -60,11 +61,23 @@ export default function SnacksOverviewModule() {
                 const lowStock = products.filter((p: any) => p.stock > 0 && p.stock < 10);
                 const outOfStockCount = products.filter((p: any) => p.stock === 0).length;
 
+                // Coupon Performance
+                const couponStats = couponsData
+                    .map((c: any) => ({
+                        code: c.code,
+                        count: c.usageCount || 0,
+                        discountValue: c.discountValue,
+                        discountType: c.discountType
+                    }))
+                    .filter((c: any) => c.count > 0)
+                    .sort((a: any, b: any) => b.count - a.count);
+
                 setStats({
                     revenue,
                     ordersByStatus,
                     lowStock,
-                    outOfStockCount
+                    outOfStockCount,
+                    couponStats
                 });
             }
         } catch (error) {
@@ -132,23 +145,39 @@ export default function SnacksOverviewModule() {
 
             <div className="grid lg:grid-cols-3 gap-8">
                 {/* Orders by Status */}
-                <div className="lg:col-span-2 bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
                     <h3 className="text-lg font-black mb-8 flex items-center gap-3 italic">
                         <Clock className="text-pink-500" />
-                        Order Status Distribution
+                        Status Distribution
                     </h3>
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-4">
                         {Object.entries(stats.ordersByStatus).map(([status, count]: any) => (
-                            <div key={status} className="flex items-center justify-between p-6 bg-gray-50 rounded-2xl group hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-gray-100">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-2 h-2 rounded-full bg-pink-500" />
-                                    <span className="text-sm font-black text-gray-900 uppercase tracking-widest">{status}</span>
-                                </div>
-                                <span className="text-2xl font-black text-gray-900 italic">{count}</span>
+                            <div key={status} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-pink-100 transition-all">
+                                <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest">{status}</span>
+                                <span className="text-xl font-black text-gray-900 italic">{count}</span>
                             </div>
                         ))}
-                        {Object.keys(stats.ordersByStatus).length === 0 && (
-                            <p className="col-span-full py-10 text-center text-gray-400 font-bold italic tracking-widest">No orders in this period.</p>
+                    </div>
+                </div>
+
+                {/* Coupon Performance */}
+                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+                    <h3 className="text-lg font-black mb-8 flex items-center gap-3 italic">
+                        <ShoppingBag className="text-indigo-500" />
+                        Coupon Performance
+                    </h3>
+                    <div className="space-y-4">
+                        {stats.couponStats.map((coupon: any) => (
+                            <div key={coupon.code} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-indigo-100 transition-all">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{coupon.code}</span>
+                                    <span className="text-[9px] font-bold text-gray-400">-{coupon.discountValue}{coupon.discountType === 'percentage' ? '%' : '₹'}</span>
+                                </div>
+                                <span className="text-xl font-black text-gray-900 italic">{coupon.count} <span className="text-[9px] uppercase tracking-tighter not-italic text-gray-400">used</span></span>
+                            </div>
+                        ))}
+                        {stats.couponStats.length === 0 && (
+                            <p className="py-10 text-center text-gray-400 font-bold italic tracking-widest text-xs">No coupon usage recorded yet.</p>
                         )}
                     </div>
                 </div>

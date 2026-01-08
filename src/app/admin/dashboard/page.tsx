@@ -51,39 +51,25 @@ export default function AdminDashboard() {
             setActiveTab(hash);
         }
 
-        // Fetch initial unread count
-        fetchUnreadCount();
-        fetchPendingOrders();
-        const interval = setInterval(() => {
-            fetchUnreadCount();
-            fetchPendingOrders();
-        }, 30000); // Poll every 30s
+        const fetchAllCounts = async () => {
+            try {
+                const res = await fetch("/api/admin/notifications");
+                if (res.ok) {
+                    const data = await res.json();
+                    setUnreadCount(data.unreadMessages || 0);
+                    setPendingOrdersCount(data.pendingOrders || 0);
+                }
+            } catch (err) {
+                console.error("Failed to fetch notification counts", err);
+            }
+        };
+
+        fetchAllCounts();
+        const interval = setInterval(fetchAllCounts, 60000); // Poll every 60s
         return () => clearInterval(interval);
     }, []);
 
-    const fetchUnreadCount = async () => {
-        try {
-            const res = await fetch("/api/admin/messages/count");
-            if (res.ok) {
-                const data = await res.json();
-                setUnreadCount(data.count);
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
-    const fetchPendingOrders = async () => {
-        try {
-            const res = await fetch("/api/admin/snacks/orders/count");
-            if (res.ok) {
-                const data = await res.json();
-                setPendingOrdersCount(data.count);
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     const handleTabChange = (tab: Tab) => {
         setActiveTab(tab);

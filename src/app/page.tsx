@@ -1,5 +1,5 @@
 import { db } from "@/db"; // Database entry point
-export const revalidate = 300; // Cache for 5 minutes
+export const revalidate = 3600; // Cache for 1 hour
 import { profiles, projects, experience, education, volunteering } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Code, Briefcase, Award, User, Star } from "lucide-react";
