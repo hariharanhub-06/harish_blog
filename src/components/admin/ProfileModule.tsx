@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Camera, Save, Loader2, User } from "lucide-react";
 import Image from "next/image";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 
 export default function ProfileModule() {
     const [profile, setProfile] = useState<any>(null);
@@ -58,25 +59,26 @@ export default function ProfileModule() {
 
         try {
             const file = e.target.files[0];
-            // Check file size (limit to 5MB before compression)
-            if (file.size > 5 * 1024 * 1024) {
-                alert("File is too large. Please select an image under 5MB.");
+            // Check file size (limit to 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert("File is too large. Please select an image under 10MB.");
                 setUploading(false);
                 return;
             }
 
-            const base64 = await compressImage(file);
+            // Upload to ImageKit CDN with AVIF optimization
+            const imagekitUrl = await uploadToImageKit(file, 'profile');
 
             if (type === 'avatar') {
-                setProfile({ ...profile, avatarUrl: base64 });
+                setProfile({ ...profile, avatarUrl: imagekitUrl });
             } else if (type === 'hero') {
-                setProfile({ ...profile, heroImageUrl: base64 });
+                setProfile({ ...profile, heroImageUrl: imagekitUrl });
             } else {
-                setProfile({ ...profile, aboutImageUrl: base64 });
+                setProfile({ ...profile, aboutImageUrl: imagekitUrl });
             }
         } catch (error) {
-            console.error("Image processing failed", error);
-            alert("Failed to process image. Please try another file.");
+            console.error("Image upload failed", error);
+            alert("Failed to upload image. Please try again.");
         } finally {
             setUploading(false);
         }

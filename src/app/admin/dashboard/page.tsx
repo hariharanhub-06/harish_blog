@@ -15,7 +15,8 @@ import {
     Home,
     X,
     Menu,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Ticket
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -26,9 +27,10 @@ import OverviewModule from "@/components/admin/OverviewModule";
 import SnacksProductModule from "@/components/admin/SnacksProductModule";
 import SnacksOrdersModule from "@/components/admin/SnacksOrdersModule";
 import SnacksOverviewModule from "@/components/admin/SnacksOverviewModule";
-import { ShoppingBag, Package, PieChart } from "lucide-react";
+import CouponsModule from "@/components/admin/CouponsModule";
+import { ShoppingBag, Package, PieChart, Ticket } from "lucide-react";
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders";
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -41,7 +43,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders"];
+        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -52,16 +54,16 @@ export default function AdminDashboard() {
         const interval = setInterval(() => {
             fetchUnreadCount();
             fetchPendingOrders();
-        }, 10000); // Poll every 10s
+        }, 30000); // Poll every 30s
         return () => clearInterval(interval);
     }, []);
 
     const fetchUnreadCount = async () => {
         try {
-            const res = await fetch("/api/admin/messages");
+            const res = await fetch("/api/admin/messages/count");
             if (res.ok) {
                 const data = await res.json();
-                setUnreadCount(data.filter((m: any) => m.status === 'Fresh').length);
+                setUnreadCount(data.count);
             }
         } catch (err) {
             console.error(err);
@@ -70,10 +72,10 @@ export default function AdminDashboard() {
 
     const fetchPendingOrders = async () => {
         try {
-            const res = await fetch("/api/admin/snacks/orders");
+            const res = await fetch("/api/admin/snacks/orders/count");
             if (res.ok) {
                 const data = await res.json();
-                setPendingOrdersCount(data.filter((o: any) => o.status === 'Pending' || o.status === 'Processing').length);
+                setPendingOrdersCount(data.count);
             }
         } catch (err) {
             console.error(err);
@@ -105,11 +107,12 @@ export default function AdminDashboard() {
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500" },
         { id: "projects", title: "Portfolio", icon: Layout, color: "bg-purple-500" },
         { id: "timeline", title: "Timeline", icon: Briefcase, color: "bg-amber-600" },
-        { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500" },
+        { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
         { id: "divider", title: "BUSINESS SECTION", icon: null, color: "" },
         { id: "snacks-overview", title: "Snacks Overview", icon: PieChart, color: "bg-pink-600" },
-        { id: "snacks-products", title: "Snack Inventory", icon: Package, color: "bg-pink-500" },
-        { id: "snacks-orders", title: "Snack Orders", icon: ShoppingBag, color: "bg-pink-400" },
+        { id: "snacks-products", title: "Snack Inventory", icon: Package, color: "bg-pink-300" },
+        { id: "snacks-orders", title: "Snack Orders", icon: ShoppingBag, color: "bg-pink-400", badge: pendingOrdersCount },
+        { id: "coupons", title: "Snack Coupons", icon: Ticket, color: "bg-blue-600" },
     ];
 
     const renderContent = () => {
@@ -121,6 +124,7 @@ export default function AdminDashboard() {
             case "snacks-products": return <SnacksProductModule />;
             case "snacks-orders": return <SnacksOrdersModule />;
             case "snacks-overview": return <SnacksOverviewModule />;
+            case "coupons": return <CouponsModule />;
             default: return <OverviewModule />;
         }
     };

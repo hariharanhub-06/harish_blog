@@ -21,7 +21,8 @@ import {
     User,
     MessageCircle,
     Mail,
-    Home
+    Home,
+    Ticket
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
@@ -42,6 +43,11 @@ export default function CartPage() {
     const [isPincodeLoading, setIsPincodeLoading] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderConfirmed, setOrderConfirmed] = useState<any>(null);
+
+    const [couponCode, setCouponCode] = useState("");
+    const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+    const [couponError, setCouponError] = useState("");
+    const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
     const [shipping, setShipping] = useState(0);
 
@@ -112,7 +118,34 @@ export default function CartPage() {
 
     }, [formData.state, formData.country, totalWeight]);
 
-    const total = subtotal + shipping;
+    const discountAmount = appliedCoupon
+        ? (appliedCoupon.discountType === 'percentage'
+            ? Math.round(subtotal * (appliedCoupon.discountValue / 100))
+            : appliedCoupon.discountValue)
+        : 0;
+
+    const total = subtotal - discountAmount + shipping;
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode) return;
+        setIsValidatingCoupon(true);
+        setCouponError("");
+        try {
+            const res = await fetch(`/api/coupons/validate?code=${couponCode}`);
+            const data = await res.json();
+            if (res.ok && data.valid) {
+                setAppliedCoupon(data);
+                setCouponError("");
+            } else {
+                setCouponError(data.message || "Invalid coupon");
+                setAppliedCoupon(null);
+            }
+        } catch (error) {
+            setCouponError("Failed to validate coupon");
+        } finally {
+            setIsValidatingCoupon(false);
+        }
+    };
 
     const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const pin = e.target.value;
@@ -158,6 +191,8 @@ export default function CartPage() {
                     customer: formData,
                     subtotal,
                     shippingCost: shipping,
+                    discountAmount,
+                    couponCode: appliedCoupon?.code,
                     totalAmount: total,
                     paymentMethod: "UPI",
                     utr: formData.utr
@@ -382,6 +417,47 @@ export default function CartPage() {
                             <div className="flex justify-between text-sm font-bold text-gray-500 group-hover:text-gray-900 transition-colors">
                                 <span className="flex items-center gap-2 italic">Shipping (Private Courier) <Truck size={14} className="text-pink-500" /></span>
                                 <span>{shipping === 0 ? "FREE" : `₹${shipping}`}</span>
+                            </div>
+
+                            {appliedCoupon && (
+                                <div className="flex justify-between text-sm font-bold text-emerald-500 animate-in fade-in slide-in-from-right-2">
+                                    <span className="flex items-center gap-2 italic">Coupon Discount ({appliedCoupon.discountType === 'percentage' ? `${appliedCoupon.discountValue}%` : `₹${appliedCoupon.discountValue}`}) <Ticket size={14} /></span>
+                                    <span>-₹{discountAmount}</span>
+                                </div>
+                            )}
+
+                            {/* Coupon Input */}
+                            <div className="pt-4 space-y-3">
+                                <div className="flex gap-2">
+                                    <div className="relative flex-grow">
+                                        <input
+                                            type="text"
+                                            placeholder="Enter Coupon Code"
+                                            value={couponCode}
+                                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                            className="w-full bg-gray-50 border-2 border-transparent focus:border-pink-200 rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest placeholder:text-gray-300 outline-none transition-all"
+                                        />
+                                        {appliedCoupon && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500">
+                                                <CheckCircle2 size={16} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={handleApplyCoupon}
+                                        disabled={isValidatingCoupon || !couponCode}
+                                        className="bg-gray-900 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-800 disabled:opacity-50 transition-all"
+                                    >
+                                        {isValidatingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                                    </button>
+                                </div>
+                                {couponError && <p className="text-[10px] font-bold text-red-500 ml-2 italic">{couponError}</p>}
+                                {appliedCoupon && (
+                                    <p className="text-[10px] font-bold text-emerald-500 ml-2 italic flex items-center gap-1">
+                                        Coupon applied! You saved ₹{discountAmount}
+                                        <button onClick={() => setAppliedCoupon(null)} className="text-gray-400 hover:text-red-500 ml-2">Remove</button>
+                                    </p>
+                                )}
                             </div>
                             <div className="pt-6 border-t border-gray-100 flex justify-between items-end">
                                 <div className="flex flex-col">

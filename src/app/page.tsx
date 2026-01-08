@@ -1,5 +1,5 @@
 import { db } from "@/db"; // Database entry point
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Cache for 5 minutes
 import { profiles, projects, experience, education, volunteering } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Code, Briefcase, Award, User, Star } from "lucide-react";
