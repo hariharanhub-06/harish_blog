@@ -433,9 +433,10 @@ export default function CartPage() {
                                         <input
                                             type="text"
                                             placeholder="Enter Coupon Code"
+                                            disabled={!!appliedCoupon}
                                             value={couponCode}
                                             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                            className="w-full bg-gray-50 border-2 border-transparent focus:border-pink-200 rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest placeholder:text-gray-300 outline-none transition-all"
+                                            className={`w-full bg-gray-50 border-2 border-transparent focus:border-pink-200 rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest placeholder:text-gray-300 outline-none transition-all ${appliedCoupon ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         />
                                         {appliedCoupon && (
                                             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500">
@@ -445,8 +446,8 @@ export default function CartPage() {
                                     </div>
                                     <button
                                         onClick={handleApplyCoupon}
-                                        disabled={isValidatingCoupon || !couponCode}
-                                        className="bg-gray-900 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-800 disabled:opacity-50 transition-all"
+                                        disabled={isValidatingCoupon || !couponCode || !!appliedCoupon}
+                                        className="bg-gray-900 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-800 disabled:opacity-50 transition-all shadow-sm h-full"
                                     >
                                         {isValidatingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
                                     </button>
@@ -455,7 +456,7 @@ export default function CartPage() {
                                 {appliedCoupon && (
                                     <p className="text-[10px] font-bold text-emerald-500 ml-2 italic flex items-center gap-1">
                                         Coupon applied! You saved ₹{discountAmount}
-                                        <button onClick={() => setAppliedCoupon(null)} className="text-gray-400 hover:text-red-500 ml-2">Remove</button>
+                                        <button onClick={() => { setAppliedCoupon(null); setCouponCode(""); }} className="text-gray-400 hover:text-red-500 ml-2 font-black uppercase tracking-tight underline">Remove</button>
                                     </p>
                                 )}
                             </div>
@@ -542,7 +543,7 @@ export default function CartPage() {
                         )}
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

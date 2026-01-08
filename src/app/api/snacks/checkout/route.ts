@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { items, customer, subtotal, shippingCost, totalAmount, paymentMethod, utr } = body;
+        const { items, customer, subtotal, shippingCost, discountAmount, couponCode, totalAmount, paymentMethod, utr } = body;
 
         // 1. Create a unique Order ID
         const orderId = `HMS-${Math.floor(Date.now() / 1000)}`;
@@ -25,6 +25,8 @@ export async function POST(req: NextRequest) {
             items: items,
             totalAmount: totalAmount,
             shippingCost: shippingCost,
+            couponCode: couponCode || null,
+            discountAmount: discountAmount || 0,
             paymentMethod: paymentMethod || "UPI",
             paymentId: utr, // Store UTR here for manual verification
             status: "Pending Verification",

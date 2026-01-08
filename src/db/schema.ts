@@ -171,6 +171,8 @@ export const snackOrders = pgTable("snack_orders", {
   courierName: text("courier_name"), // Stores Courier Name (e.g. DTDC, Shiprocket)
   status: text("status").default("Pending Verification"), // Pending Verification, Payment Confirmed, Parcel Prepared, Shipping, Delivered, Cancel
   cancelReason: text("cancel_reason"),
+  couponCode: text("coupon_code"),
+  discountAmount: integer("discount_amount").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
