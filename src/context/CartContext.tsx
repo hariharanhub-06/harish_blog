@@ -17,7 +17,7 @@ interface CartContextType {
     wishlist: string[]; // array of product IDs
     addToCart: (product: any, quantity: number, unit?: "Kg" | "Pcs") => void;
     removeFromCart: (productId: string) => void;
-    updateQuantity: (productId: string, quantity: number) => void;
+    updateQuantity: (productId: string, quantity: number, unit?: "Kg" | "Pcs") => void;
     clearCart: () => void;
     toggleWishlist: (productId: string) => void;
     isInWishlist: (productId: string) => boolean;
