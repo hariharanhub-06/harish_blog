@@ -3,43 +3,25 @@ import { db } from "@/db";
 import { snackOrders } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function PATCH(
+export async function GET(
     req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: { id: string } }
 ) {
     try {
-        const body = await req.json();
-        const { id } = await params;
-
-        const [updated] = await db
-            .update(snackOrders)
-            .set({
-                ...body,
-                updatedAt: new Date(),
-            })
+        const id = params.id;
+        const [order] = await db
+            .select()
+            .from(snackOrders)
             .where(eq(snackOrders.id, id))
-            .returning();
+            .limit(1);
 
-        return NextResponse.json(updated);
+        if (!order) {
+            return NextResponse.json({ error: "Order not found" }, { status: 404 });
+        }
+
+        return NextResponse.json(order);
     } catch (error) {
-        console.error("Update order error:", error);
-        return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
+        console.error("Fetch order detail error:", error);
+        return NextResponse.json({ error: "Failed to fetch order detail" }, { status: 500 });
     }
 }
-
-export async function DELETE(
-    req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-) {
-    try {
-        const { id } = await params;
-
-        await db.delete(snackOrders).where(eq(snackOrders.id, id));
-
-        return NextResponse.json({ success: true });
-    } catch (error) {
-        console.error("Delete order error:", error);
-        return NextResponse.json({ error: "Failed to delete order" }, { status: 500 });
-    }
-}
-

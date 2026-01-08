@@ -29,30 +29,51 @@ export default function SnacksOrdersModule() {
     const [orders, setOrders] = useState<any[]>([]);
     const [fetching, setFetching] = useState(true);
     const [search, setSearch] = useState("");
+    const [pagination, setPagination] = useState({ total: 0, limit: 10, offset: 0 });
     const [statusFilter, setStatusFilter] = useState("All");
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
+    const [fetchingDetail, setFetchingDetail] = useState(false);
     const [showShippingModal, setShowShippingModal] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [shippingData, setShippingData] = useState({ courier: "", tracking: "" });
     const [cancelReason, setCancelReason] = useState("");
 
-    const fetchOrders = useCallback(async () => {
+    const fetchOrders = useCallback(async (offset = 0) => {
         setFetching(true);
         const params = new URLSearchParams();
         if (statusFilter !== "All") params.append("status", statusFilter);
         if (search) params.append("search", search);
+        params.append("limit", "10");
+        params.append("offset", offset.toString());
+        params.append("lean", "true"); // Save bandwidth for list view
 
         const res = await fetch(`/api/snacks/orders?${params.toString()}`);
         if (res.ok) {
             const data = await res.json();
-            setOrders(data);
+            setOrders(data.orders);
+            setPagination(data.pagination);
         }
         setFetching(false);
     }, [statusFilter, search]);
 
     useEffect(() => {
-        fetchOrders();
+        fetchOrders(0);
     }, [statusFilter]);
+
+    const fetchOrderDetails = async (orderId: string) => {
+        setFetchingDetail(true);
+        try {
+            const res = await fetch(`/api/snacks/orders/${orderId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setSelectedOrder(data);
+            }
+        } catch (error) {
+            console.error("Fetch order details error:", error);
+        } finally {
+            setFetchingDetail(false);
+        }
+    };
 
     const handleUpdateStatus = async (orderId: string, newStatus: string) => {
         if (newStatus === "Shipping") {
@@ -235,10 +256,11 @@ export default function SnacksOrdersModule() {
                                     </td>
                                     <td className="px-8 py-6 text-right">
                                         <button
-                                            onClick={() => setSelectedOrder(order)}
-                                            className="p-3 bg-gray-50 text-gray-400 rounded-xl hover:bg-pink-50 hover:text-pink-500 transition-all group-hover:scale-110"
+                                            onClick={() => fetchOrderDetails(order.id)}
+                                            disabled={fetchingDetail}
+                                            className="p-3 bg-gray-50 text-gray-400 rounded-xl hover:bg-pink-50 hover:text-pink-500 transition-all group-hover:scale-110 disabled:opacity-50"
                                         >
-                                            <Eye size={18} />
+                                            {fetchingDetail ? <Loader2 size={18} className="animate-spin" /> : <Eye size={18} />}
                                         </button>
                                     </td>
                                 </tr>
@@ -255,6 +277,31 @@ export default function SnacksOrdersModule() {
                 {fetching && (
                     <div className="py-24 flex justify-center">
                         <Loader2 size={32} className="text-pink-500 animate-spin" />
+                    </div>
+                )}
+
+                {/* Pagination Controls */}
+                {!fetching && pagination.total > pagination.limit && (
+                    <div className="p-8 border-t border-gray-100 flex items-center justify-between bg-white">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                            Showing {pagination.offset + 1} - {Math.min(pagination.offset + pagination.limit, pagination.total)} of {pagination.total} orders
+                        </p>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => fetchOrders(pagination.offset - pagination.limit)}
+                                disabled={pagination.offset === 0}
+                                className="px-6 py-2 bg-gray-50 text-gray-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all disabled:opacity-20"
+                            >
+                                Previous
+                            </button>
+                            <button
+                                onClick={() => fetchOrders(pagination.offset + pagination.limit)}
+                                disabled={pagination.offset + pagination.limit >= pagination.total}
+                                className="px-6 py-2 bg-gray-50 text-gray-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all disabled:opacity-20"
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { snackOrders, snackProducts } from "@/db/schema";
 import { eq, desc, and, or, ilike, sql } from "drizzle-orm";
 
-// GET all orders with filters
+// GET all orders with filters and pagination
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
@@ -11,6 +11,9 @@ export async function GET(req: NextRequest) {
         const search = searchParams.get("search");
         const fromDate = searchParams.get("fromDate");
         const toDate = searchParams.get("toDate");
+        const limit = parseInt(searchParams.get("limit") || "10");
+        const offset = parseInt(searchParams.get("offset") || "0");
+        const lean = searchParams.get("lean") === "true";
 
         const conditions = [];
 
@@ -33,13 +36,45 @@ export async function GET(req: NextRequest) {
             conditions.push(sql`DATE(${snackOrders.createdAt}) BETWEEN ${fromDate} AND ${toDate}`);
         }
 
-        const orders = await db
-            .select()
-            .from(snackOrders)
-            .where(conditions.length > 0 ? and(...conditions as any) : undefined)
-            .orderBy(desc(snackOrders.createdAt));
+        const where = conditions.length > 0 ? and(...conditions as any) : undefined;
 
-        return NextResponse.json(orders);
+        // Get total count for pagination
+        const [{ total }] = await db
+            .select({ total: count() })
+            .from(snackOrders)
+            .where(where);
+
+        // Selection - exclude items if lean is true to save bandwidth
+        const selection = lean ? {
+            id: snackOrders.id,
+            orderId: snackOrders.orderId,
+            customerName: snackOrders.customerName,
+            customerMobile: snackOrders.customerMobile,
+            status: snackOrders.status,
+            totalAmount: snackOrders.totalAmount,
+            createdAt: snackOrders.createdAt,
+            paymentMethod: snackOrders.paymentMethod,
+            paymentId: snackOrders.paymentId,
+        } : undefined;
+
+        const query = db
+            .select(selection as any)
+            .from(snackOrders)
+            .where(where)
+            .orderBy(desc(snackOrders.createdAt))
+            .limit(limit)
+            .offset(offset);
+
+        const orders = await query;
+
+        return NextResponse.json({
+            orders,
+            pagination: {
+                total,
+                limit,
+                offset
+            }
+        });
     } catch (error) {
         console.error("Fetch orders error:", error);
         return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
