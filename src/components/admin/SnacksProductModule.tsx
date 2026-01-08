@@ -48,15 +48,19 @@ export default function SnacksProductModule() {
             const url = editing.id ? `/api/snacks/products/${editing.id}` : "/api/snacks/products";
             const method = editing.id ? "PATCH" : "POST";
 
-            console.log("Saving product:", { url, method, data: editing });
-
-            // Convert empty strings to numbers for database compatibility
+            // Map pricePoints back to individual fields
             const sanitizedData = {
                 ...editing,
-                pricePerKg: typeof editing.pricePerKg === "string" && editing.pricePerKg === "" ? null : parseFloat(editing.pricePerKg as any) || 0,
-                pricePerPiece: typeof editing.pricePerPiece === "string" && editing.pricePerPiece === "" ? null : parseInt(editing.pricePerPiece as any) || 0,
-                stock: typeof editing.stock === "string" && editing.stock === "" ? 0 : parseInt(editing.stock as any) || 0,
+                pricePerKg: editing.pricePoints?.find((p: any) => p.unit === "Kg")?.value || null,
+                pricePerPiece: editing.pricePoints?.find((p: any) => p.unit === "Pcs")?.value || null,
+                stock: typeof editing.stock === "string" && editing.stock === "" ? 0 : parseFloat(editing.stock as any) || 0,
             };
+
+            // Convert empty strings/nulls to proper values
+            if (sanitizedData.pricePerKg === "") sanitizedData.pricePerKg = null;
+            if (sanitizedData.pricePerPiece === "") sanitizedData.pricePerPiece = null;
+            if (sanitizedData.pricePerKg) sanitizedData.pricePerKg = parseFloat(sanitizedData.pricePerKg);
+            if (sanitizedData.pricePerPiece) sanitizedData.pricePerPiece = parseInt(sanitizedData.pricePerPiece);
 
             const res = await fetch(url, {
                 method,
@@ -151,7 +155,14 @@ export default function SnacksProductModule() {
                 </div>
                 {!editing && (
                     <button
-                        onClick={() => setEditing({ name: "", description: "", category: "Savories", pricePerKg: "", pricePerPiece: "", stock: "", isActive: true })}
+                        onClick={() => setEditing({
+                            name: "",
+                            description: "",
+                            category: "Savories",
+                            pricePoints: [{ value: "", unit: "Kg" }],
+                            stock: "",
+                            isActive: true
+                        })}
                         className="flex items-center space-x-2 bg-pink-500 text-white font-black px-8 py-4 rounded-[2rem] hover:shadow-2xl transition-all"
                     >
                         <Plus size={20} />
@@ -254,32 +265,78 @@ export default function SnacksProductModule() {
                                         </label>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Price per Kg (₹)</label>
-                                        <input
-                                            type="number"
-                                            value={editing.pricePerKg}
-                                            onChange={(e) => setEditing({ ...editing, pricePerKg: e.target.value === "" ? "" : parseFloat(e.target.value) || "" })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
-                                        />
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center px-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+                                            <IndianRupee size={12} /> Pricing Strategy
+                                            {editing.pricePoints?.length < 2 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setEditing({
+                                                        ...editing,
+                                                        pricePoints: [...editing.pricePoints, { value: "", unit: editing.pricePoints[0].unit === "Kg" ? "Pcs" : "Kg" }]
+                                                    })}
+                                                    className="ml-4 text-[9px] font-black uppercase text-pink-500 hover:text-pink-600 transition-colors"
+                                                >
+                                                    + Add Variation
+                                                </button>
+                                            )}
+                                        </label>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Price per Piece (₹) <span className="text-gray-300 lowercase text-[9px]">(optional)</span></label>
-                                        <input
-                                            type="number"
-                                            value={editing.pricePerPiece || ""}
-                                            onChange={(e) => setEditing({ ...editing, pricePerPiece: e.target.value === "" ? "" : parseInt(e.target.value) || "" })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
-                                        />
+
+                                    <div className="space-y-3">
+                                        {editing.pricePoints?.map((p: any, idx: number) => (
+                                            <div key={idx} className="group flex gap-3 items-center animate-in fade-in slide-in-from-right duration-300">
+                                                <div className="relative flex-grow">
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Enter price"
+                                                        value={p.value}
+                                                        onChange={(e) => {
+                                                            const newPoints = [...editing.pricePoints];
+                                                            newPoints[idx].value = e.target.value;
+                                                            setEditing({ ...editing, pricePoints: newPoints });
+                                                        }}
+                                                        className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
+                                                    />
+                                                </div>
+                                                <div className="relative">
+                                                    <select
+                                                        value={p.unit}
+                                                        onChange={(e) => {
+                                                            const newPoints = [...editing.pricePoints];
+                                                            newPoints[idx].unit = e.target.value;
+                                                            setEditing({ ...editing, pricePoints: newPoints });
+                                                        }}
+                                                        className="appearance-none bg-gray-900 text-white px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-pink-500 border-0 cursor-pointer hover:bg-pink-500 transition-all"
+                                                    >
+                                                        <option value="Kg">Kg</option>
+                                                        <option value="Pcs">Unit</option>
+                                                    </select>
+                                                </div>
+                                                {editing.pricePoints.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setEditing({
+                                                            ...editing,
+                                                            pricePoints: editing.pricePoints.filter((_: any, i: number) => i !== idx)
+                                                        })}
+                                                        className="p-3 text-gray-300 hover:text-rose-500 transition-colors"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="space-y-2 sm:col-span-2">
+
+                                    <div className="space-y-2 pt-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Available Stock <span className="text-gray-300 lowercase text-[9px]">(Kg or Units)</span></label>
                                         <input
                                             required
                                             type="number"
                                             value={editing.stock}
-                                            onChange={(e) => setEditing({ ...editing, stock: e.target.value === "" ? "" : parseInt(e.target.value) || "" })}
+                                            onChange={(e) => setEditing({ ...editing, stock: e.target.value })}
                                             className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
                                         />
                                     </div>
@@ -342,7 +399,13 @@ export default function SnacksProductModule() {
 
                             <div className="flex items-center gap-2">
                                 <button
-                                    onClick={() => setEditing(product)}
+                                    onClick={() => {
+                                        const pts = [];
+                                        if (product.pricePerKg) pts.push({ value: product.pricePerKg, unit: "Kg" });
+                                        if (product.pricePerPiece) pts.push({ value: product.pricePerPiece, unit: "Pcs" });
+                                        if (pts.length === 0) pts.push({ value: "", unit: "Kg" });
+                                        setEditing({ ...product, pricePoints: pts });
+                                    }}
                                     className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-all"
                                 >
                                     <Edit3 size={14} /> Edit
