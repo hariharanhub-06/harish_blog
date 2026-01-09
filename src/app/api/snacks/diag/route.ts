@@ -48,14 +48,32 @@ export async function GET() {
     try {
         const { getShiprocketToken } = await import("@/lib/shiprocket");
         const token = await getShiprocketToken();
-        const srRes = await fetch("https://apiv2.shiprocket.in/v1/external/settings/get/pickup/", {
+
+        // Try the standard endpoint (no trailing slash)
+        let srRes = await fetch("https://apiv2.shiprocket.in/v1/external/settings/get/pickup", {
             headers: { "Authorization": `Bearer ${token}` }
         });
+
+        // Fallback for some API versions
+        if (!srRes.ok) {
+            srRes = await fetch("https://apiv2.shiprocket.in/v1/external/pickup/locations", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+        }
+
         if (srRes.ok) {
             const srData = await srRes.json();
-            diag.shiprocket_pickup_locations = srData.data.shipping_address.map((a: any) => a.pickup_location);
+            // The structure is usually { data: { shipping_address: [...] } } or { data: [...] }
+            const addresses = srData.data?.shipping_address || srData.data || [];
+            diag.shiprocket_pickup_locations = Array.isArray(addresses)
+                ? addresses.map((a: any) => a.pickup_location || a.nickname || JSON.stringify(a))
+                : [JSON.stringify(srData)];
         } else {
-            diag.shiprocket_pickup_locations = { status: "FAIL", statusText: srRes.statusText };
+            diag.shiprocket_pickup_locations = {
+                status: "FAIL",
+                statusText: srRes.statusText,
+                url: srRes.url
+            };
         }
     } catch (e: any) {
         diag.shiprocket_pickup_locations = { status: "ERROR", message: e.message };
