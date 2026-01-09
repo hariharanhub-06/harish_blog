@@ -31,7 +31,6 @@ import SnacksProductModule from "@/components/admin/SnacksProductModule";
 import SnacksOrdersModule from "@/components/admin/SnacksOrdersModule";
 import SnacksOverviewModule from "@/components/admin/SnacksOverviewModule";
 import CouponsModule from "@/components/admin/CouponsModule";
-import CouponsModule from "@/components/admin/CouponsModule";
 
 
 type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons";
