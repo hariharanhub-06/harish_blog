@@ -1,3 +1,5 @@
+import { db } from "@/db";
+import { contactSubmissions } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { sendWhatsAppAlert } from "@/lib/whatsapp-twilio";
 
