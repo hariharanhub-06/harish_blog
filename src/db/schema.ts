@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, integer, boolean, jsonb, doublePrecision } from "drizzle-orm/pg-core";
 
 export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -140,10 +140,10 @@ export const snackProducts = pgTable("snack_products", {
   description: text("description"),
   category: text("category").notNull(), // Savories, Sweets, etc.
   imageUrl: text("image_url"),
-  pricePerKg: integer("price_per_kg"),
-  offerPricePerKg: integer("offer_price_per_kg"),
-  pricePerPiece: integer("price_per_piece"),
-  offerPricePerPiece: integer("offer_price_per_piece"),
+  pricePerKg: doublePrecision("price_per_kg"),
+  offerPricePerKg: doublePrecision("offer_price_per_kg"),
+  pricePerPiece: doublePrecision("price_per_piece"),
+  offerPricePerPiece: doublePrecision("offer_price_per_piece"),
   stock: integer("stock").default(0),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
@@ -163,8 +163,8 @@ export const snackOrders = pgTable("snack_orders", {
   state: text("state").notNull(),
   country: text("country").notNull(),
   items: jsonb("items").notNull(), // Array of {productId, name, imageUrl, quantity (in kg), price}
-  totalAmount: integer("total_amount").notNull(),
-  shippingCost: integer("shipping_cost").default(0),
+  totalAmount: doublePrecision("total_amount").notNull(),
+  shippingCost: doublePrecision("shipping_cost").default(0),
   paymentMethod: text("payment_method").default("UPI"), // 'UPI'
   paymentId: text("payment_id"), // Stores UTR for UPI
   shipmentId: text("shipment_id"), // Stores Tracking Number
@@ -172,7 +172,7 @@ export const snackOrders = pgTable("snack_orders", {
   status: text("status").default("Pending Verification"), // Pending Verification, Payment Confirmed, Parcel Prepared, Shipping, Delivered, Cancel
   cancelReason: text("cancel_reason"),
   couponCode: text("coupon_code"),
-  discountAmount: integer("discount_amount").default(0),
+  discountAmount: doublePrecision("discount_amount").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
