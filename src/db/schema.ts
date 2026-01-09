@@ -144,7 +144,7 @@ export const snackProducts = pgTable("snack_products", {
   offerPricePerKg: doublePrecision("offer_price_per_kg"),
   pricePerPiece: doublePrecision("price_per_piece"),
   offerPricePerPiece: doublePrecision("offer_price_per_piece"),
-  stock: integer("stock").default(0),
+  stock: doublePrecision("stock").default(0),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
