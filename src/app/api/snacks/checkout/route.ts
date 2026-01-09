@@ -10,6 +10,11 @@ export async function POST(req: NextRequest) {
         const { items, customer, subtotal, shippingCost, discountAmount, couponCode, totalAmount, paymentMethod, utr } = body;
 
         // 0. Server-side validation
+        if (!customer) {
+            console.error("Checkout failed: Missing customer object", body);
+            return NextResponse.json({ error: "Missing customer information" }, { status: 400 });
+        }
+
         if (!customer.name || !customer.mobile || !customer.address || !customer.pincode || !customer.city || !customer.state || !customer.country) {
             return NextResponse.json({ error: "Missing mandatory fields" }, { status: 400 });
         }

@@ -10,30 +10,30 @@ export async function POST(req: NextRequest) {
 
         if (id) {
             // Update existing abandoned cart entry
-            const [updated] = await db
+            const [updatedCart] = await db
                 .update(abandonedCarts)
                 .set({
-                    customerName,
-                    customerMobile,
+                    customerName: customerName || null,
+                    customerMobile: customerMobile || null,
                     items,
                     lastStep,
                     updatedAt: new Date(),
                 })
                 .where(eq(abandonedCarts.id, id))
                 .returning();
-            return NextResponse.json(updated);
+            return NextResponse.json(updatedCart);
         } else {
             // Create new abandoned cart entry
-            const [inserted] = await db
+            const [newCart] = await db
                 .insert(abandonedCarts)
                 .values({
-                    customerName,
-                    customerMobile,
+                    customerName: customerName || null,
+                    customerMobile: customerMobile || null,
                     items,
                     lastStep,
                 })
                 .returning();
-            return NextResponse.json(inserted);
+            return NextResponse.json(newCart);
         }
     } catch (error) {
         console.error("Cart tracking error:", error);
