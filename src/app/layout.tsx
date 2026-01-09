@@ -24,9 +24,7 @@ export const metadata: Metadata = {
     shortcut: "/hh-gold-logo.png",
     apple: "/hh-gold-logo.png",
   },
-  other: {
-    "google-adsense-account": "ca-pub-8379879880114790",
-  },
+},
 };
 
 import ClientLayout from "@/components/ClientLayout";
@@ -41,12 +39,6 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8379879880114790"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
