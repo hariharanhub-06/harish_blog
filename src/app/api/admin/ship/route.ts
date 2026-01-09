@@ -36,8 +36,8 @@ export async function POST(req: NextRequest) {
         const orderItems = (itemsRaw as any[]).map(item => ({
             name: item.name || "Product",
             sku: String(item.id || item.name || Math.random()),
-            units: Number(item.quantity) || 1,
-            selling_price: Number(item.price) || 0,
+            units: 1, // Shiprocket 'units' is count of items. For loose weight, we treat each line as 1 unit.
+            selling_price: Number(item.price || item.pricePerKg) || 0,
             discount: 0,
             tax: 0,
             hsn: 4412 // Dummy HSN
@@ -53,15 +53,16 @@ export async function POST(req: NextRequest) {
             sanitizedAddress = `${sanitizedAddress}, ${order.city || ""}, ${order.state || ""}`.slice(0, 100);
         }
 
-        // Calculate sub-total from items to ensure consistency (Shiprocket requirement)
+        // Calculate sub-total and total weight from items
         const calculatedSubTotal = orderItems.reduce((acc, item) => acc + (item.selling_price * item.units), 0);
+        const totalWeight = (order.items as any[]).reduce((acc, item) => acc + (Number(item.quantity) || 0.1), 0);
 
         const payload = {
             order_id: order.orderId,
             order_date: orderDate,
             pickup_location: "Home",
             billing_customer_name: (order.customerName || "Customer").split(" ")[0],
-            billing_last_name: (order.customerName || "Customer").split(" ")[1] || "Surname", // Shiprocket often requires last name
+            billing_last_name: (order.customerName || "Customer").split(" ")[1] || "Surname",
             billing_address: sanitizedAddress,
             billing_city: order.city || "City",
             billing_pincode: order.pincode || "000000",
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
             length: Number(calculatedSubTotal) > 2000 ? 25 : Number(calculatedSubTotal) > 1000 ? 20 : 15,
             breadth: Number(calculatedSubTotal) > 1000 ? 20 : 15,
             height: Number(calculatedSubTotal) > 1000 ? 15 : 10,
-            weight: Number(calculatedSubTotal) > 1000 ? 1.0 : 0.5
+            weight: totalWeight > 0 ? totalWeight : 0.5 // Use calculated weight or fallback
         };
 
         // 3. Create Order in Shiprocket
