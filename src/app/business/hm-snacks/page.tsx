@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Heart, Share2, Clock, X, Minus, Plus, Package } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Tilt } from "@/components/Tilt";
 import imageKitLoader from "@/lib/imagekitLoader";
+import { useSearchParams } from "next/navigation";
 
 // Category Tabs
 const CATEGORIES = ["All", "Savories", "Sweets", "Spices", "Ready to Eat"];
@@ -15,6 +16,7 @@ export default function HMSnacksPage() {
     const { addToCart, toggleWishlist, isInWishlist } = useCart();
     const [products, setProducts] = useState<any[]>([]);
     const [activeCategory, setActiveCategory] = useState("All");
+    const searchParams = useSearchParams();
 
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [modalQuantity, setModalQuantity] = useState(1);
@@ -36,6 +38,19 @@ export default function HMSnacksPage() {
         fetchProducts();
 
     }, []);
+
+    // Deep Linking: Open modal if 'product' param exists
+    useEffect(() => {
+        if (products.length > 0) {
+            const productId = searchParams.get("product");
+            if (productId && !selectedProduct) {
+                const found = products.find(p => p.id === productId || p.id == productId);
+                if (found) {
+                    openModal(found);
+                }
+            }
+        }
+    }, [products, searchParams]);
 
     const filteredProducts = activeCategory === "All"
         ? products
@@ -218,16 +233,17 @@ export default function HMSnacksPage() {
                                             onClick={async (e) => {
                                                 e.stopPropagation();
                                                 try {
+                                                    const shareUrl = `${window.location.origin}${window.location.pathname}?product=${product.id}`;
                                                     const shareData = {
                                                         title: product.name,
                                                         text: `Check out ${product.name} on HM Snacks!`,
-                                                        url: window.location.href
+                                                        url: shareUrl
                                                     };
                                                     if (navigator.share) {
                                                         await navigator.share(shareData);
                                                     } else {
                                                         await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
-                                                        alert("Link copied to clipboard!");
+                                                        alert("Product link copied to clipboard!");
                                                     }
                                                 } catch (err) {
                                                     console.error("Share failed:", err);
@@ -346,10 +362,10 @@ export default function HMSnacksPage() {
                         </Tilt>
                     ))}
                 </div>
-            </section>
+            </section >
 
             {/* Brand Values / Taglines */}
-            <section className="bg-gray-950 py-24 relative overflow-hidden">
+            < section className="bg-gray-950 py-24 relative overflow-hidden" >
                 <div className="absolute inset-0 bg-gradient-to-b from-pink-500/5 to-transparent pointer-events-none" />
                 <div className="container mx-auto px-6 relative z-10">
                     <div className="grid md:grid-cols-3 gap-16 md:gap-8">
@@ -394,10 +410,10 @@ export default function HMSnacksPage() {
 
 
                 </div>
-            </section>
+            </section >
 
             {/* Contact Support Section */}
-            <section id="contact" className="py-24 bg-white">
+            < section id="contact" className="py-24 bg-white" >
                 <div className="container mx-auto px-6">
                     <div className="max-w-4xl mx-auto bg-gray-50 rounded-[3rem] p-8 md:p-16 shadow-lg border border-gray-100">
                         <div className="text-center mb-12">
@@ -469,167 +485,169 @@ export default function HMSnacksPage() {
                         </form>
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Product Modal */}
             <AnimatePresence>
-                {selectedProduct && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setSelectedProduct(null)}
-                            className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 50 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 50 }}
-                            className="relative bg-white w-full max-w-5xl rounded-[3rem] overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]"
-                        >
-                            {/* Close Button */}
-                            <button
+                {
+                    selectedProduct && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
                                 onClick={() => setSelectedProduct(null)}
-                                className="absolute top-6 right-6 z-20 p-3 bg-white/50 backdrop-blur-md hover:bg-white rounded-full transition-all text-gray-900"
+                                className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 50 }}
+                                className="relative bg-white w-full max-w-5xl rounded-[3rem] overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]"
                             >
-                                <X size={24} />
-                            </button>
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => setSelectedProduct(null)}
+                                    className="absolute top-6 right-6 z-20 p-3 bg-white/50 backdrop-blur-md hover:bg-white rounded-full transition-all text-gray-900"
+                                >
+                                    <X size={24} />
+                                </button>
 
-                            {/* Image Side */}
-                            <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-gray-100 flex items-center justify-center">
-                                {selectedProduct.imageUrl ? (
-                                    <Image
-                                        loader={imageKitLoader}
-                                        src={selectedProduct.imageUrl}
-                                        alt={selectedProduct.name}
-                                        fill
-                                        className="object-cover"
-                                        sizes="(max-width: 768px) 100vw, 50vw"
-                                    />
-                                ) : (
-                                    <div className="text-pink-100 font-black text-9xl italic">
-                                        {selectedProduct.name.charAt(0)}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Details Side */}
-                            <div className="flex flex-col w-full md:w-1/2 p-8 md:p-12 overflow-y-auto">
-                                <div className="mb-8">
-                                    <span className="inline-block px-3 py-1 bg-pink-50 text-pink-500 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
-                                        {selectedProduct.category}
-                                    </span>
-                                    <h2 className="text-4xl font-black text-gray-900 mb-4 leading-tight">{selectedProduct.name}</h2>
-                                    <p className="text-gray-500 font-medium leading-relaxed">
-                                        {selectedProduct.description}
-                                    </p>
-                                </div>
-
-                                <div className="mt-auto space-y-8">
-                                    {/* Unit Toggle if both prices exist */}
-                                    {selectedProduct.pricePerKg && selectedProduct.pricePerPiece && (
-                                        <div className="flex p-1 bg-gray-100 rounded-2xl w-fit">
-                                            <button
-                                                onClick={() => {
-                                                    setModalUnit("kg");
-                                                    setModalQuantity(1);
-                                                }}
-                                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${modalUnit === "kg" ? "bg-white text-pink-500 shadow-sm" : "text-gray-400"}`}
-                                            >
-                                                By Weight (Kg)
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setModalUnit("pc");
-                                                    setModalQuantity(10);
-                                                }}
-                                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${modalUnit === "pc" ? "bg-white text-pink-500 shadow-sm" : "text-gray-400"}`}
-                                            >
-                                                By Pieces
-                                            </button>
+                                {/* Image Side */}
+                                <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-gray-100 flex items-center justify-center">
+                                    {selectedProduct.imageUrl ? (
+                                        <Image
+                                            loader={imageKitLoader}
+                                            src={selectedProduct.imageUrl}
+                                            alt={selectedProduct.name}
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 768px) 100vw, 50vw"
+                                        />
+                                    ) : (
+                                        <div className="text-pink-100 font-black text-9xl italic">
+                                            {selectedProduct.name.charAt(0)}
                                         </div>
                                     )}
+                                </div>
 
-                                    <div className="flex items-end justify-between border-b border-gray-100 pb-8">
-                                        <div>
-                                            <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Total Price</p>
-                                            <div className="flex items-center gap-3">
-                                                <p className="text-4xl font-black text-gray-900 italic tracking-tighter">
-                                                    ₹{Math.ceil((modalUnit === "kg"
-                                                        ? (selectedProduct.offerPricePerKg || selectedProduct.pricePerKg)
-                                                        : (selectedProduct.offerPricePerPiece || selectedProduct.pricePerPiece)) * modalQuantity)}
-                                                </p>
-                                                {((modalUnit === "kg" && selectedProduct.offerPricePerKg) || (modalUnit === "pc" && selectedProduct.offerPricePerPiece)) && (
-                                                    <p className="text-lg font-bold text-gray-300 line-through mt-1">
-                                                        ₹{Math.ceil((modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece) * modalQuantity)}
+                                {/* Details Side */}
+                                <div className="flex flex-col w-full md:w-1/2 p-8 md:p-12 overflow-y-auto">
+                                    <div className="mb-8">
+                                        <span className="inline-block px-3 py-1 bg-pink-50 text-pink-500 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
+                                            {selectedProduct.category}
+                                        </span>
+                                        <h2 className="text-4xl font-black text-gray-900 mb-4 leading-tight">{selectedProduct.name}</h2>
+                                        <p className="text-gray-500 font-medium leading-relaxed">
+                                            {selectedProduct.description}
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-auto space-y-8">
+                                        {/* Unit Toggle if both prices exist */}
+                                        {selectedProduct.pricePerKg && selectedProduct.pricePerPiece && (
+                                            <div className="flex p-1 bg-gray-100 rounded-2xl w-fit">
+                                                <button
+                                                    onClick={() => {
+                                                        setModalUnit("kg");
+                                                        setModalQuantity(1);
+                                                    }}
+                                                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${modalUnit === "kg" ? "bg-white text-pink-500 shadow-sm" : "text-gray-400"}`}
+                                                >
+                                                    By Weight (Kg)
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setModalUnit("pc");
+                                                        setModalQuantity(10);
+                                                    }}
+                                                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${modalUnit === "pc" ? "bg-white text-pink-500 shadow-sm" : "text-gray-400"}`}
+                                                >
+                                                    By Pieces
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-end justify-between border-b border-gray-100 pb-8">
+                                            <div>
+                                                <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">Total Price</p>
+                                                <div className="flex items-center gap-3">
+                                                    <p className="text-4xl font-black text-gray-900 italic tracking-tighter">
+                                                        ₹{Math.ceil((modalUnit === "kg"
+                                                            ? (selectedProduct.offerPricePerKg || selectedProduct.pricePerKg)
+                                                            : (selectedProduct.offerPricePerPiece || selectedProduct.pricePerPiece)) * modalQuantity)}
                                                     </p>
-                                                )}
+                                                    {((modalUnit === "kg" && selectedProduct.offerPricePerKg) || (modalUnit === "pc" && selectedProduct.offerPricePerPiece)) && (
+                                                        <p className="text-lg font-bold text-gray-300 line-through mt-1">
+                                                            ₹{Math.ceil((modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece) * modalQuantity)}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4 bg-gray-50 px-4 py-2 rounded-2xl">
+                                                <button
+                                                    onClick={() => {
+                                                        if (modalUnit === "kg") {
+                                                            setModalQuantity(prev => Math.max(0.25, prev - 0.25));
+                                                        } else {
+                                                            setModalQuantity(prev => Math.max(10, prev - 5));
+                                                        }
+                                                    }}
+                                                    className="p-2 hover:text-pink-500 transition-colors"
+                                                >
+                                                    <Minus size={20} />
+                                                </button>
+                                                <span className="w-16 text-center font-black text-lg">
+                                                    {modalQuantity}{modalUnit === "kg" ? "Kg" : " Pcs"}
+                                                </span>
+                                                <button
+                                                    onClick={() => {
+                                                        if (modalUnit === "kg") {
+                                                            setModalQuantity(prev => prev + 0.25);
+                                                        } else {
+                                                            setModalQuantity(prev => prev + 5);
+                                                        }
+                                                    }}
+                                                    className="p-2 hover:text-pink-500 transition-colors"
+                                                >
+                                                    <Plus size={20} />
+                                                </button>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-4 bg-gray-50 px-4 py-2 rounded-2xl">
+
+                                        <div className="flex gap-4">
                                             <button
                                                 onClick={() => {
-                                                    if (modalUnit === "kg") {
-                                                        setModalQuantity(prev => Math.max(0.25, prev - 0.25));
-                                                    } else {
-                                                        setModalQuantity(prev => Math.max(10, prev - 5));
-                                                    }
+                                                    const basePrice = modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece;
+                                                    const offerPrice = modalUnit === "kg" ? selectedProduct.offerPricePerKg : selectedProduct.offerPricePerPiece;
+                                                    const finalProduct = {
+                                                        ...selectedProduct,
+                                                        price: offerPrice || basePrice,
+                                                        unit: modalUnit === "kg" ? "Kg" : "Pcs"
+                                                    };
+                                                    addToCart(finalProduct, modalQuantity);
+                                                    setSelectedProduct(null);
                                                 }}
-                                                className="p-2 hover:text-pink-500 transition-colors"
+                                                className="flex-1 bg-gray-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-pink-500 transition-all shadow-xl flex items-center justify-center gap-3"
                                             >
-                                                <Minus size={20} />
+                                                <ShoppingCart size={18} /> Add to Cart
                                             </button>
-                                            <span className="w-16 text-center font-black text-lg">
-                                                {modalQuantity}{modalUnit === "kg" ? "Kg" : " Pcs"}
-                                            </span>
                                             <button
-                                                onClick={() => {
-                                                    if (modalUnit === "kg") {
-                                                        setModalQuantity(prev => prev + 0.25);
-                                                    } else {
-                                                        setModalQuantity(prev => prev + 5);
-                                                    }
-                                                }}
-                                                className="p-2 hover:text-pink-500 transition-colors"
+                                                onClick={() => toggleWishlist(selectedProduct.id)}
+                                                className={`p-5 rounded-2xl border-2 transition-all ${isInWishlist(selectedProduct.id)
+                                                    ? "bg-pink-50 border-pink-50 text-pink-500"
+                                                    : "border-gray-100 hover:border-pink-500 text-gray-400 hover:text-pink-500"}`}
                                             >
-                                                <Plus size={20} />
+                                                <Heart size={24} fill={isInWishlist(selectedProduct.id) ? "currentColor" : "none"} />
                                             </button>
                                         </div>
                                     </div>
-
-                                    <div className="flex gap-4">
-                                        <button
-                                            onClick={() => {
-                                                const basePrice = modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece;
-                                                const offerPrice = modalUnit === "kg" ? selectedProduct.offerPricePerKg : selectedProduct.offerPricePerPiece;
-                                                const finalProduct = {
-                                                    ...selectedProduct,
-                                                    price: offerPrice || basePrice,
-                                                    unit: modalUnit === "kg" ? "Kg" : "Pcs"
-                                                };
-                                                addToCart(finalProduct, modalQuantity);
-                                                setSelectedProduct(null);
-                                            }}
-                                            className="flex-1 bg-gray-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-pink-500 transition-all shadow-xl flex items-center justify-center gap-3"
-                                        >
-                                            <ShoppingCart size={18} /> Add to Cart
-                                        </button>
-                                        <button
-                                            onClick={() => toggleWishlist(selectedProduct.id)}
-                                            className={`p-5 rounded-2xl border-2 transition-all ${isInWishlist(selectedProduct.id)
-                                                ? "bg-pink-50 border-pink-50 text-pink-500"
-                                                : "border-gray-100 hover:border-pink-500 text-gray-400 hover:text-pink-500"}`}
-                                        >
-                                            <Heart size={24} fill={isInWishlist(selectedProduct.id) ? "currentColor" : "none"} />
-                                        </button>
-                                    </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-        </div>
+                            </motion.div>
+                        </div>
+                    )
+                }
+            </AnimatePresence >
+        </div >
     );
 }
