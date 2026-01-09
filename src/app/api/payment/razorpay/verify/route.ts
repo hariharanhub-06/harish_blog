@@ -25,11 +25,19 @@ export async function POST(req: NextRequest) {
                 })
                 .where(eq(snackOrders.orderId, db_order_id));
 
-            try {
-                const message = `✅ *Payment Received!* (Razorpay)\n\nOrder: \`${db_order_id}\`\nPayment ID: ${razorpay_payment_id}\n\nAutomated Verification Successful. 🚀`;
-                await sendWhatsAppAlert(message);
-            } catch (e) {
-                console.error("WhatsApp Alert Error", e);
+            // Fetch full order details for the alert
+            const order = await db.query.snackOrders.findFirst({
+                where: eq(snackOrders.orderId, db_order_id),
+            });
+
+            if (order) {
+                try {
+                    const itemsList = (order.items as any[]).map((item: any) => `- ${item.name} (${item.quantity}${item.unit})`).join('\n');
+                    const alertMessage = `🛍️ *New Order Received!* 🍿\n\n*ID:* \`${db_order_id}\`\n*Customer:* ${order.customerName}\n*Total:* ₹${order.totalAmount}\n*Payment:* Razorpay (${razorpay_payment_id})\n\n*Items:*\n${itemsList}\n\n*Address:* ${order.address}, ${order.city}`;
+                    await sendWhatsAppAlert(alertMessage);
+                } catch (e) {
+                    console.error("WhatsApp Alert Error", e);
+                }
             }
 
             return NextResponse.json({ success: true });
