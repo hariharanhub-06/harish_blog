@@ -433,7 +433,7 @@ export default function CartPage() {
                     )}
 
                     {step === 2 && (
-                        <div className="bg-gradient-to-br from-white via-pink-50/30 to-white p-10 rounded-[3rem] shadow-xl border border-pink-100/50 animate-in slide-in-from-left duration-500 relative overflow-hidden">
+                        <div className="bg-gradient-to-br from-white via-pink-50/30 to-white p-5 sm:p-10 rounded-[2rem] sm:rounded-[3rem] shadow-xl border border-pink-100/50 animate-in slide-in-from-left duration-500 relative overflow-hidden">
                             {/* ... Same Form Code ... */}
                             <button
                                 onClick={() => setStep(1)}
@@ -449,7 +449,7 @@ export default function CartPage() {
                             </h2>
                             <form className="space-y-6 relative z-10">
                                 {/* Only fields are needed here, copying exact input logic for brevity in replacement/or re-using existing via reference if I could, but replacer needs full block. I will implement the form fields exactly as before to ensure no data loss */}
-                                <div className="grid md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-pink-500 ml-2">Full Name</label>
                                         <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full bg-white/80 border-2 border-pink-100 rounded-2xl px-5 py-5 font-bold text-gray-900" placeholder="Name" />
@@ -467,7 +467,7 @@ export default function CartPage() {
                                     <label className="text-[10px] font-black uppercase tracking-widest text-pink-500 ml-2">Address</label>
                                     <textarea required rows={3} value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} className="w-full bg-white/80 border-2 border-pink-100 rounded-2xl px-5 py-5 font-bold text-gray-900" placeholder="Address..." />
                                 </div>
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-pink-500 ml-2">Pincode</label>
                                         <div className="relative">
