@@ -367,53 +367,63 @@ export default function CartPage() {
                     {step === 1 && (
                         <div className="space-y-6">
                             {cart.map((item) => (
-                                <div key={item.id} className="flex flex-col sm:flex-row items-center gap-8 bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 group hover:shadow-xl transition-all">
-                                    <div className="relative w-32 h-32 rounded-[2rem] overflow-hidden bg-gray-50 flex-shrink-0">
+                                <div key={item.id} className="flex flex-row items-center gap-4 sm:gap-8 bg-white p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-gray-100 group hover:shadow-xl transition-all">
+                                    <div className="relative w-20 h-20 sm:w-32 sm:h-32 rounded-2xl sm:rounded-[2rem] overflow-hidden bg-gray-50 flex-shrink-0">
                                         <Image
                                             loader={imageKitLoader}
                                             src={item.imageUrl}
                                             alt={item.name}
                                             fill
                                             className="object-cover"
-                                            sizes="128px"
+                                            sizes="(max-width: 640px) 80px, 128px"
                                         />
                                     </div>
-                                    <div className="flex-grow text-center sm:text-left">
-                                        <h3 className="text-2xl font-black text-gray-900 mb-1">{item.name}</h3>
-                                        <div className="flex items-center justify-center sm:justify-start gap-2 mb-4">
-                                            <span className="text-xs font-black uppercase tracking-widest text-pink-500">{item.category}</span>
-                                            <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs font-black text-gray-400">₹{item.price} x {item.quantity} {item.unit}</span>
+                                    <div className="flex-grow flex flex-col sm:block justify-center">
+                                        <div className="flex justify-between items-start sm:block">
+                                            <div>
+                                                <h3 className="text-base sm:text-2xl font-black text-gray-900 mb-1 leading-tight">{item.name}</h3>
+                                                <div className="flex items-center gap-2 mb-2 sm:mb-4">
+                                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-pink-500">{item.category}</span>
+                                                    <span className="w-1 h-1 bg-gray-300 rounded-full hidden sm:block" />
+                                                    <div className="hidden sm:flex items-center gap-2">
+                                                        <span className="text-xs font-black text-gray-400">₹{item.price} x {item.quantity} {item.unit}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {/* Mobile Price (Top Right) */}
+                                            <div className="text-right sm:hidden">
+                                                <p className="text-lg font-black text-gray-900 italic">₹{Math.ceil(item.price * item.quantity)}</p>
+                                                <p className="text-[10px] font-bold text-gray-400">{item.quantity} {item.unit}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center justify-center sm:justify-start gap-4">
-                                            <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-1 px-3">
+
+                                        <div className="flex items-center justify-between sm:justify-start gap-4 mt-1 sm:mt-0">
+                                            <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-1 px-2 sm:px-3">
                                                 <button
                                                     onClick={() => {
                                                         const step = item.unit === "Kg" ? 0.25 : 5;
                                                         updateQuantity(item.id, item.quantity - step, item.unit);
                                                     }}
-                                                    className="p-2 hover:text-pink-500 disabled:opacity-30"
+                                                    className="p-1.5 sm:p-2 hover:text-pink-500 disabled:opacity-30"
                                                     disabled={item.unit === "Kg" ? item.quantity <= 0.25 : item.quantity <= 10}
                                                 >
-                                                    <Minus size={16} />
+                                                    <Minus size={14} className="sm:w-4 sm:h-4" />
                                                 </button>
-                                                <span className="w-20 text-center font-black text-sm italic">{item.quantity} {item.unit}</span>
+                                                <span className="w-12 sm:w-20 text-center font-black text-xs sm:text-sm italic">{item.quantity} {item.unit}</span>
                                                 <button
                                                     onClick={() => {
                                                         const step = item.unit === "Kg" ? 0.25 : 5;
                                                         updateQuantity(item.id, item.quantity + step, item.unit);
                                                     }}
-                                                    className="p-2 hover:text-pink-500"
+                                                    className="p-1.5 sm:p-2 hover:text-pink-500"
                                                 >
-                                                    <Plus size={16} />
+                                                    <Plus size={14} className="sm:w-4 sm:h-4" />
                                                 </button>
                                             </div>
-                                            <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-rose-500 transition-colors p-2"><Trash2 size={20} /></button>
+                                            <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-rose-500 transition-colors p-2"><Trash2 size={16} className="sm:w-5 sm:h-5" /></button>
                                         </div>
                                     </div>
-                                    <div className="text-right">
+                                    <div className="text-right hidden sm:block">
                                         <p className="text-3xl font-black text-gray-900 italic">₹{Math.ceil(item.price * item.quantity)}</p>
                                     </div>
                                 </div>
