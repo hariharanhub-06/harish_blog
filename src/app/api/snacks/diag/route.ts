@@ -21,7 +21,8 @@ export async function GET() {
     // 1. Check DB Connection
     try {
         const result = await db.execute(sql`SELECT 1 as health`);
-        diag.database_connection = { status: "OK", result: (result as any)[0] };
+        const rows = (result as any).rows || result;
+        diag.database_connection = { status: "OK", result: (rows as any)[0] };
     } catch (e: any) {
         diag.database_connection = { status: "FAIL", message: e.message };
     }
@@ -34,12 +35,11 @@ export async function GET() {
             WHERE table_schema = 'public' 
             AND table_name IN ('snack_products', 'snack_orders', 'abandoned_carts', 'coupons')
         `);
-        diag.tables_found = (tablesResult as any).map((t: any) => t.table_name);
+        const rows = (tablesResult as any).rows || tablesResult;
+        diag.tables_found = (rows as any).map((t: any) => t.table_name);
 
-        const missing = ['snack_products', 'snack_orders', 'abandoned_carts', 'coupons'].filter(
-            t => !diag.tables_found.includes(t)
-        );
-        diag.tables_missing = missing;
+        const expected = ['snack_products', 'snack_orders', 'abandoned_carts', 'coupons'];
+        diag.tables_missing = expected.filter(t => !diag.tables_found.includes(t));
     } catch (e: any) {
         diag.tables_check = { status: "FAIL", message: e.message };
     }
