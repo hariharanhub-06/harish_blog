@@ -369,3 +369,5 @@ export default function BillingModule() {
         </div>
     );
 }
+
+export default BillingModule;

@@ -33,8 +33,12 @@ export async function POST(req: NextRequest) {
             if (order) {
                 try {
                     const itemsList = (order.items as any[]).map((item: any) => `- ${item.name} (${item.quantity}${item.unit})`).join('\n');
-                    const alertMessage = `🛍️ *New Order Received!* 🍿\n\n*ID:* \`${db_order_id}\`\n*Customer:* ${order.customerName}\n*Total:* ₹${order.totalAmount}\n*Payment:* Razorpay (${razorpay_payment_id})\n\n*Items:*\n${itemsList}\n\n*Address:* ${order.address}, ${order.city}`;
-                    await sendWhatsAppAlert(alertMessage);
+                    const adminMessage = `🛍️ *Razorpay Order Confirmed!* \n\n*ID:* \`${db_order_id}\`\n*Customer:* ${order.customerName}\n*Total:* ₹${order.totalAmount}\n\n*Items:*\n${itemsList}`;
+                    await sendWhatsAppAlert(adminMessage);
+
+                    // Send invoice to Customer
+                    const customerMessage = `Hi ${order.customerName}! 👋\n\nYour payment for order *#${db_order_id}* has been confirmed! 🍿\n\n*Total:* ₹${order.totalAmount}\n*Items:*\n${itemsList}\n\nWe are preparing your snacks for shipment! 🚀`;
+                    await sendWhatsAppAlert(customerMessage, order.customerMobile);
                 } catch (e) {
                     console.error("WhatsApp Alert Error", e);
                 }

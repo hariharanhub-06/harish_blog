@@ -47,6 +47,23 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Hari Haran Jeyaramamoorthy",
+              "url": "https://harishblog.fyi",
+              "logo": "https://harishblog.fyi/hh-gold-logo.png",
+              "description": "Premium developer and business consultant specializing in E-commerce (HM Snacks) and Software Solutions (HM Tech).",
+              "sameAs": [
+                "https://linkedin.com/in/hari-haran-j",
+                "https://github.com/startup-digi-3119"
+              ]
+            })
+          }}
+        />
       </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased text-text`}>
         <AuthProvider>

@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Heart, Share2, Clock, X, Minus, Plus, Package } from "lucide-react";
+import { ShoppingCart, Heart, Share2, Clock, X, Minus, Plus, Package, Star, MessageSquare } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Tilt } from "@/components/Tilt";
 import imageKitLoader from "@/lib/imagekitLoader";
@@ -21,6 +21,11 @@ function HMSnacksContent() {
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [modalQuantity, setModalQuantity] = useState(1);
     const [modalUnit, setModalUnit] = useState<"kg" | "pc">("kg");
+
+    const [reviews, setReviews] = useState<any[]>([]);
+    const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, comment: "" });
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+    const [showReviewForm, setShowReviewForm] = useState(false);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -61,10 +66,84 @@ function HMSnacksContent() {
         const hasKg = !!product.pricePerKg;
         setModalUnit(hasKg ? "kg" : "pc");
         setModalQuantity(hasKg ? 1 : 10);
+        fetchProductReviews(product.id);
+        setShowReviewForm(false);
+    };
+
+    const fetchProductReviews = async (productId: string) => {
+        try {
+            const res = await fetch(`/api/snacks/reviews?productId=${productId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setReviews(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch reviews:", error);
+        }
+    };
+
+    const handleSubmitReview = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedProduct) return;
+        setIsSubmittingReview(true);
+        try {
+            const res = await fetch("/api/snacks/reviews", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    productId: selectedProduct.id,
+                    customerName: reviewForm.name,
+                    rating: reviewForm.rating,
+                    comment: reviewForm.comment,
+                }),
+            });
+            if (res.ok) {
+                alert("Thank you! Your review has been submitted for moderation.");
+                setReviewForm({ name: "", rating: 5, comment: "" });
+                setShowReviewForm(false);
+            }
+        } catch (error) {
+            console.error("Failed to submit review:", error);
+        } finally {
+            setIsSubmittingReview(false);
+        }
     };
 
     return (
         <div className="min-h-screen bg-[#fafafa]">
+            {/* SEO Structured Data */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "ItemList",
+                        "itemListElement": products.map((product, index) => ({
+                            "@type": "ListItem",
+                            "position": index + 1,
+                            "item": {
+                                "@type": "Product",
+                                "@id": `https://harishblog.fyi/business/hm-snacks?product=${product.id}`,
+                                "name": product.name,
+                                "description": product.description,
+                                "image": product.imageUrl,
+                                "category": product.category,
+                                "brand": {
+                                    "@type": "Brand",
+                                    "name": "HM Snacks"
+                                },
+                                "offers": {
+                                    "@type": "AggregateOffer",
+                                    "priceCurrency": "INR",
+                                    "lowPrice": product.offerPricePerKg || product.pricePerKg || product.offerPricePerPiece || product.pricePerPiece,
+                                    "highPrice": product.pricePerKg || product.pricePerPiece,
+                                    "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                                }
+                            }
+                        }))
+                    })
+                }}
+            />
             {/* Hero Section */}
             <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
                 <Image
@@ -639,6 +718,103 @@ function HMSnacksContent() {
                                                 <Heart size={24} fill={isInWishlist(selectedProduct.id) ? "currentColor" : "none"} />
                                             </button>
                                         </div>
+                                    </div>
+                                    <div className="mt-12 pt-12 border-t border-gray-100">
+                                        <div className="flex justify-between items-center mb-8">
+                                            <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
+                                                Customer Reviews
+                                                <span className="text-xs font-bold text-gray-400">({reviews.length})</span>
+                                            </h3>
+                                            {!showReviewForm && (
+                                                <button
+                                                    onClick={() => setShowReviewForm(true)}
+                                                    className="text-[10px] font-black uppercase tracking-widest text-pink-500 hover:text-pink-600 transition-colors"
+                                                >
+                                                    + Write a Review
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {showReviewForm ? (
+                                            <form onSubmit={handleSubmitReview} className="space-y-4 bg-gray-50 p-6 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+                                                <div className="flex justify-between items-center">
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Your Rating</p>
+                                                    <div className="flex gap-1">
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <button
+                                                                key={star}
+                                                                type="button"
+                                                                onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                                                                className="transition-transform active:scale-90"
+                                                            >
+                                                                <Star
+                                                                    size={18}
+                                                                    className={star <= reviewForm.rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}
+                                                                />
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <input
+                                                    required
+                                                    type="text"
+                                                    placeholder="Your Name"
+                                                    value={reviewForm.name}
+                                                    onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                                                    className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-pink-500 outline-none"
+                                                />
+                                                <textarea
+                                                    required
+                                                    placeholder="Share your thoughts about this snack..."
+                                                    value={reviewForm.comment}
+                                                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                                                    className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-pink-500 outline-none h-24 resize-none"
+                                                />
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        type="submit"
+                                                        disabled={isSubmittingReview}
+                                                        className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-pink-500 transition-all disabled:opacity-50"
+                                                    >
+                                                        {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowReviewForm(false)}
+                                                        className="px-4 bg-white border border-gray-200 text-gray-400 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-gray-50 transition-all"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        ) : (
+                                            <div className="space-y-6">
+                                                {reviews.length > 0 ? (
+                                                    reviews.map((r) => (
+                                                        <div key={r.id} className="group">
+                                                            <div className="flex justify-between mb-2">
+                                                                <p className="font-black text-gray-900 text-sm">{r.customerName}</p>
+                                                                <div className="flex gap-0.5">
+                                                                    {[...Array(5)].map((_, i) => (
+                                                                        <Star
+                                                                            key={i}
+                                                                            size={10}
+                                                                            className={i < r.rating ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                            <p className="text-gray-500 text-sm font-medium leading-relaxed italic">"{r.comment}"</p>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-100">
+                                                        <MessageSquare className="mx-auto text-gray-200 mb-2" size={24} />
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Be the first to review!</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>
