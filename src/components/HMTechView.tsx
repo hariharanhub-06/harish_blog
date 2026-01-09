@@ -125,7 +125,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
 
             {/* Services Grid */}
             {/* Services Grid (White Theme) */}
-            <section id="services" className="py-20 px-6 relative z-10 bg-white">
+            <section id="services" className="py-12 px-6 relative z-10 bg-white">
                 {/* Blob Animation */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full blur-[100px] pointer-events-none animate-pulse"></div>
 
@@ -135,7 +135,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         whileInView="visible"
                         viewport={{ once: true, margin: "-100px" }}
                         variants={fadeInUp}
-                        className="text-center mb-24 space-y-6"
+                        className="text-center mb-16 space-y-4"
                     >
                         <span className="text-purple-600 font-bold tracking-[0.2em] uppercase text-sm">Capabilities</span>
                         <h2 className="text-5xl md:text-7xl font-black text-gray-900 tracking-tight">Our Expertise</h2>
@@ -155,7 +155,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                             <motion.div
                                 key={index}
                                 variants={scaleIn}
-                                className="group p-10 bg-white rounded-[2rem] border border-gray-100 hover:border-purple-500/30 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
+                                className="group p-8 bg-white rounded-3xl border border-gray-100 hover:border-purple-500/30 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
                             >
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl group-hover:bg-purple-500/10 transition-colors"></div>
                                 <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 text-gray-900 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:text-purple-600 shadow-sm transition-all duration-500">
@@ -170,7 +170,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
             </section>
 
             {/* Process / Journey Section (Digital Circuit) */}
-            <section className="py-20 px-6 relative z-10 overflow-hidden bg-[#050505]">
+            <section className="py-12 px-6 relative z-10 overflow-hidden bg-[#050505]">
                 {/* Particle Background for Flow Section */}
                 <div className="absolute inset-0 z-0 bg-[#050505]">
                     <TechParticles />
@@ -183,7 +183,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={fadeInUp}
-                        className="text-center mb-32 relative z-20"
+                        className="text-center mb-16 relative z-20"
                     >
                         <span className="text-blue-400 font-bold tracking-[0.2em] uppercase text-sm">Process</span>
                         <h2 className="text-5xl md:text-7xl font-black mt-4 tracking-tight text-white">The <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Flow</span></h2>
@@ -272,7 +272,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
 
             {/* Projects Gallery */}
             {/* Projects Gallery (White Theme) */}
-            <section className="py-20 px-6 relative z-10 bg-white">
+            <section className="py-12 px-6 relative z-10 bg-white">
                 <div className="absolute left-0 bottom-0 w-[500px] h-[500px] bg-pink-200/40 rounded-full blur-[100px] pointer-events-none animate-pulse"></div>
 
                 <div className="container mx-auto max-w-7xl relative z-10">
@@ -281,7 +281,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={fadeInUp}
-                        className="text-center mb-20"
+                        className="text-center mb-12"
                     >
                         <span className="text-pink-600 font-extrabold tracking-[0.3em] uppercase text-sm drop-shadow-sm">PORTFOLIO</span>
                         <h2 className="text-6xl md:text-8xl font-black text-gray-900 mt-4 tracking-tighter">Projects Done</h2>
@@ -299,7 +299,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                             <motion.div
                                 key={project.id}
                                 variants={scaleIn}
-                                className="group bg-gray-50 rounded-[2rem] overflow-hidden border border-gray-100 hover:border-pink-500/30 transition-all duration-500 flex flex-col hover:-translate-y-2 hover:shadow-2xl"
+                                className="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-pink-500/30 transition-all duration-500 flex flex-col hover:-translate-y-2 hover:shadow-2xl"
                             >
                                 <div className="relative h-64 overflow-hidden">
                                     {project.thumbnail ? (
@@ -337,7 +337,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
             </section>
 
             {/* Contact Form (White Theme) */}
-            <section id="contact" className="py-20 px-6 relative overflow-hidden bg-white">
+            <section id="contact" className="py-12 px-6 relative overflow-hidden bg-white">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-200/40 via-purple-200/40 to-pink-200/40 rounded-full blur-[100px] pointer-events-none"></div>
                 <div className="container mx-auto max-w-4xl relative z-10">
                     <motion.div
@@ -345,9 +345,9 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={fadeInUp}
-                        className="bg-white/80 backdrop-blur-2xl rounded-[3rem] p-8 md:p-16 border border-gray-100 shadow-2xl relative overflow-hidden"
+                        className="bg-white/80 backdrop-blur-2xl rounded-3xl p-6 md:p-12 border border-gray-100 shadow-2xl relative overflow-hidden"
                     >
-                        <div className="text-center mb-12">
+                        <div className="text-center mb-8">
                             <span className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white mb-6 shadow-lg shadow-purple-500/20">
                                 <Send size={28} />
                             </span>

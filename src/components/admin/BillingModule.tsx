@@ -115,7 +115,7 @@ export default function BillingModule() {
     return (
         <div className="space-y-8 print:p-0">
             {/* Control Panel - Hidden on Print */}
-            <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm print:hidden">
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm print:hidden">
                 <div className="flex justify-between items-center mb-8">
                     <div>
                         <h2 className="text-3xl font-black text-gray-900 tracking-tight">Manual Billing</h2>
@@ -123,7 +123,7 @@ export default function BillingModule() {
                     </div>
                     <button
                         onClick={handlePrint}
-                        className="flex items-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-gray-200"
+                        className="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl shadow-gray-200"
                     >
                         <Printer size={18} /> Print / Save PDF
                     </button>
@@ -136,7 +136,7 @@ export default function BillingModule() {
                             type="text"
                             value={customer.name}
                             onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
-                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 font-bold"
+                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold"
                             placeholder="Full Name"
                         />
                     </div>
@@ -146,7 +146,7 @@ export default function BillingModule() {
                             type="text"
                             value={customer.mobile}
                             onChange={(e) => setCustomer({ ...customer, mobile: e.target.value })}
-                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 font-bold"
+                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold"
                             placeholder="+91 ..."
                         />
                     </div>
@@ -156,7 +156,7 @@ export default function BillingModule() {
                             type="email"
                             value={customer.email}
                             onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
-                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 font-bold"
+                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold"
                             placeholder="mail@example.com"
                         />
                     </div>
@@ -166,7 +166,7 @@ export default function BillingModule() {
                             type="text"
                             value={customer.address}
                             onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
-                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 font-bold"
+                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold"
                             placeholder="City, State"
                         />
                     </div>
@@ -174,7 +174,7 @@ export default function BillingModule() {
             </div>
 
             {/* Billing Table - Control View */}
-            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-sm overflow-hidden print:hidden">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden print:hidden">
                 <table className="w-full text-left">
                     <thead>
                         <tr className="border-b border-gray-50">
@@ -262,7 +262,7 @@ export default function BillingModule() {
                         ))}
                     </tbody>
                 </table>
-                <div className="p-8 border-t border-gray-50 bg-[#fafafa] flex justify-between items-center">
+                <div className="p-6 border-t border-gray-50 bg-[#fafafa] flex justify-between items-center">
                     <button
                         onClick={addItem}
                         className="flex items-center gap-2 text-pink-500 font-black text-[10px] uppercase tracking-widest hover:text-pink-600 transition-all"
@@ -277,86 +277,93 @@ export default function BillingModule() {
             </div>
 
             {/* INVOICE PREVIEW - Designed for PDF Print */}
-            <div className="hidden print:block w-full max-w-[800px] mx-auto bg-white p-16 font-serif text-gray-900" id="invoice-capture">
-                <div className="flex justify-between items-start mb-16">
+            <div className="hidden print:block w-full max-w-[800px] mx-auto bg-white p-8 font-serif text-gray-900" id="invoice-capture" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                    @media print {
+                        @page { margin: 0.5cm; }
+                        body { margin: 0; }
+                    }
+                ` }} />
+                <div className="flex justify-between items-start mb-8">
                     <div className="flex items-center gap-4">
-                        <Image src="/hm-snacks-logo.png" alt="HM Snacks" width={80} height={80} className="rounded-2xl" />
+                        <Image src="/hm-snacks-logo.png" alt="HM Snacks" width={60} height={60} className="rounded-xl" />
                         <div>
-                            <h1 className="text-4xl font-black tracking-tighter italic">HM SNACKS</h1>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Pure. Traditional. Homemade.</p>
+                            <h1 className="text-3xl font-black tracking-tighter italic">HM SNACKS</h1>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">PURE. TRADITIONAL. HOMEMADE.</p>
                         </div>
                     </div>
                     <div className="text-right">
-                        <h2 className="text-5xl font-black text-gray-100 opacity-50 mb-4 uppercase tracking-widest">INVOICE</h2>
-                        <div className="text-[10px] font-black uppercase text-gray-400">Date: {new Date().toLocaleDateString()}</div>
-                        <div className="text-[10px] font-black uppercase text-gray-400">ID: HMS-{Math.random().toString(36).substr(2, 6).toUpperCase()}</div>
+                        <h2 className="text-4xl font-black text-gray-200 uppercase tracking-widest leading-none mb-1">INVOICE</h2>
+                        <div className="text-[9px] font-black uppercase text-gray-400">Date: {new Date().toLocaleDateString()}</div>
+                        <div className="text-[9px] font-black uppercase text-gray-400">ID: HMS-{Math.random().toString(36).substr(2, 6).toUpperCase()}</div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-16 mb-16">
+                <div className="grid grid-cols-2 gap-12 mb-8">
                     <div>
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-pink-500 mb-4">From</h3>
-                        <div className="space-y-1 text-sm font-bold">
-                            <p className="text-lg font-black italic">HM Snacks & Business</p>
+                        <h3 className="text-[9px] font-black uppercase tracking-widest text-pink-500 mb-2 border-b border-pink-100 pb-1">From</h3>
+                        <div className="space-y-0.5 text-xs font-bold">
+                            <p className="text-base font-black italic text-gray-900">HM Snacks & Business</p>
                             <p className="text-gray-600">641028, Coimbatore</p>
                             <p className="text-gray-600">Tamil Nadu, India</p>
-                            <p className="text-gray-600">Mobile: +91 99XXXXXXX</p>
+                            <p className="text-gray-600">Mobile: +91 99441 23456</p>
                         </div>
                     </div>
                     <div className="text-right">
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-4">Bill To</h3>
-                        <div className="space-y-1 text-sm font-bold">
-                            <p className="text-lg font-black italic">{customer.name || "Customer Name"}</p>
+                        <h3 className="text-[9px] font-black uppercase tracking-widest text-indigo-500 mb-2 border-b border-indigo-100 pb-1 text-right">Bill To</h3>
+                        <div className="space-y-0.5 text-xs font-bold">
+                            <p className="text-base font-black italic text-gray-900">{customer.name || "Customer Name"}</p>
                             <p className="text-gray-600">{customer.mobile || "Mobile Not Provided"}</p>
                             <p className="text-gray-600">{customer.address || "Address Not Provided"}</p>
                         </div>
                     </div>
                 </div>
 
-                <table className="w-full mb-16">
+                <table className="w-full mb-8 text-sm">
                     <thead>
                         <tr className="border-b-2 border-gray-900">
-                            <th className="py-4 text-left text-[10px] font-black uppercase">Product Description</th>
-                            <th className="py-4 text-center text-[10px] font-black uppercase w-24">Qty</th>
-                            <th className="py-4 text-right text-[10px] font-black uppercase w-32">Price</th>
-                            <th className="py-4 text-right text-[10px] font-black uppercase w-32">Amount</th>
+                            <th className="py-2 text-left text-[9px] font-black uppercase">Product Description</th>
+                            <th className="py-2 text-center text-[9px] font-black uppercase w-20">Qty</th>
+                            <th className="py-2 text-right text-[9px] font-black uppercase w-28">Price</th>
+                            <th className="py-2 text-right text-[9px] font-black uppercase w-28">Amount</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                         {items.filter(i => i.name).map((item, idx) => (
-                            <tr key={idx}>
-                                <td className="py-6">
-                                    <p className="font-black italic text-lg">{item.name}</p>
-                                    <p className="text-[9px] text-gray-400 uppercase font-bold">SNACK PRODUCT CODE: {item.productId.substr(0, 8)}</p>
+                            <tr key={idx} className="page-break-inside-avoid">
+                                <td className="py-3">
+                                    <p className="font-black italic text-base leading-tight">{item.name}</p>
+                                    <p className="text-[8px] text-gray-400 uppercase font-bold">SNACK PRODUCT CODE: {item.productId.substr(0, 8)}</p>
                                 </td>
-                                <td className="py-6 text-center font-bold">{item.quantity} {item.unit}</td>
-                                <td className="py-6 text-right font-bold">₹{item.price.toFixed(2)}</td>
-                                <td className="py-6 text-right font-black italic">₹{(item.price * item.quantity).toFixed(2)}</td>
+                                <td className="py-3 text-center font-bold">{item.quantity} {item.unit}</td>
+                                <td className="py-3 text-right font-bold">₹{item.price.toFixed(2)}</td>
+                                <td className="py-3 text-right font-black italic">₹{(item.price * item.quantity).toFixed(2)}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
 
-                <div className="flex justify-end pt-8">
-                    <div className="w-80 space-y-4">
-                        <div className="flex justify-between text-sm font-bold border-b border-gray-100 pb-2">
-                            <span className="text-gray-400 uppercase text-[10px]">Taxable Amount (Excl. GST)</span>
+                <div className="flex justify-end pt-4">
+                    <div className="w-72 space-y-2">
+                        <div className="flex justify-between text-xs font-bold border-b border-gray-100 pb-1">
+                            <span className="text-gray-400 uppercase text-[9px]">Taxable Amount (Excl. GST)</span>
                             <span>₹{totals.basePrice}</span>
                         </div>
-                        <div className="flex justify-between text-sm font-bold border-b border-gray-100 pb-2">
-                            <span className="text-gray-400 uppercase text-[10px]">GST (5%)</span>
+                        <div className="flex justify-between text-xs font-bold border-b border-gray-100 pb-1">
+                            <span className="text-gray-400 uppercase text-[9px]">GST (5%)</span>
                             <span>₹{totals.gst}</span>
                         </div>
-                        <div className="flex justify-between items-center pt-2">
-                            <span className="text-lg font-black text-pink-500 uppercase italic">Grand Total</span>
-                            <span className="text-3xl font-black italic">₹{totals.subtotal}</span>
+                        <div className="flex justify-between items-center pt-1">
+                            <span className="text-base font-black text-pink-500 uppercase italic">Grand Total</span>
+                            <span className="text-2xl font-black italic">₹{totals.subtotal}</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-32 pt-8 border-t border-gray-100 text-center">
-                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">This is a computer generated invoice</p>
-                    <p className="text-xs font-bold text-gray-400 mt-2">Thank you for your business! Reach us at @harishblog.fyi</p>
+                <div className="mt-12 pt-4 border-t border-gray-100 text-center">
+                    <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.5em]">This is a computer generated invoice</p>
+                    <p className="text-[10px] font-bold text-gray-400 mt-1">Thank you for your business! Reach us at @harishblog.fyi</p>
                 </div>
             </div>
         </div>

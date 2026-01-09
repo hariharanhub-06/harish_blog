@@ -131,7 +131,7 @@ export default function SnacksOverviewModule() {
             {/* Main Stats Grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {statCards.map((card, i) => (
-                    <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
+                    <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
                         <div className={`absolute top-0 right-0 w-32 h-32 ${card.bg} rounded-bl-[5rem] translate-x-10 -translate-y-10 group-hover:translate-x-6 group-hover:-translate-y-6 transition-transform opacity-30`} />
                         <div className={`w-14 h-14 ${card.bg} ${card.color} rounded-2xl flex items-center justify-center mb-6 relative z-10`}>
                             <card.icon size={24} />
@@ -145,7 +145,7 @@ export default function SnacksOverviewModule() {
 
             <div className="grid lg:grid-cols-3 gap-8">
                 {/* Orders by Status */}
-                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+                <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
                     <h3 className="text-lg font-black mb-8 flex items-center gap-3 italic">
                         <Clock className="text-pink-500" />
                         Status Distribution
@@ -161,7 +161,7 @@ export default function SnacksOverviewModule() {
                 </div>
 
                 {/* Coupon Performance */}
-                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+                <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
                     <h3 className="text-lg font-black mb-8 flex items-center gap-3 italic">
                         <ShoppingBag className="text-indigo-500" />
                         Coupon Performance
@@ -183,7 +183,7 @@ export default function SnacksOverviewModule() {
                 </div>
 
                 {/* Inventory Alerts */}
-                <div className="bg-gray-900 p-10 rounded-[3rem] shadow-2xl relative overflow-hidden group">
+                <div className="bg-gray-900 p-8 rounded-3xl shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
                     <h3 className="text-lg font-black text-white mb-8 flex items-center gap-3 relative z-10">
                         <AlertTriangle className="text-amber-400" />

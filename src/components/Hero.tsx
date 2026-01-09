@@ -18,7 +18,7 @@ interface HeroProps {
 
 export default function Hero({ profile }: HeroProps) {
     return (
-        <section className="relative container mx-auto px-6 pt-28 md:pt-32 pb-24 md:pb-32 flex flex-col items-center text-center overflow-hidden">
+        <section className="relative container mx-auto px-6 pt-16 md:pt-20 pb-12 md:pb-16 flex flex-col items-center text-center overflow-hidden">
             {/* Background decorative elements */}
             {/* Background Image */}
             <div className="absolute inset-0 -z-10 pointer-events-none">
@@ -47,7 +47,7 @@ export default function Hero({ profile }: HeroProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="inline-flex items-center space-x-2 glass text-primary px-5 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em] mb-10 shadow-sm border-white/50"
+                className="inline-flex items-center space-x-2 glass text-primary px-5 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em] mb-6 shadow-sm border-white/50"
             >
                 <Sparkles size={14} className="text-accent" />
                 <span>Available for new opportunities</span>
@@ -59,7 +59,7 @@ export default function Hero({ profile }: HeroProps) {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, type: "spring" }}
-                    className="relative mb-12"
+                    className="relative mb-8"
                 >
                     {/* Glowing background ring */}
                     <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-125" />
@@ -82,7 +82,7 @@ export default function Hero({ profile }: HeroProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="text-6xl md:text-8xl font-black font-poppins text-gray-900 mb-8 tracking-tight leading-[1.05]"
+                className="text-5xl md:text-7xl font-black font-poppins text-gray-900 mb-6 tracking-tight leading-[1.05]"
             >
                 Crafting Digital <br />
                 <span className="text-primary italic relative">
@@ -96,7 +96,7 @@ export default function Hero({ profile }: HeroProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-lg md:text-xl text-gray-900 max-w-3xl mb-12 leading-relaxed font-bold"
+                className="text-lg md:text-xl text-gray-900 max-w-3xl mb-8 leading-relaxed font-bold"
                 style={{ textShadow: '0 2px 4px rgba(255,255,255,0.8)' }}
             >
                 Hi, I&apos;m <span className="text-gray-900 font-black">{profile.name}</span>.
@@ -112,7 +112,7 @@ export default function Hero({ profile }: HeroProps) {
                 <MagneticButton strength={25}>
                     <Link
                         href="#portfolio"
-                        className="group bg-primary text-white px-10 py-5 rounded-2xl font-black text-lg hover:bg-blue-800 transition-all flex items-center justify-center space-x-3 shadow-xl shadow-primary/25 hover:shadow-primary/40"
+                        className="group bg-primary text-white px-8 py-4 rounded-xl font-black text-lg hover:bg-blue-800 transition-all flex items-center justify-center space-x-3 shadow-xl shadow-primary/25 hover:shadow-primary/40"
                     >
                         <span>Explore My Work</span>
                         <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
@@ -122,7 +122,7 @@ export default function Hero({ profile }: HeroProps) {
                 <MagneticButton strength={25}>
                     <Link
                         href="#contact"
-                        className="bg-white text-gray-900 border-2 border-gray-100 px-10 py-5 rounded-2xl font-black text-lg hover:border-primary/20 hover:bg-gray-50 transition-all text-center flex items-center justify-center shadow-sm hover:shadow-lg"
+                        className="bg-white text-gray-900 border-2 border-gray-100 px-8 py-4 rounded-xl font-black text-lg hover:border-primary/20 hover:bg-gray-50 transition-all text-center flex items-center justify-center shadow-sm hover:shadow-lg"
                     >
                         Let&apos;s Talk
                     </Link>
