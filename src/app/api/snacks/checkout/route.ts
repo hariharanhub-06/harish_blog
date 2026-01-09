@@ -10,12 +10,18 @@ export async function POST(req: NextRequest) {
         const { items, customer, subtotal, shippingCost, discountAmount, couponCode, totalAmount, paymentMethod, utr } = body;
 
         // 0. Server-side validation
-        if (!customer.name || !customer.mobile || !customer.address || !customer.pincode || !customer.city || !customer.state || !customer.country || !utr) {
+        if (!customer.name || !customer.mobile || !customer.address || !customer.pincode || !customer.city || !customer.state || !customer.country) {
             return NextResponse.json({ error: "Missing mandatory fields" }, { status: 400 });
         }
 
         // 1. Create a unique Order ID
         const orderId = `HMS-${Math.floor(Date.now() / 1000)}`;
+
+        // Smart Amount Logic: Add random paise (0.01 to 0.99) to make the amount unique
+        // This helps the SMS bridge identify the specific order.
+        const randomPaise = Math.floor(Math.random() * 99) + 1; // 1 to 99
+        // Ensure totalAmount has at most 2 decimal places
+        const smartTotalAmount = Math.floor(totalAmount) + (randomPaise / 100);
 
         // 2. Save order to database
         const [order] = await db.insert(snackOrders).values({
@@ -29,12 +35,12 @@ export async function POST(req: NextRequest) {
             state: customer.state,
             country: customer.country,
             items: items,
-            totalAmount: totalAmount,
+            totalAmount: smartTotalAmount, // Save the unique amount
             shippingCost: shippingCost,
             couponCode: couponCode || null,
             discountAmount: discountAmount || 0,
             paymentMethod: paymentMethod || "UPI",
-            paymentId: utr, // Store UTR here for manual verification
+            paymentId: utr || "PENDING", // Placeholder for automated payments
             status: "Pending Verification",
         }).returning();
 
@@ -49,6 +55,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
             orderId: orderId,
+            amount: smartTotalAmount, // Send back the precise amount to display
             success: true
         });
     } catch (error) {
