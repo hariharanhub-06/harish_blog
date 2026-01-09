@@ -45,12 +45,15 @@ export async function POST(req: NextRequest) {
         }).returning();
 
         // Trigger WhatsApp Alert to Admin (Non-blocking)
-        try {
-            const itemsList = items.map((item: any) => `- ${item.name} (${item.quantity}${item.unit})`).join('\n');
-            const alertMessage = `🛍️ *New Order Received!* 🍿\n\n*ID:* \`${orderId}\`\n*Customer:* ${customer.name}\n*Total:* ₹${totalAmount}\n*Payment:* ${paymentMethod} (${utr})\n\n*Items:*\n${itemsList}\n\n*Address:* ${customer.address}, ${customer.city}`;
-            await sendWhatsAppAlert(alertMessage);
-        } catch (alertError) {
-            console.error("Failed to send WhatsApp alert, but order was saved:", alertError);
+        // SKIP for Razorpay (It will send its own "Payment Received" alert later)
+        if (paymentMethod !== "Razorpay") {
+            try {
+                const itemsList = items.map((item: any) => `- ${item.name} (${item.quantity}${item.unit})`).join('\n');
+                const alertMessage = `🛍️ *New Order Received!* 🍿\n\n*ID:* \`${orderId}\`\n*Customer:* ${customer.name}\n*Total:* ₹${totalAmount}\n*Payment:* ${paymentMethod} (${utr})\n\n*Items:*\n${itemsList}\n\n*Address:* ${customer.address}, ${customer.city}`;
+                await sendWhatsAppAlert(alertMessage);
+            } catch (alertError) {
+                console.error("Failed to send WhatsApp alert, but order was saved:", alertError);
+            }
         }
 
         return NextResponse.json({

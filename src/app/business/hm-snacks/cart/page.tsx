@@ -327,7 +327,15 @@ export default function CartPage() {
                     </div>
                 </motion.div>
                 <h1 className="text-5xl font-black text-gray-900 mb-4 tracking-tighter italic">Order Placed!</h1>
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-sm mb-2">Order ID: {orderConfirmed.orderId}</p>
+                <div className="flex items-center justify-center gap-2 mb-2 group cursor-pointer" onClick={() => {
+                    navigator.clipboard.writeText(orderConfirmed.orderId);
+                    alert("Order ID Copied!");
+                }}>
+                    <p className="text-gray-400 font-bold uppercase tracking-widest text-sm group-hover:text-pink-500 transition-colors">Order ID: {orderConfirmed.orderId}</p>
+                    <div className="bg-gray-100 p-1.5 rounded-lg group-hover:bg-pink-100 text-gray-400 group-hover:text-pink-500 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                    </div>
+                </div>
                 <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 mb-10 inline-block max-w-md">
                     <p className="text-emerald-700 font-bold text-sm">Thank you for your purchase. You will receive a confirmation shortly.</p>
                 </div>
