@@ -15,7 +15,8 @@ import {
     Briefcase,
     Eye,
     MessageCircle,
-    Edit3
+    Edit3,
+    RefreshCcw
 } from "lucide-react";
 
 export default function MessagesModule() {
@@ -51,12 +52,6 @@ export default function MessagesModule() {
 
     useEffect(() => {
         fetchMessages();
-
-        const interval = setInterval(() => {
-            fetchMessages(true);
-        }, 3000);
-
-        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -139,7 +134,17 @@ export default function MessagesModule() {
             {/* Header & Filters */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900">Inbox ({messages.length})</h2>
+                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                        Inbox ({messages.length})
+                        <button
+                            onClick={() => fetchMessages()}
+                            disabled={fetching}
+                            className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-all disabled:opacity-50"
+                            title="Refresh Messages"
+                        >
+                            <RefreshCcw size={18} className={fetching ? "animate-spin" : ""} />
+                        </button>
+                    </h2>
                     <p className="text-secondary text-sm font-bold mt-1">Manage your website inquiries</p>
                 </div>
 
