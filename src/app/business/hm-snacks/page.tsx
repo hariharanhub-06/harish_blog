@@ -215,8 +215,25 @@ export default function HMSnacksPage() {
                                             <Heart size={18} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
                                         </button>
                                         <button
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="w-10 h-10 bg-white text-gray-900 rounded-xl flex items-center justify-center hover:bg-primary hover:text-white shadow-xl transition-all"
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                try {
+                                                    const shareData = {
+                                                        title: product.name,
+                                                        text: `Check out ${product.name} on HM Snacks!`,
+                                                        url: window.location.href
+                                                    };
+                                                    if (navigator.share) {
+                                                        await navigator.share(shareData);
+                                                    } else {
+                                                        await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+                                                        alert("Link copied to clipboard!");
+                                                    }
+                                                } catch (err) {
+                                                    console.error("Share failed:", err);
+                                                }
+                                            }}
+                                            className="w-10 h-10 bg-white text-gray-900 rounded-xl flex items-center justify-center hover:bg-pink-500 hover:text-white shadow-xl transition-all"
                                         >
                                             <Share2 size={18} />
                                         </button>
