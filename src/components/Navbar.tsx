@@ -94,7 +94,7 @@ export default function Navbar() {
                                         className="flex items-center space-x-3 p-3 rounded-xl hover:bg-primary/5 transition-all group/item"
                                     >
                                         <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
-                                            <Image src="https://ik.imagekit.io/lnxyzlt1x/hm-snacks-logo.png?tr=f-avif,q-80" alt="HM Snacks" fill className="object-contain" unoptimized />
+                                            <Image src="/hm-snacks-logo.png" alt="HM Snacks" fill className="object-contain" />
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-sm font-black text-gray-900 group-hover/item:text-primary">HM Snacks</span>
@@ -108,7 +108,7 @@ export default function Navbar() {
                                         className="flex items-center space-x-3 p-3 rounded-xl hover:bg-primary/5 transition-all group/item mt-1"
                                     >
                                         <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
-                                            <Image src="https://ik.imagekit.io/lnxyzlt1x/hm-tech-logo.png?tr=f-avif,q-80" alt="HM Tech" fill className="object-contain" unoptimized />
+                                            <Image src="/hm-tech-logo.png" alt="HM Tech" fill className="object-contain" />
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-sm font-black text-gray-900 group-hover/item:text-primary">HM Tech</span>
@@ -168,7 +168,7 @@ export default function Navbar() {
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
-                                            <Image src="https://ik.imagekit.io/lnxyzlt1x/hm-snacks-logo.png?tr=f-avif,q-80" alt="HM Snacks" fill className="object-contain" unoptimized />
+                                            <Image src="/hm-snacks-logo.png" alt="HM Snacks" fill className="object-contain" />
                                         </div>
                                         <span>HM Snacks</span>
                                     </div>
@@ -183,7 +183,7 @@ export default function Navbar() {
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
-                                            <Image src="https://ik.imagekit.io/lnxyzlt1x/hm-tech-logo.png?tr=f-avif,q-80" alt="HM Tech" fill className="object-contain" unoptimized />
+                                            <Image src="/hm-tech-logo.png" alt="HM Tech" fill className="object-contain" />
                                         </div>
                                         <span>HM Tech</span>
                                     </div>
