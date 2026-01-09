@@ -27,7 +27,7 @@ export async function GET() {
         diag.database_connection = { status: "FAIL", message: e.message };
     }
 
-    // 2. Check Critical Tables
+    // 2. Check Critical Tables and Columns
     try {
         const tablesResult = await db.execute(sql`
             SELECT table_name 
@@ -40,6 +40,27 @@ export async function GET() {
 
         const expected = ['snack_products', 'snack_orders', 'abandoned_carts', 'coupons'];
         diag.tables_missing = expected.filter(t => !diag.tables_found.includes(t));
+
+        // Column checks for snack_orders
+        if (diag.tables_found.includes('snack_orders')) {
+            const cols = await db.execute(sql`
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_name = 'snack_orders' 
+                AND column_name IN ('cancel_reason', 'coupon_code', 'discount_amount')
+            `);
+            const colRows = (cols as any).rows || cols;
+            diag.snack_orders_columns = (colRows as any).map((c: any) => c.column_name);
+        }
+
+        // Type check for snack_products.stock
+        if (diag.tables_found.includes('snack_products')) {
+            const stockCheck = await db.execute(sql`
+                SELECT data_type FROM information_schema.columns 
+                WHERE table_name = 'snack_products' AND column_name = 'stock'
+            `);
+            const stockRows = (stockCheck as any).rows || stockCheck;
+            diag.snack_products_stock_type = (stockRows as any)[0]?.data_type;
+        }
     } catch (e: any) {
         diag.tables_check = { status: "FAIL", message: e.message };
     }
