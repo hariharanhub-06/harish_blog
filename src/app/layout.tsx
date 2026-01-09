@@ -23,6 +23,9 @@ export const metadata: Metadata = {
     shortcut: "/hh-gold-logo.png",
     apple: "/hh-gold-logo.png",
   },
+  other: {
+    "google-adsense-account": "ca-pub-8379879880114790",
+  },
   openGraph: {
     title: "Hari Haran Jeyaramamoorthy Portfolio",
     description: "Web/App Developer | Business Consultant | Job Placement Expert",
