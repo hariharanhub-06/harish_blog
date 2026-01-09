@@ -44,5 +44,22 @@ export async function GET() {
         diag.tables_check = { status: "FAIL", message: e.message };
     }
 
+    // 3. Check Shiprocket Pickup Locations
+    try {
+        const { getShiprocketToken } = await import("@/lib/shiprocket");
+        const token = await getShiprocketToken();
+        const srRes = await fetch("https://apiv2.shiprocket.in/v1/external/settings/get/pickup/", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (srRes.ok) {
+            const srData = await srRes.json();
+            diag.shiprocket_pickup_locations = srData.data.shipping_address.map((a: any) => a.pickup_location);
+        } else {
+            diag.shiprocket_pickup_locations = { status: "FAIL", statusText: srRes.statusText };
+        }
+    } catch (e: any) {
+        diag.shiprocket_pickup_locations = { status: "ERROR", message: e.message };
+    }
+
     return NextResponse.json(diag, { status: diag.database_connection.status === "OK" ? 200 : 500 });
 }

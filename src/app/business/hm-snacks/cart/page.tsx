@@ -302,7 +302,8 @@ export default function CartPage() {
                     couponCode: appliedCoupon?.code,
                     totalAmount: total,
                     paymentMethod: "Razorpay",
-                    paymentId: orderData.id // Save Razorpay Order ID temporarily
+                    paymentId: orderData.id, // Save Razorpay Order ID temporarily
+                    abandonedCartId: abandonedCartId
                 })
             });
             const dbOrderData = await dbOrderRes.json();
