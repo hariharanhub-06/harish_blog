@@ -186,3 +186,12 @@ export const coupons = pgTable("coupons", {
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Admin Push Tokens for PWA Notifications
+export const adminPushTokens = pgTable("admin_push_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  token: text("token").notNull().unique(),
+  deviceType: text("device_type"), // 'mobile', 'desktop'
+  createdAt: timestamp("created_at").defaultNow(),
+  lastUsedAt: timestamp("last_used_at").defaultNow(),
+});

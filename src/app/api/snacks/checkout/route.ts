@@ -1,7 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
-import { snackOrders } from "@/db/schema";
 import { eq, desc, and, or, ilike, sql, count } from "drizzle-orm";
+import { sendPushNotification } from "@/lib/push-admin";
 
 export async function POST(req: NextRequest) {
     try {
@@ -36,6 +34,11 @@ export async function POST(req: NextRequest) {
             paymentId: utr, // Store UTR here for manual verification
             status: "Pending Verification",
         }).returning();
+
+        // Trigger Push Notification to Admin
+        const pushTitle = `New Order: ${orderId}`;
+        const pushBody = `From ${customer.name} - Total: ₹${totalAmount}`;
+        await sendPushNotification(pushTitle, pushBody, "/admin/dashboard#snacks-orders");
 
         return NextResponse.json({
             orderId: orderId,
