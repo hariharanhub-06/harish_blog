@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { snackOrders } from "@/db/schema";
 import { eq, desc, and, or, ilike, sql, count } from "drizzle-orm";
-import { sendWhatsAppAlert } from "@/lib/whatsapp-relay";
+import { sendWhatsAppAlert } from "@/lib/whatsapp-twilio";
 
 export async function POST(req: NextRequest) {
     try {

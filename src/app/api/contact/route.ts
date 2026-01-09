@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sendWhatsAppAlert } from "@/lib/whatsapp-relay";
+import { sendWhatsAppAlert } from "@/lib/whatsapp-twilio";
 
 export async function POST(req: Request) {
     try {
