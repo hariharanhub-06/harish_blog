@@ -12,7 +12,7 @@ import { useSearchParams } from "next/navigation";
 // Category Tabs
 const CATEGORIES = ["All", "Savories", "Sweets", "Spices", "Ready to Eat"];
 
-export default function HMSnacksPage() {
+function HMSnacksContent() {
     const { addToCart, toggleWishlist, isInWishlist } = useCart();
     const [products, setProducts] = useState<any[]>([]);
     const [activeCategory, setActiveCategory] = useState("All");
@@ -649,5 +649,15 @@ export default function HMSnacksPage() {
                 }
             </AnimatePresence >
         </div >
+    );
+}
+
+export default function HMSnacksPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#fafafa]">
+            <div className="w-10 h-10 border-4 border-pink-500 border-t-transparent rounded-full animate-spin" />
+        </div>}>
+            <HMSnacksContent />
+        </Suspense>
     );
 }
