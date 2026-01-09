@@ -148,6 +148,7 @@ export default function CartPage() {
         if (pin.length === 6) {
             setIsPincodeLoading(true);
             try {
+                // Fetch location data
                 const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
                 const data = await res.json();
                 if (data[0].Status === "Success") {
@@ -158,6 +159,30 @@ export default function CartPage() {
                         state: postOffice.State,
                         country: "India"
                     }));
+
+                    // Fetch dynamic shipping cost from Shiprocket
+                    try {
+                        const shippingRes = await fetch('/api/snacks/shipping', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                pincode: pin,
+                                weight: totalWeight || 0.5 // Minimum 500g
+                            })
+                        });
+
+                        if (shippingRes.ok) {
+                            const shippingData = await shippingRes.json();
+                            if (shippingData.available) {
+                                setShipping(shippingData.shippingCost + 40); // Add packaging charge
+                            } else {
+                                // Fallback to static rates if not available
+                                console.warn("Shiprocket not available, using static rates");
+                            }
+                        }
+                    } catch (shippingError) {
+                        console.error("Shipping API failed, using static rates", shippingError);
+                    }
                 }
             } catch (error) {
                 console.error("Pincode lookup failed", error);

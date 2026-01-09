@@ -35,6 +35,7 @@ export const metadata: Metadata = {
 
 import ClientLayout from "@/components/ClientLayout";
 import { CartProvider } from "@/context/CartContext";
+import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -43,6 +44,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8379879880114790"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased text-text`}>
         <AuthProvider>
           <CartProvider>

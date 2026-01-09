@@ -75,3 +75,48 @@ export async function generateAWB(shipmentId: string) {
 
     return result;
 }
+
+// Check Serviceability and Get Shipping Rates
+export async function checkServiceability(params: {
+    pickupPostcode: string;
+    deliveryPostcode: string;
+    weight: number;
+    cod: 0 | 1;
+}) {
+    const token = await getShiprocketToken();
+
+    const response = await fetch("https://apiv2.shiprocket.in/v1/external/courier/serviceability/", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+    });
+
+    const queryParams = new URLSearchParams({
+        pickup_postcode: params.pickupPostcode,
+        delivery_postcode: params.deliveryPostcode,
+        weight: params.weight.toString(),
+        cod: params.cod.toString(),
+    });
+
+    const serviceabilityResponse = await fetch(
+        `https://apiv2.shiprocket.in/v1/external/courier/serviceability/?${queryParams}`,
+        {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        }
+    );
+
+    const result = await serviceabilityResponse.json();
+
+    if (!serviceabilityResponse.ok) {
+        console.error("Shiprocket Serviceability Check Failed:", result);
+        throw new Error(result.message || "Failed to check serviceability");
+    }
+
+    return result;
+}
