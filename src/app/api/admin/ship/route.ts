@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
         const payload = {
             order_id: order.orderId,
             order_date: orderDate,
-            pickup_location: "Primary",
+            pickup_location: "Home",
             billing_customer_name: (order.customerName || "Customer").split(" ")[0],
             billing_last_name: (order.customerName || "Customer").split(" ")[1] || "",
             billing_address: order.address || "Address",
