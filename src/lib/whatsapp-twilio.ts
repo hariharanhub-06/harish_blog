@@ -12,6 +12,7 @@ export async function sendWhatsAppAlert(message: string) {
     }
 
     try {
+        console.log("Twilio Attempting Send:", { from: fromNumber, to: toNumber });
         const client = twilio(accountSid, authToken);
         const response = await client.messages.create({
             body: message,
@@ -19,10 +20,15 @@ export async function sendWhatsAppAlert(message: string) {
             to: toNumber.startsWith('whatsapp:') ? toNumber : `whatsapp:${toNumber}`
         });
 
-        console.log("Twilio WhatsApp Alert Sent:", response.sid);
+        console.log("Twilio WhatsApp Alert Sent Successfully:", response.sid);
         return { success: true, sid: response.sid };
     } catch (error) {
-        console.error("Failed to send Twilio WhatsApp message:", error);
+        console.error("Twilio WhatsApp Error Type:", (error as any).constructor.name);
+        console.error("Twilio WhatsApp Error Details:", {
+            message: (error as any).message,
+            code: (error as any).code,
+            status: (error as any).status
+        });
         return { success: false, error: (error as any).message };
     }
 }
