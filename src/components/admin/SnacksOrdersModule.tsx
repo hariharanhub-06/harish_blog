@@ -137,8 +137,52 @@ export default function SnacksOrdersModule() {
         setCancelReason("");
     };
 
+    const handleShipRocket = async () => {
+        if (!selectedOrder) return;
+        if (!confirm("Create Shiprocket Order & AWB? This will book the shipment.")) return;
+
+        try {
+            const res = await fetch("/api/admin/ship", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId: selectedOrder.id }),
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                alert(`Success! AWB: ${data.awbCode || "Generated"}`);
+                fetchOrderDetails(selectedOrder.id);
+                fetchOrders();
+            } else {
+                alert(`Failed: ${data.error}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Network Error");
+        }
+    };
+
     const sendWhatsAppUpdate = () => {
-        // ... (existing code)
+        if (!selectedOrder) return;
+
+        let message = `Hello ${selectedOrder.customerName}, your HM Snacks order *${selectedOrder.orderId}* is currently *${selectedOrder.status}*.`;
+
+        if (selectedOrder.status === "Shipping") {
+            message += `\n\nIt was shipped via *${selectedOrder.courierName || "Courier"}*.\nTracking ID: *${selectedOrder.shipmentId}*`;
+            message += `\n\nTrack your order here: https://hm-snacks.com/business/hm-snacks/track?orderId=${selectedOrder.orderId}`;
+        }
+
+        if (selectedOrder.status === "Payment Confirmed") {
+            message += `\n\nWe have received your payment of ₹${selectedOrder.totalAmount}. We will pack it shortly!`;
+        }
+
+        if (selectedOrder.status === "Cancel") {
+            message += `\n\nUnfortunately, your order has been cancelled.\nReason: *${selectedOrder.cancelReason || "Not specified"}*`;
+            message += `\n\nIf you have already paid, our team will process your refund shortly.`;
+        }
+
+        const encodedMsg = encodeURIComponent(message);
+        window.open(`https://wa.me/${selectedOrder.customerMobile}?text=${encodedMsg}`, '_blank');
     };
 
     const exportToCSV = () => {
