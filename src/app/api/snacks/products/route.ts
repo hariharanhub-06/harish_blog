@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
             isActive: isActive ?? true,
         }).returning();
 
-        revalidateTag('snack-products');
+        revalidateTag('snack-products', { expire: 0 });
         return NextResponse.json(product);
     } catch (error) {
         console.error("Create product error:", error);
