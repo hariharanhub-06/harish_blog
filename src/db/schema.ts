@@ -198,3 +198,26 @@ export const adminPushTokens = pgTable("admin_push_tokens", {
   createdAt: timestamp("created_at").defaultNow(),
   lastUsedAt: timestamp("last_used_at").defaultNow(),
 });
+
+// HM Snacks - Reviews Table
+export const snackReviews = pgTable("snack_reviews", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  productId: uuid("product_id").notNull(),
+  customerName: text("customer_name").notNull(),
+  rating: integer("rating").notNull(), // 1 to 5
+  comment: text("comment"),
+  status: text("status").default("Pending"), // Pending, Approved, Spam
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// HM Snacks - Abandoned Carts Table
+export const abandonedCarts = pgTable("abandoned_carts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  customerName: text("customer_name"),
+  customerMobile: text("customer_mobile"),
+  items: jsonb("items").notNull(), // Array of {productId, quantity, unit}
+  lastStep: text("last_step"), // 'Information', 'Shipping', 'Payment'
+  isRecovered: boolean("is_recovered").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});

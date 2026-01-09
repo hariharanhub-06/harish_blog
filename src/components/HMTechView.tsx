@@ -18,6 +18,7 @@ import Image from "next/image";
 import TechParticles from "@/components/TechParticles";
 import DNAParticles from "@/components/DNAParticles";
 import { motion } from "framer-motion";
+import TechPlayground from "@/components/TechPlayground";
 
 interface HMTechViewProps {
     projects: any[];
@@ -335,6 +336,9 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                     </motion.div>
                 </div>
             </section>
+
+            {/* Tech Playground Section */}
+            <TechPlayground />
 
             {/* Contact Form (White Theme) */}
             <section id="contact" className="py-12 px-6 relative overflow-hidden bg-white">

@@ -20,7 +20,9 @@ import {
     ShoppingBag,
     Package,
     PieChart,
-    FileText
+    FileText,
+    Star,
+    ShoppingCart
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -33,9 +35,11 @@ import SnacksOrdersModule from "@/components/admin/SnacksOrdersModule";
 import SnacksOverviewModule from "@/components/admin/SnacksOverviewModule";
 import CouponsModule from "@/components/admin/CouponsModule";
 import BillingModule from "@/components/admin/BillingModule";
+import ReviewsModule from "@/components/admin/ReviewsModule";
+import AbandonedCartsModule from "@/components/admin/AbandonedCartsModule";
 
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing";
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -44,11 +48,13 @@ export default function AdminDashboard() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
+    const [pendingReviewsCount, setPendingReviewsCount] = useState(0);
+    const [abandonedCartsCount, setAbandonedCartsCount] = useState(0);
 
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing"];
+        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "reviews", "abandoned-carts"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -60,6 +66,8 @@ export default function AdminDashboard() {
                     const data = await res.json();
                     setUnreadCount(data.unreadMessages || 0);
                     setPendingOrdersCount(data.pendingOrders || 0);
+                    setPendingReviewsCount(data.pendingReviews || 0);
+                    setAbandonedCartsCount(data.abandonedCarts || 0);
                 }
             } catch (err) {
                 console.error("Failed to fetch notification counts", err);
@@ -107,6 +115,8 @@ export default function AdminDashboard() {
         { id: "snacks-orders", title: "Snack Orders", icon: ShoppingBag, color: "bg-pink-400", badge: pendingOrdersCount },
         { id: "coupons", title: "Snack Coupons", icon: Ticket, color: "bg-blue-600" },
         { id: "billing", title: "Billing / Invoice", icon: FileText, color: "bg-orange-500" },
+        { id: "reviews", title: "Reviews", icon: Star, color: "bg-amber-500", badge: pendingReviewsCount },
+        { id: "abandoned-carts", title: "Drop Offs", icon: ShoppingCart, color: "bg-rose-500", badge: abandonedCartsCount },
     ];
 
     const renderContent = () => {
@@ -120,6 +130,8 @@ export default function AdminDashboard() {
             case "snacks-overview": return <SnacksOverviewModule />;
             case "coupons": return <CouponsModule />;
             case "billing": return <BillingModule />;
+            case "reviews": return <ReviewsModule />;
+            case "abandoned-carts": return <AbandonedCartsModule />;
             default: return <OverviewModule />;
         }
     };
@@ -163,6 +175,11 @@ export default function AdminDashboard() {
                                 {item.id === "snacks-orders" && pendingOrdersCount > 0 && (
                                     <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">
                                         {pendingOrdersCount}
+                                    </span>
+                                )}
+                                {item.id === "reviews" && pendingReviewsCount > 0 && (
+                                    <span className="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">
+                                        {pendingReviewsCount}
                                     </span>
                                 )}
                             </button>

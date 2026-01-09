@@ -44,15 +44,36 @@ export async function POST(req: NextRequest) {
             status: "Pending Verification",
         }).returning();
 
-        // Trigger WhatsApp Alert to Admin (Non-blocking)
-        // SKIP for Razorpay (It will send its own "Payment Received" alert later)
+        // 2.5 Deduct stock and check for low stock
+        for (const item of items) {
+            const [p] = await db.select({ stock: snackProducts.stock, name: snackProducts.name })
+                .from(snackProducts)
+                .where(eq(snackProducts.id, item.id));
+
+            if (p) {
+                const newStock = Math.max(0, (p.stock || 0) - item.quantity);
+                await db.update(snackProducts).set({ stock: newStock }).where(eq(snackProducts.id, item.id));
+
+                if (newStock < 5) { // Low stock threshold
+                    const stockAlert = `⚠️ *Low Stock Alert!* 🍿\n\n*Product:* ${p.name}\n*Remaining:* ${newStock} ${item.unit}\n\nPlease restock soon!`;
+                    await sendWhatsAppAlert(stockAlert);
+                }
+            }
+        }
+
+
+        // 3. Automated WhatsApp Invoice / Notification
         if (paymentMethod !== "Razorpay") {
             try {
                 const itemsList = items.map((item: any) => `- ${item.name} (${item.quantity}${item.unit})`).join('\n');
-                const alertMessage = `🛍️ *New Order Received!* 🍿\n\n*ID:* \`${orderId}\`\n*Customer:* ${customer.name}\n*Total:* ₹${totalAmount}\n*Payment:* ${paymentMethod} (${utr})\n\n*Items:*\n${itemsList}\n\n*Address:* ${customer.address}, ${customer.city}`;
-                await sendWhatsAppAlert(alertMessage);
-            } catch (alertError) {
-                console.error("Failed to send WhatsApp alert, but order was saved:", alertError);
+                const adminMessage = `🛍️ *New Order!* \`${orderId}\`\n\n*Customer:* ${customer.name}\n*Mobile:* ${customer.mobile}\n*Total:* ₹${totalAmount}\n\n*Items:*\n${itemsList}`;
+                await sendWhatsAppAlert(adminMessage);
+
+                // Send invoice-like message to Customer
+                const customerMessage = `Hi ${customer.name}! 👋\n\nThank you for your order at *HM Snacks*! 🍿\n\n*Order ID:* \`${orderId}\`\n*Total:* ₹${smartTotalAmount}\n*Status:* ${paymentMethod === 'UPI' ? 'Payment Pending Verification' : 'Confirmed'}\n\nWe will notify you once shipped! 🚀\n\n_Track here:_ https://harishblog.fyi/business/hm-snacks/track?id=${orderId}`;
+                await sendWhatsAppAlert(customerMessage, customer.mobile);
+            } catch (err) {
+                console.error("WhatsApp notification failed:", err);
             }
         }
 

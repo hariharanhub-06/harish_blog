@@ -46,6 +46,7 @@ export default function CartPage() {
     const [smartAmount, setSmartAmount] = useState<number | null>(null);
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
     const [orderConfirmed, setOrderConfirmed] = useState<any>(null);
+    const [abandonedCartId, setAbandonedCartId] = useState<string | null>(null);
 
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
@@ -190,6 +191,37 @@ export default function CartPage() {
             setIsPincodeLoading(false);
         }
     };
+
+    // Abandoned Cart Tracking
+    useEffect(() => {
+        const trackCart = async () => {
+            // Track if user has items and has started entering info or moved to checkout
+            if (cart.length > 0 && (formData.name || formData.mobile || step > 1)) {
+                try {
+                    const res = await fetch('/api/snacks/cart/track', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: abandonedCartId,
+                            customerName: formData.name,
+                            customerMobile: formData.mobile,
+                            items: cart,
+                            lastStep: step === 1 ? 'Cart' : step === 2 ? 'Information' : 'Payment'
+                        })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (!abandonedCartId) setAbandonedCartId(data.id);
+                    }
+                } catch (error) {
+                    console.error("Failed to track abandoned cart:", error);
+                }
+            }
+        };
+
+        const timeoutId = setTimeout(trackCart, 2000); // Debounce to avoid too many writes
+        return () => clearTimeout(timeoutId);
+    }, [formData.name, formData.mobile, step, cart.length]);
 
     // Poll for Payment Status
     useEffect(() => {
@@ -362,8 +394,12 @@ export default function CartPage() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
                     </div>
                 </div>
-                <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 mb-10 inline-block max-w-md">
-                    <p className="text-emerald-700 font-bold text-sm">Thank you for your purchase. You will receive a confirmation shortly.</p>
+                <div className="bg-emerald-50 p-8 rounded-[2rem] border border-emerald-100 mb-10 inline-block max-w-lg shadow-sm">
+                    <p className="text-emerald-800 font-bold mb-4 text-lg">Your order will be delivered within 2 to 10 days based on your location.</p>
+                    <p className="text-emerald-600 font-medium text-sm leading-relaxed">
+                        Please <span className="font-black text-emerald-800">copy your Order ID</span> and save it to track your order later.
+                        You will also receive a confirmation and tracking updates via <span className="font-black text-emerald-800">WhatsApp</span>.
+                    </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link href="/business/hm-snacks" className="bg-gray-900 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-gray-800 transition-all">Back to Shop</Link>
