@@ -141,6 +141,34 @@ export default function TrackOrderPage() {
                             </div>
                         )}
 
+                        {/* Shipping Details */}
+                        {order.status === "Shipping" && (
+                            <div className="bg-indigo-50 p-6 md:p-8 rounded-[2rem] border border-indigo-100 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-indigo-500 shadow-sm">
+                                        <Truck size={24} />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-1">Shipped via</h4>
+                                        <p className="text-lg font-black text-gray-900">{order.courierName || "Courier"}</p>
+                                    </div>
+                                </div>
+
+                                {order.awbCode && (
+                                    <div className="md:text-right">
+                                        <h4 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-1">AWB / Tracking ID</h4>
+                                        <p className="text-lg font-mono font-black text-gray-900 mb-2">{order.awbCode}</p>
+                                        <button
+                                            onClick={() => navigator.clipboard.writeText(order.awbCode)}
+                                            className="text-[10px] font-bold bg-white px-3 py-1 rounded-lg text-indigo-500 hover:bg-indigo-500 hover:text-white transition-colors"
+                                        >
+                                            COPY CODE
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Order Items Summary */}
                         <div className="space-y-6">
                             <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Items in this Order</h3>

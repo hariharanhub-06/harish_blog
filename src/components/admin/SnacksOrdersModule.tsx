@@ -137,6 +137,31 @@ export default function SnacksOrdersModule() {
         setCancelReason("");
     };
 
+    const handleShipRocket = async () => {
+        if (!selectedOrder) return;
+        if (!confirm("Create Shiprocket Order & AWB? This will book the shipment.")) return;
+
+        try {
+            const res = await fetch("/api/admin/ship", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId: selectedOrder.id }),
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                alert(`Success! AWB: ${data.awbCode || "Generated"}`);
+                fetchOrderDetails(selectedOrder.id);
+                fetchOrders();
+            } else {
+                alert(`Failed: ${data.error}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Network Error");
+        }
+    };
+
     const sendWhatsAppUpdate = () => {
         if (!selectedOrder) return;
 
@@ -398,6 +423,31 @@ export default function SnacksOrdersModule() {
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 block mb-1">Cancellation Reason</span>
                                                 <p className="text-xs font-bold text-gray-600 bg-rose-50 p-3 rounded-xl border border-rose-100">{selectedOrder.cancelReason || "No reason provided."}</p>
                                             </div>
+                                        )}
+
+                                        {/* Shiprocket Section */}
+                                        {selectedOrder.shiprocketOrderId ? (
+                                            <div className="pt-4 border-t border-indigo-100">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Shiprocket Order</span>
+                                                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shadow-sm">{selectedOrder.shiprocketOrderId}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">AWB Code</span>
+                                                    <span className="text-xs font-black text-gray-900 font-mono tracking-tight">{selectedOrder.awbCode || "Generating..."}</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            selectedOrder.status === "Payment Confirmed" && (
+                                                <div className="pt-4 border-t border-gray-100">
+                                                    <button
+                                                        onClick={handleShipRocket}
+                                                        className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                                                    >
+                                                        <Truck size={16} /> Ship with Shiprocket
+                                                    </button>
+                                                </div>
+                                            )
                                         )}
                                         <div className="pt-6 border-t border-gray-200">
                                             <div className="flex justify-between items-end">

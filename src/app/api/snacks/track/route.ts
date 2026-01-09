@@ -32,7 +32,11 @@ export async function GET(req: NextRequest) {
             items: order.items, // Customers want to see what they ordered
             shipmentId: order.shipmentId, // For reference
             totalAmount: order.totalAmount,
-            cancelReason: order.cancelReason
+            cancelReason: order.cancelReason,
+            courierName: order.courierName,
+            awbCode: order.awbCode,
+            shiprocketOrderId: order.shiprocketOrderId,
+            trackingUrl: order.trackingUrl
         };
 
         return NextResponse.json(safeOrder);
