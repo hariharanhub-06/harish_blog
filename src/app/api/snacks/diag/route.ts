@@ -21,7 +21,7 @@ export async function GET() {
     // 1. Check DB Connection
     try {
         const result = await db.execute(sql`SELECT 1 as health`);
-        diag.database_connection = { status: "OK", result: result[0] };
+        diag.database_connection = { status: "OK", result: (result as any)[0] };
     } catch (e: any) {
         diag.database_connection = { status: "FAIL", message: e.message };
     }
@@ -34,7 +34,7 @@ export async function GET() {
             WHERE table_schema = 'public' 
             AND table_name IN ('snack_products', 'snack_orders', 'abandoned_carts', 'coupons')
         `);
-        diag.tables_found = tablesResult.map((t: any) => t.table_name);
+        diag.tables_found = (tablesResult as any).map((t: any) => t.table_name);
 
         const missing = ['snack_products', 'snack_orders', 'abandoned_carts', 'coupons'].filter(
             t => !diag.tables_found.includes(t)
