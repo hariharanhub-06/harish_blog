@@ -1,6 +1,5 @@
-import { db } from "@/db";
-import { contactSubmissions } from "@/db/schema";
 import { NextResponse } from "next/server";
+import { sendPushNotification } from "@/lib/push-admin";
 
 export async function POST(req: Request) {
     try {
@@ -22,6 +21,11 @@ export async function POST(req: Request) {
             category: body.category || "Not Determined",
             status: "Fresh"
         });
+
+        // Trigger Push Notification to Admin
+        const pushTitle = `New Inquiry: ${body.category || 'General'}`;
+        const pushBody = `From ${body.name}: ${body.message.substring(0, 100)}...`;
+        await sendPushNotification(pushTitle, pushBody, "/admin/dashboard#messages");
 
         return NextResponse.json({ success: true });
     } catch (error) {
