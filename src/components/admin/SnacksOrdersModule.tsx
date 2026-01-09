@@ -203,7 +203,7 @@ export default function SnacksOrdersModule() {
 
         if (selectedOrder.status === "Shipping") {
             message += `\n\nIt was shipped via *${selectedOrder.courierName || "Courier"}*.\nTracking ID: *${selectedOrder.shipmentId}*`;
-            message += `\n\nTrack your order here: https://hm-snacks.com/business/hm-snacks/track?orderId=${selectedOrder.orderId}`;
+            message += `\n\nTrack your order here: https://hariharanhub.com/business/hm-snacks/track?orderId=${selectedOrder.orderId}`;
         }
 
         if (selectedOrder.status === "Payment Confirmed") {
