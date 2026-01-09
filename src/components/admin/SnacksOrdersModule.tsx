@@ -18,7 +18,8 @@ import {
     MapPin,
     CreditCard,
     ArrowRight,
-    Trash2
+    Trash2,
+    Download
 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
