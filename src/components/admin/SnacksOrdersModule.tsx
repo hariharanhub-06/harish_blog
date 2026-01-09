@@ -32,7 +32,7 @@ export default function SnacksOrdersModule() {
     const [pagination, setPagination] = useState({ total: 0, limit: 10, offset: 0 });
     const [statusFilter, setStatusFilter] = useState("Payment Confirmed");
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
-    const [fetchingDetail, setFetchingDetail] = useState(false);
+    const [fetchingDetailId, setFetchingDetailId] = useState<string | null>(null);
     const [showShippingModal, setShowShippingModal] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [shippingData, setShippingData] = useState({ courier: "", tracking: "" });
@@ -61,7 +61,7 @@ export default function SnacksOrdersModule() {
     }, [statusFilter]);
 
     const fetchOrderDetails = async (orderId: string) => {
-        setFetchingDetail(true);
+        setFetchingDetailId(orderId);
         try {
             const res = await fetch(`/api/snacks/orders/${orderId}`);
             if (res.ok) {
@@ -71,7 +71,7 @@ export default function SnacksOrdersModule() {
         } catch (error) {
             console.error("Fetch order details error:", error);
         } finally {
-            setFetchingDetail(false);
+            setFetchingDetailId(null);
         }
     };
 
@@ -257,10 +257,10 @@ export default function SnacksOrdersModule() {
                                     <td className="px-8 py-6 text-right">
                                         <button
                                             onClick={() => fetchOrderDetails(order.id)}
-                                            disabled={fetchingDetail}
+                                            disabled={fetchingDetailId === order.id}
                                             className="p-3 bg-gray-50 text-gray-400 rounded-xl hover:bg-pink-50 hover:text-pink-500 transition-all group-hover:scale-110 disabled:opacity-50"
                                         >
-                                            {fetchingDetail ? <Loader2 size={18} className="animate-spin" /> : <Eye size={18} />}
+                                            {fetchingDetailId === order.id ? <Loader2 size={18} className="animate-spin" /> : <Eye size={18} />}
                                         </button>
                                     </td>
                                 </tr>
