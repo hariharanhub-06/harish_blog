@@ -30,7 +30,7 @@ export default function SnacksOrdersModule() {
     const [fetching, setFetching] = useState(true);
     const [search, setSearch] = useState("");
     const [pagination, setPagination] = useState({ total: 0, limit: 10, offset: 0 });
-    const [statusFilter, setStatusFilter] = useState("All");
+    const [statusFilter, setStatusFilter] = useState("Payment Confirmed");
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [fetchingDetail, setFetchingDetail] = useState(false);
     const [showShippingModal, setShowShippingModal] = useState(false);
