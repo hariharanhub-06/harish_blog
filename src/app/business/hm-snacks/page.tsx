@@ -221,7 +221,7 @@ function HMSnacksContent() {
                                         </span>
                                     </div>
                                     {/* Action Float Buttons */}
-                                    <div className="absolute top-6 right-6 flex flex-col gap-3 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+                                    <div className="absolute top-6 right-6 flex flex-col gap-3 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-4 lg:group-hover:translate-x-0 transition-all duration-300">
                                         <button
                                             onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
                                             className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-xl transition-all ${isInWishlist(product.id) ? "bg-pink-500 text-white" : "bg-white text-gray-900 hover:bg-pink-500 hover:text-white"
@@ -233,7 +233,7 @@ function HMSnacksContent() {
                                             onClick={async (e) => {
                                                 e.stopPropagation();
                                                 try {
-                                                    const shareUrl = `${window.location.origin}${window.location.pathname}?product=${product.id}`;
+                                                    const shareUrl = `${window.location.origin}/business/hm-snacks?product=${product.id}`;
                                                     const shareData = {
                                                         title: product.name,
                                                         text: `Check out ${product.name} on HM Snacks!`,
