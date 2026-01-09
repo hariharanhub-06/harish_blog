@@ -121,10 +121,11 @@ export default function CartPage() {
 
     const handleApplyCoupon = async () => {
         if (!couponCode) return;
+        const formattedCode = couponCode.toUpperCase().trim();
         setIsValidatingCoupon(true);
         setCouponError("");
         try {
-            const res = await fetch(`/api/coupons/validate?code=${couponCode}`);
+            const res = await fetch(`/api/coupons/validate?code=${formattedCode}`);
             const data = await res.json();
             if (res.ok && data.valid) {
                 setAppliedCoupon(data);
@@ -554,7 +555,7 @@ export default function CartPage() {
                                             placeholder="COUPON"
                                             disabled={!!appliedCoupon}
                                             value={couponCode}
-                                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                            onChange={(e) => setCouponCode(e.target.value)}
                                             className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-xs font-black uppercase focus:ring-2 focus:ring-pink-200"
                                         />
                                         <button onClick={handleApplyCoupon} disabled={isValidatingCoupon || !couponCode} className="bg-gray-900 text-white px-4 rounded-xl font-bold text-[10px]">APPLY</button>
