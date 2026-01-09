@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Heart, Share2, Clock, X, Minus, Plus, Package } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Tilt } from "@/components/Tilt";
+import imageKitLoader from "@/lib/imagekitLoader";
 
 // Category Tabs
 const CATEGORIES = ["All", "Savories", "Sweets", "Spices", "Ready to Eat"];
@@ -57,6 +58,7 @@ export default function HMSnacksPage() {
                     className="object-cover brightness-50"
                     alt="Snacks Hero"
                     priority
+                    sizes="100vw"
                 />
                 <div className="relative z-10 text-center px-6">
                     <div className="flex flex-col items-center">
@@ -108,6 +110,7 @@ export default function HMSnacksPage() {
                                 fill
                                 className="object-cover"
                                 alt="Heritage"
+                                sizes="(max-width: 768px) 100vw, 50vw"
                             />
                         </div>
                         <div className="absolute -bottom-8 -right-8 bg-white p-8 rounded-3xl shadow-xl hidden md:block max-w-[240px]">
@@ -184,11 +187,12 @@ export default function HMSnacksPage() {
                                 <div className="relative h-40 md:h-72 overflow-hidden bg-gray-50 flex items-center justify-center">
                                     {product.imageUrl ? (
                                         <Image
+                                            loader={imageKitLoader}
                                             src={product.imageUrl}
                                             alt={product.name}
                                             fill
-                                            unoptimized
                                             className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-pink-100 font-black text-4xl italic px-4 text-center">
@@ -479,11 +483,12 @@ export default function HMSnacksPage() {
                             <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-gray-100 flex items-center justify-center">
                                 {selectedProduct.imageUrl ? (
                                     <Image
+                                        loader={imageKitLoader}
                                         src={selectedProduct.imageUrl}
                                         alt={selectedProduct.name}
                                         fill
-                                        unoptimized
                                         className="object-cover"
+                                        sizes="(max-width: 768px) 100vw, 50vw"
                                     />
                                 ) : (
                                     <div className="text-pink-100 font-black text-9xl italic">

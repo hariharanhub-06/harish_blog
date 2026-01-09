@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Heart, ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Tilt } from "@/components/Tilt";
+import imageKitLoader from "@/lib/imagekitLoader";
 
 export default function WishlistPage() {
     const { wishlist, toggleWishlist, addToCart } = useCart();
@@ -69,7 +70,14 @@ export default function WishlistPage() {
                     <Tilt key={product.id} options={{ max: 10, speed: 400 }}>
                         <div className="bg-white rounded-[2.5rem] border border-gray-50 shadow-sm hover:shadow-2xl transition-all group overflow-hidden h-full flex flex-col">
                             <div className="relative h-60 overflow-hidden">
-                                <Image src={product.imageUrl} alt={product.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" unoptimized />
+                                <Image
+                                    loader={imageKitLoader}
+                                    src={product.imageUrl}
+                                    alt={product.name}
+                                    fill
+                                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                />
                                 <button
                                     onClick={() => toggleWishlist(product.id)}
                                     className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-md text-rose-500 rounded-xl flex items-center justify-center shadow-lg hover:bg-rose-500 hover:text-white transition-all"

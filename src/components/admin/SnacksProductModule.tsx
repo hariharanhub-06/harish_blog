@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
+import imageKitLoader from "@/lib/imagekitLoader";
 
 const CATEGORIES = ["Savories", "Sweets", "Spices", "Ready to Eat"];
 
@@ -261,7 +262,14 @@ export default function SnacksProductModule() {
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Product Image</label>
                                     <div className="relative group aspect-square bg-gray-50 rounded-[3rem] overflow-hidden border-2 border-dashed border-gray-100 flex items-center justify-center transition-all hover:border-pink-200">
                                         {editing.imageUrl ? (
-                                            <Image src={editing.imageUrl} alt="Preview" fill className="object-cover" unoptimized />
+                                            <Image
+                                                loader={imageKitLoader}
+                                                src={editing.imageUrl}
+                                                alt="Preview"
+                                                fill
+                                                className="object-cover"
+                                                sizes="(max-width: 768px) 100vw, 50vw"
+                                            />
                                         ) : (
                                             <div className="text-center p-8">
                                                 <ImageIcon size={48} className="text-gray-200 mx-auto mb-4" />
@@ -387,7 +395,14 @@ export default function SnacksProductModule() {
                         <div key={product.id} className={`bg-white p-6 rounded-[2.5rem] border transition-all group relative ${product.isActive ? "border-gray-50 shadow-sm hover:shadow-xl" : "border-gray-100 opacity-60 grayscale"}`}>
                             <div className="relative h-48 bg-gray-50 rounded-[2rem] mb-6 overflow-hidden">
                                 {product.imageUrl ? (
-                                    <Image src={product.imageUrl} alt={product.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" unoptimized />
+                                    <Image
+                                        loader={imageKitLoader}
+                                        src={product.imageUrl}
+                                        alt={product.name}
+                                        fill
+                                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                    />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-pink-100 font-black text-5xl italic px-4 text-center">{product.name.charAt(0)}</div>
                                 )}
