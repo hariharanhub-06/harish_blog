@@ -43,31 +43,44 @@ export async function POST(req: NextRequest) {
             hsn: 4412 // Dummy HSN
         }));
 
+        // Sanitize Phone Number: must be exactly 10 digits
+        const cleanPhone = (order.customerMobile || "").replace(/\D/g, "");
+        const sanitizedPhone = cleanPhone.length > 10 ? cleanPhone.slice(-10) : cleanPhone;
+
+        // Ensure Address is at least 10 chars for Shiprocket
+        let sanitizedAddress = order.address || "Address missing";
+        if (sanitizedAddress.length < 10) {
+            sanitizedAddress = `${sanitizedAddress}, ${order.city || ""}, ${order.state || ""}`.slice(0, 100);
+        }
+
+        // Calculate sub-total from items to ensure consistency (Shiprocket requirement)
+        const calculatedSubTotal = orderItems.reduce((acc, item) => acc + (item.selling_price * item.units), 0);
+
         const payload = {
             order_id: order.orderId,
             order_date: orderDate,
             pickup_location: "Home",
             billing_customer_name: (order.customerName || "Customer").split(" ")[0],
-            billing_last_name: (order.customerName || "Customer").split(" ")[1] || "",
-            billing_address: order.address || "Address",
+            billing_last_name: (order.customerName || "Customer").split(" ")[1] || "Surname", // Shiprocket often requires last name
+            billing_address: sanitizedAddress,
             billing_city: order.city || "City",
             billing_pincode: order.pincode || "000000",
             billing_state: order.state || "State",
             billing_country: order.country || "India",
             billing_email: order.customerEmail || "customer@example.com",
-            billing_phone: order.customerMobile || "0000000000",
+            billing_phone: sanitizedPhone,
             shipping_is_billing: true,
             order_items: orderItems,
             payment_method: "Prepaid",
-            shipping_charges: 0,
+            shipping_charges: Number(order.shippingCost) || 0,
             giftwrap_charges: 0,
             transaction_charges: 0,
-            total_discount: 0,
-            sub_total: Number(order.totalAmount) || 0,
-            length: Number(order.totalAmount) > 2000 ? 25 : Number(order.totalAmount) > 1000 ? 20 : 15,
-            breadth: Number(order.totalAmount) > 2000 ? 25 : Number(order.totalAmount) > 1000 ? 20 : 15,
-            height: Number(order.totalAmount) > 2000 ? 20 : Number(order.totalAmount) > 1000 ? 15 : 10,
-            weight: (order.items as any[]).reduce((acc, item) => acc + (Number(item.quantity) || 0.1), 0) || 0.5
+            total_discount: Number(order.discountAmount) || 0,
+            sub_total: calculatedSubTotal,
+            length: Number(calculatedSubTotal) > 2000 ? 25 : Number(calculatedSubTotal) > 1000 ? 20 : 15,
+            breadth: Number(calculatedSubTotal) > 1000 ? 20 : 15,
+            height: Number(calculatedSubTotal) > 1000 ? 15 : 10,
+            weight: Number(calculatedSubTotal) > 1000 ? 1.0 : 0.5
         };
 
         // 3. Create Order in Shiprocket

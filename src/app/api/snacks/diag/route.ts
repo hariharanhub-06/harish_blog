@@ -49,31 +49,37 @@ export async function GET() {
         const { getShiprocketToken } = await import("@/lib/shiprocket");
         const token = await getShiprocketToken();
 
-        // Try the standard endpoint (no trailing slash)
-        let srRes = await fetch("https://apiv2.shiprocket.in/v1/external/settings/get/pickup", {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
+        // Try the standard endpoint
+        const endpoints = [
+            "https://apiv2.shiprocket.in/v1/external/settings/get/pickup",
+            "https://apiv2.shiprocket.in/v1/external/settings/get/all_pickup_locations"
+        ];
 
-        // Fallback for some API versions
-        if (!srRes.ok) {
-            srRes = await fetch("https://apiv2.shiprocket.in/v1/external/pickup/locations", {
+        let results: any[] = [];
+
+        for (const url of endpoints) {
+            const srRes = await fetch(url, {
                 headers: { "Authorization": `Bearer ${token}` }
+            });
+            const srData = await srRes.json().catch(() => ({ msg: "Could not parse JSON" }));
+            results.push({
+                url,
+                status: srRes.status,
+                data: srData
             });
         }
 
-        if (srRes.ok) {
-            const srData = await srRes.json();
-            // The structure is usually { data: { shipping_address: [...] } } or { data: [...] }
-            const addresses = srData.data?.shipping_address || srData.data || [];
+        diag.shiprocket_diagnostics = results;
+
+        // Extract names from any successful response
+        const successful = results.find(r => r.status === 200);
+        if (successful) {
+            const addresses = successful.data.data?.shipping_address || successful.data.data || [];
             diag.shiprocket_pickup_locations = Array.isArray(addresses)
                 ? addresses.map((a: any) => a.pickup_location || a.nickname || JSON.stringify(a))
-                : [JSON.stringify(srData)];
+                : [JSON.stringify(successful.data)];
         } else {
-            diag.shiprocket_pickup_locations = {
-                status: "FAIL",
-                statusText: srRes.statusText,
-                url: srRes.url
-            };
+            diag.shiprocket_pickup_locations = { status: "FAIL", results };
         }
     } catch (e: any) {
         diag.shiprocket_pickup_locations = { status: "ERROR", message: e.message };

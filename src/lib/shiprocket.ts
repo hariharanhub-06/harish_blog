@@ -45,11 +45,24 @@ export async function createShiprocketOrder(orderData: any) {
         body: JSON.stringify(orderData),
     });
 
-    const result = await response.json();
+    const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        console.error("Shiprocket Create Order Failed:", result);
-        throw new Error(result.message || "Failed to create order in Shiprocket");
+        console.error("Shiprocket Create Order Failed Details:", {
+            status: response.status,
+            result: result
+        });
+
+        // If there are specific field errors, format them nicely
+        let errorMessage = result.message || "Failed to create order in Shiprocket";
+        if (result.errors) {
+            const errorDetails = Object.entries(result.errors)
+                .map(([field, msgs]) => `${field}: ${(msgs as string[]).join(", ")}`)
+                .join(" | ");
+            errorMessage = `${errorMessage} (${errorDetails})`;
+        }
+
+        throw new Error(errorMessage);
     }
 
     return result;
