@@ -19,7 +19,8 @@ import {
     Ticket,
     ShoppingBag,
     Package,
-    PieChart
+    PieChart,
+    FileText
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -31,9 +32,10 @@ import SnacksProductModule from "@/components/admin/SnacksProductModule";
 import SnacksOrdersModule from "@/components/admin/SnacksOrdersModule";
 import SnacksOverviewModule from "@/components/admin/SnacksOverviewModule";
 import CouponsModule from "@/components/admin/CouponsModule";
+import BillingModule from "@/components/admin/BillingModule";
 
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons";
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -46,7 +48,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons"];
+        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -104,6 +106,7 @@ export default function AdminDashboard() {
         { id: "snacks-products", title: "Snack Inventory", icon: Package, color: "bg-pink-300" },
         { id: "snacks-orders", title: "Snack Orders", icon: ShoppingBag, color: "bg-pink-400", badge: pendingOrdersCount },
         { id: "coupons", title: "Snack Coupons", icon: Ticket, color: "bg-blue-600" },
+        { id: "billing", title: "Billing / Invoice", icon: FileText, color: "bg-orange-500" },
     ];
 
     const renderContent = () => {
@@ -116,6 +119,7 @@ export default function AdminDashboard() {
             case "snacks-orders": return <SnacksOrdersModule />;
             case "snacks-overview": return <SnacksOverviewModule />;
             case "coupons": return <CouponsModule />;
+            case "billing": return <BillingModule />;
             default: return <OverviewModule />;
         }
     };

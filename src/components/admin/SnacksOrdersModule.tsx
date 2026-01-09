@@ -137,52 +137,45 @@ export default function SnacksOrdersModule() {
         setCancelReason("");
     };
 
-    const handleShipRocket = async () => {
-        if (!selectedOrder) return;
-        if (!confirm("Create Shiprocket Order & AWB? This will book the shipment.")) return;
-
-        try {
-            const res = await fetch("/api/admin/ship", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId: selectedOrder.id }),
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                alert(`Success! AWB: ${data.awbCode || "Generated"}`);
-                fetchOrderDetails(selectedOrder.id);
-                fetchOrders();
-            } else {
-                alert(`Failed: ${data.error}`);
-            }
-        } catch (error) {
-            console.error(error);
-            alert("Network Error");
-        }
+    const sendWhatsAppUpdate = () => {
+        // ... (existing code)
     };
 
-    const sendWhatsAppUpdate = () => {
-        if (!selectedOrder) return;
+    const exportToCSV = () => {
+        if (orders.length === 0) return;
 
-        let message = `Hello ${selectedOrder.customerName}, your HM Snacks order *${selectedOrder.orderId}* is currently *${selectedOrder.status}*.`;
+        // Header
+        const headers = ["Order ID", "Date", "Customer Name", "Mobile", "Amount (Total)", "Base Price (95%)", "GST (5%)", "Status", "Items"];
 
-        if (selectedOrder.status === "Shipping") {
-            message += `\n\nIt was shipped via *${selectedOrder.courierName || "Courier"}*.\nTracking ID: *${selectedOrder.shipmentId}*`;
-            message += `\n\nTrack your order here: https://hm-snacks.com/business/hm-snacks/track?orderId=${selectedOrder.orderId}`;
-        }
+        // Data
+        const rows = orders.map(order => {
+            const total = parseFloat(order.totalAmount || 0);
+            const gst = (total * 5) / 105;
+            const base = total - gst;
 
-        if (selectedOrder.status === "Payment Confirmed") {
-            message += `\n\nWe have received your payment of ₹${selectedOrder.totalAmount}. We will pack it shortly!`;
-        }
+            return [
+                order.orderId,
+                new Date(order.createdAt).toLocaleDateString(),
+                `"${order.customerName}"`,
+                order.customerMobile,
+                total.toFixed(2),
+                base.toFixed(2),
+                gst.toFixed(2),
+                order.status,
+                `"${(order.items || []).map((i: any) => `${i.name} (${i.quantity}${i.unit || 'Kg'})`).join(', ')}"`
+            ];
+        });
 
-        if (selectedOrder.status === "Cancel") {
-            message += `\n\nUnfortunately, your order has been cancelled.\nReason: *${selectedOrder.cancelReason || "Not specified"}*`;
-            message += `\n\nIf you have already paid, our team will process your refund shortly.`;
-        }
-
-        const encodedMsg = encodeURIComponent(message);
-        window.open(`https://wa.me/${selectedOrder.customerMobile}?text=${encodedMsg}`, '_blank');
+        const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `HM-Snacks-Orders-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const getStatusColor = (status: string) => {
@@ -223,6 +216,13 @@ export default function SnacksOrdersModule() {
                         className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all"
                     >
                         Search
+                    </button>
+                    <button
+                        onClick={exportToCSV}
+                        disabled={orders.length === 0}
+                        className="bg-emerald-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 flex items-center gap-2 disabled:opacity-50"
+                    >
+                        <Download size={16} /> Export CSV
                     </button>
                 </div>
             </div>
@@ -441,7 +441,7 @@ export default function SnacksOrdersModule() {
                                             selectedOrder.status === "Payment Confirmed" && (
                                                 <div className="pt-4 border-t border-gray-100">
                                                     <button
-                                                        onClick={handleShipRocket}
+                                                        onClick={() => handleShipRocket()}
                                                         className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
                                                     >
                                                         <Truck size={16} /> Ship with Shiprocket

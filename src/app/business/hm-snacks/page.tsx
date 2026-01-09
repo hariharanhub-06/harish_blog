@@ -12,6 +12,12 @@ import { useSearchParams } from "next/navigation";
 // Category Tabs
 const CATEGORIES = ["All", "Savories", "Sweets", "Spices", "Ready to Eat"];
 
+export const metadata = {
+    title: "HM Snacks | Authentic Traditional Indian Snacks Online",
+    description: "Shop premium quality murukku, sweets, and spices from HM Snacks. 5 generations of heritage, delivered globally from Coimbatore.",
+    keywords: ["Indian snacks online", "buy murukku online", "traditional sweets", "HM Snacks", "Coimbatore snacks"],
+};
+
 function HMSnacksContent() {
     const { addToCart, toggleWishlist, isInWishlist } = useCart();
     const [products, setProducts] = useState<any[]>([]);

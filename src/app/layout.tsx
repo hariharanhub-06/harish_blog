@@ -12,9 +12,10 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://harishblog.fyi'), // Replace with actual domain when known
-  title: "Hari Haran Jeyaramamoorthy | Web Developer & Business Consultant",
-  description: "Professional portfolio of Hari Haran Jeyaramamoorthy, featuring web development projects, Career journey, and technical insights.",
+  metadataBase: new URL('https://harishblog.fyi'),
+  title: "Hari Haran Jeyaramamoorthy | Developer & Consultant",
+  description: "Portfolio of Hari Haran J.; specializing in HM Snacks (E-commerce) & HM Tech (Software Solutions). Small Scale ➜ Big Scale.",
+  keywords: ["Hari Haran Jeyaramamoorthy", "Web Developer", "Business Consultant", "HM Snacks", "HM Tech"],
   icons: {
     icon: [
       { url: "/hh-gold-logo.png" },
@@ -25,14 +26,6 @@ export const metadata: Metadata = {
   },
   other: {
     "google-adsense-account": "ca-pub-8379879880114790",
-  },
-  openGraph: {
-    title: "Hari Haran Jeyaramamoorthy Portfolio",
-    description: "Web/App Developer | Business Consultant | Job Placement Expert",
-    url: "https://harishblog.fyi", // Placeholder
-    siteName: "HariHaran Portfolio",
-    locale: "en_US",
-    type: "website",
   },
 };
 
