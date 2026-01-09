@@ -3,7 +3,10 @@ const SHIPROCKET_PASSWORD = process.env.SHIPROCKET_PASSWORD;
 
 // Helper to get authenticated token
 export async function getShiprocketToken() {
-    if (!SHIPROCKET_EMAIL || !SHIPROCKET_PASSWORD) {
+    const email = SHIPROCKET_EMAIL;
+    const password = SHIPROCKET_PASSWORD;
+
+    if (!email || !password) {
         throw new Error("Shiprocket credentials missing");
     }
 
@@ -12,15 +15,16 @@ export async function getShiprocketToken() {
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-            email: SHIPROCKET_EMAIL,
-            password: SHIPROCKET_PASSWORD,
-        }),
+        body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
-        const error = await response.text();
-        console.error("Shiprocket Login Failed:", error);
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Shiprocket Auth Failed:", {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorData
+        });
         throw new Error("Failed to authenticate with Shiprocket");
     }
 
