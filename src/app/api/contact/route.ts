@@ -1,3 +1,5 @@
+import { db } from "@/db";
+import { contactSubmissions } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { sendPushNotification } from "@/lib/push-admin";
 
