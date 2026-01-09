@@ -24,7 +24,6 @@ export const metadata: Metadata = {
     shortcut: "/hh-gold-logo.png",
     apple: "/hh-gold-logo.png",
   },
-},
 };
 
 import ClientLayout from "@/components/ClientLayout";
