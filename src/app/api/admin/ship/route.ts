@@ -33,15 +33,26 @@ export async function POST(req: NextRequest) {
 
         const orderDate = order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] + ' 10:00' : new Date().toISOString().split('T')[0] + ' 10:00';
 
-        const orderItems = (itemsRaw as any[]).map(item => ({
-            name: item.name || "Product",
-            sku: String(item.id || item.name || Math.random()),
-            units: 1, // Shiprocket 'units' is count of items. For loose weight, we treat each line as 1 unit.
-            selling_price: Number(item.price || item.pricePerKg) || 0,
-            discount: 0,
-            tax: 0,
-            hsn: 4412 // Dummy HSN
-        }));
+        const orderItems = (itemsRaw as any[]).map(item => {
+            const isPcs = (item.unit === "Pcs" || item.unit === "Piece");
+            const units = isPcs ? Math.max(1, Math.floor(Number(item.quantity) || 1)) : 1;
+
+            // If it's Kg, we treat as 1 unit of that total weight/price line
+            // If it's Pcs, selling_price is price per piece, and units is quantity.
+            const selling_price = isPcs
+                ? (Number(item.price) || 0)
+                : (Number(item.price || item.pricePerKg) || 0) * (Number(item.quantity) || 1);
+
+            return {
+                name: item.name || "Product",
+                sku: String(item.id || item.name || Math.random()),
+                units: units,
+                selling_price: Math.round(selling_price * 100) / 100, // Keep 2 decimals
+                discount: 0,
+                tax: 0,
+                hsn: 4412 // Dummy HSN
+            };
+        });
 
         // Sanitize Phone Number: must be exactly 10 digits
         const cleanPhone = (order.customerMobile || "").replace(/\D/g, "");
