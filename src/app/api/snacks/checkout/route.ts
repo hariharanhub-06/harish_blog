@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { snackOrders } from "@/db/schema";
 import { eq, desc, and, or, ilike, sql, count } from "drizzle-orm";
-import { sendPushNotification } from "@/lib/push-admin";
+import { sendWhatsAppAlert } from "@/lib/whatsapp-relay";
 
 export async function POST(req: NextRequest) {
     try {
@@ -38,10 +38,10 @@ export async function POST(req: NextRequest) {
             status: "Pending Verification",
         }).returning();
 
-        // Trigger Push Notification to Admin
-        const pushTitle = `New Order: ${orderId}`;
-        const pushBody = `From ${customer.name} - Total: ₹${totalAmount}`;
-        await sendPushNotification(pushTitle, pushBody, "/admin/dashboard#snacks-orders");
+        // Trigger WhatsApp Alert to Admin
+        const itemsList = items.map((item: any) => `- ${item.name} (${item.quantity}${item.unit})`).join('\n');
+        const alertMessage = `🛍️ *New Order Received!* 🍿\n\n*ID:* \`${orderId}\`\n*Customer:* ${customer.name}\n*Total:* ₹${totalAmount}\n*Payment:* ${paymentMethod} (${utr})\n\n*Items:*\n${itemsList}\n\n*Address:* ${customer.address}, ${customer.city}`;
+        await sendWhatsAppAlert(alertMessage);
 
         return NextResponse.json({
             orderId: orderId,
