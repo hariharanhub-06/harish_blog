@@ -24,6 +24,7 @@
     "react-dom": "19.2.3",
     "recharts": "^3.6.0",
     "tailwind-merge": "^3.4.0",
+    "twilio": "^5.11.2",
     "vanilla-tilt": "^1.8.1"
   },
   "devDependencies": {

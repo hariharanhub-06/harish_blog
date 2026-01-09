@@ -43,9 +43,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-      </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased text-text`}>
         <AuthProvider>
           <CartProvider>

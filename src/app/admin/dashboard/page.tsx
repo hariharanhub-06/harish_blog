@@ -31,8 +31,7 @@ import SnacksProductModule from "@/components/admin/SnacksProductModule";
 import SnacksOrdersModule from "@/components/admin/SnacksOrdersModule";
 import SnacksOverviewModule from "@/components/admin/SnacksOverviewModule";
 import CouponsModule from "@/components/admin/CouponsModule";
-import { requestNotificationPermission } from "@/lib/push-notifications";
-import { Bell, BellOff } from "lucide-react";
+import CouponsModule from "@/components/admin/CouponsModule";
 
 
 type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons";
@@ -44,10 +43,6 @@ export default function AdminDashboard() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
-    const [pushEnabled, setPushEnabled] = useState(false);
-    const [isPushLoading, setIsPushLoading] = useState(false);
-    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-    const [showInstallBtn, setShowInstallBtn] = useState(false);
 
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
@@ -70,67 +65,12 @@ export default function AdminDashboard() {
             }
         };
 
-        const handleBeforeInstallPrompt = (e: any) => {
-            e.preventDefault();
-            setDeferredPrompt(e);
-            setShowInstallBtn(true);
-        };
-
-        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
         fetchAllCounts();
         const interval = setInterval(fetchAllCounts, 60000); // Poll every 60s
 
-        // Register Service Worker for PWA/Push
-        if ('serviceWorker' in navigator && user) {
-            navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                .then((registration) => {
-                    console.log('Service Worker registered with scope:', registration.scope);
-                })
-                .catch((err) => {
-                    console.error('Service Worker registration failed:', err);
-                });
-        }
-
-        // Check if push is already granted
-        if (typeof window !== "undefined" && "Notification" in window) {
-            setPushEnabled(Notification.permission === "granted");
-        }
-
-        return () => {
-            clearInterval(interval);
-            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        };
+        return () => clearInterval(interval);
     }, [user]);
 
-    const handleInstallApp = async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            setShowInstallBtn(false);
-        }
-        setDeferredPrompt(null);
-    };
-
-    const handleEnableNotifications = async () => {
-        setIsPushLoading(true);
-        try {
-            const token = await requestNotificationPermission();
-            if (token) {
-                // Save token to backend
-                await fetch("/api/admin/push-token", {
-                    method: "POST",
-                    body: JSON.stringify({ token, deviceType: window.innerWidth < 768 ? "mobile" : "desktop" }),
-                });
-                setPushEnabled(true);
-            }
-        } catch (err) {
-            console.error("Failed to enable push notifications", err);
-        } finally {
-            setIsPushLoading(false);
-        }
-    };
 
 
 
@@ -227,16 +167,7 @@ export default function AdminDashboard() {
                     ))}
                 </nav>
 
-                <div className="p-6 border-t border-gray-50 space-y-3">
-                    {showInstallBtn && (
-                        <button
-                            onClick={handleInstallApp}
-                            className="w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm text-primary bg-primary/5 hover:bg-primary/10 transition-all border border-primary/20"
-                        >
-                            <ShoppingBag size={20} className="animate-bounce" />
-                            <span>Install Admin App</span>
-                        </button>
-                    )}
+                <div className="p-6 border-t border-gray-50">
                     <button
                         onClick={() => logout()}
                         className="w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm text-red-500 hover:bg-red-50 transition-all"
@@ -263,27 +194,6 @@ export default function AdminDashboard() {
                             </h2>
                         </div>
                         <div className="flex items-center space-x-6">
-                            {/* Push Notification Toggle */}
-                            <button
-                                onClick={handleEnableNotifications}
-                                disabled={pushEnabled || isPushLoading}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${pushEnabled
-                                    ? "text-emerald-500 bg-emerald-50"
-                                    : "text-amber-500 bg-amber-50 hover:bg-amber-100 animate-pulse"
-                                    }`}
-                                title={pushEnabled ? "Notifications Active" : "Enable Alerts"}
-                            >
-                                {isPushLoading ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                ) : pushEnabled ? (
-                                    <Bell size={14} />
-                                ) : (
-                                    <BellOff size={14} />
-                                )}
-                                <span className="hidden sm:inline">
-                                    {pushEnabled ? "Alerts On" : "Enable Alerts"}
-                                </span>
-                            </button>
 
                             <Link href="/" target="_blank" className="text-secondary hover:text-primary transition-colors">
                                 <ExternalLink size={20} />
