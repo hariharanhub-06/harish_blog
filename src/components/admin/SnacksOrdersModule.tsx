@@ -425,34 +425,34 @@ export default function SnacksOrdersModule() {
                         className="relative bg-white w-full max-w-4xl rounded-[3rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
                     >
                         {/* Modal Header */}
-                        <div className="p-8 md:p-12 border-b border-gray-100 flex justify-between items-center bg-[#fafafa]">
-                            <div className="flex items-center gap-6">
-                                <div className="w-16 h-16 bg-pink-500 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-pink-200">
-                                    <Package size={32} />
+                        <div className="p-4 md:p-12 border-b border-gray-100 flex justify-between items-center bg-[#fafafa]">
+                            <div className="flex items-center gap-3 md:gap-6">
+                                <div className="w-12 h-12 md:w-16 md:h-16 bg-pink-500 rounded-2xl md:rounded-3xl flex items-center justify-center text-white shadow-xl shadow-pink-200 flex-shrink-0">
+                                    <Package size={24} className="md:w-8 md:h-8" />
                                 </div>
-                                <div className="flex flex-col">
-                                    <h3 className="text-3xl font-black text-gray-900 tracking-tighter italic">{selectedOrder.orderId}</h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${getStatusColor(selectedOrder.status)}`}>
+                                <div className="flex flex-col min-w-0">
+                                    <h3 className="text-xl md:text-3xl font-black text-gray-900 tracking-tighter italic truncate">{selectedOrder.orderId}</h3>
+                                    <div className="flex flex-wrap items-center gap-2 mt-0.5 md:mt-1">
+                                        <span className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest ${getStatusColor(selectedOrder.status)}`}>
                                             {selectedOrder.status}
                                         </span>
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">• {new Date(selectedOrder.createdAt).toLocaleString()}</span>
+                                        <span className="text-[8px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">• {new Date(selectedOrder.createdAt).toLocaleString()}</span>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button onClick={sendWhatsAppUpdate} className="p-4 bg-green-500 text-white hover:bg-green-600 rounded-2xl transition-all shadow-lg shadow-green-200" title="Send WhatsApp Update">
-                                    <Phone size={24} />
+                                <button onClick={sendWhatsAppUpdate} className="p-3 md:p-4 bg-green-500 text-white hover:bg-green-600 rounded-xl md:rounded-2xl transition-all shadow-lg shadow-green-200 flex-shrink-0" title="Send WhatsApp Update">
+                                    <Phone size={20} className="md:w-6 md:h-6" />
                                 </button>
-                                <button onClick={() => setSelectedOrder(null)} className="p-4 hover:bg-gray-200 rounded-2xl transition-all">
-                                    <X size={24} className="text-gray-400" />
+                                <button onClick={() => setSelectedOrder(null)} className="p-3 md:p-4 hover:bg-gray-200 rounded-xl md:rounded-2xl transition-all flex-shrink-0">
+                                    <X size={20} className="text-gray-400 md:w-6 md:h-6" />
                                 </button>
                             </div>
                         </div>
 
                         {/* Modal Content */}
-                        <div className="flex-grow overflow-y-auto p-8 md:p-12 space-y-12">
-                            <div className="grid md:grid-cols-2 gap-12">
+                        <div className="flex-grow overflow-y-auto p-4 md:p-12 space-y-8 md:space-y-12">
+                            <div className="grid md:grid-cols-2 gap-8 md:gap-12">
                                 {/* Customer Info */}
                                 <div className="space-y-8">
                                     <h4 className="text-[10px] font-black uppercase tracking-widest text-pink-500 bg-pink-50 w-fit px-4 py-1.5 rounded-full">Customer Intelligence</h4>
@@ -484,18 +484,18 @@ export default function SnacksOrdersModule() {
                                 {/* Logistics / Payment */}
                                 <div className="space-y-8">
                                     <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 w-fit px-4 py-1.5 rounded-full">Logistics & Payments</h4>
-                                    <div className="p-8 bg-gray-50 rounded-[2rem] space-y-6">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Payment (UTR)</span>
-                                            <span className="text-xs font-black text-gray-900 tracking-tight">{selectedOrder.paymentId || "PENDING"}</span>
+                                    <div className="p-5 md:p-8 bg-gray-50 rounded-[1.5rem] md:rounded-[2rem] space-y-5 md:space-y-6">
+                                        <div className="flex justify-between items-center gap-4">
+                                            <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Payment (UTR)</span>
+                                            <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight truncate">{selectedOrder.paymentId || "PENDING"}</span>
                                         </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Courier</span>
-                                            <span className="text-xs font-black text-gray-900 tracking-tight">{selectedOrder.courierName || "UNASSIGNED"}</span>
+                                        <div className="flex justify-between items-center gap-4">
+                                            <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Courier</span>
+                                            <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight truncate">{selectedOrder.courierName || "UNASSIGNED"}</span>
                                         </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Tracking Info</span>
-                                            <span className="text-xs font-black text-gray-900 tracking-tight font-mono">{selectedOrder.shipmentId || "UNASSIGNED"}</span>
+                                        <div className="flex justify-between items-center gap-4">
+                                            <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Tracking Info</span>
+                                            <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight font-mono truncate">{selectedOrder.shipmentId || "UNASSIGNED"}</span>
                                         </div>
                                         {selectedOrder.status === "Cancel" && (
                                             <div className="pt-4 border-t border-rose-100">
@@ -577,14 +577,14 @@ export default function SnacksOrdersModule() {
                         </div>
 
                         {/* Modal Footer - Status Actions */}
-                        <div className="p-8 bg-[#fafafa] border-t border-gray-100 flex flex-wrap gap-3 items-center">
-                            <div className="flex flex-wrap gap-3 flex-grow">
+                        <div className="p-4 md:p-8 bg-[#fafafa] border-t border-gray-100 flex flex-wrap gap-2 md:gap-3 items-center">
+                            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 md:gap-3 flex-grow">
                                 {STATUSES.filter(s => s !== "All").map(s => (
                                     <button
                                         key={s}
                                         onClick={() => handleUpdateStatus(selectedOrder.id, s)}
-                                        className={`px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedOrder.status === s
-                                            ? "bg-gray-900 text-white shadow-xl scale-105"
+                                        className={`px-3 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all ${selectedOrder.status === s
+                                            ? "bg-gray-900 text-white shadow-xl scale-[1.02] md:scale-105"
                                             : "bg-white text-gray-400 border border-gray-200 hover:border-gray-900 hover:text-gray-900"
                                             }`}
                                     >
@@ -594,10 +594,10 @@ export default function SnacksOrdersModule() {
                             </div>
                             <button
                                 onClick={() => handleDeleteOrder(selectedOrder.id)}
-                                className="p-4 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-2xl transition-all border border-rose-100 ml-auto"
+                                className="p-3 md:p-4 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl md:rounded-2xl transition-all border border-rose-100 ml-auto flex-shrink-0"
                                 title="Delete Order"
                             >
-                                <Trash2 size={24} />
+                                <Trash2 size={20} className="md:w-6 md:h-6" />
                             </button>
                         </div>
                     </motion.div>
