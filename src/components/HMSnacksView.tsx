@@ -113,11 +113,11 @@ function HMSnacksContent() {
             </section>
 
             {/* About Section */}
-            <section className="container mx-auto px-6 py-24">
+            <section className="container mx-auto px-6 py-12">
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
                     <div className="relative group">
-                        <div className="absolute -inset-4 bg-pink-100/50 rounded-[3rem] -z-10 group-hover:scale-105 transition-transform duration-700" />
-                        <div className="relative aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl">
+                        <div className="absolute -inset-4 bg-pink-100/50 rounded-3xl -z-10 group-hover:scale-105 transition-transform duration-700" />
+                        <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl">
                             <Image
                                 src="/images/business/hm-snacks/heritage-shelf.jpg"
                                 fill
@@ -165,7 +165,7 @@ function HMSnacksContent() {
             </section>
 
             {/* Products Section */}
-            <section id="products" className="container mx-auto px-6 py-24 border-t border-gray-100">
+            <section id="products" className="container mx-auto px-6 py-12 border-t border-gray-100">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
                     <div className="space-y-4">
                         <h2 className="text-2xl md:text-6xl font-black text-gray-900 tracking-tight">Our <span className="text-pink-500 italic">Collection</span></h2>
@@ -194,7 +194,7 @@ function HMSnacksContent() {
                         <Tilt key={product.id} options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
                             <div
                                 onClick={() => openModal(product)}
-                                className="group bg-white rounded-xl md:rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
+                                className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
                             >
                                 {/* Image Holder */}
                                 <div className="relative h-40 md:h-72 overflow-hidden bg-gray-50 flex items-center justify-center">
@@ -363,7 +363,7 @@ function HMSnacksContent() {
             </section>
 
             {/* Brand Values / Taglines */}
-            <section className="bg-gray-950 py-24 relative overflow-hidden" >
+            <section className="bg-gray-950 py-12 relative overflow-hidden" >
                 <div className="absolute inset-0 bg-gradient-to-b from-pink-500/5 to-transparent pointer-events-none" />
                 <div className="container mx-auto px-6 relative z-10">
                     <div className="grid md:grid-cols-3 gap-16 md:gap-8">
@@ -411,9 +411,9 @@ function HMSnacksContent() {
             </section >
 
             {/* Contact Support Section */}
-            <section id="contact" className="py-24 bg-white" >
+            <section id="contact" className="py-12 bg-white" >
                 <div className="container mx-auto px-6">
-                    <div className="max-w-4xl mx-auto bg-gray-50 rounded-[3rem] p-8 md:p-16 shadow-lg border border-gray-100">
+                    <div className="max-w-4xl mx-auto bg-gray-50 rounded-3xl p-6 md:p-12 shadow-lg border border-gray-100">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">Get in <span className="text-pink-500 italic">Touch</span></h2>
                             <p className="text-gray-400 font-medium">Have a question or bulk order query? Reach out to us.</p>
@@ -501,7 +501,7 @@ function HMSnacksContent() {
                                 initial={{ opacity: 0, scale: 0.9, y: 50 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, y: 50 }}
-                                className="relative bg-white w-full max-w-5xl rounded-[3rem] overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]"
+                                className="relative bg-white w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]"
                             >
                                 {/* Close Button */}
                                 <button

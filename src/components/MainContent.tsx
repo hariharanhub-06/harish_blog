@@ -74,7 +74,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
 
     return (
-        <div className="flex flex-col gap-12 pb-8">
+        <div className="flex flex-col gap-8 pb-4">
             {/* Stats Section */}
             <section className="container mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -90,7 +90,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                         return (
                             <CardWrapper key={i} index={i}>
-                                <div className="group p-6 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:border-white transition-all duration-500 overflow-hidden relative h-full">
+                                <div className="group p-5 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:border-white transition-all duration-500 overflow-hidden relative h-full">
                                     <span className="absolute -bottom-4 -right-2 text-8xl font-black text-gray-50 group-hover:text-gray-100 transition-colors -z-10">
                                         {String(stat.value).replace('+', '')}
                                     </span>
@@ -131,7 +131,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                 {/* Professional Experience Section */}
                 {experiences.length > 0 && (
-                    <div className="mt-12 md:mt-16">
+                    <div className="mt-8 md:mt-10">
                         <div className="text-center mb-10 px-4">
                             <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase break-words px-2 leading-tight">Professional Experience</h2>
                             <div className="w-16 md:w-20 h-1.5 md:h-2 bg-blue-500 mx-auto rounded-full"></div>
@@ -156,7 +156,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                 {/* Education Section */}
                 {educations.length > 0 && (
-                    <div className="mt-12 md:mt-16">
+                    <div className="mt-8 md:mt-10">
                         <div className="text-center mb-10 px-4">
                             <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase break-words px-2 leading-tight">Education</h2>
                             <div className="w-16 md:w-20 h-1.5 md:h-2 bg-amber-500 mx-auto rounded-full"></div>
@@ -181,7 +181,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                 {/* Volunteering Section */}
                 {volunteerings && volunteerings.length > 0 && (
-                    <div className="mt-12 md:mt-16">
+                    <div className="mt-8 md:mt-10">
                         <div className="text-center mb-10 px-4">
                             <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase break-words px-2 leading-tight">Volunteering</h2>
                             <div className="w-16 md:w-20 h-1.5 md:h-2 bg-teal-500 mx-auto rounded-full"></div>
@@ -208,7 +208,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
             {/* Projects Section */}
             <section id="portfolio" className="container mx-auto px-6 scroll-mt-20">
                 <div className="flex flex-col items-center mb-10">
-                    <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight uppercase">Featured Projects</h2>
+                    <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase">Featured Projects</h2>
                     <div className="w-20 h-2 bg-accent rounded-full"></div>
                     <p className="mt-6 text-secondary text-base max-w-2xl text-center font-medium">
                         Building digital products that combine stunning design with robust business logic.
@@ -220,7 +220,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                         <CardWrapper key={project.id} index={i}>
                             <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }} className="h-full">
                                 <div
-                                    className="group flex flex-col h-full bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
+                                    className="group flex flex-col h-full bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
                                     onClick={() => setSelectedItem({ data: project, type: "project" })}
                                 >
                                     <div className="relative h-56 overflow-hidden">
@@ -238,7 +238,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                         </div>
                                     </div>
 
-                                    <div className="p-8 flex flex-col flex-grow text-left">
+                                    <div className="p-6 flex flex-col flex-grow text-left">
                                         <div className="flex flex-wrap gap-2 mb-4">
                                             {project.technologies?.slice(0, 3).map((tech: string) => (
                                                 <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-primary bg-blue-50 px-3 py-1 rounded-md">{tech}</span>
@@ -268,7 +268,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
             {/* Contact Section */}
             <section id="contact" className="container mx-auto px-6 scroll-mt-20">
-                <div className="bg-primary rounded-[3rem] p-8 md:p-12 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
+                <div className="bg-primary rounded-3xl p-6 md:p-8 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
                     <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
                     <div className="grid lg:grid-cols-2 gap-10 items-center text-left">
@@ -318,7 +318,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                             </div>
                         </div>
 
-                        <div className="bg-white p-6 md:p-10 rounded-[2rem] shadow-2xl relative">
+                        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl relative">
                             {contactStatus === "success" ? (
                                 <div className="py-12 flex flex-col items-center text-center animate-in fade-in zoom-in duration-500">
                                     <div className="bg-green-50 text-green-600 p-8 rounded-full mb-8">
@@ -364,7 +364,7 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                     </div>
                                     <button
                                         disabled={contactStatus === "loading"}
-                                        className="w-full bg-primary text-white py-5 md:py-6 rounded-[2rem] font-black text-lg md:text-xl flex items-center justify-center space-x-3 shadow-xl hover:shadow-primary/30 transition-all disabled:opacity-50"
+                                        className="w-full bg-primary text-white py-4 rounded-xl font-black text-lg md:text-xl flex items-center justify-center space-x-3 shadow-xl hover:shadow-primary/30 transition-all disabled:opacity-50"
                                     >
                                         {contactStatus === "loading" ? <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <span>Start Conversation</span>}
                                     </button>

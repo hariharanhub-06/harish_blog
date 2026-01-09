@@ -238,7 +238,7 @@ export default function SnacksOrdersModule() {
     return (
         <div className="space-y-8">
             {/* Header & Search */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
                 <div>
                     <h2 className="text-3xl font-black text-gray-900 tracking-tight">Orders Tracking</h2>
                     <p className="text-gray-400 font-medium">Manage and track customer shipments.</p>
@@ -253,19 +253,19 @@ export default function SnacksOrdersModule() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && fetchOrders()}
-                            className="w-full bg-gray-50 border-0 rounded-2xl py-4 pl-14 pr-6 focus:ring-2 focus:ring-pink-500 transition-all font-bold"
+                            className="w-full bg-gray-50 border-0 rounded-2xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-pink-500 transition-all font-bold"
                         />
                     </div>
                     <button
                         onClick={() => fetchOrders(0)}
-                        className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all"
+                        className="bg-gray-900 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all"
                     >
                         Search
                     </button>
                     <button
                         onClick={exportToCSV}
                         disabled={orders.length === 0}
-                        className="bg-emerald-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 flex items-center gap-2 disabled:opacity-50"
+                        className="bg-emerald-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 flex items-center gap-2 disabled:opacity-50"
                     >
                         <Download size={16} /> Export CSV
                     </button>
@@ -287,7 +287,7 @@ export default function SnacksOrdersModule() {
             </div>
 
             {/* Orders Table */}
-            <div className="bg-white rounded-[3rem] border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>

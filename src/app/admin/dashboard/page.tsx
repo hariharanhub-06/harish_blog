@@ -127,7 +127,7 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen bg-gray-50 flex">
             {/* Sidebar */}
-            <aside className="w-80 bg-white border-r border-gray-100 hidden lg:flex flex-col fixed inset-y-0">
+            <aside className="w-80 bg-white border-r border-gray-100 hidden lg:flex flex-col fixed inset-y-0 print:hidden">
                 <div className="p-10">
                     <Link href="/" className="text-2xl font-bold tracking-tight">
                         <span className="text-primary">Admin</span>
@@ -182,8 +182,8 @@ export default function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 lg:ml-80 w-full overflow-x-hidden min-h-screen bg-gray-50/20">
-                <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40">
+            <main className="flex-1 lg:ml-80 w-full overflow-x-hidden min-h-screen bg-gray-50/20 print:ml-0">
+                <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 print:hidden">
                     <div className="max-w-7xl mx-auto px-6 md:px-10 py-6 flex justify-between items-center">
                         <div className="flex items-center gap-4">
                             <button

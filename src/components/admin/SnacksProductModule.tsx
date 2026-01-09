@@ -175,7 +175,7 @@ export default function SnacksProductModule() {
                             stock: "",
                             isActive: true
                         })}
-                        className="flex items-center space-x-2 bg-pink-500 text-white font-black px-8 py-4 rounded-[2rem] hover:shadow-2xl transition-all"
+                        className="flex items-center space-x-2 bg-pink-500 text-white font-black px-6 py-3 rounded-2xl hover:shadow-2xl transition-all"
                     >
                         <Plus size={20} />
                         <span>Add New Snack</span>
@@ -199,15 +199,15 @@ export default function SnacksProductModule() {
             )}
 
             {editing ? (
-                <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-8 md:p-12 animate-in slide-in-from-bottom-4 duration-500">
-                    <div className="flex justify-between items-center mb-10">
-                        <h3 className="text-2xl font-black">{editing.id ? "Edit Product" : "Create New Product"}</h3>
-                        <button onClick={() => setEditing(null)} className="p-3 hover:bg-gray-100 rounded-full transition-all">
-                            <X size={28} className="text-gray-400" />
+                <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-6 md:p-8 animate-in slide-in-from-bottom-4 duration-500">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-black">{editing.id ? "Edit Product" : "Create New Product"}</h3>
+                        <button onClick={() => setEditing(null)} className="p-2 hover:bg-gray-100 rounded-full transition-all">
+                            <X size={24} className="text-gray-400" />
                         </button>
                     </div>
 
-                    <form onSubmit={handleSave} className="space-y-10">
+                    <form onSubmit={handleSave} className="space-y-6">
                         <div className="grid lg:grid-cols-2 gap-12">
                             <div className="space-y-6">
                                 <div className="space-y-2">
@@ -373,7 +373,7 @@ export default function SnacksProductModule() {
                                             type="number"
                                             value={editing.stock}
                                             onChange={(e) => setEditing({ ...editing, stock: e.target.value })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xl"
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-4 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-lg"
                                         />
                                     </div>
                                 </div>
@@ -382,7 +382,7 @@ export default function SnacksProductModule() {
 
                         <button
                             disabled={saving || uploading}
-                            className="w-full bg-gray-900 text-white py-6 rounded-[2.5rem] font-black text-xl flex items-center justify-center space-x-3 shadow-2xl transition-all active:scale-[0.98] disabled:opacity-50"
+                            className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg flex items-center justify-center space-x-3 shadow-xl transition-all active:scale-[0.98] disabled:opacity-50"
                         >
                             {saving ? <Loader2 className="animate-spin" /> : <Save size={24} />}
                             <span>{editing.id ? "Update Product" : "Publish Product"}</span>
@@ -392,8 +392,8 @@ export default function SnacksProductModule() {
             ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {products.map((product) => (
-                        <div key={product.id} className={`bg-white p-6 rounded-[2.5rem] border transition-all group relative ${product.isActive ? "border-gray-50 shadow-sm hover:shadow-xl" : "border-gray-100 opacity-60 grayscale"}`}>
-                            <div className="relative h-48 bg-gray-50 rounded-[2rem] mb-6 overflow-hidden">
+                        <div key={product.id} className={`bg-white p-4 rounded-3xl border transition-all group relative ${product.isActive ? "border-gray-50 shadow-sm hover:shadow-xl" : "border-gray-100 opacity-60 grayscale"}`}>
+                            <div className="relative h-40 bg-gray-50 rounded-2xl mb-4 overflow-hidden">
                                 {product.imageUrl ? (
                                     <Image
                                         loader={imageKitLoader}

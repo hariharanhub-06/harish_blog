@@ -109,7 +109,7 @@ export default function CouponsModule() {
             </div>
 
             {editing ? (
-                <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-8 md:p-12">
+                <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-6 md:p-8">
                     <div className="flex justify-between items-center mb-10">
                         <h3 className="text-xl font-black">{editing.id ? "Edit Coupon" : "New Coupon"}</h3>
                         <button onClick={() => setEditing(null)} className="text-secondary hover:text-red-500 transition-colors">
@@ -127,7 +127,7 @@ export default function CouponsModule() {
                                     placeholder="e.g. SAVER10"
                                     value={editing.code}
                                     onChange={(e) => setEditing({ ...editing, code: e.target.value.toUpperCase() })}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold placeholder:text-gray-300"
+                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary transition-all font-bold placeholder:text-gray-300"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -135,7 +135,7 @@ export default function CouponsModule() {
                                 <select
                                     value={editing.discountType}
                                     onChange={(e) => setEditing({ ...editing, discountType: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold"
+                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary transition-all font-bold"
                                 >
                                     <option value="percentage">Percentage (%)</option>
                                     <option value="fixed">Fixed Amount (₹)</option>
@@ -149,10 +149,10 @@ export default function CouponsModule() {
                                     placeholder={editing.discountType === 'percentage' ? "e.g. 10" : "e.g. 100"}
                                     value={editing.discountValue}
                                     onChange={(e) => setEditing({ ...editing, discountValue: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold"
+                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary transition-all font-bold"
                                 />
                             </div>
-                            <div className="flex items-center space-x-4 p-5 bg-gray-50 rounded-2xl">
+                            <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
                                 <input
                                     type="checkbox"
                                     id="isActive"
@@ -166,7 +166,7 @@ export default function CouponsModule() {
 
                         <button
                             disabled={saving}
-                            className="w-full bg-primary text-white py-6 rounded-[2rem] font-black text-xl flex items-center justify-center space-x-3 shadow-2xl transition-all disabled:opacity-50"
+                            className="w-full bg-primary text-white py-4 rounded-xl font-black text-lg flex items-center justify-center space-x-3 shadow-xl transition-all disabled:opacity-50"
                         >
                             {saving ? <Loader2 className="animate-spin" /> : <Save size={24} />}
                             <span>Save Coupon</span>
@@ -176,7 +176,7 @@ export default function CouponsModule() {
             ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {coupons.map((coupon) => (
-                        <div key={coupon.id} className={`bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden ${!coupon.isActive && 'opacity-60'}`}>
+                        <div key={coupon.id} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden ${!coupon.isActive && 'opacity-60'}`}>
                             <div className={`absolute top-0 right-0 p-4 ${coupon.isActive ? 'text-green-500' : 'text-gray-300'}`}>
                                 {coupon.isActive ? <Check size={20} /> : <X size={20} />}
                             </div>
@@ -234,7 +234,7 @@ export default function CouponsModule() {
                         </div>
                     ))}
                     {coupons.length === 0 && (
-                        <div className="col-span-full py-20 bg-gray-50 rounded-[3rem] border-4 border-dashed border-gray-100 flex flex-col items-center justify-center text-gray-400">
+                        <div className="col-span-full py-12 bg-gray-50 rounded-3xl border-4 border-dashed border-gray-100 flex flex-col items-center justify-center text-gray-400">
                             <Ticket size={48} className="mb-4 opacity-20" />
                             <p className="font-black text-xl opacity-30 uppercase tracking-widest">No Coupons Created Yet</p>
                         </div>

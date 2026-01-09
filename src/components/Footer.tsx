@@ -23,9 +23,9 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
     }
 
     return (
-        <footer className="bg-white border-t border-gray-100 py-10 transition-colors duration-300 relative z-50">
+        <footer className="bg-white border-t border-gray-100 py-6 transition-colors duration-300 relative z-50">
             <div className="container mx-auto px-6">
-                <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 mb-12">
+                <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0 mb-8">
                     <div>
                         <Link href="/" className="text-2xl font-bold text-primary">
                             HariHaran<span className="text-accent">.</span>
@@ -42,7 +42,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
                                 href={social.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-secondary hover:text-primary transition-colors p-2 bg-gray-50 rounded-full"
+                                className="text-secondary hover:text-primary transition-colors p-2 bg-gray-50 rounded-xl"
                             >
                                 <social.icon size={24} />
                             </a>
@@ -50,7 +50,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
                     </div>
                 </div>
 
-                <div className="border-t border-gray-50 pt-8 flex flex-col items-center text-center text-sm text-secondary">
+                <div className="border-t border-gray-50 pt-6 flex flex-col items-center text-center text-sm text-secondary">
                     <p>© {new Date().getFullYear()} Hari Haran Jeyaramamoorthy. All rights reserved.</p>
                 </div>
             </div>
