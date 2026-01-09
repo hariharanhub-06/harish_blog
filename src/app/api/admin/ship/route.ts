@@ -68,8 +68,13 @@ export async function POST(req: NextRequest) {
         const calculatedSubTotal = orderItems.reduce((acc, item) => acc + (item.selling_price * item.units), 0);
         const totalWeight = (order.items as any[]).reduce((acc, item) => acc + (Number(item.quantity) || 0.1), 0);
 
+        // Append a random suffix to the order_id to ensure Shirocket accepts it as a NEW order
+        // even if it was previously cancelled and re-shipped.
+        const uniqueOrderSuffix = Math.random().toString(36).substring(2, 5).toUpperCase();
+        const shiprocketUniqueOrderId = `${order.orderId}-${uniqueOrderSuffix}`;
+
         const payload = {
-            order_id: order.orderId,
+            order_id: shiprocketUniqueOrderId,
             order_date: orderDate,
             pickup_location: "Home",
             billing_customer_name: (order.customerName || "Customer").split(" ")[0],
