@@ -45,6 +45,125 @@ export default function CartPage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [smartAmount, setSmartAmount] = useState<number | null>(null);
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+    const [orderConfirmed, setOrderConfirmed] = useState<any>(null);
+
+    const [couponCode, setCouponCode] = useState("");
+    const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+    const [couponError, setCouponError] = useState("");
+    const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+    const [shipping, setShipping] = useState(0);
+
+    // Shipping Rates Configuration
+    const SHIPPING_RATES: Record<string, number> = {
+        "Tamil Nadu": 40,
+        "Kerala": 80,
+        "Andhra Pradesh": 90,
+        "Arunachal Pradesh": 90,
+        "Assam": 90,
+        "Bihar": 90,
+        "Karnataka": 90,
+        "Manipur": 90,
+        "Chhattisgarh": 200,
+        "Goa": 200,
+        "Gujarat": 200,
+        "Haryana": 200,
+        "Himachal Pradesh": 200,
+        "Jharkhand": 200,
+        "Madhya Pradesh": 200,
+        "Maharashtra": 200,
+        "Meghalaya": 200,
+        "Mizoram": 200,
+        "Nagaland": 200,
+        "Odisha": 200,
+        "Punjab": 200,
+        "Rajasthan": 200,
+        "Sikkim": 200,
+        "Telangana": 200,
+        "Uttar Pradesh": 200,
+        "Uttarakhand": 200,
+        "West Bengal": 200
+    };
+
+    const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const totalWeight = cart.reduce((acc, item) => acc + (item.unit === "Kg" ? item.quantity : 0.1), 0);
+
+    // Calculate Shipping Effect
+    useEffect(() => {
+        let ratePerKg = 200; // Default fallback for India
+        const isAbroad = formData.country.trim().toLowerCase() !== "india";
+
+        if (isAbroad) {
+            ratePerKg = 2000;
+        } else if (formData.state) {
+            const stateKey = Object.keys(SHIPPING_RATES).find(key =>
+                key.toLowerCase() === formData.state.toLowerCase()
+            );
+            if (stateKey) {
+                ratePerKg = SHIPPING_RATES[stateKey];
+            }
+        }
+
+        const baseShipping = ratePerKg * totalWeight;
+        const packagingCharge = 40;
+
+        setShipping(Math.ceil(baseShipping + packagingCharge));
+
+    }, [formData.state, formData.country, totalWeight]);
+
+    const discountAmount = appliedCoupon
+        ? (appliedCoupon.discountType === 'percentage'
+            ? Math.round(subtotal * (appliedCoupon.discountValue / 100))
+            : appliedCoupon.discountValue)
+        : 0;
+
+    const total = subtotal - discountAmount + shipping;
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode) return;
+        setIsValidatingCoupon(true);
+        setCouponError("");
+        try {
+            const res = await fetch(`/api/coupons/validate?code=${couponCode}`);
+            const data = await res.json();
+            if (res.ok && data.valid) {
+                setAppliedCoupon(data);
+                setCouponError("");
+            } else {
+                setCouponError(data.message || "Invalid coupon");
+                setAppliedCoupon(null);
+            }
+        } catch (error) {
+            setCouponError("Failed to validate coupon");
+        } finally {
+            setIsValidatingCoupon(false);
+        }
+    };
+
+    const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const pin = e.target.value;
+        setFormData({ ...formData, pincode: pin });
+
+        if (pin.length === 6) {
+            setIsPincodeLoading(true);
+            try {
+                const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+                const data = await res.json();
+                if (data[0].Status === "Success") {
+                    const postOffice = data[0].PostOffice[0];
+                    setFormData(prev => ({
+                        ...prev,
+                        city: postOffice.Block,
+                        state: postOffice.State,
+                        country: "India"
+                    }));
+                }
+            } catch (error) {
+                console.error("Pincode lookup failed", error);
+            }
+            setIsPincodeLoading(false);
+        }
+    };
 
     // Poll for Payment Status
     useEffect(() => {
