@@ -166,6 +166,36 @@ export default function SnacksOrdersModule() {
         }
     };
 
+    const handleResetShipment = async () => {
+        if (!selectedOrder) return;
+        if (!confirm("Are you sure? This will clear the Shiprocket Order ID and allow you to book a new shipment. Use this ONLY if you have cancelled the previous shipment in Shiprocket.")) return;
+
+        try {
+            const res = await fetch(`/api/snacks/orders/${selectedOrder.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    status: "Payment Confirmed",
+                    shiprocketOrderId: null,
+                    shipmentId: null,
+                    awbCode: null,
+                    courierName: null
+                }),
+            });
+
+            if (res.ok) {
+                alert("Shipment data reset successfully.");
+                fetchOrderDetails(selectedOrder.id);
+                fetchOrders();
+            } else {
+                alert("Failed to reset shipment data.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Network Error");
+        }
+    };
+
     const sendWhatsAppUpdate = () => {
         if (!selectedOrder) return;
 
@@ -481,10 +511,16 @@ export default function SnacksOrdersModule() {
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Shiprocket Order</span>
                                                     <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shadow-sm">{selectedOrder.shiprocketOrderId}</span>
                                                 </div>
-                                                <div className="flex justify-between items-center">
+                                                <div className="flex justify-between items-center mb-4">
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">AWB Code</span>
                                                     <span className="text-xs font-black text-gray-900 font-mono tracking-tight">{selectedOrder.awbCode || "Generating..."}</span>
                                                 </div>
+                                                <button
+                                                    onClick={() => handleResetShipment()}
+                                                    className="w-full py-2 bg-gray-100 text-gray-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center gap-2 border border-gray-200"
+                                                >
+                                                    <X size={14} /> Reset Shipment Data
+                                                </button>
                                             </div>
                                         ) : (
                                             selectedOrder.status === "Payment Confirmed" && (
