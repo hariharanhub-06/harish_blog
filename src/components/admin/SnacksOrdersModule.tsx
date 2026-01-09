@@ -24,7 +24,7 @@ import {
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-const STATUSES = ["All", "Payment Confirmed", "Parcel Prepared", "Shipping", "Delivered", "Cancel"];
+const STATUSES = ["All", "Payment Confirmed", "Parcel Prepared", "Shipping", "Delivered", "Cancel", "Shadow"];
 
 export default function SnacksOrdersModule() {
     const [orders, setOrders] = useState<any[]>([]);
@@ -42,7 +42,10 @@ export default function SnacksOrdersModule() {
     const fetchOrders = useCallback(async (offset = 0) => {
         setFetching(true);
         const params = new URLSearchParams();
-        if (statusFilter !== "All") params.append("status", statusFilter);
+        if (statusFilter !== "All") {
+            const apiStatus = statusFilter === "Shadow" ? "Pending Verification" : statusFilter;
+            params.append("status", apiStatus);
+        }
         if (search) params.append("search", search);
         params.append("limit", "10");
         params.append("offset", offset.toString());
@@ -231,6 +234,7 @@ export default function SnacksOrdersModule() {
             case "Delivered": return "bg-emerald-50 text-emerald-600";
             case "Cancel": return "bg-rose-50 text-rose-600";
             case "Pending Verification": return "bg-purple-50 text-purple-600 animate-pulse";
+            case "Shadow": return "bg-purple-50 text-purple-600";
             default: return "bg-gray-50 text-gray-600";
         }
     };
