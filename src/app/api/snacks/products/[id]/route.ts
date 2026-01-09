@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { snackProducts } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 
 export async function PATCH(
     req: NextRequest,
@@ -26,6 +27,7 @@ export async function PATCH(
             .returning();
 
         console.log("Product updated successfully:", updated);
+        revalidateTag('snack-products');
         return NextResponse.json(updated);
     } catch (error) {
         console.error("Update product error:", error);
@@ -44,6 +46,7 @@ export async function DELETE(
         const { id } = await params;
 
         await db.delete(snackProducts).where(eq(snackProducts.id, id));
+        revalidateTag('snack-products');
 
         return NextResponse.json({ success: true });
     } catch (error) {

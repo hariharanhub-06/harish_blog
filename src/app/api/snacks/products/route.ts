@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { snackProducts } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 
-import { unstable_cache } from "next/cache";
+import { unstable_cache, revalidateTag } from "next/cache";
 
 // Cached data fetcher
 const getCachedProducts = unstable_cache(
@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
             isActive: isActive ?? true,
         }).returning();
 
+        revalidateTag('snack-products');
         return NextResponse.json(product);
     } catch (error) {
         console.error("Create product error:", error);
