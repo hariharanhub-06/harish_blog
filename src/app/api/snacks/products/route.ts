@@ -3,6 +3,26 @@ import { db } from "@/db";
 import { snackProducts } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 
+import { unstable_cache } from "next/cache";
+
+// Cached data fetcher
+const getCachedProducts = unstable_cache(
+    async (activeOnly: boolean) => {
+        const conditions = [];
+        if (activeOnly) {
+            conditions.push(eq(snackProducts.isActive, true));
+        }
+
+        return await db
+            .select()
+            .from(snackProducts)
+            .where(conditions.length > 0 ? and(...conditions) : undefined)
+            .orderBy(desc(snackProducts.createdAt));
+    },
+    ['snack-products-list'],
+    { tags: ['snack-products'], revalidate: 3600 } // Cache for 1 hour
+);
+
 // GET all products or filter by category
 export async function GET(req: NextRequest) {
     try {
@@ -10,21 +30,12 @@ export async function GET(req: NextRequest) {
         const category = searchParams.get("category");
         const activeOnly = searchParams.get("activeOnly") === "true";
 
-        const query = db.select().from(snackProducts);
+        let products = await getCachedProducts(activeOnly);
 
-        const conditions = [];
+        // Filter in memory to avoid cache fragmentation by category
         if (category && category !== "All") {
-            conditions.push(eq(snackProducts.category, category));
+            products = products.filter(p => p.category === category);
         }
-        if (activeOnly) {
-            conditions.push(eq(snackProducts.isActive, true));
-        }
-
-        const products = await db
-            .select()
-            .from(snackProducts)
-            .where(conditions.length > 0 ? and(...conditions) : undefined)
-            .orderBy(desc(snackProducts.createdAt));
 
         return NextResponse.json(products);
     } catch (error) {
