@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { snackOrders, snackProducts } from "@/db/schema";
+import { snackOrders, snackProducts, abandonedCarts } from "@/db/schema";
 import { eq, desc, and, or, ilike, sql, count } from "drizzle-orm";
 import { sendWhatsAppAlert } from "@/lib/whatsapp-twilio";
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { items, customer, subtotal, shippingCost, discountAmount, couponCode, totalAmount, paymentMethod, utr } = body;
+        const { items, customer, subtotal, shippingCost, discountAmount, couponCode, totalAmount, paymentMethod, utr, abandonedCartId } = body;
 
         // 0. Server-side validation
         if (!customer) {
@@ -48,6 +48,18 @@ export async function POST(req: NextRequest) {
             paymentId: utr || "PENDING", // Placeholder for automated payments
             status: "Pending Verification",
         }).returning();
+
+        // 2.1 Mark abandoned cart as recovered if ID provided
+        if (abandonedCartId) {
+            try {
+                await db.update(abandonedCarts)
+                    .set({ isRecovered: true, updatedAt: new Date() })
+                    .where(eq(abandonedCarts.id, abandonedCartId));
+            } catch (recoveryErr) {
+                console.error("Failed to mark cart as recovered:", recoveryErr);
+                // Don't fail the checkout if cart recovery marking fails
+            }
+        }
 
         // 2.5 Deduct stock and check for low stock
         for (const item of items) {

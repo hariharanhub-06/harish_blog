@@ -5,21 +5,37 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
+        const getCount = async (table: any, condition: any) => {
+            try {
+                const res = await db.select({ count: count() }).from(table).where(condition);
+                return res[0].count;
+            } catch (e) {
+                console.error(`Error fetching count for table:`, e);
+                return 0;
+            }
+        };
+
         const [unreadMessages, pendingOrders, activeCoupons, pendingReviews] = await Promise.all([
-            db.select({ count: count() }).from(contactSubmissions).where(eq(contactSubmissions.status, "Fresh")),
-            db.select({ count: count() }).from(snackOrders).where(eq(snackOrders.status, "Pending Verification")),
-            db.select({ count: count() }).from(coupons).where(eq(coupons.isActive, true)),
-            db.select({ count: count() }).from(snackReviews).where(eq(snackReviews.status, "Pending"))
+            getCount(contactSubmissions, eq(contactSubmissions.status, "Fresh")),
+            getCount(snackOrders, eq(snackOrders.status, "Pending Verification")),
+            getCount(coupons, eq(coupons.isActive, true)),
+            getCount(snackReviews, eq(snackReviews.status, "Pending"))
         ]);
 
         return NextResponse.json({
-            unreadMessages: unreadMessages[0].count,
-            pendingOrders: pendingOrders[0].count,
-            activeCoupons: activeCoupons[0].count,
-            pendingReviews: pendingReviews[0].count
+            unreadMessages,
+            pendingOrders,
+            activeCoupons,
+            pendingReviews
         });
     } catch (error) {
-        console.error("GET /api/admin/notifications error:", error);
-        return NextResponse.json({ error: String(error) }, { status: 500 });
+        console.error("GET /api/admin/notifications overall error:", error);
+        return NextResponse.json({
+            unreadMessages: 0,
+            pendingOrders: 0,
+            activeCoupons: 0,
+            pendingReviews: 0,
+            error: "Degraded mode: Some data counts might be unavailable."
+        }, { status: 200 }); // Return 200 even in error to prevent dashboard crash
     }
 }

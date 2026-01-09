@@ -26,15 +26,18 @@ export async function POST(req: NextRequest) {
         }
 
         // 2. Prepare Shiprocket Payload
-        // Note: Length, Breadth, Height, Weight are placeholders or need to be approximated based on items
-        // For now, we default to a standard small box size: 10x10x10 cm, 0.5kg
+        const itemsRaw = order.items;
+        if (!Array.isArray(itemsRaw)) {
+            return NextResponse.json({ error: "Order items data is invalid or missing" }, { status: 400 });
+        }
+
         const orderDate = order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] + ' 10:00' : new Date().toISOString().split('T')[0] + ' 10:00';
 
-        const orderItems = (order.items as any[]).map(item => ({
-            name: item.name,
-            sku: item.id || item.name,
-            units: item.quantity,
-            selling_price: item.price,
+        const orderItems = (itemsRaw as any[]).map(item => ({
+            name: item.name || "Product",
+            sku: String(item.id || item.name || Math.random()),
+            units: Number(item.quantity) || 1,
+            selling_price: Number(item.price) || 0,
             discount: 0,
             tax: 0,
             hsn: 4412 // Dummy HSN
@@ -43,16 +46,16 @@ export async function POST(req: NextRequest) {
         const payload = {
             order_id: order.orderId,
             order_date: orderDate,
-            pickup_location: "Primary", // Must match a configured pickup location in Shiprocket
-            billing_customer_name: order.customerName.split(" ")[0],
-            billing_last_name: order.customerName.split(" ")[1] || "",
-            billing_address: order.address,
-            billing_city: order.city,
-            billing_pincode: order.pincode,
-            billing_state: order.state,
-            billing_country: order.country,
-            billing_email: order.customerEmail,
-            billing_phone: order.customerMobile,
+            pickup_location: "Primary",
+            billing_customer_name: (order.customerName || "Customer").split(" ")[0],
+            billing_last_name: (order.customerName || "Customer").split(" ")[1] || "",
+            billing_address: order.address || "Address",
+            billing_city: order.city || "City",
+            billing_pincode: order.pincode || "000000",
+            billing_state: order.state || "State",
+            billing_country: order.country || "India",
+            billing_email: order.customerEmail || "customer@example.com",
+            billing_phone: order.customerMobile || "0000000000",
             shipping_is_billing: true,
             order_items: orderItems,
             payment_method: "Prepaid",
@@ -60,23 +63,32 @@ export async function POST(req: NextRequest) {
             giftwrap_charges: 0,
             transaction_charges: 0,
             total_discount: 0,
-            sub_total: order.totalAmount,
-            length: 10,
-            breadth: 10,
-            height: 10,
-            weight: 0.5
+            sub_total: Number(order.totalAmount) || 0,
+            length: Number(order.totalAmount) > 2000 ? 25 : Number(order.totalAmount) > 1000 ? 20 : 15,
+            breadth: Number(order.totalAmount) > 2000 ? 25 : Number(order.totalAmount) > 1000 ? 20 : 15,
+            height: Number(order.totalAmount) > 2000 ? 20 : Number(order.totalAmount) > 1000 ? 15 : 10,
+            weight: (order.items as any[]).reduce((acc, item) => acc + (Number(item.quantity) || 0.1), 0) || 0.5
         };
 
         // 3. Create Order in Shiprocket
-        const shipResponse = await createShiprocketOrder(payload);
-        const srOrderId = shipResponse.order_id;
-        const shipmentId = shipResponse.shipment_id;
+        let srOrderId, shipmentId;
+        try {
+            const shipResponse = await createShiprocketOrder(payload);
+            srOrderId = shipResponse.order_id;
+            shipmentId = shipResponse.shipment_id;
+        } catch (e: any) {
+            console.error("Shiprocket Create Order API Failed:", e);
+            return NextResponse.json({
+                error: `Shiprocket Error: ${e.message}`,
+                details: "Check if 'Primary' pickup location is configured in Shiprocket."
+            }, { status: 400 }); // Return 400 with details instead of 500
+        }
 
         // 4. Generate AWB
         let awb = null;
         try {
             const awbResponse = await generateAWB(shipmentId);
-            awb = awbResponse.response.data.awb_code;
+            awb = awbResponse.response?.data?.awb_code || null;
         } catch (e) {
             console.error("AWB Generation warning:", e);
         }
@@ -88,14 +100,15 @@ export async function POST(req: NextRequest) {
                 shipmentId: String(shipmentId),
                 awbCode: awb,
                 courierName: "Shiprocket",
-                status: "Shipping"
+                status: "Shipping",
+                updatedAt: new Date()
             })
             .where(eq(snackOrders.id, orderId));
 
         return NextResponse.json({ success: true, shiprocketOrderId: srOrderId, awb });
 
     } catch (error: any) {
-        console.error("Shipping Error:", error);
-        return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+        console.error("Shipping Route Error:", error);
+        return NextResponse.json({ error: `Shipping Error: ${error.message}` }, { status: 500 });
     }
 }
