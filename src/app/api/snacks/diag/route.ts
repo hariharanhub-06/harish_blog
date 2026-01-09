@@ -49,10 +49,11 @@ export async function GET() {
         const { getShiprocketToken } = await import("@/lib/shiprocket");
         const token = await getShiprocketToken();
 
-        // Try the standard endpoint
+        // Try common endpoints
         const endpoints = [
             "https://apiv2.shiprocket.in/v1/external/settings/get/pickup",
-            "https://apiv2.shiprocket.in/v1/external/settings/get/all_pickup_locations"
+            "https://apiv2.shiprocket.in/v1/external/settings/get/all_pickup_locations",
+            "https://apiv2.shiprocket.in/v1/external/pickup/locations"
         ];
 
         let results: any[] = [];
