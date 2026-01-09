@@ -5,6 +5,7 @@ import { Search, Package, Truck, CheckCircle2, AlertCircle, Clock, MapPin } from
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import imageKitLoader from "@/lib/imagekitLoader";
 
 type OrderStatus = "Payment Confirmed" | "Parcel Prepared" | "Shipping" | "Delivered" | "Cancel";
 
@@ -147,7 +148,16 @@ export default function TrackOrderPage() {
                                 {order.items.map((item: any, idx: number) => (
                                     <div key={idx} className="flex items-center gap-4 md:gap-6 p-4 bg-gray-50 rounded-2xl">
                                         <div className="relative w-16 h-16 bg-white rounded-xl overflow-hidden flex-shrink-0">
-                                            {item.imageUrl && <Image src={item.imageUrl} alt={item.name} fill className="object-cover" unoptimized />}
+                                            {item.imageUrl && (
+                                                <Image
+                                                    loader={imageKitLoader}
+                                                    src={item.imageUrl}
+                                                    alt={item.name}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="64px"
+                                                />
+                                            )}
                                         </div>
                                         <div>
                                             <h4 className="font-black text-gray-900">{item.name}</h4>

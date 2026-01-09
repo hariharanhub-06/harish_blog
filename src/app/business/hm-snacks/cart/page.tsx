@@ -25,6 +25,7 @@ import {
     Ticket
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import imageKitLoader from "@/lib/imagekitLoader";
 
 export default function CartPage() {
     const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -270,7 +271,14 @@ export default function CartPage() {
                             {cart.map((item) => (
                                 <div key={item.id} className="flex flex-col sm:flex-row items-center gap-8 bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 group hover:shadow-xl transition-all">
                                     <div className="relative w-32 h-32 rounded-[2rem] overflow-hidden bg-gray-50 flex-shrink-0">
-                                        <Image src={item.imageUrl} alt={item.name} fill className="object-cover" unoptimized />
+                                        <Image
+                                            loader={imageKitLoader}
+                                            src={item.imageUrl}
+                                            alt={item.name}
+                                            fill
+                                            className="object-cover"
+                                            sizes="128px"
+                                        />
                                     </div>
                                     <div className="flex-grow text-center sm:text-left">
                                         <h3 className="text-2xl font-black text-gray-900 mb-1">{item.name}</h3>
