@@ -359,183 +359,204 @@ function HMSnacksContent() {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                    {filteredProducts.map((product) => (
-                        <Tilt key={product.id} options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
-                            <div
-                                onClick={() => openModal(product)}
-                                className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
-                            >
-                                {/* Image Holder */}
-                                <div className="relative h-40 md:h-72 overflow-hidden bg-gray-50 flex items-center justify-center">
-                                    {product.imageUrl ? (
-                                        <Image
-                                            loader={imageKitLoader}
-                                            src={product.imageUrl}
-                                            alt={product.name}
-                                            fill
-                                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-pink-100 font-black text-4xl italic px-4 text-center">
-                                            {product.name.charAt(0)}
+                    {filteredProducts.map((product) => {
+                        const productReviews = allReviews.filter(r => r.productId === product.id);
+                        const avgRating = productReviews.length > 0
+                            ? (productReviews.reduce((acc, rev) => acc + rev.rating, 0) / productReviews.length).toFixed(1)
+                            : null;
+
+                        return (
+                            <Tilt key={product.id} options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
+                                <div
+                                    onClick={() => openModal(product)}
+                                    className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
+                                >
+                                    {/* Image Holder */}
+                                    <div className="relative h-40 md:h-72 overflow-hidden bg-gray-50 flex items-center justify-center">
+                                        {product.imageUrl ? (
+                                            <Image
+                                                loader={imageKitLoader}
+                                                src={product.imageUrl}
+                                                alt={product.name}
+                                                fill
+                                                className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-pink-100 font-black text-4xl italic px-4 text-center">
+                                                {product.name.charAt(0)}
+                                            </div>
+                                        )}
+                                        {/* Badges */}
+                                        <div className="absolute top-1 left-1 md:top-6 md:left-6 flex flex-col gap-1">
+                                            <span className="bg-white/90 backdrop-blur-md text-gray-900 text-[6px] md:text-[10px] font-black px-1.5 py-0.5 md:px-3 md:py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+                                                {product.category}
+                                            </span>
                                         </div>
-                                    )}
-                                    {/* Badges */}
-                                    <div className="absolute top-1 left-1 md:top-6 md:left-6 flex flex-col gap-1">
-                                        <span className="bg-white/90 backdrop-blur-md text-gray-900 text-[6px] md:text-[10px] font-black px-1.5 py-0.5 md:px-3 md:py-1.5 rounded-full uppercase tracking-widest shadow-lg">
-                                            {product.category}
-                                        </span>
-                                    </div>
-                                    {/* Action Float Buttons */}
-                                    <div className="absolute top-6 right-6 flex flex-col gap-3 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-4 lg:group-hover:translate-x-0 transition-all duration-300">
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
-                                            className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-xl transition-all ${isInWishlist(product.id) ? "bg-pink-500 text-white" : "bg-white text-gray-900 hover:bg-pink-500 hover:text-white"
-                                                }`}
-                                            title="Add to Wishlist"
-                                        >
-                                            <Heart size={18} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); openModal(product, true); }}
-                                            className="w-10 h-10 bg-white text-gray-900 rounded-xl flex items-center justify-center hover:bg-pink-500 hover:text-white shadow-xl transition-all"
-                                            title="Write a Review"
-                                        >
-                                            <MessageSquare size={18} />
-                                        </button>
-                                        <button
-                                            onClick={async (e) => {
-                                                e.stopPropagation();
-                                                try {
-                                                    const shareUrl = `${window.location.origin}/business/hm-snacks?product=${product.id}`;
-                                                    const shareData = {
-                                                        title: product.name,
-                                                        text: `Check out ${product.name} on HM Snacks!`,
-                                                        url: shareUrl
-                                                    };
-                                                    if (navigator.share) {
-                                                        await navigator.share(shareData);
-                                                    } else {
-                                                        await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
-                                                        alert("Product link copied to clipboard!");
+                                        {/* Action Float Buttons */}
+                                        <div className="absolute top-6 right-6 flex flex-col gap-3 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-4 lg:group-hover:translate-x-0 transition-all duration-300">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
+                                                className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-xl transition-all ${isInWishlist(product.id) ? "bg-pink-500 text-white" : "bg-white text-gray-900 hover:bg-pink-500 hover:text-white"
+                                                    }`}
+                                                title="Add to Wishlist"
+                                            >
+                                                <Heart size={18} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); openModal(product, true); }}
+                                                className="w-10 h-10 bg-white text-gray-900 rounded-xl flex items-center justify-center hover:bg-pink-500 hover:text-white shadow-xl transition-all"
+                                                title="Write a Review"
+                                            >
+                                                <MessageSquare size={18} />
+                                            </button>
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    try {
+                                                        const shareUrl = `${window.location.origin}/business/hm-snacks?product=${product.id}`;
+                                                        const shareData = {
+                                                            title: product.name,
+                                                            text: `Check out ${product.name} on HM Snacks!`,
+                                                            url: shareUrl
+                                                        };
+                                                        if (navigator.share) {
+                                                            await navigator.share(shareData);
+                                                        } else {
+                                                            await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+                                                            alert("Product link copied to clipboard!");
+                                                        }
+                                                    } catch (err) {
+                                                        console.error("Share failed:", err);
                                                     }
-                                                } catch (err) {
-                                                    console.error("Share failed:", err);
-                                                }
-                                            }}
-                                            className="w-10 h-10 bg-white text-gray-900 rounded-xl flex items-center justify-center hover:bg-pink-500 hover:text-white shadow-xl transition-all"
-                                        >
-                                            <Share2 size={18} />
-                                        </button>
+                                                }}
+                                                className="w-10 h-10 bg-white text-gray-900 rounded-xl flex items-center justify-center hover:bg-pink-500 hover:text-white shadow-xl transition-all"
+                                            >
+                                                <Share2 size={18} />
+                                            </button>
+                                        </div>
+                                        {/* Quick View Overlay Text */}
+                                        <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center pb-6">
+                                            <span className="text-white text-[10px] md:text-xs font-black uppercase tracking-widest border border-white/50 px-3 py-1.5 md:px-4 md:py-2 rounded-full backdrop-blur-sm">Big View</span>
+                                        </div>
                                     </div>
-                                    {/* Quick View Overlay Text */}
-                                    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center pb-6">
-                                        <span className="text-white text-[10px] md:text-xs font-black uppercase tracking-widest border border-white/50 px-3 py-1.5 md:px-4 md:py-2 rounded-full backdrop-blur-sm">Big View</span>
-                                    </div>
-                                </div>
 
-                                {/* Content */}
-                                <div className="p-2 md:p-8 flex flex-col flex-grow">
-                                    <h3 className="text-xs md:text-2xl font-black text-gray-900 mb-0.5 md:mb-2 group-hover:text-pink-500 transition-colors line-clamp-1 leading-tight uppercase tracking-tight">
-                                        {product.name}
-                                    </h3>
-                                    <p className="hidden md:block text-gray-400 text-sm font-medium line-clamp-2 mb-6">
-                                        {product.description}
-                                    </p>
+                                    {/* Content */}
+                                    <div className="p-2 md:p-8 flex flex-col flex-grow">
+                                        <h3 className="text-xs md:text-2xl font-black text-gray-900 mb-0.5 md:mb-2 group-hover:text-pink-500 transition-colors line-clamp-1 leading-tight uppercase tracking-tight">
+                                            {product.name}
+                                        </h3>
+                                        {avgRating && (
+                                            <div className="flex items-center gap-1 mb-2 md:mb-4">
+                                                <div className="flex gap-0.5">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star
+                                                            key={i}
+                                                            size={10}
+                                                            className={i < Math.round(Number(avgRating)) ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <span className="text-[8px] md:text-[10px] font-bold text-gray-500">({productReviews.length})</span>
+                                            </div>
+                                        )}
+                                        <p className="hidden md:block text-gray-400 text-sm font-medium line-clamp-2 mb-6">
+                                            {product.description}
+                                        </p>
 
-                                    <div className="mt-auto space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex flex-col">
-                                                <span className="text-[6px] md:text-[10px] font-black uppercase tracking-[0.05em] md:tracking-widest text-gray-400">
-                                                    {product.pricePerKg ? "Per Kg" : "Per Pc"}
-                                                </span>
-                                                <div className="flex items-center gap-1">
-                                                    {product.pricePerKg ? (
-                                                        product.offerPricePerKg ? (
-                                                            <>
-                                                                <span className="text-xs md:text-2xl font-black text-pink-500 italic">₹{product.offerPricePerKg}</span>
-                                                                <span className="text-[8px] md:text-sm font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
-                                                            </>
+                                        <div className="mt-auto space-y-6">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[6px] md:text-[10px] font-black uppercase tracking-[0.05em] md:tracking-widest text-gray-400">
+                                                        {product.pricePerKg ? "Per Kg" : "Per Pc"}
+                                                    </span>
+                                                    <div className="flex items-center gap-1">
+                                                        {product.pricePerKg ? (
+                                                            product.offerPricePerKg ? (
+                                                                <>
+                                                                    <span className="text-xs md:text-2xl font-black text-pink-500 italic">₹{product.offerPricePerKg}</span>
+                                                                    <span className="text-[8px] md:text-sm font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
+                                                                </>
+                                                            ) : (
+                                                                <span className="text-xs md:text-2xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
+                                                            )
                                                         ) : (
-                                                            <span className="text-xs md:text-2xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
-                                                        )
-                                                    ) : (
-                                                        product.offerPricePerPiece ? (
-                                                            <>
-                                                                <span className="text-xs md:text-2xl font-black text-pink-500 italic">₹{product.offerPricePerPiece}</span>
-                                                                <span className="text-[8px] md:text-sm font-bold text-gray-300 line-through">₹{product.pricePerPiece}</span>
-                                                            </>
-                                                        ) : (
-                                                            <span className="text-xs md:text-2xl font-black text-gray-900 italic">₹{product.pricePerPiece}</span>
-                                                        )
-                                                    )}
+                                                            product.offerPricePerPiece ? (
+                                                                <>
+                                                                    <span className="text-xs md:text-2xl font-black text-pink-500 italic">₹{product.offerPricePerPiece}</span>
+                                                                    <span className="text-[8px] md:text-sm font-bold text-gray-300 line-through">₹{product.pricePerPiece}</span>
+                                                                </>
+                                                            ) : (
+                                                                <span className="text-xs md:text-2xl font-black text-gray-900 italic">₹{product.pricePerPiece}</span>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className={`p-1.5 md:p-2 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center gap-1 md:gap-2 ${product.stock > 0 ? "text-emerald-500 bg-emerald-50" : "text-rose-500 bg-rose-50"}`}>
+                                                    <div className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full animate-pulse ${product.stock > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
+                                                    {product.stock > 0 ? "In" : "Out"}
                                                 </div>
                                             </div>
-                                            <div className={`p-1.5 md:p-2 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center gap-1 md:gap-2 ${product.stock > 0 ? "text-emerald-500 bg-emerald-50" : "text-rose-500 bg-rose-50"}`}>
-                                                <div className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full animate-pulse ${product.stock > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
-                                                {product.stock > 0 ? "In" : "Out"}
-                                            </div>
-                                        </div>
 
-                                        <div className="grid grid-cols-2 gap-1 md:gap-3">
-                                            {product.pricePerKg ? (
-                                                <>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            const price = product.offerPricePerKg || product.pricePerKg;
-                                                            addToCart({ ...product, price, unit: "Kg" }, 0.25);
-                                                        }}
-                                                        className="bg-white border md:border-2 border-gray-100 text-gray-900 py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[7px] md:text-xs uppercase tracking-tight md:tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
-                                                    >
-                                                        <span>Buy ¼ Kg</span>
-                                                        <span className="text-[6px] md:text-[10px] mt-0.5 md:mt-1 text-gray-400 font-bold">₹{((product.offerPricePerKg || product.pricePerKg) / 4).toFixed(0)}</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            const price = product.offerPricePerKg || product.pricePerKg;
-                                                            addToCart({ ...product, price, unit: "Kg" }, 1);
-                                                        }}
-                                                        className="bg-primary text-white py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[8px] md:text-xs uppercase tracking-tight md:tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1 md:gap-2 px-1"
-                                                    >
-                                                        <ShoppingCart size={8} className="md:w-3.5 md:h-3.5 hidden md:block" />
-                                                        Add 1 Kg
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            const price = product.offerPricePerPiece || product.pricePerPiece;
-                                                            addToCart({ ...product, price, unit: "Pcs" }, 10);
-                                                        }}
-                                                        className="bg-white border md:border-2 border-gray-100 text-gray-900 py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[7px] md:text-xs uppercase tracking-tight md:tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
-                                                    >
-                                                        <span>Buy 10 Pcs</span>
-                                                        <span className="text-[6px] md:text-[10px] mt-0.5 md:mt-1 text-gray-400 font-bold">₹{((product.offerPricePerPiece || product.pricePerPiece) * 10).toFixed(0)}</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            const price = product.offerPricePerPiece || product.pricePerPiece;
-                                                            addToCart({ ...product, price, unit: "Pcs" }, 25);
-                                                        }}
-                                                        className="bg-primary text-white py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[8px] md:text-xs uppercase tracking-tight md:tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1 md:gap-2 px-1"
-                                                    >
-                                                        <ShoppingCart size={8} className="md:w-3.5 md:h-3.5 hidden md:block shrink-0" />
-                                                        <span className="whitespace-nowrap">Add 25 Pcs</span>
-                                                    </button>
-                                                </>
-                                            )}
+                                            <div className="grid grid-cols-2 gap-1 md:gap-3">
+                                                {product.pricePerKg ? (
+                                                    <>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const price = product.offerPricePerKg || product.pricePerKg;
+                                                                addToCart({ ...product, price, unit: "Kg" }, 0.25);
+                                                            }}
+                                                            className="bg-white border md:border-2 border-gray-100 text-gray-900 py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[7px] md:text-xs uppercase tracking-tight md:tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
+                                                        >
+                                                            <span>Buy ¼ Kg</span>
+                                                            <span className="text-[6px] md:text-[10px] mt-0.5 md:mt-1 text-gray-400 font-bold">₹{((product.offerPricePerKg || product.pricePerKg) / 4).toFixed(0)}</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const price = product.offerPricePerKg || product.pricePerKg;
+                                                                addToCart({ ...product, price, unit: "Kg" }, 1);
+                                                            }}
+                                                            className="bg-primary text-white py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[8px] md:text-xs uppercase tracking-tight md:tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1 md:gap-2 px-1"
+                                                        >
+                                                            <ShoppingCart size={8} className="md:w-3.5 md:h-3.5 hidden md:block" />
+                                                            Add 1 Kg
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const price = product.offerPricePerPiece || product.pricePerPiece;
+                                                                addToCart({ ...product, price, unit: "Pcs" }, 10);
+                                                            }}
+                                                            className="bg-white border md:border-2 border-gray-100 text-gray-900 py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[7px] md:text-xs uppercase tracking-tight md:tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
+                                                        >
+                                                            <span>Buy 10 Pcs</span>
+                                                            <span className="text-[6px] md:text-[10px] mt-0.5 md:mt-1 text-gray-400 font-bold">₹{((product.offerPricePerPiece || product.pricePerPiece) * 10).toFixed(0)}</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const price = product.offerPricePerPiece || product.pricePerPiece;
+                                                                addToCart({ ...product, price, unit: "Pcs" }, 25);
+                                                            }}
+                                                            className="bg-primary text-white py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[8px] md:text-xs uppercase tracking-tight md:tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1 md:gap-2 px-1"
+                                                        >
+                                                            <ShoppingCart size={8} className="md:w-3.5 md:h-3.5 hidden md:block shrink-0" />
+                                                            <span className="whitespace-nowrap">Add 25 Pcs</span>
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </Tilt>
-                    ))}
+                            </Tilt>
+                        );
+                    })}
                 </div>
             </section>
 
