@@ -57,6 +57,12 @@ export default function SnacksOrdersModule() {
     const [productSearch, setProductSearch] = useState("");
     const [creatingOrder, setCreatingOrder] = useState(false);
 
+    // Coupon State
+    const [couponCode, setCouponCode] = useState("");
+    const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+    const [couponError, setCouponError] = useState("");
+    const [validatingCoupon, setValidatingCoupon] = useState(false);
+
     useEffect(() => {
         if (showCreateModal && availableProducts.length === 0) {
             fetchProducts();
@@ -144,6 +150,28 @@ export default function SnacksOrdersModule() {
         "West Bengal": 200
     };
 
+    const handleApplyCoupon = async () => {
+        if (!couponCode) return;
+        const formattedCode = couponCode.toUpperCase().trim();
+        setValidatingCoupon(true);
+        setCouponError("");
+        try {
+            const res = await fetch(`/api/coupons/validate?code=${formattedCode}`);
+            const data = await res.json();
+            if (res.ok && data.valid) {
+                setAppliedCoupon(data);
+                setCouponError("");
+            } else {
+                setCouponError(data.message || "Invalid coupon");
+                setAppliedCoupon(null);
+            }
+        } catch (error) {
+            setCouponError("Failed to validate coupon");
+        } finally {
+            setValidatingCoupon(false);
+        }
+    };
+
     const calculateTotal = () => {
         const subtotal = createFormData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -170,9 +198,16 @@ export default function SnacksOrdersModule() {
         // Base shipping + Packaging (40)
         shipping = Math.ceil((ratePerKg * totalWeight) + 40);
 
-        const total = subtotal + shipping;
+        // Calculate Discount
+        const discountAmount = appliedCoupon
+            ? (appliedCoupon.discountType === 'percentage'
+                ? Math.round(subtotal * (appliedCoupon.discountValue / 100))
+                : appliedCoupon.discountValue)
+            : 0;
 
-        return { subtotal, shipping, total };
+        const total = subtotal - discountAmount + shipping;
+
+        return { subtotal, shipping, discountAmount, total };
     };
 
     const handleCreateSubmit = async () => {
@@ -187,7 +222,7 @@ export default function SnacksOrdersModule() {
             return;
         }
 
-        const { subtotal, shipping, total } = calculateTotal();
+        const { subtotal, shipping, discountAmount, total } = calculateTotal();
 
         const payload = {
             customer: createFormData.customer,
@@ -195,6 +230,8 @@ export default function SnacksOrdersModule() {
             totalAmount: total,
             subtotal: subtotal,
             shippingCost: shipping,
+            discountAmount: discountAmount,
+            couponCode: appliedCoupon?.code,
             paymentMethod: createFormData.paymentMethod,
             utr: createFormData.utr,
             status: createFormData.status,
@@ -1040,10 +1077,36 @@ export default function SnacksOrdersModule() {
                                             <span>Shipping ({createFormData.customer.state || "India"})</span>
                                             <span>₹{calculateTotal().shipping}</span>
                                         </div>
+                                        {appliedCoupon && (
+                                            <div className="flex justify-between items-center text-xs font-bold text-emerald-400 uppercase tracking-widest">
+                                                <span>Discount ({appliedCoupon.code})</span>
+                                                <span>-₹{calculateTotal().discountAmount}</span>
+                                            </div>
+                                        )}
                                         <div className="border-t border-gray-700 my-2 pt-2 flex justify-between items-center">
                                             <span className="font-bold text-sm uppercase tracking-widest text-white">Total Amount</span>
                                             <span className="font-black text-3xl">₹{Math.ceil(calculateTotal().total)}</span>
                                         </div>
+
+                                        {/* Coupon Input */}
+                                        <div className="pt-4 flex gap-2">
+                                            <input
+                                                placeholder="Coupon Code"
+                                                value={couponCode}
+                                                disabled={!!appliedCoupon}
+                                                onChange={e => setCouponCode(e.target.value)}
+                                                className="w-full bg-gray-800 border-0 rounded-lg px-3 py-2 text-xs font-bold text-white placeholder-gray-500 uppercase"
+                                            />
+                                            <button
+                                                onClick={handleApplyCoupon}
+                                                disabled={validatingCoupon || !couponCode || !!appliedCoupon}
+                                                className="bg-pink-500 text-white px-3 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-pink-600 disabled:opacity-50"
+                                            >
+                                                {validatingCoupon ? "..." : (appliedCoupon ? "apk" : "Apply")}
+                                            </button>
+                                        </div>
+                                        {couponError && <p className="text-[10px] text-rose-400 font-bold">{couponError}</p>}
+                                        {appliedCoupon && <p className="text-[10px] text-emerald-400 font-bold">Coupon Applied!</p>}
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
