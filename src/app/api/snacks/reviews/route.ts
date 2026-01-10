@@ -8,20 +8,25 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const productId = searchParams.get("productId");
 
-        if (!productId) {
-            return NextResponse.json({ error: "Missing productId" }, { status: 400 });
-        }
-
-        const reviews = await db
-            .select()
-            .from(snackReviews)
-            .where(
-                and(
-                    eq(snackReviews.productId, productId),
-                    eq(snackReviews.status, "Approved")
+        let reviews;
+        if (productId) {
+            reviews = await db
+                .select()
+                .from(snackReviews)
+                .where(
+                    and(
+                        eq(snackReviews.productId, productId),
+                        eq(snackReviews.status, "Approved")
+                    )
                 )
-            )
-            .orderBy(desc(snackReviews.createdAt));
+                .orderBy(desc(snackReviews.createdAt));
+        } else {
+            reviews = await db
+                .select()
+                .from(snackReviews)
+                .where(eq(snackReviews.status, "Approved"))
+                .orderBy(desc(snackReviews.createdAt));
+        }
 
         return NextResponse.json(reviews);
     } catch (error) {
