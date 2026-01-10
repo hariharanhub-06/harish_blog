@@ -147,7 +147,16 @@ export default function SnacksOrdersModule() {
         "Telangana": 200,
         "Uttar Pradesh": 200,
         "Uttarakhand": 200,
-        "West Bengal": 200
+        "West Bengal": 200,
+        // Union Territories
+        "Delhi": 200,
+        "Chandigarh": 200,
+        "Puducherry": 200,
+        "Dadra and Nagar Haveli and Daman and Diu": 200,
+        "Jammu and Kashmir": 200,
+        "Ladakh": 200,
+        "Lakshadweep": 200,
+        "Andaman and Nicobar Islands": 200
     };
 
     const handleApplyCoupon = async () => {
