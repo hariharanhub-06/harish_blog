@@ -63,6 +63,10 @@ export default function SnacksOrdersModule() {
     const [couponError, setCouponError] = useState("");
     const [validatingCoupon, setValidatingCoupon] = useState(false);
 
+    // Dynamic Shipping State
+    const [dynamicShipping, setDynamicShipping] = useState<number | null>(null);
+    const [loadingShipping, setLoadingShipping] = useState(false);
+
     useEffect(() => {
         if (showCreateModal && availableProducts.length === 0) {
             fetchProducts();
@@ -193,19 +197,26 @@ export default function SnacksOrdersModule() {
 
         // Calculate Shipping
         let shipping = 0;
-        let ratePerKg = 200; // Fallback
 
-        if (createFormData.customer.state) {
-            const stateKey = Object.keys(SHIPPING_RATES).find(key =>
-                key.toLowerCase() === createFormData.customer.state.toLowerCase()
-            );
-            if (stateKey) {
-                ratePerKg = SHIPPING_RATES[stateKey];
+        if (dynamicShipping !== null) {
+            // Use Shiprocket dynamic shipping + packaging
+            shipping = dynamicShipping + 40;
+        } else {
+            // Fallback to static rates
+            let ratePerKg = 200; // Fallback
+
+            if (createFormData.customer.state) {
+                const stateKey = Object.keys(SHIPPING_RATES).find(key =>
+                    key.toLowerCase() === createFormData.customer.state.toLowerCase()
+                );
+                if (stateKey) {
+                    ratePerKg = SHIPPING_RATES[stateKey];
+                }
             }
-        }
 
-        // Base shipping + Packaging (40)
-        shipping = Math.ceil((ratePerKg * totalWeight) + 40);
+            // Base shipping + Packaging (40)
+            shipping = Math.ceil((ratePerKg * totalWeight) + 40);
+        }
 
         // Calculate Discount
         const discountAmount = appliedCoupon
