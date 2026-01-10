@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
                 await sendWhatsAppAlert(adminMessage);
 
                 // Send invoice-like message to Customer
-                const customerMessage = `Hi ${customer.name}! 👋\n\nThank you for your order at *HM Snacks*! 🍿\n\n*Order ID:* \`${orderId}\`\n*Total:* ₹${smartTotalAmount}\n*Status:* ${paymentMethod === 'UPI' ? 'Payment Pending Verification' : 'Confirmed'}\n\nWe will notify you once shipped! 🚀\n\n_Track here:_ https://harishblog.fyi/business/hm-snacks/track?id=${orderId}`;
+                const customerMessage = `Hi ${customer.name}! 👋\n\nThank you for your order at *HM Snacks*! 🍿\n\n*Order ID:* \`${orderId}\`\n*Total:* ₹${smartTotalAmount}\n*Status:* ${paymentMethod === 'UPI' ? 'Payment Pending Verification' : 'Confirmed'}\n\nWe will notify you once shipped! 🚀\n\n_Track here:_ https://hariharanhub.com/business/hm-snacks/track?id=${orderId}`;
                 await sendWhatsAppAlert(customerMessage, customer.mobile);
             } catch (err) {
                 console.error("WhatsApp notification failed:", err);

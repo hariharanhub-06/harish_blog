@@ -12,7 +12,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://harishblog.fyi'),
+  metadataBase: new URL('https://hariharanhub.com'),
   title: "Hari Haran Jeyaramamoorthy | Developer & Consultant",
   description: "Portfolio of Hari Haran J.; specializing in HM Snacks (E-commerce) & HM Tech (Software Solutions). Small Scale ➜ Big Scale.",
   keywords: ["Hari Haran Jeyaramamoorthy", "Web Developer", "Business Consultant", "HM Snacks", "HM Tech"],
@@ -45,8 +45,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               "name": "Hari Haran Jeyaramamoorthy",
-              "url": "https://harishblog.fyi",
-              "logo": "https://harishblog.fyi/hh-gold-logo.png",
+              "url": "https://hariharanhub.com",
+              "logo": "https://hariharanhub.com/hh-gold-logo.png",
               "description": "Premium developer and business consultant specializing in E-commerce (HM Snacks) and Software Solutions (HM Tech).",
               "sameAs": [
                 "https://linkedin.com/in/hari-haran-j",
