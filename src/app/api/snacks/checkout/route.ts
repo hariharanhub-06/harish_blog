@@ -7,7 +7,7 @@ import { sendWhatsAppAlert } from "@/lib/whatsapp-twilio";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { items, customer, subtotal, shippingCost, discountAmount, couponCode, totalAmount, paymentMethod, utr, abandonedCartId } = body;
+        const { items, customer, subtotal, shippingCost, discountAmount, couponCode, totalAmount, paymentMethod, utr, abandonedCartId, status, skipNotification } = body;
 
         // 0. Server-side validation
         if (!customer) {
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
             discountAmount: discountAmount || 0,
             paymentMethod: paymentMethod || "UPI",
             paymentId: utr || "PENDING", // Placeholder for automated payments
-            status: "Pending Verification",
+            status: status || "Pending Verification",
         }).returning();
 
         // 2.1 Mark abandoned cart as recovered if ID provided
@@ -80,14 +80,14 @@ export async function POST(req: NextRequest) {
 
 
         // 3. Automated WhatsApp Invoice / Notification
-        if (paymentMethod !== "Razorpay") {
+        if (!skipNotification && paymentMethod !== "Razorpay") {
             try {
                 const itemsList = items.map((item: any) => `- ${item.name} (${item.quantity}${item.unit})`).join('\n');
                 const adminMessage = `🛍️ *New Order!* \`${orderId}\`\n\n*Customer:* ${customer.name}\n*Mobile:* ${customer.mobile}\n*Total:* ₹${totalAmount}\n\n*Items:*\n${itemsList}`;
                 await sendWhatsAppAlert(adminMessage);
 
                 // Send invoice-like message to Customer
-                const customerMessage = `Hi ${customer.name}! 👋\n\nThank you for your order at *HM Snacks*! 🍿\n\n*Order ID:* \`${orderId}\`\n*Total:* ₹${smartTotalAmount}\n*Status:* ${paymentMethod === 'UPI' ? 'Payment Pending Verification' : 'Confirmed'}\n\nWe will notify you once shipped! 🚀\n\n_Track here:_ https://hariharanhub.com/business/hm-snacks/track?id=${orderId}`;
+                const customerMessage = `Hi ${customer.name}! 👋\n\nThank you for your order at *HM Snacks*! 🍿\n\n*Order ID:* \`${orderId}\`\n*Total:* ₹${smartTotalAmount}\n*Status:* ${status || (paymentMethod === 'UPI' ? 'Payment Pending Verification' : 'Confirmed')}\n\nWe will notify you once shipped! 🚀\n\n_Track here:_ https://hariharanhub.com/business/hm-snacks/track?id=${orderId}`;
                 await sendWhatsAppAlert(customerMessage, customer.mobile);
             } catch (err) {
                 console.error("WhatsApp notification failed:", err);

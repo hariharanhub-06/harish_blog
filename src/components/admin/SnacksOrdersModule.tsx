@@ -19,7 +19,12 @@ import {
     CreditCard,
     ArrowRight,
     Trash2,
-    Download
+    ArrowRight,
+    Trash2,
+    Download,
+    Plus,
+    Minus,
+    ShoppingCart
 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -38,6 +43,137 @@ export default function SnacksOrdersModule() {
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [shippingData, setShippingData] = useState({ courier: "", tracking: "" });
     const [cancelReason, setCancelReason] = useState("");
+
+    // Create Order State
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [createFormData, setCreateFormData] = useState({
+        customer: { name: "", mobile: "", email: "", address: "", city: "", state: "", pincode: "", country: "India" },
+        items: [] as any[],
+        paymentMethod: "UPI", // UPI, Cash
+        utr: "",
+        status: "Payment Confirmed",
+        skipNotification: false
+    });
+    const [availableProducts, setAvailableProducts] = useState<any[]>([]);
+    const [productSearch, setProductSearch] = useState("");
+    const [creatingOrder, setCreatingOrder] = useState(false);
+
+    useEffect(() => {
+        if (showCreateModal && availableProducts.length === 0) {
+            fetchProducts();
+        }
+    }, [showCreateModal]);
+
+    const fetchProducts = async () => {
+        try {
+            const res = await fetch("/api/snacks/products?activeOnly=true");
+            if (res.ok) {
+                const data = await res.json();
+                setAvailableProducts(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch products", error);
+        }
+    };
+
+    const handleAddItem = (product: any) => {
+        const unit = product.offerPricePerPiece || product.pricePerPiece ? 'pack' : 'kg';
+        const price = product.offerPricePerPiece || product.pricePerPiece || product.offerPricePerKg || product.pricePerKg;
+
+        const newItem = {
+            id: product.id,
+            name: product.name,
+            imageUrl: product.imageUrl,
+            quantity: 1,
+            unit: unit,
+            price: price,
+            originalProduct: product // Keep reference for unit switching if needed? Nah, keep simple.
+        };
+
+        setCreateFormData(prev => ({
+            ...prev,
+            items: [...prev.items, newItem]
+        }));
+        setProductSearch(""); // Reset search
+    };
+
+    const handleRemoveItem = (index: number) => {
+        setCreateFormData(prev => ({
+            ...prev,
+            items: prev.items.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleUpdateItemQuantity = (index: number, delta: number) => {
+        setCreateFormData(prev => {
+            const newItems = [...prev.items];
+            const item = newItems[index];
+            const newQty = Math.max(0.25, parseFloat((item.quantity + delta).toFixed(2))); // Min 0.25
+            newItems[index] = { ...item, quantity: newQty };
+            return { ...prev, items: newItems };
+        });
+    };
+
+    const calculateTotal = () => {
+        return createFormData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    };
+
+    const handleCreateSubmit = async () => {
+        if (!createFormData.customer.name || !createFormData.customer.mobile) {
+            alert("Customer Name and Mobile are required.");
+            return;
+        }
+        if (createFormData.items.length === 0) {
+            alert("Please add at least one product.");
+            return;
+        }
+
+        setCreatingOrder(true);
+        try {
+            const totalAmount = calculateTotal();
+            const payload = {
+                customer: createFormData.customer,
+                items: createFormData.items,
+                totalAmount: totalAmount,
+                subtotal: totalAmount,
+                shippingCost: 0,
+                paymentMethod: createFormData.paymentMethod,
+                utr: createFormData.utr,
+                status: createFormData.status,
+                skipNotification: createFormData.skipNotification
+            };
+
+            const res = await fetch("/api/snacks/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                alert(`Order Created Successfully! ID: ${data.orderId}`);
+                setShowCreateModal(false);
+                fetchOrders();
+                // Reset Form
+                setCreateFormData({
+                    customer: { name: "", mobile: "", email: "", address: "", city: "", state: "", pincode: "", country: "India" },
+                    items: [],
+                    paymentMethod: "UPI",
+                    utr: "",
+                    status: "Payment Confirmed",
+                    skipNotification: false
+                });
+            } else {
+                alert(`Failed: ${data.error}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Network Error");
+        } finally {
+            setCreatingOrder(false);
+        }
+    };
 
     const fetchOrders = useCallback(async (offset = 0) => {
         setFetching(true);
@@ -298,6 +434,12 @@ export default function SnacksOrdersModule() {
                             className="w-full bg-gray-50 border-0 rounded-2xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-pink-500 transition-all font-bold"
                         />
                     </div>
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="bg-pink-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center gap-2"
+                    >
+                        <Plus size={16} /> Create Order
+                    </button>
                     <button
                         onClick={() => fetchOrders(0)}
                         className="bg-gray-900 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all"
@@ -698,6 +840,202 @@ export default function SnacksOrdersModule() {
                     </div>
                 </div>
             )}
-        </div>
+
+
+            {/* Create Order Modal */}
+            {
+                showCreateModal && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-end p-0 bg-black/30 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ x: "100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="bg-white h-full w-full max-w-2xl shadow-2xl overflow-y-auto flex flex-col"
+                        >
+                            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50 sticky top-0 z-10">
+                                <div>
+                                    <h3 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                                        <ShoppingCart className="text-pink-500" /> Create Manual Order
+                                    </h3>
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">For phone/whatsapp orders</p>
+                                </div>
+                                <button onClick={() => setShowCreateModal(false)} className="p-3 hover:bg-gray-200 rounded-xl transition-all">
+                                    <X size={24} className="text-gray-400" />
+                                </button>
+                            </div>
+
+                            <div className="p-6 md:p-8 space-y-8 flex-grow">
+                                {/* Customer Details */}
+                                <section className="space-y-4">
+                                    <h4 className="text-xs font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 pb-2">Customer Details</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input
+                                            placeholder="Name *"
+                                            value={createFormData.customer.name}
+                                            onChange={e => setCreateFormData(prev => ({ ...prev, customer: { ...prev.customer, name: e.target.value } }))}
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
+                                        />
+                                        <input
+                                            placeholder="Mobile *"
+                                            value={createFormData.customer.mobile}
+                                            onChange={e => setCreateFormData(prev => ({ ...prev, customer: { ...prev.customer, mobile: e.target.value } }))}
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
+                                        />
+                                    </div>
+                                    <input
+                                        placeholder="Address"
+                                        value={createFormData.customer.address}
+                                        onChange={e => setCreateFormData(prev => ({ ...prev, customer: { ...prev.customer, address: e.target.value } }))}
+                                        className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
+                                    />
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <input
+                                            placeholder="City"
+                                            value={createFormData.customer.city}
+                                            onChange={e => setCreateFormData(prev => ({ ...prev, customer: { ...prev.customer, city: e.target.value } }))}
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
+                                        />
+                                        <input
+                                            placeholder="State"
+                                            value={createFormData.customer.state}
+                                            onChange={e => setCreateFormData(prev => ({ ...prev, customer: { ...prev.customer, state: e.target.value } }))}
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
+                                        />
+                                        <input
+                                            placeholder="Pincode"
+                                            value={createFormData.customer.pincode}
+                                            onChange={e => setCreateFormData(prev => ({ ...prev, customer: { ...prev.customer, pincode: e.target.value } }))}
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
+                                        />
+                                    </div>
+                                </section>
+
+                                {/* Products */}
+                                <section className="space-y-4">
+                                    <h4 className="text-xs font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 pb-2">Products</h4>
+
+                                    {/* Product Search/Add */}
+                                    <div className="relative">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                        <input
+                                            placeholder="Search to add product..."
+                                            value={productSearch}
+                                            onChange={e => setProductSearch(e.target.value)}
+                                            className="w-full bg-gray-50 border-0 rounded-xl py-3 pl-10 pr-4 font-bold text-sm focus:ring-2 focus:ring-pink-500"
+                                        />
+                                        {productSearch && (
+                                            <div className="absolute z-10 w-full bg-white mt-2 rounded-xl shadow-xl border border-gray-100 max-h-60 overflow-y-auto">
+                                                {availableProducts
+                                                    .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+                                                    .map(product => (
+                                                        <div
+                                                            key={product.id}
+                                                            onClick={() => handleAddItem(product)}
+                                                            className="p-3 hover:bg-pink-50 cursor-pointer flex justify-between items-center transition-colors"
+                                                        >
+                                                            <span className="font-bold text-gray-800 text-sm">{product.name}</span>
+                                                            <span className="text-xs font-black text-pink-500">₹{product.offerPricePerPiece || product.pricePerPiece || product.offerPricePerKg || product.pricePerKg}</span>
+                                                        </div>
+                                                    ))}
+                                                {availableProducts.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).length === 0 && (
+                                                    <div className="p-3 text-center text-xs text-gray-400">No products found</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Items List */}
+                                    <div className="space-y-3">
+                                        {createFormData.items.map((item, idx) => (
+                                            <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                <div className="flex-grow">
+                                                    <p className="font-bold text-gray-900 text-sm">{item.name}</p>
+                                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">₹{item.price} / {item.unit}</p>
+                                                </div>
+                                                <div className="flex items-center gap-2 bg-white rounded-lg p-1 shadow-sm">
+                                                    <button onClick={() => handleUpdateItemQuantity(idx, -0.25)} className="p-1 hover:bg-gray-100 rounded"><Minus size={14} /></button>
+                                                    <span className="w-8 text-center font-black text-sm">{item.quantity}</span>
+                                                    <button onClick={() => handleUpdateItemQuantity(idx, 0.25)} className="p-1 hover:bg-gray-100 rounded"><Plus size={14} /></button>
+                                                </div>
+                                                <div className="font-black text-gray-900 w-16 text-right">₹{Math.ceil(item.price * item.quantity)}</div>
+                                                <button onClick={() => handleRemoveItem(idx)} className="text-gray-400 hover:text-rose-500"><X size={16} /></button>
+                                            </div>
+                                        ))}
+                                        {createFormData.items.length === 0 && (
+                                            <div className="text-center py-8 text-gray-300 font-bold text-xs uppercase tracking-widest dashed border border-gray-200 rounded-xl">
+                                                Cart is empty
+                                            </div>
+                                        )}
+                                    </div>
+                                </section>
+
+                                <section className="space-y-4">
+                                    <h4 className="text-xs font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 pb-2">Payment & Status</h4>
+                                    <div className="bg-gray-900 text-white p-6 rounded-2xl flex justify-between items-center">
+                                        <span className="font-bold text-sm uppercase tracking-widest text-gray-400">Total Amount</span>
+                                        <span className="font-black text-3xl">₹{Math.ceil(calculateTotal())}</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2 mb-1 block">Payment Method</label>
+                                            <select
+                                                value={createFormData.paymentMethod}
+                                                onChange={e => setCreateFormData(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                                                className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
+                                            >
+                                                <option value="UPI">UPI</option>
+                                                <option value="Cash">Cash</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2 mb-1 block">Initial Status</label>
+                                            <select
+                                                value={createFormData.status}
+                                                onChange={e => setCreateFormData(prev => ({ ...prev, status: e.target.value }))}
+                                                className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
+                                            >
+                                                <option value="Pending Verification">Pending Verification</option>
+                                                <option value="Payment Confirmed">Payment Confirmed</option>
+                                                <option value="Delivered">Delivered</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2 mb-1 block">Payment ID / UTR (Optional)</label>
+                                        <input
+                                            placeholder="e.g. 12928383828"
+                                            value={createFormData.utr}
+                                            onChange={e => setCreateFormData(prev => ({ ...prev, utr: e.target.value }))}
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={createFormData.skipNotification}
+                                            onChange={e => setCreateFormData(prev => ({ ...prev, skipNotification: e.target.checked }))}
+                                            className="w-4 h-4 rounded text-pink-500 focus:ring-pink-500"
+                                        />
+                                        <span className="text-xs font-bold text-gray-500">Skip WhatsApp Notification (Silent Order)</span>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <div className="p-6 md:p-8 bg-gray-50 border-t border-gray-100">
+                                <button
+                                    onClick={handleCreateSubmit}
+                                    disabled={creatingOrder}
+                                    className="w-full bg-pink-500 text-white py-4 rounded-xl font-black uppercase tracking-widest hover:bg-pink-600 disabled:opacity-70 transition-all shadow-xl shadow-pink-200 flex justify-center items-center gap-2"
+                                >
+                                    {creatingOrder ? <Loader2 size={20} className="animate-spin" /> : <CheckCircle size={20} />}
+                                    Create Order
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )
+            }
+        </div >
     );
 }
