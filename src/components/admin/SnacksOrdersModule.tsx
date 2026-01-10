@@ -123,6 +123,70 @@ export default function SnacksOrdersModule() {
         });
     };
 
+    const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const pin = e.target.value;
+        setCreateFormData(prev => ({ ...prev, customer: { ...prev.customer, pincode: pin } }));
+
+        if (pin.length === 6) {
+            setLoadingShipping(true);
+            try {
+                // Fetch location data first
+                const locationRes = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+                const locationData = await locationRes.json();
+
+                if (locationData[0].Status === "Success") {
+                    const postOffice = locationData[0].PostOffice[0];
+                    setCreateFormData(prev => ({
+                        ...prev,
+                        customer: {
+                            ...prev.customer,
+                            city: postOffice.Block,
+                            state: postOffice.State,
+                            country: "India"
+                        }
+                    }));
+
+                    // Calculate weight
+                    const totalWeight = createFormData.items.reduce((sum, item) => {
+                        return sum + (item.unit === "Kg" ? item.quantity : 0.1);
+                    }, 0);
+
+                    // Fetch dynamic shipping from Shiprocket
+                    try {
+                        const shippingRes = await fetch('/api/snacks/shipping', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                pincode: pin,
+                                weight: totalWeight || 0.5 // Minimum 500g
+                            })
+                        });
+
+                        if (shippingRes.ok) {
+                            const shippingData = await shippingRes.json();
+                            if (shippingData.available) {
+                                setDynamicShipping(shippingData.shippingCost);
+                            } else {
+                                // Fallback to static if not available
+                                setDynamicShipping(null);
+                                console.warn("Shiprocket not available, using static rates");
+                            }
+                        }
+                    } catch (shippingError) {
+                        console.error("Shipping API failed, using static rates", shippingError);
+                        setDynamicShipping(null);
+                    }
+                }
+            } catch (error) {
+                console.error("Pincode lookup failed", error);
+            }
+            setLoadingShipping(false);
+        } else {
+            // Reset shipping if pincode incomplete
+            setDynamicShipping(null);
+        }
+    };
+
     // Shipping Rates Configuration (Mirrored from Checkout)
     const SHIPPING_RATES: Record<string, number> = {
         "Tamil Nadu": 40,
@@ -1018,12 +1082,16 @@ export default function SnacksOrdersModule() {
                                             onChange={e => setCreateFormData(prev => ({ ...prev, customer: { ...prev.customer, state: e.target.value } }))}
                                             className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
                                         />
-                                        <input
-                                            placeholder="Pincode"
-                                            value={createFormData.customer.pincode}
-                                            onChange={e => setCreateFormData(prev => ({ ...prev, customer: { ...prev.customer, pincode: e.target.value } }))}
-                                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
-                                        />
+                                        <div className="relative">
+                                            <input
+                                                placeholder="Pincode"
+                                                maxLength={6}
+                                                value={createFormData.customer.pincode}
+                                                onChange={handlePincodeChange}
+                                                className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
+                                            />
+                                            {loadingShipping && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-pink-500" size={16} />}
+                                        </div>
                                     </div>
                                 </section>
 
