@@ -23,9 +23,25 @@ function HMSnacksContent() {
     const [modalUnit, setModalUnit] = useState<"kg" | "pc">("kg");
 
     const [reviews, setReviews] = useState<any[]>([]);
+    const [allReviews, setAllReviews] = useState<any[]>([]);
     const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, comment: "" });
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [showReviewForm, setShowReviewForm] = useState(false);
+
+    useEffect(() => {
+        const fetchAllReviews = async () => {
+            try {
+                const res = await fetch('/api/snacks/reviews');
+                if (res.ok) {
+                    const data = await res.json();
+                    setAllReviews(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch all reviews:", error);
+            }
+        };
+        fetchAllReviews();
+    }, []);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -242,6 +258,53 @@ function HMSnacksContent() {
                     </div>
                 </div>
             </section>
+
+            {/* Reviews Marquee Section */}
+            {allReviews.length > 0 && (
+                <section className="py-20 bg-white overflow-hidden pointer-events-none select-none">
+                    <div className="container mx-auto px-6 mb-12 text-center">
+                        <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight italic">Customer <span className="text-pink-500">Love</span></h2>
+                        <p className="text-gray-400 font-medium mt-4">What our community says about HM Snacks.</p>
+                    </div>
+
+                    <div className="relative flex overflow-x-hidden">
+                        <div className="flex animate-marquee whitespace-nowrap gap-6 py-4">
+                            {[...allReviews, ...allReviews, ...allReviews].map((review, idx) => (
+                                <div key={idx} className="inline-block p-8 bg-gray-50 rounded-[2rem] border border-gray-100 w-[350px] whitespace-normal">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-black text-sm">
+                                            {review.customerName.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-gray-900 text-sm">{review.customerName}</h4>
+                                            <div className="flex gap-0.5">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Star
+                                                        key={i}
+                                                        size={10}
+                                                        className={i < review.rating ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-600 font-medium text-sm italic leading-relaxed line-clamp-3">"{review.comment}"</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <style jsx global>{`
+                        @keyframes marquee {
+                            0% { transform: translateX(0); }
+                            100% { transform: translateX(-33.33%); }
+                        }
+                        .animate-marquee {
+                            animation: marquee 30s linear infinite;
+                        }
+                    `}</style>
+                </section>
+            )}
 
             {/* Products Section */}
             <section id="products" className="container mx-auto px-6 py-12 border-t border-gray-100">
