@@ -125,6 +125,11 @@ function HMSnacksContent() {
         }
     };
 
+    const averageRating = allReviews.length > 0
+        ? (allReviews.reduce((acc, rev) => acc + rev.rating, 0) / allReviews.length).toFixed(1)
+        : "5.0";
+    const totalReviewsCount = allReviews.length;
+
     return (
         <div className="min-h-screen bg-[#fafafa]">
             {/* SEO Structured Data */}
@@ -260,41 +265,54 @@ function HMSnacksContent() {
             </section>
 
             {/* Reviews Marquee Section */}
-            {allReviews.length > 0 && (
-                <section className="py-20 bg-white overflow-hidden pointer-events-none select-none">
-                    <div className="container mx-auto px-6 mb-12 text-center">
-                        <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight italic">Customer <span className="text-pink-500">Love</span></h2>
-                        <p className="text-gray-400 font-medium mt-4">What our community says about HM Snacks.</p>
-                    </div>
+            {
+                allReviews.length > 0 && (
+                    <section className="py-20 bg-white overflow-hidden pointer-events-none select-none">
+                        <div className="container mx-auto px-6 mb-12 text-center">
+                            <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight italic">Customer <span className="text-pink-500">Love</span></h2>
+                            <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-6">
+                                <div className="flex items-center gap-2 bg-pink-50 px-4 py-2 rounded-full">
+                                    <div className="flex gap-0.5">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} size={14} className={i < Math.round(Number(averageRating)) ? "fill-pink-500 text-pink-500" : "text-pink-200"} />
+                                        ))}
+                                    </div>
+                                    <span className="text-pink-600 font-black text-sm">{averageRating}/5 Rating</span>
+                                </div>
+                                <div className="text-gray-400 font-bold text-sm tracking-wide bg-gray-50 px-4 py-2 rounded-full">
+                                    Trusted by {totalReviewsCount}+ Customers
+                                </div>
+                            </div>
+                        </div>
 
-                    <div className="relative flex overflow-x-hidden">
-                        <div className="flex animate-marquee whitespace-nowrap gap-6 py-4">
-                            {[...allReviews, ...allReviews, ...allReviews].map((review, idx) => (
-                                <div key={idx} className="inline-block p-8 bg-gray-50 rounded-[2rem] border border-gray-100 w-[350px] whitespace-normal">
-                                    <div className="flex items-center gap-4 mb-4">
-                                        <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-black text-sm">
-                                            {review.customerName.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <h4 className="font-black text-gray-900 text-sm">{review.customerName}</h4>
-                                            <div className="flex gap-0.5">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <Star
-                                                        key={i}
-                                                        size={10}
-                                                        className={i < review.rating ? "fill-amber-400 text-amber-400" : "text-gray-200"}
-                                                    />
-                                                ))}
+                        <div className="relative flex overflow-x-hidden">
+                            <div className="flex animate-marquee whitespace-nowrap gap-6 py-4">
+                                {[...allReviews, ...allReviews, ...allReviews].map((review, idx) => (
+                                    <div key={idx} className="inline-block p-8 bg-gray-50 rounded-[2rem] border border-gray-100 w-[350px] whitespace-normal">
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white font-black text-sm">
+                                                {review.customerName.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-black text-gray-900 text-sm">{review.customerName}</h4>
+                                                <div className="flex gap-0.5">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star
+                                                            key={i}
+                                                            size={10}
+                                                            className={i < review.rating ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+                                                        />
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
+                                        <p className="text-gray-600 font-medium text-sm italic leading-relaxed line-clamp-3">"{review.comment}"</p>
                                     </div>
-                                    <p className="text-gray-600 font-medium text-sm italic leading-relaxed line-clamp-3">"{review.comment}"</p>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
-                    <style jsx global>{`
+                        <style jsx global>{`
                         @keyframes marquee {
                             0% { transform: translateX(0); }
                             100% { transform: translateX(-33.33%); }
@@ -303,8 +321,9 @@ function HMSnacksContent() {
                             animation: marquee 30s linear infinite;
                         }
                     `}</style>
-                </section>
-            )}
+                    </section>
+                )
+            }
 
             {/* Products Section */}
             <section id="products" className="container mx-auto px-6 py-12 border-t border-gray-100">
