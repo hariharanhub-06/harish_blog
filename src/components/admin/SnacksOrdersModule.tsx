@@ -215,6 +215,14 @@ export default function SnacksOrdersModule() {
             message += `\n\nIf you have already paid, our team will process your refund shortly.`;
         }
 
+        if (selectedOrder.status === "Delivered") {
+            const firstItem = selectedOrder.items?.[0];
+            message += `\n\nYour order has been delivered! Hope you loved the snacks. 😊`;
+            if (firstItem) {
+                message += `\n\n*Write a Review:* https://harishblog.fyi/business/hm-snacks?product=${firstItem.productId}&review=true`;
+            }
+        }
+
         const encodedMsg = encodeURIComponent(message);
         window.open(`https://wa.me/${selectedOrder.customerMobile}?text=${encodedMsg}`, '_blank');
     };
