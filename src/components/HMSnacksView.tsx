@@ -64,10 +64,18 @@ function HMSnacksContent() {
     useEffect(() => {
         if (products.length > 0) {
             const productId = searchParams.get("product");
+            const shouldOpenReview = searchParams.get("review") === "true";
+
             if (productId && !selectedProduct) {
                 const found = products.find(p => p.id === productId || p.id == productId);
                 if (found) {
-                    openModal(found);
+                    openModal(found, shouldOpenReview);
+                    if (shouldOpenReview) {
+                        setTimeout(() => {
+                            const reviewSection = document.getElementById('review-section');
+                            if (reviewSection) reviewSection.scrollIntoView({ behavior: 'smooth' });
+                        }, 500);
+                    }
                 }
             }
         }
