@@ -434,16 +434,16 @@ export default function SnacksOrdersModule() {
                         />
                     </div>
                     <button
-                        onClick={() => setShowCreateModal(true)}
-                        className="bg-pink-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center gap-2"
-                    >
-                        <Plus size={16} /> Create Order
-                    </button>
-                    <button
                         onClick={() => fetchOrders(0)}
                         className="bg-gray-900 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all"
                     >
                         Search
+                    </button>
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="bg-pink-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center gap-2"
+                    >
+                        <Plus size={16} /> Create Order
                     </button>
                     <button
                         onClick={exportToCSV}
