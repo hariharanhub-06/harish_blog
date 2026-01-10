@@ -61,13 +61,13 @@ function HMSnacksContent() {
         ? products
         : products.filter(p => p.category === activeCategory);
 
-    const openModal = (product: any) => {
+    const openModal = (product: any, startWithReview = false) => {
         setSelectedProduct(product);
         const hasKg = !!product.pricePerKg;
         setModalUnit(hasKg ? "kg" : "pc");
         setModalQuantity(hasKg ? 1 : 10);
         fetchProductReviews(product.id);
-        setShowReviewForm(false);
+        setShowReviewForm(startWithReview);
     };
 
     const fetchProductReviews = async (productId: string) => {
@@ -303,8 +303,16 @@ function HMSnacksContent() {
                                             onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
                                             className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-xl transition-all ${isInWishlist(product.id) ? "bg-pink-500 text-white" : "bg-white text-gray-900 hover:bg-pink-500 hover:text-white"
                                                 }`}
+                                            title="Add to Wishlist"
                                         >
                                             <Heart size={18} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); openModal(product, true); }}
+                                            className="w-10 h-10 bg-white text-gray-900 rounded-xl flex items-center justify-center hover:bg-pink-500 hover:text-white shadow-xl transition-all"
+                                            title="Write a Review"
+                                        >
+                                            <MessageSquare size={18} />
                                         </button>
                                         <button
                                             onClick={async (e) => {
@@ -692,7 +700,7 @@ function HMSnacksContent() {
                                             </div>
                                         </div>
 
-                                        <div className="flex gap-4">
+                                        <div className="flex gap-3">
                                             <button
                                                 onClick={() => {
                                                     const basePrice = modalUnit === "kg" ? selectedProduct.pricePerKg : selectedProduct.pricePerPiece;
@@ -714,12 +722,26 @@ function HMSnacksContent() {
                                                 className={`p-5 rounded-2xl border-2 transition-all ${isInWishlist(selectedProduct.id)
                                                     ? "bg-pink-50 border-pink-50 text-pink-500"
                                                     : "border-gray-100 hover:border-pink-500 text-gray-400 hover:text-pink-500"}`}
+                                                title="Add to Wishlist"
                                             >
                                                 <Heart size={24} fill={isInWishlist(selectedProduct.id) ? "currentColor" : "none"} />
                                             </button>
+                                            <button
+                                                onClick={() => {
+                                                    setShowReviewForm(true);
+                                                    setTimeout(() => {
+                                                        const reviewSection = document.getElementById('review-section');
+                                                        if (reviewSection) reviewSection.scrollIntoView({ behavior: 'smooth' });
+                                                    }, 100);
+                                                }}
+                                                className="p-5 rounded-2xl border-2 border-gray-100 text-gray-400 hover:border-pink-500 hover:text-pink-500 transition-all"
+                                                title="Write a Review"
+                                            >
+                                                <MessageSquare size={24} />
+                                            </button>
                                         </div>
                                     </div>
-                                    <div className="mt-12 pt-12 border-t border-gray-100">
+                                    <div id="review-section" className="mt-12 pt-12 border-t border-gray-100">
                                         <div className="flex justify-between items-center mb-8">
                                             <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
                                                 Customer Reviews
