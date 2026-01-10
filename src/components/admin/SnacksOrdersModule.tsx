@@ -113,39 +113,99 @@ export default function SnacksOrdersModule() {
         });
     };
 
+    // Shipping Rates Configuration (Mirrored from Checkout)
+    const SHIPPING_RATES: Record<string, number> = {
+        "Tamil Nadu": 40,
+        "Kerala": 80,
+        "Andhra Pradesh": 90,
+        "Arunachal Pradesh": 90,
+        "Assam": 90,
+        "Bihar": 90,
+        "Karnataka": 90,
+        "Manipur": 90,
+        "Chhattisgarh": 200,
+        "Goa": 200,
+        "Gujarat": 200,
+        "Haryana": 200,
+        "Himachal Pradesh": 200,
+        "Jharkhand": 200,
+        "Madhya Pradesh": 200,
+        "Maharashtra": 200,
+        "Meghalaya": 200,
+        "Mizoram": 200,
+        "Nagaland": 200,
+        "Odisha": 200,
+        "Punjab": 200,
+        "Rajasthan": 200,
+        "Sikkim": 200,
+        "Telangana": 200,
+        "Uttar Pradesh": 200,
+        "Uttarakhand": 200,
+        "West Bengal": 200
+    };
+
     const calculateTotal = () => {
-        return createFormData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const subtotal = createFormData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        // Calculate Weight
+        const totalWeight = createFormData.items.reduce((sum, item) => {
+            const weightPerUnit = item.unit === "Kg" ? 1 : 0.01; // Approx 10g per piece if not defined? Or assume standard pack? 
+            // Better logic from cart:
+            return sum + (item.unit === "Kg" ? item.quantity : 0.1);
+        }, 0);
+
+        // Calculate Shipping
+        let shipping = 0;
+        let ratePerKg = 200; // Fallback
+
+        if (createFormData.customer.state) {
+            const stateKey = Object.keys(SHIPPING_RATES).find(key =>
+                key.toLowerCase() === createFormData.customer.state.toLowerCase()
+            );
+            if (stateKey) {
+                ratePerKg = SHIPPING_RATES[stateKey];
+            }
+        }
+
+        // Base shipping + Packaging (40)
+        shipping = Math.ceil((ratePerKg * totalWeight) + 40);
+
+        const total = subtotal + shipping;
+
+        return { subtotal, shipping, total };
     };
 
     const handleCreateSubmit = async () => {
-        if (!createFormData.customer.name || !createFormData.customer.mobile) {
-            alert("Customer Name and Mobile are required.");
+        // Basic Validation
+        if (!createFormData.customer.mobile || !createFormData.customer.name) {
+            alert("Customer Name and Mobile are required");
             return;
         }
+
         if (createFormData.items.length === 0) {
-            alert("Please add at least one product.");
+            alert("Add at least one product");
             return;
         }
 
-        setCreatingOrder(true);
-        try {
-            const totalAmount = calculateTotal();
-            const payload = {
-                customer: createFormData.customer,
-                items: createFormData.items,
-                totalAmount: totalAmount,
-                subtotal: totalAmount,
-                shippingCost: 0,
-                paymentMethod: createFormData.paymentMethod,
-                utr: createFormData.utr,
-                status: createFormData.status,
-                skipNotification: createFormData.skipNotification
-            };
+        const { subtotal, shipping, total } = calculateTotal();
 
+        const payload = {
+            customer: createFormData.customer,
+            items: createFormData.items,
+            totalAmount: total,
+            subtotal: subtotal,
+            shippingCost: shipping,
+            paymentMethod: createFormData.paymentMethod,
+            utr: createFormData.utr,
+            status: createFormData.status,
+            skipNotification: createFormData.skipNotification
+        };
+
+        try {
             const res = await fetch("/api/snacks/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
             });
 
             const data = await res.json();
@@ -971,9 +1031,19 @@ export default function SnacksOrdersModule() {
 
                                 <section className="space-y-4">
                                     <h4 className="text-xs font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 pb-2">Payment & Status</h4>
-                                    <div className="bg-gray-900 text-white p-6 rounded-2xl flex justify-between items-center">
-                                        <span className="font-bold text-sm uppercase tracking-widest text-gray-400">Total Amount</span>
-                                        <span className="font-black text-3xl">₹{Math.ceil(calculateTotal())}</span>
+                                    <div className="bg-gray-900 text-white p-6 rounded-2xl space-y-2">
+                                        <div className="flex justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                            <span>Subtotal</span>
+                                            <span>₹{Math.ceil(calculateTotal().subtotal)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                            <span>Shipping ({createFormData.customer.state || "India"})</span>
+                                            <span>₹{calculateTotal().shipping}</span>
+                                        </div>
+                                        <div className="border-t border-gray-700 my-2 pt-2 flex justify-between items-center">
+                                            <span className="font-bold text-sm uppercase tracking-widest text-white">Total Amount</span>
+                                            <span className="font-black text-3xl">₹{Math.ceil(calculateTotal().total)}</span>
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
