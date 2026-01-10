@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { snackProducts, blogPosts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-const DOMAIN = "https://harishblog.fyi";
+const DOMAIN = "https://hariharanhub.com";
 
 export async function GET() {
     // 1. Static Pages

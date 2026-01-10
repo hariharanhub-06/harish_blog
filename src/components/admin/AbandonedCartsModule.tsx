@@ -27,7 +27,8 @@ export default function AbandonedCartsModule() {
     };
 
     const sendWhatsAppRecovery = (cart: any) => {
-        const message = `Hi ${cart.customerName || 'there'}! We noticed you left some snacks in your cart at HM Snacks. 🍪\n\nWould you like a special 5% OFF to complete your order? Just let us know! \n\nCheck your cart here: https://harishblog.fyi/business/hm-snacks/cart`;
+        const cartUrl = `https://hariharanhub.com/business/hm-snacks?cart=${cart.id}`;
+        const message = `Hi ${cart.customerName || 'there'}! We noticed you left some snacks in your cart at HM Snacks. 🍪\n\nWould you like a special 5% OFF to complete your order? Just let us know! \n\nCheck your cart here: ${cartUrl}`;
         const url = `https://wa.me/${cart.customerMobile}?text=${encodeURIComponent(message)}`;
         window.open(url, "_blank");
     };

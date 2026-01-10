@@ -363,7 +363,7 @@ export default function BillingModule() {
 
                 <div className="mt-12 pt-4 border-t border-gray-100 text-center">
                     <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.5em]">This is a computer generated invoice</p>
-                    <p className="text-[10px] font-bold text-gray-400 mt-1">Thank you for your business! Reach us at @harishblog.fyi</p>
+                    <p className="text-[10px] font-bold text-gray-400 mt-1">Thank you for your business! Reach us at @hariharanhub.com</p>
                 </div>
             </div>
         </div>

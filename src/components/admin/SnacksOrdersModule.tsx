@@ -219,7 +219,7 @@ export default function SnacksOrdersModule() {
             const firstItem = selectedOrder.items?.[0];
             message += `\n\nYour order has been delivered! Hope you loved the snacks. 😊`;
             if (firstItem) {
-                message += `\n\n*Write a Review:* https://harishblog.fyi/business/hm-snacks?product=${firstItem.productId}&review=true`;
+                message += `\n\n*Write a Review:* https://hariharanhub.com/business/hm-snacks?product=${firstItem.id || firstItem.productId}&review=true`;
             }
         }
 

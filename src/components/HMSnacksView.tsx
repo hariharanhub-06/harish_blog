@@ -152,7 +152,7 @@ function HMSnacksContent() {
                             "position": index + 1,
                             "item": {
                                 "@type": "Product",
-                                "@id": `https://harishblog.fyi/business/hm-snacks?product=${product.id}`,
+                                "@id": `https://hariharanhub.com/business/hm-snacks?product=${product.id}`,
                                 "name": product.name,
                                 "description": product.description,
                                 "image": product.imageUrl,
