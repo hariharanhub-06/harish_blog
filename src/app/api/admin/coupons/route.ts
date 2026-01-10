@@ -17,7 +17,7 @@ export async function GET() {
                 usageCount: sql<number>`count(${snackOrders.id})`.mapWith(Number)
             })
             .from(coupons)
-            .leftJoin(snackOrders, sql`UPPER(${snackOrders.couponCode}) = UPPER(${coupons.code})`)
+            .leftJoin(snackOrders, sql`UPPER(TRIM(${snackOrders.couponCode})) = UPPER(TRIM(${coupons.code}))`)
             .groupBy(coupons.id)
             .orderBy(desc(coupons.createdAt));
 
