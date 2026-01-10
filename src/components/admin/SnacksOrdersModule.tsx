@@ -19,8 +19,7 @@ import {
     CreditCard,
     ArrowRight,
     Trash2,
-    ArrowRight,
-    Trash2,
+
     Download,
     Plus,
     Minus,
