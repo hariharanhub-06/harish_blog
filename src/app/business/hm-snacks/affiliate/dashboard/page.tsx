@@ -110,7 +110,21 @@ export default function AffiliateDashboard() {
             if (res.ok) {
                 const data = await res.json();
                 console.log(`Fetched ${data.length} products for affiliate`);
-                setProducts(data.filter((p: any) => p.isActive));
+                const filtered = data.filter((p: any) => p.isActive);
+                setProducts(filtered);
+
+                // Debug zero earners
+                filtered.forEach((p: any) => {
+                    const isKg = !!p.pricePerKg || !!p.offerPricePerKg;
+                    const price = isKg
+                        ? (p.offerPricePerKg || p.pricePerKg || 0)
+                        : (p.offerPricePerPiece || p.pricePerPiece || 0);
+                    const totalCost = (p.productCost || 0) + (p.packagingCost || 0) + (p.otherCharges || 0);
+                    const profit = Math.max(0, price - totalCost);
+                    if (profit === 0 && (p.name.includes("Athirasam") || p.pricePerKg > 0)) {
+                        console.warn(`ZERO PROFIT PRODUCT: ${p.name}`, { price, totalCost, isKg, p });
+                    }
+                });
             }
         } catch (err) {
             console.error("Failed to fetch products", err);
@@ -514,7 +528,17 @@ export default function AffiliateDashboard() {
                                                                                 const profit = Math.max(0, price - totalCost);
                                                                                 const pool = profit * ((product.affiliatePoolPercent || 60) / 100);
                                                                                 const earn = pool * ((stats?.commissionRate || 10) / 100);
-                                                                                return Math.floor(earn);
+                                                                                const earnVal = earn % 1 === 0 ? earn : earn.toFixed(2);
+                                                                                return (
+                                                                                    <span className="flex items-center gap-1">
+                                                                                        {earnVal}
+                                                                                        {profit === 0 && (
+                                                                                            <span className="text-[8px] text-gray-400 font-normal normal-case ml-1">
+                                                                                                (P:₹{price} C:₹{totalCost})
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </span>
+                                                                                );
                                                                             })()}/{isKg ? 'Kg' : 'Pc'}
                                                                         </p>
                                                                     </div>

@@ -5,15 +5,19 @@ import { eq, desc, and } from "drizzle-orm";
 
 import { unstable_cache, revalidateTag } from "next/cache";
 
-// Cached data fetcher
-const getCachedProducts = unstable_cache(
-    async (activeOnly: boolean) => {
+// GET all products or filter by category
+export async function GET(req: NextRequest) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const category = searchParams.get("category");
+        const activeOnly = searchParams.get("activeOnly") === "true";
+
         const conditions = [];
         if (activeOnly) {
             conditions.push(eq(snackProducts.isActive, true));
         }
 
-        return await db
+        let products = await db
             .select({
                 id: snackProducts.id,
                 name: snackProducts.name,
@@ -36,19 +40,6 @@ const getCachedProducts = unstable_cache(
             .from(snackProducts)
             .where(conditions.length > 0 ? and(...conditions) : undefined)
             .orderBy(desc(snackProducts.createdAt));
-    },
-    ['snack-products-list'],
-    { tags: ['snack-products'], revalidate: 3600 } // Cache for 1 hour
-);
-
-// GET all products or filter by category
-export async function GET(req: NextRequest) {
-    try {
-        const { searchParams } = new URL(req.url);
-        const category = searchParams.get("category");
-        const activeOnly = searchParams.get("activeOnly") === "true";
-
-        let products = await getCachedProducts(activeOnly);
 
         // Filter in memory to avoid cache fragmentation by category
         if (category && category !== "All") {
