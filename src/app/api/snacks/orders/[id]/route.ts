@@ -31,6 +31,10 @@ export async function GET(
                 courierName: orderShipments.courierName,
                 trackingUrl: orderShipments.trackingUrl,
                 shiprocketOrderId: orderShipments.shiprocketOrderId,
+                vendorConfirmedDimensions: orderShipments.vendorConfirmedDimensions,
+                vendorConfirmedAt: orderShipments.vendorConfirmedAt,
+                dimensionSource: orderShipments.dimensionSource,
+                readyToShip: orderShipments.readyToShip,
             })
             .from(orderShipments)
             .leftJoin(vendors, eq(orderShipments.vendorId, vendors.id))
