@@ -79,6 +79,70 @@ export async function PATCH(
             await splitOrderIntoShipments(updatedOrder.orderId);
         }
 
+        // Cascade status updates to shipments
+        if (body.status) {
+            const statusesToCascade = ["Delivered", "Shipping", "Cancel"];
+            if (statusesToCascade.includes(body.status)) {
+                const shipmentStatus = body.status === "Shipping" ? "Shipping" : body.status;
+
+                // Get all shipments for this order
+                const shipments = await db.select()
+                    .from(orderShipments)
+                    .where(eq(orderShipments.orderId, updatedOrder.orderId));
+
+                // Update each shipment and trigger vendor earnings if delivered
+                for (const shipment of shipments) {
+                    const oldStatus = shipment.status;
+
+                    // Update shipment status
+                    await db.update(orderShipments)
+                        .set({ status: shipmentStatus })
+                        .where(eq(orderShipments.id, shipment.id));
+
+                    // Handle vendor earnings
+                    if (shipment.vendorId) {
+                        const items = shipment.items as any[];
+                        const productIds = items.map(i => i.productId || i.id).filter(Boolean);
+                        let shipmentValue = 0;
+
+                        if (productIds.length > 0) {
+                            const products = await db.select().from(snackProducts).where(inArray(snackProducts.id, productIds));
+                            const productMap = new Map(products.map(p => [p.id, p]));
+
+                            shipmentValue = items.reduce((acc, item) => {
+                                const product = productMap.get(item.productId || item.id);
+                                if (!product) return acc;
+                                const cost = Number(product.productCost || 0);
+                                const packaging = Number(product.packagingCost || 0);
+                                const quantity = Number(item.quantity) || 1;
+                                return acc + ((cost + (packaging * 0.30)) * quantity);
+                            }, 0);
+                        }
+
+                        // Credit earnings if transitioning to Delivered
+                        if (shipmentStatus === "Delivered" && oldStatus !== "Delivered" && shipmentValue > 0) {
+                            await db.update(vendors)
+                                .set({
+                                    totalEarnings: sql`${vendors.totalEarnings} + ${shipmentValue}`,
+                                    pendingBalance: sql`${vendors.pendingBalance} + ${shipmentValue}`,
+                                })
+                                .where(eq(vendors.id, shipment.vendorId));
+                        }
+
+                        // Revert earnings if transitioning away from Delivered
+                        if (oldStatus === "Delivered" && shipmentStatus !== "Delivered" && shipmentValue > 0) {
+                            await db.update(vendors)
+                                .set({
+                                    totalEarnings: sql`${vendors.totalEarnings} - ${shipmentValue}`,
+                                    pendingBalance: sql`${vendors.pendingBalance} - ${shipmentValue}`,
+                                })
+                                .where(eq(vendors.id, shipment.vendorId));
+                        }
+                    }
+                }
+            }
+        }
+
         return NextResponse.json(updatedOrder);
     } catch (error) {
         console.error("Update order error:", error);
