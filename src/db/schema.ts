@@ -293,10 +293,10 @@ export const payoutRequests = pgTable("payout_requests", {
 // HM Snacks - Affiliate Global Config
 export const affiliateConfig = pgTable("affiliate_config", {
   id: integer("id").primaryKey(), // Usually single row with ID 1
-  directSplit: doublePrecision("direct_split").default(50),
-  level1Split: doublePrecision("level1_split").default(20),
-  level2Split: doublePrecision("level2_split").default(18),
-  level3Split: doublePrecision("level3_split").default(12),
+  directSplit: doublePrecision("direct_split").default(30),
+  level1Split: doublePrecision("level1_split").default(10),
+  level2Split: doublePrecision("level2_split").default(5),
+  level3Split: doublePrecision("level3_split").default(5),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
