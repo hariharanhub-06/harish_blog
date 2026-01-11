@@ -114,12 +114,14 @@ export async function DELETE(
                     .limit(1);
 
                 if (affiliate) {
-                    console.log(`Rolling back stats for affiliate: ${affiliate.fullName}`);
+                    console.log(`[Rollback] Found direct affiliate: ${affiliate.fullName} for order ${order.orderId}`);
 
                     const transactionsToDelete = await db
                         .select()
                         .from(affiliateTransactions)
                         .where(eq(affiliateTransactions.orderId, order.orderId));
+
+                    console.log(`[Rollback] Found ${transactionsToDelete.length} transactions to reverse for order ${order.orderId}`);
 
                     // Subtract order count and sales volume from direct affiliate
                     await db.update(affiliates)
@@ -135,6 +137,8 @@ export async function DELETE(
                             tx.type === 'level1' ? 'level1Earnings' :
                                 tx.type === 'level2' ? 'level2Earnings' : 'level3Earnings';
 
+                        console.log(`[Rollback] Reversing ${tx.amount} (${tx.type}) for affiliate ID: ${tx.affiliateId}`);
+
                         await db.update(affiliates)
                             .set({
                                 totalEarnings: sql`${affiliates.totalEarnings} - ${tx.amount}`,
@@ -143,6 +147,8 @@ export async function DELETE(
                             })
                             .where(eq(affiliates.id, tx.affiliateId));
                     }
+                } else {
+                    console.log(`[Rollback] No affiliate found with coupon: ${order.couponCode}`);
                 }
             }
 
