@@ -22,7 +22,8 @@ import {
     ArrowRight,
     ExternalLink,
     ChevronDown,
-    ChevronUp
+    ChevronUp,
+    Search
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -68,6 +69,7 @@ export default function AffiliateDashboard() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [activeTab, setActiveTab] = useState<'overview' | 'tree' | 'links' | 'earnings'>('overview');
+    const [productSearch, setProductSearch] = useState("");
     const router = useRouter();
 
     const fetchStats = async () => {
@@ -472,24 +474,43 @@ export default function AffiliateDashboard() {
                                                 <ShoppingBag size={16} /> Product Promotion Tool
                                             </div>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {products.slice(0, 6).map(product => (
-                                                    <div key={product.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between group">
-                                                        <div>
-                                                            <p className="font-black text-gray-900">{product.name}</p>
-                                                            <p className="text-[10px] uppercase font-black text-gray-400">{product.category}</p>
+                                            <div className="relative">
+                                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search products to promote..."
+                                                    value={productSearch}
+                                                    onChange={(e) => setProductSearch(e.target.value)}
+                                                    className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl font-bold focus:ring-2 focus:ring-orange-500 transition-all"
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-100">
+                                                {products
+                                                    .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()) || p.category.toLowerCase().includes(productSearch.toLowerCase()))
+                                                    .map(product => (
+                                                        <div key={product.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between group hover:border-orange-200 transition-all">
+                                                            <div className="min-w-0">
+                                                                <p className="font-black text-gray-900 truncate">{product.name}</p>
+                                                                <div className="flex items-center gap-2">
+                                                                    <p className="text-[10px] uppercase font-black text-gray-400">{product.category}</p>
+                                                                    <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                                                                    <p className="text-[10px] uppercase font-black text-orange-600">
+                                                                        Earn: ₹{Math.floor((product.pricePerKg || 0) * ((stats?.commissionRate || 6) / 100))}/Kg
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => {
+                                                                    navigator.clipboard.writeText(`https://hariharanhub.com/product/${product.id}?ref=${stats?.couponCode}`);
+                                                                    alert(`Link for ${product.name} copied!`);
+                                                                }}
+                                                                className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-all"
+                                                            >
+                                                                <Copy size={18} />
+                                                            </button>
                                                         </div>
-                                                        <button
-                                                            onClick={() => {
-                                                                navigator.clipboard.writeText(`https://hariharanhub.com/product/${product.id}?ref=${stats.couponCode}`);
-                                                                alert(`Link for ${product.name} copied!`);
-                                                            }}
-                                                            className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-all"
-                                                        >
-                                                            <Copy size={18} />
-                                                        </button>
-                                                    </div>
-                                                ))}
+                                                    ))}
                                             </div>
                                         </div>
                                     </div>

@@ -1185,13 +1185,25 @@ export default function SnacksOrdersModule() {
                                                 onChange={e => setCouponCode(e.target.value)}
                                                 className="w-full bg-gray-800 border-0 rounded-lg px-3 py-2 text-xs font-bold text-white placeholder-gray-500 uppercase"
                                             />
-                                            <button
-                                                onClick={handleApplyCoupon}
-                                                disabled={validatingCoupon || !couponCode || !!appliedCoupon}
-                                                className="bg-pink-500 text-white px-3 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-pink-600 disabled:opacity-50"
-                                            >
-                                                {validatingCoupon ? "..." : (appliedCoupon ? "apk" : "Apply")}
-                                            </button>
+                                            {appliedCoupon ? (
+                                                <button
+                                                    onClick={() => {
+                                                        setAppliedCoupon(null);
+                                                        setCouponCode("");
+                                                    }}
+                                                    className="bg-red-500 text-white px-3 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-red-600"
+                                                >
+                                                    Remove
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={handleApplyCoupon}
+                                                    disabled={validatingCoupon || !couponCode}
+                                                    className="bg-pink-500 text-white px-3 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-pink-600 disabled:opacity-50"
+                                                >
+                                                    {validatingCoupon ? "..." : "Apply"}
+                                                </button>
+                                            )}
                                         </div>
                                         {couponError && <p className="text-[10px] text-rose-400 font-bold">{couponError}</p>}
                                         {appliedCoupon && <p className="text-[10px] text-emerald-400 font-bold">Coupon Applied!</p>}
