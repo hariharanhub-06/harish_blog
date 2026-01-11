@@ -3,10 +3,25 @@ import { contactSubmissions } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-export async function GET() {
-    const data = await db.query.contactSubmissions.findMany({
-        orderBy: [desc(contactSubmissions.createdAt)],
-    });
+export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get("limit") || "50");
+    const offset = parseInt(searchParams.get("offset") || "0");
+
+    const data = await db.select({
+        id: contactSubmissions.id,
+        name: contactSubmissions.name,
+        company: contactSubmissions.company,
+        mobile: contactSubmissions.mobile,
+        email: contactSubmissions.email,
+        website: contactSubmissions.website,
+        socialMedia: contactSubmissions.socialMedia,
+        category: contactSubmissions.category,
+        status: contactSubmissions.status,
+        subject: contactSubmissions.subject,
+        createdAt: contactSubmissions.createdAt,
+    }).from(contactSubmissions).orderBy(desc(contactSubmissions.createdAt)).limit(limit).offset(offset);
+
     return NextResponse.json(data);
 }
 

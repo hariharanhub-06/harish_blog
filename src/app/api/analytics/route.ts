@@ -28,9 +28,15 @@ export async function GET(req: Request) {
         const start = searchParams.get("start");
         const end = searchParams.get("end");
 
-        const whereClause = start && end
-            ? sql`DATE(${visitorAnalytics.timestamp}) >= ${start} AND DATE(${visitorAnalytics.timestamp}) <= ${end}`
-            : sql`TRUE`;
+        // Default to last 90 days if no date range provided
+        const defaultStart = new Date();
+        defaultStart.setDate(defaultStart.getDate() - 90);
+        const defaultEnd = new Date();
+
+        const actualStart = start || defaultStart.toISOString().split('T')[0];
+        const actualEnd = end || defaultEnd.toISOString().split('T')[0];
+
+        const whereClause = sql`DATE(${visitorAnalytics.timestamp}) >= ${actualStart} AND DATE(${visitorAnalytics.timestamp}) <= ${actualEnd}`;
 
         const stats = await db.select({
             date: sql<string>`DATE(${visitorAnalytics.timestamp})`,
