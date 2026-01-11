@@ -6,24 +6,23 @@ import { and, eq, sql } from "drizzle-orm";
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { mobile, couponCode } = body;
+        const { mobile, password } = body;
 
-        if (!mobile || !couponCode) {
+        if (!mobile || !password) {
             return NextResponse.json(
-                { error: "Mobile number and Coupon code are required" },
+                { error: "Mobile number and Password are required" },
                 { status: 400 }
             );
         }
 
-        // Search for affiliate with matching mobile and coupon code
-        // We use sql`UPPER` to be case-insensitive for the coupon code
+        // Search for affiliate with matching mobile and password
         const results = await db
             .select()
             .from(affiliates)
             .where(
                 and(
                     eq(affiliates.mobile, mobile),
-                    sql`UPPER(${affiliates.couponCode}) = UPPER(${couponCode})`,
+                    eq(affiliates.password, password),
                     eq(affiliates.status, 'Approved')
                 )
             );

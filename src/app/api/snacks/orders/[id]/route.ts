@@ -25,6 +25,8 @@ export async function GET(
         return NextResponse.json({ error: "Failed to fetch order detail" }, { status: 500 });
     }
 }
+import { processAffiliateCommissions } from "@/lib/affiliate-commissions";
+
 export async function PATCH(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -44,6 +46,12 @@ export async function PATCH(
 
         if (!updatedOrder) {
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
+        }
+
+        // Trigger Affiliate Commission Logic if status is successful
+        if (body.status === "Payment Confirmed" || body.status === "Success") {
+            // Passing orderId (HMS-XXX-XXX)
+            await processAffiliateCommissions(updatedOrder.orderId);
         }
 
         return NextResponse.json(updatedOrder);

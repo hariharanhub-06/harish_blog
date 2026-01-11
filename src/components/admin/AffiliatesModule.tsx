@@ -5,7 +5,7 @@ import {
     Users, CheckCircle, XCircle, Clock,
     MessageCircle, TrendingUp, DollarSign,
     Copy, ExternalLink, RefreshCw, Trash2,
-    Package, Star, ShoppingBag, ShieldCheck
+    Package, Star, ShoppingBag, ShieldCheck, Save
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -13,14 +13,25 @@ interface Affiliate {
     id: string;
     fullName: string;
     mobile: string;
+    password?: string;
     upiId: string;
     email: string | null;
     socialLink: string | null;
     couponCode: string | null;
+    referrerId: string | null;
+    parentId: string | null;
+    position: 'left' | 'right' | null;
     status: "Pending" | "Approved" | "Rejected";
     isActive: boolean;
     totalOrders: number;
-    totalCommission: number;
+    totalSalesAmount: number;
+    totalEarnings: number;
+    directEarnings: number;
+    level1Earnings: number;
+    level2Earnings: number;
+    level3Earnings: number;
+    pendingBalance: number;
+    paidBalance: number;
     currentTier: string;
     createdAt: string;
     approvedAt: string | null;
@@ -29,7 +40,9 @@ interface Affiliate {
 export default function AffiliatesModule() {
     const [affiliates, setAffiliates] = useState<Affiliate[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<"pending" | "active" | "all">("pending");
+    const [activeTab, setActiveTab] = useState<"pending" | "active" | "all" | "payouts" | "config">("pending");
+    const [payoutRequests, setPayoutRequests] = useState<any[]>([]);
+    const [config, setConfig] = useState<any>({ directSplit: 50, level1Split: 20, level2Split: 18, level3Split: 12 });
     const [updatingId, setUpdatingId] = useState<string | null>(null);
 
     const fetchAffiliates = async () => {
@@ -47,8 +60,34 @@ export default function AffiliatesModule() {
         }
     };
 
+    const fetchPayouts = async () => {
+        try {
+            const res = await fetch("/api/admin/affiliates/payouts");
+            if (res.ok) {
+                const data = await res.json();
+                setPayoutRequests(data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch payouts", err);
+        }
+    };
+
+    const fetchConfig = async () => {
+        try {
+            const res = await fetch("/api/admin/affiliates/config");
+            if (res.ok) {
+                const data = await res.json();
+                setConfig(data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch config", err);
+        }
+    };
+
     useEffect(() => {
         fetchAffiliates();
+        fetchPayouts();
+        fetchConfig();
     }, []);
 
     const handleAction = async (id: string, action: "approve" | "reject") => {
@@ -110,25 +149,75 @@ export default function AffiliatesModule() {
         }
     };
 
+    const handlePayoutAction = async (requestId: string, action: "approve" | "reject") => {
+        setUpdatingId(requestId);
+        try {
+            const res = await fetch("/api/admin/affiliates/payouts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ requestId, action }),
+            });
+
+            if (res.ok) {
+                await fetchPayouts();
+                await fetchAffiliates();
+            } else {
+                alert("Failed to process payout");
+            }
+        } catch (error) {
+            console.error("Error processing payout action", error);
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+    const handleSaveConfig = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setUpdatingId("config");
+        try {
+            const res = await fetch("/api/admin/affiliates/config", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(config),
+            });
+
+            if (res.ok) {
+                alert("Configuration saved successfully!");
+            } else {
+                alert("Failed to save configuration");
+            }
+        } catch (error) {
+            console.error("Error saving config", error);
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
     const generateWhatsAppMessage = (affiliate: Affiliate) => {
         const groupLink = "https://chat.whatsapp.com/K0tb3d13w77CIcaW7FRU3t";
+        const dashboardLink = "https://hmsnacks.in/business/hm-snacks/affiliate/login";
+
         const message = `🎉 Congratulations! Your HM Snacks Affiliate Application is Approved!
 
-Welcome to the HM Snacks Affiliate Family! 🍪
+Welcome to the HM Snacks Partner Family! 🍪
 
-📌 Your Unique Coupon Code: ${affiliate.couponCode}
-💰 Current Tier: ${affiliate.currentTier}
-📈 Next Tier: Starter (8% at 21 orders)
+📌 Your Official Code: ${affiliate.couponCode}
+🔐 Your Login Password: ${affiliate.password}
 
-How to Start Earning:
-1. Share your code with friends & family
-2. They get discount, you earn commission
-3. Track your earnings in real-time
+🚀 Access Your Partner Dashboard:
+${dashboardLink}
+(Login with your Mobile Number & Password)
 
-Join our exclusive WhatsApp Affiliate Community:
+💰 Your Commission Plan:
+- Direct Sales: 10%
+- Level 1 Downline: 2.0%
+- Level 2 Downline: 1.8%
+- Level 3 Downline: 1.6%
+
+Join our exclusive WhatsApp Partner Community:
 ${groupLink}
 
-Start promoting and earning today! 🚀
+Start promoting and tracking your binary team growth today! 🚀
 
 - Team HM Snacks`;
 
@@ -184,9 +273,9 @@ Start promoting and earning today! 🚀
                         <DollarSign size={32} />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total Commission Paid</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total Earnings Generated</p>
                         <h3 className="text-3xl font-black text-gray-900">
-                            ₹{affiliates.reduce((acc, a) => acc + (a.totalCommission || 0), 0).toFixed(0)}
+                            ₹{affiliates.reduce((acc, a) => acc + (a.totalEarnings || 0), 0).toFixed(0)}
                         </h3>
                     </div>
                 </div>
@@ -216,6 +305,20 @@ Start promoting and earning today! 🚀
                         <Users size={16} />
                         All
                     </button>
+                    <button
+                        onClick={() => setActiveTab("payouts")}
+                        className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "payouts" ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-orange-600"}`}
+                    >
+                        <DollarSign size={16} />
+                        Payouts ({payoutRequests.filter(p => p.status === "Pending").length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("config")}
+                        className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "config" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-blue-600"}`}
+                    >
+                        <RefreshCw size={16} />
+                        Split Config
+                    </button>
                 </div>
 
                 <button
@@ -235,6 +338,125 @@ Start promoting and earning today! 🚀
                             <RefreshCw className="w-12 h-12 text-primary animate-spin mb-4" />
                             <p className="text-gray-400 font-bold">Fetching Affiliate Data...</p>
                         </div>
+                    ) : activeTab === "config" ? (
+                        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-10 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="mb-8">
+                                <h3 className="text-2xl font-black text-gray-900 mb-2">Profit Pool Split Configuration</h3>
+                                <p className="text-gray-400 font-medium">Define how the calculated profit pool is distributed across levels.</p>
+                            </div>
+
+                            <form onSubmit={handleSaveConfig} className="space-y-6">
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Direct Split (%)</label>
+                                        <input
+                                            type="number"
+                                            value={config.directSplit}
+                                            onChange={(e) => setConfig({ ...config, directSplit: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold text-lg"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Level 1 Split (%)</label>
+                                        <input
+                                            type="number"
+                                            value={config.level1Split}
+                                            onChange={(e) => setConfig({ ...config, level1Split: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold text-lg"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Level 2 Split (%)</label>
+                                        <input
+                                            type="number"
+                                            value={config.level2Split}
+                                            onChange={(e) => setConfig({ ...config, level2Split: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold text-lg"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Level 3 Split (%)</label>
+                                        <input
+                                            type="number"
+                                            value={config.level3Split}
+                                            onChange={(e) => setConfig({ ...config, level3Split: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold text-lg"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                                    <p className="text-xs font-bold text-blue-600 text-center uppercase tracking-widest">
+                                        Total Split: {(Number(config.directSplit) + Number(config.level1Split) + Number(config.level2Split) + Number(config.level3Split)).toFixed(0)}%
+                                    </p>
+                                </div>
+
+                                <button
+                                    disabled={updatingId === "config"}
+                                    className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50"
+                                >
+                                    {updatingId === "config" ? <RefreshCw className="animate-spin" /> : <Save className="hidden" />}
+                                    Save Configuration
+                                </button>
+                            </form>
+                        </div>
+                    ) : activeTab === "payouts" ? (
+                        payoutRequests.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2.5rem] border border-gray-100">
+                                <DollarSign className="w-16 h-16 text-gray-100 mb-4" />
+                                <p className="text-gray-400 font-bold">No payout requests found.</p>
+                            </div>
+                        ) : (
+                            payoutRequests.map((request) => (
+                                <motion.div
+                                    key={request.id}
+                                    layout
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 flex items-center justify-between"
+                                >
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500">
+                                            <DollarSign size={28} />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-xl font-black text-gray-900">{request.affiliateName}</h4>
+                                            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">UPI: {request.upiId}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="text-center px-10 border-x border-gray-50">
+                                        <p className="text-[10px] font-black uppercase text-gray-400 mb-1">Request Amount</p>
+                                        <p className="text-3xl font-black text-gray-900">₹{request.amount}</p>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        {request.status === "Pending" ? (
+                                            <>
+                                                <button
+                                                    onClick={() => handlePayoutAction(request.id, "approve")}
+                                                    disabled={updatingId === request.id}
+                                                    className="px-6 py-3 bg-emerald-500 text-white rounded-xl font-black text-xs uppercase hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-200"
+                                                >
+                                                    Mark Paid
+                                                </button>
+                                                <button
+                                                    onClick={() => handlePayoutAction(request.id, "reject")}
+                                                    disabled={updatingId === request.id}
+                                                    className="px-6 py-3 bg-red-50 text-red-500 rounded-xl font-black text-xs uppercase hover:bg-red-100"
+                                                >
+                                                    Reject
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <span className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest ${request.status === "Approved" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"}`}>
+                                                {request.status}
+                                            </span>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            ))
+                        )
                     ) : filteredAffiliates.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2.5rem] border border-gray-100">
                             <Users className="w-16 h-16 text-gray-100 mb-4" />
@@ -290,8 +512,8 @@ Start promoting and earning today! 🚀
                                                 </a>
                                             )}
                                             <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${affiliate.status === "Approved" ? "text-emerald-600 bg-emerald-50 border-emerald-100" :
-                                                    affiliate.status === "Rejected" ? "text-red-600 bg-red-50 border-red-100" :
-                                                        "text-amber-600 bg-amber-50 border-amber-100"
+                                                affiliate.status === "Rejected" ? "text-red-600 bg-red-50 border-red-100" :
+                                                    "text-amber-600 bg-amber-50 border-amber-100"
                                                 }`}>
                                                 {affiliate.status}
                                             </span>
@@ -324,14 +546,20 @@ Start promoting and earning today! 🚀
 
                                     {/* Stats */}
                                     {affiliate.status === "Approved" && (
-                                        <div className="flex gap-8 md:px-8 border-x border-gray-50">
+                                        <div className="flex gap-6 md:px-8 border-x border-gray-50">
                                             <div className="text-center">
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Orders</p>
-                                                <p className="text-2xl font-black text-gray-900">{affiliate.totalOrders || 0}</p>
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Direct</p>
+                                                <p className="text-xl font-black text-gray-900">₹{affiliate.directEarnings?.toFixed(0) || 0}</p>
                                             </div>
                                             <div className="text-center">
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Commission</p>
-                                                <p className="text-2xl font-black text-emerald-600">₹{affiliate.totalCommission?.toFixed(0) || 0}</p>
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">MLM Levels</p>
+                                                <p className="text-xl font-black text-emerald-600">
+                                                    ₹{(Number(affiliate.level1Earnings || 0) + Number(affiliate.level2Earnings || 0) + Number(affiliate.level3Earnings || 0)).toFixed(0)}
+                                                </p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Pending Payout</p>
+                                                <p className="text-xl font-black text-orange-500">₹{affiliate.pendingBalance?.toFixed(0) || 0}</p>
                                             </div>
                                         </div>
                                     )}

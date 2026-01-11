@@ -58,6 +58,11 @@ export default function SnacksProductModule() {
                 pricePerPiece: editing.pricePoints?.find((p: any) => p.unit === "Pcs")?.value || null,
                 offerPricePerPiece: editing.pricePoints?.find((p: any) => p.unit === "Pcs")?.offerValue || null,
                 stock: typeof editing.stock === "string" && editing.stock === "" ? 0 : parseFloat(editing.stock as any) || 0,
+                productCost: parseFloat(editing.productCost as any) || 0,
+                packagingCost: parseFloat(editing.packagingCost as any) || 0,
+                otherCharges: parseFloat(editing.otherCharges as any) || 0,
+                affiliateDiscountPercent: parseFloat(editing.affiliateDiscountPercent as any) || 0,
+                affiliatePoolPercent: parseFloat(editing.affiliatePoolPercent as any) || 60,
             };
 
             // Convert empty strings/nulls to proper values
@@ -375,6 +380,66 @@ export default function SnacksProductModule() {
                                             onChange={(e) => setEditing({ ...editing, stock: e.target.value })}
                                             className="w-full bg-gray-50 border-0 rounded-xl p-4 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-lg"
                                         />
+                                    </div>
+
+                                    {/* Profit & Affiliate Configuration */}
+                                    <div className="bg-orange-50/50 p-6 rounded-[2rem] border border-orange-100 space-y-4">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-orange-600 mb-2">Cost & Affiliate Strategy</p>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">Product Cost</label>
+                                                <input
+                                                    type="number"
+                                                    value={editing.productCost}
+                                                    onChange={(e) => setEditing({ ...editing, productCost: e.target.value })}
+                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 transition-all font-bold"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">Packaging</label>
+                                                <input
+                                                    type="number"
+                                                    value={editing.packagingCost}
+                                                    onChange={(e) => setEditing({ ...editing, packagingCost: e.target.value })}
+                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 transition-all font-bold"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">Others</label>
+                                                <input
+                                                    type="number"
+                                                    value={editing.otherCharges}
+                                                    onChange={(e) => setEditing({ ...editing, otherCharges: e.target.value })}
+                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 transition-all font-bold"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">Customer Discount %</label>
+                                                <input
+                                                    type="number"
+                                                    value={editing.affiliateDiscountPercent}
+                                                    onChange={(e) => setEditing({ ...editing, affiliateDiscountPercent: e.target.value })}
+                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-emerald-600"
+                                                    placeholder="e.g. 8"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">Affiliate Pool % (of Profit)</label>
+                                                <input
+                                                    type="number"
+                                                    value={editing.affiliatePoolPercent}
+                                                    onChange={(e) => setEditing({ ...editing, affiliatePoolPercent: e.target.value })}
+                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-blue-600"
+                                                    placeholder="e.g. 60"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

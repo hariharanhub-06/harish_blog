@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
     UserPlus, Code, Share2, DollarSign, TrendingUp,
-    CheckCircle, Gift, Award, Users, Smartphone, MessageCircle
+    CheckCircle, Gift, Award, Users, Smartphone, MessageCircle, Link as LinkIcon
 } from "lucide-react";
 
 const commissionPlans = [
@@ -46,16 +47,25 @@ const steps = [
 ];
 
 export default function AffiliatePage() {
+    const searchParams = useSearchParams();
     const [formData, setFormData] = useState({
         fullName: "",
         mobile: "",
         upiId: "",
         email: "",
         socialLink: "",
+        referrerCode: "",
     });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        const ref = searchParams.get("ref");
+        if (ref) {
+            setFormData(prev => ({ ...prev, referrerCode: ref }));
+        }
+    }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -80,6 +90,7 @@ export default function AffiliatePage() {
                     upiId: "",
                     email: "",
                     socialLink: "",
+                    referrerCode: "",
                 });
             } else {
                 setError(data.error || "Registration failed");
@@ -318,6 +329,20 @@ export default function AffiliatePage() {
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-500 outline-none transition-all"
                                     placeholder="your@email.com"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">
+                                    Referral Code (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.referrerCode}
+                                    onChange={(e) => setFormData({ ...formData, referrerCode: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-500 outline-none transition-all uppercase"
+                                    placeholder="e.g. HMS12345"
+                                    disabled={!!searchParams.get("ref")}
                                 />
                             </div>
 

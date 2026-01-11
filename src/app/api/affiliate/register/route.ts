@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { fullName, mobile, upiId, email, socialLink } = body;
+        const { fullName, mobile, upiId, email, socialLink, referrerCode } = body;
 
         // Validate required fields
         if (!fullName || !mobile || !upiId) {
@@ -33,6 +33,19 @@ export async function POST(req: Request) {
             );
         }
 
+        // Find referrer if code exists
+        let referrerId = null;
+        if (referrerCode) {
+            const referrer = await db
+                .select({ id: affiliates.id })
+                .from(affiliates)
+                .where(eq(affiliates.couponCode, referrerCode.toUpperCase()));
+
+            if (referrer.length > 0) {
+                referrerId = referrer[0].id;
+            }
+        }
+
         // Create affiliate with pending status
         await db.insert(affiliates).values({
             fullName,
@@ -40,6 +53,7 @@ export async function POST(req: Request) {
             upiId,
             email: email || null,
             socialLink: socialLink || null,
+            referrerId: referrerId as any,
             status: "Pending",
             isActive: false,
         });

@@ -122,9 +122,15 @@ export default function CartPage() {
     }, [formData.state, formData.country, totalWeight]);
 
     const discountAmount = appliedCoupon
-        ? (appliedCoupon.discountType === 'percentage'
-            ? Math.round(subtotal * (appliedCoupon.discountValue / 100))
-            : appliedCoupon.discountValue)
+        ? (appliedCoupon.type === 'affiliate'
+            ? cart.reduce((acc, item) => {
+                const setting = appliedCoupon.productSettings?.find((s: any) => s.id === item.id);
+                const discountPercent = setting?.discount || 0;
+                return acc + Math.round((item.price * item.quantity) * (discountPercent / 100));
+            }, 0)
+            : (appliedCoupon.discountType === 'percentage'
+                ? Math.round(subtotal * (appliedCoupon.discountValue / 100))
+                : appliedCoupon.discountValue))
         : 0;
 
     const total = subtotal - discountAmount + shipping;
@@ -138,7 +144,24 @@ export default function CartPage() {
             const res = await fetch(`/api/coupons/validate?code=${formattedCode}`);
             const data = await res.json();
             if (res.ok && data.valid) {
-                setAppliedCoupon(data);
+                if (data.type === 'affiliate') {
+                    // Fetch product affiliate settings
+                    const prodRes = await fetch('/api/snacks/products');
+                    if (prodRes.ok) {
+                        const prods = await prodRes.json();
+                        setAppliedCoupon({
+                            ...data,
+                            productSettings: prods.map((p: any) => ({
+                                id: p.id,
+                                discount: p.affiliateDiscountPercent || 0
+                            }))
+                        });
+                    } else {
+                        setAppliedCoupon(data);
+                    }
+                } else {
+                    setAppliedCoupon(data);
+                }
                 setCouponError("");
             } else {
                 setCouponError(data.message || "Invalid coupon");

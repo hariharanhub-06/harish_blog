@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { affiliates, snackOrders } from "@/db/schema";
+import { affiliates, snackOrders, affiliateConfig } from "@/db/schema";
 import { eq, sql, count, and } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -24,51 +24,61 @@ export async function GET(req: NextRequest) {
 
         const affiliate = results[0];
 
-        // Fetch latest stats directly from orders to ensure accuracy
-        const [orderStats] = await db
-            .select({
-                orderCount: count(),
-                revenue: sql<number>`COALESCE(SUM(${snackOrders.totalAmount}), 0)`,
-            })
-            .from(snackOrders)
-            .where(
-                and(
-                    sql`UPPER(TRIM(${snackOrders.couponCode})) = UPPER(TRIM(${affiliate.couponCode}))`,
-                    sql`${snackOrders.status} != 'Cancel'`
-                )
-            );
+        const [config] = await db.select().from(affiliateConfig).where(eq(affiliateConfig.id, 1)).limit(1);
 
-        const currentCount = Number(orderStats.orderCount) || 0;
-        const currentRevenue = Number(orderStats.revenue) || 0;
-
-        // Commission Logic (same as admin)
-        const calculateRate = (count: number) => {
-            if (count >= 200) return 0.20;
-            if (count >= 180) return 0.18;
-            if (count >= 150) return 0.15;
-            if (count >= 100) return 0.12;
-            if (count >= 51) return 0.10;
-            if (count >= 21) return 0.08;
-            return 0.06;
-        };
-
-        const rate = calculateRate(currentCount);
-        const commission = currentRevenue * rate;
-
+        // Fetch latest stats directly from the database (now updated by admin or order sync)
         return NextResponse.json({
             fullName: affiliate.fullName,
             couponCode: affiliate.couponCode,
             status: affiliate.status,
-            totalOrders: currentCount,
-            totalRevenue: currentRevenue,
-            totalCommission: commission,
+            totalOrders: affiliate.totalOrders,
+            totalSalesAmount: affiliate.totalSalesAmount,
+            totalEarnings: affiliate.totalEarnings,
+            directEarnings: affiliate.directEarnings,
+            level1Earnings: affiliate.level1Earnings,
+            level2Earnings: affiliate.level2Earnings,
+            level3Earnings: affiliate.level3Earnings,
+            pendingBalance: affiliate.pendingBalance,
+            paidBalance: affiliate.paidBalance,
             currentTier: affiliate.currentTier,
-            commissionRate: rate * 100,
-            upiId: affiliate.upiId
+            commissionRate: config?.directSplit || 10,
+            upiId: affiliate.upiId,
+            parentId: affiliate.parentId,
+            referrerId: affiliate.referrerId,
+            position: affiliate.position,
+            // Downline tree (simplified to level 2 for now)
+            downline: await getDownlineTree(affiliate.id)
         });
 
     } catch (error) {
         console.error("Fetch affiliate stats error:", error);
         return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
     }
+}
+
+// Helper to get binary downline tree
+async function getDownlineTree(id: string, depth = 0) {
+    if (depth > 2) return null; // Limit depth for initial load
+
+    const children = await db
+        .select({
+            id: affiliates.id,
+            fullName: affiliates.fullName,
+            position: affiliates.position,
+            totalSalesAmount: affiliates.totalSalesAmount,
+            totalEarnings: affiliates.totalEarnings,
+            status: affiliates.status
+        })
+        .from(affiliates)
+        .where(eq(affiliates.parentId, id));
+
+    const tree: any = { left: null, right: null };
+    for (const child of children) {
+        if (child.position === 'left') {
+            tree.left = { ...child, children: await getDownlineTree(child.id, depth + 1) };
+        } else if (child.position === 'right') {
+            tree.right = { ...child, children: await getDownlineTree(child.id, depth + 1) };
+        }
+    }
+    return tree;
 }
