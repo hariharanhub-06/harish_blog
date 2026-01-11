@@ -26,7 +26,7 @@ export default function VendorLoginPage() {
             const data = await res.json();
 
             if (res.ok && data.success) {
-                login(data.vendor);
+                login(data.vendor, data.token);
             } else {
                 setError(data.error || "Login failed");
             }

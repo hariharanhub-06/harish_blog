@@ -273,7 +273,7 @@ export async function PATCH(req: NextRequest) {
     }
 }
 
-// DELETE - Remove affiliate
+// DELETE - Remove affiliate with Roll-up logic
 export async function DELETE(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
@@ -283,9 +283,27 @@ export async function DELETE(req: NextRequest) {
             return NextResponse.json({ error: "Missing affiliate ID" }, { status: 400 });
         }
 
+        // 1. Fetch affiliate to get their parentId
+        const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, id)).limit(1);
+        if (!affiliate) {
+            return NextResponse.json({ error: "Affiliate not found" }, { status: 404 });
+        }
+
+        const oldParentId = affiliate.parentId;
+
+        // 2. Roll-up children: Move direct children to the deleted person's parent
+        await db
+            .update(affiliates)
+            .set({ parentId: oldParentId })
+            .where(eq(affiliates.parentId, id));
+
+        // 3. Delete the record
         await db.delete(affiliates).where(eq(affiliates.id, id));
 
-        return NextResponse.json({ success: true, message: "Affiliate deleted" });
+        return NextResponse.json({
+            success: true,
+            message: "Affiliate deleted and tree rolled up successfully."
+        });
 
     } catch (error) {
         console.error("Delete affiliate error:", error);
