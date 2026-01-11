@@ -33,14 +33,14 @@ export async function processAffiliateCommissions(orderId: string) {
         const items = order.items as any[];
         if (!items || items.length === 0) return { success: false, message: "No items in order" };
 
-        const productIds = items.map(i => i.productId).filter(Boolean);
+        const productIds = items.map(i => i.productId || i.id).filter(Boolean);
         const products = await db.select().from(snackProducts).where(inArray(snackProducts.id, productIds));
         const productMap = new Map(products.map(p => [p.id, p]));
 
         let totalOrderProfitPool = 0;
 
         for (const item of items) {
-            const product = productMap.get(item.productId);
+            const product = productMap.get(item.productId || item.id);
             if (!product) continue;
 
             const sellingPrice = Number(item.price) || 0;
@@ -69,7 +69,15 @@ export async function processAffiliateCommissions(orderId: string) {
         const tier = getAffiliateTier(directAffiliate.totalOrders || 0);
         const directSplitRate = tier.rate; // This is the % of the pool
 
-        // 6. Distribute commissions based on pool and splits
+        // 6. Update Direct Affiliate Stats (Orders & Sales)
+        await db.update(affiliates)
+            .set({
+                totalOrders: sql`${affiliates.totalOrders} + 1`,
+                totalSalesAmount: sql`${affiliates.totalSalesAmount} + ${Number(order.totalAmount)}`,
+            })
+            .where(eq(affiliates.id, directAffiliate.id));
+
+        // 7. Distribute commissions based on pool and splits
         // Direct
         const directCommission = (totalOrderProfitPool * directSplitRate / 100);
         await distributeCommission(directAffiliate.id, directCommission, 'direct', orderId, directAffiliate.id);

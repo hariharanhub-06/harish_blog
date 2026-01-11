@@ -47,6 +47,7 @@ export async function GET(
     }
 }
 import { processAffiliateCommissions } from "@/lib/affiliate-commissions";
+import { splitOrderIntoShipments } from "@/lib/order-utils";
 
 export async function PATCH(
     req: NextRequest,
@@ -69,10 +70,13 @@ export async function PATCH(
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
         }
 
-        // Trigger Affiliate Commission Logic if status is successful
+        // Trigger Affiliate Commission & Split Shipping Logic if status is successful
         if (body.status === "Payment Confirmed" || body.status === "Success") {
-            // Passing orderId (HMS-XXX-XXX)
+            // 1. Process Commissions
             await processAffiliateCommissions(updatedOrder.orderId);
+
+            // 2. Split into multi-vendor shipments
+            await splitOrderIntoShipments(updatedOrder.orderId);
         }
 
         return NextResponse.json(updatedOrder);
