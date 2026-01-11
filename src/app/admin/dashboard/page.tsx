@@ -175,6 +175,19 @@ export default function AdminDashboard() {
                             <div key={item.id} className="px-6 pt-8 pb-2">
                                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">{item.title}</span>
                             </div>
+                        ) : item.id.startsWith("manage-") ? (
+                            <Link
+                                key={item.id}
+                                href={item.id === "manage-vendors" ? "/business/vendors" : "/business/products"}
+                                className="w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm text-secondary hover:bg-gray-50 hover:text-primary transition-all"
+                            >
+                                {item.icon && (() => {
+                                    const IconComponent = item.icon;
+                                    return <IconComponent size={20} />;
+                                })()}
+                                <span className="flex-1 text-left">{item.title}</span>
+                            </Link>
+
                         ) : (
                             <button
                                 key={item.id}
