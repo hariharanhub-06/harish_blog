@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { snackOrders, orderShipments, vendors } from "@/db/schema";
+import { snackOrders, orderShipments, vendors, affiliateTransactions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(
@@ -95,19 +95,69 @@ export async function DELETE(
 
         // 1. Get the order details first to get the orderId (HMS-XXX)
         const [order] = await db
-            .select({ orderId: snackOrders.orderId })
+            .select({
+                orderId: snackOrders.orderId,
+                couponCode: snackOrders.couponCode,
+                totalAmount: snackOrders.totalAmount
+            })
             .from(snackOrders)
             .where(eq(snackOrders.id, id))
             .limit(1);
 
         if (order) {
-            // 2. Delete associated shipments from order_shipments table
+            // 2. Roll back Affiliate Stats if the order had a coupon
+            if (order.couponCode) {
+                const [affiliate] = await db
+                    .select()
+                    .from(affiliates)
+                    .where(sql`UPPER(${affiliates.couponCode}) = UPPER(${order.couponCode})`)
+                    .limit(1);
+
+                if (affiliate) {
+                    console.log(`Rolling back stats for affiliate: ${affiliate.fullName}`);
+
+                    const transactionsToDelete = await db
+                        .select()
+                        .from(affiliateTransactions)
+                        .where(eq(affiliateTransactions.orderId, order.orderId));
+
+                    // Subtract order count and sales volume from direct affiliate
+                    await db.update(affiliates)
+                        .set({
+                            totalOrders: sql`${affiliates.totalOrders} - 1`,
+                            totalSalesAmount: sql`${affiliates.totalSalesAmount} - ${Number(order.totalAmount || 0)}`,
+                        })
+                        .where(eq(affiliates.id, affiliate.id));
+
+                    // Subtract earnings from each participant in the commission chain
+                    for (const tx of transactionsToDelete) {
+                        const field = tx.type === 'direct' ? 'directEarnings' :
+                            tx.type === 'level1' ? 'level1Earnings' :
+                                tx.type === 'level2' ? 'level2Earnings' : 'level3Earnings';
+
+                        await db.update(affiliates)
+                            .set({
+                                totalEarnings: sql`${affiliates.totalEarnings} - ${tx.amount}`,
+                                [field]: sql`${affiliates[field as keyof typeof affiliates]} - ${tx.amount}`,
+                                pendingBalance: sql`${affiliates.pendingBalance} - ${tx.amount}`,
+                            })
+                            .where(eq(affiliates.id, tx.affiliateId));
+                    }
+                }
+            }
+
+            // 3. Delete associated shipments
             await db
                 .delete(orderShipments)
                 .where(eq(orderShipments.orderId, order.orderId));
+
+            // 4. Delete associated affiliate transactions
+            await db
+                .delete(affiliateTransactions)
+                .where(eq(affiliateTransactions.orderId, order.orderId));
         }
 
-        // 3. Delete the order itself
+        // 5. Delete the order itself
         await db
             .delete(snackOrders)
             .where(eq(snackOrders.id, id));
