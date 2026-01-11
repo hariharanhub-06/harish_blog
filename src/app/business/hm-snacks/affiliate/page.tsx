@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -46,7 +46,7 @@ const steps = [
     },
 ];
 
-export default function AffiliatePage() {
+function AffiliatePageContent() {
     const searchParams = useSearchParams();
     const [formData, setFormData] = useState({
         fullName: "",
@@ -431,5 +431,17 @@ export default function AffiliatePage() {
                 </div>
             </section>
         </div>
+    );
+}
+
+export default function AffiliatePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+            </div>
+        }>
+            <AffiliatePageContent />
+        </Suspense>
     );
 }
