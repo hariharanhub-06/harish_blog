@@ -27,6 +27,8 @@ const getCachedProducts = unstable_cache(
                 isActive: snackProducts.isActive,
                 createdAt: snackProducts.createdAt,
                 updatedAt: snackProducts.updatedAt,
+                affiliateDiscountPercent: snackProducts.affiliateDiscountPercent,
+                affiliatePoolPercent: snackProducts.affiliatePoolPercent,
             })
             .from(snackProducts)
             .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -61,7 +63,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { name, description, category, imageUrl, pricePerKg, offerPricePerKg, pricePerPiece, offerPricePerPiece, stock, isActive } = body;
+        const {
+            name, description, category, imageUrl,
+            pricePerKg, offerPricePerKg, pricePerPiece, offerPricePerPiece,
+            stock, isActive,
+            productCost, packagingCost, otherCharges, affiliateDiscountPercent, affiliatePoolPercent
+        } = body;
 
         if (!name || !category || (!pricePerKg && !pricePerPiece)) {
             return NextResponse.json({ error: "Missing required fields (Name, Category, and at least one price)" }, { status: 400 });
@@ -78,6 +85,11 @@ export async function POST(req: NextRequest) {
             offerPricePerPiece: offerPricePerPiece ? parseInt(offerPricePerPiece) : null,
             stock: parseFloat(stock || 0),
             isActive: isActive ?? true,
+            productCost: parseFloat(productCost || 0),
+            packagingCost: parseFloat(packagingCost || 0),
+            otherCharges: parseFloat(otherCharges || 0),
+            affiliateDiscountPercent: parseFloat(affiliateDiscountPercent || 0),
+            affiliatePoolPercent: parseFloat(affiliatePoolPercent || 60),
         }).returning();
 
         revalidateTag('snack-products', { expire: 0 });

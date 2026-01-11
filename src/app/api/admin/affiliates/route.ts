@@ -20,6 +20,46 @@ function calculateTier(orderCount: number) {
     return { tier: "Newbie", rate: 0.06 };
 }
 
+// Helper to generate a random password
+function generatePassword(): string {
+    return Math.random().toString(36).slice(-8); // 8 characters
+}
+
+// Binary placement logic: Find the first available position in the tree under a specific affiliate
+async function findBinaryPlacement(referrerId: string | null): Promise<{ parentId: string | null, position: 'left' | 'right' | null }> {
+    if (!referrerId) {
+        // If no referrer, check if there's any affiliate in the system
+        const countRes = await db.select({ count: count() }).from(affiliates);
+        if (Number(countRes[0].count) === 0) return { parentId: null, position: null }; // First affiliate is root
+
+        // If not first, find the very first root (one with no parent)
+        const roots = await db.select({ id: affiliates.id }).from(affiliates).where(sql`parent_id IS NULL`);
+        if (roots.length > 0) referrerId = roots[0].id;
+        else return { parentId: null, position: null };
+    }
+
+    // BFS to find the first available slot
+    let queue = [referrerId];
+    while (queue.length > 0) {
+        const currentId = queue.shift()!;
+        const children = await db
+            .select({ id: affiliates.id, position: affiliates.position })
+            .from(affiliates)
+            .where(eq(affiliates.parentId, currentId));
+
+        const hasLeft = children.find(c => c.position === 'left');
+        const hasRight = children.find(c => c.position === 'right');
+
+        if (!hasLeft) return { parentId: currentId, position: 'left' };
+        if (!hasRight) return { parentId: currentId, position: 'right' };
+
+        // Both children exist, add them to queue to check their children
+        queue.push(hasLeft.id, hasRight.id);
+    }
+
+    return { parentId: null, position: null };
+}
+
 // GET - Fetch all affiliates with stats
 export async function GET() {
     try {
@@ -28,14 +68,25 @@ export async function GET() {
                 id: affiliates.id,
                 fullName: affiliates.fullName,
                 mobile: affiliates.mobile,
+                password: affiliates.password,
                 upiId: affiliates.upiId,
                 email: affiliates.email,
                 socialLink: affiliates.socialLink,
                 couponCode: affiliates.couponCode,
+                referrerId: affiliates.referrerId,
+                parentId: affiliates.parentId,
+                position: affiliates.position,
                 status: affiliates.status,
                 isActive: affiliates.isActive,
                 totalOrders: affiliates.totalOrders,
-                totalCommission: affiliates.totalCommission,
+                totalSalesAmount: affiliates.totalSalesAmount,
+                totalEarnings: affiliates.totalEarnings,
+                directEarnings: affiliates.directEarnings,
+                level1Earnings: affiliates.level1Earnings,
+                level2Earnings: affiliates.level2Earnings,
+                level3Earnings: affiliates.level3Earnings,
+                pendingBalance: affiliates.pendingBalance,
+                paidBalance: affiliates.paidBalance,
                 currentTier: affiliates.currentTier,
                 createdAt: affiliates.createdAt,
                 approvedAt: affiliates.approvedAt,
@@ -54,30 +105,41 @@ export async function GET() {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { id, action } = body; // action: "approve" or "reject"
+        const { id, action } = body;
 
         if (!id || !action) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
         if (action === "approve") {
-            // Generate unique coupon code
-            let couponCode = generateCouponCode();
+            // Get current affiliate details (especially referrerId)
+            const [current] = await db.select().from(affiliates).where(eq(affiliates.id, id));
+            if (!current) return NextResponse.json({ error: "Affiliate not found" }, { status: 404 });
 
-            // Ensure uniqueness
+            // 1. Generate unique coupon code
+            let couponCode = generateCouponCode();
             let exists = await db.select().from(affiliates).where(eq(affiliates.couponCode, couponCode));
             while (exists.length > 0) {
                 couponCode = generateCouponCode();
                 exists = await db.select().from(affiliates).where(eq(affiliates.couponCode, couponCode));
             }
 
-            // Update affiliate
+            // 2. Generate random password
+            const password = generatePassword();
+
+            // 3. Binary Placement Logic
+            const { parentId, position } = await findBinaryPlacement(current.referrerId);
+
+            // 4. Update affiliate
             const [updated] = await db
                 .update(affiliates)
                 .set({
                     status: "Approved",
                     isActive: true,
                     couponCode: couponCode,
+                    password: password,
+                    parentId: parentId,
+                    position: position,
                     approvedAt: new Date(),
                 })
                 .where(eq(affiliates.id, id))
@@ -86,7 +148,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({
                 success: true,
                 affiliate: updated,
-                message: "Affiliate approved successfully"
+                message: "Affiliate approved with password and placement"
             });
 
         } else if (action === "reject") {
@@ -150,7 +212,8 @@ export async function PUT(req: NextRequest) {
             .update(affiliates)
             .set({
                 totalOrders: orderCount,
-                totalCommission: commission,
+                totalSalesAmount: revenue,
+                totalEarnings: commission,
                 currentTier: tier,
             })
             .where(eq(affiliates.id, id));
@@ -160,7 +223,7 @@ export async function PUT(req: NextRequest) {
             stats: {
                 totalOrders: orderCount,
                 totalRevenue: revenue,
-                totalCommission: commission,
+                totalEarnings: commission,
                 currentTier: tier,
                 commissionRate: rate * 100,
             }

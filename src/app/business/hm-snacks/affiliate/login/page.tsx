@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function AffiliateLoginPage() {
     const [mobile, setMobile] = useState("");
-    const [couponCode, setCouponCode] = useState("");
+    const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const router = useRouter();
@@ -22,7 +22,7 @@ export default function AffiliateLoginPage() {
             const res = await fetch("/api/affiliate/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ mobile, couponCode }),
+                body: JSON.stringify({ mobile, password }),
             });
 
             const data = await res.json();
@@ -94,16 +94,16 @@ export default function AffiliateLoginPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Affiliate Coupon Code</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Login Password</label>
                             <div className="relative">
                                 <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
                                 <input
-                                    type="text"
+                                    type="password"
                                     required
-                                    value={couponCode}
-                                    onChange={(e) => setCouponCode(e.target.value)}
-                                    placeholder="e.g. HMS12345"
-                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl font-bold text-gray-900 outline-none focus:ring-2 focus:ring-orange-500 transition-all uppercase"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter your password"
+                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl font-bold text-gray-900 outline-none focus:ring-2 focus:ring-orange-500 transition-all"
                                 />
                             </div>
                         </div>
