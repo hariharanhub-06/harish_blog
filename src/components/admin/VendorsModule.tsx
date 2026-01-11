@@ -89,8 +89,8 @@ export default function VendorsModule() {
 
     const generateWhatsAppMessage = (vendor: any) => {
         const loginLink = "https://hariharanhub.com/business/hm-snacks/vendor/login";
-        const message = `🎉 Welcome to HM Snacks Vendor Portal!
-    
+        const message = `🎉 *Welcome to HM Snacks Vendor Portal!*
+
 Hello ${vendor.name},
 
 Your Vendor Account has been created. You can now log in to manage your shipments and dimensions.
