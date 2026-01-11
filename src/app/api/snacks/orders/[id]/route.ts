@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { snackOrders, orderShipments, vendors, affiliateTransactions } from "@/db/schema";
+import { snackOrders, orderShipments, vendors, affiliateTransactions, affiliates } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(
