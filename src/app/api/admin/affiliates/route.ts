@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { affiliates, snackOrders } from "@/db/schema";
+import { affiliates, snackOrders, affiliateTransactions } from "@/db/schema";
 import { eq, desc, sql, count } from "drizzle-orm";
 
 // Helper function to generate unique coupon code
@@ -171,28 +171,22 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// PUT - Update affiliate stats (called periodically or on order placement)
+// PUT - Sync Affiliate Stats (Recalculate from orders and transactions)
 export async function PUT(req: NextRequest) {
     try {
         const body = await req.json();
         const { id } = body;
 
-        if (!id) {
-            return NextResponse.json({ error: "Missing affiliate ID" }, { status: 400 });
-        }
+        if (!id) return NextResponse.json({ error: "Missing affiliate ID" }, { status: 400 });
 
-        // Get affiliate
-        const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, id));
+        const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, id)).limit(1);
+        if (!affiliate) return NextResponse.json({ error: "Affiliate not found" }, { status: 404 });
 
-        if (!affiliate || !affiliate.couponCode) {
-            return NextResponse.json({ error: "Affiliate not found" }, { status: 404 });
-        }
-
-        // Calculate total orders using this coupon code
+        // 1. Recalculate Order Stats (Orders using this coupon)
         const [orderStats] = await db
             .select({
                 totalOrders: count(),
-                totalRevenue: sql<number>`COALESCE(SUM(${snackOrders.totalAmount}), 0)`,
+                totalSalesAmount: sql<number>`COALESCE(SUM(${snackOrders.totalAmount}), 0)`,
             })
             .from(snackOrders)
             .where(
@@ -201,37 +195,81 @@ export async function PUT(req: NextRequest) {
             );
 
         const orderCount = Number(orderStats.totalOrders) || 0;
-        const revenue = Number(orderStats.totalRevenue) || 0;
+        const salesAmount = Number(orderStats.totalSalesAmount) || 0;
 
-        // Calculate tier and commission
-        const { tier, rate } = calculateTier(orderCount);
-        const commission = revenue * rate;
+        // 2. Recalculate Earnings from Transactions
+        const earningsStats = await db
+            .select({
+                type: affiliateTransactions.type,
+                amount: sql<number>`COALESCE(SUM(${affiliateTransactions.amount}), 0)`,
+            })
+            .from(affiliateTransactions)
+            .where(eq(affiliateTransactions.affiliateId, id))
+            .groupBy(affiliateTransactions.type);
 
-        // Update affiliate
+        let direct = 0, l1 = 0, l2 = 0, l3 = 0;
+        earningsStats.forEach(s => {
+            if (s.type === 'direct') direct = s.amount;
+            else if (s.type === 'level1') l1 = s.amount;
+            else if (s.type === 'level2') l2 = s.amount;
+            else if (s.type === 'level3') l3 = s.amount;
+        });
+
+        const totalEarnings = direct + l1 + l2 + l3;
+
+        // 3. Update Tier
+        const { tier } = calculateTier(orderCount);
+
+        // 4. Final Update
         await db
             .update(affiliates)
             .set({
                 totalOrders: orderCount,
-                totalSalesAmount: revenue,
-                totalEarnings: commission,
+                totalSalesAmount: salesAmount,
+                totalEarnings: totalEarnings,
+                directEarnings: direct,
+                level1Earnings: l1,
+                level2Earnings: l2,
+                level3Earnings: l3,
                 currentTier: tier,
+                // Note: pendingBalance is usually updated on payouts, 
+                // but we can sanity check it if needed. 
+                // For now, only update performance stats.
             })
             .where(eq(affiliates.id, id));
 
-        return NextResponse.json({
-            success: true,
-            stats: {
-                totalOrders: orderCount,
-                totalRevenue: revenue,
-                totalEarnings: commission,
-                currentTier: tier,
-                commissionRate: rate * 100,
-            }
-        });
-
+        return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Update affiliate stats error:", error);
-        return NextResponse.json({ error: "Failed to update stats" }, { status: 500 });
+        console.error("Sync affiliate error:", error);
+        return NextResponse.json({ error: "Failed to sync stats" }, { status: 500 });
+    }
+}
+
+// PATCH - Update Affiliate Profile
+export async function PATCH(req: NextRequest) {
+    try {
+        const body = await req.json();
+        const { id, fullName, mobile, upiId, email, socialLink, password, currentTier } = body;
+
+        if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+
+        await db
+            .update(affiliates)
+            .set({
+                fullName,
+                mobile,
+                upiId,
+                email,
+                socialLink,
+                password,
+                currentTier
+            })
+            .where(eq(affiliates.id, id));
+
+        return NextResponse.json({ success: true, message: "Profile updated" });
+    } catch (error) {
+        console.error("Update affiliate error:", error);
+        return NextResponse.json({ error: "Failed to update affiliate" }, { status: 500 });
     }
 }
 
