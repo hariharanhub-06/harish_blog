@@ -141,6 +141,58 @@ export async function PATCH(
                     }
                 }
             }
+
+            // Roll back affiliate earnings if order is cancelled
+            if (body.status === "Cancel" && updatedOrder.couponCode) {
+                const [affiliate] = await db.select()
+                    .from(affiliates)
+                    .where(sql`UPPER(${affiliates.couponCode}) = UPPER(${updatedOrder.couponCode})`)
+                    .limit(1);
+
+                if (affiliate) {
+                    console.log(`[Cancel Rollback] Found affiliate: ${affiliate.fullName} for order ${updatedOrder.orderId}`);
+
+                    // Get all transactions for this order
+                    const transactionsToDelete = await db.select()
+                        .from(affiliateTransactions)
+                        .where(eq(affiliateTransactions.orderId, updatedOrder.orderId));
+
+                    console.log(`[Cancel Rollback] Found ${transactionsToDelete.length} transactions to reverse`);
+
+                    if (transactionsToDelete.length > 0) {
+                        // Subtract order count and sales volume from direct affiliate
+                        await db.update(affiliates)
+                            .set({
+                                totalOrders: sql`${affiliates.totalOrders} - 1`,
+                                totalSalesAmount: sql`${affiliates.totalSalesAmount} - ${Number(updatedOrder.totalAmount || 0)}`,
+                            })
+                            .where(eq(affiliates.id, affiliate.id));
+
+                        // Subtract earnings from each participant in the commission chain
+                        for (const tx of transactionsToDelete) {
+                            const field = tx.type === 'direct' ? 'directEarnings' :
+                                tx.type === 'level1' ? 'level1Earnings' :
+                                    tx.type === 'level2' ? 'level2Earnings' : 'level3Earnings';
+
+                            console.log(`[Cancel Rollback] Reversing ${tx.amount} (${tx.type}) for affiliate ID: ${tx.affiliateId}`);
+
+                            await db.update(affiliates)
+                                .set({
+                                    totalEarnings: sql`${affiliates.totalEarnings} - ${tx.amount}`,
+                                    [field]: sql`${affiliates[field as keyof typeof affiliates]} - ${tx.amount}`,
+                                    pendingBalance: sql`${affiliates.pendingBalance} - ${tx.amount}`,
+                                })
+                                .where(eq(affiliates.id, tx.affiliateId));
+                        }
+
+                        // Delete the transactions
+                        await db.delete(affiliateTransactions)
+                            .where(eq(affiliateTransactions.orderId, updatedOrder.orderId));
+
+                        console.log(`[Cancel Rollback] Deleted ${transactionsToDelete.length} transactions`);
+                    }
+                }
+            }
         }
 
         return NextResponse.json(updatedOrder);
