@@ -436,7 +436,7 @@ export default function AffiliateDashboard() {
                             exit={{ opacity: 0, y: -20 }}
                             className="space-y-8"
                         >
-                            <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-100 shadow-sm overflow-hidden relative">
+                            <div className="bg-white rounded-2xl md:rounded-[2.5rem] p-5 md:p-12 border border-gray-100 shadow-sm overflow-hidden relative">
                                 <div className="absolute right-0 top-0 p-12 opacity-5 scale-150 rotate-12">
                                     <LinkIcon size={200} />
                                 </div>
@@ -451,12 +451,12 @@ export default function AffiliateDashboard() {
                                                 <Users size={16} /> Partner Registration Link
                                             </div>
                                             <div className="flex gap-4">
-                                                <div className="flex-1 bg-gray-50 border border-gray-100 p-5 rounded-2xl font-bold flex items-center overflow-hidden">
-                                                    <code className="text-orange-600 truncate">https://hmsnacks.in/affiliate?ref={stats.couponCode}</code>
+                                                <div className="flex-1 bg-gray-50 border border-gray-100 p-3 md:p-5 rounded-xl md:rounded-2xl font-bold flex items-center overflow-hidden">
+                                                    <code className="text-orange-600 truncate text-[10px] md:text-base">https://hariharanhub.com/business/hm-snacks/affiliate?ref={stats.couponCode}</code>
                                                 </div>
                                                 <button
                                                     onClick={() => {
-                                                        navigator.clipboard.writeText(`https://hmsnacks.in/affiliate?ref=${stats.couponCode}`);
+                                                        navigator.clipboard.writeText(`https://hariharanhub.com/business/hm-snacks/affiliate?ref=${stats.couponCode}`);
                                                         alert("Copied!");
                                                     }}
                                                     className="p-5 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all"
@@ -481,7 +481,7 @@ export default function AffiliateDashboard() {
                                                         </div>
                                                         <button
                                                             onClick={() => {
-                                                                navigator.clipboard.writeText(`https://hmsnacks.in/product/${product.id}?ref=${stats.couponCode}`);
+                                                                navigator.clipboard.writeText(`https://hariharanhub.com/product/${product.id}?ref=${stats.couponCode}`);
                                                                 alert(`Link for ${product.name} copied!`);
                                                             }}
                                                             className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-all"
