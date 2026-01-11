@@ -36,7 +36,6 @@ export async function processAffiliateCommissions(orderId: string) {
         const productIds = items.map(i => i.productId || i.id).filter(Boolean);
         const products = await db.select().from(snackProducts).where(inArray(snackProducts.id, productIds));
         const productMap = new Map(products.map(p => [p.id, p]));
-
         let totalOrderProfitPool = 0;
 
         for (const item of items) {
@@ -44,17 +43,16 @@ export async function processAffiliateCommissions(orderId: string) {
             if (!product) continue;
 
             const sellingPrice = Number(item.price) || 0;
-            const cost = Number(product.productCost || 0) + Number(product.packagingCost || 0) + Number(product.otherCharges || 0);
             const quantity = Number(item.quantity) || 1;
 
-            const itemProfit = (sellingPrice * quantity) - (cost * quantity);
+            // REVENUE-BASED COMMISSION: Pool is a percentage of the total sales amount
             const poolPercent = Number(product.affiliatePoolPercent || 60);
-            const itemPool = itemProfit > 0 ? (itemProfit * poolPercent / 100) : 0;
+            const itemPool = (sellingPrice * quantity) * (poolPercent / 100);
 
             totalOrderProfitPool += itemPool;
         }
 
-        if (totalOrderProfitPool <= 0) return { success: false, message: "No profit pool available for commissions" };
+        if (totalOrderProfitPool <= 0) return { success: false, message: "No pool available for commissions" };
 
         // 4. Find the direct affiliate
         const [directAffiliate] = await db
