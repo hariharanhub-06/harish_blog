@@ -146,6 +146,7 @@ export const snackProducts = pgTable("snack_products", {
   offerPricePerPiece: doublePrecision("offer_price_per_piece"),
   stock: doublePrecision("stock").default(0),
   isActive: boolean("is_active").default(true),
+  vendorId: uuid("vendor_id"), // Link to vendors table
 
   // Profit-based Affiliate Fields
   productCost: doublePrecision("product_cost").default(0),
@@ -300,3 +301,30 @@ export const affiliateConfig = pgTable("affiliate_config", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+
+// HM Snacks - Vendors Table
+export const vendors = pgTable("vendors", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(), // Login ID
+  password: text("password").notNull(),
+  phone: text("phone"),
+  pickupLocationId: text("pickup_location_id"), // From Shiprocket
+  address: text("address"),
+  bankDetails: jsonb("bank_details"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// HM Snacks - Order Shipments (For Split Orders)
+export const orderShipments = pgTable("order_shipments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orderId: text("order_id").notNull(),
+  vendorId: uuid("vendor_id"),
+  shiprocketOrderId: text("shiprocket_order_id"),
+  awbCode: text("awb_code"),
+  courierName: text("courier_name"),
+  trackingUrl: text("tracking_url"),
+  status: text("status").default("Pending"),
+  items: jsonb("items").notNull(), // Array of items in this shipment
+  createdAt: timestamp("created_at").defaultNow(),
+});
