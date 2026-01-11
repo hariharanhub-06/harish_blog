@@ -240,7 +240,7 @@ export default function AffiliatesModule() {
 
     const generateWhatsAppMessage = (affiliate: Affiliate) => {
         const groupLink = "https://chat.whatsapp.com/K0tb3d13w77CIcaW7FRU3t";
-        const dashboardLink = "https://hmsnacks.in/business/hm-snacks/affiliate/login";
+        const dashboardLink = "https://hariharanhub.com/business/hm-snacks/affiliate/login";
 
         const message = `🎉 Congratulations! Your HM Snacks Affiliate Application is Approved!
 
@@ -254,7 +254,7 @@ ${dashboardLink}
 (Login with your Mobile Number & Password)
 
 💰 Your Commission Plan:
-- Direct Sales: 10%
+- Direct Sales: Starting at 6% (Up to 20%)
 - Level 1 Downline: 2.0%
 - Level 2 Downline: 1.8%
 - Level 3 Downline: 1.6%
