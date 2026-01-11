@@ -27,6 +27,9 @@ const getCachedProducts = unstable_cache(
                 isActive: snackProducts.isActive,
                 createdAt: snackProducts.createdAt,
                 updatedAt: snackProducts.updatedAt,
+                productCost: snackProducts.productCost,
+                packagingCost: snackProducts.packagingCost,
+                otherCharges: snackProducts.otherCharges,
                 affiliateDiscountPercent: snackProducts.affiliateDiscountPercent,
                 affiliatePoolPercent: snackProducts.affiliatePoolPercent,
             })
