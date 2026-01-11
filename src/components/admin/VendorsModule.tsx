@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Trash2, MapPin, Mail, Phone, Lock, Building, Loader2 } from "lucide-react";
+import { Plus, Search, Trash2, MapPin, Mail, Phone, Lock, Building, Loader2, Eye, EyeOff, Copy, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function VendorsModule() {
@@ -9,6 +9,8 @@ export default function VendorsModule() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+    const [copiedId, setCopiedId] = useState<string | null>(null);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -75,6 +77,16 @@ export default function VendorsModule() {
         }
     };
 
+    const togglePasswordVisibility = (vendorId: string) => {
+        setShowPasswords(prev => ({ ...prev, [vendorId]: !prev[vendorId] }));
+    };
+
+    const copyToClipboard = (text: string, vendorId: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(vendorId);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
+
     const filteredVendors = vendors.filter(v =>
         v.name.toLowerCase().includes(search.toLowerCase()) ||
         v.email.toLowerCase().includes(search.toLowerCase())
@@ -113,12 +125,12 @@ export default function VendorsModule() {
             {loading ? (
                 <div className="flex justify-center py-20"><Loader2 className="animate-spin text-gray-400" size={32} /></div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredVendors.map((vendor) => (
                         <motion.div
                             layout
                             key={vendor.id}
-                            className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group"
+                            className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all"
                         >
                             <div className="flex justify-between items-start mb-4">
                                 <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600">
@@ -139,11 +151,58 @@ export default function VendorsModule() {
                             </div>
 
                             <div className="space-y-3 pt-4 border-t border-gray-50">
-                                <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
-                                    <Mail size={16} className="text-gray-400" />
-                                    {vendor.email}
+                                {/* Email (Login ID) with Copy */}
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-600 flex-1 min-w-0">
+                                        <Mail size={16} className="text-gray-400 flex-shrink-0" />
+                                        <span className="truncate">{vendor.email}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => copyToClipboard(vendor.email, `email-${vendor.id}`)}
+                                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                                        title="Copy Email"
+                                    >
+                                        {copiedId === `email-${vendor.id}` ?
+                                            <CheckCircle size={16} className="text-green-500" /> :
+                                            <Copy size={16} className="text-gray-400" />
+                                        }
+                                    </button>
                                 </div>
-                                <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
+
+                                {/* Password with Show/Hide and Copy */}
+                                <div className="flex items-center justify-between gap-2 bg-gray-50 px-3 py-2 rounded-xl">
+                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-900 flex-1">
+                                        <Lock size={16} className="text-gray-400 flex-shrink-0" />
+                                        <span className="font-mono">
+                                            {showPasswords[vendor.id] ? vendor.password : "••••••••"}
+                                        </span>
+                                    </div>
+                                    <div className="flex gap-1 flex-shrink-0">
+                                        <button
+                                            onClick={() => togglePasswordVisibility(vendor.id)}
+                                            className="p-1.5 hover:bg-white rounded-lg transition-colors"
+                                            title={showPasswords[vendor.id] ? "Hide Password" : "Show Password"}
+                                        >
+                                            {showPasswords[vendor.id] ?
+                                                <EyeOff size={16} className="text-gray-500" /> :
+                                                <Eye size={16} className="text-gray-400" />
+                                            }
+                                        </button>
+                                        <button
+                                            onClick={() => copyToClipboard(vendor.password, `pass-${vendor.id}`)}
+                                            className="p-1.5 hover:bg-white rounded-lg transition-colors"
+                                            title="Copy Password"
+                                        >
+                                            {copiedId === `pass-${vendor.id}` ?
+                                                <CheckCircle size={16} className="text-green-500" /> :
+                                                <Copy size={16} className="text-gray-400" />
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Phone */}
+                                <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
                                     <Phone size={16} className="text-gray-400" />
                                     {vendor.phone || "No phone"}
                                 </div>
