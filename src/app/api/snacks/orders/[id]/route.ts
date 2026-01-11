@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { snackOrders, orderShipments, vendors, affiliateTransactions, affiliates } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { snackOrders, orderShipments, vendors, affiliateTransactions, affiliates, snackProducts } from "@/db/schema";
+import { eq, sql, inArray } from "drizzle-orm";
 
 export async function GET(
     req: NextRequest,
@@ -152,12 +152,48 @@ export async function DELETE(
                 }
             }
 
-            // 3. Delete associated shipments
+            // 3. Revert Vendor Earnings for Delivered Shipments
+            const shipments = await db.select().from(orderShipments).where(eq(orderShipments.orderId, order.orderId));
+
+            for (const shipment of shipments) {
+                if (shipment.status === "Delivered" && shipment.vendorId) {
+                    const items = shipment.items as any[];
+                    const productIds = items.map(i => i.productId || i.id).filter(Boolean);
+
+                    if (productIds.length > 0) {
+                        const products = await db.select().from(snackProducts).where(inArray(snackProducts.id, productIds));
+                        const productMap = new Map(products.map(p => [p.id, p]));
+
+                        const shipmentValue = items.reduce((acc, item) => {
+                            const product = productMap.get(item.productId || item.id);
+                            if (!product) return acc;
+
+                            const cost = Number(product.productCost || 0);
+                            const packaging = Number(product.packagingCost || 0);
+                            const quantity = Number(item.quantity) || 1;
+
+                            const perUnitEarnings = cost + (packaging * 0.30);
+                            return acc + (perUnitEarnings * quantity);
+                        }, 0);
+
+                        console.log(`[Rollback] Reversing Vendor Earning: ${shipmentValue} for Vendor ${shipment.vendorId}`);
+
+                        await db.update(vendors)
+                            .set({
+                                totalEarnings: sql`${vendors.totalEarnings} - ${shipmentValue}`,
+                                pendingBalance: sql`${vendors.pendingBalance} - ${shipmentValue}`,
+                            })
+                            .where(eq(vendors.id, shipment.vendorId));
+                    }
+                }
+            }
+
+            // 4. Delete associated shipments
             await db
                 .delete(orderShipments)
                 .where(eq(orderShipments.orderId, order.orderId));
 
-            // 4. Delete associated affiliate transactions
+            // 5. Delete associated affiliate transactions
             await db
                 .delete(affiliateTransactions)
                 .where(eq(affiliateTransactions.orderId, order.orderId));
