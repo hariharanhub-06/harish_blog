@@ -60,7 +60,12 @@ interface Product {
     id: string;
     name: string;
     pricePerKg: number;
+    offerPricePerKg?: number;
     category: string;
+    productCost?: number;
+    packagingCost?: number;
+    otherCharges?: number;
+    affiliatePoolPercent?: number;
 }
 
 export default function AffiliateDashboard() {
@@ -497,7 +502,14 @@ export default function AffiliateDashboard() {
                                                                     <p className="text-[10px] uppercase font-black text-gray-400">{product.category}</p>
                                                                     <span className="w-1 h-1 bg-gray-300 rounded-full" />
                                                                     <p className="text-[10px] uppercase font-black text-orange-600">
-                                                                        Earn: ₹{Math.floor((product.pricePerKg || 0) * ((stats?.commissionRate || 6) / 100))}/Kg
+                                                                        Earn: ₹{(() => {
+                                                                            const price = product.offerPricePerKg || product.pricePerKg || 0;
+                                                                            const totalCost = (product.productCost || 0) + (product.packagingCost || 0) + (product.otherCharges || 0);
+                                                                            const profit = Math.max(0, price - totalCost);
+                                                                            const pool = profit * ((product.affiliatePoolPercent || 60) / 100);
+                                                                            const earn = pool * ((stats?.commissionRate || 10) / 100);
+                                                                            return Math.floor(earn);
+                                                                        })()}/Kg
                                                                     </p>
                                                                 </div>
                                                             </div>
