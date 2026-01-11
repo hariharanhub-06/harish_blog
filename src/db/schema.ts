@@ -221,3 +221,22 @@ export const abandonedCarts = pgTable("abandoned_carts", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// HM Snacks - Affiliates Table
+export const affiliates = pgTable("affiliates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  fullName: text("full_name").notNull(),
+  mobile: text("mobile").notNull().unique(),
+  upiId: text("upi_id").notNull(),
+  email: text("email"),
+  socialLink: text("social_link"),
+  couponCode: text("coupon_code").unique(), // HMS + 5 random digits (e.g., HMS12345)
+  status: text("status").default("Pending"), // Pending, Approved, Rejected
+  isActive: boolean("is_active").default(false),
+  totalOrders: integer("total_orders").default(0),
+  totalCommission: doublePrecision("total_commission").default(0),
+  currentTier: text("current_tier").default("Newbie"), // Newbie, Starter, Silver, Golden, Platinum, Pro, Elite
+  createdAt: timestamp("created_at").defaultNow(),
+  approvedAt: timestamp("approved_at"),
+});
+
