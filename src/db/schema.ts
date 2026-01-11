@@ -155,6 +155,12 @@ export const snackProducts = pgTable("snack_products", {
   affiliateDiscountPercent: doublePrecision("affiliate_discount_percent").default(0),
   affiliatePoolPercent: doublePrecision("affiliate_pool_percent").default(60),
 
+  // Shipping Dimensions
+  length: doublePrecision("length").default(1),
+  width: doublePrecision("width").default(1),
+  height: doublePrecision("height").default(1),
+  weight: doublePrecision("weight").default(0.5), // in KG
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

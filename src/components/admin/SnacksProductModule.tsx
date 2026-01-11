@@ -63,6 +63,10 @@ export default function SnacksProductModule() {
                 otherCharges: parseFloat(editing.otherCharges as any) || 0,
                 affiliateDiscountPercent: parseFloat(editing.affiliateDiscountPercent as any) || 0,
                 affiliatePoolPercent: parseFloat(editing.affiliatePoolPercent as any) || 60,
+                length: parseFloat(editing.length as any) || 1,
+                width: parseFloat(editing.width as any) || 1,
+                height: parseFloat(editing.height as any) || 1,
+                weight: parseFloat(editing.weight as any) || 0.5,
             };
 
             // Convert empty strings/nulls to proper values
@@ -177,7 +181,11 @@ export default function SnacksProductModule() {
                             category: "Savories",
                             pricePoints: [{ value: "", unit: "Kg" }],
                             stock: "",
-                            isActive: true
+                            isActive: true,
+                            length: 1,
+                            width: 1,
+                            height: 1,
+                            weight: 0.5
                         })}
                         className="flex items-center space-x-2 bg-pink-500 text-white font-black px-6 py-3 rounded-2xl hover:shadow-2xl transition-all"
                     >
@@ -425,6 +433,52 @@ export default function SnacksProductModule() {
                                                     onChange={(e) => setEditing({ ...editing, affiliatePoolPercent: e.target.value })}
                                                     className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-blue-600"
                                                     placeholder="e.g. 60"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Physical Dimensions */}
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mt-4 mb-2">Shipping Package (Predefined)</p>
+                                        <div className="grid grid-cols-4 gap-3">
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">L (cm)</label>
+                                                <input
+                                                    type="number"
+                                                    value={editing.length}
+                                                    onChange={(e) => setEditing({ ...editing, length: e.target.value })}
+                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                                    placeholder="1"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">W (cm)</label>
+                                                <input
+                                                    type="number"
+                                                    value={editing.width}
+                                                    onChange={(e) => setEditing({ ...editing, width: e.target.value })}
+                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                                    placeholder="1"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">H (cm)</label>
+                                                <input
+                                                    type="number"
+                                                    value={editing.height}
+                                                    onChange={(e) => setEditing({ ...editing, height: e.target.value })}
+                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                                    placeholder="1"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">Weight (kg)</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={editing.weight}
+                                                    onChange={(e) => setEditing({ ...editing, weight: e.target.value })}
+                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                                    placeholder="0.5"
                                                 />
                                             </div>
                                         </div>

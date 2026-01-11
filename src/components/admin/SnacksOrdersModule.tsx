@@ -66,6 +66,7 @@ export default function SnacksOrdersModule() {
     // Dynamic Shipping State
     const [dynamicShipping, setDynamicShipping] = useState<number | null>(null);
     const [loadingShipping, setLoadingShipping] = useState(false);
+    const [packageDimensions, setPackageDimensions] = useState<Record<string, { l: string, b: string, h: string, w: string }>>({});
 
     useEffect(() => {
         if (showCreateModal && availableProducts.length === 0) {
@@ -485,6 +486,16 @@ export default function SnacksOrdersModule() {
         }
     };
 
+    const updateDimension = (shipmentId: string, field: string, value: string) => {
+        setPackageDimensions(prev => ({
+            ...prev,
+            [shipmentId]: {
+                ...(prev[shipmentId] || { l: "15", b: "15", h: "10", w: "0.5" }),
+                [field]: value
+            }
+        }));
+    };
+
     const handleUpdateShipmentStatus = async (shipmentId: string, newStatus: string) => {
         try {
             const res = await fetch(`/api/admin/shipments/${shipmentId}`, {
@@ -899,12 +910,56 @@ export default function SnacksOrdersModule() {
                                                             </div>
                                                         ) : (
                                                             (shipment.status === "Pending" || selectedOrder.status === "Payment Confirmed") && (
-                                                                <button
-                                                                    onClick={() => handleShipRocket(shipment.id)}
-                                                                    className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
-                                                                >
-                                                                    <Truck size={16} /> Ship This Package
-                                                                </button>
+                                                                <div className="space-y-4">
+                                                                    <div className="grid grid-cols-4 gap-2">
+                                                                        <div>
+                                                                            <label className="text-[8px] font-black uppercase text-gray-400 ml-1">L (cm)</label>
+                                                                            <input
+                                                                                type="number"
+                                                                                placeholder="15"
+                                                                                value={packageDimensions[shipment.id]?.l || ""}
+                                                                                onChange={(e) => updateDimension(shipment.id, 'l', e.target.value)}
+                                                                                className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
+                                                                            />
+                                                                        </div>
+                                                                        <div>
+                                                                            <label className="text-[8px] font-black uppercase text-gray-400 ml-1">B (cm)</label>
+                                                                            <input
+                                                                                type="number"
+                                                                                placeholder="15"
+                                                                                value={packageDimensions[shipment.id]?.b || ""}
+                                                                                onChange={(e) => updateDimension(shipment.id, 'b', e.target.value)}
+                                                                                className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
+                                                                            />
+                                                                        </div>
+                                                                        <div>
+                                                                            <label className="text-[8px] font-black uppercase text-gray-400 ml-1">H (cm)</label>
+                                                                            <input
+                                                                                type="number"
+                                                                                placeholder="10"
+                                                                                value={packageDimensions[shipment.id]?.h || ""}
+                                                                                onChange={(e) => updateDimension(shipment.id, 'h', e.target.value)}
+                                                                                className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
+                                                                            />
+                                                                        </div>
+                                                                        <div>
+                                                                            <label className="text-[8px] font-black uppercase text-gray-400 ml-1">W (kg)</label>
+                                                                            <input
+                                                                                type="number"
+                                                                                placeholder="0.5"
+                                                                                value={packageDimensions[shipment.id]?.w || ""}
+                                                                                onChange={(e) => updateDimension(shipment.id, 'w', e.target.value)}
+                                                                                className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => handleShipRocket(shipment.id)}
+                                                                        className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                                                                    >
+                                                                        <Truck size={16} /> Ship This Package
+                                                                    </button>
+                                                                </div>
                                                             )
                                                         )}
                                                     </div>
@@ -954,7 +1009,49 @@ export default function SnacksOrdersModule() {
                                                     </div>
                                                 ) : (
                                                     selectedOrder.status === "Payment Confirmed" && (
-                                                        <div className="pt-4 border-t border-gray-100">
+                                                        <div className="pt-4 border-t border-gray-100 space-y-4">
+                                                            <div className="grid grid-cols-4 gap-2">
+                                                                <div>
+                                                                    <label className="text-[8px] font-black uppercase text-gray-400 ml-1">L (cm)</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="15"
+                                                                        value={packageDimensions["full"]?.l || ""}
+                                                                        onChange={(e) => updateDimension("full", 'l', e.target.value)}
+                                                                        className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[8px] font-black uppercase text-gray-400 ml-1">B (cm)</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="15"
+                                                                        value={packageDimensions["full"]?.b || ""}
+                                                                        onChange={(e) => updateDimension("full", 'b', e.target.value)}
+                                                                        className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[8px] font-black uppercase text-gray-400 ml-1">H (cm)</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="10"
+                                                                        value={packageDimensions["full"]?.h || ""}
+                                                                        onChange={(e) => updateDimension("full", 'h', e.target.value)}
+                                                                        className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[8px] font-black uppercase text-gray-400 ml-1">W (kg)</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="0.5"
+                                                                        value={packageDimensions["full"]?.w || ""}
+                                                                        onChange={(e) => updateDimension("full", 'w', e.target.value)}
+                                                                        className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
+                                                                    />
+                                                                </div>
+                                                            </div>
                                                             <button
                                                                 onClick={() => handleShipRocket()}
                                                                 className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
