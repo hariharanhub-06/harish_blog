@@ -10,13 +10,13 @@ import {
 } from "lucide-react";
 
 const commissionPlans = [
-    { name: "Newbie", orders: "1-20", rate: "6%", color: "from-gray-400 to-gray-500" },
-    { name: "Starter", orders: "21-50", rate: "8%", color: "from-blue-400 to-blue-500" },
-    { name: "Silver", orders: "51-100", rate: "10%", color: "from-gray-300 to-gray-400" },
-    { name: "Golden", orders: "100-150", rate: "12%", color: "from-yellow-400 to-yellow-500" },
-    { name: "Platinum", orders: "150-180", rate: "15%", color: "from-purple-400 to-purple-500" },
-    { name: "Pro", orders: "180-200", rate: "18%", color: "from-pink-400 to-pink-500" },
-    { name: "Elite", orders: "200+", rate: "20%", color: "from-orange-500 to-red-500" },
+    { name: "Newbie", orders: "0-20", rate: "30%", color: "from-gray-400 to-gray-500" },
+    { name: "Starter", orders: "21-50", rate: "35%", color: "from-blue-400 to-blue-500" },
+    { name: "Silver", orders: "51-100", rate: "40%", color: "from-gray-300 to-gray-400" },
+    { name: "Golden", orders: "101-150", rate: "45%", color: "from-yellow-400 to-yellow-500" },
+    { name: "Platinum", orders: "151-180", rate: "50%", color: "from-purple-400 to-purple-500" },
+    { name: "Pro", orders: "181-200", rate: "55%", color: "from-pink-400 to-pink-500" },
+    { name: "Elite", orders: "201+", rate: "60%", color: "from-orange-500 to-red-500" },
 ];
 
 const steps = [

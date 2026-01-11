@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { affiliates, snackOrders, affiliateConfig } from "@/db/schema";
 import { eq, sql, count, and } from "drizzle-orm";
+import { getAffiliateTier } from "@/lib/affiliate-tiers";
 
 export async function GET(req: NextRequest) {
     try {
@@ -23,8 +24,7 @@ export async function GET(req: NextRequest) {
         }
 
         const affiliate = results[0];
-
-        const [config] = await db.select().from(affiliateConfig).where(eq(affiliateConfig.id, 1)).limit(1);
+        const tier = getAffiliateTier(affiliate.totalOrders || 0);
 
         // Fetch latest stats directly from the database (now updated by admin or order sync)
         return NextResponse.json({
@@ -40,8 +40,8 @@ export async function GET(req: NextRequest) {
             level3Earnings: affiliate.level3Earnings,
             pendingBalance: affiliate.pendingBalance,
             paidBalance: affiliate.paidBalance,
-            currentTier: affiliate.currentTier,
-            commissionRate: config?.directSplit || 10,
+            currentTier: tier.name,
+            commissionRate: tier.rate,
             upiId: affiliate.upiId,
             parentId: affiliate.parentId,
             referrerId: affiliate.referrerId,

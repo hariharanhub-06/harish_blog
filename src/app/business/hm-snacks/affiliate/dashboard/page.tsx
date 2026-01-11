@@ -23,7 +23,8 @@ import {
     ExternalLink,
     ChevronDown,
     ChevronUp,
-    Search
+    Search,
+    Archive
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
