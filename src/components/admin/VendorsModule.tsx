@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Trash2, MapPin, Mail, Phone, Lock, Building, Loader2, Eye, EyeOff, Copy, CheckCircle } from "lucide-react";
+import { Plus, Search, Trash2, MapPin, Mail, Phone, Lock, Building, Loader2, Eye, EyeOff, Copy, CheckCircle, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function VendorsModule() {
@@ -87,6 +87,28 @@ export default function VendorsModule() {
         setTimeout(() => setCopiedId(null), 2000);
     };
 
+    const generateWhatsAppMessage = (vendor: any) => {
+        const loginLink = "https://hmsnacks.in/business/hm-snacks/vendor/login";
+        const message = `🎉 Welcome to HM Snacks Vendor Portal!
+    
+Hello ${vendor.name},
+
+Your Vendor Account has been created. You can now log in to manage your shipments and dimensions.
+
+🔐 *Login Credentials:*
+Username: ${vendor.email}
+Password: ${vendor.password}
+
+🚀 *Access Your Dashboard:*
+${loginLink}
+
+Please log in and update your package specifications when you have shipments ready.
+
+- Team HM Snacks`;
+
+        return `https://wa.me/91${vendor.phone}?text=${encodeURIComponent(message)}`;
+    };
+
     const filteredVendors = vendors.filter(v =>
         v.name.toLowerCase().includes(search.toLowerCase()) ||
         v.email.toLowerCase().includes(search.toLowerCase())
@@ -136,12 +158,22 @@ export default function VendorsModule() {
                                 <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600">
                                     <Building size={24} />
                                 </div>
-                                <button
-                                    onClick={() => handleDelete(vendor.id, vendor.name)}
-                                    className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
+                                <div className="flex gap-2">
+                                    <a
+                                        href={generateWhatsAppMessage(vendor)}
+                                        target="_blank"
+                                        className="p-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100"
+                                        title="Send Credentials via WhatsApp"
+                                    >
+                                        <MessageCircle size={18} />
+                                    </a>
+                                    <button
+                                        onClick={() => handleDelete(vendor.id, vendor.name)}
+                                        className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                             </div>
 
                             <h3 className="text-xl font-bold text-gray-900 mb-1">{vendor.name}</h3>
