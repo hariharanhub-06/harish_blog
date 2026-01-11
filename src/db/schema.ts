@@ -160,6 +160,7 @@ export const snackProducts = pgTable("snack_products", {
   width: doublePrecision("width").default(1),
   height: doublePrecision("height").default(1),
   weight: doublePrecision("weight").default(0.5), // in KG
+  dimensionTiers: jsonb("dimension_tiers"), // Array of {weight, l, w, h}
 
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

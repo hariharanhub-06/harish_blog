@@ -69,10 +69,60 @@ export default function SnacksOrdersModule() {
     const [packageDimensions, setPackageDimensions] = useState<Record<string, { l: string, b: string, h: string, w: string }>>({});
 
     useEffect(() => {
-        if (showCreateModal && availableProducts.length === 0) {
+        if ((showCreateModal || selectedOrder) && availableProducts.length === 0) {
             fetchProducts();
         }
-    }, [showCreateModal]);
+    }, [showCreateModal, selectedOrder]);
+
+    const autoSetDimensions = useCallback((shipment: any) => {
+        if (!shipment || !availableProducts.length) return;
+
+        const items = Array.isArray(shipment.items) ? shipment.items : [];
+        let totalWeight = items.reduce((sum: number, item: any) => {
+            return sum + (item.unit === "Kg" ? Number(item.quantity) : 0.1);
+        }, 0);
+
+        const itemIds = items.map((it: any) => it.id);
+
+        let allTiers: any[] = [];
+        availableProducts.filter(p => itemIds.includes(p.id)).forEach(p => {
+            if (p.dimensionTiers && Array.isArray(p.dimensionTiers)) {
+                allTiers = [...allTiers, ...p.dimensionTiers];
+            }
+        });
+
+        if (allTiers.length > 0) {
+            const sortedTiers = allTiers.sort((a, b) => a.weight - b.weight || (b.l * b.w * b.h) - (a.l * a.w * a.h));
+            const bestTier = sortedTiers.find(t => t.weight >= totalWeight) || sortedTiers[sortedTiers.length - 1];
+
+            if (bestTier) {
+                setPackageDimensions(prev => ({
+                    ...prev,
+                    [shipment.id || "full"]: {
+                        l: String(bestTier.l),
+                        b: String(bestTier.w),
+                        h: String(bestTier.h),
+                        w: String(totalWeight)
+                    }
+                }));
+            }
+        }
+    }, [availableProducts]);
+
+    useEffect(() => {
+        if (selectedOrder && availableProducts.length > 0) {
+            if (selectedOrder.status === "Payment Confirmed" && !selectedOrder.shiprocketOrderId) {
+                autoSetDimensions({ id: "full", items: selectedOrder.items });
+            }
+            if (selectedOrder.shipments) {
+                selectedOrder.shipments.forEach((shipment: any) => {
+                    if (shipment.status === "Payment Confirmed" && !shipment.shiprocketOrderId) {
+                        autoSetDimensions(shipment);
+                    }
+                });
+            }
+        }
+    }, [selectedOrder, availableProducts.length, autoSetDimensions]);
 
     const fetchProducts = async () => {
         try {
