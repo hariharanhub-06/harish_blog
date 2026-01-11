@@ -174,7 +174,6 @@ export default function SnacksProductModule() {
                     <button
                         onClick={() => setEditing({
                             name: "",
-                            description: "",
                             category: "Savories",
                             pricePoints: [{ value: "", unit: "Kg" }],
                             stock: "",
@@ -224,17 +223,6 @@ export default function SnacksProductModule() {
                                         onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                                         className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-lg"
                                         placeholder="e.g. Butter Murukku"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Description</label>
-                                    <textarea
-                                        required
-                                        rows={4}
-                                        value={editing.description}
-                                        onChange={(e) => setEditing({ ...editing, description: e.target.value })}
-                                        className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold"
-                                        placeholder="Describe the taste and ingredients..."
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -453,7 +441,7 @@ export default function SnacksProductModule() {
                             <span>{editing.id ? "Update Product" : "Publish Product"}</span>
                         </button>
                     </form>
-                </div>
+                </div >
             ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {products.map((product) => (
@@ -549,7 +537,8 @@ export default function SnacksProductModule() {
                         </div>
                     )}
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }
