@@ -99,9 +99,10 @@ export default function AffiliateDashboard() {
 
     const fetchProducts = async () => {
         try {
-            const res = await fetch('/api/snack-products');
+            const res = await fetch('/api/snacks/products?activeOnly=true');
             if (res.ok) {
                 const data = await res.json();
+                console.log(`Fetched ${data.length} products for affiliate`);
                 setProducts(data.filter((p: any) => p.isActive));
             }
         } catch (err) {
@@ -208,7 +209,7 @@ export default function AffiliateDashboard() {
                         {[
                             { id: 'overview', label: 'Overview', icon: PieChart },
                             { id: 'tree', label: 'Binary Tree', icon: GitBranch },
-                            { id: 'links', label: 'Marketing', icon: LinkIcon },
+                            { id: 'links', label: 'Promote', icon: LinkIcon },
                             { id: 'earnings', label: 'Earnings', icon: DollarSign },
                         ].map((tab) => (
                             <button
@@ -487,7 +488,7 @@ export default function AffiliateDashboard() {
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-100">
                                                 {products
-                                                    .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()) || p.category.toLowerCase().includes(productSearch.toLowerCase()))
+                                                    .filter(p => (p.name?.toLowerCase() || "").includes(productSearch.toLowerCase()) || (p.category?.toLowerCase() || "").includes(productSearch.toLowerCase()))
                                                     .map(product => (
                                                         <div key={product.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between group hover:border-orange-200 transition-all">
                                                             <div className="min-w-0">
@@ -502,7 +503,7 @@ export default function AffiliateDashboard() {
                                                             </div>
                                                             <button
                                                                 onClick={() => {
-                                                                    navigator.clipboard.writeText(`https://hariharanhub.com/product/${product.id}?ref=${stats?.couponCode}`);
+                                                                    navigator.clipboard.writeText(`https://hariharanhub.com/business/hm-snacks?product=${product.id}&ref=${stats?.couponCode}`);
                                                                     alert(`Link for ${product.name} copied!`);
                                                                 }}
                                                                 className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-all"
@@ -511,6 +512,18 @@ export default function AffiliateDashboard() {
                                                             </button>
                                                         </div>
                                                     ))}
+                                                {products.length === 0 && (
+                                                    <div className="col-span-full py-20 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                                                        <ShoppingBag className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                                                        <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">No products available to promote yet.</p>
+                                                    </div>
+                                                )}
+                                                {products.length > 0 && products.filter(p => (p.name?.toLowerCase() || "").includes(productSearch.toLowerCase()) || (p.category?.toLowerCase() || "").includes(productSearch.toLowerCase())).length === 0 && (
+                                                    <div className="col-span-full py-20 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                                                        <Search className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                                                        <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">No products match your search.</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
