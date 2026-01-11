@@ -22,7 +22,8 @@ import {
     PieChart,
     FileText,
     Star,
-    ShoppingCart
+    ShoppingCart,
+    Users
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -37,9 +38,10 @@ import CouponsModule from "@/components/admin/CouponsModule";
 import BillingModule from "@/components/admin/BillingModule";
 import ReviewsModule from "@/components/admin/ReviewsModule";
 import AbandonedCartsModule from "@/components/admin/AbandonedCartsModule";
+import AffiliatesModule from "@/components/admin/AffiliatesModule";
 
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts";
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts" | "affiliates";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -54,7 +56,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "reviews", "abandoned-carts"];
+        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "reviews", "abandoned-carts", "affiliates"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -117,6 +119,7 @@ export default function AdminDashboard() {
         { id: "billing", title: "Billing / Invoice", icon: FileText, color: "bg-orange-500" },
         { id: "reviews", title: "Reviews", icon: Star, color: "bg-amber-500", badge: pendingReviewsCount },
         { id: "abandoned-carts", title: "Drop Offs", icon: ShoppingCart, color: "bg-rose-500", badge: abandonedCartsCount },
+        { id: "affiliates", title: "Affiliates", icon: Users, color: "bg-orange-600" },
     ];
 
     const renderContent = () => {
@@ -132,6 +135,7 @@ export default function AdminDashboard() {
             case "billing": return <BillingModule />;
             case "reviews": return <ReviewsModule />;
             case "abandoned-carts": return <AbandonedCartsModule />;
+            case "affiliates": return <AffiliatesModule />;
             default: return <OverviewModule />;
         }
     };
