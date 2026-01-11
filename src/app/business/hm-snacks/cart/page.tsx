@@ -652,7 +652,25 @@ export default function CartPage() {
                                             onChange={(e) => setCouponCode(e.target.value)}
                                             className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-xs font-black uppercase focus:ring-2 focus:ring-pink-200"
                                         />
-                                        <button onClick={handleApplyCoupon} disabled={isValidatingCoupon || !couponCode} className="bg-gray-900 text-white px-4 rounded-xl font-bold text-[10px]">APPLY</button>
+                                        {appliedCoupon ? (
+                                            <button
+                                                onClick={() => {
+                                                    setAppliedCoupon(null);
+                                                    setCouponCode("");
+                                                }}
+                                                className="bg-red-500 text-white px-4 rounded-xl font-bold text-[10px]"
+                                            >
+                                                REMOVE
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={handleApplyCoupon}
+                                                disabled={isValidatingCoupon || !couponCode}
+                                                className="bg-gray-900 text-white px-4 rounded-xl font-bold text-[10px]"
+                                            >
+                                                {isValidatingCoupon ? "..." : "APPLY"}
+                                            </button>
+                                        )}
                                     </div>
                                     {couponError && <p className="text-[10px] text-red-500 font-bold">{couponError}</p>}
                                     {appliedCoupon && <p className="text-[10px] text-emerald-500 font-bold">Applied!</p>}

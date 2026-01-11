@@ -23,7 +23,8 @@ import {
     FileText,
     Star,
     ShoppingCart,
-    Users
+    Users,
+    DollarSign
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -39,9 +40,10 @@ import BillingModule from "@/components/admin/BillingModule";
 import ReviewsModule from "@/components/admin/ReviewsModule";
 import AbandonedCartsModule from "@/components/admin/AbandonedCartsModule";
 import AffiliatesModule from "@/components/admin/AffiliatesModule";
+import AffiliatePayoutsModule from "@/components/admin/AffiliatePayoutsModule";
 
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts" | "affiliates";
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts" | "affiliates" | "affiliate-payouts";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -120,6 +122,7 @@ export default function AdminDashboard() {
         { id: "reviews", title: "Reviews", icon: Star, color: "bg-amber-500", badge: pendingReviewsCount },
         { id: "abandoned-carts", title: "Drop Offs", icon: ShoppingCart, color: "bg-rose-500", badge: abandonedCartsCount },
         { id: "affiliates", title: "Affiliates", icon: Users, color: "bg-orange-600" },
+        { id: "affiliate-payouts", title: "Partner Payments", icon: DollarSign, color: "bg-emerald-600" },
     ];
 
     const renderContent = () => {
@@ -136,6 +139,7 @@ export default function AdminDashboard() {
             case "reviews": return <ReviewsModule />;
             case "abandoned-carts": return <AbandonedCartsModule />;
             case "affiliates": return <AffiliatesModule />;
+            case "affiliate-payouts": return <AffiliatePayoutsModule />;
             default: return <OverviewModule />;
         }
     };
