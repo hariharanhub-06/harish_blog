@@ -122,17 +122,17 @@ export default function AffiliatePayoutsModule() {
                         <TrendingUp size={100} />
                     </div>
                     <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-                        <Info size={18} className="text-blue-500" />
-                        Automation Idea
+                        <Zap size={18} className="text-orange-500" />
+                        Automated Payouts Plan
                     </h3>
                     <div className="space-y-4">
-                        <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 italic">
-                            <p className="text-[11px] font-bold text-blue-700 leading-relaxed">
-                                "We can automate these via <b>Razorpay Payouts</b>. A weekly script (Cron Job) could fetch all partners with balance &gt; ₹500 and transfer money instantly to their UPI IDs."
+                        <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100 italic">
+                            <p className="text-[11px] font-bold text-orange-700 leading-relaxed">
+                                "The automated system will only process requests that you have <b>Approved</b>. Every Monday, it can batch-pay all approved partners with {'>'}₹500 via Razorpay."
                             </p>
                         </div>
                         <div className="flex items-center gap-3 text-gray-400 font-bold text-[10px] uppercase tracking-widest">
-                            <Zap size={14} /> Weekly Schedule • Minimum ₹500
+                            <CheckCircle size={14} /> Admin Approval Required
                         </div>
                     </div>
                 </div>
@@ -207,7 +207,7 @@ export default function AffiliatePayoutsModule() {
                                                 disabled={updatingId === request.id}
                                                 className="px-8 py-3 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-200 disabled:opacity-50 flex items-center gap-2"
                                             >
-                                                {updatingId === request.id ? <RefreshCw className="animate-spin" size={12} /> : <CheckCircle size={14} />} Mark Paid
+                                                {updatingId === request.id ? <RefreshCw className="animate-spin" size={12} /> : <CheckCircle size={14} />} Approve Payment
                                             </button>
                                             <button
                                                 onClick={() => handlePayoutAction(request.id, "reject")}
