@@ -325,20 +325,18 @@ export default function SnacksOrdersModule() {
             }
         }
 
-        if (dynamicShipping !== null) {
-            // Use Shiprocket dynamic shipping + packaging
-            shipping = dynamicShipping + 40;
-        } else {
-            // Sum shipping costs for all unique vendors
-            const uniqueVendors = Object.keys(vendorGroups);
-            if (uniqueVendors.length > 0) {
-                uniqueVendors.forEach(vendorId => {
-                    const groupWeight = vendorGroups[vendorId];
-                    // (Weight * Rate) + 40 Packaging per vendor
-                    shipping += Math.ceil((ratePerKg * groupWeight) + 40);
-                });
-            }
+        // Sum shipping costs for all unique vendors
+        const uniqueVendors = Object.keys(vendorGroups);
+
+        // Always calculate based on split shipments to ensure no loss
+        if (uniqueVendors.length > 0) {
+            uniqueVendors.forEach(vendorId => {
+                const groupWeight = vendorGroups[vendorId];
+                // (Weight * Rate) + 40 Packaging per vendor
+                shipping += Math.ceil((ratePerKg * groupWeight) + 40);
+            });
         }
+
 
         // Calculate Discount
         const discountAmount = appliedCoupon
