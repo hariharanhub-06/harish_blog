@@ -43,16 +43,17 @@ export async function processAffiliateCommissions(orderId: string) {
             if (!product) continue;
 
             const sellingPrice = Number(item.price) || 0;
+            const cost = Number(product.productCost || 0) + Number(product.packagingCost || 0) + Number(product.otherCharges || 0);
             const quantity = Number(item.quantity) || 1;
 
-            // REVENUE-BASED COMMISSION: Pool is a percentage of the total sales amount
+            const itemProfit = (sellingPrice * quantity) - (cost * quantity);
             const poolPercent = Number(product.affiliatePoolPercent || 60);
-            const itemPool = (sellingPrice * quantity) * (poolPercent / 100);
+            const itemPool = itemProfit > 0 ? (itemProfit * poolPercent / 100) : 0;
 
             totalOrderProfitPool += itemPool;
         }
 
-        if (totalOrderProfitPool <= 0) return { success: false, message: "No pool available for commissions" };
+        if (totalOrderProfitPool <= 0) return { success: false, message: "No profit pool available for commissions" };
 
         // 4. Find the direct affiliate
         const [directAffiliate] = await db
@@ -84,21 +85,21 @@ export async function processAffiliateCommissions(orderId: string) {
         if (directAffiliate.parentId) {
             const [l1Affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, directAffiliate.parentId)).limit(1);
             if (l1Affiliate) {
-                const l1Commission = (totalOrderProfitPool * (splits.level1Split ?? 20) / 100);
+                const l1Commission = (totalOrderProfitPool * (splits.level1Split ?? 10) / 100);
                 await distributeCommission(l1Affiliate.id, l1Commission, 'level1', orderId, directAffiliate.id);
 
                 // Level 2
                 if (l1Affiliate.parentId) {
                     const [l2Affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, l1Affiliate.parentId)).limit(1);
                     if (l2Affiliate) {
-                        const l2Commission = (totalOrderProfitPool * (splits.level2Split ?? 18) / 100);
+                        const l2Commission = (totalOrderProfitPool * (splits.level2Split ?? 5) / 100);
                         await distributeCommission(l2Affiliate.id, l2Commission, 'level2', orderId, directAffiliate.id);
 
                         // Level 3
                         if (l2Affiliate.parentId) {
                             const [l3Affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, l2Affiliate.parentId)).limit(1);
                             if (l3Affiliate) {
-                                const l3Commission = (totalOrderProfitPool * (splits.level3Split ?? 12) / 100);
+                                const l3Commission = (totalOrderProfitPool * (splits.level3Split ?? 5) / 100);
                                 await distributeCommission(l3Affiliate.id, l3Commission, 'level3', orderId, directAffiliate.id);
                             }
                         }
