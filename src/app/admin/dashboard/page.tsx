@@ -24,7 +24,8 @@ import {
     Star,
     ShoppingCart,
     Users,
-    DollarSign
+    DollarSign,
+    Building
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -121,6 +122,8 @@ export default function AdminDashboard() {
         { id: "billing", title: "Billing / Invoice", icon: FileText, color: "bg-orange-500" },
         { id: "reviews", title: "Reviews", icon: Star, color: "bg-amber-500", badge: pendingReviewsCount },
         { id: "abandoned-carts", title: "Drop Offs", icon: ShoppingCart, color: "bg-rose-500", badge: abandonedCartsCount },
+        { id: "manage-vendors", title: "Manage Vendors", icon: Building, color: "bg-teal-600" },
+        { id: "manage-products", title: "Product Assignment", icon: Package, color: "bg-teal-500" },
         { id: "affiliates", title: "Affiliates", icon: Users, color: "bg-orange-600" },
         { id: "affiliate-payouts", title: "Partner Payments", icon: DollarSign, color: "bg-emerald-600" },
     ];
@@ -140,7 +143,18 @@ export default function AdminDashboard() {
             case "abandoned-carts": return <AbandonedCartsModule />;
             case "affiliates": return <AffiliatesModule />;
             case "affiliate-payouts": return <AffiliatePayoutsModule />;
+            case "affiliate-payouts": return <AffiliatePayoutsModule />;
             default: return <OverviewModule />;
+        }
+    };
+
+    const handleNavigation = (id: string) => {
+        if (id === "manage-vendors") {
+            router.push("/business/vendors");
+        } else if (id === "manage-products") {
+            router.push("/business/products");
+        } else {
+            handleTabChange(id as Tab);
         }
     };
 
