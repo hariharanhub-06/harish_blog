@@ -498,7 +498,7 @@ export default function SnacksOrdersModule() {
             [shipmentId]: {
                 ...(prev[shipmentId] || { l: "15", b: "15", h: "10", w: "0.5" }),
                 [field]: value
-            }
+            } as { l: string, b: string, h: string, w: string }
         }));
     };
 
@@ -998,7 +998,7 @@ export default function SnacksOrdersModule() {
                                                 selectedOrder.status === "Payment Confirmed" && (
                                                     <div className="pt-4 border-t border-gray-100 space-y-4">
                                                         <div className="grid grid-cols-4 gap-2">
-                                                            {['l', 'b', 'h', 'w'].map(dim => (
+                                                            {(['l', 'b', 'h', 'w'] as const).map(dim => (
                                                                 <div key={dim}>
                                                                     <label className="text-[7px] font-black uppercase text-gray-400 ml-1">{dim === 'w' ? 'Wt' : dim.toUpperCase()} (cm/kg)</label>
                                                                     <input type="number" placeholder={dim === 'w' ? "0.5" : "15"} value={packageDimensions["full"]?.[dim] || ""} onChange={(e) => updateDimension("full", dim, e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-[10px] font-bold" />
