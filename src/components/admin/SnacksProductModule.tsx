@@ -82,6 +82,7 @@ export default function SnacksProductModule() {
                 height: parseFloat(editing.height as any) || 1,
                 weight: parseFloat(editing.weight as any) || 0.5,
                 vendorId: editing.vendorId || null,
+                dimensionTiers: editing.dimensionTiers || null,
             };
 
             // Convert empty strings/nulls to proper values
@@ -200,7 +201,13 @@ export default function SnacksProductModule() {
                             length: 1,
                             width: 1,
                             height: 1,
-                            weight: 0.5
+                            weight: 0.5,
+                            dimensionTiers: [
+                                { weight: 0.25, l: 15, w: 15, h: 3 },
+                                { weight: 0.50, l: 20, w: 15, h: 5 },
+                                { weight: 0.75, l: 20, w: 15, h: 7 },
+                                { weight: 1.00, l: 30, w: 15, h: 7 }
+                            ]
                         })}
                         className="flex items-center space-x-2 bg-pink-500 text-white font-black px-6 py-3 rounded-2xl hover:shadow-2xl transition-all"
                     >
@@ -466,50 +473,87 @@ export default function SnacksProductModule() {
                                             </select>
                                         </div>
 
-                                        {/* Physical Dimensions */}
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mt-4 mb-2">Shipping Package (Predefined)</p>
-                                        <div className="grid grid-cols-4 gap-3">
-                                            <div className="space-y-1">
-                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">L (cm)</label>
-                                                <input
-                                                    type="number"
-                                                    value={editing.length}
-                                                    onChange={(e) => setEditing({ ...editing, length: e.target.value })}
-                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
-                                                    placeholder="1"
-                                                />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">W (cm)</label>
-                                                <input
-                                                    type="number"
-                                                    value={editing.width}
-                                                    onChange={(e) => setEditing({ ...editing, width: e.target.value })}
-                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
-                                                    placeholder="1"
-                                                />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">H (cm)</label>
-                                                <input
-                                                    type="number"
-                                                    value={editing.height}
-                                                    onChange={(e) => setEditing({ ...editing, height: e.target.value })}
-                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
-                                                    placeholder="1"
-                                                />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">Weight (kg)</label>
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    value={editing.weight}
-                                                    onChange={(e) => setEditing({ ...editing, weight: e.target.value })}
-                                                    className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
-                                                    placeholder="0.5"
-                                                />
-                                            </div>
+                                        {/* Variation-Specific Dimensions */}
+                                        <div className="flex justify-between items-center mt-6 mb-2">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">Weight-Based Package Specs</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditing({
+                                                    ...editing,
+                                                    dimensionTiers: [...(editing.dimensionTiers || []), { weight: 1, l: 15, w: 15, h: 10 }]
+                                                })}
+                                                className="text-[9px] font-black uppercase text-blue-500 hover:text-blue-600 transition-colors"
+                                            >
+                                                + Add Tier
+                                            </button>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {editing.dimensionTiers?.map((tier: any, tIdx: number) => (
+                                                <div key={tIdx} className="grid grid-cols-5 gap-2 items-end bg-white p-3 rounded-2xl border border-blue-50 group">
+                                                    <div className="space-y-1">
+                                                        <label className="text-[8px] font-black uppercase text-gray-400 ml-1">Wt (kg)</label>
+                                                        <input
+                                                            type="number" step="0.01"
+                                                            value={tier.weight}
+                                                            onChange={(e) => {
+                                                                const newTiers = [...editing.dimensionTiers];
+                                                                newTiers[tIdx].weight = parseFloat(e.target.value);
+                                                                setEditing({ ...editing, dimensionTiers: newTiers });
+                                                            }}
+                                                            className="w-full bg-blue-50/30 border-0 rounded-lg p-2 focus:ring-1 focus:ring-blue-500 transition-all font-bold text-xs"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[8px] font-black uppercase text-gray-400 ml-1">L</label>
+                                                        <input
+                                                            type="number"
+                                                            value={tier.l}
+                                                            onChange={(e) => {
+                                                                const newTiers = [...editing.dimensionTiers];
+                                                                newTiers[tIdx].l = parseFloat(e.target.value);
+                                                                setEditing({ ...editing, dimensionTiers: newTiers });
+                                                            }}
+                                                            className="w-full bg-gray-50 border-0 rounded-lg p-2 focus:ring-1 focus:ring-blue-500 transition-all font-bold text-xs"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[8px] font-black uppercase text-gray-400 ml-1">W</label>
+                                                        <input
+                                                            type="number"
+                                                            value={tier.w}
+                                                            onChange={(e) => {
+                                                                const newTiers = [...editing.dimensionTiers];
+                                                                newTiers[tIdx].w = parseFloat(e.target.value);
+                                                                setEditing({ ...editing, dimensionTiers: newTiers });
+                                                            }}
+                                                            className="w-full bg-gray-50 border-0 rounded-lg p-2 focus:ring-1 focus:ring-blue-500 transition-all font-bold text-xs"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[8px] font-black uppercase text-gray-400 ml-1">H</label>
+                                                        <input
+                                                            type="number"
+                                                            value={tier.h}
+                                                            onChange={(e) => {
+                                                                const newTiers = [...editing.dimensionTiers];
+                                                                newTiers[tIdx].h = parseFloat(e.target.value);
+                                                                setEditing({ ...editing, dimensionTiers: newTiers });
+                                                            }}
+                                                            className="w-full bg-gray-50 border-0 rounded-lg p-2 focus:ring-1 focus:ring-blue-500 transition-all font-bold text-xs"
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setEditing({
+                                                            ...editing,
+                                                            dimensionTiers: editing.dimensionTiers.filter((_: any, i: number) => i !== tIdx)
+                                                        })}
+                                                        className="p-2 text-gray-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
@@ -597,7 +641,16 @@ export default function SnacksProductModule() {
                                         if (product.pricePerKg) pts.push({ value: product.pricePerKg, offerValue: product.offerPricePerKg || "", unit: "Kg" });
                                         if (product.pricePerPiece) pts.push({ value: product.pricePerPiece, offerValue: product.offerPricePerPiece || "", unit: "Pcs" });
                                         if (pts.length === 0) pts.push({ value: "", offerValue: "", unit: "Kg" });
-                                        setEditing({ ...product, pricePoints: pts });
+                                        setEditing({
+                                            ...product,
+                                            pricePoints: pts,
+                                            dimensionTiers: product.dimensionTiers || [
+                                                { weight: 0.25, l: 15, w: 15, h: 3 },
+                                                { weight: 0.50, l: 20, w: 15, h: 5 },
+                                                { weight: 0.75, l: 20, w: 15, h: 7 },
+                                                { weight: 1.00, l: 30, w: 15, h: 7 }
+                                            ]
+                                        });
                                     }}
                                     className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-all"
                                 >

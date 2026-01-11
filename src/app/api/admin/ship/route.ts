@@ -100,6 +100,7 @@ export async function POST(req: NextRequest) {
         let predefinedL = 0;
         let predefinedW = 0;
         let predefinedH = 0;
+        let allTiers: any[] = [];
 
         if (itemIds.length > 0) {
             const productsData = await db
@@ -111,6 +112,12 @@ export async function POST(req: NextRequest) {
                 const item = itemsToShip.find(it => it.id === p.id);
                 const qty = Number(item?.quantity) || 1;
                 predefinedWeight += (p.weight || 0.5) * qty;
+
+                // Collect tiers if they exist
+                if (p.dimensionTiers && Array.isArray(p.dimensionTiers)) {
+                    allTiers = [...allTiers, ...p.dimensionTiers];
+                }
+
                 predefinedL = Math.max(predefinedL, p.length || 15);
                 predefinedW = Math.max(predefinedW, p.width || 15);
                 predefinedH += (p.height || 1) * qty;
@@ -118,6 +125,20 @@ export async function POST(req: NextRequest) {
         }
 
         const totalWeight = weight ? Number(weight) : (predefinedWeight || itemsToShip.reduce((acc, item) => acc + (Number(item.quantity) || 0.1), 0));
+
+        // Use Tiered Dimensions if available
+        if (allTiers.length > 0) {
+            // Deduplicate and sort tiers (favoring larger dimensions for same weight if conflicting)
+            const sortedTiers = allTiers.sort((a, b) => a.weight - b.weight || (b.l * b.w * b.h) - (a.l * a.w * a.h));
+            const bestTier = sortedTiers.find(t => t.weight >= totalWeight) || sortedTiers[sortedTiers.length - 1];
+
+            if (bestTier) {
+                console.log("Using Tiered Dimensions:", bestTier);
+                predefinedL = bestTier.l;
+                predefinedW = bestTier.w;
+                predefinedH = bestTier.h;
+            }
+        }
 
         const uniqueOrderSuffix = Math.random().toString(36).substring(2, 5).toUpperCase();
         // Use shipmentId if split, else orderId
