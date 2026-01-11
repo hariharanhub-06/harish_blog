@@ -71,11 +71,12 @@ export async function PATCH(
         }
 
         // Trigger Affiliate Commission & Split Shipping Logic if status is successful
-        if (body.status === "Payment Confirmed" || body.status === "Success") {
-            // 1. Process Commissions
+        const successStatuses = ["Payment Confirmed", "Success", "Delivered", "Shipping"];
+        if (body.status && successStatuses.includes(body.status)) {
+            // 1. Process Commissions (will skip if already processed)
             await processAffiliateCommissions(updatedOrder.orderId);
 
-            // 2. Split into multi-vendor shipments
+            // 2. Split into multi-vendor shipments (will skip if already split)
             await splitOrderIntoShipments(updatedOrder.orderId);
         }
 
