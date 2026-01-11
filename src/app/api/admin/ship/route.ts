@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { snackOrders, orderShipments, vendors } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
+import { snackProducts, snackOrders, orderShipments, vendors } from "@/db/schema";
 import { createShiprocketOrder, generateAWB } from "@/lib/shiprocket";
 
 export async function POST(req: NextRequest) {
     try {
-        const { orderId, shipmentId } = await req.json();
+        const { orderId, shipmentId, length, breadth, height, weight } = await req.json();
 
         if (!orderId) {
             return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
@@ -93,7 +93,31 @@ export async function POST(req: NextRequest) {
         }
 
         const calculatedSubTotal = orderItems.reduce((acc, item) => acc + (item.selling_price * item.units), 0);
-        const totalWeight = itemsToShip.reduce((acc, item) => acc + (Number(item.quantity) || 0.1), 0);
+
+        // 2.5 Fetch Predefined Dimensions from Products
+        const itemIds = itemsToShip.map(item => item.id).filter(Boolean);
+        let predefinedWeight = 0;
+        let predefinedL = 0;
+        let predefinedW = 0;
+        let predefinedH = 0;
+
+        if (itemIds.length > 0) {
+            const productsData = await db
+                .select()
+                .from(snackProducts)
+                .where(inArray(snackProducts.id, itemIds));
+
+            productsData.forEach(p => {
+                const item = itemsToShip.find(it => it.id === p.id);
+                const qty = Number(item?.quantity) || 1;
+                predefinedWeight += (p.weight || 0.5) * qty;
+                predefinedL = Math.max(predefinedL, p.length || 15);
+                predefinedW = Math.max(predefinedW, p.width || 15);
+                predefinedH += (p.height || 1) * qty;
+            });
+        }
+
+        const totalWeight = weight ? Number(weight) : (predefinedWeight || itemsToShip.reduce((acc, item) => acc + (Number(item.quantity) || 0.1), 0));
 
         const uniqueOrderSuffix = Math.random().toString(36).substring(2, 5).toUpperCase();
         // Use shipmentId if split, else orderId
@@ -121,8 +145,10 @@ export async function POST(req: NextRequest) {
             transaction_charges: 0,
             total_discount: 0,
             sub_total: calculatedSubTotal,
-            length: 15, breadth: 15, height: 10,
-            weight: totalWeight > 0 ? totalWeight : 0.5
+            length: Number(length) || predefinedL || 15,
+            breadth: Number(breadth) || predefinedW || 15,
+            height: Number(height) || predefinedH || 10,
+            weight: totalWeight
         };
 
         // 3. Create Order in Shiprocket

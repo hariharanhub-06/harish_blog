@@ -36,6 +36,10 @@ export async function GET(req: NextRequest) {
                 otherCharges: snackProducts.otherCharges,
                 affiliateDiscountPercent: snackProducts.affiliateDiscountPercent,
                 affiliatePoolPercent: snackProducts.affiliatePoolPercent,
+                length: snackProducts.length,
+                width: snackProducts.width,
+                height: snackProducts.height,
+                weight: snackProducts.weight,
             })
             .from(snackProducts)
             .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -61,7 +65,8 @@ export async function POST(req: NextRequest) {
             name, description, category, imageUrl,
             pricePerKg, offerPricePerKg, pricePerPiece, offerPricePerPiece,
             stock, isActive,
-            productCost, packagingCost, otherCharges, affiliateDiscountPercent, affiliatePoolPercent
+            productCost, packagingCost, otherCharges, affiliateDiscountPercent, affiliatePoolPercent,
+            length, width, height, weight
         } = body;
 
         if (!name || !category || (!pricePerKg && !pricePerPiece)) {
@@ -84,6 +89,10 @@ export async function POST(req: NextRequest) {
             otherCharges: parseFloat(otherCharges || 0),
             affiliateDiscountPercent: parseFloat(affiliateDiscountPercent || 0),
             affiliatePoolPercent: parseFloat(affiliatePoolPercent || 60),
+            length: parseFloat(length || 1),
+            width: parseFloat(width || 1),
+            height: parseFloat(height || 1),
+            weight: parseFloat(weight || 0.5),
         }).returning();
 
         revalidateTag('snack-products', { expire: 0 });
