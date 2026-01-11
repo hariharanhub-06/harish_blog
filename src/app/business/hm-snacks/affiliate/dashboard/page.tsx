@@ -59,8 +59,10 @@ interface Stats {
 interface Product {
     id: string;
     name: string;
-    pricePerKg: number;
+    pricePerKg?: number;
     offerPricePerKg?: number;
+    pricePerPiece?: number;
+    offerPricePerPiece?: number;
     category: string;
     productCost?: number;
     packagingCost?: number;
@@ -494,36 +496,41 @@ export default function AffiliateDashboard() {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-100">
                                                 {products
                                                     .filter(p => (p.name?.toLowerCase() || "").includes(productSearch.toLowerCase()) || (p.category?.toLowerCase() || "").includes(productSearch.toLowerCase()))
-                                                    .map(product => (
-                                                        <div key={product.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between group hover:border-orange-200 transition-all">
-                                                            <div className="min-w-0">
-                                                                <p className="font-black text-gray-900 truncate">{product.name}</p>
-                                                                <div className="flex items-center gap-2">
-                                                                    <p className="text-[10px] uppercase font-black text-gray-400">{product.category}</p>
-                                                                    <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                                                                    <p className="text-[10px] uppercase font-black text-orange-600">
-                                                                        Earn: ₹{(() => {
-                                                                            const price = product.offerPricePerKg || product.pricePerKg || 0;
-                                                                            const totalCost = (product.productCost || 0) + (product.packagingCost || 0) + (product.otherCharges || 0);
-                                                                            const profit = Math.max(0, price - totalCost);
-                                                                            const pool = profit * ((product.affiliatePoolPercent || 60) / 100);
-                                                                            const earn = pool * ((stats?.commissionRate || 10) / 100);
-                                                                            return Math.floor(earn);
-                                                                        })()}/Kg
-                                                                    </p>
+                                                    .map(product => {
+                                                        const isPcs = !!product.pricePerPiece || !!product.offerPricePerPiece;
+                                                        return (
+                                                            <div key={product.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between group hover:border-orange-200 transition-all">
+                                                                <div className="min-w-0">
+                                                                    <p className="font-black text-gray-900 truncate">{product.name}</p>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <p className="text-[10px] uppercase font-black text-gray-400">{product.category}</p>
+                                                                        <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                                                                        <p className="text-[10px] uppercase font-black text-orange-600">
+                                                                            Earn: ₹{(() => {
+                                                                                const price = isPcs
+                                                                                    ? (product.offerPricePerPiece || product.pricePerPiece || 0)
+                                                                                    : (product.offerPricePerKg || product.pricePerKg || 0);
+                                                                                const totalCost = (product.productCost || 0) + (product.packagingCost || 0) + (product.otherCharges || 0);
+                                                                                const profit = Math.max(0, price - totalCost);
+                                                                                const pool = profit * ((product.affiliatePoolPercent || 60) / 100);
+                                                                                const earn = pool * ((stats?.commissionRate || 10) / 100);
+                                                                                return Math.floor(earn);
+                                                                            })()}/{isPcs ? 'Pc' : 'Kg'}
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        navigator.clipboard.writeText(`https://hariharanhub.com/business/hm-snacks?product=${product.id}&ref=${stats?.couponCode}`);
+                                                                        alert(`Link for ${product.name} copied!`);
+                                                                    }}
+                                                                    className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-all"
+                                                                >
+                                                                    <Copy size={18} />
+                                                                </button>
                                                             </div>
-                                                            <button
-                                                                onClick={() => {
-                                                                    navigator.clipboard.writeText(`https://hariharanhub.com/business/hm-snacks?product=${product.id}&ref=${stats?.couponCode}`);
-                                                                    alert(`Link for ${product.name} copied!`);
-                                                                }}
-                                                                className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-all"
-                                                            >
-                                                                <Copy size={18} />
-                                                            </button>
-                                                        </div>
-                                                    ))}
+                                                        );
+                                                    })}
                                                 {products.length === 0 && (
                                                     <div className="col-span-full py-20 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
                                                         <ShoppingBag className="w-12 h-12 text-gray-200 mx-auto mb-4" />
