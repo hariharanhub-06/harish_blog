@@ -253,34 +253,40 @@ export default function SnacksOrdersModule() {
     const calculateTotal = () => {
         const subtotal = createFormData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-        // Calculate Weight
-        const totalWeight = createFormData.items.reduce((sum, item) => {
-            const weightPerUnit = item.unit === "Kg" ? 1 : 0.01; // Approx 10g per piece if not defined? Or assume standard pack? 
-            // Better logic from cart:
-            return sum + (item.unit === "Kg" ? item.quantity : 0.1);
-        }, 0);
+        // Group Items by Vendor for Separate Shipments
+        const vendorGroups: Record<string, number> = {};
+        createFormData.items.forEach(item => {
+            const vendorId = item.originalProduct?.vendorId || "admin";
+            const weight = item.unit === "Kg" ? item.quantity : 0.1;
+            vendorGroups[vendorId] = (vendorGroups[vendorId] || 0) + weight;
+        });
 
-        // Calculate Shipping
+        // Calculate Shipping per Vendor
         let shipping = 0;
+        let ratePerKg = 200; // Fallback
+
+        if (createFormData.customer.state) {
+            const stateKey = Object.keys(SHIPPING_RATES).find(key =>
+                key.toLowerCase() === createFormData.customer.state.toLowerCase()
+            );
+            if (stateKey) {
+                ratePerKg = SHIPPING_RATES[stateKey];
+            }
+        }
 
         if (dynamicShipping !== null) {
             // Use Shiprocket dynamic shipping + packaging
             shipping = dynamicShipping + 40;
         } else {
-            // Fallback to static rates
-            let ratePerKg = 200; // Fallback
-
-            if (createFormData.customer.state) {
-                const stateKey = Object.keys(SHIPPING_RATES).find(key =>
-                    key.toLowerCase() === createFormData.customer.state.toLowerCase()
-                );
-                if (stateKey) {
-                    ratePerKg = SHIPPING_RATES[stateKey];
-                }
+            // Sum shipping costs for all unique vendors
+            const uniqueVendors = Object.keys(vendorGroups);
+            if (uniqueVendors.length > 0) {
+                uniqueVendors.forEach(vendorId => {
+                    const groupWeight = vendorGroups[vendorId];
+                    // (Weight * Rate) + 40 Packaging per vendor
+                    shipping += Math.ceil((ratePerKg * groupWeight) + 40);
+                });
             }
-
-            // Base shipping + Packaging (40)
-            shipping = Math.ceil((ratePerKg * totalWeight) + 40);
         }
 
         // Calculate Discount
@@ -837,246 +843,194 @@ export default function SnacksOrdersModule() {
 
                         {/* Modal Content */}
                         <div className="flex-grow overflow-y-auto p-4 md:p-12 space-y-8 md:space-y-12">
-                            <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-                                {/* Customer Info */}
-                                <div className="space-y-8">
-                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-pink-500 bg-pink-50 w-fit px-4 py-1.5 rounded-full">Customer Intelligence</h4>
-                                    <div className="space-y-5">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400"><User size={18} /></div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Name</span>
-                                                <span className="font-black text-gray-900">{selectedOrder.customerName}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400"><Phone size={18} /></div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">WhatsApp</span>
-                                                <span className="font-black text-gray-900">{selectedOrder.customerMobile}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400"><MapPin size={18} /></div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Delivery Address</span>
-                                                <span className="font-bold text-gray-600 text-sm">{selectedOrder.address}, {selectedOrder.city}, {selectedOrder.state} - {selectedOrder.pincode}</span>
-                                            </div>
-                                        </div>
+                            {/* Information Summary Bar */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 md:p-8 bg-gray-50 rounded-[2.5rem] border border-gray-100">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-pink-500 shadow-sm">
+                                        <User size={20} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Recipient</span>
+                                        <span className="font-black text-gray-900 truncate block text-lg">{selectedOrder.customerName}</span>
                                     </div>
                                 </div>
+                                <div className="flex items-center gap-4 border-l-0 md:border-l border-gray-200 md:pl-10">
+                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-green-500 shadow-sm">
+                                        <Phone size={20} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Contact</span>
+                                        <span className="font-black text-gray-900 truncate block text-lg">{selectedOrder.customerMobile}</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4 border-l-0 md:border-l border-gray-200 md:pl-10">
+                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-indigo-500 shadow-sm">
+                                        <MapPin size={20} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Location</span>
+                                        <span className="font-bold text-gray-600 truncate block leading-tight">
+                                            {selectedOrder.city}, {selectedOrder.state}<br />
+                                            <span className="text-[10px] font-black font-mono">PIN: {selectedOrder.pincode}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
 
-                                {/* Logistics / Payment */}
-                                <div className="space-y-8">
-                                    {(selectedOrder.shipments && selectedOrder.shipments.length > 0) ? (
-                                        <>
-                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 w-fit px-4 py-1.5 rounded-full">Shipments (Split Order)</h4>
+                            {/* Full Width Logistics & Items */}
+                            <div className="space-y-10">
+                                {(selectedOrder.shipments && selectedOrder.shipments.length > 0) ? (
+                                    <div className="space-y-8">
+                                        <div className="flex items-center justify-between px-2">
+                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 px-4 py-1.5 rounded-full">Split Shipments ({selectedOrder.shipments.length})</h4>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Value</span>
+                                                <span className="text-xl font-black text-gray-900 italic">₹{selectedOrder.totalAmount}</span>
+                                            </div>
+                                        </div>
 
+                                        <div className="grid grid-cols-1 gap-8">
                                             {selectedOrder.shipments.map((shipment: any, idx: number) => (
-                                                <div key={shipment.id || idx} className="p-6 md:p-8 bg-gray-50 rounded-[2rem] space-y-6 border-2 border-dashed border-gray-200">
+                                                <div key={shipment.id || idx} className="bg-white rounded-[2.5rem] border border-gray-200 shadow-sm overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gray-100">
 
-                                                    {/* Shipment Header */}
-                                                    <div className="flex justify-between items-center pb-4 border-b border-gray-200">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Vendor</span>
-                                                            <span className="text-lg font-black text-gray-900">{shipment.vendorName || "Active Business (Admin)"}</span>
+                                                    {/* Vendor & Status Column */}
+                                                    <div className="p-8 md:w-1/3 bg-[#fafafa] space-y-6">
+                                                        <div className="space-y-1">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 block">Vendor</span>
+                                                            <h5 className="text-xl font-black text-gray-900 tracking-tight">{shipment.vendorName || "Active Business (Admin)"}</h5>
                                                         </div>
-                                                        <select
-                                                            value={shipment.status}
-                                                            onChange={(e) => handleUpdateShipmentStatus(shipment.id, e.target.value)}
-                                                            className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-0 focus:ring-2 focus:ring-indigo-500 cursor-pointer ${getStatusColor(shipment.status)}`}
-                                                        >
-                                                            {STATUSES.filter(s => s !== "All" && s !== "Shadow").map(s => (
-                                                                <option key={s} value={s}>{s}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
 
-                                                    {/* Items in this shipment */}
-                                                    <div>
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Items</span>
-                                                        {renderItemsRaw(shipment.items)}
-                                                    </div>
+                                                        <div className="space-y-3">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 block">Processing Status</span>
+                                                            <select
+                                                                value={shipment.status}
+                                                                onChange={(e) => handleUpdateShipmentStatus(shipment.id, e.target.value)}
+                                                                className={`w-full px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-transparent focus:ring-0 shadow-sm cursor-pointer transition-all ${getStatusColor(shipment.status)}`}
+                                                            >
+                                                                {STATUSES.filter(s => s !== "All" && s !== "Shadow").map(s => (
+                                                                    <option key={s} value={s}>{s}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
 
-                                                    {/* Actions for this shipment */}
-                                                    <div className="pt-4">
-                                                        {shipment.shiprocketOrderId ? (
-                                                            <div className="bg-white p-4 rounded-xl border border-indigo-100 flex justify-between items-center">
-                                                                <div>
-                                                                    <div className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Shipped</div>
-                                                                    <div className="text-xs font-bold text-gray-900">AWB: {shipment.awbCode}</div>
+                                                        {/* Shipment Actions */}
+                                                        <div className="pt-4 border-t border-gray-200">
+                                                            {shipment.shiprocketOrderId ? (
+                                                                <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                                                                    <div className="flex items-center gap-2 mb-1">
+                                                                        <CheckCircle size={14} className="text-emerald-500" />
+                                                                        <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Shiprocket Active</span>
+                                                                    </div>
+                                                                    <div className="text-xs font-black text-emerald-900 font-mono">AWB: {shipment.awbCode}</div>
                                                                 </div>
-                                                                {/* Optional Reset Button for Shipment could go here */}
-                                                            </div>
-                                                        ) : (
-                                                            (shipment.status === "Pending" || selectedOrder.status === "Payment Confirmed") && (
+                                                            ) : (
                                                                 <div className="space-y-4">
-                                                                    <div className="grid grid-cols-4 gap-2">
-                                                                        <div>
-                                                                            <label className="text-[8px] font-black uppercase text-gray-400 ml-1">L (cm)</label>
-                                                                            <input
-                                                                                type="number"
-                                                                                placeholder="15"
-                                                                                value={packageDimensions[shipment.id]?.l || ""}
-                                                                                onChange={(e) => updateDimension(shipment.id, 'l', e.target.value)}
-                                                                                className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
-                                                                            />
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        <div className="space-y-1">
+                                                                            <label className="text-[8px] font-black uppercase text-gray-400 ml-1">L x B (cm)</label>
+                                                                            <div className="flex gap-1">
+                                                                                <input type="number" placeholder="L" value={packageDimensions[shipment.id]?.l || ""} onChange={(e) => updateDimension(shipment.id, 'l', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
+                                                                                <input type="number" placeholder="B" value={packageDimensions[shipment.id]?.b || ""} onChange={(e) => updateDimension(shipment.id, 'b', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
+                                                                            </div>
                                                                         </div>
-                                                                        <div>
-                                                                            <label className="text-[8px] font-black uppercase text-gray-400 ml-1">B (cm)</label>
-                                                                            <input
-                                                                                type="number"
-                                                                                placeholder="15"
-                                                                                value={packageDimensions[shipment.id]?.b || ""}
-                                                                                onChange={(e) => updateDimension(shipment.id, 'b', e.target.value)}
-                                                                                className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
-                                                                            />
-                                                                        </div>
-                                                                        <div>
-                                                                            <label className="text-[8px] font-black uppercase text-gray-400 ml-1">H (cm)</label>
-                                                                            <input
-                                                                                type="number"
-                                                                                placeholder="10"
-                                                                                value={packageDimensions[shipment.id]?.h || ""}
-                                                                                onChange={(e) => updateDimension(shipment.id, 'h', e.target.value)}
-                                                                                className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
-                                                                            />
-                                                                        </div>
-                                                                        <div>
-                                                                            <label className="text-[8px] font-black uppercase text-gray-400 ml-1">W (kg)</label>
-                                                                            <input
-                                                                                type="number"
-                                                                                placeholder="0.5"
-                                                                                value={packageDimensions[shipment.id]?.w || ""}
-                                                                                onChange={(e) => updateDimension(shipment.id, 'w', e.target.value)}
-                                                                                className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
-                                                                            />
+                                                                        <div className="space-y-1">
+                                                                            <label className="text-[8px] font-black uppercase text-gray-400 ml-1">H x W (cm/kg)</label>
+                                                                            <div className="flex gap-1">
+                                                                                <input type="number" placeholder="H" value={packageDimensions[shipment.id]?.h || ""} onChange={(e) => updateDimension(shipment.id, 'h', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
+                                                                                <input type="number" placeholder="W" value={packageDimensions[shipment.id]?.w || ""} onChange={(e) => updateDimension(shipment.id, 'w', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                     <button
                                                                         onClick={() => handleShipRocket(shipment.id)}
-                                                                        className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                                                                        className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2"
                                                                     >
-                                                                        <Truck size={16} /> Ship This Package
+                                                                        <Truck size={14} /> Ship via Shiprocket
                                                                     </button>
                                                                 </div>
-                                                            )
-                                                        )}
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Items List Column */}
+                                                    <div className="p-8 flex-grow space-y-6">
+                                                        <div className="flex items-center gap-2">
+                                                            <Package size={14} className="text-gray-400" />
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Included Items</span>
+                                                        </div>
+                                                        {renderItemsRaw(shipment.items)}
                                                     </div>
                                                 </div>
                                             ))}
-
-                                            {/* Order Totals Summary */}
-                                            <div className="p-5 bg-gray-900 text-white rounded-3xl flex justify-between items-center">
-                                                <span className="font-bold uppercase tracking-widest text-xs">Total Order Value</span>
-                                                <span className="font-black text-3xl">₹{selectedOrder.totalAmount}</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="grid md:grid-cols-2 gap-8">
+                                        <div className="p-8 bg-gray-50 rounded-[2.5rem] space-y-6 border border-gray-100">
+                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 w-fit px-4 py-1.5 rounded-full">Logistics Details</h4>
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center py-2 border-b border-gray-200/50">
+                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Payment ID</span>
+                                                    <span className="text-xs font-black text-gray-900 font-mono tracking-tight">{selectedOrder.paymentId || "PENDING"}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center py-2 border-b border-gray-200/50">
+                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Courier</span>
+                                                    <span className="text-xs font-black text-gray-900">{selectedOrder.courierName || "UNASSIGNED"}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center py-2">
+                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tracking Info</span>
+                                                    <span className="text-xs font-black text-gray-900 font-mono">{selectedOrder.shipmentId || "UNASSIGNED"}</span>
+                                                </div>
                                             </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 w-fit px-4 py-1.5 rounded-full">Logistics & Payments</h4>
-                                            <div className="p-5 md:p-8 bg-gray-50 rounded-[1.5rem] md:rounded-[2rem] space-y-5 md:space-y-6">
-                                                <div className="flex justify-between items-center gap-4">
-                                                    <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Payment (UTR)</span>
-                                                    <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight truncate">{selectedOrder.paymentId || "PENDING"}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center gap-4">
-                                                    <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Courier</span>
-                                                    <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight truncate">{selectedOrder.courierName || "UNASSIGNED"}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center gap-4">
-                                                    <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Tracking Info</span>
-                                                    <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight font-mono truncate">{selectedOrder.shipmentId || "UNASSIGNED"}</span>
-                                                </div>
 
-                                                {/* Shiprocket Section for Legacy */}
-                                                {selectedOrder.shiprocketOrderId ? (
-                                                    <div className="pt-4 border-t border-indigo-100">
-                                                        <div className="flex justify-between items-center mb-2">
-                                                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Shiprocket Order</span>
-                                                            <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shadow-sm">{selectedOrder.shiprocketOrderId}</span>
+                                            {/* Legacy Shiprocket Section */}
+                                            {selectedOrder.shiprocketOrderId ? (
+                                                <div className="pt-4 border-t border-indigo-100 space-y-4">
+                                                    <div className="flex justify-between items-center bg-white p-3 rounded-xl border border-indigo-50">
+                                                        <span className="text-[10px] font-black uppercase text-indigo-500">SR ID: {selectedOrder.shiprocketOrderId}</span>
+                                                        <span className="text-[10px] font-black font-mono text-gray-900">AWB: {selectedOrder.awbCode}</span>
+                                                    </div>
+                                                    <button onClick={handleResetShipment} className="w-full py-2 bg-rose-50 text-rose-500 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-rose-100 transition-all border border-rose-100">
+                                                        Reset Shipment
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                selectedOrder.status === "Payment Confirmed" && (
+                                                    <div className="pt-4 border-t border-gray-100 space-y-4">
+                                                        <div className="grid grid-cols-4 gap-2">
+                                                            {['l', 'b', 'h', 'w'].map(dim => (
+                                                                <div key={dim}>
+                                                                    <label className="text-[7px] font-black uppercase text-gray-400 ml-1">{dim === 'w' ? 'Wt' : dim.toUpperCase()} (cm/kg)</label>
+                                                                    <input type="number" placeholder={dim === 'w' ? "0.5" : "15"} value={packageDimensions["full"]?.[dim] || ""} onChange={(e) => updateDimension("full", dim, e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-[10px] font-bold" />
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                        <div className="flex justify-between items-center mb-4">
-                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">AWB Code</span>
-                                                            <span className="text-xs font-black text-gray-900 font-mono tracking-tight">{selectedOrder.awbCode || "Generating..."}</span>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => handleResetShipment()}
-                                                            className="w-full py-2 bg-gray-100 text-gray-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center gap-2 border border-gray-200"
-                                                        >
-                                                            <X size={14} /> Reset Shipment Data
+                                                        <button onClick={handleShipRocket} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
+                                                            Generate Shipping Label
                                                         </button>
                                                     </div>
-                                                ) : (
-                                                    selectedOrder.status === "Payment Confirmed" && (
-                                                        <div className="pt-4 border-t border-gray-100 space-y-4">
-                                                            <div className="grid grid-cols-4 gap-2">
-                                                                <div>
-                                                                    <label className="text-[8px] font-black uppercase text-gray-400 ml-1">L (cm)</label>
-                                                                    <input
-                                                                        type="number"
-                                                                        placeholder="15"
-                                                                        value={packageDimensions["full"]?.l || ""}
-                                                                        onChange={(e) => updateDimension("full", 'l', e.target.value)}
-                                                                        className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <label className="text-[8px] font-black uppercase text-gray-400 ml-1">B (cm)</label>
-                                                                    <input
-                                                                        type="number"
-                                                                        placeholder="15"
-                                                                        value={packageDimensions["full"]?.b || ""}
-                                                                        onChange={(e) => updateDimension("full", 'b', e.target.value)}
-                                                                        className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <label className="text-[8px] font-black uppercase text-gray-400 ml-1">H (cm)</label>
-                                                                    <input
-                                                                        type="number"
-                                                                        placeholder="10"
-                                                                        value={packageDimensions["full"]?.h || ""}
-                                                                        onChange={(e) => updateDimension("full", 'h', e.target.value)}
-                                                                        className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <label className="text-[8px] font-black uppercase text-gray-400 ml-1">W (kg)</label>
-                                                                    <input
-                                                                        type="number"
-                                                                        placeholder="0.5"
-                                                                        value={packageDimensions["full"]?.w || ""}
-                                                                        onChange={(e) => updateDimension("full", 'w', e.target.value)}
-                                                                        className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold"
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                            <button
-                                                                onClick={() => handleShipRocket()}
-                                                                className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
-                                                            >
-                                                                <Truck size={16} /> Ship with Shiprocket
-                                                            </button>
-                                                        </div>
-                                                    )
-                                                )}
-                                                <div className="pt-6 border-t border-gray-200">
-                                                    <div className="flex justify-between items-end">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Revenue</span>
-                                                            <span className="text-4xl font-black text-gray-900 italic">₹{selectedOrder.totalAmount}</span>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Method</span>
-                                                            <p className="text-sm font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-lg">{selectedOrder.paymentMethod || "UPI"}</p>
-                                                        </div>
-                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+
+                                        <div className="p-8 bg-gray-900 text-white rounded-[2.5rem] flex flex-col justify-between">
+                                            <div className="space-y-6">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Financial Summary</span>
+                                                    <span className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black text-emerald-400 border border-white/10 uppercase tracking-widest">{selectedOrder.paymentMethod}</span>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">Total Revenue</span>
+                                                    <span className="text-5xl font-black italic tracking-tighter text-white">₹{selectedOrder.totalAmount}</span>
                                                 </div>
                                             </div>
-                                        </>
-                                    )}
-                                </div>
+                                            <div className="pt-6 border-t border-white/10 flex justify-between items-center">
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Order Verified</span>
+                                                <CheckCircle size={20} className="text-emerald-500" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Order Items (Only show here if NOT split, or show ALL as summary?) - Legacy shows all here */}

@@ -10,6 +10,7 @@ export interface CartItem {
     imageUrl: string;
     quantity: number;
     category: string;
+    vendorId?: string | null;
     originalPrice?: number;
 }
 
@@ -71,6 +72,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 imageUrl: product.imageUrl,
                 quantity: quantity,
                 category: product.category,
+                vendorId: product.vendorId || null,
                 originalPrice: originalPrice
             }];
         });

@@ -98,6 +98,14 @@ export default function CartPage() {
     const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const totalWeight = cart.reduce((acc, item) => acc + (item.unit === "Kg" ? item.quantity : 0.1), 0);
 
+    // Group Items by Vendor for Separate Shipments
+    const vendorGroups: Record<string, number> = {};
+    cart.forEach(item => {
+        const vendorId = item.vendorId || "admin";
+        const weight = item.unit === "Kg" ? item.quantity : 0.1;
+        vendorGroups[vendorId] = (vendorGroups[vendorId] || 0) + weight;
+    });
+
     // Calculate Shipping Effect
     useEffect(() => {
         let ratePerKg = 200; // Default fallback for India
@@ -114,12 +122,21 @@ export default function CartPage() {
             }
         }
 
-        const baseShipping = ratePerKg * totalWeight;
-        const packagingCharge = 40;
+        // Sum shipping costs for all unique vendors involved
+        let totalShipping = 0;
+        const uniqueVendors = Object.keys(vendorGroups);
 
-        setShipping(Math.ceil(baseShipping + packagingCharge));
+        if (uniqueVendors.length > 0) {
+            uniqueVendors.forEach(vendorId => {
+                const groupWeight = vendorGroups[vendorId];
+                // (Weight * Rate) + 40 Packaging per vendor
+                totalShipping += Math.ceil((ratePerKg * groupWeight) + 40);
+            });
+        }
 
-    }, [formData.state, formData.country, totalWeight]);
+        setShipping(totalShipping);
+
+    }, [formData.state, formData.country, JSON.stringify(vendorGroups)]);
 
     const discountAmount = appliedCoupon
         ? (appliedCoupon.type === 'affiliate'

@@ -28,10 +28,24 @@ export default function SnacksProductModule() {
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [filterCategory, setFilterCategory] = useState("All");
+    const [allVendors, setAllVendors] = useState<any[]>([]);
 
     useEffect(() => {
         fetchProducts();
+        fetchVendors();
     }, [filterCategory]);
+
+    const fetchVendors = async () => {
+        try {
+            const res = await fetch("/api/admin/vendors");
+            if (res.ok) {
+                const data = await res.json();
+                setAllVendors(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch vendors", error);
+        }
+    };
 
     const fetchProducts = async () => {
         setFetching(true);
@@ -67,6 +81,7 @@ export default function SnacksProductModule() {
                 width: parseFloat(editing.width as any) || 1,
                 height: parseFloat(editing.height as any) || 1,
                 weight: parseFloat(editing.weight as any) || 0.5,
+                vendorId: editing.vendorId || null,
             };
 
             // Convert empty strings/nulls to proper values
@@ -435,6 +450,20 @@ export default function SnacksProductModule() {
                                                     placeholder="e.g. 60"
                                                 />
                                             </div>
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1">Fulfillment Vendor</label>
+                                            <select
+                                                value={editing.vendorId || ""}
+                                                onChange={(e) => setEditing({ ...editing, vendorId: e.target.value || null })}
+                                                className="w-full bg-white border-0 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 transition-all font-bold"
+                                            >
+                                                <option value="">Admin (Internal)</option>
+                                                {allVendors.map((vendor: any) => (
+                                                    <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
 
                                         {/* Physical Dimensions */}
