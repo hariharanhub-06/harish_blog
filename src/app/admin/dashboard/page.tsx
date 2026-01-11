@@ -42,9 +42,11 @@ import ReviewsModule from "@/components/admin/ReviewsModule";
 import AbandonedCartsModule from "@/components/admin/AbandonedCartsModule";
 import AffiliatesModule from "@/components/admin/AffiliatesModule";
 import AffiliatePayoutsModule from "@/components/admin/AffiliatePayoutsModule";
+import VendorsModule from "@/components/admin/VendorsModule";
+import VendorProductAssignmentModule from "@/components/admin/VendorProductAssignmentModule";
 
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts" | "affiliates" | "affiliate-payouts";
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts" | "affiliates" | "affiliate-payouts" | "manage-vendors" | "manage-products";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -59,7 +61,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "reviews", "abandoned-carts", "affiliates"];
+        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "reviews", "abandoned-carts", "affiliates", "manage-vendors", "manage-products"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -143,18 +145,9 @@ export default function AdminDashboard() {
             case "abandoned-carts": return <AbandonedCartsModule />;
             case "affiliates": return <AffiliatesModule />;
             case "affiliate-payouts": return <AffiliatePayoutsModule />;
-            case "affiliate-payouts": return <AffiliatePayoutsModule />;
+            case "manage-vendors": return <VendorsModule />;
+            case "manage-products": return <VendorProductAssignmentModule />;
             default: return <OverviewModule />;
-        }
-    };
-
-    const handleNavigation = (id: string) => {
-        if (id === "manage-vendors") {
-            router.push("/business/vendors");
-        } else if (id === "manage-products") {
-            router.push("/business/products");
-        } else {
-            handleTabChange(id as Tab);
         }
     };
 
@@ -175,19 +168,6 @@ export default function AdminDashboard() {
                             <div key={item.id} className="px-6 pt-8 pb-2">
                                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">{item.title}</span>
                             </div>
-                        ) : item.id.startsWith("manage-") ? (
-                            <Link
-                                key={item.id}
-                                href={item.id === "manage-vendors" ? "/business/vendors" : "/business/products"}
-                                className="w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm text-secondary hover:bg-gray-50 hover:text-primary transition-all"
-                            >
-                                {item.icon && (() => {
-                                    const IconComponent = item.icon;
-                                    return <IconComponent size={20} />;
-                                })()}
-                                <span className="flex-1 text-left">{item.title}</span>
-                            </Link>
-
                         ) : (
                             <button
                                 key={item.id}
