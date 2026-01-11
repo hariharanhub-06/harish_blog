@@ -8,6 +8,7 @@ import { eq, sql } from "drizzle-orm";
  */
 import { affiliateConfig, snackProducts } from "@/db/schema";
 import { inArray } from "drizzle-orm";
+import { getAffiliateTier } from "./affiliate-tiers";
 
 export async function processAffiliateCommissions(orderId: string) {
     try {
@@ -64,9 +65,13 @@ export async function processAffiliateCommissions(orderId: string) {
 
         if (!directAffiliate) return { success: false, message: "No matching approved affiliate found" };
 
-        // 5. Distribute commissions based on pool and splits
+        // 5. Get Tiered Commission Rate
+        const tier = getAffiliateTier(directAffiliate.totalOrders || 0);
+        const directSplitRate = tier.rate; // This is the % of the pool
+
+        // 6. Distribute commissions based on pool and splits
         // Direct
-        const directCommission = (totalOrderProfitPool * (splits.directSplit ?? 50) / 100);
+        const directCommission = (totalOrderProfitPool * directSplitRate / 100);
         await distributeCommission(directAffiliate.id, directCommission, 'direct', orderId, directAffiliate.id);
 
         // Level 1
