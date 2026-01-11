@@ -1,0 +1,32 @@
+﻿{
+    "value":  [
+                  {
+                      "id":  "cb16165e-5f4c-469e-b5a5-dedb8df5633f",
+                      "fullName":  "test affilate",
+                      "mobile":  "9080488152",
+                      "password":  "ozj9s8gk",
+                      "upiId":  "jvharish06.in@okhdfcbank",
+                      "email":  null,
+                      "socialLink":  null,
+                      "couponCode":  "HMS68731",
+                      "referrerId":  null,
+                      "parentId":  "cb16165e-5f4c-469e-b5a5-dedb8df5633f",
+                      "position":  "left",
+                      "status":  "Approved",
+                      "isActive":  true,
+                      "totalOrders":  0,
+                      "totalSalesAmount":  0,
+                      "totalEarnings":  0,
+                      "directEarnings":  0,
+                      "level1Earnings":  0,
+                      "level2Earnings":  0,
+                      "level3Earnings":  0,
+                      "pendingBalance":  0,
+                      "paidBalance":  0,
+                      "currentTier":  "Newbie",
+                      "createdAt":  "2026-01-11T12:35:18.771Z",
+                      "approvedAt":  "2026-01-11T12:35:36.648Z"
+                  }
+              ],
+    "Count":  1
+}

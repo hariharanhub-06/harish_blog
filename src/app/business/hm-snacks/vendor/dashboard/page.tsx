@@ -66,6 +66,47 @@ export default function VendorDashboard() {
         }
     };
 
+    const handleMarkReadyToShip = async (shipmentId: string) => {
+        try {
+            // Get dimension values from inputs
+            const l = (document.getElementById(`l-${shipmentId}`) as HTMLInputElement)?.value;
+            const w = (document.getElementById(`w-${shipmentId}`) as HTMLInputElement)?.value;
+            const h = (document.getElementById(`h-${shipmentId}`) as HTMLInputElement)?.value;
+            const weight = (document.getElementById(`weight-${shipmentId}`) as HTMLInputElement)?.value;
+
+            if (!l || !w || !h || !weight) {
+                alert("Please fill in all package dimensions");
+                return;
+            }
+
+            const token = localStorage.getItem("vendor_token");
+            if (!token) return;
+
+            const res = await fetch(`/api/vendor/shipments/${shipmentId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    dimensions: { l: Number(l), w: Number(w), h: Number(h), weight: Number(weight) },
+                    readyToShip: true
+                })
+            });
+
+            if (res.ok) {
+                alert("✅ Shipment marked as ready! Admin has been notified.");
+                fetchOrders(); // Refresh
+            } else {
+                const data = await res.json();
+                alert(data.error || "Failed to update shipment");
+            }
+        } catch (error) {
+            console.error("Failed to mark ready:", error);
+            alert("An error occurred");
+        }
+    };
+
     if (loading || !vendor) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -216,14 +257,57 @@ export default function VendorDashboard() {
                                         </div>
                                     </div>
 
-                                    {/* Action Buttons (Future) */}
-                                    {/* 
-                                    <div className="mt-8 pt-6 border-t border-gray-50 flex justify-end">
-                                        <button className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center gap-2">
-                                            <Truck size={16} /> Mark Ready to Ship
-                                        </button>
-                                    </div> 
-                                    */}
+                                    {/* Action Buttons - Package Dimensions */}
+                                    {!shipment.awbCode && shipment.status !== "Delivered" && (
+                                        <div className="mt-8 pt-6 border-t border-gray-50 space-y-4">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Package Specifications</p>
+                                            <div className="grid grid-cols-4 gap-3">
+                                                <div>
+                                                    <label className="text-[8px] font-bold text-gray-400 ml-1">Length (cm)</label>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="15"
+                                                        id={`l-${shipment.id}`}
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold mt-1"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[8px] font-bold text-gray-400 ml-1">Width (cm)</label>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="15"
+                                                        id={`w-${shipment.id}`}
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold mt-1"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[8px] font-bold text-gray-400 ml-1">Height (cm)</label>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="5"
+                                                        id={`h-${shipment.id}`}
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold mt-1"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[8px] font-bold text-gray-400 ml-1">Weight (kg)</label>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="0.5"
+                                                        step="0.01"
+                                                        id={`weight-${shipment.id}`}
+                                                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold mt-1"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleMarkReadyToShip(shipment.id)}
+                                                className="w-full bg-indigo-600 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2"
+                                            >
+                                                <Truck size={16} /> Mark Ready to Ship
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>

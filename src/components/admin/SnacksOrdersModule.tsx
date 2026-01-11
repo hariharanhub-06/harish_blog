@@ -975,19 +975,31 @@ export default function SnacksOrdersModule() {
                                                                 </div>
                                                             ) : (
                                                                 <div className="space-y-4">
+                                                                    {/* Vendor Confirmed Badge */}
+                                                                    {(shipment as any).vendorConfirmedDimensions && (
+                                                                        <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                                                                            <div className="flex items-center gap-2 mb-1">
+                                                                                <CheckCircle size={12} className="text-emerald-500" />
+                                                                                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Vendor Confirmed</span>
+                                                                            </div>
+                                                                            <div className="text-[8px] text-emerald-700 font-medium">
+                                                                                {new Date((shipment as any).vendorConfirmedAt).toLocaleString()}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
                                                                     <div className="grid grid-cols-2 gap-2">
                                                                         <div className="space-y-1">
                                                                             <label className="text-[8px] font-black uppercase text-gray-400 ml-1">L x B (cm)</label>
                                                                             <div className="flex gap-1">
-                                                                                <input type="number" placeholder="L" value={packageDimensions[shipment.id]?.l || ""} onChange={(e) => updateDimension(shipment.id, 'l', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
-                                                                                <input type="number" placeholder="B" value={packageDimensions[shipment.id]?.b || ""} onChange={(e) => updateDimension(shipment.id, 'b', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
+                                                                                <input type="number" placeholder="L" value={packageDimensions[shipment.id]?.l || (shipment as any).vendorConfirmedDimensions?.l || ""} onChange={(e) => updateDimension(shipment.id, 'l', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
+                                                                                <input type="number" placeholder="B" value={packageDimensions[shipment.id]?.b || (shipment as any).vendorConfirmedDimensions?.w || ""} onChange={(e) => updateDimension(shipment.id, 'b', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
                                                                             </div>
                                                                         </div>
                                                                         <div className="space-y-1">
                                                                             <label className="text-[8px] font-black uppercase text-gray-400 ml-1">H x W (cm/kg)</label>
                                                                             <div className="flex gap-1">
-                                                                                <input type="number" placeholder="H" value={packageDimensions[shipment.id]?.h || ""} onChange={(e) => updateDimension(shipment.id, 'h', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
-                                                                                <input type="number" placeholder="W" value={packageDimensions[shipment.id]?.w || ""} onChange={(e) => updateDimension(shipment.id, 'w', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
+                                                                                <input type="number" placeholder="H" value={packageDimensions[shipment.id]?.h || (shipment as any).vendorConfirmedDimensions?.h || ""} onChange={(e) => updateDimension(shipment.id, 'h', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
+                                                                                <input type="number" placeholder="W" value={packageDimensions[shipment.id]?.w || (shipment as any).vendorConfirmedDimensions?.weight || ""} onChange={(e) => updateDimension(shipment.id, 'w', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold" />
                                                                             </div>
                                                                         </div>
                                                                     </div>

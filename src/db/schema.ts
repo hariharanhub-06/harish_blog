@@ -350,5 +350,9 @@ export const orderShipments = pgTable("order_shipments", {
   trackingUrl: text("tracking_url"),
   status: text("status").default("Pending"),
   items: jsonb("items").notNull(), // Array of items in this shipment
+  vendorConfirmedDimensions: jsonb("vendor_confirmed_dimensions"), // {l, w, h, weight} from vendor
+  vendorConfirmedAt: timestamp("vendor_confirmed_at"),
+  dimensionSource: text("dimension_source").default("auto"), // 'vendor', 'admin', 'auto'
+  readyToShip: boolean("ready_to_ship").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
