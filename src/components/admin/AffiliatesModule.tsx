@@ -288,38 +288,38 @@ Start promoting and tracking your binary team growth today! 🚀
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-4 animate-in fade-in duration-500">
             {/* Header Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6">
-                    <div className="w-16 h-16 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-500">
-                        <Users size={32} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500">
+                        <Users size={24} />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total Affiliates</p>
-                        <h3 className="text-3xl font-black text-gray-900">{affiliates.length}</h3>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Affiliates</p>
+                        <h3 className="text-xl font-black text-gray-900">{affiliates.length}</h3>
                     </div>
                 </div>
 
-                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6">
-                    <div className="w-16 h-16 bg-pink-50 rounded-3xl flex items-center justify-center text-pink-500">
-                        <ShoppingBag size={32} />
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-500">
+                        <ShoppingBag size={24} />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total Orders</p>
-                        <h3 className="text-3xl font-black text-gray-900">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Orders</p>
+                        <h3 className="text-xl font-black text-gray-900">
                             {affiliates.reduce((acc, a) => acc + (a.totalOrders || 0), 0)}
                         </h3>
                     </div>
                 </div>
 
-                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6">
-                    <div className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center text-emerald-500">
-                        <DollarSign size={32} />
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500">
+                        <DollarSign size={24} />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total Earnings Generated</p>
-                        <h3 className="text-3xl font-black text-gray-900">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Earnings</p>
+                        <h3 className="text-xl font-black text-gray-900">
                             ₹{affiliates.reduce((acc, a) => acc + (a.totalEarnings || 0), 0).toFixed(0)}
                         </h3>
                     </div>
@@ -327,51 +327,51 @@ Start promoting and tracking your binary team growth today! 🚀
             </div>
 
             {/* Tabs and Controls */}
-            <div className="bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex p-2 bg-gray-50 rounded-2xl w-fit">
+            <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="flex p-1.5 bg-gray-50 rounded-xl w-fit">
                     <button
                         onClick={() => setActiveTab("pending")}
-                        className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "pending" ? "bg-white text-primary shadow-sm" : "text-gray-400 hover:text-primary"}`}
+                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "pending" ? "bg-white text-primary shadow-sm" : "text-gray-400 hover:text-primary"}`}
                     >
-                        <Clock size={16} />
+                        <Clock size={14} />
                         Pending ({affiliates.filter(a => a.status === "Pending").length})
                     </button>
                     <button
                         onClick={() => setActiveTab("active")}
-                        className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "active" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-400 hover:text-emerald-600"}`}
+                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "active" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-400 hover:text-emerald-600"}`}
                     >
-                        <CheckCircle size={16} />
+                        <CheckCircle size={14} />
                         Active ({affiliates.filter(a => a.status === "Approved").length})
                     </button>
                     <button
                         onClick={() => setActiveTab("all")}
-                        className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-900"}`}
+                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-900"}`}
                     >
-                        <Users size={16} />
+                        <Users size={14} />
                         All
                     </button>
                     <button
                         onClick={() => setActiveTab("payouts")}
-                        className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "payouts" ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-orange-600"}`}
+                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "payouts" ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-orange-600"}`}
                     >
-                        <DollarSign size={16} />
+                        <DollarSign size={14} />
                         Payouts ({payoutRequests.filter(p => p.status === "Pending").length})
                     </button>
                     <button
                         onClick={() => setActiveTab("config")}
-                        className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "config" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-blue-600"}`}
+                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "config" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-blue-600"}`}
                     >
-                        <RefreshCw size={16} />
-                        Split Config
+                        <RefreshCw size={14} />
+                        Config
                     </button>
                 </div>
 
                 <button
                     onClick={fetchAffiliates}
-                    className="p-4 bg-gray-50 text-gray-500 rounded-xl hover:bg-gray-100 transition-all"
+                    className="p-3 bg-gray-50 text-gray-500 rounded-lg hover:bg-gray-100 transition-all"
                     title="Refresh List"
                 >
-                    <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
+                    <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
                 </button>
             </div>
 
@@ -456,45 +456,45 @@ Start promoting and tracking your binary team growth today! 🚀
                                 <motion.div
                                     key={request.id}
                                     layout
-                                    initial={{ opacity: 0, x: -20 }}
+                                    initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 flex items-center justify-between"
+                                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center justify-between"
                                 >
-                                    <div className="flex items-center gap-6">
-                                        <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500">
-                                            <DollarSign size={28} />
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-orange-500">
+                                            <DollarSign size={20} />
                                         </div>
                                         <div>
-                                            <h4 className="text-xl font-black text-gray-900">{request.affiliateName}</h4>
-                                            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">UPI: {request.upiId}</p>
+                                            <h4 className="text-base font-black text-gray-900">{request.affiliateName}</h4>
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">UPI: {request.upiId}</p>
                                         </div>
                                     </div>
 
-                                    <div className="text-center px-10 border-x border-gray-50">
-                                        <p className="text-[10px] font-black uppercase text-gray-400 mb-1">Request Amount</p>
-                                        <p className="text-3xl font-black text-gray-900">₹{request.amount}</p>
+                                    <div className="text-center px-6 border-x border-gray-50">
+                                        <p className="text-[9px] font-black uppercase text-gray-400 mb-0.5">Amount</p>
+                                        <p className="text-xl font-black text-gray-900">₹{request.amount}</p>
                                     </div>
 
-                                    <div className="flex gap-3">
+                                    <div className="flex gap-2">
                                         {request.status === "Pending" ? (
                                             <>
                                                 <button
                                                     onClick={() => handlePayoutAction(request.id, "approve")}
                                                     disabled={updatingId === request.id}
-                                                    className="px-6 py-3 bg-emerald-500 text-white rounded-xl font-black text-xs uppercase hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-200"
+                                                    className="px-4 py-2 bg-emerald-500 text-white rounded-lg font-black text-[10px] uppercase hover:bg-emerald-600 transition-all shadow-sm shadow-emerald-200"
                                                 >
-                                                    Mark Paid
+                                                    Paid
                                                 </button>
                                                 <button
                                                     onClick={() => handlePayoutAction(request.id, "reject")}
                                                     disabled={updatingId === request.id}
-                                                    className="px-6 py-3 bg-red-50 text-red-500 rounded-xl font-black text-xs uppercase hover:bg-red-100"
+                                                    className="px-4 py-2 bg-red-50 text-red-500 rounded-lg font-black text-[10px] uppercase hover:bg-red-100"
                                                 >
                                                     Reject
                                                 </button>
                                             </>
                                         ) : (
-                                            <span className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest ${request.status === "Approved" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"}`}>
+                                            <span className={`px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest ${request.status === "Approved" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"}`}>
                                                 {request.status}
                                             </span>
                                         )}
@@ -512,51 +512,51 @@ Start promoting and tracking your binary team growth today! 🚀
                             <motion.div
                                 key={affiliate.id}
                                 layout
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden"
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
                             >
-                                <div className="p-8 md:p-10 flex flex-col md:flex-row gap-8 items-start md:items-center">
+                                <div className="p-4 md:p-5 flex flex-col md:flex-row gap-5 items-start md:items-center">
                                     {/* Name and Basic Info */}
-                                    <div className="flex-1 space-y-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400 font-black text-xl">
+                                    <div className="flex-1 space-y-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 font-black text-base">
                                                 {affiliate.fullName.charAt(0)}
                                             </div>
                                             <div>
-                                                <h4 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                                                <h4 className="text-base font-black text-gray-900 flex items-center gap-2">
                                                     {affiliate.fullName}
                                                     {affiliate.status === "Approved" && (
-                                                        <ShieldCheck size={20} className="text-emerald-500" />
+                                                        <ShieldCheck size={16} className="text-emerald-500" />
                                                     )}
                                                 </h4>
-                                                <div className="flex items-center gap-3 text-sm font-bold text-gray-400">
+                                                <div className="flex items-center gap-2 text-[11px] font-bold text-gray-400">
                                                     <span>{affiliate.mobile}</span>
                                                     {affiliate.email && (
                                                         <>
                                                             <span>•</span>
-                                                            <span>{affiliate.email}</span>
+                                                            <span className="truncate max-w-[150px]">{affiliate.email}</span>
                                                         </>
                                                     )}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-wrap gap-2">
-                                            <span className="px-4 py-1.5 bg-gray-100 text-gray-500 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                        <div className="flex flex-wrap gap-1.5">
+                                            <span className="px-2.5 py-1 bg-gray-50 text-gray-500 rounded-lg text-[9px] font-black uppercase tracking-widest border border-gray-100">
                                                 UPI: {affiliate.upiId}
                                             </span>
                                             {affiliate.socialLink && (
                                                 <a
                                                     href={affiliate.socialLink}
                                                     target="_blank"
-                                                    className="px-4 py-1.5 bg-blue-50 text-blue-500 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-blue-100 transition-all border border-blue-100"
+                                                    className="px-2.5 py-1 bg-blue-50 text-blue-500 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:bg-blue-100 transition-all border border-blue-100"
                                                 >
-                                                    Social Link <ExternalLink size={10} />
+                                                    Social <ExternalLink size={9} />
                                                 </a>
                                             )}
-                                            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${affiliate.status === "Approved" ? "text-emerald-600 bg-emerald-50 border-emerald-100" :
+                                            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${affiliate.status === "Approved" ? "text-emerald-600 bg-emerald-50 border-emerald-100" :
                                                 affiliate.status === "Rejected" ? "text-red-600 bg-red-50 border-red-100" :
                                                     "text-amber-600 bg-amber-50 border-amber-100"
                                                 }`}>
@@ -567,10 +567,10 @@ Start promoting and tracking your binary team growth today! 🚀
 
                                     {/* Coupon and Tier */}
                                     {affiliate.status === "Approved" && (
-                                        <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-3xl min-w-[200px] border border-gray-100">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Coupon Code</p>
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-2xl font-black text-pink-500 italic tracking-tighter">
+                                        <div className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-2xl min-w-[140px] border border-gray-100">
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Coupon</p>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-lg font-black text-pink-500 italic tracking-tighter">
                                                     {affiliate.couponCode}
                                                 </span>
                                                 <button
@@ -578,103 +578,103 @@ Start promoting and tracking your binary team growth today! 🚀
                                                         navigator.clipboard.writeText(affiliate.couponCode || "");
                                                         alert("Code copied!");
                                                     }}
-                                                    className="p-1.5 hover:text-primary transition-all"
+                                                    className="p-1 hover:text-primary transition-all text-gray-400"
                                                 >
-                                                    <Copy size={16} />
+                                                    <Copy size={12} />
                                                 </button>
                                             </div>
-                                            <div className={`mt-3 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getTierColor(affiliate.currentTier)}`}>
-                                                {affiliate.currentTier} Tier
+                                            <div className={`mt-2 px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${getTierColor(affiliate.currentTier)}`}>
+                                                {affiliate.currentTier}
                                             </div>
                                         </div>
                                     )}
 
                                     {/* Stats */}
                                     {affiliate.status === "Approved" && (
-                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-8 md:px-8 border-y md:border-y-0 md:border-x border-gray-50 py-6 md:py-0 w-full md:w-auto">
+                                        <div className="grid grid-cols-5 gap-3 md:px-5 border-y md:border-y-0 md:border-x border-gray-50 py-4 md:py-0 w-full md:w-auto">
                                             <div className="text-center">
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Orders</p>
-                                                <p className="text-xl font-black text-gray-900">{affiliate.totalOrders || 0}</p>
+                                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Orders</p>
+                                                <p className="text-sm font-black text-gray-900">{affiliate.totalOrders || 0}</p>
                                             </div>
                                             <div className="text-center">
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Sales</p>
-                                                <p className="text-xl font-black text-blue-600">₹{affiliate.totalSalesAmount?.toFixed(0) || 0}</p>
+                                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Sales</p>
+                                                <p className="text-sm font-black text-blue-600">₹{(affiliate.totalSalesAmount || 0).toFixed(0)}</p>
                                             </div>
                                             <div className="text-center">
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Direct</p>
-                                                <p className="text-xl font-black text-gray-900">₹{affiliate.directEarnings?.toFixed(0) || 0}</p>
+                                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Direct</p>
+                                                <p className="text-sm font-black text-gray-900">₹{(affiliate.directEarnings || 0).toFixed(0)}</p>
                                             </div>
                                             <div className="text-center">
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">MLM Levels</p>
-                                                <p className="text-xl font-black text-emerald-600">
+                                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">MLM</p>
+                                                <p className="text-sm font-black text-emerald-600">
                                                     ₹{(Number(affiliate.level1Earnings || 0) + Number(affiliate.level2Earnings || 0) + Number(affiliate.level3Earnings || 0)).toFixed(0)}
                                                 </p>
                                             </div>
-                                            <div className="text-center col-span-2 md:col-span-1">
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Pending Payout</p>
-                                                <p className="text-xl font-black text-orange-500">₹{affiliate.pendingBalance?.toFixed(0) || 0}</p>
+                                            <div className="text-center">
+                                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Pending</p>
+                                                <p className="text-sm font-black text-orange-500">₹{(affiliate.pendingBalance || 0).toFixed(0)}</p>
                                             </div>
                                         </div>
                                     )}
 
                                     {/* Actions */}
-                                    <div className="flex flex-wrap md:flex-col gap-3 w-full md:w-auto">
+                                    <div className="flex flex-wrap md:flex-col gap-2 w-full md:w-auto">
                                         {affiliate.status === "Pending" ? (
                                             <>
                                                 <button
                                                     onClick={() => handleAction(affiliate.id, "approve")}
                                                     disabled={updatingId === affiliate.id}
-                                                    className="flex-1 md:flex-none px-6 py-3 bg-emerald-500 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all disabled:opacity-50 shadow-lg shadow-emerald-200"
+                                                    className="flex-1 md:flex-none px-4 py-2 bg-emerald-500 text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all disabled:opacity-50"
                                                 >
                                                     Approve
                                                 </button>
                                                 <button
                                                     onClick={() => handleAction(affiliate.id, "reject")}
                                                     disabled={updatingId === affiliate.id}
-                                                    className="flex-1 md:flex-none px-6 py-3 bg-red-50 text-red-500 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-100 transition-all disabled:opacity-50"
+                                                    className="flex-1 md:flex-none px-4 py-2 bg-red-50 text-red-500 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-red-100 transition-all disabled:opacity-50"
                                                 >
                                                     Reject
                                                 </button>
                                             </>
                                         ) : (
-                                            <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 w-full">
+                                            <div className="grid grid-cols-3 lg:grid-cols-2 gap-1.5 w-full">
                                                 {affiliate.status === "Approved" && (
                                                     <>
                                                         <button
                                                             onClick={() => setEditingAffiliate(affiliate)}
-                                                            className="px-4 py-3 bg-gray-50 text-gray-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+                                                            className="px-2 py-1.5 bg-gray-50 text-gray-600 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-gray-100 transition-all flex items-center justify-center gap-1.5"
                                                         >
-                                                            <Edit size={14} /> Edit
+                                                            <Edit size={12} /> Edit
                                                         </button>
                                                         <button
                                                             onClick={() => fetchTree(affiliate.id)}
-                                                            className="px-4 py-3 bg-purple-50 text-purple-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-purple-100 transition-all flex items-center justify-center gap-2"
+                                                            className="px-2 py-1.5 bg-purple-50 text-purple-600 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-purple-100 transition-all flex items-center justify-center gap-1.5"
                                                         >
-                                                            <GitBranch size={14} /> Tree
+                                                            <GitBranch size={12} /> Tree
                                                         </button>
                                                         <a
                                                             href={generateWhatsAppMessage(affiliate)}
                                                             target="_blank"
-                                                            className="px-4 py-3 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-200"
+                                                            className="px-2 py-1.5 bg-emerald-500 text-white rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-200"
                                                         >
-                                                            <MessageCircle size={14} /> Notify
+                                                            <MessageCircle size={12} /> WA
                                                         </a>
                                                         <button
                                                             onClick={() => handleUpdateStats(affiliate.id)}
                                                             disabled={updatingId === affiliate.id}
-                                                            className="px-4 py-3 bg-blue-50 text-blue-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-100 transition-all flex items-center justify-center gap-2"
-                                                            title="Recalculate Stats"
+                                                            className="px-2 py-1.5 bg-blue-50 text-blue-500 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-blue-100 transition-all flex items-center justify-center gap-1.5"
+                                                            title="Sync"
                                                         >
-                                                            <RefreshCw size={14} className={updatingId === affiliate.id ? "animate-spin" : ""} /> Sync
+                                                            <RefreshCw size={12} className={updatingId === affiliate.id ? "animate-spin" : ""} /> Sync
                                                         </button>
                                                     </>
                                                 )}
                                                 <button
                                                     onClick={() => handleDelete(affiliate.id)}
                                                     disabled={updatingId === affiliate.id}
-                                                    className="px-4 py-3 bg-rose-50 text-rose-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-100 transition-all flex items-center justify-center gap-2"
+                                                    className="px-2 py-1.5 bg-rose-50 text-rose-500 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-rose-100 transition-all flex items-center justify-center gap-1.5"
                                                 >
-                                                    <Trash2 size={14} /> Delete
+                                                    <Trash2 size={12} /> Del
                                                 </button>
                                             </div>
                                         )}
@@ -689,80 +689,80 @@ Start promoting and tracking your binary team growth today! 🚀
             {/* Edit Modal */}
             <AnimatePresence>
                 {editingAffiliate && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden"
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="bg-white rounded-[2rem] shadow-2xl w-full max-w-xl overflow-hidden"
                         >
-                            <div className="p-8 md:p-10 border-b border-gray-100 flex justify-between items-center">
+                            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center">
                                 <div>
-                                    <h3 className="text-2xl font-black text-gray-900">Edit Partner Profile</h3>
-                                    <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Update basic info and credentials</p>
+                                    <h3 className="text-xl font-black text-gray-900">Edit Partner Profile</h3>
+                                    <p className="text-gray-400 font-bold uppercase text-[9px] tracking-widest">Update basic info and credentials</p>
                                 </div>
-                                <button onClick={() => setEditingAffiliate(null)} className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 hover:text-red-500 transition-all">
-                                    <X size={24} />
+                                <button onClick={() => setEditingAffiliate(null)} className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 transition-all">
+                                    <X size={20} />
                                 </button>
                             </div>
 
-                            <form onSubmit={handleSaveProfile} className="p-8 md:p-10 space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Full Name</label>
+                            <form onSubmit={handleSaveProfile} className="p-6 md:p-8 space-y-5">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1.5">Full Name</label>
                                         <input
                                             required
                                             type="text"
                                             value={editingAffiliate.fullName}
                                             onChange={(e) => setEditingAffiliate({ ...editingAffiliate, fullName: e.target.value })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500 transition-all font-bold text-sm"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile Number</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1.5">Mobile Number</label>
                                         <input
                                             required
                                             type="text"
                                             value={editingAffiliate.mobile}
                                             onChange={(e) => setEditingAffiliate({ ...editingAffiliate, mobile: e.target.value })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500 transition-all font-bold text-sm"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">UPI ID</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1.5">UPI ID</label>
                                         <input
                                             required
                                             type="text"
                                             value={editingAffiliate.upiId}
                                             onChange={(e) => setEditingAffiliate({ ...editingAffiliate, upiId: e.target.value })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500 transition-all font-bold text-sm"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Login Password</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1.5">Login Password</label>
                                         <input
                                             required
                                             type="text"
                                             value={editingAffiliate.password}
                                             onChange={(e) => setEditingAffiliate({ ...editingAffiliate, password: e.target.value })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500 transition-all font-bold text-sm"
                                         />
                                     </div>
-                                    <div className="space-y-2 md:col-span-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Email Address</label>
+                                    <div className="space-y-1.5 md:col-span-2">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1.5">Email Address</label>
                                         <input
                                             type="email"
                                             value={editingAffiliate.email || ""}
                                             onChange={(e) => setEditingAffiliate({ ...editingAffiliate, email: e.target.value })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500 transition-all font-bold text-sm"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Current Tier</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1.5">Current Tier</label>
                                         <select
                                             value={editingAffiliate.currentTier}
                                             onChange={(e) => setEditingAffiliate({ ...editingAffiliate, currentTier: e.target.value })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500 transition-all font-bold text-sm"
                                         >
                                             {["Newbie", "Starter", "Silver", "Golden", "Platinum", "Pro", "Elite"].map(t => (
                                                 <option key={t} value={t}>{t}</option>
@@ -773,9 +773,9 @@ Start promoting and tracking your binary team growth today! 🚀
 
                                 <button
                                     disabled={updatingId === editingAffiliate.id}
-                                    className="w-full bg-gray-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-95 disabled:opacity-50"
+                                    className="w-full bg-gray-900 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-95 disabled:opacity-50"
                                 >
-                                    {updatingId === editingAffiliate.id ? <RefreshCw className="animate-spin" /> : <Save size={18} />}
+                                    {updatingId === editingAffiliate.id ? <RefreshCw className="animate-spin" /> : <Save size={14} />}
                                     Save Changes
                                 </button>
                             </form>
@@ -792,27 +792,27 @@ Start promoting and tracking your binary team growth today! 🚀
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white rounded-[3rem] shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden"
+                            className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden"
                         >
-                            <div className="p-8 md:p-10 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <div className="p-5 md:p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                                 <div>
-                                    <h3 className="text-2xl font-black text-gray-900">{treeData.fullName}'s Network</h3>
-                                    <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Binary Downline Visualization</p>
+                                    <h3 className="text-lg font-black text-gray-900">{treeData.fullName}'s Network</h3>
+                                    <p className="text-gray-400 font-bold uppercase text-[9px] tracking-widest">Binary Downline Visualization</p>
                                 </div>
-                                <button onClick={() => setViewingTree(null)} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-all border border-gray-100">
-                                    <X size={24} />
+                                <button onClick={() => setViewingTree(null)} className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-all border border-gray-100">
+                                    <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-auto p-12 bg-[#F9FBFF] scrollbar-hide">
+                            <div className="flex-1 overflow-auto p-6 bg-[#F9FBFF] scrollbar-hide">
                                 <div className="flex justify-center min-w-[800px]">
                                     <div className="relative pt-12">
                                         <AdminTreeNode name={treeData.fullName} isSelf />
-                                        <div className="flex justify-between w-[500px] mx-auto">
-                                            <div className="w-1/2 border-t-2 border-l-2 border-gray-200 h-10 rounded-tl-[1.5rem]" />
-                                            <div className="w-1/2 border-t-2 border-r-2 border-gray-200 h-10 rounded-tr-[1.5rem]" />
+                                        <div className="flex justify-between w-[300px] mx-auto">
+                                            <div className="w-1/2 border-t-2 border-l-2 border-gray-200 h-6 rounded-tl-xl" />
+                                            <div className="w-1/2 border-t-2 border-r-2 border-gray-200 h-6 rounded-tr-xl" />
                                         </div>
-                                        <div className="flex justify-between w-[600px] mx-auto">
+                                        <div className="flex justify-between w-[400px] mx-auto">
                                             <div className="flex-1 flex flex-col items-center">
                                                 {treeData.downline?.left ? (
                                                     <AdminTreeNode name={treeData.downline.left.fullName} amount={treeData.downline.left.totalSalesAmount} />
@@ -826,8 +826,8 @@ Start promoting and tracking your binary team growth today! 🚀
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mt-20 text-center">
-                                    <p className="text-gray-400 font-bold text-xs">Note: Showing up to level 1 in admin quick-view. Detailed tree available in partner dashboard.</p>
+                                <div className="mt-10 text-center">
+                                    <p className="text-gray-400 font-bold text-[10px]">Note: Level 1 quick-view. Full tree in dashboard.</p>
                                 </div>
                             </div>
                         </motion.div>
@@ -843,14 +843,14 @@ function AdminTreeNode({ name, isSelf, mini, amount }: any) {
         <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
-            className={`${mini ? 'w-24 p-3' : isSelf ? 'w-48 p-6' : 'w-40 p-4'} bg-white border border-gray-100 shadow-xl rounded-[2rem] flex flex-col items-center gap-2 group hover:border-blue-500 transition-all z-10 mx-auto mb-4 border-2`}
+            className={`${mini ? 'w-20 p-2' : isSelf ? 'w-32 p-3' : 'w-28 p-2'} bg-white border border-gray-100 shadow-lg rounded-2xl flex flex-col items-center gap-1.5 group hover:border-blue-500 transition-all z-10 mx-auto mb-3 border-2`}
         >
-            <div className={`${mini ? 'w-8 h-8 text-[8px]' : isSelf ? 'w-16 h-16 text-xl' : 'w-12 h-12 text-sm'} ${isSelf ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'} rounded-2xl flex items-center justify-center font-black group-hover:rotate-12 transition-transform shadow-lg`}>
+            <div className={`${mini ? 'w-6 h-6 text-[7px]' : isSelf ? 'w-10 h-10 text-sm' : 'w-8 h-8 text-[11px]'} ${isSelf ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'} rounded-xl flex items-center justify-center font-black group-hover:rotate-12 transition-transform shadow-md`}>
                 {name.charAt(0)}
             </div>
-            <p className={`${mini ? 'text-[8px]' : 'text-xs'} font-black text-gray-900 truncate w-full text-center leading-tight`}>{name}</p>
+            <p className={`${mini ? 'text-[7px]' : 'text-[10px]'} font-black text-gray-900 truncate w-full text-center leading-tight`}>{name}</p>
             {!mini && amount !== undefined && (
-                <p className="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full">₹{amount.toFixed(0)}</p>
+                <p className="text-[9px] font-black text-blue-500 bg-blue-50 px-2.5 py-0.5 rounded-full">₹{amount.toFixed(0)}</p>
             )}
         </motion.div>
     );
@@ -858,7 +858,7 @@ function AdminTreeNode({ name, isSelf, mini, amount }: any) {
 
 function AdminEmptyNode({ big }: any) {
     return (
-        <div className={`${big ? 'w-40 h-32' : 'w-24 h-12'} border-2 border-dashed border-gray-200 rounded-[2rem] flex items-center justify-center text-gray-300 uppercase font-black text-[8px] tracking-widest bg-white`}>
+        <div className={`${big ? 'w-28 h-20' : 'w-16 h-8'} border border-dashed border-gray-200 rounded-2xl flex items-center justify-center text-gray-300 uppercase font-black text-[7px] tracking-widest bg-white`}>
             Slot Available
         </div>
     );
