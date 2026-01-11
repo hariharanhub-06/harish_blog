@@ -84,6 +84,22 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
+
+        // 1. Get the order details first to get the orderId (HMS-XXX)
+        const [order] = await db
+            .select({ orderId: snackOrders.orderId })
+            .from(snackOrders)
+            .where(eq(snackOrders.id, id))
+            .limit(1);
+
+        if (order) {
+            // 2. Delete associated shipments from order_shipments table
+            await db
+                .delete(orderShipments)
+                .where(eq(orderShipments.orderId, order.orderId));
+        }
+
+        // 3. Delete the order itself
         await db
             .delete(snackOrders)
             .where(eq(snackOrders.id, id));
