@@ -88,7 +88,7 @@ export default function VendorsModule() {
     };
 
     const generateWhatsAppMessage = (vendor: any) => {
-        const loginLink = "https://hmsnacks.in/business/hm-snacks/vendor/login";
+        const loginLink = "https://hariharanhub.com/business/hm-snacks/vendor/login";
         const message = `🎉 Welcome to HM Snacks Vendor Portal!
     
 Hello ${vendor.name},
