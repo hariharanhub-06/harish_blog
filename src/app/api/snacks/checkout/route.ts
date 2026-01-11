@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { snackOrders, snackProducts, abandonedCarts } from "@/db/schema";
 import { eq, desc, and, or, ilike, sql, count } from "drizzle-orm";
 import { sendWhatsAppAlert } from "@/lib/whatsapp-twilio";
-
+import { splitOrderIntoShipments } from "@/lib/order-utils";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
@@ -78,6 +78,14 @@ export async function POST(req: NextRequest) {
             }
         }
 
+        // 2.7 Split Shipping for manual/pre-confirmed orders
+        if (status === "Payment Confirmed" || status === "Success") {
+            try {
+                await splitOrderIntoShipments(orderId);
+            } catch (splitErr) {
+                console.error("Failed to split manual order:", splitErr);
+            }
+        }
 
         // 3. Automated WhatsApp Invoice / Notification
         if (!skipNotification && paymentMethod !== "Razorpay") {

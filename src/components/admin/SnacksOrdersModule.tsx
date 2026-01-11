@@ -142,12 +142,13 @@ export default function SnacksOrdersModule() {
 
         const newItem = {
             id: product.id,
+            productId: product.id, // Explicitly add for commission logic
             name: product.name,
             imageUrl: product.imageUrl,
             quantity: 1,
             unit: unit,
             price: price,
-            originalProduct: product // Keep reference for unit switching if needed? Nah, keep simple.
+            originalProduct: product
         };
 
         setCreateFormData(prev => ({
