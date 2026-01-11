@@ -497,7 +497,7 @@ export default function AffiliateDashboard() {
                                                 {products
                                                     .filter(p => (p.name?.toLowerCase() || "").includes(productSearch.toLowerCase()) || (p.category?.toLowerCase() || "").includes(productSearch.toLowerCase()))
                                                     .map(product => {
-                                                        const isPcs = !!product.pricePerPiece || !!product.offerPricePerPiece;
+                                                        const isKg = !!product.pricePerKg || !!product.offerPricePerKg;
                                                         return (
                                                             <div key={product.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between group hover:border-orange-200 transition-all">
                                                                 <div className="min-w-0">
@@ -507,15 +507,15 @@ export default function AffiliateDashboard() {
                                                                         <span className="w-1 h-1 bg-gray-300 rounded-full" />
                                                                         <p className="text-[10px] uppercase font-black text-orange-600">
                                                                             Earn: ₹{(() => {
-                                                                                const price = isPcs
-                                                                                    ? (product.offerPricePerPiece || product.pricePerPiece || 0)
-                                                                                    : (product.offerPricePerKg || product.pricePerKg || 0);
+                                                                                const price = isKg
+                                                                                    ? (product.offerPricePerKg || product.pricePerKg || 0)
+                                                                                    : (product.offerPricePerPiece || product.pricePerPiece || 0);
                                                                                 const totalCost = (product.productCost || 0) + (product.packagingCost || 0) + (product.otherCharges || 0);
                                                                                 const profit = Math.max(0, price - totalCost);
                                                                                 const pool = profit * ((product.affiliatePoolPercent || 60) / 100);
                                                                                 const earn = pool * ((stats?.commissionRate || 10) / 100);
                                                                                 return Math.floor(earn);
-                                                                            })()}/{isPcs ? 'Pc' : 'Kg'}
+                                                                            })()}/{isKg ? 'Kg' : 'Pc'}
                                                                         </p>
                                                                     </div>
                                                                 </div>
