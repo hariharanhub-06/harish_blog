@@ -27,7 +27,7 @@ export async function processAffiliateCommissions(orderId: string) {
 
         // 2. Fetch Split Config
         const [config] = await db.select().from(affiliateConfig).where(eq(affiliateConfig.id, 1)).limit(1);
-        const splits = config || { directSplit: 50, level1Split: 20, level2Split: 18, level3Split: 12 };
+        const splits = config || { directSplit: 30, level1Split: 10, level2Split: 5, level3Split: 5 };
 
         // 3. Calculate Total Profit Pool from Items
         const items = order.items as any[];
