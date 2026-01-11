@@ -167,12 +167,12 @@ export default function AffiliateDashboard() {
             <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 px-6 py-4">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-200">
-                            <Star size={20} fill="currentColor" />
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-200">
+                            <Star size={18} fill="currentColor" />
                         </div>
-                        <div className="hidden sm:block">
-                            <h1 className="text-lg font-black tracking-tight leading-tight">HM Partner Central</h1>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Binary Business Dashboard</p>
+                        <div>
+                            <h1 className="text-sm sm:text-lg font-black tracking-tight leading-tight">HM Partner Central</h1>
+                            <p className="text-[8px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest">Business Dashboard</p>
                         </div>
                     </div>
 
@@ -195,14 +195,14 @@ export default function AffiliateDashboard() {
             <main className="max-w-7xl mx-auto px-6 mt-10 space-y-8">
                 {/* Welcome & Navigation */}
                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                    <div className="space-y-2">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-600">Merchant Panel</span>
-                        <h2 className="text-4xl md:text-5xl font-black tracking-tight text-gray-900">
+                    <div className="space-y-1">
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-600">Merchant Panel</span>
+                        <h2 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900">
                             Hello, {stats.fullName.split(' ')[0]} ⚡
                         </h2>
                     </div>
 
-                    <div className="flex p-1.5 bg-gray-100 rounded-[2rem] w-fit overflow-x-auto no-scrollbar">
+                    <div className="flex p-1 bg-gray-100 rounded-2xl md:rounded-[2rem] w-full lg:w-fit overflow-x-auto no-scrollbar">
                         {[
                             { id: 'overview', label: 'Overview', icon: PieChart },
                             { id: 'tree', label: 'Binary Tree', icon: GitBranch },
@@ -212,9 +212,9 @@ export default function AffiliateDashboard() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex items-center gap-2 px-6 py-3 rounded-[1.5rem] text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-900"}`}
+                                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-xl md:rounded-[1.5rem] text-[10px] md:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-900"}`}
                             >
-                                <tab.icon size={16} />
+                                <tab.icon size={14} className="md:w-4 md:h-4" />
                                 {tab.label}
                             </button>
                         ))}
@@ -231,53 +231,53 @@ export default function AffiliateDashboard() {
                             className="space-y-8"
                         >
                             {/* Main Banner */}
-                            <div className="bg-gradient-to-r from-orange-600 to-pink-600 rounded-[3rem] p-8 md:p-12 text-white relative overflow-hidden shadow-2xl shadow-orange-200">
+                            <div className="bg-gradient-to-br from-orange-600 to-pink-600 rounded-3xl md:rounded-[3rem] p-6 md:p-12 text-white relative overflow-hidden shadow-2xl shadow-orange-200">
                                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-40 -mt-40 blur-3xl underline" />
-                                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-12">
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-3">
-                                            <span className="px-5 py-2 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
-                                                Approved ID: {stats.couponCode}
+                                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-12">
+                                    <div className="space-y-4 md:space-y-6 text-center md:text-left">
+                                        <div className="flex items-center justify-center md:justify-start gap-2 md:gap-3">
+                                            <span className="px-3 md:px-5 py-1.5 md:py-2 bg-white/20 backdrop-blur-md rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]">
+                                                ID: {stats.couponCode}
                                             </span>
-                                            <span className="px-5 py-2 bg-emerald-500/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-400/30">
+                                            <span className="px-3 md:px-5 py-1.5 md:py-2 bg-emerald-500/20 backdrop-blur-md rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-400/30">
                                                 {stats.status}
                                             </span>
                                         </div>
-                                        <h2 className="text-4xl md:text-6xl font-black leading-[0.9] tracking-tighter">
+                                        <h2 className="text-3xl md:text-6xl font-black leading-[0.9] tracking-tighter">
                                             EARN UP TO <br /><span className="text-orange-200">₹25,000/mo</span>
                                         </h2>
-                                        <p className="text-orange-100 font-bold max-w-sm">
+                                        <p className="text-orange-100 font-bold max-w-sm mx-auto md:mx-0 text-sm md:text-base">
                                             Your binary team is growing! Recruit more partners to unlock level 3 commissions.
                                         </p>
                                     </div>
 
-                                    <div className="bg-white/10 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/20 min-w-[300px]">
-                                        <p className="text-[10px] font-black uppercase tracking-widest mb-4 opacity-80">Total Wallet Balance</p>
-                                        <div className="flex items-end gap-2 mb-6">
-                                            <span className="text-6xl font-black tracking-tighter italic">₹{stats.pendingBalance.toFixed(0)}</span>
+                                    <div className="bg-white/10 backdrop-blur-xl rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 border border-white/20 min-w-full md:min-w-[300px] text-center md:text-left">
+                                        <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-3 md:mb-4 opacity-80">Total Wallet Balance</p>
+                                        <div className="flex items-end justify-center md:justify-start gap-2 mb-6">
+                                            <span className="text-5xl md:text-6xl font-black tracking-tighter italic">₹{stats.pendingBalance.toFixed(0)}</span>
                                             <span className="text-orange-200 font-bold mb-2">Pending</span>
                                         </div>
                                         <button
                                             onClick={handleWithdraw}
                                             disabled={stats.pendingBalance < 500}
-                                            className="w-full bg-white text-orange-600 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl hover:scale-[1.05] transition-all disabled:opacity-50 disabled:scale-100"
+                                            className="w-full bg-white text-orange-600 py-4 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs shadow-xl hover:scale-[1.05] transition-all disabled:opacity-50 disabled:scale-100"
                                         >
                                             {stats.pendingBalance < 500 ? 'Min. ₹500 required' : 'Withdraw Funds'}
                                         </button>
                                     </div>
 
-                                    <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-                                        <p className="text-[10px] font-black uppercase tracking-widest mb-2 opacity-80">Your Referral Code</p>
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-4xl font-black italic tracking-tighter">{stats.couponCode}</span>
+                                    <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 md:p-6 border border-white/20 flex flex-col items-center md:items-start">
+                                        <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-2 opacity-80">Your Referral Code</p>
+                                        <div className="flex items-center gap-3 md:gap-4">
+                                            <span className="text-3xl md:text-4xl font-black italic tracking-tighter">{stats.couponCode}</span>
                                             <button
                                                 onClick={() => {
                                                     navigator.clipboard.writeText(stats.couponCode);
                                                     alert("Code copied!");
                                                 }}
-                                                className="p-3 bg-white text-orange-600 rounded-xl hover:scale-110 transition-transform shadow-lg"
+                                                className="p-2.5 md:p-3 bg-white text-orange-600 rounded-lg md:rounded-xl hover:scale-110 transition-transform shadow-lg"
                                             >
-                                                <Copy size={20} />
+                                                <Copy size={18} />
                                             </button>
                                         </div>
                                     </div>
@@ -285,9 +285,9 @@ export default function AffiliateDashboard() {
                             </div>
 
                             {/* Stats Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                                 <StatCard
-                                    icon={<ShoppingBag className="text-blue-500" />}
+                                    icon={<ShoppingBag size={20} className="text-blue-500" />}
                                     label="Total Sales"
                                     value={`₹${stats.totalSalesAmount.toFixed(0)}`}
                                     sub={`${stats.totalOrders} total orders`}
@@ -295,26 +295,26 @@ export default function AffiliateDashboard() {
                                     delay={0.1}
                                 />
                                 <StatCard
-                                    icon={<TrendingUp className="text-orange-500" />}
+                                    icon={<TrendingUp size={20} className="text-orange-500" />}
                                     label="Direct Income"
                                     value={`₹${stats.directEarnings.toFixed(0)}`}
-                                    sub="From your personal code"
+                                    sub="From personal code"
                                     color="bg-orange-50"
                                     delay={0.2}
                                 />
                                 <StatCard
-                                    icon={<Users className="text-purple-500" />}
+                                    icon={<Users size={20} className="text-purple-500" />}
                                     label="MLM Income"
                                     value={`₹${(stats.level1Earnings + stats.level2Earnings + stats.level3Earnings).toFixed(0)}`}
-                                    sub="Team referral earnings"
+                                    sub="Team referral"
                                     color="bg-purple-50"
                                     delay={0.3}
                                 />
                                 <StatCard
-                                    icon={<ShieldCheck className="text-emerald-500" />}
+                                    icon={<ShieldCheck size={20} className="text-emerald-500" />}
                                     label="Payouts Done"
                                     value={`₹${stats.paidBalance.toFixed(0)}`}
-                                    sub="Sent to your UPI"
+                                    sub="Sent to UPI"
                                     color="bg-emerald-50"
                                     delay={0.4}
                                 />
@@ -323,9 +323,9 @@ export default function AffiliateDashboard() {
                             {/* Two Column Section */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 {/* Income Breakdown Component */}
-                                <div className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-gray-100 shadow-sm">
-                                    <h3 className="text-2xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                                        <TrendingUp size={24} className="text-orange-500" />
+                                <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-gray-100 shadow-sm">
+                                    <h3 className="text-xl md:text-2xl font-black text-gray-900 mb-6 md:mb-8 flex items-center gap-3">
+                                        <TrendingUp size={20} className="text-orange-500" />
                                         Income Breakdown
                                     </h3>
                                     <div className="space-y-4">
@@ -337,25 +337,25 @@ export default function AffiliateDashboard() {
                                 </div>
 
                                 {/* Quick Info */}
-                                <div className="bg-gradient-to-br from-gray-900 to-black rounded-[2.5rem] p-8 md:p-10 text-white relative overflow-hidden">
+                                <div className="bg-gradient-to-br from-gray-900 to-black rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden">
                                     <div className="absolute bottom-0 right-0 w-48 h-48 bg-orange-500/20 rounded-full -mb-24 -mr-24 blur-3xl" />
                                     <div className="relative z-10 flex flex-col justify-between h-full">
                                         <div>
-                                            <h3 className="text-2xl font-black mb-6">Partner Policy</h3>
-                                            <ul className="space-y-4 text-gray-400 text-sm font-bold">
-                                                <li className="flex items-center gap-3"><ChevronRight size={16} className="text-orange-500" /> Weekly Payouts every Monday</li>
-                                                <li className="flex items-center gap-3"><ChevronRight size={16} className="text-orange-500" /> Minimum Withdrawal: ₹500</li>
-                                                <li className="flex items-center gap-3"><ChevronRight size={16} className="text-orange-500" /> Max commission cap: 20%</li>
+                                            <h3 className="text-xl md:text-2xl font-black mb-6">Partner Policy</h3>
+                                            <ul className="space-y-3 text-gray-400 text-[11px] md:text-sm font-bold">
+                                                <li className="flex items-center gap-3"><ChevronRight size={14} className="text-orange-500" /> Weekly Payouts every Monday</li>
+                                                <li className="flex items-center gap-3"><ChevronRight size={14} className="text-orange-500" /> Minimum Withdrawal: ₹500</li>
+                                                <li className="flex items-center gap-3"><ChevronRight size={14} className="text-orange-500" /> Max commission cap: 20%</li>
                                             </ul>
                                         </div>
 
-                                        <div className="mt-8 flex items-center gap-4 p-5 bg-white/5 rounded-3xl border border-white/10">
-                                            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-orange-500">
-                                                <User size={24} />
+                                        <div className="mt-8 flex items-center gap-4 p-4 md:p-5 bg-white/5 rounded-2xl md:rounded-3xl border border-white/10">
+                                            <div className="w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-xl md:rounded-2xl flex items-center justify-center text-orange-500">
+                                                <User size={20} />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-black uppercase text-gray-500">Self Account ID</p>
-                                                <p className="font-black text-lg">HMS-A-{stats.couponCode.replace('HMS', '')}</p>
+                                                <p className="text-[8px] md:text-[10px] font-black uppercase text-gray-500">Self Account ID</p>
+                                                <p className="font-black text-base md:text-lg">HMS-A-{stats.couponCode.replace('HMS', '')}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -370,7 +370,7 @@ export default function AffiliateDashboard() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white rounded-[3rem] p-8 md:p-16 border border-gray-100 shadow-sm overflow-x-auto min-h-[600px]"
+                            className="bg-white rounded-3xl md:rounded-[3rem] p-6 md:p-16 border border-gray-100 shadow-sm overflow-x-auto min-h-[500px]"
                         >
                             <div className="text-center mb-16 space-y-4">
                                 <h3 className="text-3xl font-black text-gray-900 leading-tight">Your Binary Downline</h3>
@@ -383,13 +383,13 @@ export default function AffiliateDashboard() {
                                     <TreeNode name={stats.fullName} isSelf />
 
                                     {/* Connection Lines (Root to L1) */}
-                                    <div className="flex justify-between w-[500px] mx-auto">
-                                        <div className="w-1/2 border-t-2 border-l-2 border-gray-200 h-10 rounded-tl-[1.5rem]" />
-                                        <div className="w-1/2 border-t-2 border-r-2 border-gray-200 h-10 rounded-tr-[1.5rem]" />
+                                    <div className="flex justify-between w-[280px] md:w-[500px] mx-auto">
+                                        <div className="w-1/2 border-t-2 border-l-2 border-gray-200 h-6 md:h-10 rounded-tl-xl md:rounded-tl-[1.5rem]" />
+                                        <div className="w-1/2 border-t-2 border-r-2 border-gray-200 h-6 md:h-10 rounded-tr-xl md:rounded-tr-[1.5rem]" />
                                     </div>
 
                                     {/* Level 1 Container */}
-                                    <div className="flex justify-between w-[600px] mx-auto">
+                                    <div className="flex justify-between w-[340px] md:w-[600px] mx-auto">
                                         <div className="flex-1 flex flex-col items-center">
                                             {stats.downline?.left ? (
                                                 <>
@@ -507,55 +507,55 @@ export default function AffiliateDashboard() {
                             className="space-y-8"
                         >
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm flex flex-col justify-between overflow-hidden relative">
+                                <div className="lg:col-span-2 bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-gray-100 shadow-sm flex flex-col justify-between overflow-hidden relative">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-orange-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
                                     <div>
-                                        <h3 className="text-3xl font-black mb-8">Payout Status</h3>
-                                        <div className="space-y-6 py-6 border-y border-gray-50">
-                                            <div className="flex justify-between items-center bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-gray-400 shadow-sm"><ArchiveIcon /></div>
+                                        <h3 className="text-2xl md:text-3xl font-black mb-6 md:mb-8">Payout Status</h3>
+                                        <div className="space-y-4 md:space-y-6 py-4 md:py-6 border-y border-gray-50">
+                                            <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 p-5 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 gap-4">
+                                                <div className="flex items-center gap-4 w-full sm:w-auto">
+                                                    <div className="w-12 h-12 md:w-14 md:h-14 bg-white rounded-xl md:rounded-2xl flex items-center justify-center text-gray-400 shadow-sm"><ArchiveIcon /></div>
                                                     <div>
-                                                        <p className="text-[10px] font-black uppercase text-gray-400">Total Cleared Earnings</p>
-                                                        <p className="text-2xl font-black">₹{stats.paidBalance.toFixed(0)}</p>
+                                                        <p className="text-[9px] md:text-[10px] font-black uppercase text-gray-400">Total Cleared Earnings</p>
+                                                        <p className="text-xl md:text-2xl font-black">₹{stats.paidBalance.toFixed(0)}</p>
                                                     </div>
                                                 </div>
-                                                <span className="bg-emerald-50 text-emerald-600 px-6 py-2 rounded-full font-black text-[10px] uppercase border border-emerald-100">Settled</span>
+                                                <span className="w-full sm:w-auto text-center bg-emerald-50 text-emerald-600 px-6 py-2 rounded-full font-black text-[9px] md:text-[10px] uppercase border border-emerald-100">Settled</span>
                                             </div>
 
-                                            <div className="flex justify-between items-center bg-orange-50 p-6 rounded-3xl border border-orange-100">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-orange-500 shadow-sm"><PendingIcon /></div>
+                                            <div className="flex flex-col sm:flex-row justify-between items-center bg-orange-50 p-5 md:p-6 rounded-2xl md:rounded-3xl border border-orange-100 gap-4">
+                                                <div className="flex items-center gap-4 w-full sm:w-auto">
+                                                    <div className="w-12 h-12 md:w-14 md:h-14 bg-white rounded-xl md:rounded-2xl flex items-center justify-center text-orange-500 shadow-sm"><PendingIcon /></div>
                                                     <div>
-                                                        <p className="text-[10px] font-black uppercase text-orange-400">Next Payout Estimate</p>
-                                                        <p className="text-2xl font-black text-orange-600">₹{stats.pendingBalance.toFixed(0)}</p>
+                                                        <p className="text-[9px] md:text-[10px] font-black uppercase text-orange-400">Next Payout Estimate</p>
+                                                        <p className="text-xl md:text-2xl font-black text-orange-600">₹{stats.pendingBalance.toFixed(0)}</p>
                                                     </div>
                                                 </div>
-                                                <span className="bg-white text-orange-600 px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-sm">Process Batch #102</span>
+                                                <span className="w-full sm:w-auto text-center bg-white text-orange-600 px-6 py-2 rounded-full font-black text-[9px] md:text-[10px] uppercase shadow-sm">Processing Batch</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="mt-8">
-                                        <p className="text-gray-400 text-xs font-bold leading-relaxed mb-6">Note: Your payouts are automatically processed every 7 days. If your balance is below ₹500, it rolls over to the next week.</p>
-                                        <button className="flex items-center gap-3 text-orange-600 font-black uppercase text-xs hover:gap-4 transition-all">Support & Discrepancies <ArrowRight size={16} /></button>
+                                    <div className="mt-8 text-center md:text-left">
+                                        <p className="text-gray-400 text-[11px] md:text-xs font-bold leading-relaxed mb-6">Note: Your payouts are automatically processed every 7 days. Min threshold ₹500.</p>
+                                        <button className="flex items-center justify-center md:justify-start gap-3 text-orange-600 font-black uppercase text-[10px] md:text-xs hover:gap-4 transition-all w-full md:w-auto">Support & Discrepancies <ArrowRight size={14} /></button>
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm">
-                                    <h3 className="text-2xl font-black mb-8">Registered UPI</h3>
-                                    <div className="space-y-8">
-                                        <div className="p-8 bg-gray-50 rounded-[2rem] border border-gray-100 text-center space-y-4">
-                                            <div className="w-16 h-16 bg-white rounded-3xl mx-auto flex items-center justify-center shadow-sm">
-                                                <Users className="text-gray-300" size={32} />
+                                <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-gray-100 shadow-sm">
+                                    <h3 className="text-xl md:text-2xl font-black mb-6 md:mb-8">Registered UPI</h3>
+                                    <div className="space-y-6 md:space-y-8">
+                                        <div className="p-6 md:p-8 bg-gray-50 rounded-2xl md:rounded-[2rem] border border-gray-100 text-center space-y-4">
+                                            <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl md:rounded-3xl mx-auto flex items-center justify-center shadow-sm">
+                                                <Users className="text-gray-300" size={24} />
                                             </div>
-                                            <p className="font-black text-lg break-all">{stats.upiId}</p>
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Primary Withdrawal Method</p>
+                                            <p className="font-black text-base md:text-lg break-all">{stats.upiId}</p>
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Primary Withdrawal</p>
                                         </div>
 
-                                        <div className="p-6 bg-blue-50 rounded-3xl border border-blue-100 flex items-start gap-4">
-                                            <ShieldCheck className="text-blue-500 shrink-0" size={20} />
-                                            <p className="text-xs font-bold text-blue-900 leading-relaxed">Your withdrawal method is secured and KYC verified. Changes require support approval.</p>
+                                        <div className="p-4 md:p-6 bg-blue-50 rounded-2xl md:rounded-3xl border border-blue-100 flex items-start gap-3 md:gap-4">
+                                            <ShieldCheck className="text-blue-500 shrink-0" size={18} />
+                                            <p className="text-[11px] md:text-xs font-bold text-blue-900 leading-relaxed text-left">Your withdrawal method is secured and KYC verified.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -575,15 +575,15 @@ function StatCard({ icon, label, value, sub, color, delay }: any) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay }}
             whileHover={{ y: -8 }}
-            className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4 group transition-all hover:shadow-2xl"
+            className="bg-white p-4 md:p-10 rounded-2xl md:rounded-[2.5rem] border border-gray-100 shadow-sm space-y-3 md:space-y-4 group transition-all hover:shadow-2xl"
         >
-            <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
+            <div className={`w-10 h-10 md:w-14 md:h-14 ${color} rounded-xl md:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
                 {icon}
             </div>
             <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{label}</p>
-                <h4 className="text-3xl font-black text-gray-900 mb-1">{value}</h4>
-                <p className="text-xs font-bold text-gray-300 group-hover:text-gray-400 transition-colors uppercase tracking-widest">{sub}</p>
+                <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{label}</p>
+                <h4 className="text-xl md:text-3xl font-black text-gray-900 mb-0.5 md:mb-1">{value}</h4>
+                <p className="text-[9px] md:text-xs font-bold text-gray-300 group-hover:text-gray-400 transition-colors uppercase tracking-widest">{sub}</p>
             </div>
         </motion.div>
     );
@@ -614,14 +614,14 @@ function TreeNode({ name, isSelf, mini, amount }: any) {
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             title={name}
-            className={`${mini ? 'w-24 p-3' : isSelf ? 'w-48 p-6' : 'w-40 p-4'} bg-white border border-gray-100 shadow-lg rounded-[1.5rem] flex flex-col items-center gap-2 group hover:border-orange-500 transition-all z-10 mx-auto`}
+            className={`${mini ? 'w-20 p-2.5' : isSelf ? 'w-36 md:w-48 p-4 md:p-6' : 'w-32 md:w-40 p-3 md:p-4'} bg-white border border-gray-100 shadow-lg rounded-2xl md:rounded-[1.5rem] flex flex-col items-center gap-1.5 md:gap-2 group hover:border-orange-500 transition-all z-10 mx-auto`}
         >
-            <div className={`${mini ? 'w-8 h-8 text-[8px]' : isSelf ? 'w-16 h-16 text-xl' : 'w-12 h-12 text-sm'} ${isSelf ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'} rounded-full flex items-center justify-center font-black group-hover:scale-110 transition-transform`}>
+            <div className={`${mini ? 'w-6 h-6 text-[7px]' : isSelf ? 'w-10 h-10 md:w-16 md:h-16 text-xs md:text-xl' : 'w-8 h-8 md:w-12 md:h-12 text-[11px] md:text-sm'} ${isSelf ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'} rounded-full flex items-center justify-center font-black group-hover:scale-110 transition-transform`}>
                 {name.charAt(0)}
             </div>
-            <p className={`${mini ? 'text-[8px]' : 'text-xs'} font-black text-gray-900 truncate w-full text-center leading-tight`}>{name}</p>
+            <p className={`${mini ? 'text-[7px]' : 'text-[10px] md:text-xs'} font-black text-gray-900 truncate w-full text-center leading-tight`}>{name}</p>
             {!mini && amount !== undefined && (
-                <p className="text-[10px] font-black text-emerald-500">₹{amount.toFixed(0)}</p>
+                <p className="text-[9px] md:text-[10px] font-black text-emerald-500">₹{amount.toFixed(0)}</p>
             )}
         </motion.div>
     );
