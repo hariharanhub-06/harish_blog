@@ -1162,7 +1162,7 @@ export default function SnacksOrdersModule() {
                                     className="w-full bg-gray-50 border-0 rounded-2xl p-4 font-bold font-mono"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4 pt-4">
+                            <div className="grid grid-cols-3 gap-4 pt-4">
                                 <button
                                     onClick={() => setShowShippingModal(false)}
                                     className="px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs text-gray-500 hover:bg-gray-100"
@@ -1170,11 +1170,20 @@ export default function SnacksOrdersModule() {
                                     Cancel
                                 </button>
                                 <button
+                                    onClick={() => {
+                                        setShippingData({ courier: '', tracking: '' });
+                                        submitShipping();
+                                    }}
+                                    className="px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs bg-amber-500 text-white hover:bg-amber-600 transition-all"
+                                >
+                                    Skip
+                                </button>
+                                <button
                                     onClick={submitShipping}
                                     disabled={!shippingData.courier || !shippingData.tracking}
                                     className="px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs bg-gray-900 text-white hover:bg-pink-500 disabled:opacity-50 transition-all"
                                 >
-                                    Confirm Shipment
+                                    Confirm
                                 </button>
                             </div>
                         </div>
