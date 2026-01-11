@@ -68,6 +68,7 @@ interface Product {
     packagingCost?: number;
     otherCharges?: number;
     affiliatePoolPercent?: number;
+    affiliateDiscountPercent?: number;
 }
 
 export default function AffiliateDashboard() {
@@ -541,6 +542,11 @@ export default function AffiliateDashboard() {
                                                                                 );
                                                                             })()}/{isKg ? 'Kg' : 'Pc'}</span>
                                                                         </div>
+                                                                        {(product.affiliateDiscountPercent ?? 0) > 0 && (
+                                                                            <div className="bg-blue-50 text-blue-600 text-[8px] px-1.5 py-0.5 rounded-md font-black shrink-0">
+                                                                                {product.affiliateDiscountPercent}% OFF
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                                 <button
@@ -641,7 +647,7 @@ export default function AffiliateDashboard() {
                     )}
                 </AnimatePresence>
             </main>
-        </div>
+        </div >
     );
 }
 
