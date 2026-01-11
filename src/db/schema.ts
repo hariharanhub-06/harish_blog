@@ -313,6 +313,23 @@ export const vendors = pgTable("vendors", {
   address: text("address"),
   bankDetails: jsonb("bank_details"),
   createdAt: timestamp("created_at").defaultNow(),
+
+  // Settlement Stats
+  totalEarnings: doublePrecision("total_earnings").default(0),
+  paidAmount: doublePrecision("paid_amount").default(0),
+  pendingBalance: doublePrecision("pending_balance").default(0),
+});
+
+// HM Snacks - Vendor Payouts
+export const vendorPayouts = pgTable("vendor_payouts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  vendorId: uuid("vendor_id").notNull(),
+  amount: doublePrecision("amount").notNull(),
+  paymentId: text("payment_id"), // UTR or Reference
+  method: text("method").default("UPI"),
+  status: text("status").default("Completed"), // Completed, Pending
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // HM Snacks - Order Shipments (For Split Orders)

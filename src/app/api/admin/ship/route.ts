@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { snackOrders } from "@/db/schema";
+import { snackOrders, orderShipments, vendors } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createShiprocketOrder, generateAWB } from "@/lib/shiprocket";
 
 export async function POST(req: NextRequest) {
     try {
-        const { orderId } = await req.json();
+        const { orderId, shipmentId } = await req.json();
 
         if (!orderId) {
             return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
@@ -21,24 +21,54 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
         }
 
-        if (order.shiprocketOrderId) {
-            return NextResponse.json({ error: "Order already shipped via Shiprocket" }, { status: 400 });
+        let itemsToShip = order.items as any[];
+        let pickupLocation = "Home";
+        let isSplitShipment = false;
+
+        // 2. logic for Split Shipment
+        if (shipmentId) {
+            const [shipment] = await db
+                .select()
+                .from(orderShipments)
+                .where(eq(orderShipments.id, shipmentId));
+
+            if (!shipment) {
+                return NextResponse.json({ error: "Shipment not found" }, { status: 404 });
+            }
+
+            if (shipment.shiprocketOrderId) {
+                return NextResponse.json({ error: "Shipment already shipped" }, { status: 400 });
+            }
+
+            itemsToShip = shipment.items as any[];
+            isSplitShipment = true;
+
+            if (shipment.vendorId) {
+                const [vendor] = await db
+                    .select()
+                    .from(vendors)
+                    .where(eq(vendors.id, shipment.vendorId));
+
+                if (vendor && vendor.pickupLocationId) {
+                    pickupLocation = vendor.pickupLocationId;
+                }
+            }
+        } else {
+            // Legacy / Full Order Check
+            if (order.shiprocketOrderId) {
+                return NextResponse.json({ error: "Order already shipped via Shiprocket" }, { status: 400 });
+            }
         }
 
-        // 2. Prepare Shiprocket Payload
-        const itemsRaw = order.items;
-        if (!Array.isArray(itemsRaw)) {
-            return NextResponse.json({ error: "Order items data is invalid or missing" }, { status: 400 });
+        if (!Array.isArray(itemsToShip)) {
+            return NextResponse.json({ error: "Items data is invalid" }, { status: 400 });
         }
 
         const orderDate = order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] + ' 10:00' : new Date().toISOString().split('T')[0] + ' 10:00';
 
-        const orderItems = (itemsRaw as any[]).map(item => {
+        const orderItems = itemsToShip.map(item => {
             const isPcs = (item.unit === "Pcs" || item.unit === "Piece");
             const units = isPcs ? Math.max(1, Math.floor(Number(item.quantity) || 1)) : 1;
-
-            // If it's Kg, we treat as 1 unit of that total weight/price line
-            // If it's Pcs, selling_price is price per piece, and units is quantity.
             const selling_price = isPcs
                 ? (Number(item.price) || 0)
                 : (Number(item.price || item.pricePerKg) || 0) * (Number(item.quantity) || 1);
@@ -47,36 +77,33 @@ export async function POST(req: NextRequest) {
                 name: item.name || "Product",
                 sku: String(item.id || item.name || Math.random()),
                 units: units,
-                selling_price: Math.round(selling_price * 100) / 100, // Keep 2 decimals
+                selling_price: Math.round(selling_price * 100) / 100,
                 discount: 0,
                 tax: 0,
                 hsn: 4412 // Dummy HSN
             };
         });
 
-        // Sanitize Phone Number: must be exactly 10 digits
         const cleanPhone = (order.customerMobile || "").replace(/\D/g, "");
         const sanitizedPhone = cleanPhone.length > 10 ? cleanPhone.slice(-10) : cleanPhone;
 
-        // Ensure Address is at least 10 chars for Shiprocket
         let sanitizedAddress = order.address || "Address missing";
         if (sanitizedAddress.length < 10) {
             sanitizedAddress = `${sanitizedAddress}, ${order.city || ""}, ${order.state || ""}`.slice(0, 100);
         }
 
-        // Calculate sub-total and total weight from items
         const calculatedSubTotal = orderItems.reduce((acc, item) => acc + (item.selling_price * item.units), 0);
-        const totalWeight = (order.items as any[]).reduce((acc, item) => acc + (Number(item.quantity) || 0.1), 0);
+        const totalWeight = itemsToShip.reduce((acc, item) => acc + (Number(item.quantity) || 0.1), 0);
 
-        // Append a random suffix to the order_id to ensure Shirocket accepts it as a NEW order
-        // even if it was previously cancelled and re-shipped.
         const uniqueOrderSuffix = Math.random().toString(36).substring(2, 5).toUpperCase();
-        const shiprocketUniqueOrderId = `${order.orderId}-${uniqueOrderSuffix}`;
+        // Use shipmentId if split, else orderId
+        const referenceId = isSplitShipment ? `${order.orderId}-S-${shipmentId.slice(0, 4)}` : order.orderId;
+        const shiprocketUniqueOrderId = `${referenceId}-${uniqueOrderSuffix}`;
 
         const payload = {
             order_id: shiprocketUniqueOrderId,
             order_date: orderDate,
-            pickup_location: "Home",
+            pickup_location: pickupLocation,
             billing_customer_name: (order.customerName || "Customer").split(" ")[0],
             billing_last_name: (order.customerName || "Customer").split(" ")[1] || "Surname",
             billing_address: sanitizedAddress,
@@ -89,51 +116,67 @@ export async function POST(req: NextRequest) {
             shipping_is_billing: true,
             order_items: orderItems,
             payment_method: "Prepaid",
-            shipping_charges: Number(order.shippingCost) || 0,
+            shipping_charges: 0, // Assume free shipping for split or handled at order level
             giftwrap_charges: 0,
             transaction_charges: 0,
-            total_discount: Number(order.discountAmount) || 0,
+            total_discount: 0,
             sub_total: calculatedSubTotal,
-            length: Number(calculatedSubTotal) > 2000 ? 25 : Number(calculatedSubTotal) > 1000 ? 20 : 15,
-            breadth: Number(calculatedSubTotal) > 1000 ? 20 : 15,
-            height: Number(calculatedSubTotal) > 1000 ? 15 : 10,
-            weight: totalWeight > 0 ? totalWeight : 0.5 // Use calculated weight or fallback
+            length: 15, breadth: 15, height: 10,
+            weight: totalWeight > 0 ? totalWeight : 0.5
         };
 
         // 3. Create Order in Shiprocket
-        let srOrderId, shipmentId;
+        let srOrderId, srShipmentId;
         try {
             const shipResponse = await createShiprocketOrder(payload);
             srOrderId = shipResponse.order_id;
-            shipmentId = shipResponse.shipment_id;
+            srShipmentId = shipResponse.shipment_id;
         } catch (e: any) {
             console.error("Shiprocket Create Order API Failed:", e);
             return NextResponse.json({
                 error: `Shiprocket Error: ${e.message}`,
-                details: "Check if 'Primary' pickup location is configured in Shiprocket."
-            }, { status: 400 }); // Return 400 with details instead of 500
+                details: "Check if pickup location is configured in Shiprocket."
+            }, { status: 400 });
         }
 
         // 4. Generate AWB
         let awb = null;
         try {
-            const awbResponse = await generateAWB(shipmentId);
+            const awbResponse = await generateAWB(srShipmentId);
             awb = awbResponse.response?.data?.awb_code || null;
         } catch (e) {
             console.error("AWB Generation warning:", e);
         }
 
         // 5. Update Database
-        await db.update(snackOrders)
-            .set({
-                shiprocketOrderId: String(srOrderId),
-                shipmentId: String(shipmentId),
-                awbCode: awb,
-                courierName: "Shiprocket",
-                status: "Shipping",
-                updatedAt: new Date()
-            })
-            .where(eq(snackOrders.id, orderId));
+        if (isSplitShipment && shipmentId) {
+            await db.update(orderShipments)
+                .set({
+                    shiprocketOrderId: String(srOrderId),
+                    awbCode: awb,
+                    courierName: "Shiprocket",
+                    status: "Shipping",
+                })
+                .where(eq(orderShipments.id, shipmentId));
+
+            // Check if all shipments are shipped to update main order status
+            // (Simplified: Just mark main order as Shipping if at least one is shipped?)
+            // Or leave main order status as "Payment Confirmed" but show individual statuses.
+            // Let's set main order to "Shipping" so user knows something happened.
+            await db.update(snackOrders).set({ status: "Shipping" }).where(eq(snackOrders.id, orderId));
+
+        } else {
+            await db.update(snackOrders)
+                .set({
+                    shiprocketOrderId: String(srOrderId),
+                    shipmentId: String(srShipmentId),
+                    awbCode: awb,
+                    courierName: "Shiprocket",
+                    status: "Shipping",
+                    updatedAt: new Date()
+                })
+                .where(eq(snackOrders.id, orderId));
+        }
 
         return NextResponse.json({ success: true, shiprocketOrderId: srOrderId, awb });
 

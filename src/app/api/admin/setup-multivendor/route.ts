@@ -46,6 +46,36 @@ export async function GET() {
             );
         `);
 
+        // 4. Update Vendors Table with Settlement Stats
+        await db.execute(sql`
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vendors' AND column_name='total_earnings') THEN 
+                    ALTER TABLE vendors ADD COLUMN total_earnings DOUBLE PRECISION DEFAULT 0;
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vendors' AND column_name='paid_amount') THEN 
+                    ALTER TABLE vendors ADD COLUMN paid_amount DOUBLE PRECISION DEFAULT 0;
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vendors' AND column_name='pending_balance') THEN 
+                    ALTER TABLE vendors ADD COLUMN pending_balance DOUBLE PRECISION DEFAULT 0;
+                END IF;
+            END $$;
+        `);
+
+        // 5. Create Vendor Payouts Table
+        await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS vendor_payouts (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                vendor_id UUID NOT NULL REFERENCES vendors(id),
+                amount DOUBLE PRECISION NOT NULL,
+                payment_id TEXT,
+                method TEXT DEFAULT 'UPI',
+                status TEXT DEFAULT 'Completed',
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT NOW()
+            );
+        `);
+
         return NextResponse.json({ success: true, message: "Multi-Vendor Tables Setup Complete" });
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });

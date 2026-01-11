@@ -25,7 +25,8 @@ import {
     ShoppingCart,
     Users,
     DollarSign,
-    Building
+    Building,
+    Banknote
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -44,9 +45,11 @@ import AffiliatesModule from "@/components/admin/AffiliatesModule";
 import AffiliatePayoutsModule from "@/components/admin/AffiliatePayoutsModule";
 import VendorsModule from "@/components/admin/VendorsModule";
 import VendorProductAssignmentModule from "@/components/admin/VendorProductAssignmentModule";
+import VendorSettlementsModule from "@/components/admin/VendorSettlementsModule";
 
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts" | "affiliates" | "affiliate-payouts" | "manage-vendors" | "manage-products";
+
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts" | "affiliates" | "affiliate-payouts" | "manage-vendors" | "manage-products" | "vendor-settlements";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -61,7 +64,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "reviews", "abandoned-carts", "affiliates", "manage-vendors", "manage-products"];
+        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "reviews", "abandoned-carts", "affiliates", "affiliate-payouts", "manage-vendors", "manage-products", "vendor-settlements"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -126,6 +129,7 @@ export default function AdminDashboard() {
         { id: "abandoned-carts", title: "Drop Offs", icon: ShoppingCart, color: "bg-rose-500", badge: abandonedCartsCount },
         { id: "manage-vendors", title: "Manage Vendors", icon: Building, color: "bg-teal-600" },
         { id: "manage-products", title: "Product Assignment", icon: Package, color: "bg-teal-500" },
+        { id: "vendor-settlements", title: "Vendor Settlements", icon: Banknote, color: "bg-pink-500" },
         { id: "affiliates", title: "Affiliates", icon: Users, color: "bg-orange-600" },
         { id: "affiliate-payouts", title: "Partner Payments", icon: DollarSign, color: "bg-emerald-600" },
     ];
@@ -147,6 +151,7 @@ export default function AdminDashboard() {
             case "affiliate-payouts": return <AffiliatePayoutsModule />;
             case "manage-vendors": return <VendorsModule />;
             case "manage-products": return <VendorProductAssignmentModule />;
+            case "vendor-settlements": return <VendorSettlementsModule />;
             default: return <OverviewModule />;
         }
     };

@@ -457,7 +457,7 @@ export default function SnacksOrdersModule() {
         setCancelReason("");
     };
 
-    const handleShipRocket = async () => {
+    const handleShipRocket = async (shipmentId?: string) => {
         if (!selectedOrder) return;
         if (!confirm("Create Shiprocket Order & AWB? This will book the shipment.")) return;
 
@@ -465,7 +465,10 @@ export default function SnacksOrdersModule() {
             const res = await fetch("/api/admin/ship", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId: selectedOrder.id }),
+                body: JSON.stringify({
+                    orderId: selectedOrder.id,
+                    shipmentId: shipmentId
+                }),
             });
             const data = await res.json();
 
@@ -479,6 +482,25 @@ export default function SnacksOrdersModule() {
         } catch (error) {
             console.error(error);
             alert("Network Error");
+        }
+    };
+
+    const handleUpdateShipmentStatus = async (shipmentId: string, newStatus: string) => {
+        try {
+            const res = await fetch(`/api/admin/shipments/${shipmentId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: newStatus }),
+            });
+
+            if (res.ok) {
+                if (selectedOrder) fetchOrderDetails(selectedOrder.id);
+                fetchOrders();
+            } else {
+                alert("Failed to update shipment status");
+            }
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -546,10 +568,8 @@ export default function SnacksOrdersModule() {
     const exportToCSV = () => {
         if (orders.length === 0) return;
 
-        // Header
         const headers = ["Order ID", "Date", "Customer Name", "Mobile", "Amount (Total)", "Base Price (95%)", "GST (5%)", "Status", "Items"];
 
-        // Data
         const rows = orders.map(order => {
             const total = parseFloat(order.totalAmount || 0);
             const gst = (total * 5) / 105;
@@ -592,6 +612,30 @@ export default function SnacksOrdersModule() {
             default: return "bg-gray-50 text-gray-600";
         }
     };
+
+    // Helper to render items list
+    const renderItemsRaw = (items: any[]) => (
+        <div className="grid gap-4">
+            {items.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-6 p-4 bg-white border border-gray-100 rounded-3xl hover:shadow-xl transition-all">
+                    <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-gray-50 flex-shrink-0">
+                        {item.imageUrl ? (
+                            <Image src={item.imageUrl} alt={item.name} fill className="object-cover" unoptimized />
+                        ) : (
+                            <Package size={24} className="m-auto text-gray-200" />
+                        )}
+                    </div>
+                    <div className="flex-grow">
+                        <h5 className="font-black text-gray-900">{item.name}</h5>
+                        <p className="text-xs font-bold text-gray-400">Qty: {item.quantity} {item.unit || 'Kg'}</p>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-lg font-black text-gray-900 italic">₹{Math.ceil((item.price || item.pricePerKg) * item.quantity)}</span>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 
     return (
         <div className="space-y-8">
@@ -813,97 +857,138 @@ export default function SnacksOrdersModule() {
 
                                 {/* Logistics / Payment */}
                                 <div className="space-y-8">
-                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 w-fit px-4 py-1.5 rounded-full">Logistics & Payments</h4>
-                                    <div className="p-5 md:p-8 bg-gray-50 rounded-[1.5rem] md:rounded-[2rem] space-y-5 md:space-y-6">
-                                        <div className="flex justify-between items-center gap-4">
-                                            <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Payment (UTR)</span>
-                                            <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight truncate">{selectedOrder.paymentId || "PENDING"}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center gap-4">
-                                            <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Courier</span>
-                                            <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight truncate">{selectedOrder.courierName || "UNASSIGNED"}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center gap-4">
-                                            <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Tracking Info</span>
-                                            <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight font-mono truncate">{selectedOrder.shipmentId || "UNASSIGNED"}</span>
-                                        </div>
-                                        {selectedOrder.status === "Cancel" && (
-                                            <div className="pt-4 border-t border-rose-100">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 block mb-1">Cancellation Reason</span>
-                                                <p className="text-xs font-bold text-gray-600 bg-rose-50 p-3 rounded-xl border border-rose-100">{selectedOrder.cancelReason || "No reason provided."}</p>
-                                            </div>
-                                        )}
+                                    {(selectedOrder.shipments && selectedOrder.shipments.length > 0) ? (
+                                        <>
+                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 w-fit px-4 py-1.5 rounded-full">Shipments (Split Order)</h4>
 
-                                        {/* Shiprocket Section */}
-                                        {selectedOrder.shiprocketOrderId ? (
-                                            <div className="pt-4 border-t border-indigo-100">
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Shiprocket Order</span>
-                                                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shadow-sm">{selectedOrder.shiprocketOrderId}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center mb-4">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">AWB Code</span>
-                                                    <span className="text-xs font-black text-gray-900 font-mono tracking-tight">{selectedOrder.awbCode || "Generating..."}</span>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleResetShipment()}
-                                                    className="w-full py-2 bg-gray-100 text-gray-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center gap-2 border border-gray-200"
-                                                >
-                                                    <X size={14} /> Reset Shipment Data
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            selectedOrder.status === "Payment Confirmed" && (
-                                                <div className="pt-4 border-t border-gray-100">
-                                                    <button
-                                                        onClick={() => handleShipRocket()}
-                                                        className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
-                                                    >
-                                                        <Truck size={16} /> Ship with Shiprocket
-                                                    </button>
-                                                </div>
-                                            )
-                                        )}
-                                        <div className="pt-6 border-t border-gray-200">
-                                            <div className="flex justify-between items-end">
-                                                <div className="flex flex-col">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Revenue</span>
-                                                    <span className="text-4xl font-black text-gray-900 italic">₹{selectedOrder.totalAmount}</span>
-                                                </div>
-                                                <div className="text-right">
-                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Method</span>
-                                                    <p className="text-sm font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-lg">{selectedOrder.paymentMethod || "UPI"}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                            {selectedOrder.shipments.map((shipment: any, idx: number) => (
+                                                <div key={shipment.id || idx} className="p-6 md:p-8 bg-gray-50 rounded-[2rem] space-y-6 border-2 border-dashed border-gray-200">
 
-                            {/* Order Items */}
-                            <div className="space-y-6">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Items Purchased</h4>
-                                <div className="grid gap-4">
-                                    {(selectedOrder.items as any[]).map((item, idx) => (
-                                        <div key={idx} className="flex items-center gap-6 p-4 bg-white border border-gray-100 rounded-3xl hover:shadow-xl transition-all">
-                                            <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-gray-50 flex-shrink-0">
-                                                {item.imageUrl ? (
-                                                    <Image src={item.imageUrl} alt={item.name} fill className="object-cover" unoptimized />
+                                                    {/* Shipment Header */}
+                                                    <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Vendor</span>
+                                                            <span className="text-lg font-black text-gray-900">{shipment.vendorName || "Active Business (Admin)"}</span>
+                                                        </div>
+                                                        <select
+                                                            value={shipment.status}
+                                                            onChange={(e) => handleUpdateShipmentStatus(shipment.id, e.target.value)}
+                                                            className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-0 focus:ring-2 focus:ring-indigo-500 cursor-pointer ${getStatusColor(shipment.status)}`}
+                                                        >
+                                                            {STATUSES.filter(s => s !== "All" && s !== "Shadow").map(s => (
+                                                                <option key={s} value={s}>{s}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+
+                                                    {/* Items in this shipment */}
+                                                    <div>
+                                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Items</span>
+                                                        {renderItemsRaw(shipment.items)}
+                                                    </div>
+
+                                                    {/* Actions for this shipment */}
+                                                    <div className="pt-4">
+                                                        {shipment.shiprocketOrderId ? (
+                                                            <div className="bg-white p-4 rounded-xl border border-indigo-100 flex justify-between items-center">
+                                                                <div>
+                                                                    <div className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Shipped</div>
+                                                                    <div className="text-xs font-bold text-gray-900">AWB: {shipment.awbCode}</div>
+                                                                </div>
+                                                                {/* Optional Reset Button for Shipment could go here */}
+                                                            </div>
+                                                        ) : (
+                                                            (shipment.status === "Pending" || selectedOrder.status === "Payment Confirmed") && (
+                                                                <button
+                                                                    onClick={() => handleShipRocket(shipment.id)}
+                                                                    className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                                                                >
+                                                                    <Truck size={16} /> Ship This Package
+                                                                </button>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {/* Order Totals Summary */}
+                                            <div className="p-5 bg-gray-900 text-white rounded-3xl flex justify-between items-center">
+                                                <span className="font-bold uppercase tracking-widest text-xs">Total Order Value</span>
+                                                <span className="font-black text-3xl">₹{selectedOrder.totalAmount}</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 w-fit px-4 py-1.5 rounded-full">Logistics & Payments</h4>
+                                            <div className="p-5 md:p-8 bg-gray-50 rounded-[1.5rem] md:rounded-[2rem] space-y-5 md:space-y-6">
+                                                <div className="flex justify-between items-center gap-4">
+                                                    <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Payment (UTR)</span>
+                                                    <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight truncate">{selectedOrder.paymentId || "PENDING"}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center gap-4">
+                                                    <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Courier</span>
+                                                    <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight truncate">{selectedOrder.courierName || "UNASSIGNED"}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center gap-4">
+                                                    <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Tracking Info</span>
+                                                    <span className="text-[10px] md:text-xs font-black text-gray-900 tracking-tight font-mono truncate">{selectedOrder.shipmentId || "UNASSIGNED"}</span>
+                                                </div>
+
+                                                {/* Shiprocket Section for Legacy */}
+                                                {selectedOrder.shiprocketOrderId ? (
+                                                    <div className="pt-4 border-t border-indigo-100">
+                                                        <div className="flex justify-between items-center mb-2">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Shiprocket Order</span>
+                                                            <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded shadow-sm">{selectedOrder.shiprocketOrderId}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center mb-4">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">AWB Code</span>
+                                                            <span className="text-xs font-black text-gray-900 font-mono tracking-tight">{selectedOrder.awbCode || "Generating..."}</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleResetShipment()}
+                                                            className="w-full py-2 bg-gray-100 text-gray-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center gap-2 border border-gray-200"
+                                                        >
+                                                            <X size={14} /> Reset Shipment Data
+                                                        </button>
+                                                    </div>
                                                 ) : (
-                                                    <Package size={24} className="m-auto text-gray-200" />
+                                                    selectedOrder.status === "Payment Confirmed" && (
+                                                        <div className="pt-4 border-t border-gray-100">
+                                                            <button
+                                                                onClick={() => handleShipRocket()}
+                                                                className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                                                            >
+                                                                <Truck size={16} /> Ship with Shiprocket
+                                                            </button>
+                                                        </div>
+                                                    )
                                                 )}
+                                                <div className="pt-6 border-t border-gray-200">
+                                                    <div className="flex justify-between items-end">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Revenue</span>
+                                                            <span className="text-4xl font-black text-gray-900 italic">₹{selectedOrder.totalAmount}</span>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Method</span>
+                                                            <p className="text-sm font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-lg">{selectedOrder.paymentMethod || "UPI"}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="flex-grow">
-                                                <h5 className="font-black text-gray-900">{item.name}</h5>
-                                                <p className="text-xs font-bold text-gray-400">Qty: {item.quantity} {item.unit || 'Kg'}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="text-lg font-black text-gray-900 italic">₹{Math.ceil((item.price || item.pricePerKg) * item.quantity)}</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        </>
+                                    )}
                                 </div>
                             </div>
+
+                            {/* Order Items (Only show here if NOT split, or show ALL as summary?) - Legacy shows all here */}
+                            {!(selectedOrder.shipments && selectedOrder.shipments.length > 0) && (
+                                <div className="space-y-6">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Items Purchased</h4>
+                                    {renderItemsRaw(selectedOrder.items)}
+                                </div>
+                            )}
                         </div>
 
                         {/* Modal Footer - Status Actions */}
@@ -1198,49 +1283,14 @@ export default function SnacksOrdersModule() {
                                             ) : (
                                                 <button
                                                     onClick={handleApplyCoupon}
-                                                    disabled={validatingCoupon || !couponCode}
-                                                    className="bg-pink-500 text-white px-3 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-pink-600 disabled:opacity-50"
+                                                    disabled={!couponCode || validatingCoupon}
+                                                    className="bg-emerald-500 text-white px-3 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 disabled:opacity-50"
                                                 >
                                                     {validatingCoupon ? "..." : "Apply"}
                                                 </button>
                                             )}
                                         </div>
-                                        {couponError && <p className="text-[10px] text-rose-400 font-bold">{couponError}</p>}
-                                        {appliedCoupon && <p className="text-[10px] text-emerald-400 font-bold">Coupon Applied!</p>}
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2 mb-1 block">Payment Method</label>
-                                            <select
-                                                value={createFormData.paymentMethod}
-                                                onChange={e => setCreateFormData(prev => ({ ...prev, paymentMethod: e.target.value }))}
-                                                className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
-                                            >
-                                                <option value="UPI">UPI</option>
-                                                <option value="Cash">Cash</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2 mb-1 block">Initial Status</label>
-                                            <select
-                                                value={createFormData.status}
-                                                onChange={e => setCreateFormData(prev => ({ ...prev, status: e.target.value }))}
-                                                className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
-                                            >
-                                                <option value="Pending Verification">Pending Verification</option>
-                                                <option value="Payment Confirmed">Payment Confirmed</option>
-                                                <option value="Delivered">Delivered</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2 mb-1 block">Payment ID / UTR (Optional)</label>
-                                        <input
-                                            placeholder="e.g. 12928383828"
-                                            value={createFormData.utr}
-                                            onChange={e => setCreateFormData(prev => ({ ...prev, utr: e.target.value }))}
-                                            className="w-full bg-gray-50 border-0 rounded-xl p-3 font-bold text-sm"
-                                        />
+                                        {couponError && <p className="text-red-400 text-[10px] font-bold mt-1">{couponError}</p>}
                                     </div>
                                     <div className="flex items-center gap-2 pt-2">
                                         <input
@@ -1271,3 +1321,6 @@ export default function SnacksOrdersModule() {
         </div >
     );
 }
+
+
+

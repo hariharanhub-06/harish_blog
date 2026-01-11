@@ -1,0 +1,10 @@
+--- VENDORS ---
+Kannama Food : d7e99e8d-6c05-45df-ab1d-7055bb87ff39
+HM Snacks : 1d29f24b-8da0-4215-9d3f-aa2a9e739ff2
+
+--- PRODUCTS ---
+INIPPU SEVVU (ef72c061-7c42-40a8-9cb1-bfa07de50a38) -> Vendor: d7e99e8d-6c05-45df-ab1d-7055bb87ff39
+KAARA SEVVU (199d174d-c286-410d-8eeb-492d88ca0c9e) -> Vendor: 1d29f24b-8da0-4215-9d3f-aa2a9e739ff2
+
+--- AFFILIATE ---
+Found: undefined (ID: 3a3eb4be-25cb-40ce-8040-fb82a5725218) Code: HMS63294

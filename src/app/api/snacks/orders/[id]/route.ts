@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { snackOrders } from "@/db/schema";
+import { snackOrders, orderShipments, vendors } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(
@@ -19,7 +19,24 @@ export async function GET(
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
         }
 
-        return NextResponse.json(order);
+        // Fetch associated shipments (Split Orders)
+        const shipments = await db
+            .select({
+                id: orderShipments.id,
+                vendorId: orderShipments.vendorId,
+                items: orderShipments.items,
+                status: orderShipments.status,
+                vendorName: vendors.name,
+                awbCode: orderShipments.awbCode,
+                courierName: orderShipments.courierName,
+                trackingUrl: orderShipments.trackingUrl,
+                shiprocketOrderId: orderShipments.shiprocketOrderId,
+            })
+            .from(orderShipments)
+            .leftJoin(vendors, eq(orderShipments.vendorId, vendors.id))
+            .where(eq(orderShipments.orderId, order.orderId));
+
+        return NextResponse.json({ ...order, shipments });
     } catch (error) {
         console.error("Fetch order detail error:", error);
         return NextResponse.json({ error: "Failed to fetch order detail" }, { status: 500 });

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/db";
-import { snackOrders } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { snackOrders, snackProducts, orderShipments } from "@/db/schema";
+import { eq, inArray } from "drizzle-orm";
 import { sendWhatsAppAlert } from "@/lib/whatsapp-twilio";
 
 export async function POST(req: NextRequest) {
@@ -25,12 +25,73 @@ export async function POST(req: NextRequest) {
                 })
                 .where(eq(snackOrders.orderId, db_order_id));
 
-            // Fetch full order details for the alert
+            // Fetch full order details for the alert & split shipping
             const order = await db.query.snackOrders.findFirst({
                 where: eq(snackOrders.orderId, db_order_id),
             });
 
             if (order) {
+                // --- SPLIT SHIPPING LOGIC START ---
+                try {
+                    const orderItems = (order.items as any[]) || [];
+                    const productIds = orderItems.map((i) => i.id);
+
+                    if (productIds.length > 0) {
+                        const products = await db
+                            .select({ id: snackProducts.id, vendorId: snackProducts.vendorId })
+                            .from(snackProducts)
+                            .where(inArray(snackProducts.id, productIds));
+
+                        const vendorMap = new Map();
+                        products.forEach((p) => vendorMap.set(p.id, p.vendorId));
+
+                        const shipments = new Map<string, any[]>(); // vendorId -> items
+                        const noVendorItems: any[] = [];
+
+                        orderItems.forEach((item) => {
+                            const vId = vendorMap.get(item.id);
+                            if (vId) {
+                                if (!shipments.has(vId)) shipments.set(vId, []);
+                                shipments.get(vId)?.push(item);
+                            } else {
+                                noVendorItems.push(item);
+                            }
+                        });
+
+                        const shipmentPromises = [];
+
+                        // Create shipments for vendor items
+                        for (const [vendorId, items] of shipments.entries()) {
+                            shipmentPromises.push(
+                                db.insert(orderShipments).values({
+                                    orderId: db_order_id,
+                                    vendorId: vendorId,
+                                    items: items,
+                                    status: "Pending",
+                                })
+                            );
+                        }
+
+                        // Create shipment for own fulfillment (no vendor)
+                        if (noVendorItems.length > 0) {
+                            shipmentPromises.push(
+                                db.insert(orderShipments).values({
+                                    orderId: db_order_id,
+                                    vendorId: null, // Internal
+                                    items: noVendorItems,
+                                    status: "Pending",
+                                })
+                            );
+                        }
+
+                        await Promise.all(shipmentPromises);
+                    }
+                } catch (splitError) {
+                    console.error("Split Shipping Error for Order:", db_order_id, splitError);
+                    // Don't block the main flow, just log it
+                }
+                // --- SPLIT SHIPPING LOGIC END ---
+
                 try {
                     const itemsList = (order.items as any[]).map((item: any) => `- ${item.name} (${item.quantity}${item.unit})`).join('\n');
                     const adminMessage = `🛍️ *Razorpay Order Confirmed!* \n\n*ID:* \`${db_order_id}\`\n*Customer:* ${order.customerName}\n*Total:* ₹${order.totalAmount}\n\n*Items:*\n${itemsList}`;
