@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { orderShipments, vendors } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { orderShipments, vendors, snackProducts } from "@/db/schema";
+import { eq, sql, inArray } from "drizzle-orm";
 
 export async function PATCH(
     req: NextRequest,
@@ -24,17 +24,51 @@ export async function PATCH(
             .where(eq(orderShipments.id, id))
             .returning();
 
-        // 3. If transitioning to Delivered, update Vendor Earnings
-        if (status === "Delivered" && oldStatus !== "Delivered") {
-            // Calculate total items value in this shipment
+        // 3. Handle Vendor Earnings Logic
+        if (updatedShipment.vendorId) {
             const items = updatedShipment.items as any[];
-            const shipmentValue = items.reduce((acc, item) => acc + (Number(item.price) * (Number(item.quantity) || 1)), 0);
+            // Fetch product costs
+            const productIds = items.map(i => i.productId || i.id).filter(Boolean);
+            let productMap = new Map();
 
-            if (updatedShipment.vendorId) {
+            if (productIds.length > 0) {
+                const products = await db.select().from(snackProducts).where(inArray(snackProducts.id, productIds));
+                productMap = new Map(products.map(p => [p.id, p]));
+            }
+
+            // Calculate Value: Product Cost + 30% of Packaging Cost
+            const shipmentValue = items.reduce((acc, item) => {
+                const product = productMap.get(item.productId || item.id);
+                if (!product) return acc;
+
+                const cost = Number(product.productCost || 0);
+                const packaging = Number(product.packagingCost || 0);
+                const quantity = Number(item.quantity) || 1;
+
+                // Formula: (Cost + (Packaging * 0.3)) * Qty
+                // OR: (Cost * Qty) + (Packaging * 0.3 * Qty) ?? 
+                // Creating a per-unit cost:
+                const perUnitEarnings = cost + (packaging * 0.30);
+
+                return acc + (perUnitEarnings * quantity);
+            }, 0);
+
+            // A. Delivered: Credit Earnings
+            if (status === "Delivered" && oldStatus !== "Delivered") {
                 await db.update(vendors)
                     .set({
                         totalEarnings: sql`${vendors.totalEarnings} + ${shipmentValue}`,
                         pendingBalance: sql`${vendors.pendingBalance} + ${shipmentValue}`,
+                    })
+                    .where(eq(vendors.id, updatedShipment.vendorId));
+            }
+
+            // B. Revert: If it WAS Delivered, and now it's NOT (e.g. Cancelled, Returned, or Status Change mistake)
+            if (oldStatus === "Delivered" && status !== "Delivered") {
+                await db.update(vendors)
+                    .set({
+                        totalEarnings: sql`${vendors.totalEarnings} - ${shipmentValue}`,
+                        pendingBalance: sql`${vendors.pendingBalance} - ${shipmentValue}`,
                     })
                     .where(eq(vendors.id, updatedShipment.vendorId));
             }
