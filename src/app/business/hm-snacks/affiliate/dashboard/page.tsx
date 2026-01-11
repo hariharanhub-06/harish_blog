@@ -516,11 +516,11 @@ export default function AffiliateDashboard() {
                                                             <div key={product.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between group hover:border-orange-200 transition-all">
                                                                 <div className="min-w-0">
                                                                     <p className="font-black text-gray-900 truncate">{product.name}</p>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <p className="text-[10px] uppercase font-black text-gray-400">{product.category}</p>
-                                                                        <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                                                                        <p className="text-[10px] uppercase font-black text-orange-600">
-                                                                            Earn: ₹{(() => {
+                                                                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                                                        <p className="text-[10px] uppercase font-black text-gray-400 whitespace-nowrap">{product.category}</p>
+                                                                        <span className="w-1 h-1 bg-gray-300 rounded-full shrink-0" />
+                                                                        <div className="text-[10px] uppercase font-black text-orange-600 flex items-center gap-1 whitespace-nowrap">
+                                                                            <span>Earn: ₹{(() => {
                                                                                 const price = isKg
                                                                                     ? (product.offerPricePerKg || product.pricePerKg || 0)
                                                                                     : (product.offerPricePerPiece || product.pricePerPiece || 0);
@@ -530,17 +530,17 @@ export default function AffiliateDashboard() {
                                                                                 const earn = pool * ((stats?.commissionRate || 10) / 100);
                                                                                 const earnVal = earn % 1 === 0 ? earn : earn.toFixed(2);
                                                                                 return (
-                                                                                    <span className="flex items-center gap-1">
+                                                                                    <span className="inline-flex items-center gap-1">
                                                                                         {earnVal}
                                                                                         {profit === 0 && (
-                                                                                            <span className="text-[8px] text-gray-400 font-normal normal-case ml-1">
+                                                                                            <span className="text-[7px] text-gray-400 font-normal normal-case opacity-60">
                                                                                                 (P:₹{price} C:₹{totalCost})
                                                                                             </span>
                                                                                         )}
                                                                                     </span>
                                                                                 );
-                                                                            })()}/{isKg ? 'Kg' : 'Pc'}
-                                                                        </p>
+                                                                            })()}/{isKg ? 'Kg' : 'Pc'}</span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                                 <button
