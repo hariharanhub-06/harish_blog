@@ -14,7 +14,20 @@ const getCachedProducts = unstable_cache(
         }
 
         return await db
-            .select()
+            .select({
+                id: snackProducts.id,
+                name: snackProducts.name,
+                category: snackProducts.category,
+                imageUrl: snackProducts.imageUrl,
+                pricePerKg: snackProducts.pricePerKg,
+                offerPricePerKg: snackProducts.offerPricePerKg,
+                pricePerPiece: snackProducts.pricePerPiece,
+                offerPricePerPiece: snackProducts.offerPricePerPiece,
+                stock: snackProducts.stock,
+                isActive: snackProducts.isActive,
+                createdAt: snackProducts.createdAt,
+                updatedAt: snackProducts.updatedAt,
+            })
             .from(snackProducts)
             .where(conditions.length > 0 ? and(...conditions) : undefined)
             .orderBy(desc(snackProducts.createdAt));

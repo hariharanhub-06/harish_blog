@@ -4,9 +4,14 @@ import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    const data = await db.query.experience.findMany({
-        orderBy: [desc(experience.order)],
-    });
+    const data = await db.select({
+        id: experience.id,
+        company: experience.company,
+        role: experience.role,
+        duration: experience.duration,
+        order: experience.order,
+        createdAt: experience.createdAt,
+    }).from(experience).orderBy(desc(experience.order));
     return NextResponse.json(data);
 }
 

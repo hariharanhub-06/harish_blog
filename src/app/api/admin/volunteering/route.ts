@@ -5,7 +5,13 @@ import { eq, asc } from "drizzle-orm";
 
 export async function GET() {
     try {
-        const data = await db.select().from(volunteering).orderBy(asc(volunteering.order));
+        const data = await db.select({
+            id: volunteering.id,
+            role: volunteering.role,
+            organization: volunteering.organization,
+            duration: volunteering.duration,
+            order: volunteering.order,
+        }).from(volunteering).orderBy(asc(volunteering.order));
         return NextResponse.json(data);
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });

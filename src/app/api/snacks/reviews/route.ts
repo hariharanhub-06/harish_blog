@@ -7,11 +7,23 @@ export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
         const productId = searchParams.get("productId");
+        const limit = parseInt(searchParams.get("limit") || "50");
+        const offset = parseInt(searchParams.get("offset") || "0");
+
+        const selectFields = {
+            id: snackReviews.id,
+            productId: snackReviews.productId,
+            customerName: snackReviews.customerName,
+            rating: snackReviews.rating,
+            comment: snackReviews.comment,
+            status: snackReviews.status,
+            createdAt: snackReviews.createdAt,
+        };
 
         let reviews;
         if (productId) {
             reviews = await db
-                .select()
+                .select(selectFields)
                 .from(snackReviews)
                 .where(
                     and(
@@ -19,13 +31,17 @@ export async function GET(req: NextRequest) {
                         eq(snackReviews.status, "Approved")
                     )
                 )
-                .orderBy(desc(snackReviews.createdAt));
+                .orderBy(desc(snackReviews.createdAt))
+                .limit(limit)
+                .offset(offset);
         } else {
             reviews = await db
-                .select()
+                .select(selectFields)
                 .from(snackReviews)
                 .where(eq(snackReviews.status, "Approved"))
-                .orderBy(desc(snackReviews.createdAt));
+                .orderBy(desc(snackReviews.createdAt))
+                .limit(limit)
+                .offset(offset);
         }
 
         return NextResponse.json(reviews);

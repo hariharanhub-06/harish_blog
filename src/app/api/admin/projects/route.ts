@@ -4,9 +4,18 @@ import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    const allProjects = await db.query.projects.findMany({
-        orderBy: [desc(projects.order), desc(projects.createdAt)],
-    });
+    const allProjects = await db.select({
+        id: projects.id,
+        title: projects.title,
+        thumbnail: projects.thumbnail,
+        technologies: projects.technologies,
+        liveUrl: projects.liveUrl,
+        repoUrl: projects.repoUrl,
+        category: projects.category,
+        featured: projects.featured,
+        order: projects.order,
+        createdAt: projects.createdAt,
+    }).from(projects).orderBy(desc(projects.order), desc(projects.createdAt));
     return NextResponse.json(allProjects);
 }
 
