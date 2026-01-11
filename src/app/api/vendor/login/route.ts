@@ -3,6 +3,10 @@ import { db } from "@/db";
 import { vendors } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
+
 export async function POST(req: NextRequest) {
     try {
         const { email, password } = await req.json();
@@ -17,9 +21,17 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
         }
 
-        // Return vendor info (frontend will store it)
+        // Generate JWT Token
+        const token = jwt.sign(
+            { id: vendor.id, email: vendor.email, type: 'vendor' },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        // Return vendor info and token
         return NextResponse.json({
             success: true,
+            token,
             vendor: {
                 id: vendor.id,
                 name: vendor.name,

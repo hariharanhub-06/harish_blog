@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
             paymentStatus: snackOrders.status,
         })
             .from(orderShipments)
-            .leftJoin(snackOrders, eq(orderShipments.orderId, snackOrders.id))
+            .leftJoin(snackOrders, eq(orderShipments.orderId, snackOrders.orderId))
             .where(eq(orderShipments.vendorId, vendorId))
             .orderBy(desc(orderShipments.createdAt));
 

@@ -13,7 +13,7 @@ interface Vendor {
 interface VendorAuthContextType {
     vendor: Vendor | null;
     loading: boolean;
-    login: (vendorData: Vendor) => void;
+    login: (vendorData: Vendor, token: string) => void;
     logout: () => void;
 }
 
@@ -38,20 +38,23 @@ export const VendorAuthProvider = ({ children }: { children: React.ReactNode }) 
             } catch (e) {
                 console.error("Invalid vendor session");
                 localStorage.removeItem("vendor_session");
+                localStorage.removeItem("vendor_token");
             }
         }
         setLoading(false);
     }, []);
 
-    const login = (vendorData: Vendor) => {
+    const login = (vendorData: Vendor, token: string) => {
         setVendor(vendorData);
         localStorage.setItem("vendor_session", JSON.stringify(vendorData));
+        localStorage.setItem("vendor_token", token);
         router.push("/business/hm-snacks/vendor/dashboard");
     };
 
     const logout = () => {
         setVendor(null);
         localStorage.removeItem("vendor_session");
+        localStorage.removeItem("vendor_token");
         router.push("/business/hm-snacks/vendor/login");
     };
 
