@@ -130,7 +130,11 @@ export async function POST(req: NextRequest) {
             // 3. Binary Placement Logic
             const { parentId, position } = await findBinaryPlacement(current.referrerId);
 
-            // 4. Update affiliate
+            // 4. Update affiliate (Safety check: parentId cannot be current id)
+            if (parentId === id) {
+                console.error(`Attempted to set self-reference for affiliate ${id}. Forcing parent to NULL.`);
+            }
+
             const [updated] = await db
                 .update(affiliates)
                 .set({
@@ -138,7 +142,7 @@ export async function POST(req: NextRequest) {
                     isActive: true,
                     couponCode: couponCode,
                     password: password,
-                    parentId: parentId,
+                    parentId: parentId === id ? null : parentId,
                     position: position,
                     approvedAt: new Date(),
                 })
