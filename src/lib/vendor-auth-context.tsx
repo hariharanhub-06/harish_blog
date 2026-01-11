@@ -32,7 +32,9 @@ export const VendorAuthProvider = ({ children }: { children: React.ReactNode }) 
     useEffect(() => {
         // Check localStorage on load
         const stored = localStorage.getItem("vendor_session");
-        if (stored) {
+        const token = localStorage.getItem("vendor_token");
+
+        if (stored && token) {
             try {
                 setVendor(JSON.parse(stored));
             } catch (e) {
@@ -40,6 +42,9 @@ export const VendorAuthProvider = ({ children }: { children: React.ReactNode }) 
                 localStorage.removeItem("vendor_session");
                 localStorage.removeItem("vendor_token");
             }
+        } else if (stored && !token) {
+            // Force clear if session exists but token is missing
+            localStorage.removeItem("vendor_session");
         }
         setLoading(false);
     }, []);

@@ -13,10 +13,12 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const token = authHeader.split(" ")[1];
+    console.log("Token:", token);
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET) as any;
         const vendorId = decoded.id;
+        console.log(`[VendorOrders] Fetching for vendorId: ${vendorId}`);
 
         // 2. Fetch Shipments
         const shipments = await db.select({
@@ -39,6 +41,7 @@ export async function GET(req: NextRequest) {
             .where(eq(orderShipments.vendorId, vendorId))
             .orderBy(desc(orderShipments.createdAt));
 
+        console.log(`[VendorOrders] Found ${shipments.length} shipments`);
         return NextResponse.json({ shipments });
 
     } catch (err) {
