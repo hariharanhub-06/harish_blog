@@ -340,9 +340,14 @@ export default function SnacksOrdersModule() {
 
         // Calculate Discount
         const discountAmount = appliedCoupon
-            ? (appliedCoupon.discountType === 'percentage'
-                ? Math.round(subtotal * (appliedCoupon.discountValue / 100))
-                : appliedCoupon.discountValue)
+            ? (appliedCoupon.type === 'affiliate'
+                ? createFormData.items.reduce((acc, item) => {
+                    const discountPercent = item.originalProduct?.affiliateDiscountPercent || 0;
+                    return acc + Math.round((item.price * item.quantity) * (discountPercent / 100));
+                }, 0)
+                : (appliedCoupon.discountType === 'percentage'
+                    ? Math.round(subtotal * (appliedCoupon.discountValue / 100))
+                    : appliedCoupon.discountValue))
             : 0;
 
         const total = subtotal - discountAmount + shipping;
