@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { orderShipments, snackOrders } from "@/db/schema";
+import { orderShipments, snackOrders, vendors } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 
@@ -41,8 +41,21 @@ export async function GET(req: NextRequest) {
             .where(eq(orderShipments.vendorId, vendorId))
             .orderBy(desc(orderShipments.createdAt));
 
+        // 3. Fetch Vendor Stats
+        const [vendorStats] = await db.select({
+            totalEarnings: vendors.totalEarnings,
+            paidAmount: vendors.paidAmount,
+            pendingBalance: vendors.pendingBalance
+        })
+            .from(vendors)
+            .where(eq(vendors.id, vendorId))
+            .limit(1);
+
         console.log(`[VendorOrders] Found ${shipments.length} shipments`);
-        return NextResponse.json({ shipments });
+        return NextResponse.json({
+            shipments,
+            stats: vendorStats || { totalEarnings: 0, paidAmount: 0, pendingBalance: 0 }
+        });
 
     } catch (err) {
         return NextResponse.json({ error: "Invalid Token" }, { status: 401 });
