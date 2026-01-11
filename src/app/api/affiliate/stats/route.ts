@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
             referrerId: affiliate.referrerId,
             position: affiliate.position,
             // Downline tree (simplified to level 2 for now)
-            downline: await getDownlineTree(affiliate.id)
+            downline: await getDownlineTree(affiliate.id, 0, new Set([affiliate.id]))
         });
 
     } catch (error) {
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
 }
 
 // Helper to get binary downline tree
-async function getDownlineTree(id: string, depth = 0) {
+async function getDownlineTree(id: string, depth = 0, visited = new Set<string>()) {
     if (depth > 2) return null; // Limit depth for initial load
 
     const children = await db
@@ -74,10 +74,19 @@ async function getDownlineTree(id: string, depth = 0) {
 
     const tree: any = { left: null, right: null };
     for (const child of children) {
+        // Prevent cycles
+        if (visited.has(child.id)) {
+            console.warn(`Cycle detected at affiliate: ${child.id}`);
+            continue;
+        }
+
+        const newVisited = new Set(visited);
+        newVisited.add(child.id);
+
         if (child.position === 'left') {
-            tree.left = { ...child, children: await getDownlineTree(child.id, depth + 1) };
+            tree.left = { ...child, children: await getDownlineTree(child.id, depth + 1, newVisited) };
         } else if (child.position === 'right') {
-            tree.right = { ...child, children: await getDownlineTree(child.id, depth + 1) };
+            tree.right = { ...child, children: await getDownlineTree(child.id, depth + 1, newVisited) };
         }
     }
     return tree;
