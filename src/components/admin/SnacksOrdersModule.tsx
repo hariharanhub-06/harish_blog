@@ -1005,7 +1005,7 @@ export default function SnacksOrdersModule() {
                                                                 </div>
                                                             ))}
                                                         </div>
-                                                        <button onClick={handleShipRocket} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
+                                                        <button onClick={() => handleShipRocket()} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
                                                             Generate Shipping Label
                                                         </button>
                                                     </div>
