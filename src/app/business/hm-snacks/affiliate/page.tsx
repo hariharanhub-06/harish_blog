@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import {
     UserPlus, Code, Share2, DollarSign, TrendingUp,
     CheckCircle, Gift, Award, Users, Smartphone, MessageCircle
@@ -116,12 +117,20 @@ export default function AffiliatePage() {
                         Promote HM Snacks and earn up to <span className="font-bold text-orange-600">20% commission</span> on every successful order.
                     </p>
 
-                    <button
-                        onClick={scrollToForm}
-                        className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-orange-500/50 transition-all hover:scale-105"
-                    >
-                        Join Now →
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button
+                            onClick={scrollToForm}
+                            className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-pink-500 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-orange-500/50 transition-all hover:scale-105"
+                        >
+                            Join Now →
+                        </button>
+                        <Link
+                            href="/business/hm-snacks/affiliate/login"
+                            className="w-full sm:w-auto bg-white text-gray-900 border-2 border-gray-100 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all hover:scale-105"
+                        >
+                            Partner Login
+                        </Link>
+                    </div>
                 </motion.div>
             </section>
 
