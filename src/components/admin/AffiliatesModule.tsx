@@ -5,7 +5,8 @@ import {
     Users, CheckCircle, XCircle, Clock,
     MessageCircle, TrendingUp, DollarSign,
     Copy, ExternalLink, RefreshCw, Trash2,
-    Package, Star, ShoppingBag, ShieldCheck, Save
+    Package, Star, ShoppingBag, ShieldCheck, Save,
+    Edit, GitBranch, Eye, ChevronRight, X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -44,6 +45,10 @@ export default function AffiliatesModule() {
     const [payoutRequests, setPayoutRequests] = useState<any[]>([]);
     const [config, setConfig] = useState<any>({ directSplit: 50, level1Split: 20, level2Split: 18, level3Split: 12 });
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [editingAffiliate, setEditingAffiliate] = useState<Affiliate | null>(null);
+    const [viewingTree, setViewingTree] = useState<string | null>(null);
+    const [treeData, setTreeData] = useState<any>(null);
+    const [treeLoading, setTreeLoading] = useState(false);
 
     const fetchAffiliates = async () => {
         setLoading(true);
@@ -190,6 +195,46 @@ export default function AffiliatesModule() {
             console.error("Error saving config", error);
         } finally {
             setUpdatingId(null);
+        }
+    };
+
+    const handleSaveProfile = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingAffiliate) return;
+        setUpdatingId(editingAffiliate.id);
+        try {
+            const res = await fetch("/api/admin/affiliates", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(editingAffiliate),
+            });
+
+            if (res.ok) {
+                await fetchAffiliates();
+                setEditingAffiliate(null);
+            } else {
+                alert("Failed to update profile");
+            }
+        } catch (error) {
+            console.error("Error saving profile", error);
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+    const fetchTree = async (id: string) => {
+        setTreeLoading(true);
+        try {
+            const res = await fetch(`/api/affiliate/stats?id=${id}`);
+            if (res.ok) {
+                const data = await res.json();
+                setTreeData(data);
+                setViewingTree(id);
+            }
+        } catch (err) {
+            console.error("Failed to fetch tree", err);
+        } finally {
+            setTreeLoading(false);
         }
     };
 
@@ -546,7 +591,15 @@ Start promoting and tracking your binary team growth today! 🚀
 
                                     {/* Stats */}
                                     {affiliate.status === "Approved" && (
-                                        <div className="flex gap-6 md:px-8 border-x border-gray-50">
+                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-8 md:px-8 border-y md:border-y-0 md:border-x border-gray-50 py-6 md:py-0 w-full md:w-auto">
+                                            <div className="text-center">
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Orders</p>
+                                                <p className="text-xl font-black text-gray-900">{affiliate.totalOrders || 0}</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Sales</p>
+                                                <p className="text-xl font-black text-blue-600">₹{affiliate.totalSalesAmount?.toFixed(0) || 0}</p>
+                                            </div>
                                             <div className="text-center">
                                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Direct</p>
                                                 <p className="text-xl font-black text-gray-900">₹{affiliate.directEarnings?.toFixed(0) || 0}</p>
@@ -557,7 +610,7 @@ Start promoting and tracking your binary team growth today! 🚀
                                                     ₹{(Number(affiliate.level1Earnings || 0) + Number(affiliate.level2Earnings || 0) + Number(affiliate.level3Earnings || 0)).toFixed(0)}
                                                 </p>
                                             </div>
-                                            <div className="text-center">
+                                            <div className="text-center col-span-2 md:col-span-1">
                                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Pending Payout</p>
                                                 <p className="text-xl font-black text-orange-500">₹{affiliate.pendingBalance?.toFixed(0) || 0}</p>
                                             </div>
@@ -565,56 +618,65 @@ Start promoting and tracking your binary team growth today! 🚀
                                     )}
 
                                     {/* Actions */}
-                                    <div className="flex flex-row md:flex-col gap-3">
+                                    <div className="flex flex-wrap md:flex-col gap-3 w-full md:w-auto">
                                         {affiliate.status === "Pending" ? (
                                             <>
                                                 <button
                                                     onClick={() => handleAction(affiliate.id, "approve")}
                                                     disabled={updatingId === affiliate.id}
-                                                    className="px-6 py-3 bg-emerald-500 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all disabled:opacity-50 shadow-lg shadow-emerald-200"
+                                                    className="flex-1 md:flex-none px-6 py-3 bg-emerald-500 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all disabled:opacity-50 shadow-lg shadow-emerald-200"
                                                 >
                                                     Approve
                                                 </button>
                                                 <button
                                                     onClick={() => handleAction(affiliate.id, "reject")}
                                                     disabled={updatingId === affiliate.id}
-                                                    className="px-6 py-3 bg-red-50 text-red-500 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-100 transition-all disabled:opacity-50"
+                                                    className="flex-1 md:flex-none px-6 py-3 bg-red-50 text-red-500 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-100 transition-all disabled:opacity-50"
                                                 >
                                                     Reject
                                                 </button>
                                             </>
                                         ) : (
-                                            <>
+                                            <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 w-full">
                                                 {affiliate.status === "Approved" && (
                                                     <>
+                                                        <button
+                                                            onClick={() => setEditingAffiliate(affiliate)}
+                                                            className="px-4 py-3 bg-gray-50 text-gray-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+                                                        >
+                                                            <Edit size={14} /> Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => fetchTree(affiliate.id)}
+                                                            className="px-4 py-3 bg-purple-50 text-purple-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-purple-100 transition-all flex items-center justify-center gap-2"
+                                                        >
+                                                            <GitBranch size={14} /> Tree
+                                                        </button>
                                                         <a
                                                             href={generateWhatsAppMessage(affiliate)}
                                                             target="_blank"
-                                                            className="px-6 py-3 bg-emerald-500 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-200"
+                                                            className="px-4 py-3 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-200"
                                                         >
-                                                            <MessageCircle size={16} />
-                                                            Notify
+                                                            <MessageCircle size={14} /> Notify
                                                         </a>
                                                         <button
                                                             onClick={() => handleUpdateStats(affiliate.id)}
                                                             disabled={updatingId === affiliate.id}
-                                                            className="px-6 py-3 bg-blue-50 text-blue-500 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-100 transition-all flex items-center justify-center gap-2"
+                                                            className="px-4 py-3 bg-blue-50 text-blue-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-100 transition-all flex items-center justify-center gap-2"
                                                             title="Recalculate Stats"
                                                         >
-                                                            <RefreshCw size={16} className={updatingId === affiliate.id ? "animate-spin" : ""} />
-                                                            Sync
+                                                            <RefreshCw size={14} className={updatingId === affiliate.id ? "animate-spin" : ""} /> Sync
                                                         </button>
                                                     </>
                                                 )}
                                                 <button
                                                     onClick={() => handleDelete(affiliate.id)}
                                                     disabled={updatingId === affiliate.id}
-                                                    className="px-6 py-3 bg-rose-50 text-rose-500 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-rose-100 transition-all flex items-center justify-center gap-2"
+                                                    className="px-4 py-3 bg-rose-50 text-rose-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-100 transition-all flex items-center justify-center gap-2"
                                                 >
-                                                    <Trash2 size={16} />
-                                                    Delete
+                                                    <Trash2 size={14} /> Delete
                                                 </button>
-                                            </>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -623,6 +685,181 @@ Start promoting and tracking your binary team growth today! 🚀
                     )}
                 </AnimatePresence>
             </div>
+
+            {/* Edit Modal */}
+            <AnimatePresence>
+                {editingAffiliate && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden"
+                        >
+                            <div className="p-8 md:p-10 border-b border-gray-100 flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-2xl font-black text-gray-900">Edit Partner Profile</h3>
+                                    <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Update basic info and credentials</p>
+                                </div>
+                                <button onClick={() => setEditingAffiliate(null)} className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 hover:text-red-500 transition-all">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleSaveProfile} className="p-8 md:p-10 space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Full Name</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            value={editingAffiliate.fullName}
+                                            onChange={(e) => setEditingAffiliate({ ...editingAffiliate, fullName: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile Number</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            value={editingAffiliate.mobile}
+                                            onChange={(e) => setEditingAffiliate({ ...editingAffiliate, mobile: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">UPI ID</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            value={editingAffiliate.upiId}
+                                            onChange={(e) => setEditingAffiliate({ ...editingAffiliate, upiId: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Login Password</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            value={editingAffiliate.password}
+                                            onChange={(e) => setEditingAffiliate({ ...editingAffiliate, password: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                        />
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Email Address</label>
+                                        <input
+                                            type="email"
+                                            value={editingAffiliate.email || ""}
+                                            onChange={(e) => setEditingAffiliate({ ...editingAffiliate, email: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Current Tier</label>
+                                        <select
+                                            value={editingAffiliate.currentTier}
+                                            onChange={(e) => setEditingAffiliate({ ...editingAffiliate, currentTier: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                                        >
+                                            {["Newbie", "Starter", "Silver", "Golden", "Platinum", "Pro", "Elite"].map(t => (
+                                                <option key={t} value={t}>{t}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button
+                                    disabled={updatingId === editingAffiliate.id}
+                                    className="w-full bg-gray-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-95 disabled:opacity-50"
+                                >
+                                    {updatingId === editingAffiliate.id ? <RefreshCw className="animate-spin" /> : <Save size={18} />}
+                                    Save Changes
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Tree Modal */}
+            <AnimatePresence>
+                {viewingTree && treeData && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white rounded-[3rem] shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden"
+                        >
+                            <div className="p-8 md:p-10 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <div>
+                                    <h3 className="text-2xl font-black text-gray-900">{treeData.fullName}'s Network</h3>
+                                    <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Binary Downline Visualization</p>
+                                </div>
+                                <button onClick={() => setViewingTree(null)} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-all border border-gray-100">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-auto p-12 bg-[#F9FBFF] scrollbar-hide">
+                                <div className="flex justify-center min-w-[800px]">
+                                    <div className="relative pt-12">
+                                        <AdminTreeNode name={treeData.fullName} isSelf />
+                                        <div className="flex justify-between w-[500px] mx-auto">
+                                            <div className="w-1/2 border-t-2 border-l-2 border-gray-200 h-10 rounded-tl-[1.5rem]" />
+                                            <div className="w-1/2 border-t-2 border-r-2 border-gray-200 h-10 rounded-tr-[1.5rem]" />
+                                        </div>
+                                        <div className="flex justify-between w-[600px] mx-auto">
+                                            <div className="flex-1 flex flex-col items-center">
+                                                {treeData.downline?.left ? (
+                                                    <AdminTreeNode name={treeData.downline.left.fullName} amount={treeData.downline.left.totalSalesAmount} />
+                                                ) : <AdminEmptyNode big />}
+                                            </div>
+                                            <div className="flex-1 flex flex-col items-center">
+                                                {treeData.downline?.right ? (
+                                                    <AdminTreeNode name={treeData.downline.right.fullName} amount={treeData.downline.right.totalSalesAmount} />
+                                                ) : <AdminEmptyNode big />}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-20 text-center">
+                                    <p className="text-gray-400 font-bold text-xs">Note: Showing up to level 1 in admin quick-view. Detailed tree available in partner dashboard.</p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
+
+function AdminTreeNode({ name, isSelf, mini, amount }: any) {
+    return (
+        <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className={`${mini ? 'w-24 p-3' : isSelf ? 'w-48 p-6' : 'w-40 p-4'} bg-white border border-gray-100 shadow-xl rounded-[2rem] flex flex-col items-center gap-2 group hover:border-blue-500 transition-all z-10 mx-auto mb-4 border-2`}
+        >
+            <div className={`${mini ? 'w-8 h-8 text-[8px]' : isSelf ? 'w-16 h-16 text-xl' : 'w-12 h-12 text-sm'} ${isSelf ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'} rounded-2xl flex items-center justify-center font-black group-hover:rotate-12 transition-transform shadow-lg`}>
+                {name.charAt(0)}
+            </div>
+            <p className={`${mini ? 'text-[8px]' : 'text-xs'} font-black text-gray-900 truncate w-full text-center leading-tight`}>{name}</p>
+            {!mini && amount !== undefined && (
+                <p className="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full">₹{amount.toFixed(0)}</p>
+            )}
+        </motion.div>
+    );
+}
+
+function AdminEmptyNode({ big }: any) {
+    return (
+        <div className={`${big ? 'w-40 h-32' : 'w-24 h-12'} border-2 border-dashed border-gray-200 rounded-[2rem] flex items-center justify-center text-gray-300 uppercase font-black text-[8px] tracking-widest bg-white`}>
+            Slot Available
         </div>
     );
 }
