@@ -354,6 +354,9 @@ export const orderShipments = pgTable("order_shipments", {
   vendorConfirmedAt: timestamp("vendor_confirmed_at"),
   dimensionSource: text("dimension_source").default("auto"), // 'vendor', 'admin', 'auto'
   readyToShip: boolean("ready_to_ship").default(false),
+  labelUrl: text("label_url"),
+  pickupDate: text("pickup_date"),
+  pickupTime: text("pickup_time"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

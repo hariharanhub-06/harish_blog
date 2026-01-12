@@ -108,7 +108,9 @@ export default function VendorDashboard() {
                 },
                 body: JSON.stringify({
                     dimensions: { l: Number(l), w: Number(w), h: Number(h), weight: Number(weight) },
-                    readyToShip: true
+                    readyToShip: true,
+                    pickupDate: (document.getElementById(`date-${shipmentId}`) as HTMLInputElement)?.value,
+                    pickupTime: (document.getElementById(`time-${shipmentId}`) as HTMLInputElement)?.value
                 })
             });
 
@@ -340,6 +342,11 @@ export default function VendorDashboard() {
                                                                     {shipment.trackingUrl && (
                                                                         <a href={shipment.trackingUrl} target="_blank" className="text-[10px] font-black text-indigo-600 bg-white px-3 py-1.5 rounded-xl shadow-sm hover:shadow-md transition-all">TRACK</a>
                                                                     )}
+                                                                    {shipment.labelUrl && (
+                                                                        <a href={shipment.labelUrl} target="_blank" className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-1">
+                                                                            <Package size={10} /> LABEL
+                                                                        </a>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         )}
@@ -383,6 +390,30 @@ export default function VendorDashboard() {
                                                                             />
                                                                         </div>
                                                                     ))}
+                                                                </div>
+
+                                                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-5 ml-1">Schedule Pickup</h4>
+                                                                <div className="grid grid-cols-2 gap-3 mb-6">
+                                                                    <div className="space-y-2">
+                                                                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Pickup Date</label>
+                                                                        <input
+                                                                            type="date"
+                                                                            id={`date-${shipment.id}`}
+                                                                            defaultValue={new Date().toISOString().split('T')[0]}
+                                                                            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-black focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="space-y-2">
+                                                                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Pickup Slot</label>
+                                                                        <select
+                                                                            id={`time-${shipment.id}`}
+                                                                            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-black focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                                                        >
+                                                                            <option value="Morning">Morning (10 AM - 1 PM)</option>
+                                                                            <option value="Afternoon">Afternoon (1 PM - 4 PM)</option>
+                                                                            <option value="Evening">Evening (4 PM - 7 PM)</option>
+                                                                        </select>
+                                                                    </div>
                                                                 </div>
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); handleMarkReadyToShip(shipment.id); }}
