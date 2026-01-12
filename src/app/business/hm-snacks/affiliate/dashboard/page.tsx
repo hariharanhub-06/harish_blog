@@ -54,6 +54,13 @@ interface Stats {
     currentTier: string;
     commissionRate: number;
     upiId: string;
+    recentOrders: Array<{
+        orderId: string;
+        createdAt: string;
+        status: string;
+        totalAmount: number;
+        customerName: string;
+    }>;
     downline: { left: DownlineNode | null, right: DownlineNode | null } | null;
 }
 
@@ -77,7 +84,7 @@ export default function AffiliateDashboard() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [activeTab, setActiveTab] = useState<'overview' | 'tree' | 'links' | 'earnings'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'tree' | 'links' | 'earnings' | 'orders'>('overview');
     const [productSearch, setProductSearch] = useState("");
     const router = useRouter();
 
@@ -231,6 +238,7 @@ export default function AffiliateDashboard() {
                     <div className="flex p-1 bg-gray-100 rounded-2xl md:rounded-[2rem] w-full lg:w-fit overflow-x-auto no-scrollbar">
                         {[
                             { id: 'overview', label: 'Overview', icon: PieChart },
+                            { id: 'orders', label: 'Orders', icon: ShoppingBag },
                             { id: 'tree', label: 'Binary Tree', icon: GitBranch },
                             { id: 'links', label: 'Promote', icon: LinkIcon },
                             { id: 'earnings', label: 'Earnings', icon: DollarSign },
@@ -578,6 +586,77 @@ export default function AffiliateDashboard() {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'orders' && (
+                        <motion.div
+                            key="orders"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="space-y-6"
+                        >
+                            <div className="bg-white rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 border border-gray-100 shadow-sm overflow-hidden">
+                                <h3 className="text-2xl font-black mb-8 flex items-center gap-3">
+                                    <ShoppingBag className="text-orange-500" />
+                                    Recent Referrals
+                                </h3>
+
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-gray-50">
+                                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Order ID</th>
+                                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Date</th>
+                                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Customer</th>
+                                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Status</th>
+                                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Order Value</th>
+                                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Commission</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-50">
+                                            {stats.recentOrders && stats.recentOrders.length > 0 ? (
+                                                stats.recentOrders.map((order: any) => (
+                                                    <tr key={order.orderId} className="group transition-colors hover:bg-gray-50/50">
+                                                        <td className="py-5 font-black text-gray-900 text-sm">{order.orderId}</td>
+                                                        <td className="py-5 text-gray-500 font-bold text-xs">{new Date(order.createdAt).toLocaleDateString()}</td>
+                                                        <td className="py-5 text-gray-900 font-bold text-sm">{order.customerName}</td>
+                                                        <td className="py-5 text-center">
+                                                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                                                order.status === 'Cancel' ? 'bg-rose-50 text-rose-600' :
+                                                                    'bg-orange-50 text-orange-600'
+                                                                }`}>
+                                                                {order.status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-5 text-right font-black text-gray-900 text-sm">₹{order.totalAmount}</td>
+                                                        <td className="py-5 text-right">
+                                                            <div className="flex flex-col items-end">
+                                                                <span className="text-orange-600 font-black text-sm italic">
+                                                                    ₹{(order.totalAmount * (stats.commissionRate / 100)).toFixed(0)}*
+                                                                </span>
+                                                                <span className={`text-[8px] font-black uppercase tracking-widest ${order.status === 'Delivered' ? 'text-emerald-500' : 'text-gray-400'}`}>
+                                                                    {order.status === 'Delivered' ? 'Added to Balance' : 'Pending Delivery'}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={6} className="py-20 text-center text-gray-400 font-bold uppercase text-[10px] tracking-widest">
+                                                        No orders referred yet.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p className="mt-8 text-[9px] font-bold text-gray-400 italic">
+                                    * Commission is estimated. Exact earnings are calculated based on the profit pool of each product once the order is Delivered.
+                                </p>
                             </div>
                         </motion.div>
                     )}

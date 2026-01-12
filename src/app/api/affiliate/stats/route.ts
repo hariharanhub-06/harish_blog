@@ -46,6 +46,19 @@ export async function GET(req: NextRequest) {
             parentId: affiliate.parentId,
             referrerId: affiliate.referrerId,
             position: affiliate.position,
+            // Fetch recent orders for this affiliate
+            recentOrders: await db
+                .select({
+                    orderId: snackOrders.orderId,
+                    createdAt: snackOrders.createdAt,
+                    status: snackOrders.status,
+                    totalAmount: snackOrders.totalAmount,
+                    customerName: snackOrders.customerName
+                })
+                .from(snackOrders)
+                .where(sql`UPPER(${snackOrders.couponCode}) = UPPER(${affiliate.couponCode})`)
+                .orderBy(sql`${snackOrders.createdAt} DESC`)
+                .limit(20),
             // Downline tree (simplified to level 2 for now)
             downline: await getDownlineTree(affiliate.id, 0, new Set([affiliate.id]))
         });
