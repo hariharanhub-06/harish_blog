@@ -312,15 +312,17 @@ export async function DELETE(
                 }
             }
 
-            // 4. Delete associated shipments
+            // 4. Delete associated shipments (Using orderId like 'HMS-XXX')
             await db
                 .delete(orderShipments)
                 .where(eq(orderShipments.orderId, order.orderId));
 
-            // 5. Delete associated affiliate transactions
+            // 5. Delete associated affiliate transactions (Using orderId like 'HMS-XXX')
             await db
                 .delete(affiliateTransactions)
                 .where(eq(affiliateTransactions.orderId, order.orderId));
+
+            console.log(`[Cleanup] Deleted shipments and transactions for ${order.orderId}`);
         }
 
         // 5. Delete the order itself
