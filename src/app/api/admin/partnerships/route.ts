@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { partnerships } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 
+export const dynamic = "force-dynamic";
+
 // GET - Fetch all partnerships (admin)
 export async function GET() {
     try {
