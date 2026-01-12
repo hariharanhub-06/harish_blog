@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { snackOrders, orderShipments, vendors, affiliateTransactions, affiliates, snackProducts } from "@/db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
+import { processAffiliateCommissions } from "@/lib/affiliate-commissions";
+import { splitOrderIntoShipments } from "@/lib/order-utils";
 
 export async function GET(
     req: NextRequest,
@@ -19,35 +21,43 @@ export async function GET(
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
         }
 
-        // Fetch associated shipments (Split Orders)
-        const shipments = await db
-            .select({
-                id: orderShipments.id,
-                vendorId: orderShipments.vendorId,
-                items: orderShipments.items,
-                status: orderShipments.status,
-                vendorName: vendors.name,
-                awbCode: orderShipments.awbCode,
-                courierName: orderShipments.courierName,
-                trackingUrl: orderShipments.trackingUrl,
-                shiprocketOrderId: orderShipments.shiprocketOrderId,
-                vendorConfirmedDimensions: orderShipments.vendorConfirmedDimensions,
-                vendorConfirmedAt: orderShipments.vendorConfirmedAt,
-                dimensionSource: orderShipments.dimensionSource,
-                readyToShip: orderShipments.readyToShip,
-            })
-            .from(orderShipments)
-            .leftJoin(vendors, eq(orderShipments.vendorId, vendors.id))
-            .where(eq(orderShipments.orderId, order.orderId));
+        // 2. Fetch associated shipments safely
+        let shipments: any[] = [];
+        try {
+            shipments = await db
+                .select({
+                    id: orderShipments.id,
+                    vendorId: orderShipments.vendorId,
+                    items: orderShipments.items,
+                    status: orderShipments.status,
+                    vendorName: vendors.name,
+                    awbCode: orderShipments.awbCode,
+                    courierName: orderShipments.courierName,
+                    trackingUrl: orderShipments.trackingUrl,
+                    shiprocketOrderId: orderShipments.shiprocketOrderId,
+                    vendorConfirmedDimensions: orderShipments.vendorConfirmedDimensions,
+                    vendorConfirmedAt: orderShipments.vendorConfirmedAt,
+                    dimensionSource: orderShipments.dimensionSource,
+                    readyToShip: orderShipments.readyToShip,
+                })
+                .from(orderShipments)
+                .leftJoin(vendors, eq(orderShipments.vendorId, vendors.id))
+                .where(eq(orderShipments.orderId, order.orderId));
+        } catch (shipErr: any) {
+            console.error("Failed to fetch shipments for order:", shipErr);
+            // Non-blocking fallback: empty shipments but return the order
+        }
 
         return NextResponse.json({ ...order, shipments });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Fetch order detail error:", error);
-        return NextResponse.json({ error: "Failed to fetch order detail" }, { status: 500 });
+        return NextResponse.json({
+            error: "Failed to fetch order detail",
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 });
     }
 }
-import { processAffiliateCommissions } from "@/lib/affiliate-commissions";
-import { splitOrderIntoShipments } from "@/lib/order-utils";
 
 export async function PATCH(
     req: NextRequest,

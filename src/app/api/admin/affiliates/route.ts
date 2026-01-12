@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { affiliates, snackOrders, affiliateTransactions } from "@/db/schema";
-import { eq, desc, sql, count } from "drizzle-orm";
+import { affiliates, snackOrders, affiliateTransactions, payoutRequests } from "@/db/schema";
+import { eq, desc, sql, count, or } from "drizzle-orm";
 import { generatePassword, findBinaryPlacement, generateCouponCode } from "@/lib/affiliate-utils";
 import { getAffiliateTier } from "@/lib/affiliate-tiers";
 
@@ -243,13 +243,28 @@ export async function DELETE(req: NextRequest) {
 
         const oldParentId = affiliate.parentId;
 
-        // 2. Roll-up children: Move direct children to the deleted person's parent
+        // 2. Cleanup related data to avoid FK errors
+        // Delete transactions where they are the recipient or the source
+        await db.delete(affiliateTransactions).where(
+            or(
+                eq(affiliateTransactions.affiliateId, id),
+                eq(affiliateTransactions.fromAffiliateId, id)
+            )
+        );
+
+        // Delete payout requests
+        await db.delete(payoutRequests).where(eq(payoutRequests.affiliateId, id));
+
+        // Update direct referrals to have no referrer
+        await db.update(affiliates).set({ referrerId: null }).where(eq(affiliates.referrerId, id));
+
+        // 3. Roll-up children: Move direct binary children to the deleted person's parent
         await db
             .update(affiliates)
             .set({ parentId: oldParentId })
             .where(eq(affiliates.parentId, id));
 
-        // 3. Delete the record
+        // 4. Delete the record
         await db.delete(affiliates).where(eq(affiliates.id, id));
 
         return NextResponse.json({
@@ -257,8 +272,12 @@ export async function DELETE(req: NextRequest) {
             message: "Affiliate deleted and tree rolled up successfully."
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Delete affiliate error:", error);
-        return NextResponse.json({ error: "Failed to delete affiliate" }, { status: 500 });
+        return NextResponse.json({
+            error: "Failed to delete affiliate",
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 });
     }
 }
