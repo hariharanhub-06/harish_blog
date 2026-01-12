@@ -55,6 +55,7 @@ export default function SnacksOrdersModule() {
     });
     const [availableProducts, setAvailableProducts] = useState<any[]>([]);
     const [productSearch, setProductSearch] = useState("");
+    const [highlightedIndex, setHighlightedIndex] = useState(0);
     const [creatingOrder, setCreatingOrder] = useState(false);
 
     // Coupon State
@@ -312,29 +313,36 @@ export default function SnacksOrdersModule() {
             vendorGroups[vendorId] = (vendorGroups[vendorId] || 0) + weight;
         });
 
-        // Calculate Shipping per Vendor
+        // Calculate Shipping
         let shipping = 0;
-        let ratePerKg = 200; // Fallback
 
-        if (createFormData.customer.state) {
-            const stateKey = Object.keys(SHIPPING_RATES).find(key =>
-                key.toLowerCase() === createFormData.customer.state.toLowerCase()
-            );
-            if (stateKey) {
-                ratePerKg = SHIPPING_RATES[stateKey];
+        if (dynamicShipping !== null) {
+            // Use Shiprocket Dynamic Rate + Packaging
+            shipping = dynamicShipping + 40;
+        } else {
+            // Fallback: Calculate Shipping per Vendor
+            let ratePerKg = 200; // Fallback
+
+            if (createFormData.customer.state) {
+                const stateKey = Object.keys(SHIPPING_RATES).find(key =>
+                    key.toLowerCase() === createFormData.customer.state.toLowerCase()
+                );
+                if (stateKey) {
+                    ratePerKg = SHIPPING_RATES[stateKey];
+                }
             }
-        }
 
-        // Sum shipping costs for all unique vendors
-        const uniqueVendors = Object.keys(vendorGroups);
+            // Sum shipping costs for all unique vendors
+            const uniqueVendors = Object.keys(vendorGroups);
 
-        // Always calculate based on split shipments to ensure no loss
-        if (uniqueVendors.length > 0) {
-            uniqueVendors.forEach(vendorId => {
-                const groupWeight = vendorGroups[vendorId];
-                // (Weight * Rate) + 40 Packaging per vendor
-                shipping += Math.ceil((ratePerKg * groupWeight) + 40);
-            });
+            // Always calculate based on split shipments to ensure no loss
+            if (uniqueVendors.length > 0) {
+                uniqueVendors.forEach(vendorId => {
+                    const groupWeight = vendorGroups[vendorId];
+                    // (Weight * Rate) + 40 Packaging per vendor
+                    shipping += Math.ceil((ratePerKg * groupWeight) + 40);
+                });
+            }
         }
 
 
@@ -1315,20 +1323,39 @@ export default function SnacksOrdersModule() {
                                     <div className="relative">
                                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                         <input
-                                            placeholder="Search to add product..."
+                                            placeholder="Search to add product... (Use Arrow Keys)"
                                             value={productSearch}
-                                            onChange={e => setProductSearch(e.target.value)}
+                                            onChange={e => {
+                                                setProductSearch(e.target.value);
+                                                setHighlightedIndex(0);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                const filtered = availableProducts.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()));
+                                                if (e.key === "ArrowDown") {
+                                                    e.preventDefault();
+                                                    setHighlightedIndex(prev => (prev < filtered.length - 1 ? prev + 1 : prev));
+                                                } else if (e.key === "ArrowUp") {
+                                                    e.preventDefault();
+                                                    setHighlightedIndex(prev => (prev > 0 ? prev - 1 : 0));
+                                                } else if (e.key === "Enter") {
+                                                    e.preventDefault();
+                                                    if (filtered[highlightedIndex]) {
+                                                        handleAddItem(filtered[highlightedIndex]);
+                                                    }
+                                                }
+                                            }}
                                             className="w-full bg-gray-50 border-0 rounded-xl py-3 pl-10 pr-4 font-bold text-sm focus:ring-2 focus:ring-pink-500"
                                         />
                                         {productSearch && (
-                                            <div className="absolute z-10 w-full bg-white mt-2 rounded-xl shadow-xl border border-gray-100 max-h-60 overflow-y-auto">
+                                            <div className="absolute z-50 w-full bg-white mt-2 rounded-xl shadow-xl border border-gray-100 max-h-60 overflow-y-auto">
                                                 {availableProducts
                                                     .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
-                                                    .map(product => (
+                                                    .map((product, idx) => (
                                                         <div
                                                             key={product.id}
                                                             onClick={() => handleAddItem(product)}
-                                                            className="p-3 hover:bg-pink-50 cursor-pointer flex justify-between items-center transition-colors"
+                                                            className={`p-3 cursor-pointer flex justify-between items-center transition-colors ${idx === highlightedIndex ? "bg-pink-100 ring-1 ring-pink-200" : "hover:bg-pink-50"
+                                                                }`}
                                                         >
                                                             <span className="font-bold text-gray-800 text-sm">{product.name}</span>
                                                             <span className="text-xs font-black text-pink-500">₹{product.offerPricePerPiece || product.pricePerPiece || product.offerPricePerKg || product.pricePerKg}</span>

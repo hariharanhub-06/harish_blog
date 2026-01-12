@@ -118,10 +118,10 @@ export async function POST(req: Request) {
                 : "Thank you for registering! Your request is pending admin approval."
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Affiliate registration error:", error);
         return NextResponse.json(
-            { error: "Failed to register. Please try again." },
+            { error: `Failed to register: ${error.message || "Unknown error"}` },
             { status: 500 }
         );
     }
