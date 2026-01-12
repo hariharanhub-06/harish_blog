@@ -137,3 +137,54 @@ export async function checkServiceability(params: {
 
     return result;
 }
+
+// Generate Shipping Label
+export async function generateLabel(shipmentId: string) {
+    const token = await getShiprocketToken();
+
+    const response = await fetch("https://apiv2.shiprocket.in/v1/external/courier/generate/label", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+            shipment_id: [shipmentId],
+        }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        console.error("Shiprocket Label Generation Failed:", result);
+        throw new Error(result.message || "Failed to generate label");
+    }
+
+    return result;
+}
+
+// Schedule Pickup
+export async function schedulePickup(shipmentId: string) {
+    const token = await getShiprocketToken();
+
+    const response = await fetch("https://apiv2.shiprocket.in/v1/external/courier/generate/pickup", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+            shipment_id: [shipmentId],
+        }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        console.error("Shiprocket Pickup Scheduling Failed:", result);
+        // Sometimes pickup fails if already scheduled or other reasons, we might want to log but not crash
+        return result;
+    }
+
+    return result;
+}
