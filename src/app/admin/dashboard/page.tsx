@@ -166,9 +166,9 @@ export default function AdminDashboard() {
             );
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
-                    <OverviewModule />
+                    <SnacksOverviewModule />
                     <div className="pt-16 border-t border-gray-100">
-                        <SnacksOverviewModule />
+                        <OverviewModule />
                     </div>
                 </div>
             );
