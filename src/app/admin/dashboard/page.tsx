@@ -137,9 +137,9 @@ export default function AdminDashboard() {
             case "messages": return <MessagesModule />;
             case "snack-central": return (
                 <div className="space-y-16 animate-in fade-in duration-700">
-                    <SnacksProductModule />
+                    <SnacksOrdersModule />
                     <div className="pt-16 border-t border-gray-100">
-                        <SnacksOrdersModule />
+                        <SnacksProductModule />
                     </div>
                     <div className="pt-16 border-t border-gray-100">
                         <CouponsModule />
