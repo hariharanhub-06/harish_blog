@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { affiliates, affiliateTransactions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { generatePassword, findBinaryPlacement } from "@/lib/affiliate-utils";
+import Razorpay from "razorpay";
 
 export async function POST(req: Request) {
     try {
@@ -47,29 +48,47 @@ export async function POST(req: Request) {
             }
         }
 
-        // Create affiliate
         const isPaid = !!body.isPaid;
-        const status = isPaid ? "Approved" : "Pending";
-        const isActive = isPaid;
+        let razorpayOrderId = null;
 
-        // Helper to generate a unique coupon code
+        // If Paid Tier, Create Razorpay Order
+        if (isPaid) {
+            const razorpay = new Razorpay({
+                key_id: process.env.RAZORPAY_KEY_ID!,
+                key_secret: process.env.RAZORPAY_KEY_SECRET!,
+            });
+
+            const options = {
+                amount: 100 * 100, // ₹100 in paise
+                currency: "INR",
+                receipt: `aff_reg_${mobile}`,
+                payment_capture: 1, // Auto capture
+            };
+
+            const order = await razorpay.orders.create(options);
+            razorpayOrderId = order.id;
+        }
+
+        // Create affiliate
+        // If PAID -> Status "Pending Payment", Active False. Password/Code generated AFTER payment.
+        // If FREE -> Status "Pending", Active False (Admin Approval).
+
+        const status = isPaid ? "Pending Payment" : "Pending";
+        const isActive = false;
+
+        // Helper to generate a unique coupon code (Generated early for free users, later for paid)
         const generateCouponCode = (name: string) => {
             const prefix = name.split(" ")[0].toUpperCase().slice(0, 5);
             const suffix = Math.floor(1000 + Math.random() * 9000);
             return `${prefix}${suffix}`;
         };
 
-        const couponCode = isPaid ? generateCouponCode(fullName) : null;
-        const password = isPaid ? generatePassword() : null;
+        // If FREE, generate code now. If PAID, generate AFTER payment.
+        const couponCode = !isPaid ? generateCouponCode(fullName) : null;
+        const password = !isPaid ? generatePassword() : null; // Free users get password (but inactive)
 
-        // Find placement if paid
-        let parentIdToSet = null;
-        let positionToSet = null;
-        if (isPaid) {
-            const placement = await findBinaryPlacement(referrerId);
-            parentIdToSet = placement.parentId;
-            positionToSet = placement.position;
-        }
+        // Find placement if paid (Actually, placement should happen AFTER payment for Paid users to avoid holes in tree)
+        // For now, we will assign placement AFTER payment success in verify API.
 
         const [newAffiliate] = await db.insert(affiliates).values({
             fullName,
@@ -78,44 +97,32 @@ export async function POST(req: Request) {
             email: email || null,
             socialLink: socialLink || null,
             referrerId: referrerId as any,
-            parentId: parentIdToSet as any,
-            position: positionToSet,
+            parentId: null, // Assigned after approval/payment
+            position: null,
             status,
             isActive,
             isPaid,
-            paidAt: isPaid ? new Date() : null,
+            paidAt: null, // Set after payment
             couponCode: couponCode,
             password: password,
         }).returning();
 
-        // If paid, give ₹20 bonus to referrer
-        if (isPaid && referrerId) {
-            await db.insert(affiliateTransactions).values({
-                affiliateId: referrerId,
-                amount: 20,
-                type: 'bonus',
-                description: `Referral bonus for ${fullName} joining as Paid Affiliate`,
-                fromAffiliateId: newAffiliate.id,
-                status: 'Completed'
+        if (isPaid) {
+            return NextResponse.json({
+                success: true,
+                requirePayment: true,
+                razorpayOrderId: razorpayOrderId,
+                amount: 100,
+                affiliateId: newAffiliate.id,
+                key: process.env.RAZORPAY_KEY_ID,
+                message: "Please complete payment to activate account."
             });
-
-            // Update referrer's earnings
-            const [referrer] = await db.select().from(affiliates).where(eq(affiliates.id, referrerId)).limit(1);
-            if (referrer) {
-                await db.update(affiliates)
-                    .set({
-                        totalEarnings: (referrer.totalEarnings || 0) + 20,
-                        pendingBalance: (referrer.pendingBalance || 0) + 20
-                    })
-                    .where(eq(affiliates.id, referrerId));
-            }
         }
 
         return NextResponse.json({
             success: true,
-            message: isPaid
-                ? `Welcome! Your account is active. \nCoupon Code: ${couponCode}\nLogin Password: ${password}\n\nPlease save your password for future login.`
-                : "Thank you for registering! Your request is pending admin approval."
+            requirePayment: false,
+            message: "Thank you for registering! Your request is pending admin approval."
         });
 
     } catch (error: any) {
