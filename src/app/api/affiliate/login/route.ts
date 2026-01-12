@@ -44,7 +44,6 @@ export async function POST(req: Request) {
             );
         }
 
-        const affiliate = results[0];
 
         // For simplicity, we return the affiliate data. 
         // In a production app, you'd set a JWT cookie here.
