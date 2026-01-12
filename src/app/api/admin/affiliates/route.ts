@@ -236,7 +236,10 @@ export async function DELETE(req: NextRequest) {
         }
 
         // 1. Fetch affiliate to get their parentId
-        const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, id)).limit(1);
+        const [affiliate] = await db.select({
+            id: affiliates.id,
+            parentId: affiliates.parentId
+        }).from(affiliates).where(eq(affiliates.id, id)).limit(1);
         if (!affiliate) {
             return NextResponse.json({ error: "Affiliate not found" }, { status: 404 });
         }
