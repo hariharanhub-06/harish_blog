@@ -15,21 +15,31 @@ export async function POST(req: Request) {
             );
         }
 
-        // Search for affiliate with matching mobile and password
-        const results = await db
+        // Search for affiliate with matching mobile
+        const [affiliate] = await db
             .select()
             .from(affiliates)
-            .where(
-                and(
-                    eq(affiliates.mobile, mobile),
-                    eq(affiliates.password, password),
-                    eq(affiliates.status, 'Approved')
-                )
-            );
+            .where(eq(affiliates.mobile, mobile))
+            .limit(1);
 
-        if (results.length === 0) {
+        if (!affiliate) {
             return NextResponse.json(
-                { error: "Invalid credentials or account not yet approved." },
+                { error: "No account found with this mobile number." },
+                { status: 401 }
+            );
+        }
+
+        // Check password and status
+        if (affiliate.password !== password) {
+            return NextResponse.json(
+                { error: "Invalid password." },
+                { status: 401 }
+            );
+        }
+
+        if (affiliate.status !== 'Approved') {
+            return NextResponse.json(
+                { error: "Your account is not yet approved by an admin." },
                 { status: 401 }
             );
         }
