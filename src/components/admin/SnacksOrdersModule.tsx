@@ -479,7 +479,8 @@ export default function SnacksOrdersModule() {
             setSelectedOrder(null);
             fetchOrders();
         } else {
-            alert("Failed to delete order");
+            const data = await res.json();
+            alert(`Failed to delete order: ${data.message || data.error || "Unknown Error"}`);
         }
     };
 
