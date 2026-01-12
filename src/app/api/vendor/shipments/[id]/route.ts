@@ -3,6 +3,9 @@ import { db } from "@/db";
 import { orderShipments, snackOrders, vendors } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createShiprocketOrder, generateAWB, generateLabel, schedulePickup } from "@/lib/shiprocket";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
 
 export async function PATCH(
     req: NextRequest,
@@ -10,6 +13,27 @@ export async function PATCH(
 ) {
     try {
         const { id } = await params;
+
+        // --- Security Check Start ---
+        const authHeader = req.headers.get("Authorization");
+        const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+
+        if (!token) {
+            return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+        }
+
+        let decoded: any;
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+        } catch (err) {
+            return NextResponse.json({ error: "Unauthorized: Invalid token" }, { status: 401 });
+        }
+
+        if (!decoded || decoded.type !== 'vendor' || !decoded.id) {
+            return NextResponse.json({ error: "Unauthorized: Invalid token payload" }, { status: 401 });
+        }
+        // --- Security Check End ---
+
         const { dimensions, readyToShip, pickupDate, pickupTime } = await req.json();
 
         // 1. Get current shipment data along with order and vendor info
@@ -28,6 +52,12 @@ export async function PATCH(
         if (!shipment) {
             return NextResponse.json({ error: "Shipment not found" }, { status: 404 });
         }
+
+        // --- Ownership Check ---
+        if (shipment.shipment.vendorId !== decoded.id) {
+            return NextResponse.json({ error: "Forbidden: You do not own this shipment" }, { status: 403 });
+        }
+        // --- End Ownership Check ---
 
         const { shipment: shipmentData, order: orderData, vendor: vendorData } = shipment;
 
