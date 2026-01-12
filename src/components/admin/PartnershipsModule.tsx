@@ -31,9 +31,10 @@ export default function PartnershipsModule() {
     const fetchPartnerships = async () => {
         setFetching(true);
         try {
-            const res = await fetch("/api/admin/partnerships");
+            const res = await fetch(`/api/admin/partnerships?t=${Date.now()}`);
             if (res.ok) {
                 const data = await res.json();
+                console.log("[Partnerships] Fetched data:", data);
                 setPartnerships(data);
             } else {
                 const err = await res.json();
