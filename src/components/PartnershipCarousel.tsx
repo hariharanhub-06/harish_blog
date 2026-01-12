@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import imageKitLoader from "@/lib/imagekitLoader";
 
 interface Partnership {
     id: string;
@@ -22,37 +23,79 @@ export default function PartnershipCarousel() {
 
     if (partnerships.length === 0) return null;
 
-    // Duplicate the array to create seamless loop
-    const duplicatedPartnerships = [...partnerships, ...partnerships, ...partnerships];
+    // For a seamless infinite scroll, we need enough items to fill the width.
+    // We'll duplicate the list multiple times if it's very short.
+    const displayPartners = partnerships.length > 0
+        ? (partnerships.length < 6 ? [...partnerships, ...partnerships, ...partnerships, ...partnerships] : [...partnerships, ...partnerships])
+        : [];
 
     return (
-        <section className="bg-gradient-to-r from-gray-50 via-white to-gray-50 py-12 overflow-hidden">
-            <div className="container mx-auto px-4 mb-8">
-                <h2 className="text-3xl font-black text-center text-gray-900">
-                    Partnered By
-                </h2>
-                <div className="h-1 w-24 bg-gradient-to-r from-pink-500 to-purple-500 mx-auto mt-3 rounded-full"></div>
+        <section className="py-20 bg-white overflow-hidden border-b border-gray-50">
+            <div className="container mx-auto px-6 mb-12">
+                <div className="flex flex-col items-center">
+                    <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight text-center">Partnered <span className="text-primary italic">By</span></h2>
+                    <div className="w-24 h-1.5 bg-gradient-to-r from-primary to-pink-500 rounded-full mt-4"></div>
+                </div>
             </div>
 
-            {/* Auto-scrolling carousel */}
-            <div className="relative">
-                <div className="flex gap-12 animate-scroll">
-                    {duplicatedPartnerships.map((partner, index) => (
+            <div className="relative group flex overflow-hidden">
+                <div
+                    className="flex animate-scroll hover:[animation-play-state:paused] whitespace-nowrap"
+                    style={{
+                        animation: `scroll 30s linear infinite`
+                    }}
+                >
+                    {displayPartners.map((partner, idx) => (
                         <div
-                            key={`${partner.id}-${index}`}
-                            className="flex-shrink-0 flex flex-col items-center justify-center gap-4 min-w-[200px]"
+                            key={`${partner.id}-${idx}`}
+                            className="flex-shrink-0 w-[280px] md:w-[350px] mx-4"
                         >
-                            <div className="relative w-40 h-20 bg-white rounded-xl shadow-lg p-4 flex items-center justify-center hover:shadow-2xl transition-shadow">
-                                <Image
-                                    src={partner.logo}
-                                    alt={partner.name}
-                                    fill
-                                    className="object-contain p-2"
-                                />
+                            <div className="bg-white rounded-[2rem] p-8 md:p-12 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 group/card">
+                                <div className="relative h-24 md:h-32 w-full flex items-center justify-center">
+                                    <Image
+                                        loader={imageKitLoader}
+                                        src={partner.logo}
+                                        alt={partner.name}
+                                        fill
+                                        className="object-contain group-hover/card:scale-110 transition-transform duration-700"
+                                    />
+                                </div>
+                                <div className="mt-8 text-center italic">
+                                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">{partner.name}</h3>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary opacity-60 mt-1">{partner.partnerType}</p>
+                                </div>
                             </div>
-                            <div className="text-center">
-                                <p className="text-sm font-bold text-gray-800">{partner.name}</p>
-                                <p className="text-xs text-gray-500">{partner.partnerType}</p>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Second track for seamlessness */}
+                <div
+                    className="flex animate-scroll hover:[animation-play-state:paused] whitespace-nowrap"
+                    aria-hidden="true"
+                    style={{
+                        animation: `scroll 30s linear infinite`
+                    }}
+                >
+                    {displayPartners.map((partner, idx) => (
+                        <div
+                            key={`dup-${partner.id}-${idx}`}
+                            className="flex-shrink-0 w-[280px] md:w-[350px] mx-4"
+                        >
+                            <div className="bg-white rounded-[2rem] p-8 md:p-12 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 group/card">
+                                <div className="relative h-24 md:h-32 w-full flex items-center justify-center">
+                                    <Image
+                                        loader={imageKitLoader}
+                                        src={partner.logo}
+                                        alt={partner.name}
+                                        fill
+                                        className="object-contain group-hover/card:scale-110 transition-transform duration-700"
+                                    />
+                                </div>
+                                <div className="mt-8 text-center italic">
+                                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">{partner.name}</h3>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary opacity-60 mt-1">{partner.partnerType}</p>
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -61,16 +104,10 @@ export default function PartnershipCarousel() {
 
             <style jsx>{`
                 @keyframes scroll {
-                    0% {
-                        transform: translateX(0);
-                    }
-                    100% {
-                        transform: translateX(-33.33%);
-                    }
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-100%); }
                 }
-
                 .animate-scroll {
-                    animation: scroll 30s linear infinite;
                     display: flex;
                     width: max-content;
                 }
