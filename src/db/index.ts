@@ -4,10 +4,6 @@ import * as schema from "./schema";
 
 // Optimize Neon connection with caching and performance settings
 const sql = neon(process.env.DATABASE_URL!, {
-    // Disable fetch caching to ensure real-time updates for admin operations
-    fetchOptions: {
-        cache: 'no-store',
-    },
     // Enable full results streaming for large datasets
     fullResults: true,
     // Array mode is faster than object mode for large result sets
