@@ -37,9 +37,7 @@ export const getCachedAffiliateConfig = unstable_cache(
 // Cache vendor list (revalidate every 10 minutes)
 export const getCachedVendors = unstable_cache(
     async () => {
-        const vendors = await db.query.vendors.findMany({
-            where: (vendors, { eq }) => eq(vendors.isActive, true),
-        });
+        const vendors = await db.query.vendors.findMany();
         return vendors;
     },
     ['vendors-cache'],
