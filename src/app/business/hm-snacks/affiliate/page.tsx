@@ -84,6 +84,63 @@ function AffiliatePageContent() {
             const data = await res.json();
 
             if (res.ok) {
+                if (data.requirePayment && data.razorpayOrderId) {
+                    // Handle Razorpay Payment
+                    const options = {
+                        key: data.key,
+                        amount: data.amount * 100,
+                        currency: "INR",
+                        name: "HM Snacks Affiliate",
+                        description: "Affiliate Membership Fee",
+                        order_id: data.razorpayOrderId,
+                        handler: async function (response: any) {
+                            try {
+                                const verifyRes = await fetch("/api/affiliate/verify-payment", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        affiliateId: data.affiliateId
+                                    })
+                                });
+                                const verifyData = await verifyRes.json();
+                                if (verifyRes.ok) {
+                                    setMessage(`Payment Successful! \nCoupon Code: ${verifyData.couponCode}\nPassword: ${verifyData.password}\n\nPlease save these credentials.`);
+                                    setFormData({
+                                        fullName: "",
+                                        mobile: "",
+                                        upiId: "",
+                                        email: "",
+                                        socialLink: "",
+                                        referrerCode: "",
+                                        isPaid: true
+                                    });
+                                } else {
+                                    setError(verifyData.error || "Payment verification failed");
+                                }
+                            } catch (err) {
+                                setError("Payment verification failed");
+                            }
+                        },
+                        prefill: {
+                            name: formData.fullName,
+                            email: formData.email,
+                            contact: formData.mobile
+                        },
+                        theme: {
+                            color: "#F97316"
+                        }
+                    };
+
+                    const rzp = new (window as any).Razorpay(options);
+                    rzp.open();
+                    setLoading(false); // Stop loading provided modal opens
+                    return;
+
+                }
+
                 setMessage(data.message);
                 setFormData({
                     fullName: "",
@@ -100,9 +157,20 @@ function AffiliatePageContent() {
         } catch (err) {
             setError("Something went wrong. Please try again.");
         } finally {
-            setLoading(false);
+            if (!formData.isPaid) setLoading(false); // keep loading for paid until modal opens
         }
     };
+
+    // Load Razorpay SDK
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        document.body.appendChild(script);
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     const scrollToForm = () => {
         document.getElementById("registration-form")?.scrollIntoView({ behavior: "smooth" });

@@ -167,11 +167,49 @@ export default function AffiliateDashboard() {
             });
 
             const data = await res.json();
-            if (res.ok) {
-                alert(data.message);
-                fetchStats();
+            if (res.ok && data.razorpayOrderId) {
+                const options = {
+                    key: data.key,
+                    amount: data.amount * 100,
+                    currency: "INR",
+                    name: "HM Snacks Affiliate",
+                    description: "Upgrade to Premium",
+                    order_id: data.razorpayOrderId,
+                    handler: async function (response: any) {
+                        try {
+                            const verifyRes = await fetch("/api/affiliate/verify-payment", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    affiliateId: id
+                                })
+                            });
+                            if (verifyRes.ok) {
+                                alert("Upgrade Successful! Welcome to Premium.");
+                                fetchStats();
+                            } else {
+                                alert("Payment verification failed");
+                            }
+                        } catch (e) {
+                            alert("Payment verification failed");
+                        }
+                    },
+                    prefill: {
+                        name: stats?.fullName,
+                        contact: stats?.couponCode // we don't have mobile in stats interface explicitly shown but backend has it. prefill is optional or good to have.
+                    },
+                    theme: {
+                        color: "#F97316"
+                    }
+                };
+                const rzp = new (window as any).Razorpay(options);
+                rzp.open();
+
             } else {
-                alert(data.error || "Failed to upgrade");
+                alert(data.error || "Failed to initiate upgrade");
             }
         } catch (err) {
             alert("Something went wrong");
@@ -179,6 +217,17 @@ export default function AffiliateDashboard() {
             setRefreshing(false);
         }
     };
+
+    // Load Razorpay Script in Dashboard too
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        document.body.appendChild(script);
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     const handleWithdraw = async () => {
         const id = localStorage.getItem("affiliate_id");

@@ -118,7 +118,10 @@ export async function GET(req: NextRequest) {
         }
 
         // 5. Splits
-        const tier = getAffiliateTier(affiliate.totalOrders || 0, !!affiliate.isPaid);
+        const tier = getAffiliateTier(
+            !!affiliate.isPaid ? (affiliate.ordersSincePaid || 0) : (affiliate.totalOrders || 0),
+            !!affiliate.isPaid
+        );
         log(`Direct Affiliate Tier: ${tier.name}, Rate: ${tier.rate}%`);
 
         const directCommission = (totalOrderProfitPool * tier.rate / 100);

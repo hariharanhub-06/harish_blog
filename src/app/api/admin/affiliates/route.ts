@@ -169,7 +169,10 @@ export async function PUT(req: NextRequest) {
         const totalEarnings = direct + l1 + l2 + l3;
 
         // 3. Update Tier
-        const tierObj = getAffiliateTier(orderCount, !!affiliate.isPaid);
+        // For paid affiliates, use ordersSincePaid for tier calculation
+        // But for admin display, we might want to show total? No, show effective tier base.
+        const tierBasis = !!affiliate.isPaid ? (affiliate.ordersSincePaid || 0) : orderCount;
+        const tierObj = getAffiliateTier(tierBasis, !!affiliate.isPaid);
         const tier = tierObj.name;
 
         // 4. Final Update
