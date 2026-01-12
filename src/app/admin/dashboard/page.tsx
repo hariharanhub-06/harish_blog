@@ -51,7 +51,7 @@ import { Handshake } from "lucide-react";
 
 
 
-type Tab = "overview" | "profile" | "professional-journey" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "partner-network" | "vendor-central" | "manage-products" | "public-assets";
+type Tab = "overview" | "profile" | "professional-journey" | "messages" | "snack-central" | "billing" | "partner-network" | "vendor-central" | "public-assets";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "professional-journey", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "partner-network", "vendor-central", "manage-products", "public-assets"];
+        const validTabs = ["overview", "profile", "professional-journey", "messages", "snack-central", "billing", "partner-network", "vendor-central", "public-assets"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -111,19 +111,15 @@ export default function AdminDashboard() {
     }
 
     const menuItems = [
-        { id: "overview", title: "Dashboard", icon: Home, color: "bg-blue-500" },
+        { id: "overview", title: "Command Center", icon: Home, color: "bg-blue-500" },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500" },
         { id: "professional-journey", title: "Professional Journey", icon: Briefcase, color: "bg-amber-600" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
         { id: "divider", title: "BUSINESS SECTION", icon: null, color: "" },
-        { id: "snacks-overview", title: "Snacks Overview", icon: PieChart, color: "bg-pink-600" },
-        { id: "snacks-products", title: "Snack Inventory", icon: Package, color: "bg-pink-300" },
-        { id: "snacks-orders", title: "Snack Orders", icon: ShoppingBag, color: "bg-pink-400", badge: pendingOrdersCount },
-        { id: "coupons", title: "Snack Coupons", icon: Ticket, color: "bg-blue-600" },
+        { id: "snack-central", title: "Snack Central", icon: Package, color: "bg-pink-600", badge: pendingOrdersCount },
         { id: "billing", title: "Billing / Invoice", icon: FileText, color: "bg-orange-500" },
         { id: "partner-network", title: "Partner Network", icon: Users, color: "bg-orange-600" },
         { id: "vendor-central", title: "Vendor Central", icon: Building, color: "bg-teal-600" },
-        { id: "manage-products", title: "Product Assignment", icon: Package, color: "bg-teal-500" },
         { id: "public-assets", title: "Public Assets", icon: Handshake, color: "bg-blue-400", badge: pendingReviewsCount },
     ];
 
@@ -139,10 +135,17 @@ export default function AdminDashboard() {
                 </div>
             );
             case "messages": return <MessagesModule />;
-            case "snacks-products": return <SnacksProductModule />;
-            case "snacks-orders": return <SnacksOrdersModule />;
-            case "snacks-overview": return <SnacksOverviewModule />;
-            case "coupons": return <CouponsModule />;
+            case "snack-central": return (
+                <div className="space-y-16 animate-in fade-in duration-700">
+                    <SnacksProductModule />
+                    <div className="pt-16 border-t border-gray-100">
+                        <SnacksOrdersModule />
+                    </div>
+                    <div className="pt-16 border-t border-gray-100">
+                        <CouponsModule />
+                    </div>
+                </div>
+            );
             case "billing": return <BillingModule />;
             case "partner-network": return (
                 <div className="space-y-16 animate-in fade-in duration-700">
@@ -153,7 +156,6 @@ export default function AdminDashboard() {
                 </div>
             );
             case "vendor-central": return <VendorsModule />;
-            case "manage-products": return <VendorProductAssignmentModule />;
             case "public-assets": return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <ReviewsModule />
@@ -162,7 +164,14 @@ export default function AdminDashboard() {
                     </div>
                 </div>
             );
-            default: return <OverviewModule />;
+            default: return (
+                <div className="space-y-16 animate-in fade-in duration-700">
+                    <OverviewModule />
+                    <div className="pt-16 border-t border-gray-100">
+                        <SnacksOverviewModule />
+                    </div>
+                </div>
+            );
         }
     };
 
