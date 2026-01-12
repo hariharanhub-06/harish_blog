@@ -8,6 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { Tilt } from "@/components/Tilt";
 import imageKitLoader from "@/lib/imagekitLoader";
 import { useSearchParams } from "next/navigation";
+import PartnershipCarousel from "@/components/PartnershipCarousel";
 
 // Category Tabs
 const CATEGORIES = ["All", "Savories", "Sweets", "Spices", "Ready to Eat"];
@@ -332,6 +333,9 @@ function HMSnacksContent() {
                     </section>
                 )
             }
+
+            {/* Partnership Carousel Section */}
+            <PartnershipCarousel />
 
             {/* Products Section */}
             <section id="products" className="container mx-auto px-6 py-12 border-t border-gray-100">

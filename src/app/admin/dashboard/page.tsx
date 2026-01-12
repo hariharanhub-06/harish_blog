@@ -46,10 +46,12 @@ import AffiliatePayoutsModule from "@/components/admin/AffiliatePayoutsModule";
 import VendorsModule from "@/components/admin/VendorsModule";
 import VendorProductAssignmentModule from "@/components/admin/VendorProductAssignmentModule";
 import VendorSettlementsModule from "@/components/admin/VendorSettlementsModule";
+import PartnershipsModule from "@/components/admin/PartnershipsModule";
+import { Handshake } from "lucide-react";
 
 
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts" | "affiliates" | "affiliate-payouts" | "manage-vendors" | "manage-products" | "vendor-settlements";
+type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts" | "affiliates" | "affiliate-payouts" | "manage-vendors" | "manage-products" | "vendor-settlements" | "partnerships";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -64,7 +66,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "reviews", "abandoned-carts", "affiliates", "affiliate-payouts", "manage-vendors", "manage-products", "vendor-settlements"];
+        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "reviews", "abandoned-carts", "affiliates", "affiliate-payouts", "manage-vendors", "manage-products", "vendor-settlements", "partnerships"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -130,6 +132,7 @@ export default function AdminDashboard() {
         { id: "manage-vendors", title: "Manage Vendors", icon: Building, color: "bg-teal-600" },
         { id: "manage-products", title: "Product Assignment", icon: Package, color: "bg-teal-500" },
         { id: "vendor-settlements", title: "Vendor Settlements", icon: Banknote, color: "bg-pink-500" },
+        { id: "partnerships", title: "Partnership", icon: Handshake, color: "bg-blue-400" },
         { id: "affiliates", title: "Affiliates", icon: Users, color: "bg-orange-600" },
         { id: "affiliate-payouts", title: "Partner Payments", icon: DollarSign, color: "bg-emerald-600" },
     ];
@@ -152,6 +155,7 @@ export default function AdminDashboard() {
             case "manage-vendors": return <VendorsModule />;
             case "manage-products": return <VendorProductAssignmentModule />;
             case "vendor-settlements": return <VendorSettlementsModule />;
+            case "partnerships": return <PartnershipsModule />;
             default: return <OverviewModule />;
         }
     };

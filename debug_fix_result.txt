@@ -2,7 +2,7 @@
   "result": "ALREADY_PROCESSED",
   "transactions": [
     {
-      "id": "7f5f3133-f357-442f-bb35-ced82573e0a4",
+      "id": "3bcc72ef-2cef-431b-91e4-6f6e652407ce",
       "affiliateId": "cb16165e-5f4c-469e-b5a5-dedb8df5633f",
       "orderId": "HMS-1768153422",
       "amount": 21.6,
@@ -10,7 +10,7 @@
       "description": "Commission from order HMS-1768153422 (direct)",
       "fromAffiliateId": "cb16165e-5f4c-469e-b5a5-dedb8df5633f",
       "status": "Completed",
-      "createdAt": "2026-01-11T18:25:24.046Z"
+      "createdAt": "2026-01-11T19:18:08.723Z"
     }
   ],
   "affiliateStats": {
@@ -19,8 +19,8 @@
     "totalOrders": 1
   },
   "logs": [
-    "Analyzing Order: latest",
-    "Order found. Status: Shipping, Total: 640.94",
+    "Analyzing Order: HMS-1768153422",
+    "Order found. Status: Delivered, Total: 640.94",
     "Coupon Code: HMS68731",
     "Affiliate Found: test affilate (cb16165e-5f4c-469e-b5a5-dedb8df5633f) - Status: Approved",
     "Existing Transactions for HMS-1768153422: 1"
