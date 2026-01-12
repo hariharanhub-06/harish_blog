@@ -52,6 +52,7 @@ export default function CartPage() {
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
     const [couponError, setCouponError] = useState("");
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+    const [isDynamicShipping, setIsDynamicShipping] = useState(false);
 
     const [shipping, setShipping] = useState(0);
 
@@ -108,35 +109,64 @@ export default function CartPage() {
 
     // Calculate Shipping Effect
     useEffect(() => {
-        let ratePerKg = 200; // Default fallback for India
-        const isAbroad = formData.country.trim().toLowerCase() !== "india";
+        const calculateShipping = async () => {
+            if (isDynamicShipping && formData.pincode.length === 6) {
+                // Re-fetch dynamic shipping because weight/items might have changed
+                try {
+                    const shippingRes = await fetch('/api/snacks/shipping', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            pincode: formData.pincode,
+                            weight: totalWeight || 0.5 // Minimum 500g
+                        })
+                    });
 
-        if (isAbroad) {
-            ratePerKg = 2000;
-        } else if (formData.state) {
-            const stateKey = Object.keys(SHIPPING_RATES).find(key =>
-                key.toLowerCase() === formData.state.toLowerCase()
-            );
-            if (stateKey) {
-                ratePerKg = SHIPPING_RATES[stateKey];
+                    if (shippingRes.ok) {
+                        const shippingData = await shippingRes.json();
+                        if (shippingData.available) {
+                            setShipping(shippingData.shippingCost + 40); // Add packaging
+                            return; // Exit, do not do static calc
+                        }
+                    }
+                } catch (e) {
+                    console.error("Re-fetch shipping failed", e);
+                }
             }
-        }
 
-        // Sum shipping costs for all unique vendors involved
-        let totalShipping = 0;
-        const uniqueVendors = Object.keys(vendorGroups);
+            // Static / Fallback Logic
+            let ratePerKg = 200; // Default fallback for India
+            const isAbroad = formData.country.trim().toLowerCase() !== "india";
 
-        if (uniqueVendors.length > 0) {
-            uniqueVendors.forEach(vendorId => {
-                const groupWeight = vendorGroups[vendorId];
-                // (Weight * Rate) + 40 Packaging per vendor
-                totalShipping += Math.ceil((ratePerKg * groupWeight) + 40);
-            });
-        }
+            if (isAbroad) {
+                ratePerKg = 2000;
+            } else if (formData.state) {
+                const stateKey = Object.keys(SHIPPING_RATES).find(key =>
+                    key.toLowerCase() === formData.state.toLowerCase()
+                );
+                if (stateKey) {
+                    ratePerKg = SHIPPING_RATES[stateKey];
+                }
+            }
 
-        setShipping(totalShipping);
+            // Sum shipping costs for all unique vendors involved
+            let totalShipping = 0;
+            const uniqueVendors = Object.keys(vendorGroups);
 
-    }, [formData.state, formData.country, JSON.stringify(vendorGroups)]);
+            if (uniqueVendors.length > 0) {
+                uniqueVendors.forEach(vendorId => {
+                    const groupWeight = vendorGroups[vendorId];
+                    // (Weight * Rate) + 40 Packaging per vendor
+                    totalShipping += Math.ceil((ratePerKg * groupWeight) + 40);
+                });
+            }
+
+            setShipping(totalShipping);
+        };
+
+        calculateShipping();
+
+    }, [formData.state, formData.country, JSON.stringify(vendorGroups), isDynamicShipping, formData.pincode, totalWeight]);
 
     const discountAmount = appliedCoupon
         ? (appliedCoupon.type === 'affiliate'
@@ -194,6 +224,7 @@ export default function CartPage() {
     const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const pin = e.target.value;
         setFormData({ ...formData, pincode: pin });
+        if (pin.length !== 6) setIsDynamicShipping(false);
 
         if (pin.length === 6) {
             setIsPincodeLoading(true);
@@ -225,12 +256,15 @@ export default function CartPage() {
                             const shippingData = await shippingRes.json();
                             if (shippingData.available) {
                                 setShipping(shippingData.shippingCost + 40); // Add packaging charge
+                                setIsDynamicShipping(true);
                             } else {
                                 // Fallback to static rates if not available
+                                setIsDynamicShipping(false);
                                 console.warn("Shiprocket not available, using static rates");
                             }
                         }
                     } catch (shippingError) {
+                        setIsDynamicShipping(false);
                         console.error("Shipping API failed, using static rates", shippingError);
                     }
                 }
