@@ -52,26 +52,31 @@ export default function PartnershipsModule() {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log("[Partnerships] handleSave triggered", editing);
         setSaving(true);
         try {
             const url = editing.id ? `/api/admin/partnerships/${editing.id}` : "/api/admin/partnerships";
             const method = editing.id ? "PATCH" : "POST";
 
+            console.log(`[Partnerships] Sending ${method} request to ${url}`);
             const res = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(editing),
             });
+            console.log("[Partnerships] Response received:", res.status);
 
             if (res.ok) {
+                console.log("[Partnerships] Save successful");
                 fetchPartnerships();
                 setEditing(null);
             } else {
                 const err = await res.json();
+                console.error("[Partnerships] Save failed:", err);
                 alert("Error saving partner: " + (err.error || "Unknown error"));
             }
         } catch (error) {
-            console.error("Failed to save partnership", error);
+            console.error("[Partnerships] Network error:", error);
             alert("Network error while saving. Check server logs.");
         } finally {
             setSaving(false);
