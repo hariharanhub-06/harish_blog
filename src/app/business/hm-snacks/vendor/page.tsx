@@ -186,7 +186,7 @@ function VendorPageContent() {
                         <div className="relative">
                             <div className="aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl">
                                 <img
-                                    src="https://images.unsplash.com/photo-1590500155251-f21396eb9467?q=80&w=1000"
+                                    src="https://images.unsplash.com/photo-1605548237062-b1e36c7df6f2?q=80&w=1000"
                                     className="w-full h-full object-cover"
                                     alt="Vendor Craftsmanship"
                                 />
