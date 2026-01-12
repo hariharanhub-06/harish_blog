@@ -22,15 +22,18 @@ export async function GET() {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
+        console.log("[API Partnerships] Received POST body:", body);
         const { name, logo, partnerType, displayOrder = 0 } = body;
 
         if (!name || !logo || !partnerType) {
+            console.warn("[API Partnerships] Missing required fields");
             return NextResponse.json(
                 { error: "Name, logo, and partner type are required" },
                 { status: 400 }
             );
         }
 
+        console.log("[API Partnerships] Inserting into database...");
         const [newPartnership] = await db
             .insert(partnerships)
             .values({
@@ -41,10 +44,11 @@ export async function POST(req: NextRequest) {
                 isActive: true,
             })
             .returning();
+        console.log("[API Partnerships] Success:", newPartnership.id);
 
         return NextResponse.json(newPartnership);
     } catch (error) {
-        console.error("Create partnership error:", error);
-        return NextResponse.json({ error: "Failed to create partnership" }, { status: 500 });
+        console.error("[API Partnerships] Create partnership error:", error);
+        return NextResponse.json({ error: "Failed to create partnership: " + (error as Error).message }, { status: 500 });
     }
 }
