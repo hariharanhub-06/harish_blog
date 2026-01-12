@@ -356,3 +356,16 @@ export const orderShipments = pgTable("order_shipments", {
   readyToShip: boolean("ready_to_ship").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Partnerships table for displaying partner logos on product pages
+export const partnerships = pgTable("partnerships", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  logo: text("logo").notNull(), // ImageKit URL
+  partnerType: text("partner_type").notNull(), // e.g., "Supplier", "Distributor", "Sponsor"
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
