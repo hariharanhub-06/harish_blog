@@ -29,6 +29,8 @@ export async function GET(req: NextRequest) {
             awbCode: orderShipments.awbCode,
             courierName: orderShipments.courierName,
             shiprocketOrderId: orderShipments.shiprocketOrderId,
+            labelUrl: orderShipments.labelUrl,
+            trackingUrl: orderShipments.trackingUrl,
             // Join Data
             displayOrderId: snackOrders.orderId,
             customerName: snackOrders.customerName,
