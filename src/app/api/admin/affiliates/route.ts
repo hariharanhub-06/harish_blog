@@ -2,64 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { affiliates, snackOrders, affiliateTransactions } from "@/db/schema";
 import { eq, desc, sql, count } from "drizzle-orm";
+import { generatePassword, findBinaryPlacement, generateCouponCode } from "@/lib/affiliate-utils";
+import { getAffiliateTier } from "@/lib/affiliate-tiers";
 
-// Helper function to generate unique coupon code
-function generateCouponCode(): string {
-    const randomNum = Math.floor(10000 + Math.random() * 90000); // 5 digits
-    return `HMS${randomNum}`;
-}
-
-// Helper function to calculate tier based on order count
-function calculateTier(orderCount: number, isPaid: boolean = false) {
-    if (!isPaid) return { tier: "Newbie", rate: 0.06 }; // Non-paid stuck in Newbie
-    if (orderCount >= 200) return { tier: "Elite", rate: 0.20 };
-    if (orderCount >= 180) return { tier: "Pro", rate: 0.18 };
-    if (orderCount >= 150) return { tier: "Platinum", rate: 0.15 };
-    if (orderCount >= 100) return { tier: "Golden", rate: 0.12 };
-    if (orderCount >= 51) return { tier: "Silver", rate: 0.10 };
-    if (orderCount >= 21) return { tier: "Starter", rate: 0.08 };
-    return { tier: "Newbie", rate: 0.06 };
-}
-
-// Helper to generate a random password
-function generatePassword(): string {
-    return Math.random().toString(36).slice(-8); // 8 characters
-}
-
-// Binary placement logic: Find the first available position in the tree under a specific affiliate
-async function findBinaryPlacement(referrerId: string | null): Promise<{ parentId: string | null, position: 'left' | 'right' | null }> {
-    if (!referrerId) {
-        // If no referrer, check if there's any affiliate in the system
-        const countRes = await db.select({ count: count() }).from(affiliates);
-        if (Number(countRes[0].count) === 0) return { parentId: null, position: null }; // First affiliate is root
-
-        // If not first, find the very first root (one with no parent)
-        const roots = await db.select({ id: affiliates.id }).from(affiliates).where(sql`parent_id IS NULL`);
-        if (roots.length > 0) referrerId = roots[0].id;
-        else return { parentId: null, position: null };
-    }
-
-    // BFS to find the first available slot
-    let queue = [referrerId];
-    while (queue.length > 0) {
-        const currentId = queue.shift()!;
-        const children = await db
-            .select({ id: affiliates.id, position: affiliates.position })
-            .from(affiliates)
-            .where(eq(affiliates.parentId, currentId));
-
-        const hasLeft = children.find(c => c.position === 'left');
-        const hasRight = children.find(c => c.position === 'right');
-
-        if (!hasLeft) return { parentId: currentId, position: 'left' };
-        if (!hasRight) return { parentId: currentId, position: 'right' };
-
-        // Both children exist, add them to queue to check their children
-        queue.push(hasLeft.id, hasRight.id);
-    }
-
-    return { parentId: null, position: null };
-}
 
 // GET - Fetch all affiliates with stats
 export async function GET() {
@@ -224,7 +169,8 @@ export async function PUT(req: NextRequest) {
         const totalEarnings = direct + l1 + l2 + l3;
 
         // 3. Update Tier
-        const { tier } = calculateTier(orderCount, !!affiliate.isPaid);
+        const tierObj = getAffiliateTier(orderCount, !!affiliate.isPaid);
+        const tier = tierObj.name;
 
         // 4. Final Update
         await db

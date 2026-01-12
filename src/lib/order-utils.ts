@@ -6,7 +6,7 @@ import { eq, inArray } from "drizzle-orm";
  * Splits an order into multiple shipments based on the vendor of each product.
  * If shipments already exist for the order, it skips creation to avoid duplicates.
  */
-export async function splitOrderIntoShipments(orderId: string) {
+export async function splitOrderIntoShipments(orderId: string, initialStatus: string = "Pending") {
     try {
         console.log(`[SplitShipping] Processing order: ${orderId}`);
 
@@ -73,7 +73,7 @@ export async function splitOrderIntoShipments(orderId: string) {
                     orderId: orderId,
                     vendorId: vendorId,
                     items: items,
-                    status: "Pending",
+                    status: initialStatus,
                 })
             );
         }
@@ -85,7 +85,7 @@ export async function splitOrderIntoShipments(orderId: string) {
                     orderId: orderId,
                     vendorId: null,
                     items: noVendorItems,
-                    status: "Pending",
+                    status: initialStatus,
                 })
             );
         }

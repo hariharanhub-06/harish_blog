@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
         if (status === "Payment Confirmed" || status === "Success") {
             try {
                 await processAffiliateCommissions(orderId);
-                await splitOrderIntoShipments(orderId);
+                await splitOrderIntoShipments(orderId, status);
             } catch (splitErr) {
                 console.error("Failed to split manual order:", splitErr);
             }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { snackOrders, orderShipments, vendors, snackProducts } from "@/db/schema";
 import { eq, inArray, sql } from "drizzle-orm";
+import { splitOrderIntoShipments } from "@/lib/order-utils";
 
 export async function POST(req: NextRequest) {
     try {
@@ -22,11 +23,26 @@ export async function POST(req: NextRequest) {
         logs.push(`Order ${orderId} current status: ${targetStatus}`);
 
         // Get all shipments
-        const shipments = await db.select()
+        let shipments = await db.select()
             .from(orderShipments)
             .where(eq(orderShipments.orderId, orderId));
 
         logs.push(`Found ${shipments.length} shipment(s)`);
+
+        // HEAL: If no shipments exist but order is confirmed, create them
+        if (shipments.length === 0 && (targetStatus === "Payment Confirmed" || targetStatus === "Success" || targetStatus === "Parcel Prepared" || targetStatus === "Shipping" || targetStatus === "Delivered")) {
+            logs.push(`HEAL: No shipments found for confirmed order. Creating now...`);
+            const splitRes = await splitOrderIntoShipments(orderId, targetStatus);
+            if (splitRes.success) {
+                logs.push(`HEAL: Created ${splitRes.count} shipments.`);
+                // Fetch again
+                shipments = await db.select()
+                    .from(orderShipments)
+                    .where(eq(orderShipments.orderId, orderId));
+            } else {
+                logs.push(`HEAL: Failed to create shipments: ${JSON.stringify(splitRes.error)}`);
+            }
+        }
 
         // Update each shipment
         for (const shipment of shipments) {

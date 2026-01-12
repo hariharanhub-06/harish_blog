@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { affiliates, affiliateTransactions } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { generatePassword, findBinaryPlacement } from "@/lib/affiliate-utils";
 
 export async function POST(req: Request) {
     try {
@@ -59,6 +60,16 @@ export async function POST(req: Request) {
         };
 
         const couponCode = isPaid ? generateCouponCode(fullName) : null;
+        const password = isPaid ? generatePassword() : null;
+
+        // Find placement if paid
+        let parentIdToSet = null;
+        let positionToSet = null;
+        if (isPaid) {
+            const placement = await findBinaryPlacement(referrerId);
+            parentIdToSet = placement.parentId;
+            positionToSet = placement.position;
+        }
 
         const [newAffiliate] = await db.insert(affiliates).values({
             fullName,
@@ -67,11 +78,14 @@ export async function POST(req: Request) {
             email: email || null,
             socialLink: socialLink || null,
             referrerId: referrerId as any,
+            parentId: parentIdToSet as any,
+            position: positionToSet,
             status,
             isActive,
             isPaid,
             paidAt: isPaid ? new Date() : null,
             couponCode: couponCode,
+            password: password,
         }).returning();
 
         // If paid, give ₹20 bonus to referrer
@@ -100,7 +114,7 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: true,
             message: isPaid
-                ? `Welcome! Your account is active. Your coupon code is ${couponCode}`
+                ? `Welcome! Your account is active. \nCoupon Code: ${couponCode}\nLogin Password: ${password}\n\nPlease save your password for future login.`
                 : "Thank you for registering! Your request is pending admin approval."
         });
 
