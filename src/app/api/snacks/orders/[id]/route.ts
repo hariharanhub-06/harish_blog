@@ -82,9 +82,9 @@ export async function PATCH(
 
         // Cascade status updates to shipments
         if (body.status) {
-            const statusesToCascade = ["Delivered", "Shipping", "Cancel"];
+            const statusesToCascade = ["Delivered", "Shipping", "Cancel", "Payment Confirmed", "Parcel Prepared"];
             if (statusesToCascade.includes(body.status)) {
-                const shipmentStatus = body.status === "Shipping" ? "Shipping" : body.status;
+                const shipmentStatus = body.status;
 
                 // Get all shipments for this order
                 const shipments = await db.select()
