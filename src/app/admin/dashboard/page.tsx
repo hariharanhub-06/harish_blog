@@ -51,7 +51,7 @@ import { Handshake } from "lucide-react";
 
 
 
-type Tab = "overview" | "profile" | "projects" | "timeline" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "reviews" | "abandoned-carts" | "affiliates" | "affiliate-payouts" | "manage-vendors" | "manage-products" | "vendor-settlements" | "partnerships";
+type Tab = "overview" | "profile" | "professional-journey" | "messages" | "snacks-overview" | "snacks-products" | "snacks-orders" | "coupons" | "billing" | "partner-network" | "vendor-central" | "manage-products" | "public-assets";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -61,12 +61,11 @@ export default function AdminDashboard() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
     const [pendingReviewsCount, setPendingReviewsCount] = useState(0);
-    const [abandonedCartsCount, setAbandonedCartsCount] = useState(0);
 
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "projects", "timeline", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "reviews", "abandoned-carts", "affiliates", "affiliate-payouts", "manage-vendors", "manage-products", "vendor-settlements", "partnerships"];
+        const validTabs = ["overview", "profile", "professional-journey", "messages", "snacks-overview", "snacks-products", "snacks-orders", "coupons", "billing", "partner-network", "vendor-central", "manage-products", "public-assets"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -79,7 +78,6 @@ export default function AdminDashboard() {
                     setUnreadCount(data.unreadMessages || 0);
                     setPendingOrdersCount(data.pendingOrders || 0);
                     setPendingReviewsCount(data.pendingReviews || 0);
-                    setAbandonedCartsCount(data.abandonedCarts || 0);
                 }
             } catch (err) {
                 console.error("Failed to fetch notification counts", err);
@@ -91,9 +89,6 @@ export default function AdminDashboard() {
 
         return () => clearInterval(interval);
     }, [user]);
-
-
-
 
     const handleTabChange = (tab: Tab) => {
         setActiveTab(tab);
@@ -118,8 +113,7 @@ export default function AdminDashboard() {
     const menuItems = [
         { id: "overview", title: "Dashboard", icon: Home, color: "bg-blue-500" },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500" },
-        { id: "projects", title: "Portfolio", icon: Layout, color: "bg-purple-500" },
-        { id: "timeline", title: "Timeline", icon: Briefcase, color: "bg-amber-600" },
+        { id: "professional-journey", title: "Professional Journey", icon: Briefcase, color: "bg-amber-600" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
         { id: "divider", title: "BUSINESS SECTION", icon: null, color: "" },
         { id: "snacks-overview", title: "Snacks Overview", icon: PieChart, color: "bg-pink-600" },
@@ -127,35 +121,47 @@ export default function AdminDashboard() {
         { id: "snacks-orders", title: "Snack Orders", icon: ShoppingBag, color: "bg-pink-400", badge: pendingOrdersCount },
         { id: "coupons", title: "Snack Coupons", icon: Ticket, color: "bg-blue-600" },
         { id: "billing", title: "Billing / Invoice", icon: FileText, color: "bg-orange-500" },
-        { id: "reviews", title: "Reviews", icon: Star, color: "bg-amber-500", badge: pendingReviewsCount },
-        { id: "abandoned-carts", title: "Drop Offs", icon: ShoppingCart, color: "bg-rose-500", badge: abandonedCartsCount },
-        { id: "manage-vendors", title: "Manage Vendors", icon: Building, color: "bg-teal-600" },
+        { id: "partner-network", title: "Partner Network", icon: Users, color: "bg-orange-600" },
+        { id: "vendor-central", title: "Vendor Central", icon: Building, color: "bg-teal-600" },
         { id: "manage-products", title: "Product Assignment", icon: Package, color: "bg-teal-500" },
-        { id: "vendor-settlements", title: "Vendor Settlements", icon: Banknote, color: "bg-pink-500" },
-        { id: "partnerships", title: "Partnership", icon: Handshake, color: "bg-blue-400" },
-        { id: "affiliates", title: "Affiliates", icon: Users, color: "bg-orange-600" },
-        { id: "affiliate-payouts", title: "Partner Payments", icon: DollarSign, color: "bg-emerald-600" },
+        { id: "public-assets", title: "Public Assets", icon: Handshake, color: "bg-blue-400", badge: pendingReviewsCount },
     ];
 
     const renderContent = () => {
         switch (activeTab) {
             case "profile": return <ProfileModule />;
-            case "projects": return <ProjectsModule />;
-            case "timeline": return <TimelineModule />;
+            case "professional-journey": return (
+                <div className="space-y-16 animate-in fade-in duration-700">
+                    <ProjectsModule />
+                    <div className="pt-16 border-t border-gray-100">
+                        <TimelineModule />
+                    </div>
+                </div>
+            );
             case "messages": return <MessagesModule />;
             case "snacks-products": return <SnacksProductModule />;
             case "snacks-orders": return <SnacksOrdersModule />;
             case "snacks-overview": return <SnacksOverviewModule />;
             case "coupons": return <CouponsModule />;
             case "billing": return <BillingModule />;
-            case "reviews": return <ReviewsModule />;
-            case "abandoned-carts": return <AbandonedCartsModule />;
-            case "affiliates": return <AffiliatesModule />;
-            case "affiliate-payouts": return <AffiliatePayoutsModule />;
-            case "manage-vendors": return <VendorsModule />;
+            case "partner-network": return (
+                <div className="space-y-16 animate-in fade-in duration-700">
+                    <AffiliatesModule />
+                    <div className="pt-16 border-t border-gray-100">
+                        <AffiliatePayoutsModule />
+                    </div>
+                </div>
+            );
+            case "vendor-central": return <VendorsModule />;
             case "manage-products": return <VendorProductAssignmentModule />;
-            case "vendor-settlements": return <VendorSettlementsModule />;
-            case "partnerships": return <PartnershipsModule />;
+            case "public-assets": return (
+                <div className="space-y-16 animate-in fade-in duration-700">
+                    <ReviewsModule />
+                    <div className="pt-16 border-t border-gray-100">
+                        <PartnershipsModule />
+                    </div>
+                </div>
+            );
             default: return <OverviewModule />;
         }
     };
