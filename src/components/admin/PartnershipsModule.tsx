@@ -15,7 +15,7 @@ import Image from "next/image";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import imageKitLoader from "@/lib/imagekitLoader";
 
-const PARTNER_TYPES = ["Supplier", "Distributor", "Sponsor", "Production Partner", "Logistics Partner"];
+const PARTNER_TYPES = ["Supplier", "Distributor", "Sponsor", "Production Partner", "Logistics Partner", "Payment Gateway Partner"];
 
 export default function PartnershipsModule() {
     const [partnerships, setPartnerships] = useState<any[]>([]);
