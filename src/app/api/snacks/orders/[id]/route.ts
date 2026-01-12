@@ -242,7 +242,11 @@ export async function DELETE(
             // 2. Roll back Affiliate Stats if the order had a coupon
             if (order.couponCode) {
                 const [affiliate] = await db
-                    .select()
+                    .select({
+                        id: affiliates.id,
+                        fullName: affiliates.fullName,
+                        couponCode: affiliates.couponCode
+                    })
                     .from(affiliates)
                     .where(sql`UPPER(${affiliates.couponCode}) = UPPER(${order.couponCode})`)
                     .limit(1);
@@ -287,7 +291,12 @@ export async function DELETE(
             }
 
             // 3. Revert Vendor Earnings for Delivered Shipments
-            const shipments = await db.select().from(orderShipments).where(eq(orderShipments.orderId, order.orderId));
+            const shipments = await db.select({
+                id: orderShipments.id,
+                status: orderShipments.status,
+                vendorId: orderShipments.vendorId,
+                items: orderShipments.items
+            }).from(orderShipments).where(eq(orderShipments.orderId, order.orderId));
 
             for (const shipment of shipments) {
                 if (shipment.status === "Delivered" && shipment.vendorId) {
