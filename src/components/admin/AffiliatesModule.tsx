@@ -146,9 +146,13 @@ export default function AffiliatesModule() {
 
             if (res.ok) {
                 await fetchAffiliates();
+            } else {
+                const data = await res.json();
+                alert(`Failed to delete affiliate: ${data.message || data.error || "Unknown error"}`);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error deleting affiliate", error);
+            alert(`Network Error: ${error.message}`);
         } finally {
             setUpdatingId(null);
         }

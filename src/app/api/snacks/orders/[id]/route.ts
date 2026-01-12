@@ -341,8 +341,12 @@ export async function DELETE(
             .where(eq(snackOrders.id, id));
 
         return NextResponse.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Delete order error:", error);
-        return NextResponse.json({ error: "Failed to delete order" }, { status: 500 });
+        return NextResponse.json({
+            error: "Failed to delete order",
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 });
     }
 }
