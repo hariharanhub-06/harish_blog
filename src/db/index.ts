@@ -8,8 +8,6 @@ const sql = neon(process.env.DATABASE_URL!, {
     fetchOptions: {
         cache: 'force-cache',
     },
-    // Set connection timeout to prevent hanging requests
-    fetchConnectionCache: true,
     // Enable full results streaming for large datasets
     fullResults: true,
     // Array mode is faster than object mode for large result sets
