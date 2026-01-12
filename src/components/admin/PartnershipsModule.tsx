@@ -35,6 +35,13 @@ export default function PartnershipsModule() {
             if (res.ok) {
                 const data = await res.json();
                 setPartnerships(data);
+            } else {
+                const err = await res.json();
+                console.error("Fetch error:", err);
+                // If it's the first time, maybe table is missing
+                if (res.status === 500) {
+                    alert("Failed to load partnerships. Have you run the SQL script in create_partnerships_table.sql?");
+                }
             }
         } catch (error) {
             console.error("Failed to fetch partnerships", error);
@@ -59,9 +66,13 @@ export default function PartnershipsModule() {
             if (res.ok) {
                 fetchPartnerships();
                 setEditing(null);
+            } else {
+                const err = await res.json();
+                alert("Error saving partner: " + (err.error || "Unknown error"));
             }
         } catch (error) {
             console.error("Failed to save partnership", error);
+            alert("Network error while saving. Check server logs.");
         } finally {
             setSaving(false);
         }
@@ -71,9 +82,14 @@ export default function PartnershipsModule() {
         if (!confirm("Are you sure you want to delete this partner?")) return;
         try {
             const res = await fetch(`/api/admin/partnerships/${id}`, { method: "DELETE" });
-            if (res.ok) fetchPartnerships();
+            if (res.ok) {
+                fetchPartnerships();
+            } else {
+                alert("Failed to delete partner.");
+            }
         } catch (error) {
             console.error("Failed to delete partnership", error);
+            alert("Network error while deleting.");
         }
     };
 
