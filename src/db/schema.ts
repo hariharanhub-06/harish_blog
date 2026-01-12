@@ -256,6 +256,9 @@ export const affiliates = pgTable("affiliates", {
 
   status: text("status").default("Pending"),
   isActive: boolean("is_active").default(false),
+  isPaid: boolean("is_paid").default(false),
+  paidAt: timestamp("paid_at"),
+  ordersSincePaid: integer("orders_since_paid").default(0),
 
   // Stats
   totalOrders: integer("total_orders").default(0),

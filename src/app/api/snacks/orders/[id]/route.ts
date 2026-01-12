@@ -54,6 +54,9 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
+        const body = await req.json();
+
         // Fetch old order for status transition checks
         const [oldOrder] = await db
             .select()

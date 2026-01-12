@@ -24,13 +24,15 @@ export async function GET(req: NextRequest) {
         }
 
         const affiliate = results[0];
-        const tier = getAffiliateTier(affiliate.totalOrders || 0);
+        const tier = getAffiliateTier(affiliate.totalOrders || 0, !!affiliate.isPaid);
 
         // Fetch latest stats directly from the database (now updated by admin or order sync)
         return NextResponse.json({
             fullName: affiliate.fullName,
             couponCode: affiliate.couponCode,
             status: affiliate.status,
+            isPaid: affiliate.isPaid,
+            paidAt: affiliate.paidAt,
             totalOrders: affiliate.totalOrders,
             totalSalesAmount: affiliate.totalSalesAmount,
             totalEarnings: affiliate.totalEarnings,

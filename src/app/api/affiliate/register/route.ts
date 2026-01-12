@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { affiliates } from "@/db/schema";
+import { affiliates, affiliateTransactions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
@@ -46,21 +46,62 @@ export async function POST(req: Request) {
             }
         }
 
-        // Create affiliate with pending status
-        await db.insert(affiliates).values({
+        // Create affiliate
+        const isPaid = !!body.isPaid;
+        const status = isPaid ? "Approved" : "Pending";
+        const isActive = isPaid;
+
+        // Helper to generate a unique coupon code
+        const generateCouponCode = (name: string) => {
+            const prefix = name.split(" ")[0].toUpperCase().slice(0, 5);
+            const suffix = Math.floor(1000 + Math.random() * 9000);
+            return `${prefix}${suffix}`;
+        };
+
+        const couponCode = isPaid ? generateCouponCode(fullName) : null;
+
+        const [newAffiliate] = await db.insert(affiliates).values({
             fullName,
             mobile,
             upiId,
             email: email || null,
             socialLink: socialLink || null,
             referrerId: referrerId as any,
-            status: "Pending",
-            isActive: false,
-        });
+            status,
+            isActive,
+            isPaid,
+            paidAt: isPaid ? new Date() : null,
+            couponCode: couponCode,
+        }).returning();
+
+        // If paid, give ₹20 bonus to referrer
+        if (isPaid && referrerId) {
+            await db.insert(affiliateTransactions).values({
+                affiliateId: referrerId,
+                amount: 20,
+                type: 'bonus',
+                description: `Referral bonus for ${fullName} joining as Paid Affiliate`,
+                fromAffiliateId: newAffiliate.id,
+                status: 'Completed'
+            });
+
+            // Update referrer's earnings
+            const [referrer] = await db.select().from(affiliates).where(eq(affiliates.id, referrerId)).limit(1);
+            if (referrer) {
+                await db.update(affiliates)
+                    .set({
+                        totalEarnings: (referrer.totalEarnings || 0) + 20,
+                        pendingBalance: (referrer.pendingBalance || 0) + 20
+                    })
+                    .where(eq(affiliates.id, referrerId));
+            }
+        }
 
         return NextResponse.json({
             success: true,
-            message: "Thank you for registering! Your affiliate code will be shared with you within 24 hours."
+            message: isPaid
+                ? `Welcome! Your account is active. Your coupon code is ${couponCode}`
+                : "Thank you for registering! Your request is pending admin approval."
         });
 
     } catch (error) {

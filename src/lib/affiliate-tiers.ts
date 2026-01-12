@@ -8,6 +8,7 @@ export const AFFILIATE_TIERS = [
     { name: "Elite", minOrders: 201, maxOrders: Infinity, rate: 60, color: "from-orange-500 to-red-500" },
 ];
 
-export function getAffiliateTier(orderCount: number) {
+export function getAffiliateTier(orderCount: number, isPaid: boolean = false) {
+    if (!isPaid) return AFFILIATE_TIERS[0]; // Always Newbie if not paid
     return AFFILIATE_TIERS.find(t => orderCount >= t.minOrders && orderCount <= t.maxOrders) || AFFILIATE_TIERS[0];
 }

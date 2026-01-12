@@ -55,6 +55,7 @@ function AffiliatePageContent() {
         email: "",
         socialLink: "",
         referrerCode: "",
+        isPaid: true,
     });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
@@ -91,6 +92,7 @@ function AffiliatePageContent() {
                     email: "",
                     socialLink: "",
                     referrerCode: "",
+                    isPaid: true
                 });
             } else {
                 setError(data.error || "Registration failed");
@@ -347,16 +349,50 @@ function AffiliatePageContent() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">
-                                    Instagram / WhatsApp Link (Optional)
+                                <label className="block text-sm font-bold text-gray-700 mb-4">
+                                    Membership Type <span className="text-red-500">*</span>
                                 </label>
-                                <input
-                                    type="url"
-                                    value={formData.socialLink}
-                                    onChange={(e) => setFormData({ ...formData, socialLink: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-500 outline-none transition-all"
-                                    placeholder="https://instagram.com/yourprofile"
-                                />
+                                <div className="grid grid-cols-1 gap-4">
+                                    <label className={`relative flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all ${formData.isPaid ? 'border-orange-500 bg-orange-50 shadow-md' : 'border-gray-100 bg-gray-50'}`}>
+                                        <input
+                                            type="radio"
+                                            name="membership"
+                                            checked={formData.isPaid}
+                                            onChange={() => setFormData({ ...formData, isPaid: true })}
+                                            className="hidden"
+                                        />
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="font-black text-gray-900">Directly Approved (Paid)</span>
+                                                <span className="bg-orange-500 text-white text-[10px] px-2 py-0.5 rounded-lg font-black uppercase">₹100</span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 font-medium italic">Instant approval + eligibility for higher commission tiers.</p>
+                                        </div>
+                                        <div className={`w-5 h-5 rounded-full border-2 ml-4 flex items-center justify-center ${formData.isPaid ? 'border-orange-500 bg-orange-500' : 'border-gray-300'}`}>
+                                            {formData.isPaid && <div className="w-2 h-2 rounded-full bg-white" />}
+                                        </div>
+                                    </label>
+
+                                    <label className={`relative flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all ${!formData.isPaid ? 'border-rose-400 bg-rose-50 shadow-md' : 'border-gray-100 bg-gray-50'}`}>
+                                        <input
+                                            type="radio"
+                                            name="membership"
+                                            checked={!formData.isPaid}
+                                            onChange={() => setFormData({ ...formData, isPaid: false })}
+                                            className="hidden"
+                                        />
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="font-black text-gray-900">Wait for Approval (Non-Paid)</span>
+                                                <span className="bg-gray-400 text-white text-[10px] px-2 py-0.5 rounded-lg font-black uppercase">FREE</span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 font-medium italic">Admin approval required. Permanently limited to "Newbie" tier (30%).</p>
+                                        </div>
+                                        <div className={`w-5 h-5 rounded-full border-2 ml-4 flex items-center justify-center ${!formData.isPaid ? 'border-rose-400 bg-rose-400' : 'border-gray-300'}`}>
+                                            {!formData.isPaid && <div className="w-2 h-2 rounded-full bg-white" />}
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
 
                             <button
@@ -364,7 +400,7 @@ function AffiliatePageContent() {
                                 disabled={loading}
                                 className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {loading ? "Registering..." : "Register Now"}
+                                {loading ? "Registering..." : formData.isPaid ? "Pay ₹100 & Join" : "Submit Request"}
                             </button>
                         </div>
                     </form>

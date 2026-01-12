@@ -54,6 +54,8 @@ interface Stats {
     currentTier: string;
     commissionRate: number;
     upiId: string;
+    isPaid: boolean;
+    paidAt?: string;
     recentOrders: Array<{
         orderId: string;
         createdAt: string;
@@ -148,6 +150,34 @@ export default function AffiliateDashboard() {
     const handleLogout = () => {
         localStorage.clear();
         router.push("/business/hm-snacks/affiliate/login");
+    };
+
+    const handleUpgrade = async () => {
+        const id = localStorage.getItem("affiliate_id");
+        if (!id) return;
+
+        if (!confirm("Upgrade to Paid Membership for ₹100? This will unlock higher earning tiers based on your orders.")) return;
+
+        setRefreshing(true);
+        try {
+            const res = await fetch("/api/affiliate/upgrade", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ affiliateId: id }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                fetchStats();
+            } else {
+                alert(data.error || "Failed to upgrade");
+            }
+        } catch (err) {
+            alert("Something went wrong");
+        } finally {
+            setRefreshing(false);
+        }
     };
 
     const handleWithdraw = async () => {
@@ -264,6 +294,38 @@ export default function AffiliateDashboard() {
                             exit={{ opacity: 0, x: 20 }}
                             className="space-y-8"
                         >
+                            {/* Membership Status */}
+                            {!stats.isPaid && (
+                                <div className="bg-rose-50 border border-rose-100 rounded-[2rem] p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                                    <div className="flex items-center gap-4 text-center md:text-left">
+                                        <div className="w-12 h-12 bg-rose-100 rounded-2xl flex items-center justify-center text-rose-500">
+                                            <ShieldCheck size={24} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-black text-rose-900">Non-Paid Affiliate Account</h3>
+                                            <p className="text-sm text-rose-700 font-bold opacity-80">You are currently restricted to the <span className="underline">Newbie Tier (30%)</span>. Upgrade to unlock higher rates.</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleUpgrade}
+                                        className="w-full md:w-auto px-10 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 active:scale-95"
+                                    >
+                                        Upgrade Now (₹100)
+                                    </button>
+                                </div>
+                            )}
+
+                            {stats.isPaid && (
+                                <div className="bg-emerald-50 border border-emerald-100 rounded-[2rem] p-4 flex items-center gap-4 shadow-sm max-w-fit px-8">
+                                    <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-500">
+                                        <Award size={18} />
+                                    </div>
+                                    <p className="text-xs font-black text-emerald-800 uppercase tracking-widest">
+                                        Premium Paid Affiliate Member
+                                    </p>
+                                </div>
+                            )}
+
                             {/* Main Banner */}
                             <div className="bg-gradient-to-br from-orange-600 to-pink-600 rounded-3xl md:rounded-[3rem] p-6 md:p-12 text-white relative overflow-hidden shadow-2xl shadow-orange-200">
                                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-40 -mt-40 blur-3xl underline" />
