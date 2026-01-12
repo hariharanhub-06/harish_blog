@@ -54,8 +54,16 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
-        const body = await req.json();
+        // Fetch old order for status transition checks
+        const [oldOrder] = await db
+            .select()
+            .from(snackOrders)
+            .where(eq(snackOrders.id, id))
+            .limit(1);
+
+        if (!oldOrder) {
+            return NextResponse.json({ error: "Order not found" }, { status: 404 });
+        }
 
         const [updatedOrder] = await db
             .update(snackOrders)
@@ -66,17 +74,14 @@ export async function PATCH(
             .where(eq(snackOrders.id, id))
             .returning();
 
-        if (!updatedOrder) {
-            return NextResponse.json({ error: "Order not found" }, { status: 404 });
+        // 1. Trigger Affiliate Commission only if Delivered
+        if (body.status === "Delivered" && oldOrder.status !== "Delivered") {
+            await processAffiliateCommissions(updatedOrder.orderId);
         }
 
-        // Trigger Affiliate Commission & Split Shipping Logic if status is successful
-        const successStatuses = ["Payment Confirmed", "Success", "Delivered", "Shipping"];
-        if (body.status && successStatuses.includes(body.status)) {
-            // 1. Process Commissions (will skip if already processed)
-            await processAffiliateCommissions(updatedOrder.orderId);
-
-            // 2. Split into multi-vendor shipments (will skip if already split)
+        // 2. Split into multi-vendor shipments (if not already split)
+        const splitStatuses = ["Payment Confirmed", "Success", "Delivered", "Shipping"];
+        if (body.status && splitStatuses.includes(body.status)) {
             await splitOrderIntoShipments(updatedOrder.orderId);
         }
 
@@ -93,14 +98,14 @@ export async function PATCH(
 
                 // Update each shipment and trigger vendor earnings if delivered
                 for (const shipment of shipments) {
-                    const oldStatus = shipment.status;
+                    const oldShipmentStatus = shipment.status;
 
                     // Update shipment status
                     await db.update(orderShipments)
                         .set({ status: shipmentStatus })
                         .where(eq(orderShipments.id, shipment.id));
 
-                    // Handle vendor earnings
+                    // Handle vendor earnings (strictly on Delivered)
                     if (shipment.vendorId) {
                         const items = shipment.items as any[];
                         const productIds = items.map(i => i.productId || i.id).filter(Boolean);
@@ -121,7 +126,7 @@ export async function PATCH(
                         }
 
                         // Credit earnings if transitioning to Delivered
-                        if (shipmentStatus === "Delivered" && oldStatus !== "Delivered" && shipmentValue > 0) {
+                        if (shipmentStatus === "Delivered" && oldShipmentStatus !== "Delivered" && shipmentValue > 0) {
                             await db.update(vendors)
                                 .set({
                                     totalEarnings: sql`${vendors.totalEarnings} + ${shipmentValue}`,
@@ -131,7 +136,7 @@ export async function PATCH(
                         }
 
                         // Revert earnings if transitioning away from Delivered
-                        if (oldStatus === "Delivered" && shipmentStatus !== "Delivered" && shipmentValue > 0) {
+                        if (oldShipmentStatus === "Delivered" && shipmentStatus !== "Delivered" && shipmentValue > 0) {
                             await db.update(vendors)
                                 .set({
                                     totalEarnings: sql`${vendors.totalEarnings} - ${shipmentValue}`,
@@ -143,25 +148,28 @@ export async function PATCH(
                 }
             }
 
-            // Roll back affiliate earnings if order is cancelled
-            if (body.status === "Cancel" && updatedOrder.couponCode) {
+            // --- Affiliate Earnings Rollback ---
+            // If the order was Delivered but is now something else, or if it's Cancelled and has commissions
+            const shouldRollbackAffiliate =
+                (oldOrder.status === "Delivered" && body.status !== "Delivered") ||
+                (body.status === "Cancel");
+
+            if (shouldRollbackAffiliate && updatedOrder.couponCode) {
                 const [affiliate] = await db.select()
                     .from(affiliates)
                     .where(sql`UPPER(${affiliates.couponCode}) = UPPER(${updatedOrder.couponCode})`)
                     .limit(1);
 
                 if (affiliate) {
-                    console.log(`[Cancel Rollback] Found affiliate: ${affiliate.fullName} for order ${updatedOrder.orderId}`);
-
-                    // Get all transactions for this order
+                    // Check if there are transactions to reverse
                     const transactionsToDelete = await db.select()
                         .from(affiliateTransactions)
                         .where(eq(affiliateTransactions.orderId, updatedOrder.orderId));
 
-                    console.log(`[Cancel Rollback] Found ${transactionsToDelete.length} transactions to reverse`);
-
                     if (transactionsToDelete.length > 0) {
-                        // Subtract order count and sales volume from direct affiliate
+                        console.log(`[Affiliate Rollback] Reversing ${transactionsToDelete.length} transactions for order ${updatedOrder.orderId}`);
+
+                        // Subtract order count and sales volume from direct affiliate (only if it was confirmed)
                         await db.update(affiliates)
                             .set({
                                 totalOrders: sql`${affiliates.totalOrders} - 1`,
@@ -175,8 +183,6 @@ export async function PATCH(
                                 tx.type === 'level1' ? 'level1Earnings' :
                                     tx.type === 'level2' ? 'level2Earnings' : 'level3Earnings';
 
-                            console.log(`[Cancel Rollback] Reversing ${tx.amount} (${tx.type}) for affiliate ID: ${tx.affiliateId}`);
-
                             await db.update(affiliates)
                                 .set({
                                     totalEarnings: sql`${affiliates.totalEarnings} - ${tx.amount}`,
@@ -189,8 +195,6 @@ export async function PATCH(
                         // Delete the transactions
                         await db.delete(affiliateTransactions)
                             .where(eq(affiliateTransactions.orderId, updatedOrder.orderId));
-
-                        console.log(`[Cancel Rollback] Deleted ${transactionsToDelete.length} transactions`);
                     }
                 }
             }
