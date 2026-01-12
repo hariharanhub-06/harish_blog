@@ -55,6 +55,11 @@ export default function SnacksNavbar() {
                         )}
                     </Link>
 
+                    {/* Vendor Link */}
+                    <Link href="/business/hm-snacks/vendor" className="hidden md:block text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-600 transition-colors">
+                        Vendor
+                    </Link>
+
                     {/* Affiliate Link */}
                     <Link href="/business/hm-snacks/affiliate" className="hidden md:block text-[10px] font-black uppercase tracking-widest text-pink-500 hover:text-pink-600 transition-colors">
                         Affiliate
@@ -91,6 +96,7 @@ export default function SnacksNavbar() {
                                 Wishlist
                                 <span className="bg-pink-500 text-white px-3 py-1 rounded-full text-xs">{wishlist.length}</span>
                             </Link>
+                            <Link href="/business/hm-snacks/vendor" onClick={() => setIsOpen(false)} className="text-2xl font-black text-indigo-500">Become a Vendor</Link>
                             <Link href="/business/hm-snacks/affiliate" onClick={() => setIsOpen(false)} className="text-2xl font-black text-pink-500">Become an Affiliate</Link>
                             <Link href="/business/hm-snacks/track" onClick={() => setIsOpen(false)} className="text-2xl font-black text-gray-900">Track Order</Link>
 
