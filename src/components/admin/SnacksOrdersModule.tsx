@@ -58,6 +58,18 @@ export default function SnacksOrdersModule() {
     const [highlightedIndex, setHighlightedIndex] = useState(0);
     const [creatingOrder, setCreatingOrder] = useState(false);
 
+    const listRef = useRef<HTMLDivElement>(null);
+    const productRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+    useEffect(() => {
+        if (highlightedIndex >= 0 && productRefs.current[highlightedIndex]) {
+            productRefs.current[highlightedIndex]?.scrollIntoView({
+                block: "nearest",
+                behavior: "smooth"
+            });
+        }
+    }, [highlightedIndex]);
+
     // Coupon State
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
@@ -1347,22 +1359,26 @@ export default function SnacksOrdersModule() {
                                             className="w-full bg-gray-50 border-0 rounded-xl py-3 pl-10 pr-4 font-bold text-sm focus:ring-2 focus:ring-pink-500"
                                         />
                                         {productSearch && (
-                                            <div className="absolute z-50 w-full bg-white mt-2 rounded-xl shadow-xl border border-gray-100 max-h-60 overflow-y-auto">
+                                            <div ref={listRef} className="absolute z-[100] w-full bg-white mt-2 rounded-xl shadow-2xl border border-gray-100 max-h-80 overflow-y-auto ring-4 ring-gray-900/5">
                                                 {availableProducts
                                                     .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
                                                     .map((product, idx) => (
                                                         <div
                                                             key={product.id}
+                                                            ref={(el) => { productRefs.current[idx] = el; }}
                                                             onClick={() => handleAddItem(product)}
-                                                            className={`p-3 cursor-pointer flex justify-between items-center transition-colors ${idx === highlightedIndex ? "bg-pink-100 ring-1 ring-pink-200" : "hover:bg-pink-50"
+                                                            className={`p-4 cursor-pointer flex justify-between items-center transition-colors border-b border-gray-50 last:border-0 ${idx === highlightedIndex ? "bg-pink-50 ring-inset ring-2 ring-pink-500" : "hover:bg-gray-50"
                                                                 }`}
                                                         >
-                                                            <span className="font-bold text-gray-800 text-sm">{product.name}</span>
-                                                            <span className="text-xs font-black text-pink-500">₹{product.offerPricePerPiece || product.pricePerPiece || product.offerPricePerKg || product.pricePerKg}</span>
+                                                            <div className="flex flex-col">
+                                                                <span className="font-black text-gray-800 text-sm">{product.name}</span>
+                                                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">{product.category}</span>
+                                                            </div>
+                                                            <span className="text-xs font-black text-pink-500 bg-pink-50 px-2 py-1 rounded-lg">₹{product.offerPricePerPiece || product.pricePerPiece || product.offerPricePerKg || product.pricePerKg}</span>
                                                         </div>
                                                     ))}
                                                 {availableProducts.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).length === 0 && (
-                                                    <div className="p-3 text-center text-xs text-gray-400">No products found</div>
+                                                    <div className="p-4 text-center text-xs text-gray-400 font-bold uppercase tracking-widest">No products found</div>
                                                 )}
                                             </div>
                                         )}
