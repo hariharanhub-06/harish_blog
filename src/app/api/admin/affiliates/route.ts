@@ -10,7 +10,8 @@ function generateCouponCode(): string {
 }
 
 // Helper function to calculate tier based on order count
-function calculateTier(orderCount: number) {
+function calculateTier(orderCount: number, isPaid: boolean = false) {
+    if (!isPaid) return { tier: "Newbie", rate: 0.06 }; // Non-paid stuck in Newbie
     if (orderCount >= 200) return { tier: "Elite", rate: 0.20 };
     if (orderCount >= 180) return { tier: "Pro", rate: 0.18 };
     if (orderCount >= 150) return { tier: "Platinum", rate: 0.15 };
@@ -140,6 +141,7 @@ export async function POST(req: NextRequest) {
                 .set({
                     status: "Approved",
                     isActive: true,
+                    isPaid: false, // Admin approval means skip payment
                     couponCode: couponCode,
                     password: password,
                     parentId: parentId === id ? null : parentId,
@@ -222,7 +224,7 @@ export async function PUT(req: NextRequest) {
         const totalEarnings = direct + l1 + l2 + l3;
 
         // 3. Update Tier
-        const { tier } = calculateTier(orderCount);
+        const { tier } = calculateTier(orderCount, !!affiliate.isPaid);
 
         // 4. Final Update
         await db

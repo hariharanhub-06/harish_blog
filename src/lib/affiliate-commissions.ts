@@ -65,7 +65,7 @@ export async function processAffiliateCommissions(orderId: string) {
         if (!directAffiliate) return { success: false, message: "No matching approved affiliate found" };
 
         // 5. Get Tiered Commission Rate
-        const tier = getAffiliateTier(directAffiliate.totalOrders || 0);
+        const tier = getAffiliateTier(directAffiliate.totalOrders || 0, !!directAffiliate.isPaid);
         const directSplitRate = tier.rate; // This is the % of the pool
 
         // 6. Update Direct Affiliate Stats (Orders & Sales)
