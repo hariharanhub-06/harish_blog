@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { affiliates, snackOrders, affiliateTransactions, payoutRequests } from "@/db/schema";
-import { eq, desc, sql, count, or } from "drizzle-orm";
+import { eq, desc, sql, count, or, and, inArray } from "drizzle-orm";
 import { generatePassword, findBinaryPlacement, generateCouponCode } from "@/lib/affiliate-utils";
 import { getAffiliateTier } from "@/lib/affiliate-tiers";
 
