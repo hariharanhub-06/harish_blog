@@ -125,29 +125,33 @@ export async function confirmAffiliateCommissions(orderId: string) {
     try {
         console.log(`[Affiliate] Confirming commissions for order: ${orderId}`);
 
-        // 1. Get all transactions for this order
-        const transactions = await db.select().from(affiliateTransactions).where(eq(affiliateTransactions.orderId, orderId));
+        // 1. Get all transactions for this order that aren't already settled
+        const transactions = await db.select().from(affiliateTransactions).where(
+            sql`${affiliateTransactions.orderId} = ${orderId} AND ${affiliateTransactions.status} != 'Settled'`
+        );
 
         if (transactions.length === 0) {
-            console.log(`[Affiliate] No transactions found for order ${orderId}`);
-            return { success: false, message: "No transactions found" };
+            console.log(`[Affiliate] No unsettled transactions found for order ${orderId}`);
+            return { success: false, message: "No unsettled transactions found" };
         }
 
-        // 2. Update each affiliate's balance
-        const updates = transactions.map(tx => {
-            return db.update(affiliates)
-                .set({
-                    pendingBalance: sql`${affiliates.pendingBalance} - ${tx.amount}`,
-                    availableBalance: sql`${affiliates.availableBalance} + ${tx.amount}`,
-                })
-                .where(eq(affiliates.id, tx.affiliateId));
-        });
+        // 2. Update each affiliate's balance and mark transaction as settled
+        for (const tx of transactions) {
+            await db.transaction(async (trx) => {
+                await trx.update(affiliates)
+                    .set({
+                        pendingBalance: sql`${affiliates.pendingBalance} - ${tx.amount}`,
+                        availableBalance: sql`${affiliates.availableBalance} + ${tx.amount}`,
+                    })
+                    .where(eq(affiliates.id, tx.affiliateId));
 
-        await Promise.all(updates);
+                await trx.update(affiliateTransactions)
+                    .set({ status: 'Settled' })
+                    .where(eq(affiliateTransactions.id, tx.id));
+            });
+        }
 
-        // 3. Update transaction status? Actually let's just keep them as 'Completed'
-
-        console.log(`[Affiliate] Successfully confirmed commissions for ${transactions.length} affiliates for order ${orderId}`);
+        console.log(`[Affiliate] Successfully confirmed and settled commissions for ${transactions.length} transactions for order ${orderId}`);
         return { success: true, count: transactions.length };
     } catch (error) {
         console.error(`[Affiliate] Error confirming commissions for ${orderId}:`, error);
