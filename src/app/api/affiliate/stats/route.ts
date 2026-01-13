@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { affiliates, snackOrders, affiliateConfig } from "@/db/schema";
-import { eq, sql, count, and } from "drizzle-orm";
+import { affiliates, snackOrders, affiliateConfig, affiliateTransactions } from "@/db/schema";
+import { eq, sql, count, and, desc } from "drizzle-orm";
 import { getAffiliateTier } from "@/lib/affiliate-tiers";
 
 export async function GET(req: NextRequest) {
@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
             level2Earnings: affiliate.level2Earnings,
             level3Earnings: affiliate.level3Earnings,
             pendingBalance: affiliate.pendingBalance,
+            availableBalance: affiliate.availableBalance,
             paidBalance: affiliate.paidBalance,
             currentTier: tier.name,
             commissionRate: tier.rate,
@@ -51,18 +52,18 @@ export async function GET(req: NextRequest) {
             parentId: affiliate.parentId,
             referrerId: affiliate.referrerId,
             position: affiliate.position,
-            // Fetch recent orders for this affiliate
             recentOrders: await db
                 .select({
                     orderId: snackOrders.orderId,
                     createdAt: snackOrders.createdAt,
                     status: snackOrders.status,
                     totalAmount: snackOrders.totalAmount,
-                    customerName: snackOrders.customerName
+                    customerName: snackOrders.customerName,
+                    commission: sql<number>`COALESCE((SELECT SUM(amount) FROM ${affiliateTransactions} WHERE ${affiliateTransactions.orderId} = ${snackOrders.orderId} AND ${affiliateTransactions.affiliateId} = ${affiliate.id}), 0)`
                 })
                 .from(snackOrders)
                 .where(sql`UPPER(${snackOrders.couponCode}) = UPPER(${affiliate.couponCode})`)
-                .orderBy(sql`${snackOrders.createdAt} DESC`)
+                .orderBy(desc(snackOrders.createdAt))
                 .limit(20),
             // Downline tree (simplified to level 2 for now)
             downline: await getDownlineTree(affiliate.id, 0, new Set([affiliate.id]))

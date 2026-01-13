@@ -4,6 +4,7 @@ import { snackOrders, orderShipments, vendors, affiliateTransactions, affiliates
 import { eq, sql, inArray } from "drizzle-orm";
 import { processAffiliateCommissions } from "@/lib/affiliate-commissions";
 import { splitOrderIntoShipments } from "@/lib/order-utils";
+import { confirmAffiliateCommissions } from "@/lib/affiliate-commissions";
 
 export async function GET(
     req: NextRequest,
@@ -87,14 +88,33 @@ export async function PATCH(
             .where(eq(snackOrders.id, id))
             .returning();
 
-        // 1. Trigger Affiliate Commission only if Delivered
-        if (body.status === "Delivered" && oldOrder.status !== "Delivered") {
+        // 1. Process Affiliate commission if order is paid/confirmed
+        const paidStatuses = ["Payment Confirmed", "Success", "Delivered", "Shipping", "Parcel Prepared"];
+        if (body.status && paidStatuses.includes(body.status)) {
             await processAffiliateCommissions(updatedOrder.orderId);
         }
 
-        // 2. Split into multi-vendor shipments (if not already split)
-        const splitStatuses = ["Payment Confirmed", "Success", "Delivered", "Shipping"];
-        if (body.status && splitStatuses.includes(body.status)) {
+        // 2. Clear commission for payout only if Delivered
+        if (body.status === "Delivered" && oldOrder.status !== "Delivered") {
+            await confirmAffiliateCommissions(updatedOrder.orderId);
+        }
+
+        // 3. Move commission BACK to pending if transitioned AWAY from Delivered
+        if (oldOrder.status === "Delivered" && body.status !== "Delivered" && body.status !== "Cancel") {
+            // New logic: Move from available back to pending
+            const transactions = await db.select().from(affiliateTransactions).where(eq(affiliateTransactions.orderId, updatedOrder.orderId));
+            for (const tx of transactions) {
+                await db.update(affiliates)
+                    .set({
+                        availableBalance: sql`${affiliates.availableBalance} - ${tx.amount}`,
+                        pendingBalance: sql`${affiliates.pendingBalance} + ${tx.amount}`,
+                    })
+                    .where(eq(affiliates.id, tx.affiliateId));
+            }
+        }
+
+        // 4. Split into multi-vendor shipments
+        if (body.status && paidStatuses.includes(body.status)) {
             await splitOrderIntoShipments(updatedOrder.orderId);
         }
 
@@ -196,11 +216,13 @@ export async function PATCH(
                                 tx.type === 'level1' ? 'level1Earnings' :
                                     tx.type === 'level2' ? 'level2Earnings' : 'level3Earnings';
 
+                            const balanceField = oldOrder.status === "Delivered" ? 'availableBalance' : 'pendingBalance';
+
                             await db.update(affiliates)
                                 .set({
                                     totalEarnings: sql`${affiliates.totalEarnings} - ${tx.amount}`,
                                     [field]: sql`${affiliates[field as keyof typeof affiliates]} - ${tx.amount}`,
-                                    pendingBalance: sql`${affiliates.pendingBalance} - ${tx.amount}`,
+                                    [balanceField]: sql`${affiliates[balanceField as keyof typeof affiliates]} - ${tx.amount}`,
                                 })
                                 .where(eq(affiliates.id, tx.affiliateId));
                         }
@@ -232,7 +254,8 @@ export async function DELETE(
             .select({
                 orderId: snackOrders.orderId,
                 couponCode: snackOrders.couponCode,
-                totalAmount: snackOrders.totalAmount
+                totalAmount: snackOrders.totalAmount,
+                status: snackOrders.status
             })
             .from(snackOrders)
             .where(eq(snackOrders.id, id))
@@ -281,7 +304,7 @@ export async function DELETE(
                             .set({
                                 totalEarnings: sql`${affiliates.totalEarnings} - ${tx.amount}`,
                                 [field]: sql`${affiliates[field as keyof typeof affiliates]} - ${tx.amount}`,
-                                pendingBalance: sql`${affiliates.pendingBalance} - ${tx.amount}`,
+                                [order.status === "Delivered" ? 'availableBalance' : 'pendingBalance']: sql`${affiliates[order.status === "Delivered" ? 'availableBalance' : 'pendingBalance'] || 0} - ${tx.amount}`,
                             })
                             .where(eq(affiliates.id, tx.affiliateId));
                     }

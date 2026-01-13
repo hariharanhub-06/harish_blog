@@ -50,6 +50,7 @@ interface Stats {
     level2Earnings: number;
     level3Earnings: number;
     pendingBalance: number;
+    availableBalance: number;
     paidBalance: number;
     currentTier: string;
     commissionRate: number;
@@ -62,6 +63,7 @@ interface Stats {
         status: string;
         totalAmount: number;
         customerName: string;
+        commission?: number;
     }>;
     downline: { left: DownlineNode | null, right: DownlineNode | null } | null;
 }
@@ -233,12 +235,12 @@ export default function AffiliateDashboard() {
         const id = localStorage.getItem("affiliate_id");
         if (!stats || !id) return;
 
-        if (stats.pendingBalance < 500) {
+        if (stats.availableBalance < 500) {
             alert("Minimum payout threshold is ₹500");
             return;
         }
 
-        if (!confirm(`Are you sure you want to withdraw ₹${stats.pendingBalance.toFixed(0)}?`)) return;
+        if (!confirm(`Are you sure you want to withdraw ₹${stats.availableBalance.toFixed(0)}?`)) return;
 
         try {
             const res = await fetch("/api/affiliate/payout", {
@@ -246,7 +248,7 @@ export default function AffiliateDashboard() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     affiliateId: id,
-                    amount: stats.pendingBalance,
+                    amount: stats.availableBalance,
                     upiId: stats.upiId
                 }),
             });
@@ -397,17 +399,20 @@ export default function AffiliateDashboard() {
                                     </div>
 
                                     <div className="bg-white/10 backdrop-blur-xl rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 border border-white/20 min-w-full md:min-w-[300px] text-center md:text-left">
-                                        <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-3 md:mb-4 opacity-80">Total Wallet Balance</p>
-                                        <div className="flex items-end justify-center md:justify-start gap-2 mb-6">
-                                            <span className="text-5xl md:text-6xl font-black tracking-tighter italic">₹{stats.pendingBalance.toFixed(0)}</span>
-                                            <span className="text-orange-200 font-bold mb-2">Pending</span>
+                                        <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest mb-3 md:mb-4 opacity-80 text-orange-200">Available to Withdraw</p>
+                                        <div className="flex items-end justify-center md:justify-start gap-2 mb-2">
+                                            <span className="text-5xl md:text-6xl font-black tracking-tighter italic text-white">₹{stats.availableBalance.toFixed(0)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-center md:justify-start gap-2 mb-6">
+                                            <div className="w-2 h-2 bg-orange-200 rounded-full animate-pulse" />
+                                            <span className="text-orange-100 text-[10px] font-bold">₹{stats.pendingBalance.toFixed(0)} Pending Delivery</span>
                                         </div>
                                         <button
                                             onClick={handleWithdraw}
-                                            disabled={stats.pendingBalance < 500}
+                                            disabled={stats.availableBalance < 500}
                                             className="w-full bg-white text-orange-600 py-4 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs shadow-xl hover:scale-[1.05] transition-all disabled:opacity-50 disabled:scale-100"
                                         >
-                                            {stats.pendingBalance < 500 ? 'Min. ₹500 required' : 'Withdraw Funds'}
+                                            {stats.availableBalance < 500 ? 'Min. ₹500 required' : 'Withdraw Funds'}
                                         </button>
                                     </div>
 
@@ -746,7 +751,7 @@ export default function AffiliateDashboard() {
                                                         <td className="py-5 text-right">
                                                             <div className="flex flex-col items-end">
                                                                 <span className="text-orange-600 font-black text-sm italic">
-                                                                    ₹{(order.totalAmount * (stats.commissionRate / 100)).toFixed(0)}*
+                                                                    ₹{order.commission > 0 ? order.commission.toFixed(0) : (order.totalAmount * (stats.commissionRate / 100)).toFixed(0)}*
                                                                 </span>
                                                                 <span className={`text-[8px] font-black uppercase tracking-widest ${order.status === 'Delivered' ? 'text-emerald-500' : 'text-gray-400'}`}>
                                                                     {order.status === 'Delivered' ? 'Added to Balance' : 'Pending Delivery'}

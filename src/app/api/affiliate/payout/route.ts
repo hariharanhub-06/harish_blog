@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Affiliate not found" }, { status: 404 });
         }
 
-        if (Number(affiliate.pendingBalance) < Number(amount)) {
+        if (Number(affiliate.availableBalance) < Number(amount)) {
             return NextResponse.json({ error: "Insufficient balance" }, { status: 400 });
         }
 
@@ -46,13 +46,10 @@ export async function POST(req: NextRequest) {
             status: "Pending"
         });
 
-        // 4. Update pending balance (move to a 'locked' state or just reduce)
-        // For simplicity, we'll keep it in pendingBalance but status is 'Pending' in payout_requests.
-        // Or we deduct it now and add to paidBalance only on approval.
-        // Let's deduct from pendingBalance now to prevent double requests.
+        // 4. Update available balance (lock it)
         await db.update(affiliates)
             .set({
-                pendingBalance: sql`${affiliates.pendingBalance} - ${Number(amount)}`
+                availableBalance: sql`${affiliates.availableBalance} - ${Number(amount)}`
             })
             .where(eq(affiliates.id, affiliateId));
 
