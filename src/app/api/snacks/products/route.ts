@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
                 weight: snackProducts.weight,
                 vendorId: snackProducts.vendorId,
                 dimensionTiers: snackProducts.dimensionTiers,
+                gstPercent: snackProducts.gstPercent, // Added GST field
             })
             .from(snackProducts)
             .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
             pricePerKg, offerPricePerKg, pricePerPiece, offerPricePerPiece,
             stock, isActive,
             productCost, packagingCost, otherCharges, affiliateDiscountPercent, affiliatePoolPercent,
-            length, width, height, weight, vendorId, dimensionTiers
+            length, width, height, weight, vendorId, dimensionTiers, gstPercent
         } = body;
 
         if (!name || !category || (!pricePerKg && !pricePerPiece)) {
@@ -91,6 +92,7 @@ export async function POST(req: NextRequest) {
             otherCharges: parseFloat(otherCharges || 0),
             affiliateDiscountPercent: parseFloat(affiliateDiscountPercent || 0),
             affiliatePoolPercent: parseFloat(affiliatePoolPercent || 60),
+            gstPercent: parseFloat(gstPercent || 5), // Default to 5%
             length: parseFloat(length || 1),
             width: parseFloat(width || 1),
             height: parseFloat(height || 1),

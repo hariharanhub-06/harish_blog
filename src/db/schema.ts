@@ -152,6 +152,7 @@ export const snackProducts = pgTable("snack_products", {
   productCost: doublePrecision("product_cost").default(0),
   packagingCost: doublePrecision("packaging_cost").default(0),
   otherCharges: doublePrecision("other_charges").default(0),
+  gstPercent: doublePrecision("gst_percent").default(5), // Added GST field
   affiliateDiscountPercent: doublePrecision("affiliate_discount_percent").default(0),
   affiliatePoolPercent: doublePrecision("affiliate_pool_percent").default(60),
 

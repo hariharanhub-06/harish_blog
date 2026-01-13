@@ -24,6 +24,7 @@ interface Item {
     quantity: number;
     price: number; // Final price including GST
     unit: string;
+    gstPercent: number; // Added GST
 }
 
 export default function BillingModule() {
@@ -34,7 +35,7 @@ export default function BillingModule() {
         address: "",
         email: ""
     });
-    const [items, setItems] = useState<Item[]>([{ productId: "", name: "", quantity: 1, price: 0, unit: "Kg" }]);
+    const [items, setItems] = useState<Item[]>([{ productId: "", name: "", quantity: 1, price: 0, unit: "Kg", gstPercent: 5 }]);
     const [searchQuery, setSearchQuery] = useState<{ [key: number]: string }>({});
     const [showDropdown, setShowDropdown] = useState<{ [key: number]: boolean }>({});
     const [fetchingProducts, setFetchingProducts] = useState(false);
@@ -61,7 +62,7 @@ export default function BillingModule() {
 
     const addItem = () => {
         if (items.length < 15) {
-            setItems([...items, { productId: "", name: "", quantity: 1, price: 0, unit: "Kg" }]);
+            setItems([...items, { productId: "", name: "", quantity: 1, price: 0, unit: "Kg", gstPercent: 5 }]);
         }
     };
 
@@ -76,7 +77,8 @@ export default function BillingModule() {
             name: product.name,
             quantity: 1,
             price: product.offerPricePerKg || product.pricePerKg || product.offerPricePerPiece || product.pricePerPiece || 0,
-            unit: product.pricePerKg ? "Kg" : "Pcs"
+            unit: product.pricePerKg ? "Kg" : "Pcs",
+            gstPercent: product.gstPercent || 5 // Get GST from product
         };
         setItems(newItems);
         setShowDropdown({ ...showDropdown, [index]: false });
@@ -96,13 +98,25 @@ export default function BillingModule() {
     };
 
     const calculateTotals = () => {
-        const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const gst = subtotal * (5 / 105); // GST is included, so 5/105 gets the 5% portion
-        const basePrice = subtotal - gst;
+        let totalSubtotal = 0;
+        let totalGst = 0;
+        let totalBase = 0;
+
+        items.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            // Formula: Price = Base * (1 + GST/100) => Base = Price / (1 + GST/100)
+            const itemBase = itemTotal / (1 + (item.gstPercent / 100));
+            const itemGst = itemTotal - itemBase;
+
+            totalSubtotal += itemTotal;
+            totalGst += itemGst;
+            totalBase += itemBase;
+        });
+
         return {
-            subtotal: subtotal.toFixed(2),
-            gst: gst.toFixed(2),
-            basePrice: basePrice.toFixed(2)
+            subtotal: totalSubtotal.toFixed(2),
+            gst: totalGst.toFixed(2),
+            basePrice: totalBase.toFixed(2)
         };
     };
 
@@ -181,6 +195,7 @@ export default function BillingModule() {
                             <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Product Name</th>
                             <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Quantity</th>
                             <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Price / Unit</th>
+                            <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">GST %</th>
                             <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Total</th>
                             <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400"></th>
                         </tr>
@@ -248,6 +263,18 @@ export default function BillingModule() {
                                         className="w-24 bg-gray-50 border-0 rounded-xl py-3 px-4 font-bold text-sm"
                                     />
                                 </td>
+                                <td className="px-8 py-4">
+                                    <input
+                                        type="number"
+                                        value={item.gstPercent}
+                                        onChange={(e) => {
+                                            const newItems = [...items];
+                                            newItems[idx].gstPercent = parseFloat(e.target.value) || 0;
+                                            setItems(newItems);
+                                        }}
+                                        className="w-16 bg-gray-50 border-0 rounded-xl py-3 px-4 font-bold text-sm text-center"
+                                    />
+                                </td>
                                 <td className="px-8 py-4 text-right">
                                     <span className="font-black text-gray-900">₹{(item.price * item.quantity).toFixed(2)}</span>
                                 </td>
@@ -270,7 +297,7 @@ export default function BillingModule() {
                         <Plus size={16} /> Add Product Line
                     </button>
                     <div className="text-right space-y-1">
-                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Invoice Value (incl. 5% GST)</div>
+                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Invoice Value</div>
                         <div className="text-4xl font-black text-gray-900 italic">₹{totals.subtotal}</div>
                     </div>
                 </div>
@@ -308,6 +335,7 @@ export default function BillingModule() {
                             <p className="text-gray-600">641028, Coimbatore</p>
                             <p className="text-gray-600">Tamil Nadu, India</p>
                             <p className="text-gray-600">Mobile: +91 99441 23456</p>
+                            <p className="text-gray-600">GSTIN: 33ABCDE1234F1Z5</p>
                         </div>
                     </div>
                     <div className="text-right">
@@ -324,34 +352,45 @@ export default function BillingModule() {
                     <thead>
                         <tr className="border-b-2 border-gray-900">
                             <th className="py-2 text-left text-[9px] font-black uppercase">Product Description</th>
-                            <th className="py-2 text-center text-[9px] font-black uppercase w-20">Qty</th>
-                            <th className="py-2 text-right text-[9px] font-black uppercase w-28">Price</th>
-                            <th className="py-2 text-right text-[9px] font-black uppercase w-28">Amount</th>
+                            <th className="py-2 text-center text-[9px] font-black uppercase w-16">Qty</th>
+                            <th className="py-2 text-right text-[9px] font-black uppercase w-20">Rate</th>
+                            <th className="py-2 text-right text-[9px] font-black uppercase w-16">GST %</th>
+                            <th className="py-2 text-right text-[9px] font-black uppercase w-20">Tax</th>
+                            <th className="py-2 text-right text-[9px] font-black uppercase w-24">Amount</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {items.filter(i => i.name).map((item, idx) => (
-                            <tr key={idx} className="page-break-inside-avoid">
-                                <td className="py-3">
-                                    <p className="font-black italic text-base leading-tight">{item.name}</p>
-                                    <p className="text-[8px] text-gray-400 uppercase font-bold">SNACK PRODUCT CODE: {item.productId.substr(0, 8)}</p>
-                                </td>
-                                <td className="py-3 text-center font-bold">{item.quantity} {item.unit}</td>
-                                <td className="py-3 text-right font-bold">₹{item.price.toFixed(2)}</td>
-                                <td className="py-3 text-right font-black italic">₹{(item.price * item.quantity).toFixed(2)}</td>
-                            </tr>
-                        ))}
+                        {items.filter(i => i.name).map((item, idx) => {
+                            const itemTotal = item.price * item.quantity;
+                            const itemBase = itemTotal / (1 + (item.gstPercent / 100));
+                            const itemGst = itemTotal - itemBase;
+                            const unitRate = item.price / (1 + (item.gstPercent / 100)); // Base Rate per unit
+
+                            return (
+                                <tr key={idx} className="page-break-inside-avoid">
+                                    <td className="py-3">
+                                        <p className="font-black italic text-base leading-tight">{item.name}</p>
+                                        <p className="text-[8px] text-gray-400 uppercase font-bold">SNACK PRODUCT CODE: {item.productId.substr(0, 8)}</p>
+                                    </td>
+                                    <td className="py-3 text-center font-bold">{item.quantity} {item.unit}</td>
+                                    <td className="py-3 text-right font-bold">₹{unitRate.toFixed(2)}</td>
+                                    <td className="py-3 text-right font-bold">{item.gstPercent}%</td>
+                                    <td className="py-3 text-right font-bold">₹{itemGst.toFixed(2)}</td>
+                                    <td className="py-3 text-right font-black italic">₹{itemTotal.toFixed(2)}</td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
 
                 <div className="flex justify-end pt-4">
                     <div className="w-72 space-y-2">
                         <div className="flex justify-between text-xs font-bold border-b border-gray-100 pb-1">
-                            <span className="text-gray-400 uppercase text-[9px]">Taxable Amount (Excl. GST)</span>
+                            <span className="text-gray-400 uppercase text-[9px]">Taxable Amount</span>
                             <span>₹{totals.basePrice}</span>
                         </div>
                         <div className="flex justify-between text-xs font-bold border-b border-gray-100 pb-1">
-                            <span className="text-gray-400 uppercase text-[9px]">GST (5%)</span>
+                            <span className="text-gray-400 uppercase text-[9px]">Total GST</span>
                             <span>₹{totals.gst}</span>
                         </div>
                         <div className="flex justify-between items-center pt-1">
