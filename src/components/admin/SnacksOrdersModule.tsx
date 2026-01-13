@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { calculateShipping } from "@/lib/shipping-utils";
 
 const STATUSES = ["All", "Payment Confirmed", "Parcel Prepared", "Shipping", "Delivered", "Cancel", "Shadow"];
 
@@ -92,7 +93,7 @@ export default function SnacksOrdersModule() {
 
         const items = Array.isArray(shipment.items) ? shipment.items : [];
         let totalWeight = items.reduce((sum: number, item: any) => {
-            return sum + (item.unit === "Kg" ? Number(item.quantity) : 0.1);
+            return sum + (item.unit?.toLowerCase() === "kg" ? Number(item.quantity) : 0.1);
         }, 0);
 
         const itemIds = items.map((it: any) => it.id);
@@ -182,7 +183,7 @@ export default function SnacksOrdersModule() {
         setCreateFormData(prev => {
             const newItems = [...prev.items];
             const item = newItems[index];
-            const newQty = Math.max(0.25, parseFloat((item.quantity + delta).toFixed(2))); // Min 0.25
+            const newQty = Math.max(item.unit?.toLowerCase() === "kg" ? 0.25 : 1, parseFloat((item.quantity + delta).toFixed(2)));
             newItems[index] = { ...item, quantity: newQty };
             return { ...prev, items: newItems };
         });
@@ -213,7 +214,7 @@ export default function SnacksOrdersModule() {
 
                     // Calculate weight
                     const totalWeight = createFormData.items.reduce((sum, item) => {
-                        return sum + (item.unit === "Kg" ? item.quantity : 0.1);
+                        return sum + (item.unit?.toLowerCase() === "kg" ? item.quantity : 0.1);
                     }, 0);
 
                     // Fetch dynamic shipping from Shiprocket
@@ -252,45 +253,7 @@ export default function SnacksOrdersModule() {
         }
     };
 
-    // Shipping Rates Configuration (Mirrored from Checkout)
-    const SHIPPING_RATES: Record<string, number> = {
-        "Tamil Nadu": 40,
-        "Kerala": 80,
-        "Andhra Pradesh": 90,
-        "Arunachal Pradesh": 90,
-        "Assam": 90,
-        "Bihar": 90,
-        "Karnataka": 90,
-        "Manipur": 90,
-        "Chhattisgarh": 200,
-        "Goa": 200,
-        "Gujarat": 200,
-        "Haryana": 200,
-        "Himachal Pradesh": 200,
-        "Jharkhand": 200,
-        "Madhya Pradesh": 200,
-        "Maharashtra": 200,
-        "Meghalaya": 200,
-        "Mizoram": 200,
-        "Nagaland": 200,
-        "Odisha": 200,
-        "Punjab": 200,
-        "Rajasthan": 200,
-        "Sikkim": 200,
-        "Telangana": 200,
-        "Uttar Pradesh": 200,
-        "Uttarakhand": 200,
-        "West Bengal": 200,
-        // Union Territories
-        "Delhi": 200,
-        "Chandigarh": 200,
-        "Puducherry": 200,
-        "Dadra and Nagar Haveli and Daman and Diu": 200,
-        "Jammu and Kashmir": 200,
-        "Ladakh": 200,
-        "Lakshadweep": 200,
-        "Andaman and Nicobar Islands": 200
-    };
+
 
     const handleApplyCoupon = async () => {
         if (!couponCode) return;
@@ -315,50 +278,17 @@ export default function SnacksOrdersModule() {
     };
 
     const calculateTotal = () => {
+        // Subtotal
         const subtotal = createFormData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-        // Group Items by Vendor for Separate Shipments
-        const vendorGroups: Record<string, number> = {};
-        createFormData.items.forEach(item => {
-            const vendorId = item.originalProduct?.vendorId || "admin";
-            const weight = item.unit === "Kg" ? item.quantity : 0.1;
-            vendorGroups[vendorId] = (vendorGroups[vendorId] || 0) + weight;
+        // Shipping – use shared utility
+        const shipping = calculateShipping({
+            items: createFormData.items,
+            state: createFormData.customer.state,
+            dynamicRate: dynamicShipping,
         });
 
-        // Calculate Shipping
-        let shipping = 0;
-
-        if (dynamicShipping !== null) {
-            // Use Shiprocket Dynamic Rate + Packaging
-            shipping = dynamicShipping + 40;
-        } else {
-            // Fallback: Calculate Shipping per Vendor
-            let ratePerKg = 200; // Fallback
-
-            if (createFormData.customer.state) {
-                const stateKey = Object.keys(SHIPPING_RATES).find(key =>
-                    key.toLowerCase() === createFormData.customer.state.toLowerCase()
-                );
-                if (stateKey) {
-                    ratePerKg = SHIPPING_RATES[stateKey];
-                }
-            }
-
-            // Sum shipping costs for all unique vendors
-            const uniqueVendors = Object.keys(vendorGroups);
-
-            // Always calculate based on split shipments to ensure no loss
-            if (uniqueVendors.length > 0) {
-                uniqueVendors.forEach(vendorId => {
-                    const groupWeight = vendorGroups[vendorId];
-                    // (Weight * Rate) + 40 Packaging per vendor
-                    shipping += Math.ceil((ratePerKg * groupWeight) + 40);
-                });
-            }
-        }
-
-
-        // Calculate Discount
+        // Discount calculation (unchanged)
         const discountAmount = appliedCoupon
             ? (appliedCoupon.type === 'affiliate'
                 ? createFormData.items.reduce((acc, item) => {
@@ -371,7 +301,6 @@ export default function SnacksOrdersModule() {
             : 0;
 
         const total = subtotal - discountAmount + shipping;
-
         return { subtotal, shipping, discountAmount, total };
     };
 
@@ -1359,7 +1288,7 @@ export default function SnacksOrdersModule() {
                                             className="w-full bg-gray-50 border-0 rounded-xl py-3 pl-10 pr-4 font-bold text-sm focus:ring-2 focus:ring-pink-500"
                                         />
                                         {productSearch && (
-                                            <div ref={listRef} className="absolute z-[100] w-full bg-white mt-2 rounded-xl shadow-2xl border border-gray-100 max-h-80 overflow-y-auto ring-4 ring-gray-900/5">
+                                            <div ref={listRef} className="absolute z-[1000] w-full bg-white mt-2 rounded-xl shadow-2xl border border-gray-100 max-h-60 overflow-y-auto ring-4 ring-gray-900/5 overscroll-contain">
                                                 {availableProducts
                                                     .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
                                                     .map((product, idx) => (

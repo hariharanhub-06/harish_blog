@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import imageKitLoader from "@/lib/imagekitLoader";
+import { calculateShipping } from "@/lib/shipping-utils";
 
 export default function CartPage() {
     const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -55,49 +56,12 @@ export default function CartPage() {
     const [isDynamicShipping, setIsDynamicShipping] = useState(false);
 
     const [shipping, setShipping] = useState(0);
+    const [dynamicShippingRate, setDynamicShippingRate] = useState<number | null>(null);
 
-    // Shipping Rates Configuration
-    const SHIPPING_RATES: Record<string, number> = {
-        "Tamil Nadu": 40,
-        "Kerala": 80,
-        "Andhra Pradesh": 90,
-        "Arunachal Pradesh": 90,
-        "Assam": 90,
-        "Bihar": 90,
-        "Karnataka": 90,
-        "Manipur": 90,
-        "Chhattisgarh": 200,
-        "Goa": 200,
-        "Gujarat": 200,
-        "Haryana": 200,
-        "Himachal Pradesh": 200,
-        "Jharkhand": 200,
-        "Madhya Pradesh": 200,
-        "Maharashtra": 200,
-        "Meghalaya": 200,
-        "Mizoram": 200,
-        "Nagaland": 200,
-        "Odisha": 200,
-        "Punjab": 200,
-        "Rajasthan": 200,
-        "Sikkim": 200,
-        "Telangana": 200,
-        "Uttar Pradesh": 200,
-        "Uttarakhand": 200,
-        "West Bengal": 200,
-        // Union Territories
-        "Delhi": 200,
-        "Chandigarh": 200,
-        "Puducherry": 200,
-        "Dadra and Nagar Haveli and Daman and Diu": 200,
-        "Jammu and Kashmir": 200,
-        "Ladakh": 200,
-        "Lakshadweep": 200,
-        "Andaman and Nicobar Islands": 200
-    };
+
 
     const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const totalWeight = cart.reduce((acc, item) => acc + (item.unit === "Kg" ? item.quantity : 0.1), 0);
+    const totalWeight = cart.reduce((acc, item) => acc + (item.unit?.toLowerCase() === "kg" ? item.quantity : 0.1), 0);
 
     // Group Items by Vendor for Separate Shipments
     const vendorGroups: Record<string, number> = {};
@@ -109,7 +73,9 @@ export default function CartPage() {
 
     // Calculate Shipping Effect
     useEffect(() => {
-        const calculateShipping = async () => {
+        const updateShipping = async () => {
+            let currentDynamicRate = dynamicShippingRate;
+
             if (isDynamicShipping && formData.pincode.length === 6) {
                 // Re-fetch dynamic shipping because weight/items might have changed
                 try {
@@ -125,8 +91,8 @@ export default function CartPage() {
                     if (shippingRes.ok) {
                         const shippingData = await shippingRes.json();
                         if (shippingData.available) {
-                            setShipping(shippingData.shippingCost + 40); // Add packaging
-                            return; // Exit, do not do static calc
+                            currentDynamicRate = shippingData.shippingCost;
+                            setDynamicShippingRate(currentDynamicRate);
                         }
                     }
                 } catch (e) {
@@ -134,39 +100,23 @@ export default function CartPage() {
                 }
             }
 
-            // Static / Fallback Logic
-            let ratePerKg = 200; // Default fallback for India
-            const isAbroad = formData.country.trim().toLowerCase() !== "india";
+            // Use shared utility for consistent calculation
+            const calculatedShipping = calculateShipping({
+                items: cart.map(item => ({
+                    price: item.price,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                    originalProduct: { vendorId: item.vendorId }
+                })),
+                state: formData.state,
+                dynamicRate: isDynamicShipping ? currentDynamicRate : null
+            });
 
-            if (isAbroad) {
-                ratePerKg = 2000;
-            } else if (formData.state) {
-                const stateKey = Object.keys(SHIPPING_RATES).find(key =>
-                    key.toLowerCase() === formData.state.toLowerCase()
-                );
-                if (stateKey) {
-                    ratePerKg = SHIPPING_RATES[stateKey];
-                }
-            }
-
-            // Sum shipping costs for all unique vendors involved
-            let totalShipping = 0;
-            const uniqueVendors = Object.keys(vendorGroups);
-
-            if (uniqueVendors.length > 0) {
-                uniqueVendors.forEach(vendorId => {
-                    const groupWeight = vendorGroups[vendorId];
-                    // (Weight * Rate) + 40 Packaging per vendor
-                    totalShipping += Math.ceil((ratePerKg * groupWeight) + 40);
-                });
-            }
-
-            setShipping(totalShipping);
+            setShipping(calculatedShipping);
         };
 
-        calculateShipping();
-
-    }, [formData.state, formData.country, JSON.stringify(vendorGroups), isDynamicShipping, formData.pincode, totalWeight]);
+        updateShipping();
+    }, [formData.state, formData.country, isDynamicShipping, formData.pincode, totalWeight, cart]);
 
     const discountAmount = appliedCoupon
         ? (appliedCoupon.type === 'affiliate'
@@ -255,11 +205,12 @@ export default function CartPage() {
                         if (shippingRes.ok) {
                             const shippingData = await shippingRes.json();
                             if (shippingData.available) {
-                                setShipping(shippingData.shippingCost + 40); // Add packaging charge
+                                setDynamicShippingRate(shippingData.shippingCost);
                                 setIsDynamicShipping(true);
                             } else {
                                 // Fallback to static rates if not available
                                 setIsDynamicShipping(false);
+                                setDynamicShippingRate(null);
                                 console.warn("Shiprocket not available, using static rates");
                             }
                         }
