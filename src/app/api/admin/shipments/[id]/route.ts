@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { orderShipments, vendors, snackProducts } from "@/db/schema";
+import { orderShipments, vendors, snackProducts, snackOrders } from "@/db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
+import { confirmAffiliateCommissions } from "@/lib/affiliate-commissions";
 
 export async function PATCH(
     req: NextRequest,
@@ -71,6 +72,20 @@ export async function PATCH(
                         pendingBalance: sql`${vendors.pendingBalance} - ${shipmentValue}`,
                     })
                     .where(eq(vendors.id, updatedShipment.vendorId));
+            }
+            // C. Update Order status if all shipments for this order are Delivered
+            if (updatedShipment.orderId) {
+                const allShipments = await db.select().from(orderShipments).where(eq(orderShipments.orderId, updatedShipment.orderId));
+                const allDelivered = allShipments.every(s => s.status === "Delivered");
+
+                if (allDelivered) {
+                    await db.update(snackOrders)
+                        .set({ status: "Delivered", updatedAt: new Date() })
+                        .where(eq(snackOrders.orderId, updatedShipment.orderId));
+
+                    // Trigger Affiliate Commission Confirmation
+                    await confirmAffiliateCommissions(updatedShipment.orderId);
+                }
             }
         }
 
