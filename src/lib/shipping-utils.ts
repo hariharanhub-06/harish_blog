@@ -65,12 +65,25 @@ export const calculateShipping = ({ items, state, dynamicRate }: ShippingParams)
     const vendorGroups: Record<string, number> = {};
     items.forEach((item) => {
         const vendorId = item.originalProduct?.vendorId ?? "admin";
-        // Normalise unit comparison to avoid case issues.
-        const weight = item.unit?.toLowerCase() === "kg" ? item.quantity : 0.1;
+        // Normalise unit comparison.
+        // If Kg, quantity is the weight.
+        // Otherwise (pieces/packs), assume each item is 0.1kg (100g)
+        const weight = item.unit?.toLowerCase() === "kg"
+            ? item.quantity
+            : (0.1 * (item.quantity || 1));
+
         vendorGroups[vendorId] = (vendorGroups[vendorId] ?? 0) + weight;
     });
 
-    // If we have a dynamic Shiprocket rate, apply it once + packaging.
+    const vendorIds = Object.keys(vendorGroups);
+
+    // If we have more than one vendor, we MUST use fallback/static rates
+    // because dynamic rate from Shiprocket only applies to a single pickup location.
+    if (vendorIds.length > 1) {
+        dynamicRate = null;
+    }
+
+    // If we have a dynamic Shiprocket rate (single vendor), apply it once + packaging.
     if (dynamicRate !== null && dynamicRate !== undefined) {
         return Math.ceil(dynamicRate + 40);
     }
@@ -85,9 +98,11 @@ export const calculateShipping = ({ items, state, dynamicRate }: ShippingParams)
     }
 
     // Calculate shipping per vendor, adding packaging charge per vendor.
+    // Couriers charge per Kg (rounded up).
     let shipping = 0;
     Object.values(vendorGroups).forEach((weight) => {
-        shipping += Math.ceil(ratePerKg * weight + 40);
+        const roundedWeight = Math.ceil(weight);
+        shipping += (roundedWeight * ratePerKg) + 40;
     });
     return shipping;
 };
