@@ -61,22 +61,24 @@ export default function CartPage() {
 
 
     const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const totalWeight = cart.reduce((acc, item) => acc + (item.unit?.toLowerCase() === "kg" ? item.quantity : 0.1), 0);
+    const totalWeight = cart.reduce((acc, item) => acc + (item.unit?.toLowerCase() === "kg" ? item.quantity : (0.1 * item.quantity)), 0);
 
     // Group Items by Vendor for Separate Shipments
     const vendorGroups: Record<string, number> = {};
     cart.forEach(item => {
         const vendorId = item.vendorId || "admin";
-        const weight = item.unit === "Kg" ? item.quantity : 0.1;
+        const weight = item.unit?.toLowerCase() === "kg" ? item.quantity : (0.1 * item.quantity);
         vendorGroups[vendorId] = (vendorGroups[vendorId] || 0) + weight;
     });
+
+    const isMultiVendor = Object.keys(vendorGroups).length > 1;
 
     // Calculate Shipping Effect
     useEffect(() => {
         const updateShipping = async () => {
             let currentDynamicRate = dynamicShippingRate;
 
-            if (isDynamicShipping && formData.pincode.length === 6) {
+            if (isDynamicShipping && formData.pincode.length === 6 && !isMultiVendor) {
                 // Re-fetch dynamic shipping because weight/items might have changed
                 try {
                     const shippingRes = await fetch('/api/snacks/shipping', {
@@ -98,6 +100,9 @@ export default function CartPage() {
                 } catch (e) {
                     console.error("Re-fetch shipping failed", e);
                 }
+            } else if (isMultiVendor) {
+                // Multi-vendor always uses fallback
+                currentDynamicRate = null;
             }
 
             // Use shared utility for consistent calculation

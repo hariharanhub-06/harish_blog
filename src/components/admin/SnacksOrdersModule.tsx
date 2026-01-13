@@ -202,7 +202,7 @@ export default function SnacksOrdersModule() {
         if (pin.length === 6) {
             setLoadingShipping(true);
             try {
-                // Fetch location data first
+                // Fetch location data
                 const locationRes = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
                 const locationData = await locationRes.json();
 
@@ -217,47 +217,70 @@ export default function SnacksOrdersModule() {
                             country: "India"
                         }
                     }));
-
-                    // Calculate weight
-                    const totalWeight = createFormData.items.reduce((sum, item) => {
-                        return sum + (item.unit?.toLowerCase() === "kg" ? item.quantity : 0.1);
-                    }, 0);
-
-                    // Fetch dynamic shipping from Shiprocket
-                    try {
-                        const shippingRes = await fetch('/api/snacks/shipping', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                pincode: pin,
-                                weight: totalWeight || 0.5 // Minimum 500g
-                            })
-                        });
-
-                        if (shippingRes.ok) {
-                            const shippingData = await shippingRes.json();
-                            if (shippingData.available) {
-                                setDynamicShipping(shippingData.shippingCost);
-                            } else {
-                                // Fallback to static if not available
-                                setDynamicShipping(null);
-                                console.warn("Shiprocket not available, using static rates");
-                            }
-                        }
-                    } catch (shippingError) {
-                        console.error("Shipping API failed, using static rates", shippingError);
-                        setDynamicShipping(null);
-                    }
                 }
             } catch (error) {
                 console.error("Pincode lookup failed", error);
             }
             setLoadingShipping(false);
         } else {
-            // Reset shipping if pincode incomplete
             setDynamicShipping(null);
         }
     };
+
+    // Shipping Calculation Effect
+    useEffect(() => {
+        const updateShipping = async () => {
+            const pincode = createFormData.customer.pincode;
+            const items = createFormData.items;
+
+            if (pincode.length !== 6 || items.length === 0) {
+                setDynamicShipping(null);
+                return;
+            }
+
+            // Check for multi-vendor
+            const vendors = new Set(items.map(i => i.originalProduct?.vendorId || "admin"));
+            const isMultiVendor = vendors.size > 1;
+
+            if (isMultiVendor) {
+                setDynamicShipping(null);
+                return;
+            }
+
+            // Single vendor: Fetch dynamic rate
+            setLoadingShipping(true);
+            try {
+                const totalWeight = items.reduce((sum, item) => {
+                    return sum + (item.unit?.toLowerCase() === "kg" ? item.quantity : (0.1 * item.quantity));
+                }, 0);
+
+                const shippingRes = await fetch('/api/snacks/shipping', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pincode: pincode,
+                        weight: totalWeight || 0.5
+                    })
+                });
+
+                if (shippingRes.ok) {
+                    const shippingData = await shippingRes.json();
+                    if (shippingData.available) {
+                        setDynamicShipping(shippingData.shippingCost);
+                    } else {
+                        setDynamicShipping(null);
+                    }
+                }
+            } catch (error) {
+                console.error("Shipping fetch error", error);
+                setDynamicShipping(null);
+            } finally {
+                setLoadingShipping(false);
+            }
+        };
+
+        updateShipping();
+    }, [createFormData.customer.pincode, createFormData.items]);
 
 
 
