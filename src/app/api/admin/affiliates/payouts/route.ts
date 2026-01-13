@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
                 .where(eq(payoutRequests.id, requestId));
 
             // 2. Update Affiliate paidBalance
-            // Note: We already deducted from pendingBalance when request was created.
+            // Note: We already deducted from availableBalance when request was created.
             await db.update(affiliates)
                 .set({
                     paidBalance: sql`${affiliates.paidBalance} + ${request.amount}`
@@ -53,10 +53,10 @@ export async function POST(req: NextRequest) {
                 .set({ status: "Rejected", processedAt: new Date() })
                 .where(eq(payoutRequests.id, requestId));
 
-            // 2. Add amount back to pendingBalance
+            // 2. Add amount back to availableBalance
             await db.update(affiliates)
                 .set({
-                    pendingBalance: sql`${affiliates.pendingBalance} + ${request.amount}`
+                    availableBalance: sql`${affiliates.availableBalance} + ${request.amount}`
                 })
                 .where(eq(affiliates.id, request.affiliateId));
         }

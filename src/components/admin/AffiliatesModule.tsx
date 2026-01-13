@@ -32,6 +32,7 @@ interface Affiliate {
     level2Earnings: number;
     level3Earnings: number;
     pendingBalance: number;
+    availableBalance: number;
     paidBalance: number;
     currentTier: string;
     createdAt: string;
@@ -615,8 +616,12 @@ Start promoting and tracking your binary team growth today! 🚀
                                                 </p>
                                             </div>
                                             <div className="text-center">
+                                                <p className="text-[8px] font-black uppercase tracking-widest text-emerald-500 mb-0.5">Ready</p>
+                                                <p className="text-sm font-black text-emerald-600">₹{(affiliate.availableBalance || 0).toFixed(0)}</p>
+                                            </div>
+                                            <div className="text-center">
                                                 <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Pending</p>
-                                                <p className="text-sm font-black text-orange-500">₹{(affiliate.pendingBalance || 0).toFixed(0)}</p>
+                                                <p className="text-sm font-black text-orange-400">₹{(affiliate.pendingBalance || 0).toFixed(0)}</p>
                                             </div>
                                         </div>
                                     )}

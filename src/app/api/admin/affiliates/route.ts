@@ -32,6 +32,7 @@ export async function GET() {
                 level2Earnings: affiliates.level2Earnings,
                 level3Earnings: affiliates.level3Earnings,
                 pendingBalance: affiliates.pendingBalance,
+                availableBalance: affiliates.availableBalance,
                 paidBalance: affiliates.paidBalance,
                 currentTier: affiliates.currentTier,
                 createdAt: affiliates.createdAt,
@@ -187,9 +188,49 @@ export async function PUT(req: NextRequest) {
                 level2Earnings: l2,
                 level3Earnings: l3,
                 currentTier: tier,
-                // Note: pendingBalance is usually updated on payouts, 
-                // but we can sanity check it if needed. 
-                // For now, only update performance stats.
+            })
+            .where(eq(affiliates.id, id));
+
+        // 4. Smart Balance Recalculation
+        // Get all transactions
+        const allTxs = await db.select({
+            amount: affiliateTransactions.amount,
+            orderId: affiliateTransactions.orderId
+        }).from(affiliateTransactions).where(eq(affiliateTransactions.affiliateId, id));
+
+        // Get unique order IDs
+        const orderIds = allTxs.map(t => t.orderId).filter((oid): oid is string => !!oid);
+        const uniqueOrderIds = [...new Set(orderIds)];
+
+        let deliveredOrderIds: string[] = [];
+        if (uniqueOrderIds.length > 0) {
+            const deliveredOrders = await db.select({ orderId: snackOrders.orderId })
+                .from(snackOrders)
+                .where(and(
+                    inArray(snackOrders.orderId, uniqueOrderIds),
+                    eq(snackOrders.status, "Delivered")
+                ));
+            deliveredOrderIds = deliveredOrders.map(o => o.orderId);
+        }
+
+        let calculatedAvailableTotal = 0;
+        let calculatedPendingTotal = 0;
+
+        for (const tx of allTxs) {
+            if (tx.orderId && deliveredOrderIds.includes(tx.orderId)) {
+                calculatedAvailableTotal += Number(tx.amount);
+            } else {
+                calculatedPendingTotal += Number(tx.amount);
+            }
+        }
+
+        // Subtract already paid balance from available
+        const finalAvailable = Math.max(0, calculatedAvailableTotal - Number(affiliate.paidBalance || 0));
+
+        await db.update(affiliates)
+            .set({
+                availableBalance: finalAvailable,
+                pendingBalance: calculatedPendingTotal
             })
             .where(eq(affiliates.id, id));
 

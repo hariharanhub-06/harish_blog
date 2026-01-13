@@ -269,8 +269,9 @@ export const affiliates = pgTable("affiliates", {
   level1Earnings: doublePrecision("level1_earnings").default(0),
   level2Earnings: doublePrecision("level2_earnings").default(0),
   level3Earnings: doublePrecision("level3_earnings").default(0),
-  pendingBalance: doublePrecision("pending_balance").default(0),
-  paidBalance: doublePrecision("paid_balance").default(0),
+  pendingBalance: doublePrecision("pending_balance").default(0), // Balance waiting for order delivery
+  availableBalance: doublePrecision("available_balance").default(0), // Balance ready for withdrawal
+  paidBalance: doublePrecision("paid_balance").default(0), // Total amount already paid out
 
   currentTier: text("current_tier").default("Newbie"),
   createdAt: timestamp("created_at").defaultNow(),

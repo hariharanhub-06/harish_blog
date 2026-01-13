@@ -119,6 +119,43 @@ export async function processAffiliateCommissions(orderId: string) {
 }
 
 /**
+ * Moves commissions from pendingBalance to availableBalance when an order is delivered.
+ */
+export async function confirmAffiliateCommissions(orderId: string) {
+    try {
+        console.log(`[Affiliate] Confirming commissions for order: ${orderId}`);
+
+        // 1. Get all transactions for this order
+        const transactions = await db.select().from(affiliateTransactions).where(eq(affiliateTransactions.orderId, orderId));
+
+        if (transactions.length === 0) {
+            console.log(`[Affiliate] No transactions found for order ${orderId}`);
+            return { success: false, message: "No transactions found" };
+        }
+
+        // 2. Update each affiliate's balance
+        const updates = transactions.map(tx => {
+            return db.update(affiliates)
+                .set({
+                    pendingBalance: sql`${affiliates.pendingBalance} - ${tx.amount}`,
+                    availableBalance: sql`${affiliates.availableBalance} + ${tx.amount}`,
+                })
+                .where(eq(affiliates.id, tx.affiliateId));
+        });
+
+        await Promise.all(updates);
+
+        // 3. Update transaction status? Actually let's just keep them as 'Completed'
+
+        console.log(`[Affiliate] Successfully confirmed commissions for ${transactions.length} affiliates for order ${orderId}`);
+        return { success: true, count: transactions.length };
+    } catch (error) {
+        console.error(`[Affiliate] Error confirming commissions for ${orderId}:`, error);
+        return { success: false, error };
+    }
+}
+
+/**
  * Distributes commission to a specific affiliate and updates their balance.
  */
 async function distributeCommission(
