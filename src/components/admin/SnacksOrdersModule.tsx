@@ -83,7 +83,7 @@ export default function SnacksOrdersModule() {
     const [packageDimensions, setPackageDimensions] = useState<Record<string, { l: string, b: string, h: string, w: string }>>({});
 
     useEffect(() => {
-        if ((showCreateModal || selectedOrder) && availableProducts.length === 0) {
+        if (showCreateModal || selectedOrder) {
             fetchProducts();
         }
     }, [showCreateModal, selectedOrder]);
@@ -140,10 +140,16 @@ export default function SnacksOrdersModule() {
 
     const fetchProducts = async () => {
         try {
-            const res = await fetch("/api/snacks/products?activeOnly=true");
+            // Try fetching all products first to be sure
+            const res = await fetch("/api/snacks/products");
             if (res.ok) {
                 const data = await res.json();
+                console.log(`Fetched ${data.length} products for manual order creation`);
+                // If there are many products, we might want to filter active ones only here
+                // but for now, let's keep all to avoid "not found" issues
                 setAvailableProducts(data);
+            } else {
+                console.error("Failed to fetch products for manual order", res.status);
             }
         } catch (error) {
             console.error("Failed to fetch products", error);
@@ -1271,7 +1277,7 @@ export default function SnacksOrdersModule() {
                                                 setHighlightedIndex(0);
                                             }}
                                             onKeyDown={(e) => {
-                                                const filtered = availableProducts.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()));
+                                                const filtered = availableProducts.filter(p => p.name?.toLowerCase().includes(productSearch.toLowerCase()));
                                                 if (e.key === "ArrowDown") {
                                                     e.preventDefault();
                                                     setHighlightedIndex(prev => (prev < filtered.length - 1 ? prev + 1 : prev));
@@ -1290,7 +1296,7 @@ export default function SnacksOrdersModule() {
                                         {productSearch && (
                                             <div ref={listRef} className="absolute z-[1000] w-full bg-white mt-2 rounded-xl shadow-2xl border border-gray-100 max-h-60 overflow-y-auto ring-4 ring-gray-900/5 overscroll-contain">
                                                 {availableProducts
-                                                    .filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+                                                    .filter(p => p.name?.toLowerCase().includes(productSearch.toLowerCase()))
                                                     .map((product, idx) => (
                                                         <div
                                                             key={product.id}
