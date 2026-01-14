@@ -95,11 +95,11 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                         {String(stat.value).replace('+', '')}
                                     </span>
 
-                                    <div className={`${color.bg} ${color.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform`}>
-                                        <Icon size={24} />
+                                    <div className={`${color.bg} ${color.color} w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform`}>
+                                        <Icon size={20} />
                                     </div>
-                                    <h3 className="text-3xl font-black text-gray-900 mb-2">{stat.value}</h3>
-                                    <p className="text-secondary text-[10px] font-black uppercase tracking-widest leading-none">{stat.label}</p>
+                                    <h3 className="text-2xl font-black text-gray-900 mb-1">{stat.value}</h3>
+                                    <p className="text-secondary text-[9px] font-black uppercase tracking-widest leading-none">{stat.label}</p>
                                 </div>
                             </CardWrapper>
                         );
@@ -131,10 +131,10 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                 {/* Professional Experience Section */}
                 {experiences.length > 0 && (
-                    <div className="mt-8 md:mt-10">
-                        <div className="text-center mb-10 px-4">
-                            <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase break-words px-2 leading-tight">Professional Experience</h2>
-                            <div className="w-16 md:w-20 h-1.5 md:h-2 bg-blue-500 mx-auto rounded-full"></div>
+                    <div className="mt-6 md:mt-8">
+                        <div className="text-center mb-8 px-4">
+                            <h2 className="text-xl md:text-3xl font-black mb-3 tracking-tight uppercase break-words px-2 leading-tight">Professional Experience</h2>
+                            <div className="w-12 md:w-16 h-1 md:h-1.5 bg-blue-500 mx-auto rounded-full"></div>
                         </div>
                         <TimelineCarousel
                             items={[...experiences].sort((a, b) => {
@@ -156,10 +156,10 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                 {/* Education Section */}
                 {educations.length > 0 && (
-                    <div className="mt-8 md:mt-10">
-                        <div className="text-center mb-10 px-4">
-                            <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase break-words px-2 leading-tight">Education</h2>
-                            <div className="w-16 md:w-20 h-1.5 md:h-2 bg-amber-500 mx-auto rounded-full"></div>
+                    <div className="mt-6 md:mt-8">
+                        <div className="text-center mb-8 px-4">
+                            <h2 className="text-xl md:text-3xl font-black mb-3 tracking-tight uppercase break-words px-2 leading-tight">Education</h2>
+                            <div className="w-12 md:w-16 h-1 md:h-1.5 bg-amber-500 mx-auto rounded-full"></div>
                         </div>
                         <TimelineCarousel
                             items={[...educations].sort((a, b) => {
@@ -181,10 +181,10 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
                 {/* Volunteering Section */}
                 {volunteerings && volunteerings.length > 0 && (
-                    <div className="mt-8 md:mt-10">
-                        <div className="text-center mb-10 px-4">
-                            <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase break-words px-2 leading-tight">Volunteering</h2>
-                            <div className="w-16 md:w-20 h-1.5 md:h-2 bg-teal-500 mx-auto rounded-full"></div>
+                    <div className="mt-6 md:mt-8">
+                        <div className="text-center mb-8 px-4">
+                            <h2 className="text-xl md:text-3xl font-black mb-3 tracking-tight uppercase break-words px-2 leading-tight">Volunteering</h2>
+                            <div className="w-12 md:w-16 h-1 md:h-1.5 bg-teal-500 mx-auto rounded-full"></div>
                         </div>
                         <TimelineCarousel
                             items={[...volunteerings].sort((a, b) => {
@@ -207,10 +207,10 @@ export default function MainContent({ profile, stats, projects, experiences, edu
 
             {/* Projects Section */}
             <section id="portfolio" className="container mx-auto px-6 scroll-mt-20">
-                <div className="flex flex-col items-center mb-10">
-                    <h2 className="text-2xl md:text-5xl font-black mb-4 tracking-tight uppercase">Featured Projects</h2>
-                    <div className="w-20 h-2 bg-accent rounded-full"></div>
-                    <p className="mt-6 text-secondary text-base max-w-2xl text-center font-medium">
+                <div className="flex flex-col items-center mb-8">
+                    <h2 className="text-xl md:text-3xl font-black mb-3 tracking-tight uppercase">Featured Projects</h2>
+                    <div className="w-16 h-1.5 bg-accent rounded-full"></div>
+                    <p className="mt-4 text-secondary text-sm max-w-xl text-center font-medium">
                         Building digital products that combine stunning design with robust business logic.
                     </p>
                 </div>
@@ -238,15 +238,15 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                                         </div>
                                     </div>
 
-                                    <div className="p-6 flex flex-col flex-grow text-left">
-                                        <div className="flex flex-wrap gap-2 mb-4">
+                                    <div className="p-5 flex flex-col flex-grow text-left">
+                                        <div className="flex flex-wrap gap-1.5 mb-3">
                                             {project.technologies?.slice(0, 3).map((tech: string) => (
-                                                <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-primary bg-blue-50 px-3 py-1 rounded-md">{tech}</span>
+                                                <span key={tech} className="text-[9px] font-black uppercase tracking-widest text-primary bg-blue-50 px-2.5 py-1 rounded-md">{tech}</span>
                                             ))}
                                         </div>
 
-                                        <h3 className="text-xl font-black mb-3 group-hover:text-primary transition-colors">{project.title}</h3>
-                                        <p className="text-secondary text-sm leading-relaxed mb-6 line-clamp-2">{project.description}</p>
+                                        <h3 className="text-lg font-black mb-2 group-hover:text-primary transition-colors">{project.title}</h3>
+                                        <p className="text-secondary text-xs leading-relaxed mb-4 line-clamp-2">{project.description}</p>
 
                                         <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
                                             <span className="text-primary font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
@@ -271,12 +271,12 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                 <div className="bg-primary rounded-3xl p-6 md:p-8 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
                     <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-                    <div className="grid lg:grid-cols-2 gap-10 items-center text-left">
-                        <div className="space-y-8">
-                            <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tighter">
+                    <div className="grid lg:grid-cols-2 gap-8 items-center text-left">
+                        <div className="space-y-6">
+                            <h2 className="text-2xl md:text-4xl font-black text-white leading-tight tracking-tighter">
                                 Let&apos;s Build <br /> Something <span className="text-accent italic">Extraordinary</span> Together.
                             </h2>
-                            <p className="text-white/70 text-lg leading-relaxed max-w-xl">
+                            <p className="text-white/70 text-base leading-relaxed max-w-lg">
                                 I assist startups and established businesses in building scalable digital identities and automated workflows.
                             </p>
 

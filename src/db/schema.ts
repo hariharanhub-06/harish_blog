@@ -377,3 +377,24 @@ export const partnerships = pgTable("partnerships", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// HariPicks - Affiliate Products Table
+export const affiliateProducts = pgTable("affiliate_products", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  description: text("description"),
+  originalPrice: doublePrecision("original_price"),
+  discountedPrice: doublePrecision("discounted_price"),
+  discountPercent: integer("discount_percent"),
+  affiliateUrl: text("affiliate_url").notNull(),
+  imageUrl: text("image_url"),
+  platform: text("platform"), // 'amazon', 'flipkart', 'other'
+  category: text("category"), // 'Electronics', 'Fashion', 'Home', 'Books', etc.
+  rating: doublePrecision("rating"), // 0-5 star rating
+  isFeatured: boolean("is_featured").default(false),
+  isActive: boolean("is_active").default(true),
+  viewsCount: integer("views_count").default(0),
+  clicksCount: integer("clicks_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+

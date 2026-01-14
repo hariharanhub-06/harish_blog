@@ -114,18 +114,18 @@ export default function PartnershipsModule() {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-3xl font-black text-gray-900 tracking-tight">Partnership <span className="text-primary italic">Center</span></h2>
-                    <p className="text-secondary font-medium mt-1">Manage brand partners and sponsors displayed on product pages.</p>
+                    <h2 className="text-xl font-black text-gray-900 tracking-tight">Partnership <span className="text-primary italic">Center</span></h2>
+                    <p className="text-secondary font-medium mt-0.5 text-[10px] uppercase tracking-widest">Manage brand partners and sponsors.</p>
                 </div>
                 <button
                     onClick={() => setEditing({ name: "", logo: "", partnerType: "Supplier", displayOrder: 0, isActive: true })}
-                    className="flex items-center space-x-2 bg-primary text-white px-6 py-4 rounded-2xl font-black text-sm hover:shadow-xl hover:shadow-primary/20 transition-all active:scale-95"
+                    className="flex items-center space-x-2 bg-primary text-white px-4 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95"
                 >
-                    <Plus size={20} />
-                    <span>Add New Partner</span>
+                    <Plus size={16} />
+                    <span>Add Partner</span>
                 </button>
             </div>
 
@@ -134,28 +134,28 @@ export default function PartnershipsModule() {
                     <Loader2 className="w-12 h-12 text-primary animate-spin" />
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     {partnerships.map((partner) => (
-                        <div key={partner.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
-                            <div className="relative aspect-video bg-gray-50 rounded-2xl mb-6 overflow-hidden flex items-center justify-center border border-gray-50 p-4">
+                        <div key={partner.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-lg transition-all group">
+                            <div className="relative aspect-video bg-gray-50 rounded-xl mb-4 overflow-hidden flex items-center justify-center border border-gray-50 p-3">
                                 {partner.logo ? (
                                     <Image
                                         loader={imageKitLoader}
                                         src={partner.logo}
                                         alt={partner.name}
                                         fill
-                                        className="object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                                        className="object-contain p-2 group-hover:scale-110 transition-transform duration-500"
                                     />
                                 ) : (
-                                    <ImageIcon className="text-gray-200" size={48} />
+                                    <ImageIcon className="text-gray-200" size={32} />
                                 )}
                             </div>
-                            <div className="flex justify-between items-start mb-4">
+                            <div className="flex justify-between items-start mb-3">
                                 <div>
-                                    <h3 className="text-xl font-black text-gray-900 group-hover:text-primary transition-colors">{partner.name}</h3>
-                                    <p className="text-xs font-black uppercase tracking-widest text-primary mt-1 opacity-70">{partner.partnerType}</p>
+                                    <h3 className="text-base font-black text-gray-900 group-hover:text-primary transition-colors tracking-tight">{partner.name}</h3>
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-primary mt-0.5 opacity-70">{partner.partnerType}</p>
                                 </div>
-                                <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${partner.isActive ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}>
+                                <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${partner.isActive ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}>
                                     {partner.isActive ? "Active" : "Inactive"}
                                 </div>
                             </div>
@@ -183,18 +183,18 @@ export default function PartnershipsModule() {
             {editing && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditing(null)} />
-                    <div className="relative bg-white w-full max-w-xl rounded-[2.5rem] p-8 md:p-12 shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
-                        <button onClick={() => setEditing(null)} className="absolute top-8 right-8 text-secondary hover:text-gray-900 p-2">
-                            <X size={24} />
+                    <div className="relative bg-white w-full max-w-lg rounded-[2rem] p-8 md:p-10 shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
+                        <button onClick={() => setEditing(null)} className="absolute top-6 right-6 text-secondary hover:text-gray-900 p-2">
+                            <X size={20} />
                         </button>
 
-                        <div className="flex items-center space-x-4 mb-10">
-                            <div className="p-4 bg-primary/10 text-primary rounded-2xl">
-                                <Layout size={24} />
+                        <div className="flex items-center space-x-3 mb-8">
+                            <div className="p-3 bg-primary/10 text-primary rounded-xl">
+                                <Layout size={20} />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-black text-gray-900">{editing.id ? "Edit Partner" : "New Partner"}</h3>
-                                <p className="text-secondary font-medium">Configure partner details and branding.</p>
+                                <h3 className="text-xl font-black text-gray-900">{editing.id ? "Edit Partner" : "New Partner"}</h3>
+                                <p className="text-secondary font-medium text-[10px] uppercase tracking-widest">Configure partner details and branding.</p>
                             </div>
                         </div>
 
@@ -251,43 +251,42 @@ export default function PartnershipsModule() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-secondary ml-2">Display Order</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-secondary ml-1.5">Display Order</label>
                                     <input
                                         type="number"
                                         value={editing.displayOrder}
                                         onChange={(e) => setEditing({ ...editing, displayOrder: parseInt(e.target.value) })}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 font-black text-sm focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all"
+                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3.5 font-black text-xs focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-secondary ml-2">Visibility</label>
-                                    <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-2xl h-[52px]">
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-secondary ml-1.5">Visibility</label>
+                                    <div className="flex items-center space-x-1.5 bg-gray-50 p-1.5 rounded-xl h-[47px]">
                                         <button
                                             type="button"
                                             onClick={() => setEditing({ ...editing, isActive: true })}
-                                            className={`flex-1 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${editing.isActive ? "bg-white text-emerald-500 shadow-sm" : "text-gray-400"}`}
+                                            className={`flex-1 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${editing.isActive ? "bg-white text-emerald-500 shadow-sm" : "text-gray-400"}`}
                                         >
                                             Active
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setEditing({ ...editing, isActive: false })}
-                                            className={`flex-1 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${!editing.isActive ? "bg-white text-rose-500 shadow-sm" : "text-gray-400"}`}
+                                            className={`flex-1 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${!editing.isActive ? "bg-white text-rose-500 shadow-sm" : "text-gray-400"}`}
                                         >
                                             Inactive
                                         </button>
                                     </div>
                                 </div>
                             </div>
-
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className="w-full bg-primary text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:shadow-2xl hover:shadow-primary/20 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                                className="w-full bg-primary text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:shadow-2xl hover:shadow-primary/20 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
                             >
-                                {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+                                {saving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                                 <span>{editing.id ? "Update Partner" : "Create Partner"}</span>
                             </button>
                         </form>

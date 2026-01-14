@@ -29,22 +29,21 @@ export default function Navbar() {
 
     return (
         <nav
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 py-3`}
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 py-2`}
         >
-            <div className={`container mx-auto max-w-7xl h-14 rounded-2xl flex justify-between items-center transition-all duration-300 ${scrolled
-                ? (isTechPage ? "bg-black/90 backdrop-blur-md shadow-2xl border border-white/10 px-6" : "bg-white/95 backdrop-blur-md shadow-xl border border-gray-100 px-6")
-                : (isTechPage ? "bg-white/5 backdrop-blur-sm border border-white/10 px-4" : "bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 px-4")
+            <div className={`container mx-auto max-w-6xl h-12 rounded-xl flex justify-between items-center transition-all duration-300 ${scrolled
+                ? (isTechPage ? "bg-black/90 backdrop-blur-md shadow-2xl border border-white/10 px-4" : "bg-white/95 backdrop-blur-md shadow-xl border border-gray-100 px-4")
+                : (isTechPage ? "bg-white/5 backdrop-blur-sm border border-white/10 px-3" : "bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 px-3")
                 }`}>
-                <Link href="/" className="flex items-center gap-3 text-2xl font-bold tracking-tight">
-                    {/* Dynamic Business Logo */}
+                <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
                     {/* Dynamic Business Logo */}
                     {isSnacksPage && (
-                        <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/20 shadow-md">
+                        <div className="relative w-6 h-6 rounded-full overflow-hidden border border-white/20 shadow-md">
                             <Image src="/hm-snacks-logo.png" alt="HM Snacks" fill className="object-cover" />
                         </div>
                     )}
                     {isTechPage && (
-                        <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/20 shadow-md bg-white/10 p-1">
+                        <div className="relative w-6 h-6 rounded-full overflow-hidden border border-white/20 shadow-md bg-white/10 p-1">
                             <Image src="/hm-tech-logo.png" alt="HM Tech" fill className="object-contain" />
                         </div>
                     )}
@@ -52,7 +51,7 @@ export default function Navbar() {
                     <div className="flex items-baseline">
                         <span className={`${isTechPage ? "text-white" : (isSnacksPage ? "text-pink-500" : "text-primary")}`}>Hari</span>
                         <span className={`${isTechPage ? "text-white" : "text-gray-900"} font-black`}>Haran</span>
-                        <span className="text-accent underline decoration-4 decoration-accent/30 underline-offset-4">.</span>
+                        <span className="text-accent underline decoration-2 decoration-accent/30 underline-offset-4">.</span>
                     </div>
                 </Link>
 
@@ -62,57 +61,71 @@ export default function Navbar() {
                         <Link
                             key={link.name}
                             href={link.href}
-                            className={`px-4 py-2 font-bold text-sm transition-all rounded-lg hover:bg-primary/5 ${isTechPage ? "text-white/80 hover:text-white" : "text-gray-900 hover:text-primary"}`}
+                            className={`px-3 py-1.5 font-bold text-xs transition-all rounded-lg hover:bg-primary/5 ${isTechPage ? "text-white/80 hover:text-white" : "text-gray-900 hover:text-primary"}`}
                         >
                             {link.name}
                         </Link>
                     ))}
-                    <div className="ml-4 pl-4 border-l border-gray-200 flex gap-3">
+                    <div className="ml-3 pl-3 border-l border-gray-200 flex gap-2">
                         {/* Business Dropdown */}
                         <div className="relative group">
                             <button
-                                className={`px-6 py-2.5 rounded-xl transition-all font-bold text-sm shadow-sm border flex items-center gap-2 ${isTechPage ? "bg-white/10 text-white border-white/10 hover:bg-white/20" : "bg-gray-100 text-gray-900 border-gray-200 hover:bg-gray-200"}`}
+                                className={`px-4 py-2 rounded-lg transition-all font-bold text-xs shadow-sm border flex items-center gap-2 ${isTechPage ? "bg-white/10 text-white border-white/10 hover:bg-white/20" : "bg-gray-100 text-gray-900 border-gray-200 hover:bg-gray-200"}`}
                             >
                                 Business
                                 <motion.div
                                     animate={{ rotate: 0 }}
                                     className="group-hover:rotate-180 transition-transform"
                                 >
-                                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <svg width="8" height="5" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 </motion.div>
                             </button>
 
                             {/* Dropdown Menu */}
-                            <div className="absolute top-full left-0 mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-[60]">
-                                <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2">
+                            <div className="absolute top-full left-0 mt-1 w-44 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-1 z-[60]">
+                                <div className="bg-white rounded-xl shadow-2xl border border-gray-100 p-1.5">
                                     <Link
                                         href="/business/hm-snacks"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center space-x-3 p-3 rounded-xl hover:bg-primary/5 transition-all group/item"
+                                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-primary/5 transition-all group/item"
                                     >
-                                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
+                                        <div className="relative w-6 h-6 rounded-md overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
                                             <Image src="/hm-snacks-logo.png" alt="HM Snacks" fill className="object-contain" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-black text-gray-900 group-hover/item:text-primary">HM Snacks</span>
-                                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Tradition Taste</span>
+                                            <span className="text-xs font-black text-gray-900 group-hover/item:text-primary">HM Snacks</span>
+                                            <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Tradition</span>
+                                        </div>
+                                    </Link>
+                                    <Link
+                                        href="/business/haripicks"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-primary/5 transition-all group/item mt-0.5"
+                                    >
+                                        <div className="relative w-6 h-6 rounded-md overflow-hidden bg-gradient-to-br from-purple-500 to-orange-500 shadow-sm border border-gray-100 p-0.5 flex items-center justify-center">
+                                            <span className="text-white font-black text-xs">H</span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-black text-gray-900 group-hover/item:text-primary">HariPicks</span>
+                                            <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Deals</span>
                                         </div>
                                     </Link>
                                     <Link
                                         href="/business/hm-tech"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center space-x-3 p-3 rounded-xl hover:bg-primary/5 transition-all group/item mt-1"
+                                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-primary/5 transition-all group/item mt-0.5"
                                     >
-                                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
+                                        <div className="relative w-6 h-6 rounded-md overflow-hidden bg-white shadow-sm border border-gray-100 p-0.5">
                                             <Image src="/hm-tech-logo.png" alt="HM Tech" fill className="object-contain" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-black text-gray-900 group-hover/item:text-primary">HM Tech</span>
-                                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Test Design</span>
+                                            <span className="text-xs font-black text-gray-900 group-hover/item:text-primary">HM Tech</span>
+                                            <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Tech</span>
                                         </div>
                                     </Link>
                                 </div>
@@ -121,7 +134,7 @@ export default function Navbar() {
 
                         <Link
                             href={isSnacksPage || isTechPage ? "#contact" : "/#contact"}
-                            className={`${isTechPage ? "bg-white text-black hover:bg-gray-200" : "bg-primary text-white hover:bg-blue-800"} px-6 py-2.5 rounded-xl transition-all font-bold text-sm shadow-lg ${(isSnacksPage || isTechPage) ? "shadow-white/5" : "shadow-primary/20"}`}
+                            className={`${isTechPage ? "bg-white text-black hover:bg-gray-200" : "bg-primary text-white hover:bg-blue-800"} px-4 py-2 rounded-lg transition-all font-bold text-xs shadow-md ${(isSnacksPage || isTechPage) ? "shadow-white/5" : "shadow-primary/20"}`}
                         >
                             {isSnacksPage || isTechPage ? "Hire Us" : "Hire Me"}
                         </Link>
@@ -173,6 +186,21 @@ export default function Navbar() {
                                         <span>HM Snacks</span>
                                     </div>
                                     <span className="text-[10px] bg-pink-500 text-white px-2 py-0.5 rounded-lg">SHOP</span>
+                                </Link>
+                                <Link
+                                    href="/business/haripicks"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`w-full px-6 py-4 rounded-xl font-black shadow-sm border flex items-center justify-between transition-colors ${isTechPage ? "bg-white/5 text-white border-white/10 hover:bg-white/10" : "bg-gray-50 text-gray-900 border-gray-100 hover:bg-gray-100"}`}
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-gradient-to-br from-purple-500 to-orange-500 shadow-sm border border-gray-100 flex items-center justify-center">
+                                            <span className="text-white font-black text-sm">H</span>
+                                        </div>
+                                        <span>HariPicks</span>
+                                    </div>
+                                    <span className="text-[10px] bg-purple-500 text-white px-2 py-0.5 rounded-lg">DEALS</span>
                                 </Link>
                                 <Link
                                     href="/business/hm-tech"

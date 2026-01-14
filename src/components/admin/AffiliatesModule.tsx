@@ -6,7 +6,7 @@ import {
     MessageCircle, TrendingUp, DollarSign,
     Copy, ExternalLink, RefreshCw, Trash2,
     Package, Star, ShoppingBag, ShieldCheck, Save,
-    Edit, GitBranch, Eye, ChevronRight, X
+    Edit, GitBranch, Eye, ChevronRight, X, Search, Download
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -50,6 +50,9 @@ export default function AffiliatesModule() {
     const [viewingTree, setViewingTree] = useState<string | null>(null);
     const [treeData, setTreeData] = useState<any>(null);
     const [treeLoading, setTreeLoading] = useState(false);
+    const [search, setSearch] = useState("");
+    const [filterStatus, setFilterStatus] = useState("All");
+    const [showAddModal, setShowAddModal] = useState(false);
 
     const fetchAffiliates = async () => {
         setLoading(true);
@@ -275,8 +278,21 @@ Start promoting and tracking your binary team growth today! 🚀
     };
 
     const filteredAffiliates = affiliates.filter(a => {
-        if (activeTab === "pending") return a.status === "Pending";
-        if (activeTab === "active") return a.status === "Approved";
+        // Tab filter
+        if (activeTab === "pending" && a.status !== "Pending") return false;
+        if (activeTab === "active" && a.status !== "Approved") return false;
+
+        // Status filter (from bar)
+        if (filterStatus !== "All" && a.status !== filterStatus) return false;
+
+        // Search filter
+        if (search) {
+            const s = search.toLowerCase();
+            return a.fullName.toLowerCase().includes(s) ||
+                a.mobile.includes(s) ||
+                (a.email && a.email.toLowerCase().includes(s));
+        }
+
         return true;
     });
 
@@ -295,89 +311,91 @@ Start promoting and tracking your binary team growth today! 🚀
     return (
         <div className="space-y-4 animate-in fade-in duration-500">
             {/* Header Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500">
-                        <Users size={24} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500">
+                        <Users size={20} />
                     </div>
                     <div>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Affiliates</p>
-                        <h3 className="text-xl font-black text-gray-900">{affiliates.length}</h3>
+                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Affiliates</p>
+                        <h3 className="text-lg font-black text-gray-900">{affiliates.length}</h3>
                     </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-500">
-                        <ShoppingBag size={24} />
+                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center text-pink-500">
+                        <ShoppingBag size={20} />
                     </div>
                     <div>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Orders</p>
-                        <h3 className="text-xl font-black text-gray-900">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Orders</p>
+                        <h3 className="text-lg font-black text-gray-900">
                             {affiliates.reduce((acc, a) => acc + (a.totalOrders || 0), 0)}
                         </h3>
                     </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500">
-                        <DollarSign size={24} />
+                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
+                        <DollarSign size={20} />
                     </div>
                     <div>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Earnings</p>
-                        <h3 className="text-xl font-black text-gray-900">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Earnings</p>
+                        <h3 className="text-lg font-black text-gray-900">
                             ₹{affiliates.reduce((acc, a) => acc + (a.totalEarnings || 0), 0).toFixed(0)}
                         </h3>
                     </div>
                 </div>
             </div>
 
-            {/* Tabs and Controls */}
-            <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div className="flex p-1.5 bg-gray-50 rounded-xl w-fit">
+            {/* Header & Tabs */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div className="flex p-1 bg-gray-50 rounded-xl w-fit">
                     <button
                         onClick={() => setActiveTab("pending")}
-                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "pending" ? "bg-white text-primary shadow-sm" : "text-gray-400 hover:text-primary"}`}
+                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === "pending" ? "bg-white text-primary shadow-sm" : "text-gray-400 hover:text-primary"}`}
                     >
-                        <Clock size={14} />
+                        <Clock size={12} />
                         Pending ({affiliates.filter(a => a.status === "Pending").length})
                     </button>
                     <button
                         onClick={() => setActiveTab("active")}
-                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "active" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-400 hover:text-emerald-600"}`}
+                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === "active" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-400 hover:text-emerald-600"}`}
                     >
-                        <CheckCircle size={14} />
+                        <CheckCircle size={12} />
                         Active ({affiliates.filter(a => a.status === "Approved").length})
                     </button>
                     <button
                         onClick={() => setActiveTab("all")}
-                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-900"}`}
+                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === "all" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-900"}`}
                     >
-                        <Users size={14} />
+                        <Users size={12} />
                         All
                     </button>
                     <button
                         onClick={() => setActiveTab("payouts")}
-                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "payouts" ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-orange-600"}`}
+                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === "payouts" ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-orange-600"}`}
                     >
-                        <DollarSign size={14} />
+                        <DollarSign size={12} />
                         Payouts ({payoutRequests.filter(p => p.status === "Pending").length})
                     </button>
                     <button
                         onClick={() => setActiveTab("config")}
-                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === "config" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-blue-600"}`}
+                        className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${activeTab === "config" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-blue-600"}`}
                     >
-                        <RefreshCw size={14} />
+                        <RefreshCw size={12} />
                         Config
                     </button>
                 </div>
 
-                <button
-                    onClick={fetchAffiliates}
-                    className="p-3 bg-gray-50 text-gray-500 rounded-lg hover:bg-gray-100 transition-all"
-                    title="Refresh List"
-                >
-                    <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={fetchAffiliates}
+                        className="p-2 bg-gray-50 text-gray-500 rounded-lg hover:bg-gray-100 transition-all"
+                        title="Refresh List"
+                    >
+                        <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+                    </button>
+                </div>
             </div>
 
             {/* List */}
@@ -633,14 +651,14 @@ Start promoting and tracking your binary team growth today! 🚀
                                                 <button
                                                     onClick={() => handleAction(affiliate.id, "approve")}
                                                     disabled={updatingId === affiliate.id}
-                                                    className="flex-1 md:flex-none px-4 py-2 bg-emerald-500 text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all disabled:opacity-50"
+                                                    className="flex-1 md:flex-none px-3 py-1.5 bg-blue-600 text-white rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-50"
                                                 >
                                                     Approve
                                                 </button>
                                                 <button
                                                     onClick={() => handleAction(affiliate.id, "reject")}
                                                     disabled={updatingId === affiliate.id}
-                                                    className="flex-1 md:flex-none px-4 py-2 bg-red-50 text-red-500 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-red-100 transition-all disabled:opacity-50"
+                                                    className="flex-1 md:flex-none px-3 py-1.5 bg-red-50 text-red-500 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-red-100 transition-all disabled:opacity-50"
                                                 >
                                                     Reject
                                                 </button>

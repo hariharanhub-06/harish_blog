@@ -134,29 +134,29 @@ export default function MessagesModule() {
             {/* Header & Filters */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                    <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
                         Inbox ({messages.length})
                         <button
                             onClick={() => fetchMessages()}
                             disabled={fetching}
-                            className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-all disabled:opacity-50"
+                            className="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-all disabled:opacity-50"
                             title="Refresh Messages"
                         >
-                            <RefreshCcw size={18} className={fetching ? "animate-spin" : ""} />
+                            <RefreshCcw size={14} className={fetching ? "animate-spin" : ""} />
                         </button>
                     </h2>
-                    <p className="text-secondary text-sm font-bold mt-1">Manage your website inquiries</p>
+                    <p className="text-secondary text-xs font-bold mt-0.5">Manage your website inquiries</p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
-                    <div className="flex items-center gap-2 px-3">
-                        <Filter size={14} className="text-secondary" />
-                        <span className="text-[10px] font-black uppercase text-secondary">Filter</span>
+                <div className="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-xl border border-gray-100 shadow-sm">
+                    <div className="flex items-center gap-1.5 px-2">
+                        <Filter size={12} className="text-secondary" />
+                        <span className="text-[8px] font-black uppercase text-secondary">Filter</span>
                     </div>
                     <select
                         value={filterCategory}
                         onChange={(e) => setFilterCategory(e.target.value)}
-                        className="bg-gray-50 border-0 rounded-xl text-xs font-bold px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
+                        className="bg-gray-50 border-0 rounded-lg text-[10px] font-bold px-2 py-1.5 outline-none focus:ring-2 focus:ring-primary/20"
                     >
                         <option value="All">All Categories</option>
                         {availableCategories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -164,7 +164,7 @@ export default function MessagesModule() {
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
-                        className="bg-gray-50 border-0 rounded-xl text-xs font-bold px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
+                        className="bg-gray-50 border-0 rounded-lg text-[10px] font-bold px-2 py-1.5 outline-none focus:ring-2 focus:ring-primary/20"
                     >
                         <option value="All">All Statuses</option>
                         {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
@@ -177,19 +177,19 @@ export default function MessagesModule() {
                 {filteredMessages.map((msg) => (
                     <div
                         key={msg.id}
-                        className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col xl:flex-row items-start xl:items-center gap-6 xl:gap-10 hover:border-primary/20 relative group flex-wrap"
+                        className="bg-white p-4 md:p-6 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col xl:flex-row items-start xl:items-center gap-4 xl:gap-8 hover:border-primary/20 relative group flex-wrap"
                     >
-                        <div className="flex items-center gap-5 shrink-0 min-w-0 md:min-w-[240px]">
-                            <div className="w-14 h-14 md:w-16 md:h-16 rounded-3xl bg-gray-50 text-primary flex items-center justify-center font-black text-xl shrink-0 group-hover:scale-110 transition-transform">
+                        <div className="flex items-center gap-4 shrink-0 min-w-0 md:min-w-[200px]">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gray-50 text-primary flex items-center justify-center font-black text-lg shrink-0 group-hover:scale-110 transition-transform">
                                 {msg.name.charAt(0)}
                             </div>
                             <div className="min-w-0">
-                                <h3 className="font-black text-gray-900 truncate text-lg">{msg.name}</h3>
-                                <div className="flex items-center gap-2 text-primary font-bold text-sm mt-1">
-                                    <Phone size={14} className="shrink-0" />
+                                <h3 className="font-black text-gray-900 truncate text-base">{msg.name}</h3>
+                                <div className="flex items-center gap-1.5 text-primary font-bold text-xs mt-0.5">
+                                    <Phone size={12} className="shrink-0" />
                                     <span>{msg.mobile}</span>
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-secondary/40 block mt-2">
+                                <span className="text-[8px] font-black uppercase tracking-widest text-secondary/40 block mt-1.5">
                                     {new Date(msg.createdAt).toLocaleDateString()}
                                 </span>
                             </div>
@@ -212,39 +212,39 @@ export default function MessagesModule() {
                         </div>
 
                         <div className="flex-1 min-w-0 w-full overflow-hidden">
-                            <p className="text-sm text-gray-500 font-medium line-clamp-2 italic px-4 py-3 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 group-hover:bg-white transition-colors">&quot;{msg.message}&quot;</p>
+                            <p className="text-xs text-gray-500 font-medium line-clamp-2 italic px-3 py-2 bg-gray-50/50 rounded-xl border border-dashed border-gray-200 group-hover:bg-white transition-colors">&quot;{msg.message}&quot;</p>
                         </div>
 
-                        <div className="flex items-center gap-3 w-full sm:w-auto mt-4 xl:mt-0 pt-6 xl:pt-0 border-t xl:border-0 border-gray-50 flex-wrap justify-end ml-auto">
-                            <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-full sm:w-auto mt-3 xl:mt-0 pt-4 xl:pt-0 border-t xl:border-0 border-gray-50 flex-wrap justify-end ml-auto">
+                            <div className="flex items-center gap-1.5">
                                 <button
                                     onClick={() => setViewing(msg)}
-                                    className="p-3 bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-2xl transition-all shadow-sm active:scale-95"
+                                    className="p-2 bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all shadow-sm active:scale-95"
                                 >
-                                    <Eye size={20} />
+                                    <Eye size={16} />
                                 </button>
                                 <a
                                     href={`https://wa.me/${msg.mobile?.replace(/\D/g, '')}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-3 bg-gray-50 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-2xl transition-all shadow-sm active:scale-95"
+                                    className="p-2 bg-gray-50 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-xl transition-all shadow-sm active:scale-95"
                                 >
-                                    <MessageCircle size={20} />
+                                    <MessageCircle size={16} />
                                 </a>
                             </div>
 
                             <button
                                 onClick={() => setEditing(msg)}
-                                className="flex-1 sm:flex-none px-6 py-3 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-2xl transition-all font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm shadow-amber-100/50 active:scale-95"
+                                className="flex-1 sm:flex-none px-4 py-2.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-xl transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-sm shadow-amber-100/50 active:scale-95"
                             >
-                                <Edit3 size={16} /> Update
+                                <Edit3 size={14} /> Update
                             </button>
 
                             <button
                                 onClick={() => handleDelete(msg.id)}
-                                className="p-3 bg-red-50 text-red-200 hover:bg-red-500 hover:text-white rounded-2xl transition-all shadow-sm active:scale-95"
+                                className="p-2 bg-red-50 text-red-200 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm active:scale-95"
                             >
-                                <Trash2 size={20} />
+                                <Trash2 size={16} />
                             </button>
                         </div>
                     </div>
@@ -260,46 +260,46 @@ export default function MessagesModule() {
             {/* View Modal (Ensuring it's bigger and clearer) */}
             {viewing && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-10 md:p-14 relative">
-                        <button onClick={() => setViewing(null)} className="absolute top-8 right-8 p-3 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-full transition-all">
-                            <X size={28} />
+                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8 md:p-10 relative">
+                        <button onClick={() => setViewing(null)} className="absolute top-6 right-6 p-2 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-full transition-all">
+                            <X size={20} />
                         </button>
 
-                        <div className="flex items-center gap-6 mb-12">
-                            <div className="w-20 h-20 rounded-3xl bg-primary text-white flex items-center justify-center font-black text-3xl shadow-xl shadow-primary/20">
+                        <div className="flex items-center gap-5 mb-8">
+                            <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-2xl shadow-xl shadow-primary/20">
                                 {viewing.name.charAt(0)}
                             </div>
                             <div>
-                                <h3 className="text-3xl font-black text-gray-900 mb-1">{viewing.name}</h3>
-                                <p className="text-secondary font-bold flex items-center gap-2 text-sm">
-                                    <Calendar size={14} /> {new Date(viewing.createdAt).toLocaleDateString()}
+                                <h3 className="text-2xl font-black text-gray-900 mb-0.5">{viewing.name}</h3>
+                                <p className="text-secondary font-bold flex items-center gap-1.5 text-xs">
+                                    <Calendar size={12} /> {new Date(viewing.createdAt).toLocaleDateString()}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-8 mb-10">
-                            <div className="space-y-2">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile</p>
-                                <div className="p-5 bg-gray-50 rounded-2xl font-bold flex items-center justify-between">
-                                    <span className="flex items-center gap-3"><Phone size={18} className="text-primary" /> {viewing.mobile}</span>
-                                    <a href={`https://wa.me/${viewing.mobile?.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-green-500 bg-white p-2 rounded-lg shadow-sm">
-                                        <MessageCircle size={18} />
+                        <div className="grid md:grid-cols-2 gap-6 mb-8">
+                            <div className="space-y-1.5">
+                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile</p>
+                                <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center justify-between text-sm">
+                                    <span className="flex items-center gap-2.5"><Phone size={16} className="text-primary" /> {viewing.mobile}</span>
+                                    <a href={`https://wa.me/${viewing.mobile?.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-green-500 bg-white p-1.5 rounded-lg shadow-sm">
+                                        <MessageCircle size={16} />
                                     </a>
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Email</p>
-                                <div className="p-5 bg-gray-50 rounded-2xl font-bold flex items-center gap-3">
-                                    <Mail size={18} className="text-blue-400" />
+                            <div className="space-y-1.5">
+                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Email</p>
+                                <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center gap-2.5 text-sm">
+                                    <Mail size={16} className="text-blue-400" />
                                     <span className="truncate">{viewing.email}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Message Content</p>
-                            <div className="p-8 bg-gray-50 rounded-[2.5rem] border-l-4 border-primary">
-                                <p className="text-gray-800 leading-relaxed font-medium whitespace-pre-wrap">{viewing.message}</p>
+                        <div className="space-y-1.5">
+                            <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Message Content</p>
+                            <div className="p-6 bg-gray-50 rounded-[2rem] border-l-4 border-primary">
+                                <p className="text-sm text-gray-800 leading-relaxed font-medium whitespace-pre-wrap">{viewing.message}</p>
                             </div>
                         </div>
                     </div>
@@ -309,19 +309,19 @@ export default function MessagesModule() {
             {/* Edit Modal */}
             {editing && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md p-10">
-                        <div className="flex justify-between items-center mb-8">
-                            <h3 className="text-xl font-black">Update Submission</h3>
-                            <button onClick={() => setEditing(null)} className="p-2 hover:bg-red-50 text-gray-300 rounded-full transition-all">
-                                <X size={24} />
+                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-8">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-black">Update Submission</h3>
+                            <button onClick={() => setEditing(null)} className="p-1.5 hover:bg-red-50 text-gray-300 rounded-full transition-all">
+                                <X size={20} />
                             </button>
                         </div>
 
-                        <form onSubmit={handleUpdate} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Category</label>
+                        <form onSubmit={handleUpdate} className="space-y-5">
+                            <div className="space-y-1.5">
+                                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Category</label>
                                 <select
-                                    className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary appearance-none font-bold"
+                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary appearance-none font-bold text-xs"
                                     value={availableCategories.includes(editing.category) ? editing.category : '__new__'}
                                     onChange={(e) => {
                                         if (e.target.value === '__new__') {
@@ -365,7 +365,7 @@ export default function MessagesModule() {
                                     <input
                                         autoFocus
                                         placeholder="New status..."
-                                        className="w-full mt-2 bg-white border-2 border-primary/10 rounded-2xl p-4 font-bold"
+                                        className="w-full mt-2 bg-white border-2 border-primary/10 rounded-xl p-3 font-bold text-xs"
                                         value={editing.status}
                                         onChange={(e) => setEditing({ ...editing, status: e.target.value })}
                                     />
@@ -375,9 +375,9 @@ export default function MessagesModule() {
                             <button
                                 type="submit"
                                 disabled={updating}
-                                className="w-full bg-primary text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-3 transition-all active:scale-95"
+                                className="w-full bg-primary text-white py-4 rounded-xl font-black text-base shadow-xl shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-2.5 transition-all active:scale-95"
                             >
-                                {updating && <Loader2 className="w-5 h-5 animate-spin" />}
+                                {updating && <Loader2 className="w-4 h-4 animate-spin" />}
                                 <span>{updating ? "Saving..." : "Save Updates"}</span>
                             </button>
                         </form>
