@@ -30,11 +30,11 @@ export default function PartnershipCarousel() {
         : [];
 
     return (
-        <section className="py-20 bg-white overflow-hidden border-b border-gray-50">
-            <div className="container mx-auto px-6 mb-12">
+        <section className="py-12 bg-white overflow-hidden border-b border-gray-50">
+            <div className="container mx-auto px-6 mb-8">
                 <div className="flex flex-col items-center">
-                    <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight text-center">Partnered <span className="text-primary italic">By</span></h2>
-                    <div className="w-24 h-1.5 bg-gradient-to-r from-primary to-pink-500 rounded-full mt-4"></div>
+                    <h2 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight text-center">Partnered <span className="text-primary italic">By</span></h2>
+                    <div className="w-16 h-1 bg-gradient-to-r from-primary to-pink-500 rounded-full mt-3"></div>
                 </div>
             </div>
 
@@ -48,10 +48,10 @@ export default function PartnershipCarousel() {
                     {displayPartners.map((partner, idx) => (
                         <div
                             key={`${partner.id}-${idx}`}
-                            className="flex-shrink-0 w-[280px] md:w-[350px] mx-4"
+                            className="flex-shrink-0 w-[240px] md:w-[300px] mx-3"
                         >
-                            <div className="bg-white rounded-[2rem] p-8 md:p-12 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 group/card">
-                                <div className="relative h-24 md:h-32 w-full flex items-center justify-center">
+                            <div className="bg-white rounded-[1.5rem] p-6 md:p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 group/card">
+                                <div className="relative h-20 md:h-24 w-full flex items-center justify-center">
                                     <Image
                                         loader={imageKitLoader}
                                         src={partner.logo}
@@ -60,9 +60,9 @@ export default function PartnershipCarousel() {
                                         className="object-contain group-hover/card:scale-110 transition-transform duration-700"
                                     />
                                 </div>
-                                <div className="mt-8 text-center italic">
-                                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">{partner.name}</h3>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary opacity-60 mt-1">{partner.partnerType}</p>
+                                <div className="mt-6 text-center italic">
+                                    <h3 className="text-base font-black text-gray-900 uppercase tracking-tight">{partner.name}</h3>
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-primary opacity-60 mt-1">{partner.partnerType}</p>
                                 </div>
                             </div>
                         </div>
@@ -80,10 +80,10 @@ export default function PartnershipCarousel() {
                     {displayPartners.map((partner, idx) => (
                         <div
                             key={`dup-${partner.id}-${idx}`}
-                            className="flex-shrink-0 w-[280px] md:w-[350px] mx-4"
+                            className="flex-shrink-0 w-[240px] md:w-[300px] mx-3"
                         >
-                            <div className="bg-white rounded-[2rem] p-8 md:p-12 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 group/card">
-                                <div className="relative h-24 md:h-32 w-full flex items-center justify-center">
+                            <div className="bg-white rounded-[1.5rem] p-6 md:p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 group/card">
+                                <div className="relative h-20 md:h-24 w-full flex items-center justify-center">
                                     <Image
                                         loader={imageKitLoader}
                                         src={partner.logo}
@@ -92,9 +92,9 @@ export default function PartnershipCarousel() {
                                         className="object-contain group-hover/card:scale-110 transition-transform duration-700"
                                     />
                                 </div>
-                                <div className="mt-8 text-center italic">
-                                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">{partner.name}</h3>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary opacity-60 mt-1">{partner.partnerType}</p>
+                                <div className="mt-6 text-center italic">
+                                    <h3 className="text-base font-black text-gray-900 uppercase tracking-tight">{partner.name}</h3>
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-primary opacity-60 mt-1">{partner.partnerType}</p>
                                 </div>
                             </div>
                         </div>

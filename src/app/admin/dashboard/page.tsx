@@ -47,11 +47,12 @@ import VendorsModule from "@/components/admin/VendorsModule";
 import VendorProductAssignmentModule from "@/components/admin/VendorProductAssignmentModule";
 import VendorSettlementsModule from "@/components/admin/VendorSettlementsModule";
 import PartnershipsModule from "@/components/admin/PartnershipsModule";
+import HariPicksModule from "@/components/admin/HariPicksModule";
 import { Handshake } from "lucide-react";
 
 
 
-type Tab = "overview" | "profile" | "professional-journey" | "messages" | "snack-central" | "billing" | "partner-network" | "vendor-central" | "public-assets";
+type Tab = "overview" | "profile" | "professional-journey" | "messages" | "snack-central" | "billing" | "partner-network" | "vendor-central" | "public-assets" | "haripicks";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -65,7 +66,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "professional-journey", "messages", "snack-central", "billing", "partner-network", "vendor-central", "public-assets"];
+        const validTabs = ["overview", "profile", "professional-journey", "messages", "snack-central", "billing", "partner-network", "vendor-central", "public-assets", "haripicks"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -117,6 +118,7 @@ export default function AdminDashboard() {
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
         { id: "divider", title: "BUSINESS SECTION", icon: null, color: "" },
         { id: "snack-central", title: "Snack Central", icon: Package, color: "bg-pink-600", badge: pendingOrdersCount },
+        { id: "haripicks", title: "HariPicks Manager", icon: ShoppingBag, color: "bg-purple-600" },
         { id: "billing", title: "Billing / Invoice", icon: FileText, color: "bg-orange-500" },
         { id: "partner-network", title: "Partner Network", icon: Users, color: "bg-orange-600" },
         { id: "vendor-central", title: "Vendor Central", icon: Building, color: "bg-teal-600" },
@@ -156,6 +158,7 @@ export default function AdminDashboard() {
                 </div>
             );
             case "vendor-central": return <VendorsModule />;
+            case "haripicks": return <HariPicksModule />;
             case "public-assets": return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <ReviewsModule />
@@ -176,95 +179,119 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-[#fcfcfd] flex relative overflow-hidden font-poppins">
+            {/* Soft Background Decorative Blobs */}
+            <div className="fixed top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+            <div className="fixed bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+            <div className="fixed top-[20%] right-[10%] w-[30%] h-[30%] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
+
             {/* Sidebar */}
-            <aside className="w-80 bg-white border-r border-gray-100 hidden lg:flex flex-col fixed inset-y-0 print:hidden">
-                <div className="p-10">
-                    <Link href="/" className="text-2xl font-bold tracking-tight">
-                        <span className="text-primary">Admin</span>
-                        <span className="text-gray-900 font-black">Panel</span>
+            <aside className="w-64 bg-white/70 backdrop-blur-xl border-r border-gray-100 hidden lg:flex flex-col fixed inset-y-0 z-50 print:hidden shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+                <div className="p-6">
+                    <Link href="/" className="group flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-all text-white">
+                            <Layout size={16} />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-400 leading-none mb-0.5">Nexus</span>
+                            <span className="text-lg font-bold tracking-tight text-gray-900 leading-none">Admin<span className="text-primary italic">.</span></span>
+                        </div>
                     </Link>
                 </div>
 
-                <nav className="flex-1 px-6 space-y-2 mt-10 overflow-y-auto pb-10">
+                <nav className="flex-1 px-4 space-y-1 mt-6 overflow-y-auto pb-6 scrollbar-hide">
                     {menuItems.map((item) => (
                         item.id === "divider" ? (
-                            <div key={item.id} className="px-6 pt-8 pb-2">
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">{item.title}</span>
+                            <div key={item.id} className="px-4 pt-6 pb-2">
+                                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-gray-400">{item.title}</span>
                             </div>
                         ) : (
                             <button
                                 key={item.id}
                                 onClick={() => handleTabChange(item.id as Tab)}
-                                className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm transition-all ${activeTab === item.id
-                                    ? "bg-primary text-white shadow-xl shadow-primary/20"
-                                    : "text-secondary hover:bg-gray-50 hover:text-primary"
+                                className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-bold text-xs transition-all relative group ${activeTab === item.id
+                                    ? "bg-primary text-white shadow-lg shadow-primary/25 translate-x-1"
+                                    : "text-gray-500 hover:bg-gray-50/80 hover:text-primary hover:translate-x-1"
                                     }`}
                             >
-                                {item.icon && (() => {
-                                    const IconComponent = item.icon;
-                                    return <IconComponent size={20} />;
-                                })()}
+                                <div className={`p-1.5 rounded-lg transition-colors ${activeTab === item.id ? "bg-white/20" : "bg-gray-50 group-hover:bg-primary/5"}`}>
+                                    {item.icon && (() => {
+                                        const IconComponent = item.icon;
+                                        return <IconComponent size={14} />;
+                                    })()}
+                                </div>
                                 <span className="flex-1 text-left">{item.title}</span>
-                                {item.id === "messages" && unreadCount > 0 && (
-                                    <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">
-                                        {unreadCount}
+
+                                {item.badge && item.badge > 0 && (
+                                    <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-black animate-pulse ${activeTab === item.id ? "bg-white text-primary" : "bg-red-500 text-white"}`}>
+                                        {item.badge}
                                     </span>
                                 )}
-                                {item.id === "snacks-orders" && pendingOrdersCount > 0 && (
-                                    <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">
-                                        {pendingOrdersCount}
-                                    </span>
-                                )}
-                                {item.id === "reviews" && pendingReviewsCount > 0 && (
-                                    <span className="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse">
-                                        {pendingReviewsCount}
-                                    </span>
+
+                                {activeTab === item.id && (
+                                    <div className="absolute left-1 w-0.5 h-4 bg-white rounded-full" />
                                 )}
                             </button>
                         )
                     ))}
                 </nav>
 
-                <div className="p-6 border-t border-gray-50">
+                <div className="p-4 border-t border-gray-100/50">
                     <button
                         onClick={() => logout()}
-                        className="w-full flex items-center space-x-4 px-6 py-4 rounded-2xl font-black text-sm text-red-500 hover:bg-red-50 transition-all"
+                        className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-black text-xs text-red-500 hover:bg-red-50 transition-all group"
                     >
-                        <LogOut size={20} />
+                        <div className="p-1.5 rounded-lg bg-red-50 group-hover:bg-red-100 transition-colors">
+                            <LogOut size={16} />
+                        </div>
                         <span>Logout</span>
                     </button>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 lg:ml-80 w-full overflow-x-hidden min-h-screen bg-gray-50/20 print:ml-0">
-                <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 print:hidden">
-                    <div className="max-w-7xl mx-auto px-6 md:px-10 py-6 flex justify-between items-center">
+            <main className="flex-1 lg:ml-64 w-full overflow-x-hidden min-h-screen relative z-10 print:ml-0">
+                <header className="bg-white/60 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-40 print:hidden shadow-sm">
+                    <div className="max-w-7xl mx-auto px-6 md:px-8 py-3.5 flex justify-between items-center">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setIsMobileMenuOpen(true)}
-                                className="lg:hidden p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-100 bg-white shadow-sm"
                             >
-                                <Menu size={24} />
+                                <Menu size={18} />
                             </button>
-                            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">
-                                {activeTab === 'overview' ? 'Command Center' : activeTab}
-                            </h2>
+                            <div className="flex flex-col">
+                                <div className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-gray-400 mb-0.5">
+                                    <div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                    <span>System Online</span>
+                                </div>
+                                <h2 className="text-sm font-black text-gray-900 tracking-tight flex items-center gap-1.5 lowercase">
+                                    <span className="text-primary">/</span> {activeTab === 'overview' ? 'Command Center' : activeTab.replace('-', ' ')}
+                                </h2>
+                            </div>
                         </div>
-                        <div className="flex items-center space-x-6">
-
-                            <Link href="/" target="_blank" className="text-secondary hover:text-primary transition-colors">
-                                <ExternalLink size={20} />
+                        <div className="flex items-center space-x-4">
+                            <Link
+                                href="/"
+                                target="_blank"
+                                className="p-2 rounded-lg border border-gray-100 bg-white text-gray-400 hover:text-primary hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all shadow-sm group"
+                            >
+                                <ExternalLink size={16} className="group-hover:scale-110 transition-transform" />
                             </Link>
-                            <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center font-black text-primary">
-                                {user.email?.charAt(0).toUpperCase()}
+                            <div className="flex items-center gap-2 pl-2 border-l border-gray-100">
+                                <div className="flex flex-col items-end hidden sm:flex">
+                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">Admin</span>
+                                    <span className="text-[10px] font-bold text-gray-900 leading-none">{user.email?.split('@')[0]}</span>
+                                </div>
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 shadow-lg shadow-primary/20 flex items-center justify-center font-black text-white text-sm border-2 border-white">
+                                    {user.email?.charAt(0).toUpperCase()}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </header>
 
-                <div className="p-6 md:p-10 max-w-7xl mx-auto w-full">
+                <div className="p-4 md:p-8 max-w-7xl mx-auto w-full relative">
                     {renderContent()}
                 </div>
             </main>

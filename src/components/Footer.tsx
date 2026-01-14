@@ -14,8 +14,8 @@ const socialLinks = [
 export default function Footer({ minimal = false }: { minimal?: boolean }) {
     if (minimal) {
         return (
-            <footer className="bg-white border-t border-gray-50 py-8 relative z-50 overflow-hidden">
-                <div className="container mx-auto px-6 text-center text-sm text-secondary relative z-10 text-gray-500">
+            <footer className="bg-white border-t border-gray-50 py-6 relative z-50 overflow-hidden">
+                <div className="container mx-auto px-6 text-center text-[11px] text-secondary relative z-10 text-gray-500">
                     <p>© {new Date().getFullYear()} Hari Haran Jeyaramamoorthy. All rights reserved.</p>
                 </div>
             </footer>
@@ -23,34 +23,34 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
     }
 
     return (
-        <footer className="bg-white border-t border-gray-100 py-6 transition-colors duration-300 relative z-50">
+        <footer className="bg-white border-t border-gray-100 py-4 transition-colors duration-300 relative z-50">
             <div className="container mx-auto px-6">
-                <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0 mb-8">
+                <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
                     <div>
-                        <Link href="/" className="text-2xl font-bold text-primary">
+                        <Link href="/" className="text-xl font-bold text-primary">
                             HariHaran<span className="text-accent">.</span>
                         </Link>
-                        <p className="text-secondary mt-2 max-w-sm">
+                        <p className="text-secondary mt-1 max-w-sm text-xs">
                             Helping businesses grow through technology and strategic leadership.
                         </p>
                     </div>
 
-                    <div className="flex space-x-6">
+                    <div className="flex space-x-4">
                         {socialLinks.map((social) => (
                             <a
                                 key={social.name}
                                 href={social.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-secondary hover:text-primary transition-colors p-2 bg-gray-50 rounded-xl"
+                                className="text-secondary hover:text-primary transition-colors p-1.5 bg-gray-50 rounded-lg"
                             >
-                                <social.icon size={24} />
+                                <social.icon size={20} />
                             </a>
                         ))}
                     </div>
                 </div>
 
-                <div className="border-t border-gray-50 pt-6 flex flex-col items-center text-center text-sm text-secondary">
+                <div className="border-t border-gray-50 pt-4 flex flex-col items-center text-center text-[11px] text-secondary">
                     <p>© {new Date().getFullYear()} Hari Haran Jeyaramamoorthy. All rights reserved.</p>
                 </div>
             </div>

@@ -18,7 +18,7 @@ interface HeroProps {
 
 export default function Hero({ profile }: HeroProps) {
     return (
-        <section className="relative container mx-auto px-6 pt-16 md:pt-20 pb-12 md:pb-16 flex flex-col items-center text-center overflow-hidden">
+        <section className="relative container mx-auto px-6 pt-12 md:pt-14 pb-8 md:pb-10 flex flex-col items-center text-center overflow-hidden">
             {/* Background decorative elements */}
             {/* Background Image */}
             <div className="absolute inset-0 -z-10 pointer-events-none">
@@ -31,25 +31,24 @@ export default function Hero({ profile }: HeroProps) {
                             className="object-cover opacity-20"
                             priority
                         />
-                        {/* Gradient overlay for text readability (Very Minimal) */}
+                        {/* Gradient overlay for text readability */}
                         <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/40" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10" />
                     </>
                 ) : (
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-full blur-[100px] opacity-20">
-                        <div className="absolute top-10 left-10 w-72 h-72 bg-primary rounded-full" />
-                        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent rounded-full" />
+                        <div className="absolute top-10 left-10 w-60 h-60 bg-primary rounded-full" />
+                        <div className="absolute bottom-10 right-10 w-72 h-72 bg-accent rounded-full" />
                     </div>
                 )}
             </div>
 
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="inline-flex items-center space-x-2 glass text-primary px-5 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em] mb-6 shadow-sm border-white/50"
+                className="inline-flex items-center space-x-2 glass text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-5 shadow-sm border-white/50"
             >
-                <Sparkles size={14} className="text-accent" />
+                <Sparkles size={12} className="text-accent" />
                 <span>Available for new opportunities</span>
             </motion.div>
 
@@ -59,13 +58,13 @@ export default function Hero({ profile }: HeroProps) {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, type: "spring" }}
-                    className="relative mb-8"
+                    className="relative mb-6"
                 >
                     {/* Glowing background ring */}
-                    <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-125" />
+                    <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-125" />
 
                     <Tilt options={{ max: 15, speed: 400, glare: true, "max-glare": 0.3 }} className="relative z-10">
-                        <div className="relative w-40 h-40 md:w-56 md:h-56 rounded-full overflow-hidden border-8 border-white shadow-[0_20px_50px_rgba(30,64,175,0.2)] group transition-all duration-500">
+                        <div className="relative w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden border-4 border-white shadow-[0_15px_40px_rgba(30,64,175,0.15)] group transition-all duration-500">
                             <Image
                                 src={profile.avatarUrl}
                                 alt={profile.name}
@@ -79,50 +78,50 @@ export default function Hero({ profile }: HeroProps) {
             )}
 
             <motion.h1
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="text-5xl md:text-7xl font-black font-poppins text-gray-900 mb-6 tracking-tight leading-[1.05]"
+                className="text-4xl md:text-5xl font-black font-poppins text-gray-900 mb-4 tracking-tight leading-[1.1]"
             >
                 Crafting Digital <br />
                 <span className="text-primary italic relative">
                     Excellence
-                    <span className="absolute bottom-2 left-0 w-full h-3 bg-accent/20 -z-10 rotate-1" />
+                    <span className="absolute bottom-1.5 left-0 w-full h-2 bg-accent/20 -z-10 rotate-1" />
                 </span>
                 <span className="text-gray-900">.</span>
             </motion.h1>
 
             <motion.p
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-lg md:text-xl text-gray-900 max-w-3xl mb-8 leading-relaxed font-bold"
-                style={{ textShadow: '0 2px 4px rgba(255,255,255,0.8)' }}
+                className="text-base md:text-lg text-gray-900 max-w-2xl mb-6 leading-relaxed font-bold"
+                style={{ textShadow: '0 1px 2px rgba(255,255,255,0.8)' }}
             >
                 Hi, I&apos;m <span className="text-gray-900 font-black">{profile.name}</span>.
-                <span className="block mt-2 text-gray-800 font-semibold">{profile.headline}</span>
+                <span className="block mt-1 text-gray-800 font-semibold">{profile.headline}</span>
             </motion.p>
 
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="flex flex-col sm:flex-row gap-5"
+                className="flex flex-col sm:flex-row gap-4"
             >
-                <MagneticButton strength={25}>
+                <MagneticButton strength={20}>
                     <Link
                         href="#portfolio"
-                        className="group bg-primary text-white px-8 py-4 rounded-xl font-black text-lg hover:bg-blue-800 transition-all flex items-center justify-center space-x-3 shadow-xl shadow-primary/25 hover:shadow-primary/40"
+                        className="group bg-primary text-white px-6 py-3 rounded-lg font-black text-base hover:bg-blue-800 transition-all flex items-center justify-center space-x-2 shadow-lg shadow-primary/20 hover:shadow-primary/30"
                     >
                         <span>Explore My Work</span>
-                        <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </MagneticButton>
 
-                <MagneticButton strength={25}>
+                <MagneticButton strength={20}>
                     <Link
                         href="#contact"
-                        className="bg-white text-gray-900 border-2 border-gray-100 px-8 py-4 rounded-xl font-black text-lg hover:border-primary/20 hover:bg-gray-50 transition-all text-center flex items-center justify-center shadow-sm hover:shadow-lg"
+                        className="bg-white text-gray-900 border-2 border-gray-100 px-6 py-3 rounded-lg font-black text-base hover:border-primary/20 hover:bg-gray-50 transition-all text-center flex items-center justify-center shadow-sm hover:shadow-md"
                     >
                         Let&apos;s Talk
                     </Link>

@@ -204,159 +204,156 @@ Please log in and update your package specifications when you have shipments rea
     const totalLiability = vendors.reduce((acc, v) => acc + (v.pendingBalance || 0), 0);
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-500">
             {/* Header Block */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-gray-900 rounded-[2.5rem] p-8 md:p-10 text-white relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform duration-700">
-                        <Building size={150} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div className="lg:col-span-2 bg-gray-900 rounded-[2rem] p-6 md:p-8 text-white relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                        <Building size={100} />
                     </div>
-                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-5">
                         <div>
-                            <h1 className="text-4xl font-black italic tracking-tighter text-pink-500 uppercase">Vendor <span className="text-white">Central</span></h1>
-                            <p className="text-gray-400 font-bold mt-2 max-w-md">Manage accounts, settlements, and performance for all manufacturing partners.</p>
+                            <h1 className="text-2xl font-black italic tracking-tighter text-pink-500 uppercase">Vendor <span className="text-white">Central</span></h1>
+                            <p className="text-gray-400 font-bold mt-1 text-[11px] max-w-sm uppercase tracking-wide">Accounts, settlements, and performance.</p>
 
-                            <div className="mt-8">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-2">Total Network Liability</p>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-5xl font-black italic tracking-tighter">₹{totalLiability.toLocaleString()}</span>
-                                    <div className="bg-emerald-500/20 text-emerald-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                                        <Clock size={12} /> Pending Settle
+                            <div className="mt-6">
+                                <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500 mb-1">Total Liability</p>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-3xl font-black italic tracking-tighter">₹{totalLiability.toLocaleString()}</span>
+                                    <div className="bg-emerald-500/20 text-emerald-500 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest flex items-center gap-1">
+                                        <Clock size={10} /> Pending
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex gap-4">
+                        <div className="flex gap-3">
                             <button
                                 onClick={fetchVendors}
-                                className="bg-white/10 hover:bg-white/20 p-4 rounded-2xl transition-all"
+                                className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-all"
                             >
-                                <RefreshCw className={loading ? "animate-spin" : ""} size={20} />
+                                <RefreshCw className={loading ? "animate-spin" : ""} size={16} />
                             </button>
                             <button
                                 onClick={() => setShowAddModal(true)}
-                                className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-pink-500/20 transition-all active:scale-95 flex items-center gap-2"
+                                className="bg-pink-500 hover:bg-pink-600 text-white px-5 py-3 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-pink-500/20 transition-all active:scale-95 flex items-center gap-2"
                             >
-                                <Plus size={20} /> Add Vendor
+                                <Plus size={16} /> Add Vendor
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-gray-100 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-10 opacity-5 scale-150 rotate-12 group-hover:rotate-45 transition-transform duration-700">
-                        <TrendingUp size={100} />
+                <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-6 opacity-5 scale-150 rotate-12 group-hover:rotate-45 transition-transform duration-700 pointer-events-none">
+                        <TrendingUp size={80} />
                     </div>
-                    <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-                        <Zap size={18} className="text-pink-500" />
+                    <h3 className="text-sm font-black text-gray-900 mb-3 flex items-center gap-2 uppercase tracking-wide">
+                        <Zap size={16} className="text-pink-500" />
                         Quick Guide
                     </h3>
-                    <div className="space-y-4">
-                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 italic">
-                            <p className="text-[11px] font-bold text-gray-500 leading-relaxed">
-                                "Click <span className="text-pink-600">Settle Dues</span> to record a bank transfer. Click the <span className="text-emerald-600">WhatsApp icon</span> to send login info."
+                    <div className="space-y-3">
+                        <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-100 italic">
+                            <p className="text-[10px] font-bold text-gray-500 leading-normal">
+                                Click <span className="text-pink-600">Settle Dues</span> to record a transfer. Click <span className="text-emerald-600">WhatsApp</span> for credentials.
                             </p>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-400 font-bold text-[10px] uppercase tracking-widest">
-                            <CheckCircle size={14} /> System Synchronized
+                        <div className="flex items-center gap-2 text-gray-400 font-bold text-[8px] uppercase tracking-widest">
+                            <CheckCircle size={12} /> System Synchronized
                         </div>
                     </div>
                 </div>
             </div>
-
             {/* Search */}
-            <div className="relative max-w-md mx-auto">
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
+            <div className="relative max-w-sm mx-auto">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                 <input
                     type="text"
-                    placeholder="Search by name or email..."
+                    placeholder="Search vendor..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full bg-white border border-gray-100 rounded-[2rem] py-5 pl-14 pr-6 font-black text-sm focus:ring-2 focus:ring-pink-500 shadow-sm transition-all"
+                    className="w-full bg-white border border-gray-100 rounded-xl py-3 pl-12 pr-4 font-black text-xs focus:ring-2 focus:ring-pink-500 shadow-sm transition-all text-gray-700"
                 />
             </div>
-
             {/* Vendor List */}
             {loading ? (
                 <div className="flex justify-center py-20"><Loader2 className="animate-spin text-pink-500" size={48} /></div>
             ) : (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     {filteredVendors.map((vendor) => (
                         <motion.div
                             layout
                             key={vendor.id}
-                            className="bg-white rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all overflow-hidden group"
+                            className="bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden group"
                         >
                             {/* Card Header: Info & Actions */}
-                            <div className="p-8 pb-0 flex justify-between items-start">
-                                <div className="flex gap-6">
-                                    <div className="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center text-gray-400 group-hover:text-pink-500 group-hover:bg-pink-50 transition-all">
-                                        <Building size={32} />
+                            <div className="p-6 pb-0 flex justify-between items-start">
+                                <div className="flex gap-4">
+                                    <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-pink-500 group-hover:bg-pink-50 transition-all">
+                                        <Building size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-black text-gray-900 tracking-tighter uppercase italic">{vendor.name}</h3>
-                                        <p className="text-xs font-bold text-gray-400 flex items-center gap-1.5">
-                                            <MapPin size={12} /> {vendor.pickupLocationId || "L-ID Missing"}
+                                        <h3 className="text-lg font-black text-gray-900 tracking-tighter uppercase italic">{vendor.name}</h3>
+                                        <p className="text-[10px] font-bold text-gray-400 flex items-center gap-1.5 uppercase tracking-wide">
+                                            <MapPin size={10} /> {vendor.pickupLocationId || "L-ID Missing"}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-1.5">
                                     <a
                                         href={generateWhatsAppMessage(vendor)}
                                         target="_blank"
-                                        className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                                        className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                                         title="WhatsApp Credentials"
                                     >
-                                        <MessageCircle size={20} />
+                                        <MessageCircle size={16} />
                                     </a>
                                     <button
                                         onClick={() => handleDelete(vendor.id, vendor.name)}
-                                        className="p-3 bg-gray-50 text-gray-400 hover:text-white hover:bg-rose-500 rounded-2xl transition-all"
+                                        className="p-2 bg-gray-50 text-gray-400 hover:text-white hover:bg-rose-500 rounded-xl transition-all"
                                     >
-                                        <Trash2 size={20} />
+                                        <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>
-
                             {/* Middle Section: Financials */}
-                            <div className="px-8 mt-8 grid grid-cols-3 gap-6">
-                                <div className="p-4 bg-gray-50 rounded-2xl">
-                                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 text-center">Earnings</p>
-                                    <p className="text-lg font-black text-gray-900 tracking-tighter text-center italic">₹{(vendor.totalEarnings || 0).toLocaleString()}</p>
+                            <div className="px-6 mt-6 grid grid-cols-3 gap-4">
+                                <div className="p-3 bg-gray-50 rounded-xl">
+                                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 text-center">Earnings</p>
+                                    <p className="text-sm font-black text-gray-900 tracking-tighter text-center italic">₹{(vendor.totalEarnings || 0).toLocaleString()}</p>
                                 </div>
-                                <div className="p-4 bg-gray-50 rounded-2xl">
-                                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 text-center">Paid</p>
-                                    <p className="text-lg font-black text-emerald-600 tracking-tighter text-center italic">₹{(vendor.paidAmount || 0).toLocaleString()}</p>
+                                <div className="p-3 bg-gray-50 rounded-xl">
+                                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 text-center">Paid</p>
+                                    <p className="text-sm font-black text-emerald-600 tracking-tighter text-center italic">₹{(vendor.paidAmount || 0).toLocaleString()}</p>
                                 </div>
-                                <div className="p-4 bg-pink-50 rounded-2xl">
-                                    <p className="text-[9px] font-black text-pink-400 uppercase tracking-widest mb-1 text-center">DUE</p>
-                                    <p className="text-lg font-black text-pink-600 tracking-tighter text-center italic">₹{(vendor.pendingBalance || 0).toLocaleString()}</p>
+                                <div className="p-3 bg-pink-50 rounded-xl">
+                                    <p className="text-[8px] font-black text-pink-400 uppercase tracking-widest mb-1 text-center">DUE</p>
+                                    <p className="text-sm font-black text-pink-600 tracking-tighter text-center italic">₹{(vendor.pendingBalance || 0).toLocaleString()}</p>
                                 </div>
                             </div>
 
                             {/* Card Footer: Credentials & Settle */}
-                            <div className="p-8 mt-4 bg-gray-50/50 flex flex-col md:flex-row items-center justify-between gap-6">
-                                <div className="space-y-3 flex-1 min-w-0">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-100 flex-1 min-w-0">
-                                            <Mail size={14} className="text-gray-300 flex-shrink-0" />
-                                            <span className="text-[11px] font-bold text-gray-600 truncate">{vendor.email}</span>
-                                            <button onClick={() => copyToClipboard(vendor.email, `e-${vendor.id}`)} className="ml-auto p-1 hover:bg-gray-50 rounded text-gray-400">
-                                                {copiedId === `e-${vendor.id}` ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                            <div className="p-6 mt-4 bg-gray-50/50 flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div className="space-y-2 flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-gray-100 flex-1 min-w-0">
+                                            <Mail size={12} className="text-gray-300 flex-shrink-0" />
+                                            <span className="text-[10px] font-bold text-gray-600 truncate">{vendor.email}</span>
+                                            <button onClick={() => copyToClipboard(vendor.email, `e-${vendor.id}`)} className="ml-auto p-0.5 hover:bg-gray-50 rounded text-gray-400">
+                                                {copiedId === `e-${vendor.id}` ? <Check size={10} className="text-emerald-500" /> : <Copy size={10} />}
                                             </button>
                                         </div>
-                                        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-100 flex-1">
-                                            <Lock size={14} className="text-gray-300" />
-                                            <span className="text-[11px] font-bold text-gray-600 tracking-wider">
+                                        <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-gray-100 flex-1">
+                                            <Lock size={12} className="text-gray-300" />
+                                            <span className="text-[10px] font-bold text-gray-600 tracking-wider">
                                                 {showPasswords[vendor.id] ? (vendor.password || "N/A") : "••••••••"}
                                             </span>
-                                            <button onClick={() => togglePasswordVisibility(vendor.id)} className="ml-auto p-1 text-gray-400">
-                                                {showPasswords[vendor.id] ? <EyeOff size={12} /> : <Eye size={12} />}
+                                            <button onClick={() => togglePasswordVisibility(vendor.id)} className="ml-auto p-0.5 text-gray-400">
+                                                {showPasswords[vendor.id] ? <EyeOff size={10} /> : <Eye size={10} />}
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                                    <div className="flex items-center gap-1.5 text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">
                                         <Phone size={10} /> {vendor.phone || "No Contact"}
                                     </div>
                                 </div>
@@ -366,9 +363,9 @@ Please log in and update your package specifications when you have shipments rea
                                         setSelectedVendor(vendor);
                                         fetchHistory(vendor.id);
                                     }}
-                                    className="w-full md:w-auto px-8 py-5 bg-gray-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-pink-600 transition-all shadow-xl shadow-gray-200 flex items-center justify-center gap-2"
+                                    className="w-full md:w-auto px-6 py-4 bg-gray-900 text-white rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-pink-600 transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2"
                                 >
-                                    Settle Dues <ArrowRight size={14} />
+                                    Settle Dues <ArrowRight size={12} />
                                 </button>
                             </div>
                         </motion.div>

@@ -690,53 +690,53 @@ export default function SnacksOrdersModule() {
     return (
         <div className="space-y-8">
             {/* Header & Search */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                 <div>
-                    <h2 className="text-3xl font-black text-gray-900 tracking-tight">Orders Tracking</h2>
-                    <p className="text-gray-400 font-medium">Manage and track customer shipments.</p>
+                    <h2 className="text-xl font-black text-gray-900 tracking-tight">Orders Tracking</h2>
+                    <p className="text-gray-400 text-xs font-medium">Manage and track customer shipments.</p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                    <div className="relative group flex-grow sm:min-w-[300px]">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-pink-500 transition-colors" size={20} />
+                <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto">
+                    <div className="relative group flex-grow sm:min-w-[260px]">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-pink-500 transition-colors" size={16} />
                         <input
                             type="text"
                             placeholder="Order ID, Mobile, Name..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && fetchOrders()}
-                            className="w-full bg-gray-50 border-0 rounded-2xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-pink-500 transition-all font-bold"
+                            className="w-full bg-gray-50 border-0 rounded-xl py-2 pl-10 pr-4 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xs"
                         />
                     </div>
                     <button
                         onClick={() => fetchOrders(0)}
-                        className="bg-gray-900 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all"
+                        className="bg-gray-900 text-white px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-gray-800 transition-all"
                     >
                         Search
                     </button>
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="bg-pink-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center gap-2"
+                        className="bg-pink-500 text-white px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 flex items-center gap-1.5"
                     >
-                        <Plus size={16} /> Create Order
+                        <Plus size={14} /> Create
                     </button>
                     <button
                         onClick={exportToCSV}
                         disabled={orders.length === 0}
-                        className="bg-emerald-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 flex items-center gap-2 disabled:opacity-50"
+                        className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 flex items-center gap-1.5 disabled:opacity-50"
                     >
-                        <Download size={16} /> Export CSV
+                        <Download size={14} /> Export
                     </button>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-2xl w-fit">
+            <div className="flex flex-wrap gap-1.5 p-1.5 bg-gray-50 rounded-xl w-fit">
                 {STATUSES.map(s => (
                     <button
                         key={s}
                         onClick={() => setStatusFilter(s)}
-                        className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${statusFilter === s ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-900"
+                        className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${statusFilter === s ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-900"
                             }`}
                     >
                         {s}
@@ -745,50 +745,50 @@ export default function SnacksOrdersModule() {
             </div>
 
             {/* Orders Table */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-gray-50">
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Order details</th>
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Customer</th>
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Amount</th>
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Actions</th>
+                                <th className="px-5 py-4 text-[8px] font-black uppercase tracking-widest text-gray-400">Order details</th>
+                                <th className="px-5 py-4 text-[8px] font-black uppercase tracking-widest text-gray-400">Customer</th>
+                                <th className="px-5 py-4 text-[8px] font-black uppercase tracking-widest text-gray-400">Status</th>
+                                <th className="px-5 py-4 text-[8px] font-black uppercase tracking-widest text-gray-400">Amount</th>
+                                <th className="px-5 py-4 text-[8px] font-black uppercase tracking-widest text-gray-400 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {orders.map((order) => (
                                 <tr key={order.id} className="hover:bg-gray-50 transition-colors group">
-                                    <td className="px-8 py-6">
+                                    <td className="px-5 py-4">
                                         <div className="flex flex-col">
-                                            <span className="font-black text-gray-900 leading-none mb-1">{order.orderId}</span>
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                            <span className="font-black text-gray-900 leading-none mb-1 text-sm">{order.orderId}</span>
+                                            <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">
                                                 {new Date(order.createdAt).toLocaleDateString()}
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6">
+                                    <td className="px-5 py-4">
                                         <div className="flex flex-col">
-                                            <span className="font-bold text-gray-900">{order.customerName}</span>
-                                            <span className="text-xs text-gray-400">{order.customerMobile}</span>
+                                            <span className="font-bold text-gray-900 text-sm">{order.customerName}</span>
+                                            <span className="text-[10px] text-gray-400">{order.customerMobile}</span>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
+                                    <td className="px-5 py-4">
+                                        <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
                                             {order.status}
                                         </span>
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <span className="font-black text-gray-900">₹{order.totalAmount}</span>
+                                    <td className="px-5 py-4">
+                                        <span className="font-black text-gray-900 text-sm">₹{order.totalAmount}</span>
                                     </td>
-                                    <td className="px-8 py-6 text-right">
+                                    <td className="px-5 py-4 text-right">
                                         <button
                                             onClick={() => fetchOrderDetails(order.id)}
                                             disabled={fetchingDetailId === order.id}
-                                            className="p-3 bg-gray-50 text-gray-400 rounded-xl hover:bg-pink-50 hover:text-pink-500 transition-all group-hover:scale-110 disabled:opacity-50"
+                                            className="p-2 bg-gray-50 text-gray-400 rounded-lg hover:bg-pink-50 hover:text-pink-500 transition-all group-hover:scale-110 disabled:opacity-50"
                                         >
-                                            {fetchingDetailId === order.id ? <Loader2 size={18} className="animate-spin" /> : <Eye size={18} />}
+                                            {fetchingDetailId === order.id ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
                                         </button>
                                     </td>
                                 </tr>
@@ -810,22 +810,22 @@ export default function SnacksOrdersModule() {
 
                 {/* Pagination Controls */}
                 {!fetching && pagination.total > pagination.limit && (
-                    <div className="p-8 border-t border-gray-100 flex items-center justify-between bg-white">
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                            Showing {pagination.offset + 1} - {Math.min(pagination.offset + pagination.limit, pagination.total)} of {pagination.total} orders
+                    <div className="p-5 border-t border-gray-100 flex items-center justify-between bg-white">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                            Showing {pagination.offset + 1} - {Math.min(pagination.offset + pagination.limit, pagination.total)} of {pagination.total}
                         </p>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => fetchOrders(pagination.offset - pagination.limit)}
                                 disabled={pagination.offset === 0}
-                                className="px-6 py-2 bg-gray-50 text-gray-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all disabled:opacity-20"
+                                className="px-4 py-1.5 bg-gray-50 text-gray-400 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all disabled:opacity-20"
                             >
-                                Previous
+                                Prev
                             </button>
                             <button
                                 onClick={() => fetchOrders(pagination.offset + pagination.limit)}
                                 disabled={pagination.offset + pagination.limit >= pagination.total}
-                                className="px-6 py-2 bg-gray-50 text-gray-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all disabled:opacity-20"
+                                className="px-4 py-1.5 bg-gray-50 text-gray-400 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all disabled:opacity-20"
                             >
                                 Next
                             </button>
@@ -846,65 +846,65 @@ export default function SnacksOrdersModule() {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="relative bg-white w-full max-w-4xl rounded-[3rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                        className="relative bg-white w-full max-w-3xl rounded-[2rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
                     >
                         {/* Modal Header */}
-                        <div className="p-4 md:p-12 border-b border-gray-100 flex justify-between items-center bg-[#fafafa]">
-                            <div className="flex items-center gap-3 md:gap-6">
-                                <div className="w-12 h-12 md:w-16 md:h-16 bg-pink-500 rounded-2xl md:rounded-3xl flex items-center justify-center text-white shadow-xl shadow-pink-200 flex-shrink-0">
-                                    <Package size={24} className="md:w-8 md:h-8" />
+                        <div className="p-3 md:p-6 border-b border-gray-100 flex justify-between items-center bg-[#fafafa]">
+                            <div className="flex items-center gap-2.5 md:gap-4">
+                                <div className="w-10 h-10 md:w-12 md:h-12 bg-pink-500 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-xl shadow-pink-200 flex-shrink-0">
+                                    <Package size={20} className="md:w-6 md:h-6" />
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                    <h3 className="text-xl md:text-3xl font-black text-gray-900 tracking-tighter italic truncate">{selectedOrder.orderId}</h3>
-                                    <div className="flex flex-wrap items-center gap-2 mt-0.5 md:mt-1">
-                                        <span className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest ${getStatusColor(selectedOrder.status)}`}>
+                                    <h3 className="text-lg md:text-xl font-black text-gray-900 tracking-tighter italic truncate">{selectedOrder.orderId}</h3>
+                                    <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${getStatusColor(selectedOrder.status)}`}>
                                             {selectedOrder.status}
                                         </span>
-                                        <span className="text-[8px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">• {new Date(selectedOrder.createdAt).toLocaleString()}</span>
+                                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest truncate">• {new Date(selectedOrder.createdAt).toLocaleString()}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <button onClick={sendWhatsAppUpdate} className="p-3 md:p-4 bg-green-500 text-white hover:bg-green-600 rounded-xl md:rounded-2xl transition-all shadow-lg shadow-green-200 flex-shrink-0" title="Send WhatsApp Update">
-                                    <Phone size={20} className="md:w-6 md:h-6" />
+                            <div className="flex items-center gap-1.5">
+                                <button onClick={sendWhatsAppUpdate} className="p-2 md:p-3 bg-green-500 text-white hover:bg-green-600 rounded-lg md:rounded-xl transition-all shadow-lg shadow-green-200 flex-shrink-0" title="Send WhatsApp Update">
+                                    <Phone size={16} className="md:w-5 md:h-5" />
                                 </button>
-                                <button onClick={() => setSelectedOrder(null)} className="p-3 md:p-4 hover:bg-gray-200 rounded-xl md:rounded-2xl transition-all flex-shrink-0">
-                                    <X size={20} className="text-gray-400 md:w-6 md:h-6" />
+                                <button onClick={() => setSelectedOrder(null)} className="p-2 md:p-3 hover:bg-gray-200 rounded-lg md:rounded-xl transition-all flex-shrink-0">
+                                    <X size={16} className="text-gray-400 md:w-5 md:h-5" />
                                 </button>
                             </div>
                         </div>
 
                         {/* Modal Content */}
-                        <div className="flex-grow overflow-y-auto p-4 md:p-12 space-y-8 md:space-y-12">
+                        <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-6 md:space-y-8">
                             {/* Information Summary Bar */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 md:p-8 bg-gray-50 rounded-[2.5rem] border border-gray-100">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-pink-500 shadow-sm">
-                                        <User size={20} />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 md:p-6 bg-gray-50 rounded-[2rem] border border-gray-100">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-pink-500 shadow-sm">
+                                        <User size={16} />
                                     </div>
                                     <div className="min-w-0">
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Recipient</span>
-                                        <span className="font-black text-gray-900 truncate block text-lg">{selectedOrder.customerName}</span>
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Recipient</span>
+                                        <span className="font-black text-gray-900 truncate block text-sm">{selectedOrder.customerName}</span>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 border-l-0 md:border-l border-gray-200 md:pl-10">
-                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-green-500 shadow-sm">
-                                        <Phone size={20} />
+                                <div className="flex items-center gap-3 border-l-0 md:border-l border-gray-200 md:pl-6">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-green-500 shadow-sm">
+                                        <Phone size={16} />
                                     </div>
                                     <div className="min-w-0">
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Contact</span>
-                                        <span className="font-black text-gray-900 truncate block text-lg">{selectedOrder.customerMobile}</span>
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Contact</span>
+                                        <span className="font-black text-gray-900 truncate block text-sm">{selectedOrder.customerMobile}</span>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 border-l-0 md:border-l border-gray-200 md:pl-10">
-                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-indigo-500 shadow-sm">
-                                        <MapPin size={20} />
+                                <div className="flex items-center gap-3 border-l-0 md:border-l border-gray-200 md:pl-6">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-500 shadow-sm">
+                                        <MapPin size={16} />
                                     </div>
                                     <div className="min-w-0">
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Location</span>
-                                        <span className="font-bold text-gray-600 truncate block leading-tight">
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Location</span>
+                                        <span className="font-bold text-gray-600 truncate block leading-tight text-[11px]">
                                             {selectedOrder.city}, {selectedOrder.state}<br />
-                                            <span className="text-[10px] font-black font-mono">PIN: {selectedOrder.pincode}</span>
+                                            <span className="text-[8px] font-black font-mono">PIN: {selectedOrder.pincode}</span>
                                         </span>
                                     </div>
                                 </div>
@@ -1088,14 +1088,14 @@ export default function SnacksOrdersModule() {
                         </div>
 
                         {/* Modal Footer - Status Actions */}
-                        <div className="p-4 md:p-8 bg-[#fafafa] border-t border-gray-100 flex flex-wrap gap-2 md:gap-3 items-center">
-                            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 md:gap-3 flex-grow">
+                        <div className="p-3 md:p-5 bg-[#fafafa] border-t border-gray-100 flex flex-wrap gap-2 md:gap-2.5 items-center">
+                            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 md:gap-2 flex-grow">
                                 {STATUSES.filter(s => s !== "All").map(s => (
                                     <button
                                         key={s}
                                         onClick={() => handleUpdateStatus(selectedOrder.id, s)}
-                                        className={`px-3 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all ${selectedOrder.status === s
-                                            ? "bg-gray-900 text-white shadow-xl scale-[1.02] md:scale-105"
+                                        className={`px-2.5 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${selectedOrder.status === s
+                                            ? "bg-gray-900 text-white shadow-lg scale-[1.02]"
                                             : "bg-white text-gray-400 border border-gray-200 hover:border-gray-900 hover:text-gray-900"
                                             }`}
                                     >
@@ -1105,10 +1105,10 @@ export default function SnacksOrdersModule() {
                             </div>
                             <button
                                 onClick={() => handleDeleteOrder(selectedOrder.id)}
-                                className="p-3 md:p-4 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl md:rounded-2xl transition-all border border-rose-100 ml-auto flex-shrink-0"
+                                className="p-2.5 md:p-3 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-lg md:rounded-xl transition-all border border-rose-100 ml-auto flex-shrink-0"
                                 title="Delete Order"
                             >
-                                <Trash2 size={20} className="md:w-6 md:h-6" />
+                                <Trash2 size={16} className="md:w-5 md:h-5" />
                             </button>
                         </div>
                     </motion.div>

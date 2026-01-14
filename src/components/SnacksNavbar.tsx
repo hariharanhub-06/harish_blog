@@ -20,59 +20,58 @@ export default function SnacksNavbar() {
     const cartCount = cart.reduce((acc, item) => acc + (item.quantity > 0 ? 1 : 0), 0);
 
     return (
-        <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4`}>
-            <div className={`container mx-auto max-w-7xl h-20 rounded-3xl flex justify-between items-center transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl shadow-2xl border border-white/50 px-10" : "bg-white/40 backdrop-blur-md px-6 border border-white/20"}`}>
+        <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 py-3`}>
+            <div className={`container mx-auto max-w-6xl h-14 rounded-xl flex justify-between items-center transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl shadow-xl border border-white/50 px-6" : "bg-white/40 backdrop-blur-md px-4 border border-white/20"}`}>
 
 
 
                 {/* Logo */}
                 <Link href="/business/hm-snacks" className="flex flex-col items-center">
-                    <span className="text-3xl font-black tracking-tighter text-gray-900 leading-none">
+                    <span className="text-xl font-black tracking-tighter text-gray-900 leading-none">
                         HM<span className="text-pink-500 italic">Snacks</span>
                     </span>
-                    <span className="text-[8px] font-black uppercase tracking-[0.4em] text-pink-500/60 mt-1">Tradition Taste</span>
+                    <span className="text-[7px] font-black uppercase tracking-[0.4em] text-pink-500/60 mt-0.5">Tradition Taste</span>
                 </Link>
 
                 {/* Right Actions */}
-                <div className="flex items-center space-x-2 md:space-x-6">
+                <div className="flex items-center space-x-1 md:space-x-4">
                     {/* Wishlist */}
-                    <Link href="/business/hm-snacks/wishlist" className="relative p-3 text-gray-500 hover:text-pink-500 transition-colors group">
-                        <Heart size={22} className={wishlist.length > 0 ? "fill-pink-500 text-pink-500" : "group-hover:scale-110 transition-transform"} />
+                    <Link href="/business/hm-snacks/wishlist" className="relative p-2 text-gray-500 hover:text-pink-500 transition-colors group">
+                        <Heart size={18} className={wishlist.length > 0 ? "fill-pink-500 text-pink-500" : "group-hover:scale-110 transition-transform"} />
                         {wishlist.length > 0 && (
-                            <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-pink-500 text-[9px] font-bold text-white">
+                            <span className="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-pink-500 text-[8px] font-bold text-white">
                                 {wishlist.length}
                             </span>
                         )}
                     </Link>
 
                     {/* Cart */}
-                    <Link href="/business/hm-snacks/cart" className="relative p-3 text-gray-500 hover:text-primary transition-colors group">
-                        <ShoppingCart size={22} className="group-hover:scale-110 transition-transform" />
+                    <Link href="/business/hm-snacks/cart" className="relative p-2 text-gray-500 hover:text-primary transition-colors group">
+                        <ShoppingCart size={18} className="group-hover:scale-110 transition-transform" />
                         {cartCount > 0 && (
-                            <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
+                            <span className="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-white">
                                 {cartCount}
                             </span>
                         )}
                     </Link>
 
-                    {/* Vendor Link */}
-                    <Link href="/business/hm-snacks/vendor" className="hidden md:block text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-600 transition-colors">
+                    {/* Desktop Links */}
+                    <Link href="/business/hm-snacks/vendor" className="hidden md:block text-[9px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-600 transition-colors">
                         Vendor
                     </Link>
 
-                    {/* Affiliate Link */}
-                    <Link href="/business/hm-snacks/affiliate" className="hidden md:block text-[10px] font-black uppercase tracking-widest text-pink-500 hover:text-pink-600 transition-colors">
+                    <Link href="/business/hm-snacks/affiliate" className="hidden md:block text-[9px] font-black uppercase tracking-widest text-pink-500 hover:text-pink-600 transition-colors">
                         Affiliate
                     </Link>
 
-                    {/* Order Status (Optional but good) */}
-                    <Link href="/business/hm-snacks/track" className="hidden md:block text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">
-                        Track Order
+                    {/* Track Order */}
+                    <Link href="/business/hm-snacks/track" className="hidden md:block text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">
+                        Track
                     </Link>
 
                     {/* Mobile Toggle */}
-                    <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-3 text-gray-900">
-                        {isOpen ? <X size={24} /> : <Menu size={24} />}
+                    <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-2 text-gray-900">
+                        {isOpen ? <X size={20} /> : <Menu size={20} />}
                     </button>
                 </div>
             </div>

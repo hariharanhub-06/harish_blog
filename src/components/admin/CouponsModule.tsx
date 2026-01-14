@@ -94,141 +94,144 @@ export default function CouponsModule() {
     }
 
     return (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-black text-gray-900">Manage Coupons</h2>
+                <div>
+                    <h2 className="text-xl font-black text-gray-900 tracking-tight">Manage Coupons</h2>
+                    <p className="text-gray-400 text-[10px] font-medium uppercase tracking-widest">Create and manage discount codes.</p>
+                </div>
                 {!editing && (
                     <button
                         onClick={() => setEditing({ code: "", discountValue: "", discountType: "percentage", isActive: true })}
-                        className="flex items-center space-x-2 bg-primary text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
+                        className="flex items-center space-x-2 bg-primary text-white font-black px-4 py-2 rounded-xl hover:shadow-lg transition-all text-[11px] uppercase tracking-widest"
                     >
-                        <Plus size={20} />
+                        <Plus size={16} />
                         <span>Create Coupon</span>
                     </button>
                 )}
             </div>
 
             {editing ? (
-                <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-6 md:p-8">
-                    <div className="flex justify-between items-center mb-10">
-                        <h3 className="text-xl font-black">{editing.id ? "Edit Coupon" : "New Coupon"}</h3>
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8 animate-in slide-in-from-bottom-2">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-lg font-black">{editing.id ? "Edit Coupon" : "New Coupon"}</h3>
                         <button onClick={() => setEditing(null)} className="text-secondary hover:text-red-500 transition-colors">
-                            <X size={28} />
+                            <X size={20} />
                         </button>
                     </div>
 
-                    <form onSubmit={handleSave} className="space-y-8">
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="space-y-2">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Coupon Code</label>
+                    <form onSubmit={handleSave} className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-5">
+                            <div className="space-y-1.5">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1.5">Coupon Code</label>
                                 <input
                                     required
                                     type="text"
                                     placeholder="e.g. SAVER10"
                                     value={editing.code}
                                     onChange={(e) => setEditing({ ...editing, code: e.target.value.toUpperCase() })}
-                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary transition-all font-bold placeholder:text-gray-300"
+                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary transition-all font-bold text-sm placeholder:text-gray-300"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Discount Type</label>
+                            <div className="space-y-1.5">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1.5">Discount Type</label>
                                 <select
                                     value={editing.discountType}
                                     onChange={(e) => setEditing({ ...editing, discountType: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary transition-all font-bold"
+                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary transition-all font-bold text-sm"
                                 >
                                     <option value="percentage">Percentage (%)</option>
                                     <option value="fixed">Fixed Amount (₹)</option>
                                 </select>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Discount Value</label>
+                            <div className="space-y-1.5">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1.5">Discount Value</label>
                                 <input
                                     required
                                     type="number"
                                     placeholder={editing.discountType === 'percentage' ? "e.g. 10" : "e.g. 100"}
                                     value={editing.discountValue}
                                     onChange={(e) => setEditing({ ...editing, discountValue: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary transition-all font-bold"
+                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary transition-all font-bold text-sm"
                                 />
                             </div>
-                            <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
                                 <input
                                     type="checkbox"
                                     id="isActive"
                                     checked={editing.isActive}
                                     onChange={(e) => setEditing({ ...editing, isActive: e.target.checked })}
-                                    className="w-6 h-6 text-primary rounded-lg focus:ring-primary"
+                                    className="w-5 h-5 text-primary rounded-lg focus:ring-primary"
                                 />
-                                <label htmlFor="isActive" className="font-bold cursor-pointer">Active</label>
+                                <label htmlFor="isActive" className="text-xs font-bold cursor-pointer">Active</label>
                             </div>
                         </div>
 
                         <button
                             disabled={saving}
-                            className="w-full bg-primary text-white py-4 rounded-xl font-black text-lg flex items-center justify-center space-x-3 shadow-xl transition-all disabled:opacity-50"
+                            className="w-full bg-primary text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest flex items-center justify-center space-x-3 shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                         >
-                            {saving ? <Loader2 className="animate-spin" /> : <Save size={24} />}
+                            {saving ? <Loader2 className="animate-spin w-5 h-5" /> : <Save size={18} />}
                             <span>Save Coupon</span>
                         </button>
                     </form>
                 </div>
             ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {coupons.map((coupon) => (
-                        <div key={coupon.id} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden ${!coupon.isActive && 'opacity-60'}`}>
-                            <div className={`absolute top-0 right-0 p-4 ${coupon.isActive ? 'text-green-500' : 'text-gray-300'}`}>
-                                {coupon.isActive ? <Check size={20} /> : <X size={20} />}
+                        <div key={coupon.id} className={`bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group relative overflow-hidden ${!coupon.isActive && 'opacity-60'}`}>
+                            <div className={`absolute top-0 right-0 p-3 ${coupon.isActive ? 'text-green-500' : 'text-gray-300'}`}>
+                                {coupon.isActive ? <Check size={16} /> : <X size={16} />}
                             </div>
 
-                            <div className="flex items-center space-x-4 mb-6">
-                                <div className="p-4 bg-primary/5 text-primary rounded-2xl">
-                                    <Ticket size={24} />
+                            <div className="flex items-center space-x-3 mb-4">
+                                <div className="p-3 bg-primary/5 text-primary rounded-xl">
+                                    <Ticket size={18} />
                                 </div>
-                                <h3 className="text-xl font-black">{coupon.code}</h3>
+                                <h3 className="text-lg font-black tracking-tight">{coupon.code}</h3>
                             </div>
 
-                            <div className="space-y-4 mb-8">
-                                <div className="flex justify-between items-center text-sm">
+                            <div className="space-y-2.5 mb-6">
+                                <div className="flex justify-between items-center text-[11px]">
                                     <span className="text-gray-400 font-bold uppercase tracking-wider">Discount</span>
                                     <span className="font-black text-gray-900">
                                         {coupon.discountType === 'percentage' ? `${coupon.discountValue}% Off` : `₹${coupon.discountValue} Off`}
                                     </span>
                                 </div>
-                                <div className="flex justify-between items-center text-sm">
+                                <div className="flex justify-between items-center text-[11px]">
                                     <span className="text-gray-400 font-bold uppercase tracking-wider">Status</span>
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${coupon.isActive ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${coupon.isActive ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
                                         {coupon.isActive ? 'Active' : 'Inactive'}
                                     </span>
                                 </div>
-                                <div className="flex justify-between items-center text-sm">
+                                <div className="flex justify-between items-center text-[11px]">
                                     <span className="text-gray-400 font-bold uppercase tracking-wider">Total Used</span>
-                                    <span className="font-black text-gray-900 bg-gray-50 px-3 py-1 rounded-lg">
+                                    <span className="font-black text-gray-900 bg-gray-50 px-2 py-0.5 rounded-lg">
                                         {coupon.usageCount || 0} times
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="flex justify-between items-center pt-6 border-t border-gray-50">
-                                <div className="flex space-x-2">
+                            <div className="flex justify-between items-center pt-4 border-t border-gray-50">
+                                <div className="flex space-x-1.5">
                                     <button
                                         onClick={() => setEditing(coupon)}
-                                        className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all"
+                                        className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all"
                                     >
-                                        <Edit3 size={18} />
+                                        <Edit3 size={16} />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(coupon.id)}
-                                        className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                                        className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all"
                                     >
-                                        <Trash2 size={18} />
+                                        <Trash2 size={16} />
                                     </button>
                                 </div>
                                 <button
                                     onClick={() => toggleStatus(coupon)}
-                                    className={`p-3 rounded-xl transition-all ${coupon.isActive ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white' : 'bg-green-50 text-green-600 hover:bg-green-600 hover:text-white'}`}
+                                    className={`p-2 rounded-lg transition-all ${coupon.isActive ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white' : 'bg-green-50 text-green-600 hover:bg-green-600 hover:text-white'}`}
                                 >
-                                    {coupon.isActive ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
+                                    {coupon.isActive ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
                                 </button>
                             </div>
                         </div>

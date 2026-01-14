@@ -187,12 +187,13 @@ export default function SnacksProductModule() {
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 className="text-3xl font-black text-gray-900 tracking-tight">Product Management</h2>
-                    <p className="text-gray-400 font-medium">Manage HM Snacks catalog and inventory.</p>
+                    <h2 className="text-xl font-black text-gray-900 tracking-tight">Product Management</h2>
+                    <p className="text-gray-400 text-xs font-medium">Manage HM Snacks catalog and inventory.</p>
                 </div>
                 {!editing && (
                     <button
                         onClick={() => setEditing({
+                            // ... same fields ...
                             name: "",
                             category: "Savories",
                             pricePoints: [{ value: "", unit: "Kg" }],
@@ -209,21 +210,21 @@ export default function SnacksProductModule() {
                                 { weight: 1.00, l: 30, w: 15, h: 7 }
                             ]
                         })}
-                        className="flex items-center space-x-2 bg-pink-500 text-white font-black px-6 py-3 rounded-2xl hover:shadow-2xl transition-all"
+                        className="flex items-center space-x-1.5 bg-pink-500 text-white font-black px-4 py-2 rounded-xl hover:shadow-2xl transition-all text-[10px] uppercase tracking-widest"
                     >
-                        <Plus size={20} />
+                        <Plus size={16} />
                         <span>Add New Snack</span>
                     </button>
                 )}
             </div>
 
             {!editing && (
-                <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-2xl w-fit">
+                <div className="flex flex-wrap gap-1.5 p-1.5 bg-gray-50 rounded-xl w-fit">
                     {["All", ...CATEGORIES].map(cat => (
                         <button
                             key={cat}
                             onClick={() => setFilterCategory(cat)}
-                            className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterCategory === cat ? "bg-white text-pink-500 shadow-sm" : "text-gray-400 hover:text-gray-900"
+                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterCategory === cat ? "bg-white text-pink-500 shadow-sm" : "text-gray-400 hover:text-gray-900"
                                 }`}
                         >
                             {cat}
@@ -233,45 +234,45 @@ export default function SnacksProductModule() {
             )}
 
             {editing ? (
-                <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-6 md:p-8 animate-in slide-in-from-bottom-4 duration-500">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-black">{editing.id ? "Edit Product" : "Create New Product"}</h3>
-                        <button onClick={() => setEditing(null)} className="p-2 hover:bg-gray-100 rounded-full transition-all">
-                            <X size={24} className="text-gray-400" />
+                <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 md:p-6 animate-in slide-in-from-bottom-4 duration-500">
+                    <div className="flex justify-between items-center mb-5">
+                        <h3 className="text-lg font-black">{editing.id ? "Edit Product" : "Create New Product"}</h3>
+                        <button onClick={() => setEditing(null)} className="p-1.5 hover:bg-gray-100 rounded-full transition-all">
+                            <X size={20} className="text-gray-400" />
                         </button>
                     </div>
 
                     <form onSubmit={handleSave} className="space-y-6">
                         <div className="grid lg:grid-cols-2 gap-12">
                             <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Product Name</label>
+                                <div className="space-y-1.5">
+                                    <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Product Name</label>
                                     <input
                                         required
                                         type="text"
                                         value={editing.name}
                                         onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                                        className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-lg"
+                                        className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-base"
                                         placeholder="e.g. Butter Murukku"
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Category</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Category</label>
                                         <select
                                             value={editing.category}
                                             onChange={(e) => setEditing({ ...editing, category: e.target.value })}
-                                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-pink-500 transition-all font-bold"
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-pink-500 transition-all font-bold text-xs"
                                         >
                                             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Status</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Status</label>
                                         <button
                                             type="button"
                                             onClick={() => setEditing({ ...editing, isActive: !editing.isActive })}
-                                            className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${editing.isActive ? "bg-emerald-50 text-emerald-500" : "bg-rose-50 text-rose-500"
+                                            className={`w-full py-3.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${editing.isActive ? "bg-emerald-50 text-emerald-500" : "bg-rose-50 text-rose-500"
                                                 }`}
                                         >
                                             {editing.isActive ? "Enabled" : "Disabled"}
@@ -570,10 +571,10 @@ export default function SnacksProductModule() {
                     </form>
                 </div >
             ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                     {products.map((product) => (
-                        <div key={product.id} className={`bg-white p-4 rounded-3xl border transition-all group relative ${product.isActive ? "border-gray-50 shadow-sm hover:shadow-xl" : "border-gray-100 opacity-60 grayscale"}`}>
-                            <div className="relative h-40 bg-gray-50 rounded-2xl mb-4 overflow-hidden">
+                        <div key={product.id} className={`bg-white p-3.5 rounded-2xl border transition-all group relative ${product.isActive ? "border-gray-50 shadow-sm hover:shadow-xl" : "border-gray-100 opacity-60 grayscale"}`}>
+                            <div className="relative h-36 bg-gray-50 rounded-xl mb-3 overflow-hidden">
                                 {product.imageUrl ? (
                                     <Image
                                         loader={imageKitLoader}
@@ -584,57 +585,57 @@ export default function SnacksProductModule() {
                                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-pink-100 font-black text-5xl italic px-4 text-center">{product.name.charAt(0)}</div>
+                                    <div className="w-full h-full flex items-center justify-center text-pink-100 font-black text-4xl italic px-4 text-center">{product.name.charAt(0)}</div>
                                 )}
-                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[9px] font-black text-gray-900 uppercase tracking-widest">
+                                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[8px] font-black text-gray-900 uppercase tracking-widest">
                                     {product.category}
                                 </div>
                             </div>
 
-                            <h3 className="text-lg font-black mb-1 line-clamp-1">{product.name}</h3>
-                            <div className="flex flex-col gap-1 mb-4">
+                            <h3 className="text-base font-black mb-1 line-clamp-1">{product.name}</h3>
+                            <div className="flex flex-col gap-0.5 mb-3">
                                 {product.pricePerKg && (
                                     <div className="flex items-center gap-2">
                                         {product.offerPricePerKg ? (
                                             <>
-                                                <span className="text-xl font-black text-pink-500">₹{product.offerPricePerKg}</span>
-                                                <span className="text-sm font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
+                                                <span className="text-lg font-black text-pink-500">₹{product.offerPricePerKg}</span>
+                                                <span className="text-xs font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
                                             </>
                                         ) : (
-                                            <span className="text-xl font-black text-gray-900">₹{product.pricePerKg}</span>
+                                            <span className="text-lg font-black text-gray-900">₹{product.pricePerKg}</span>
                                         )}
-                                        <span className="text-[9px] font-bold text-gray-400 lowercase">per Kg</span>
+                                        <span className="text-[8px] font-bold text-gray-400 lowercase">per Kg</span>
                                     </div>
                                 )}
                                 {product.pricePerPiece && (
                                     <div className="flex items-center gap-2">
                                         {product.offerPricePerPiece ? (
                                             <>
-                                                <span className="text-xl font-black text-pink-500">₹{product.offerPricePerPiece}</span>
-                                                <span className="text-sm font-bold text-gray-300 line-through">₹{product.pricePerPiece}</span>
+                                                <span className="text-lg font-black text-pink-500">₹{product.offerPricePerPiece}</span>
+                                                <span className="text-xs font-bold text-gray-300 line-through">₹{product.pricePerPiece}</span>
                                             </>
                                         ) : (
-                                            <span className="text-xl font-black text-pink-500">₹{product.pricePerPiece}</span>
+                                            <span className="text-lg font-black text-pink-500">₹{product.pricePerPiece}</span>
                                         )}
-                                        <span className="text-[9px] font-bold text-gray-400 lowercase">per Piece</span>
+                                        <span className="text-[8px] font-bold text-gray-400 lowercase">per Piece</span>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl mb-6">
-                                <div className="flex items-center gap-2">
-                                    <Package size={14} className="text-gray-400" />
-                                    <span className={`text-xs font-black ${product.stock < 10 ? "text-rose-500" : "text-gray-900"}`}>{product.stock} {product.pricePerKg ? 'Kg' : 'Units'}</span>
+                            <div className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg mb-4">
+                                <div className="flex items-center gap-1.5">
+                                    <Package size={12} className="text-gray-400" />
+                                    <span className={`text-[10px] font-black ${product.stock < 10 ? "text-rose-500" : "text-gray-900"}`}>{product.stock} {product.pricePerKg ? 'Kg' : 'Units'}</span>
                                 </div>
                                 <button
                                     onClick={() => toggleStatus(product)}
-                                    className={`p-1.5 rounded-lg transition-colors ${product.isActive ? "text-emerald-500 hover:bg-emerald-50" : "text-gray-400 hover:bg-gray-100"}`}
+                                    className={`p-1 rounded-lg transition-colors ${product.isActive ? "text-emerald-500 hover:bg-emerald-50" : "text-gray-400 hover:bg-gray-100"}`}
                                 >
-                                    {product.isActive ? <Eye size={18} /> : <EyeOff size={18} />}
+                                    {product.isActive ? <Eye size={16} /> : <EyeOff size={16} />}
                                 </button>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                                 <button
                                     onClick={() => {
                                         const pts = [];
@@ -652,15 +653,15 @@ export default function SnacksProductModule() {
                                             ]
                                         });
                                     }}
-                                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-all"
+                                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-gray-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all"
                                 >
-                                    <Edit3 size={14} /> Edit
+                                    <Edit3 size={12} /> Edit
                                 </button>
                                 <button
                                     onClick={() => handleDelete(product.id)}
-                                    className="p-3 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all"
+                                    className="p-2.5 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-all"
                                 >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={14} />
                                 </button>
                             </div>
                         </div>

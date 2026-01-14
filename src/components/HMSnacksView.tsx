@@ -206,7 +206,7 @@ function HMSnacksContent() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-8xl font-black text-white mb-6 tracking-tighter"
+                        className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter"
                     >
                         Taste the <br /> <span className="text-pink-500 italic">Tradition.</span>
                     </motion.h1>
@@ -214,7 +214,7 @@ function HMSnacksContent() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto font-medium"
+                        className="text-base md:text-lg text-white/80 max-w-xl mx-auto font-medium"
                     >
                         We are the 5th generation taking our ancestral gourmet recipes to the worldwide stage. Authentic, pure, and filled with love.
                     </motion.p>
@@ -248,25 +248,25 @@ function HMSnacksContent() {
                             <div className="w-12 h-1 bg-pink-500 rounded-full" />
                             <span className="text-pink-500 font-black uppercase tracking-[0.3em] text-xs">Our Heritage</span>
                         </div>
-                        <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight leading-none">
+                        <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight leading-none">
                             Taking Forward a <br /> <span className="text-pink-500 italic">Century</span> of Flavor.
                         </h2>
-                        <div className="space-y-6 text-gray-500 font-medium text-lg leading-relaxed">
+                        <div className="space-y-4 text-gray-500 font-medium text-base leading-relaxed">
                             <p>
                                 What started as a small kitchen experiment in 1920 has now blossomed into a global mission. We take pride in being the 5th generation to carry forward the legacy of HM Snacks.
                             </p>
                             <p>
-                                Our recipes haven&apos;t changed because perfection doesn&apos;t need to. Every murukku, ہر sweets, and special spice blend is crafted using the same techniques our great-grandparents mastered, now enhanced with modern hygiene standards and global shipping through our partners.
+                                Our recipes haven&apos;t changed because perfection doesn&apos;t need to. Every murukku, special sweets, and special spice blend is crafted using the same techniques our great-grandparents mastered.
                             </p>
                         </div>
-                        <div className="grid grid-cols-2 gap-6 pt-4">
-                            <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                                <div className="text-3xl font-black text-pink-500 mb-1">100%</div>
-                                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Pure Ghee & Oil</div>
+                        <div className="grid grid-cols-2 gap-4 pt-4">
+                            <div className="p-5 bg-white rounded-2xl shadow-sm border border-gray-100">
+                                <div className="text-2xl font-black text-pink-500 mb-1">100%</div>
+                                <div className="text-[9px] font-black uppercase tracking-widest text-gray-400">Pure Ghee & Oil</div>
                             </div>
-                            <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-                                <div className="text-3xl font-black text-pink-500 mb-1">Global</div>
-                                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Worldwide Delivery</div>
+                            <div className="p-5 bg-white rounded-2xl shadow-sm border border-gray-100">
+                                <div className="text-2xl font-black text-pink-500 mb-1">Global</div>
+                                <div className="text-[9px] font-black uppercase tracking-widest text-gray-400">Worldwide Delivery</div>
                             </div>
                         </div>
                     </div>
@@ -278,9 +278,9 @@ function HMSnacksContent() {
             {/* Products Section */}
             <section id="products" className="container mx-auto px-6 py-12 border-t border-gray-100">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
-                    <div className="space-y-4">
-                        <h2 className="text-2xl md:text-6xl font-black text-gray-900 tracking-tight">Our <span className="text-pink-500 italic">Collection</span></h2>
-                        <p className="text-gray-400 font-medium max-w-lg">Order the freshest snacks, delivered globally. Minimum order starts from 250g (1/4 Kg).</p>
+                    <div className="space-y-3">
+                        <h2 className="text-2xl md:text-5xl font-black text-gray-900 tracking-tight">Our <span className="text-pink-500 italic">Collection</span></h2>
+                        <p className="text-gray-400 font-medium max-w-md text-sm">Order the freshest snacks, delivered globally. Minimum order starts from 250g (1/4 Kg).</p>
                     </div>
 
                     {/* Category Tabs */}
@@ -314,7 +314,7 @@ function HMSnacksContent() {
                                     className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col cursor-pointer"
                                 >
                                     {/* Image Holder */}
-                                    <div className="relative h-40 md:h-72 overflow-hidden bg-gray-50 flex items-center justify-center">
+                                    <div className="relative h-40 md:h-64 overflow-hidden bg-gray-50 flex items-center justify-center">
                                         {product.imageUrl ? (
                                             <Image
                                                 loader={imageKitLoader}
@@ -384,63 +384,63 @@ function HMSnacksContent() {
                                     </div>
 
                                     {/* Content */}
-                                    <div className="p-2 md:p-8 flex flex-col flex-grow">
-                                        <h3 className="text-xs md:text-2xl font-black text-gray-900 mb-0.5 md:mb-2 group-hover:text-pink-500 transition-colors line-clamp-1 leading-tight uppercase tracking-tight">
+                                    <div className="p-3 md:p-6 flex flex-col flex-grow">
+                                        <h3 className="text-xs md:text-lg font-black text-gray-900 mb-0.5 md:mb-1 group-hover:text-pink-500 transition-colors line-clamp-1 leading-tight uppercase tracking-tight">
                                             {product.name}
                                         </h3>
                                         {avgRating && (
-                                            <div className="flex items-center gap-1 mb-2 md:mb-4">
+                                            <div className="flex items-center gap-1 mb-1.5 md:mb-3">
                                                 <div className="flex gap-0.5">
                                                     {[...Array(5)].map((_, i) => (
                                                         <Star
                                                             key={i}
-                                                            size={10}
+                                                            size={8}
                                                             className={i < Math.round(Number(avgRating)) ? "fill-amber-400 text-amber-400" : "text-gray-200"}
                                                         />
                                                     ))}
                                                 </div>
-                                                <span className="text-[8px] md:text-[10px] font-bold text-gray-500">({productReviews.length})</span>
+                                                <span className="text-[7px] md:text-[9px] font-bold text-gray-500">({productReviews.length})</span>
                                             </div>
                                         )}
-                                        <p className="hidden md:block text-gray-400 text-sm font-medium line-clamp-2 mb-6">
+                                        <p className="hidden md:block text-gray-400 text-xs font-medium line-clamp-2 mb-4">
                                             {product.description}
                                         </p>
 
-                                        <div className="mt-auto space-y-6">
+                                        <div className="mt-auto space-y-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex flex-col">
-                                                    <span className="text-[6px] md:text-[10px] font-black uppercase tracking-[0.05em] md:tracking-widest text-gray-400">
+                                                    <span className="text-[6px] md:text-[9px] font-black uppercase tracking-[0.05em] md:tracking-widest text-gray-400">
                                                         {product.pricePerKg ? "Per Kg" : "Per Pc"}
                                                     </span>
                                                     <div className="flex items-center gap-1">
                                                         {product.pricePerKg ? (
                                                             product.offerPricePerKg ? (
                                                                 <>
-                                                                    <span className="text-xs md:text-2xl font-black text-pink-500 italic">₹{product.offerPricePerKg}</span>
-                                                                    <span className="text-[8px] md:text-sm font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
+                                                                    <span className="text-xs md:text-xl font-black text-pink-500 italic">₹{product.offerPricePerKg}</span>
+                                                                    <span className="text-[8px] md:text-xs font-bold text-gray-300 line-through">₹{product.pricePerKg}</span>
                                                                 </>
                                                             ) : (
-                                                                <span className="text-xs md:text-2xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
+                                                                <span className="text-xs md:text-xl font-black text-gray-900 italic">₹{product.pricePerKg}</span>
                                                             )
                                                         ) : (
                                                             product.offerPricePerPiece ? (
                                                                 <>
-                                                                    <span className="text-xs md:text-2xl font-black text-pink-500 italic">₹{product.offerPricePerPiece}</span>
-                                                                    <span className="text-[8px] md:text-sm font-bold text-gray-300 line-through">₹{product.pricePerPiece}</span>
+                                                                    <span className="text-xs md:text-xl font-black text-pink-500 italic">₹{product.offerPricePerPiece}</span>
+                                                                    <span className="text-[8px] md:text-xs font-bold text-gray-300 line-through">₹{product.pricePerPiece}</span>
                                                                 </>
                                                             ) : (
-                                                                <span className="text-xs md:text-2xl font-black text-gray-900 italic">₹{product.pricePerPiece}</span>
+                                                                <span className="text-xs md:text-xl font-black text-gray-900 italic">₹{product.pricePerPiece}</span>
                                                             )
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className={`p-1.5 md:p-2 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center gap-1 md:gap-2 ${product.stock > 0 ? "text-emerald-500 bg-emerald-50" : "text-rose-500 bg-rose-50"}`}>
-                                                    <div className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full animate-pulse ${product.stock > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
+                                                <div className={`p-1 md:p-1.5 rounded-lg text-[8px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 md:gap-1.5 ${product.stock > 0 ? "text-emerald-500 bg-emerald-50" : "text-rose-500 bg-rose-50"}`}>
+                                                    <div className={`w-1 h-1 md:w-1 md:h-1 rounded-full animate-pulse ${product.stock > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
                                                     {product.stock > 0 ? "In" : "Out"}
                                                 </div>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-1 md:gap-3">
+                                            <div className="grid grid-cols-2 gap-1 md:gap-2">
                                                 {product.pricePerKg ? (
                                                     <>
                                                         <button
@@ -449,10 +449,10 @@ function HMSnacksContent() {
                                                                 const price = product.offerPricePerKg || product.pricePerKg;
                                                                 addToCart({ ...product, price, unit: "Kg" }, 0.25);
                                                             }}
-                                                            className="bg-white border md:border-2 border-gray-100 text-gray-900 py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[7px] md:text-xs uppercase tracking-tight md:tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
+                                                            className="bg-white border md:border border-gray-100 text-gray-900 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-black text-[7px] md:text-[10px] uppercase tracking-tight md:tracking-widest hover:border-pink-500/50 hover:bg-pink-50/30 transition-all flex flex-col items-center justify-center leading-none"
                                                         >
                                                             <span>Buy ¼ Kg</span>
-                                                            <span className="text-[6px] md:text-[10px] mt-0.5 md:mt-1 text-gray-400 font-bold">₹{((product.offerPricePerKg || product.pricePerKg) / 4).toFixed(0)}</span>
+                                                            <span className="text-[6px] md:text-[8px] mt-0.5 md:mt-1 text-gray-400 font-bold">₹{((product.offerPricePerKg || product.pricePerKg) / 4).toFixed(0)}</span>
                                                         </button>
                                                         <button
                                                             onClick={(e) => {
@@ -460,9 +460,9 @@ function HMSnacksContent() {
                                                                 const price = product.offerPricePerKg || product.pricePerKg;
                                                                 addToCart({ ...product, price, unit: "Kg" }, 1);
                                                             }}
-                                                            className="bg-primary text-white py-1.5 md:py-4 rounded-lg md:rounded-2xl font-black text-[8px] md:text-xs uppercase tracking-tight md:tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1 md:gap-2 px-1"
+                                                            className="bg-primary text-white py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-black text-[8px] md:text-[10px] uppercase tracking-tight md:tracking-widest hover:bg-blue-800 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-1 md:gap-2 px-1"
                                                         >
-                                                            <ShoppingCart size={8} className="md:w-3.5 md:h-3.5 hidden md:block" />
+                                                            <ShoppingCart size={8} className="md:w-3 md:h-3 hidden md:block" />
                                                             Add 1 Kg
                                                         </button>
                                                     </>

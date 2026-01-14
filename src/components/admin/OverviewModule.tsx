@@ -77,12 +77,12 @@ export default function OverviewModule() {
     return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Analytics and Controls */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-                        <TrendingUp className="text-primary" /> Analytics Overview
+                    <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
+                        <TrendingUp size={18} className="text-primary" /> Analytics Overview
                     </h2>
-                    <p className="text-secondary font-medium mt-1">Track your performance and inquiries</p>
+                    <p className="text-gray-400 text-xs font-medium mt-0.5">Track your performance and inquiries</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 md:gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm w-full md:w-auto">
@@ -108,36 +108,64 @@ export default function OverviewModule() {
                 </div>
             </div>
 
-            {/* Header Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden group">
-                    <div className="absolute -bottom-6 -right-6 text-blue-50 group-hover:text-blue-100 transition-colors">
-                        <Globe size={120} />
+            {/* Header Cards with Glassmorphism and Accents */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="bg-white/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] relative overflow-hidden group hover:shadow-primary/5 transition-all duration-500">
+                    <div className="absolute -bottom-4 -right-4 text-blue-500/5 group-hover:text-blue-500/10 transition-colors rotate-12 group-hover:rotate-0 duration-700">
+                        <Globe size={110} />
                     </div>
-                    <p className="text-secondary text-xs font-black uppercase tracking-widest mb-2 relative z-10">Total Page Views</p>
-                    <h3 className="text-4xl font-black text-gray-900 relative z-10">{stats.totalViews.toLocaleString()}</h3>
+                    <div className="relative z-10">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-4 group-hover:scale-110 transition-transform">
+                            <Globe size={16} />
+                        </div>
+                        <p className="text-gray-400 text-[8px] font-black uppercase tracking-[0.2em] mb-1">Page Views</p>
+                        <h3 className="text-2xl font-black text-gray-900 leading-none">{stats.totalViews.toLocaleString()}</h3>
+                    </div>
                 </div>
 
-                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden group">
-                    <div className="absolute -bottom-6 -right-6 text-purple-50 group-hover:text-purple-100 transition-colors">
-                        <User size={120} />
+                <div className="bg-white/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] relative overflow-hidden group hover:shadow-purple-500/5 transition-all duration-500">
+                    <div className="absolute -bottom-4 -right-4 text-purple-500/5 group-hover:text-purple-500/10 transition-colors -rotate-12 group-hover:rotate-0 duration-700">
+                        <User size={110} />
                     </div>
-                    <p className="text-secondary text-xs font-black uppercase tracking-widest mb-2 relative z-10">Unique Visitors</p>
-                    <h3 className="text-4xl font-black text-gray-900 relative z-10">{stats.totalVisitors.toLocaleString()}</h3>
+                    <div className="relative z-10">
+                        <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 mb-4 group-hover:scale-110 transition-transform">
+                            <User size={16} />
+                        </div>
+                        <p className="text-gray-400 text-[8px] font-black uppercase tracking-[0.2em] mb-1">Visitors</p>
+                        <h3 className="text-2xl font-black text-gray-900 leading-none">{stats.totalVisitors.toLocaleString()}</h3>
+                    </div>
                 </div>
 
-                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden group">
-                    <div className="absolute -bottom-6 -right-6 text-amber-50 group-hover:text-amber-100 transition-colors">
-                        <MessageSquare size={120} />
+                <div className="bg-white/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] relative overflow-hidden group hover:shadow-emerald-500/5 transition-all duration-500">
+                    <div className="absolute -bottom-4 -right-4 text-emerald-500/5 group-hover:text-emerald-500/10 transition-colors rotate-6 group-hover:rotate-0 duration-700">
+                        <MessageSquare size={110} />
                     </div>
-                    <p className="text-secondary text-xs font-black uppercase tracking-widest mb-2 relative z-10">Unread Inquiries</p>
-                    <h3 className="text-4xl font-black text-gray-900 relative z-10">{stats.unreadMessages}</h3>
+                    <div className="relative z-10">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-110 transition-transform">
+                            <MessageSquare size={16} />
+                        </div>
+                        <p className="text-gray-400 text-[8px] font-black uppercase tracking-[0.2em] mb-1">Inquiries</p>
+                        <h3 className="text-2xl font-black text-gray-900 leading-none">{stats.unreadMessages}</h3>
+                    </div>
                 </div>
             </div>
 
-            {/* Analytics Graph */}
-            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
-                <div className="h-[400px] w-full mt-6">
+            {/* Analytics Graph with Modern Styling */}
+            <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2rem] border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-base font-black text-gray-900 tracking-tight">Growth Metrics</h3>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full bg-primary" />
+                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Views</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Visitors</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="h-[240px] w-full">
                     {analytics.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={analytics}>
@@ -197,72 +225,90 @@ export default function OverviewModule() {
             </div>
 
             {/* Top Pages and Referrers */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
-                    <h3 className="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                        <Globe className="text-blue-500" /> Top Pages
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white/60 backdrop-blur-xl p-6 rounded-[2rem] border border-white/50 shadow-sm">
+                    <h3 className="text-base font-black text-gray-900 mb-5 flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-lg bg-blue-50 text-blue-500">
+                            <Globe size={16} />
+                        </div>
+                        Top Pages
                     </h3>
-                    <div className="space-y-4">
+                    <div className="space-y-2.5">
                         {topPages.map((page, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                                <span className="text-sm font-bold text-gray-700 truncate max-w-[200px]">{page.page}</span>
-                                <span className="text-xs font-black text-primary bg-white px-3 py-1 rounded-lg shadow-sm">{page.count} views</span>
+                            <div key={idx} className="flex items-center justify-between p-3 bg-white/50 rounded-xl border border-gray-50/50 hover:border-primary/20 hover:bg-white transition-all group">
+                                <span className="text-[11px] font-bold text-gray-600 truncate max-w-[180px] group-hover:text-gray-900">{page.page}</span>
+                                <span className="text-[9px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded-lg">{page.count} views</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
-                    <h3 className="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
-                        <Search className="text-purple-500" /> Top Referrers
+                <div className="bg-white/60 backdrop-blur-xl p-6 rounded-[2rem] border border-white/50 shadow-sm">
+                    <h3 className="text-base font-black text-gray-900 mb-5 flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-lg bg-purple-50 text-purple-500">
+                            <Search size={16} />
+                        </div>
+                        Top Referrers
                     </h3>
-                    <div className="space-y-4">
+                    <div className="space-y-2.5">
                         {topReferrers.map((ref, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                                <span className="text-sm font-bold text-gray-700 truncate max-w-[200px]">{ref.referrer}</span>
-                                <span className="text-xs font-black text-primary bg-white px-3 py-1 rounded-lg shadow-sm">{ref.count} visits</span>
+                            <div key={idx} className="flex items-center justify-between p-3 bg-white/50 rounded-xl border border-gray-50/50 hover:border-primary/20 hover:bg-white transition-all group">
+                                <span className="text-[11px] font-bold text-gray-600 truncate max-w-[180px] group-hover:text-gray-900">{ref.referrer}</span>
+                                <span className="text-[9px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded-lg">{ref.count} visits</span>
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* Recent Messages Feed */}
-            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
-                <div className="flex justify-between items-center mb-10">
+            {/* Recent Messages with Premium Feed Style */}
+            <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2rem] border border-white/50 shadow-sm">
+                <div className="flex justify-between items-end mb-6">
                     <div>
-                        <h3 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-                            <MessageSquare className="text-emerald-500" /> Recent Inquiries
+                        <h3 className="text-lg font-black text-gray-900 flex items-center gap-2.5 tracking-tight">
+                            <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-500">
+                                <MessageSquare size={18} />
+                            </div>
+                            Live Inquiries
                         </h3>
-                        <p className="text-secondary font-medium mt-1">Last 5 messages received</p>
+                        <p className="text-gray-400 text-[10px] font-bold mt-0.5">Real-time engagement feed</p>
                     </div>
+                    <button className="text-[9px] font-black uppercase tracking-widest text-primary hover:text-blue-700 transition-colors flex items-center gap-1 group">
+                        View All <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-2.5">
                     {recentMessages.length > 0 ? recentMessages.map((msg) => (
-                        <div key={msg.id} className="flex items-center justify-between p-6 bg-gray-50 rounded-[2rem] hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
-                            <div className="flex items-center space-x-6">
-                                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center font-black text-primary shadow-sm group-hover:scale-110 transition-transform">
+                        <div key={msg.id} className="flex items-center justify-between p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-gray-50 hover:border-primary/20 hover:bg-white hover:shadow-xl hover:shadow-gray-200/20 transition-all group cursor-pointer">
+                            <div className="flex items-center space-x-4">
+                                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-50 to-white border border-gray-100 flex items-center justify-center font-black text-primary shadow-sm group-hover:scale-105 transition-transform text-sm">
                                     {msg.name.charAt(0)}
                                 </div>
-                                <div>
-                                    <h4 className="font-black text-gray-900">{msg.name}</h4>
-                                    <div className="flex items-center gap-4 text-xs font-bold text-secondary mt-1">
-                                        <span className="flex items-center gap-1.5"><Phone size={12} /> {msg.mobile}</span>
-                                        <span className="flex items-center gap-1.5"><Calendar size={12} /> {new Date(msg.createdAt).toLocaleDateString()}</span>
+                                <div className="flex flex-col">
+                                    <h4 className="font-bold text-xs text-gray-900 group-hover:text-primary transition-colors">{msg.name}</h4>
+                                    <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 mt-0.5">
+                                        <span className="flex items-center gap-1"><Phone size={8} /> {msg.mobile}</span>
+                                        <div className="w-0.5 h-0.5 rounded-full bg-gray-200" />
+                                        <span className="flex items-center gap-1"><Calendar size={8} /> {new Date(msg.createdAt).toLocaleDateString()}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-6">
-                                <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${msg.status === 'Fresh' ? 'bg-green-100 text-green-600' : 'bg-white text-gray-500'
+                            <div className="flex items-center gap-4">
+                                <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${msg.status === 'Fresh' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-400'
                                     }`}>
                                     {msg.status || 'Fresh'}
                                 </span>
-                                <ArrowRight size={20} className="text-gray-200 group-hover:text-primary transition-colors" />
+                                <div className="p-1.5 rounded-lg bg-gray-50 group-hover:bg-primary group-hover:text-white transition-all text-gray-300">
+                                    <ArrowRight size={12} />
+                                </div>
                             </div>
                         </div>
                     )) : (
-                        <p className="text-center py-10 text-secondary font-medium uppercase tracking-widest text-xs">No recent messages</p>
+                        <div className="text-center py-8">
+                            <MessageSquare size={24} className="text-gray-100 mx-auto mb-2" />
+                            <p className="text-secondary font-black uppercase tracking-widest text-[10px]">No recent messages</p>
+                        </div>
                     )}
                 </div>
             </div>

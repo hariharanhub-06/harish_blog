@@ -42,17 +42,17 @@ export default function AbandonedCartsModule() {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-3xl font-black text-gray-900 tracking-tight italic">Abandoned <span className="text-pink-500">Carts</span></h2>
-                    <p className="text-gray-400 font-medium">Follow up with customers who didn't finish their purchase.</p>
+                    <h2 className="text-xl font-black text-gray-900 tracking-tight italic">Abandoned <span className="text-pink-500">Carts</span></h2>
+                    <p className="text-gray-400 text-[10px] font-medium uppercase tracking-widest">Follow up with customers who didn't finish their purchase.</p>
                 </div>
                 <button
                     onClick={fetchCarts}
-                    className="p-3 bg-white border border-gray-100 rounded-xl hover:bg-gray-50 transition-all text-gray-400 hover:text-gray-900 shadow-sm"
+                    className="p-2 bg-white border border-gray-100 rounded-lg hover:bg-gray-50 transition-all text-gray-400 hover:text-gray-900 shadow-sm"
                 >
-                    <RefreshCw size={20} />
+                    <RefreshCw size={16} />
                 </button>
             </div>
 
@@ -60,32 +60,32 @@ export default function AbandonedCartsModule() {
                 {carts.map((cart) => (
                     <div
                         key={cart.id}
-                        className="bg-white p-6 rounded-[2rem] border border-gray-100 hover:shadow-xl transition-all"
+                        className="bg-white p-4 rounded-2xl border border-gray-100 hover:shadow-lg transition-all"
                     >
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                            <div className="space-y-4 flex-1">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center">
-                                        <ShoppingCart size={24} />
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div className="space-y-3 flex-1">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 bg-pink-50 text-pink-500 rounded-xl flex items-center justify-center">
+                                        <ShoppingCart size={18} />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-xl text-gray-900 italic">
+                                        <h4 className="font-black text-base text-gray-900 italic">
                                             {cart.customerName || "Anonymous Guest"}
                                         </h4>
-                                        <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
-                                            <Calendar size={12} />
+                                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400">
+                                            <Calendar size={10} />
                                             {new Date(cart.createdAt).toLocaleString()}
                                             <span className="text-pink-200">|</span>
-                                            <span className="text-pink-500 font-black uppercase tracking-widest">{cart.lastStep}</span>
+                                            <span className="text-pink-500 font-black uppercase tracking-widest text-[9px]">{cart.lastStep}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-1.5">
                                     {cart.items.map((item: any, idx: number) => (
-                                        <div key={idx} className="bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100 flex items-center gap-2">
-                                            <Package size={10} className="text-gray-400" />
-                                            <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">
+                                        <div key={idx} className="bg-gray-50 px-2 py-1 rounded-lg border border-gray-100 flex items-center gap-1.5">
+                                            <Package size={8} className="text-gray-400" />
+                                            <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest">
                                                 {item.name} ({item.quantity}{item.unit})
                                             </span>
                                         </div>
@@ -97,14 +97,14 @@ export default function AbandonedCartsModule() {
                                 {cart.customerMobile && (
                                     <button
                                         onClick={() => sendWhatsAppRecovery(cart)}
-                                        className="flex-1 md:flex-none border-2 border-emerald-500 text-emerald-500 px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-emerald-500 hover:text-white transition-all shadow-lg shadow-emerald-100"
+                                        className="flex-1 md:flex-none border-2 border-emerald-500 text-emerald-500 px-4 py-2 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-emerald-500 hover:text-white transition-all shadow-md shadow-emerald-100"
                                     >
-                                        <MessageCircle size={16} /> Recovery SMS
+                                        <MessageCircle size={14} /> Recovery
                                     </button>
                                 )}
-                                <div className="flex-1 md:flex-none bg-gray-50 px-6 py-3 rounded-2xl border border-gray-100">
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Items</p>
-                                    <p className="text-lg font-black text-gray-900">{cart.items.length}</p>
+                                <div className="flex-1 md:flex-none bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+                                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Items</p>
+                                    <p className="text-base font-black text-gray-900">{cart.items.length}</p>
                                 </div>
                             </div>
                         </div>
