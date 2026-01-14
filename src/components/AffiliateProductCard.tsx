@@ -214,7 +214,10 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
             className="relative h-full flex flex-col group"
         >
             {/* Main Card */}
-            <div className="relative flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[28px] overflow-hidden flex flex-col shadow-2xl transition-all duration-500 hover:border-white/20">
+            <div
+                className="relative flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[28px] overflow-hidden flex flex-col shadow-2xl transition-all duration-500 hover:border-white/20 cursor-pointer"
+                onClick={handleCardClick}
+            >
                 {/* Background Glow */}
                 <div className={`absolute -inset-2 opacity-0 group-hover:opacity-20 transition-opacity duration-700 blur-2xl rounded-[32px] bg-gradient-to-br from-purple-600 to-orange-500`} />
 
@@ -243,7 +246,7 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                         </span>
                         <button
                             onClick={handleShare}
-                            className={`p-2 rounded-xl backdrop-blur-md border transition-all pointer-events-auto ${copied ? "bg-emerald-500/40 text-white border-emerald-500/50" : "bg-white/10 text-white/50 hover:text-white border-white/10 hover:bg-white/20"}`}
+                            className={`p-2.5 rounded-xl backdrop-blur-md border transition-all pointer-events-auto shadow-lg ${copied ? "bg-emerald-500 text-white border-emerald-400" : "bg-white/20 text-white border-white/20 hover:bg-white hover:text-slate-950"}`}
                         >
                             <AnimatePresence mode="wait">
                                 {copied ? (
@@ -252,7 +255,7 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                                     </motion.div>
                                 ) : (
                                     <motion.div key="share" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                                        <Share2 size={12} />
+                                        <Share2 size={16} />
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -271,10 +274,7 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                 </div>
 
                 {/* Content Section */}
-                <div
-                    className="px-4 pb-4 pt-1 flex-1 flex flex-col cursor-pointer"
-                    onClick={handleCardClick}
-                >
+                <div className="px-4 pb-4 pt-1 flex-1 flex flex-col">
                     <div className="flex items-center gap-2 mb-2">
                         {product.category && (
                             <div className="flex items-center gap-1.5">
