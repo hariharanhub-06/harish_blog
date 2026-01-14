@@ -38,10 +38,14 @@ export async function POST(request: NextRequest) {
             "";
 
         if (description.includes("Amazon.in")) {
-            description = description.split("Amazon.in")[0].replace(/[:|\-]$/, "").trim();
+            description = description.split("Amazon.in")[0].trim();
         } else if (description.includes("Flipkart.com")) {
-            description = description.split("Flipkart.com")[0].replace(/[:|\-]$/, "").trim();
+            description = description.split("Flipkart.com")[0].trim();
         }
+
+        // Clean trailing junk
+        description = description.replace(/[:|\-|\s|.]*$/, "").trim();
+        title = title.replace(/[:|\-|\s|.]*$/, "").trim();
 
         let image =
             $('meta[property="og:image"]').attr("content") ||
@@ -54,11 +58,14 @@ export async function POST(request: NextRequest) {
         else if (url.includes("flipkart")) platform = "flipkart";
 
         // Platform-specific enhancements
-        let price = "";
+        let originalPrice = "";
+        let discountedPrice = "";
+        let rating = "";
+        let reviewsCount = "";
 
         if (platform === "amazon") {
-            // Price: prioritize deal price if available
-            price =
+            // Discounted Price: prioritize deal price if available
+            discountedPrice =
                 $(".a-price.priceToPay .a-price-whole").first().text() ||
                 $(".a-price-whole").first().text() ||
                 $(".a-price .a-offscreen").first().text() ||
@@ -67,7 +74,26 @@ export async function POST(request: NextRequest) {
                 $("#kindle-price").text() ||
                 $("#price").text();
 
-            price = price.replace(/[^\d.]/g, "");
+            // Original Price (M.R.P)
+            originalPrice =
+                $(".a-price.a-text-price span[aria-hidden='true']").first().text() ||
+                $(".basisPrice .a-offscreen").first().text() ||
+                $(".a-text-strike").first().text() ||
+                $("#listPrice").text();
+
+            // Rating
+            const ratingText =
+                $("span[data-hook='rating-out-of-text']").first().text() ||
+                $("i.a-icon-star span.a-icon-alt").first().text() ||
+                $(".a-icon-star span").first().text();
+
+            if (ratingText) {
+                const match = ratingText.match(/(\d+\.?\d*)/);
+                if (match) rating = match[1];
+            }
+
+            // Reviews Count
+            reviewsCount = $("#acrCustomerReviewText").first().text().replace(/[^\d]/g, "");
 
             // Image: Amazon often has multiple images, try to get the main one
             const landingImage = $("#landingImage");
@@ -75,11 +101,9 @@ export async function POST(request: NextRequest) {
 
             if (dynamicImageAttr) {
                 try {
-                    // This is a JSON string of URL -> [width, height]
                     const images = JSON.parse(dynamicImageAttr);
                     const urls = Object.keys(images);
                     if (urls.length > 0) {
-                        // Usually the first one is the best, or we could find the largest
                         image = urls.reduce((prev, curr) => images[curr][0] > images[prev][0] ? curr : prev);
                     }
                 } catch (e) {
@@ -95,13 +119,22 @@ export async function POST(request: NextRequest) {
             }
         } else if (platform === "flipkart") {
             // Price
-            price = $("._30jeq3._16Jk6d").first().text() || $("._30jeq3").first().text();
-            price = price.replace(/[^\d.]/g, "");
+            discountedPrice = $("._30jeq3._16Jk6d").first().text() || $("._30jeq3").first().text();
+            originalPrice = $("._3I9_ca").first().text() || $("._2p6l8y").first().text();
+
+            // Rating
+            rating = $("._3LWZlK").first().text();
+            reviewsCount = $("._2AfS94").first().text().replace(/[^\d]/g, "");
 
             // Image: Flipkart specific
             const flipkartImg = $("img._396cs4").attr("src") || $("img._2r_T1I").attr("src") || $('img[alt="product"]').attr("src");
             if (flipkartImg) image = flipkartImg;
         }
+
+        // Clean up prices
+        const cleanPrice = (p: string) => p.replace(/[^\d.]/g, "");
+        discountedPrice = cleanPrice(discountedPrice);
+        originalPrice = cleanPrice(originalPrice);
 
         // Clean up relative URLs
         if (image && image.startsWith("//")) {
@@ -113,14 +146,18 @@ export async function POST(request: NextRequest) {
             } catch (e) { }
         }
 
-        console.log(`[Scraper] Found - Title: ${title.substring(0, 30)}..., Image: ${image ? "Yes" : "No"}, Price: ${price}`);
+        console.log(`[Scraper] Found - Title: ${title.substring(0, 30)}..., Image: ${image ? "Yes" : "No"}, Price: ${discountedPrice}, Original: ${originalPrice}, Rating: ${rating}`);
 
         return NextResponse.json({
             title: title.trim(),
             description: description.trim(),
             image: image,
             platform,
-            price: price || null
+            discountedPrice: discountedPrice || null,
+            originalPrice: originalPrice || null,
+            rating: rating || null,
+            reviewsCount: reviewsCount || null,
+            price: discountedPrice || null // Legacy support
         });
     } catch (error) {
         console.error("Scraping error:", error);
