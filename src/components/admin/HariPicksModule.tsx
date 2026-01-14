@@ -172,7 +172,8 @@ export default function HariPicksModule() {
                     imageUrl: finalImageUrl
                 });
             } else {
-                alert("Could not fetch details. You may need to enter them manually.");
+                const errorData = await res.json().catch(() => ({ error: "Unknown error occurred" }));
+                alert(`Fetch failed: ${errorData.error || "Could not fetch details."}\n\nYou may need to enter details manually.`);
             }
         } catch (error) {
             console.error("Fetch error:", error);
