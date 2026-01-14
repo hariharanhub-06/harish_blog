@@ -6,6 +6,7 @@ import {
     ChevronDown, Sparkles, Award, Shield, Zap, TrendingUp, Star, Filter, X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 import AffiliateProductCard from "@/components/AffiliateProductCard";
 
 const PLATFORMS = ["all", "amazon", "flipkart", "other"];
@@ -19,6 +20,9 @@ const SORT_OPTIONS = [
 ];
 
 export default function HariPicksView() {
+    const searchParams = useSearchParams();
+    const sharedId = searchParams.get("id");
+
     const [products, setProducts] = useState<any[]>([]);
     const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -40,6 +44,20 @@ export default function HariPicksView() {
         fetchProducts();
         fetchFeatured();
     }, [selectedPlatform, selectedCategory, searchQuery]);
+
+    useEffect(() => {
+        if (sharedId && !loading && products.length > 0) {
+            const element = document.getElementById(`product-${sharedId}`);
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth", block: "center" });
+                // Add a temporary highlight effect
+                element.classList.add("ring-2", "ring-purple-500", "ring-offset-4", "ring-offset-slate-950");
+                setTimeout(() => {
+                    element.classList.remove("ring-2", "ring-purple-500", "ring-offset-4", "ring-offset-slate-950");
+                }, 3000);
+            }
+        }
+    }, [sharedId, loading, products]);
 
     const fetchProducts = async () => {
         setLoading(true);
@@ -358,6 +376,7 @@ export default function HariPicksView() {
                                     {products.map((product, idx) => (
                                         <motion.div
                                             key={product.id}
+                                            id={`product-${product.id}`}
                                             layout
                                             initial={{ opacity: 0, scale: 0.9 }}
                                             animate={{ opacity: 1, scale: 1 }}

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ExternalLink, Star, TrendingUp, Tag, ShoppingCart, Zap, ArrowUpRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { ExternalLink, Star, TrendingUp, Tag, ShoppingCart, Zap, ArrowUpRight, Share2, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import imageKitLoader from "@/lib/imagekitLoader";
 
 interface AffiliateProductCardProps {
@@ -15,6 +15,7 @@ interface AffiliateProductCardProps {
 export default function AffiliateProductCard({ product, featured = false, viewMode = "grid" }: AffiliateProductCardProps) {
     const [imageError, setImageError] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     const handleClick = async () => {
         try {
@@ -27,6 +28,32 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
             console.error("Failed to track click:", error);
         }
         window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
+    };
+
+    const handleShare = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const shareUrl = `${window.location.origin}/business/haripicks?id=${product.id}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `Check out this deal: ${product.title}`,
+                    text: product.description || `Great deal on HariPicks: ${product.title}`,
+                    url: shareUrl,
+                });
+            } catch (err) {
+                console.error("Error sharing:", err);
+            }
+        } else {
+            // Fallback to clipboard
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            } catch (err) {
+                console.error("Failed to copy:", err);
+            }
+        }
     };
 
     const getPlatformStyles = (platform: string) => {
@@ -129,19 +156,38 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                                 ) : null}
                             </div>
 
-                            <button
-                                onClick={handleClick}
-                                className="group/btn relative overflow-hidden bg-white text-slate-950 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2"
-                            >
-                                <span className="relative z-10 flex items-center gap-1.5">
-                                    VIEW <ArrowUpRight size={14} />
-                                </span>
-                                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-orange-500 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500" />
-                                <div className="absolute inset-0 bg-white group-hover/btn:opacity-0 transition-opacity duration-500" />
-                                <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500 flex items-center justify-center text-white">
-                                    <span className="relative z-20 flex items-center gap-1.5">VIEW <ArrowUpRight size={14} /></span>
-                                </div>
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handleShare}
+                                    className={`p-2.5 rounded-xl border border-white/10 transition-all ${copied ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-white/5 text-gray-400 hover:text-white hover:bg-white/10"}`}
+                                    title="Share product"
+                                >
+                                    <AnimatePresence mode="wait">
+                                        {copied ? (
+                                            <motion.div key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                                                <Check size={16} />
+                                            </motion.div>
+                                        ) : (
+                                            <motion.div key="share" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                                                <Share2 size={16} />
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </button>
+                                <button
+                                    onClick={handleClick}
+                                    className="group/btn relative overflow-hidden bg-white text-slate-950 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2"
+                                >
+                                    <span className="relative z-10 flex items-center gap-1.5">
+                                        VIEW <ArrowUpRight size={14} />
+                                    </span>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-orange-500 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500" />
+                                    <div className="absolute inset-0 bg-white group-hover/btn:opacity-0 transition-opacity duration-500" />
+                                    <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500 flex items-center justify-center text-white">
+                                        <span className="relative z-20 flex items-center gap-1.5">VIEW <ArrowUpRight size={14} /></span>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,10 +227,26 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                     )}
 
                     {/* Floating Info */}
-                    <div className="absolute top-3 left-3 right-3 flex justify-between items-start pointer-events-none">
+                    <div className="absolute top-3 left-3 right-3 flex justify-between items-center pointer-events-none">
                         <span className={`${styles.bg} text-white px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-2xl ${styles.glow}`}>
                             {product.platform}
                         </span>
+                        <button
+                            onClick={handleShare}
+                            className={`p-2 rounded-xl backdrop-blur-md border transition-all pointer-events-auto ${copied ? "bg-emerald-500/40 text-white border-emerald-500/50" : "bg-white/10 text-white/50 hover:text-white border-white/10 hover:bg-white/20"}`}
+                        >
+                            <AnimatePresence mode="wait">
+                                {copied ? (
+                                    <motion.div key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                                        <Check size={12} />
+                                    </motion.div>
+                                ) : (
+                                    <motion.div key="share" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                                        <Share2 size={12} />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </button>
                     </div>
 
                     {/* Discount Pill */}

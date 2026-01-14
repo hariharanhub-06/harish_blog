@@ -15,10 +15,12 @@ import {
     Star,
     TrendingUp,
     ShoppingBag,
-    Tag
+    Tag,
+    Zap,
+    Download
 } from "lucide-react";
 import Image from "next/image";
-import { uploadToImageKit } from "@/lib/imagekit-upload";
+import { uploadToImageKit, uploadFromUrl } from "@/lib/imagekit-upload";
 import imageKitLoader from "@/lib/imagekitLoader";
 
 const PLATFORMS = ["amazon", "flipkart", "other"];
@@ -122,6 +124,59 @@ export default function HariPicksModule() {
             alert("Failed to upload image. Please try again.");
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handleAutoFetch = async () => {
+        if (!editing.affiliateUrl) {
+            alert("Please enter an Affiliate URL first.");
+            return;
+        }
+
+        setSaving(true);
+        try {
+            const res = await fetch("/api/haripicks/scrape", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: editing.affiliateUrl }),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                // If we got an image URL, try to upload it to ImageKit instead of using external hotlink
+                let finalImageUrl = editing.imageUrl;
+                if (data.image) {
+                    try {
+                        setUploading(true);
+                        // Using our imagekit helper to upload from external URL
+                        const uploadedUrl = await uploadFromUrl(data.image, 'haripicks');
+                        finalImageUrl = uploadedUrl;
+                    } catch (imgErr) {
+                        console.error("Failed to upload external image:", imgErr);
+                        // Fallback to the original URL if upload fails (though ImageKit is preferred)
+                        finalImageUrl = data.image;
+                    } finally {
+                        setUploading(false);
+                    }
+                }
+
+                setEditing({
+                    ...editing,
+                    title: data.title || editing.title,
+                    description: data.description || editing.description,
+                    platform: data.platform || editing.platform,
+                    discountedPrice: data.price || editing.discountedPrice,
+                    imageUrl: finalImageUrl
+                });
+            } else {
+                alert("Could not fetch details. You may need to enter them manually.");
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            alert("Failed to auto-fetch details.");
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -290,15 +345,33 @@ export default function HariPicksModule() {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Affiliate URL</label>
-                                    <input
-                                        required
-                                        type="url"
-                                        value={editing.affiliateUrl}
-                                        onChange={(e) => setEditing({ ...editing, affiliateUrl: e.target.value })}
-                                        className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-purple-500 transition-all font-bold text-[10px]"
-                                        placeholder="https://..."
-                                    />
+                                    <div className="flex justify-between items-center">
+                                        <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Affiliate URL</label>
+                                        {editing.affiliateUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={handleAutoFetch}
+                                                disabled={saving || uploading}
+                                                className="text-[8px] font-black uppercase tracking-widest text-purple-500 hover:text-purple-700 transition-all flex items-center gap-1"
+                                            >
+                                                {saving ? <Loader2 size={10} className="animate-spin" /> : <Zap size={10} />}
+                                                Auto-Fetch Details
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            required
+                                            type="url"
+                                            value={editing.affiliateUrl}
+                                            onChange={(e) => setEditing({ ...editing, affiliateUrl: e.target.value })}
+                                            className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-purple-500 transition-all font-bold text-[10px] pr-12"
+                                            placeholder="https://..."
+                                        />
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300">
+                                            <ShoppingBag size={14} />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="flex gap-3">
@@ -426,8 +499,8 @@ export default function HariPicksModule() {
                                         <span className="text-[10px] font-black text-gray-900">{product.viewsCount || 0} views</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <ExternalLink size={12} className="text-gray-400" />
-                                        <span className="text-[10px] font-black text-gray-900">{product.clicksCount || 0} clicks</span>
+                                        <ExternalLink size={12} className="text-purple-400" />
+                                        <span className="text-[10px] font-black text-purple-600">{product.clicksCount || 0} clicks</span>
                                     </div>
                                 </div>
                                 <div className="flex gap-1.5">
