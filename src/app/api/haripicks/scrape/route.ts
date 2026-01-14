@@ -10,18 +10,28 @@ export async function POST(request: NextRequest) {
         }
 
         // Fetch the page with a browser-like User-Agent
+        console.log(`[Scraper] Fetching URL: ${url}`);
         const response = await fetch(url, {
             headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
                 "Accept-Language": "en-US,en;q=0.9",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Referer": "https://www.google.com/",
             },
         });
 
         if (!response.ok) {
-            return NextResponse.json({ error: "Failed to fetch the URL" }, { status: 500 });
+            console.error(`[Scraper] Fetch failed with status: ${response.status}`);
+            return NextResponse.json({ error: `Failed to fetch the URL: ${response.status}` }, { status: 500 });
         }
 
         const html = await response.text();
+
+        if (html.includes("robot check") || html.includes("captcha") || html.includes("To discuss automated access to Amazon data please contact")) {
+            console.error(`[Scraper] Bot detection triggered by Amazon`);
+            return NextResponse.json({ error: "Access denied by platform (Bot Detection)" }, { status: 403 });
+        }
+
         const $ = cheerio.load(html);
 
         // Extract metadata
