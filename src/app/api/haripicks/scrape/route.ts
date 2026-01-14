@@ -9,14 +9,23 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "URL is required" }, { status: 400 });
         }
 
-        // Fetch the page with a browser-like User-Agent
-        console.log(`[Scraper] Fetching URL: ${url}`);
+        // Determine if it's a Meesho URL
+        const isMeesho = url.includes("meesho.com");
+
+        // Fetch the page
+        // For Meesho, we use a social bot User-Agent to get the Open Graph tags and bypass strict WAF
+        const userAgent = isMeesho
+            ? "Twitterbot/1.0"
+            : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+
+        console.log(`[Scraper] Fetching URL: ${url} (Is Meesho: ${isMeesho})`);
+
         const response = await fetch(url, {
             headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                "User-Agent": userAgent,
                 "Accept-Language": "en-US,en;q=0.9",
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-                "Referer": "https://www.google.com/",
+                "Referer": isMeesho ? "https://t.co/" : "https://www.google.com/",
             },
         });
 
@@ -28,7 +37,7 @@ export async function POST(request: NextRequest) {
         const html = await response.text();
 
         if (html.includes("robot check") || html.includes("captcha") || html.includes("To discuss automated access to Amazon data please contact")) {
-            console.error(`[Scraper] Bot detection triggered by Amazon`);
+            console.error(`[Scraper] Bot detection triggered`);
             return NextResponse.json({ error: "Access denied by platform (Bot Detection)" }, { status: 403 });
         }
 
@@ -66,6 +75,7 @@ export async function POST(request: NextRequest) {
         let platform = "other";
         if (url.includes("amazon")) platform = "amazon";
         else if (url.includes("flipkart")) platform = "flipkart";
+        else if (url.includes("meesho")) platform = "meesho";
 
         // Platform-specific enhancements
         let originalPrice = "";
@@ -139,6 +149,25 @@ export async function POST(request: NextRequest) {
             // Image: Flipkart specific
             const flipkartImg = $("img._396cs4").attr("src") || $("img._2r_T1I").attr("src") || $('img[alt="product"]').attr("src");
             if (flipkartImg) image = flipkartImg;
+        } else if (platform === "meesho") {
+            // Meesho Logic (via OpenGraph/Twitter Cards)
+            // Example Description: "Get this product for ₹233 ..." or similar variants
+
+            // Attempt to extract price from description or title if possible
+            // Meesho OG description often contains the price
+            const priceRegex = /₹\s*([\d,]+)/;
+
+            let priceMatch = description.match(priceRegex);
+            if (!priceMatch) {
+                priceMatch = title.match(priceRegex);
+            }
+
+            if (priceMatch) {
+                discountedPrice = priceMatch[1];
+            }
+
+            // Clean up title if it has Meesho specific suffix
+            title = title.split("| Meesho")[0].trim();
         }
 
         // Clean up prices
