@@ -15,10 +15,10 @@ import {
     Send
 } from "lucide-react";
 import Image from "next/image";
-import TechParticles from "@/components/TechParticles";
-import DNAParticles from "@/components/DNAParticles";
+import TechParticles from "./TechParticles";
+import DNAParticles from "./DNAParticles";
 import { motion } from "framer-motion";
-import TechPlayground from "@/components/TechPlayground";
+import DinoRunnerGame from "./DinoRunnerGame";
 
 interface HMTechViewProps {
     projects: any[];
@@ -96,28 +96,28 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                     initial="hidden"
                     animate="visible"
                     variants={staggerContainer}
-                    className="relative z-10 text-center max-w-6xl mx-auto space-y-10"
+                    className="relative z-10 text-center max-w-5xl mx-auto space-y-6"
                 >
-                    <motion.div variants={fadeInUp} className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-white font-bold text-lg tracking-[0.15em] uppercase mb-4 hover:bg-white/10 transition-colors shadow-2xl">
-                        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-white font-bold text-sm tracking-[0.15em] uppercase mb-2 hover:bg-white/10 transition-colors shadow-2xl">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
                         HM Tech
                     </motion.div>
 
-                    <motion.h1 variants={fadeInUp} className="text-6xl md:text-9xl font-black text-white tracking-tighter leading-[0.9] drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+                    <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.95] drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                         Digital <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">Evolution</span>
                     </motion.h1>
 
-                    <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
+                    <motion.p variants={fadeInUp} className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed">
                         We craft <span className="text-white">Fluid Web Experiences</span> & <span className="text-white">Enterprise Solutions</span>. <br />
                         Reasonable Pricing. Unmatched Speed.
                     </motion.p>
 
-                    <motion.div variants={fadeInUp} className="flex flex-wrap items-center justify-center gap-6 pt-10">
-                        <a href="#contact" className="group px-12 py-5 bg-white text-black rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-3 shadow-[0_0_50px_-10px_rgba(255,255,255,0.4)]">
-                            Start Project <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                    <motion.div variants={fadeInUp} className="flex flex-wrap items-center justify-center gap-4 pt-6">
+                        <a href="#contact" className="group px-8 py-4 bg-white text-black rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2.5 shadow-[0_0_30px_-10px_rgba(255,255,255,0.4)]">
+                            Start Project <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                         </a>
-                        <a href="#services" className="px-12 py-5 bg-white/5 border border-white/10 text-white rounded-full font-bold text-sm uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-md">
+                        <a href="#services" className="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-md">
                             Our Services
                         </a>
                     </motion.div>
@@ -136,11 +136,11 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         whileInView="visible"
                         viewport={{ once: true, margin: "-100px" }}
                         variants={fadeInUp}
-                        className="text-center mb-16 space-y-4"
+                        className="text-center mb-12 space-y-3"
                     >
-                        <span className="text-purple-600 font-bold tracking-[0.2em] uppercase text-sm">Capabilities</span>
-                        <h2 className="text-5xl md:text-7xl font-black text-gray-900 tracking-tight">Our Expertise</h2>
-                        <p className="text-xl text-gray-500 font-medium max-w-2xl mx-auto">
+                        <span className="text-purple-600 font-bold tracking-[0.2em] uppercase text-xs">Capabilities</span>
+                        <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight">Our Expertise</h2>
+                        <p className="text-lg text-gray-500 font-medium max-w-xl mx-auto">
                             High-impact digital solutions tailored to your unique business needs.
                         </p>
                     </motion.div>
@@ -156,14 +156,14 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                             <motion.div
                                 key={index}
                                 variants={scaleIn}
-                                className="group p-8 bg-white rounded-3xl border border-gray-100 hover:border-purple-500/30 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
+                                className="group p-6 bg-white rounded-2xl border border-gray-100 hover:border-purple-500/30 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1.5 relative overflow-hidden"
                             >
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl group-hover:bg-purple-500/10 transition-colors"></div>
-                                <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 text-gray-900 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:text-purple-600 shadow-sm transition-all duration-500">
-                                    <service.icon size={32} strokeWidth={1.5} />
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 text-gray-900 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:text-purple-600 shadow-sm transition-all duration-500">
+                                    <service.icon size={24} strokeWidth={1.5} />
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-purple-600 transition-colors">{service.title}</h3>
-                                <p className="text-gray-500 font-medium leading-relaxed group-hover:text-gray-600">{service.desc}</p>
+                                <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">{service.title}</h3>
+                                <p className="text-sm text-gray-500 font-medium leading-relaxed group-hover:text-gray-600">{service.desc}</p>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -184,10 +184,10 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={fadeInUp}
-                        className="text-center mb-16 relative z-20"
+                        className="text-center mb-12 relative z-20"
                     >
-                        <span className="text-blue-400 font-bold tracking-[0.2em] uppercase text-sm">Process</span>
-                        <h2 className="text-5xl md:text-7xl font-black mt-4 tracking-tight text-white">The <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Flow</span></h2>
+                        <span className="text-blue-400 font-bold tracking-[0.2em] uppercase text-xs">Process</span>
+                        <h2 className="text-3xl md:text-5xl font-black mt-3 tracking-tight text-white">The <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Flow</span></h2>
                     </motion.div>
 
                     <div className="relative">
@@ -244,13 +244,13 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                                         initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true, margin: "-50px" }}
-                                        whileHover={{ scale: 1.02 }}
-                                        className={`w-full md:w-[45%] relative group ${index % 2 === 0 ? 'md:mr-auto' : 'md:ml-auto'} mt-12 md:mt-0`}
+                                        whileHover={{ scale: 1.01 }}
+                                        className={`w-full md:w-[45%] relative group ${index % 2 === 0 ? 'md:mr-auto' : 'md:ml-auto'} mt-10 md:mt-0`}
                                     >
-                                        <div className="absolute inset-0 bg-blue-500/5 rounded-2xl blur-xl group-hover:bg-blue-500/10 transition-colors"></div>
-                                        <div className="relative p-6 md:p-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl hover:border-blue-500/50 transition-all duration-300">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="text-[10px] font-mono text-blue-400 uppercase tracking-widest">
+                                        <div className="absolute inset-0 bg-blue-500/5 rounded-xl blur-xl group-hover:bg-blue-500/10 transition-colors"></div>
+                                        <div className="relative p-5 md:p-6 bg-black/40 backdrop-blur-md border border-white/10 rounded-xl hover:border-blue-500/50 transition-all duration-300">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="text-[9px] font-mono text-blue-400 uppercase tracking-widest">
                                                     Node_0{index + 1}
                                                 </div>
                                                 <div className="flex gap-1">
@@ -259,7 +259,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                                                     <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
                                                 </div>
                                             </div>
-                                            <h3 className="text-xl md:text-2xl font-bold text-white group-hover:text-blue-200 transition-colors font-mono">
+                                            <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-blue-200 transition-colors font-mono">
                                                 {step}
                                             </h3>
                                         </div>
@@ -282,11 +282,11 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={fadeInUp}
-                        className="text-center mb-12"
+                        className="text-center mb-10"
                     >
-                        <span className="text-pink-600 font-extrabold tracking-[0.3em] uppercase text-sm drop-shadow-sm">PORTFOLIO</span>
-                        <h2 className="text-6xl md:text-8xl font-black text-gray-900 mt-4 tracking-tighter">Projects Done</h2>
-                        <p className="text-xl md:text-2xl text-gray-500 font-medium mt-6 tracking-wide">Selected works from our portfolio</p>
+                        <span className="text-pink-600 font-extrabold tracking-[0.3em] uppercase text-xs drop-shadow-sm">PORTFOLIO</span>
+                        <h2 className="text-4xl md:text-6xl font-black text-gray-900 mt-3 tracking-tighter">Projects Done</h2>
+                        <p className="text-lg md:text-xl text-gray-500 font-medium mt-4 tracking-wide">Selected works from our portfolio</p>
                     </motion.div>
 
                     <motion.div
@@ -302,7 +302,7 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                                 variants={scaleIn}
                                 className="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-pink-500/30 transition-all duration-500 flex flex-col hover:-translate-y-2 hover:shadow-2xl"
                             >
-                                <div className="relative h-64 overflow-hidden">
+                                <div className="relative h-48 overflow-hidden">
                                     {project.thumbnail ? (
                                         <Image
                                             src={project.thumbnail}
@@ -312,23 +312,22 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">
-                                            <Layout size={40} />
+                                            <Layout size={32} />
                                         </div>
                                     )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div className="absolute bottom-4 left-4 flex gap-2 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="absolute bottom-3 left-3 flex gap-1.5 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity">
                                         {project.technologies?.slice(0, 3).map((tech: string, i: number) => (
-                                            <span key={i} className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] text-white font-bold border border-white/10 uppercase tracking-wide">{tech}</span>
+                                            <span key={i} className="px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-full text-[8px] text-white font-bold border border-white/10 uppercase tracking-wide">{tech}</span>
                                         ))}
                                     </div>
                                 </div>
-                                <div className="p-8 flex-1 flex flex-col">
-                                    <h3 className="text-[10px] md:text-2xl font-black text-gray-900 mb-1 group-hover:text-pink-500 transition-colors uppercase tracking-tight leading-none line-clamp-1">
+                                <div className="p-5 flex-1 flex flex-col">
+                                    <h3 className="text-base font-black text-gray-900 mb-1 group-hover:text-pink-500 transition-colors uppercase tracking-tight leading-none line-clamp-1">
                                         {project.title}
                                     </h3>
-                                    <p className="text-gray-500 font-medium text-sm line-clamp-3 mb-8 flex-1 leading-relaxed">{project.description}</p>
-                                    <a href={project.liveUrl || project.repoUrl || "#"} target="_blank" className="inline-flex items-center gap-2 text-gray-900 font-bold uppercase tracking-widest text-xs hover:text-pink-500 transition-all">
-                                        View Case Study <ArrowRight size={14} />
+                                    <p className="text-gray-500 font-medium text-xs line-clamp-2 mb-4 flex-1 leading-relaxed">{project.description}</p>
+                                    <a href={project.liveUrl || project.repoUrl || "#"} target="_blank" className="inline-flex items-center gap-2 text-gray-900 font-bold uppercase tracking-widest text-[10px] hover:text-pink-500 transition-all">
+                                        View Study <ArrowRight size={12} />
                                     </a>
                                 </div>
                             </motion.div>
@@ -337,8 +336,8 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                 </div>
             </section>
 
-            {/* Tech Playground Section */}
-            <TechPlayground />
+            {/* Dino Runner Game Section */}
+            <DinoRunnerGame />
 
             {/* Contact Form (White Theme) */}
             <section id="contact" className="py-12 px-6 relative overflow-hidden bg-white">
@@ -349,14 +348,14 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={fadeInUp}
-                        className="bg-white/80 backdrop-blur-2xl rounded-3xl p-6 md:p-12 border border-gray-100 shadow-2xl relative overflow-hidden"
+                        className="bg-white/80 backdrop-blur-2xl rounded-2xl p-5 md:p-8 border border-gray-100 shadow-2xl relative overflow-hidden"
                     >
-                        <div className="text-center mb-8">
-                            <span className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white mb-6 shadow-lg shadow-purple-500/20">
-                                <Send size={28} />
+                        <div className="text-center mb-6">
+                            <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white mb-4 shadow-lg shadow-purple-500/20">
+                                <Send size={24} />
                             </span>
-                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">Let's Build the Future</h2>
-                            <p className="text-gray-500">Get a response within 24 hours.</p>
+                            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2 tracking-tight">Let's Build the Future</h2>
+                            <p className="text-gray-500 text-sm">Get a response within 24 hours.</p>
                         </div>
 
                         <form onSubmit={async (e) => {
@@ -440,4 +439,3 @@ export default function HMTechView({ projects }: HMTechViewProps) {
         </div>
     );
 }
-
