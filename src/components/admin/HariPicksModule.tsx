@@ -23,7 +23,7 @@ import Image from "next/image";
 import { uploadToImageKit, uploadFromUrl } from "@/lib/imagekit-upload";
 import imageKitLoader from "@/lib/imagekitLoader";
 
-const PLATFORMS = ["amazon", "flipkart", "other"];
+const PLATFORMS = ["amazon"];
 const CATEGORIES = ["Electronics", "Fashion", "Home & Kitchen", "Books", "Beauty", "Sports", "Toys", "Grocery"];
 
 export default function HariPicksModule() {
@@ -32,6 +32,7 @@ export default function HariPicksModule() {
     const [fetching, setFetching] = useState(true);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
+    // filterPlatform is effectively always "all" or "amazon", so we can simplify or just keep "all" as default
     const [filterPlatform, setFilterPlatform] = useState("all");
     const [filterCategory, setFilterCategory] = useState("all");
 
@@ -43,6 +44,7 @@ export default function HariPicksModule() {
         setFetching(true);
         try {
             const params = new URLSearchParams();
+            // Since we only have Amazon, we might strictly filter or just fetch all (which are now only Amazon)
             if (filterPlatform !== "all") params.append("platform", filterPlatform);
             if (filterCategory !== "all") params.append("category", filterCategory);
 
@@ -64,10 +66,13 @@ export default function HariPicksModule() {
             const url = editing.id ? `/api/haripicks/products/${editing.id}` : "/api/haripicks/products";
             const method = editing.id ? "PATCH" : "POST";
 
+            // Enforce platform as amazon
+            const payload = { ...editing, platform: "amazon" };
+
             const res = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(editing),
+                body: JSON.stringify(payload),
             });
 
             const data = await res.json();
@@ -165,7 +170,8 @@ export default function HariPicksModule() {
                     ...editing,
                     title: data.title || editing.title,
                     description: data.description || editing.description,
-                    platform: data.platform || editing.platform,
+                    // Force platform to amazon regardless of what scraper says if we only want amazon
+                    platform: "amazon",
                     discountedPrice: data.discountedPrice || data.price || editing.discountedPrice,
                     originalPrice: data.originalPrice || editing.originalPrice,
                     rating: data.rating || editing.rating,
@@ -196,7 +202,7 @@ export default function HariPicksModule() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <div>
                     <h2 className="text-xl font-black text-gray-900 tracking-tight">HariPicks Manager</h2>
-                    <p className="text-gray-400 text-xs font-medium mt-0.5">Manage affiliate products from Amazon, Flipkart, and more.</p>
+                    <p className="text-gray-400 text-xs font-medium mt-0.5">Manage Amazon affiliate products.</p>
                 </div>
                 {!editing && (
                     <button
@@ -222,19 +228,8 @@ export default function HariPicksModule() {
 
             {!editing && (
                 <div className="flex flex-wrap gap-3">
-                    <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-gray-50 rounded-xl w-fit">
-                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 px-3 py-1.5">Platform:</span>
-                        {["all", ...PLATFORMS].map(platform => (
-                            <button
-                                key={platform}
-                                onClick={() => setFilterPlatform(platform)}
-                                className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterPlatform === platform ? "bg-white text-purple-500 shadow-sm" : "text-gray-400 hover:text-gray-900"
-                                    }`}
-                            >
-                                {platform}
-                            </button>
-                        ))}
-                    </div>
+                    {/* Platform filter removed as it is now only Amazon */}
+
                     <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-gray-50 rounded-xl w-fit">
                         <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 px-3 py-1.5">Category:</span>
                         {["all", ...CATEGORIES].map(cat => (
@@ -284,7 +279,7 @@ export default function HariPicksModule() {
                                             value={editing.affiliateUrl}
                                             onChange={(e) => setEditing({ ...editing, affiliateUrl: e.target.value })}
                                             className="w-full bg-purple-50/30 border-2 border-purple-100/50 rounded-xl p-3.5 focus:ring-2 focus:ring-purple-500 transition-all font-bold text-[10px] pr-12 focus:bg-white"
-                                            placeholder="Paste Amazon/Flipkart URL here..."
+                                            placeholder="Paste Amazon URL here..."
                                         />
                                         <div className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-300">
                                             <ShoppingBag size={14} />
@@ -315,17 +310,8 @@ export default function HariPicksModule() {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Platform</label>
-                                        <select
-                                            value={editing.platform}
-                                            onChange={(e) => setEditing({ ...editing, platform: e.target.value })}
-                                            className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-purple-500 transition-all font-bold text-xs"
-                                        >
-                                            {PLATFORMS.map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
-                                        </select>
-                                    </div>
-                                    <div className="space-y-1.5">
+                                    {/* Platform input removed, defaults to Amazon internally */}
+                                    <div className="space-y-1.5 col-span-2">
                                         <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Category</label>
                                         <select
                                             value={editing.category}
