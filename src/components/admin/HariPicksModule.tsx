@@ -166,7 +166,9 @@ export default function HariPicksModule() {
                     title: data.title || editing.title,
                     description: data.description || editing.description,
                     platform: data.platform || editing.platform,
-                    discountedPrice: data.price || editing.discountedPrice,
+                    discountedPrice: data.discountedPrice || data.price || editing.discountedPrice,
+                    originalPrice: data.originalPrice || editing.originalPrice,
+                    rating: data.rating || editing.rating,
                     imageUrl: finalImageUrl
                 });
             } else {
@@ -262,6 +264,34 @@ export default function HariPicksModule() {
                             {/* Left Column */}
                             <div className="space-y-6">
                                 <div className="space-y-1.5">
+                                    <div className="flex justify-between items-center">
+                                        <label className="text-[8px] font-black uppercase tracking-widest text-purple-500 ml-2">Affiliate URL (Fetch First)</label>
+                                        <button
+                                            type="button"
+                                            onClick={handleAutoFetch}
+                                            disabled={saving || uploading}
+                                            className="text-[8px] font-black uppercase tracking-widest text-purple-500 hover:text-purple-700 transition-all flex items-center gap-1 bg-purple-50 px-3 py-1.5 rounded-lg"
+                                        >
+                                            {saving ? <Loader2 size={10} className="animate-spin" /> : <Zap size={10} />}
+                                            Auto-Fetch Details
+                                        </button>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            required
+                                            type="url"
+                                            value={editing.affiliateUrl}
+                                            onChange={(e) => setEditing({ ...editing, affiliateUrl: e.target.value })}
+                                            className="w-full bg-purple-50/30 border-2 border-purple-100/50 rounded-xl p-3.5 focus:ring-2 focus:ring-purple-500 transition-all font-bold text-[10px] pr-12 focus:bg-white"
+                                            placeholder="Paste Amazon/Flipkart URL here..."
+                                        />
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-300">
+                                            <ShoppingBag size={14} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
                                     <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Product Title</label>
                                     <input
                                         required
@@ -341,36 +371,6 @@ export default function HariPicksModule() {
                                             className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-purple-500 transition-all font-bold text-xs"
                                             placeholder="4.5"
                                         />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <div className="flex justify-between items-center">
-                                        <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Affiliate URL</label>
-                                        {editing.affiliateUrl && (
-                                            <button
-                                                type="button"
-                                                onClick={handleAutoFetch}
-                                                disabled={saving || uploading}
-                                                className="text-[8px] font-black uppercase tracking-widest text-purple-500 hover:text-purple-700 transition-all flex items-center gap-1"
-                                            >
-                                                {saving ? <Loader2 size={10} className="animate-spin" /> : <Zap size={10} />}
-                                                Auto-Fetch Details
-                                            </button>
-                                        )}
-                                    </div>
-                                    <div className="relative">
-                                        <input
-                                            required
-                                            type="url"
-                                            value={editing.affiliateUrl}
-                                            onChange={(e) => setEditing({ ...editing, affiliateUrl: e.target.value })}
-                                            className="w-full bg-gray-50 border-0 rounded-xl p-3.5 focus:ring-2 focus:ring-purple-500 transition-all font-bold text-[10px] pr-12"
-                                            placeholder="https://..."
-                                        />
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300">
-                                            <ShoppingBag size={14} />
-                                        </div>
                                     </div>
                                 </div>
 
