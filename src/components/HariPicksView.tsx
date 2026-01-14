@@ -409,27 +409,6 @@ export default function HariPicksView() {
                 </div>
             </main>
 
-            {/* Newsletter Float - Decorative */}
-            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 px-4 w-full max-w-lg pointer-events-none">
-                <motion.div
-                    initial={{ y: 100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 2, type: "spring" }}
-                    className="bg-white rounded-full p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 flex items-center gap-4 pointer-events-auto"
-                >
-                    <div className="flex -space-x-2 ml-4">
-                        <div className="w-8 h-8 rounded-full border-2 border-white bg-purple-500" />
-                        <div className="w-8 h-8 rounded-full border-2 border-white bg-orange-500" />
-                        <div className="w-8 h-8 rounded-full border-2 border-white bg-blue-500" />
-                    </div>
-                    <div className="flex-1 text-[10px] font-black text-gray-500 uppercase tracking-wider">
-                        Join 2k+ deal hunters
-                    </div>
-                    <button className="bg-slate-950 text-white px-6 py-2.5 rounded-full text-xs font-black hover:bg-purple-600 transition-all">
-                        ALERTS
-                    </button>
-                </motion.div>
-            </div>
 
             <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar {

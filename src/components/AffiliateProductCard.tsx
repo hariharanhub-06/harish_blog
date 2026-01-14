@@ -17,7 +17,7 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
     const [isHovered, setIsHovered] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    const handleClick = async () => {
+    const trackClick = async () => {
         try {
             await fetch("/api/haripicks/track-click", {
                 method: "POST",
@@ -27,6 +27,10 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
         } catch (error) {
             console.error("Failed to track click:", error);
         }
+    };
+
+    const handleCardClick = () => {
+        trackClick();
         window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
     };
 
@@ -174,8 +178,14 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                                         )}
                                     </AnimatePresence>
                                 </button>
-                                <button
-                                    onClick={handleClick}
+                                <a
+                                    href={product.affiliateUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        trackClick();
+                                    }}
                                     className="group/btn relative overflow-hidden bg-white text-slate-950 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2"
                                 >
                                     <span className="relative z-10 flex items-center gap-1.5">
@@ -186,7 +196,7 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                                     <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500 flex items-center justify-center text-white">
                                         <span className="relative z-20 flex items-center gap-1.5">VIEW <ArrowUpRight size={14} /></span>
                                     </div>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -261,7 +271,10 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                 </div>
 
                 {/* Content Section */}
-                <div className="px-4 pb-4 pt-1 flex-1 flex flex-col">
+                <div
+                    className="px-4 pb-4 pt-1 flex-1 flex flex-col cursor-pointer"
+                    onClick={handleCardClick}
+                >
                     <div className="flex items-center gap-2 mb-2">
                         {product.category && (
                             <div className="flex items-center gap-1.5">
@@ -287,12 +300,18 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                             )}
                         </div>
 
-                        <button
-                            onClick={handleClick}
-                            className="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-xl transition-all duration-300 hover:rotate-6 hover:scale-110 shadow-lg shadow-purple-600/30"
+                        <a
+                            href={product.affiliateUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                trackClick();
+                            }}
+                            className="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-xl transition-all duration-300 hover:rotate-6 hover:scale-110 shadow-lg shadow-purple-600/30 flex items-center justify-center"
                         >
                             <ShoppingCart size={16} />
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

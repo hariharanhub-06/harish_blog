@@ -118,7 +118,7 @@ export default function AdminDashboard() {
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
         { id: "divider", title: "BUSINESS SECTION", icon: null, color: "" },
         { id: "snack-central", title: "Snack Central", icon: Package, color: "bg-pink-600", badge: pendingOrdersCount },
-        { id: "haripicks", title: "HariPicks Manager", icon: ShoppingBag, color: "bg-purple-600" },
+        { id: "haripicks", title: "HariPicks Manager", icon: ShoppingCart, color: "bg-purple-600" },
         { id: "billing", title: "Billing / Invoice", icon: FileText, color: "bg-orange-500" },
         { id: "partner-network", title: "Partner Network", icon: Users, color: "bg-orange-600" },
         { id: "vendor-central", title: "Vendor Central", icon: Building, color: "bg-teal-600" },
