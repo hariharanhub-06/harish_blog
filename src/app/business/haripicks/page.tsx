@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import HariPicksView from "@/components/HariPicksView";
 
 export const metadata = {
@@ -7,5 +8,13 @@ export const metadata = {
 };
 
 export default function HariPicksPage() {
-    return <HariPicksView />;
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+                <div className="w-10 h-10 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+            </div>
+        }>
+            <HariPicksView />
+        </Suspense>
+    );
 }
