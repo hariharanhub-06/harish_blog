@@ -143,7 +143,7 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                                 {product.title}
                             </h3>
 
-                            <p className="text-xs text-gray-600 mb-2 line-clamp-1 font-medium">{product.description}</p>
+                            <p className="text-xs text-gray-600 mb-2 line-clamp-3 font-medium">{product.description}</p>
                         </div>
 
                         <div className="flex items-center justify-between mt-2">
@@ -284,9 +284,15 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                         )}
                     </div>
 
-                    <h3 className="text-sm font-black text-white line-clamp-2 leading-tight group-hover:text-purple-400 transition-colors mb-2 flex-1">
+                    <h3 className="text-sm font-black text-white line-clamp-2 leading-tight group-hover:text-purple-400 transition-colors mb-2">
                         {product.title}
                     </h3>
+
+                    {product.description && (
+                        <p className="text-[10px] text-gray-400 font-medium line-clamp-2 mb-3 leading-relaxed">
+                            {product.description}
+                        </p>
+                    )}
 
                     <div className="flex items-end justify-between gap-3 mt-auto">
                         <div className="flex flex-col">
