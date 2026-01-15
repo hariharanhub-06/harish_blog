@@ -3,6 +3,9 @@ import { Inter, Poppins } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
+import ClientLayout from "@/components/ClientLayout";
+import { CartProvider } from "@/context/CartContext";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const poppins = Poppins({
@@ -13,9 +16,22 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://hariharanhub.com'),
-  title: "Hari Haran Jeyaramamoorthy | Developer & Consultant",
-  description: "Portfolio of Hari Haran J.; specializing in HM Snacks (E-commerce) & HM Tech (Software Solutions). Small Scale ➜ Big Scale.",
-  keywords: ["Hari Haran Jeyaramamoorthy", "Web Developer", "Business Consultant", "HM Snacks", "HM Tech"],
+  title: "Hari Haran's Blog | Developer, Consultant & Entrepreneur",
+  description: "Official Blog & Portfolio of Hari Haran Jeyaramamoorthy. Insights on Web Development, HM Snacks (E-commerce), HM Tech, and HariPicks.",
+  keywords: [
+    "Hari Haran Jeyaramamoorthy",
+    "Hari Haran Blog",
+    "Tech Blog",
+    "Web Developer",
+    "Business Consultant",
+    "HM Snacks",
+    "HM Tech",
+    "Haripicks",
+    "Snack Business",
+    "Tech Solutions",
+    "Software Engineer",
+    "Next.js Developer"
+  ],
   icons: {
     icon: [
       { url: "/hh-gold-logo.png" },
@@ -24,11 +40,20 @@ export const metadata: Metadata = {
     shortcut: "/hh-gold-logo.png",
     apple: "/hh-gold-logo.png",
   },
+  openGraph: {
+    title: "Hari Haran's Blog | Developer, Consultant & Entrepreneur",
+    description: "Read my latest thoughts on Technology, Business, and E-commerce. Featuring HM Snacks, HM Tech, and HariPicks.",
+    url: 'https://hariharanhub.com',
+    siteName: 'Hari Haran Jeyaramamoorthy',
+    locale: 'en_US',
+    type: 'website',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
-import ClientLayout from "@/components/ClientLayout";
-import { CartProvider } from "@/context/CartContext";
-import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -43,15 +68,44 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "Organization",
+              "@type": "Person",
               "name": "Hari Haran Jeyaramamoorthy",
               "url": "https://hariharanhub.com",
-              "logo": "https://hariharanhub.com/hh-gold-logo.png",
-              "description": "Premium developer and business consultant specializing in E-commerce (HM Snacks) and Software Solutions (HM Tech).",
+              "jobTitle": "Founder & Developer",
+              "worksFor": [
+                {
+                  "@type": "Organization",
+                  "name": "HM Tech",
+                  "url": "https://hariharanhub.com/business/hm-tech"
+                },
+                {
+                  "@type": "Organization",
+                  "name": "HM Snacks",
+                  "url": "https://hariharanhub.com/business/hm-snacks"
+                }
+              ],
+              "knowsAbout": ["Web Development", "E-commerce", "Business Strategy", "Software Engineering"],
               "sameAs": [
                 "https://linkedin.com/in/hari-haran-j",
                 "https://github.com/startup-digi-3119"
               ]
+            })
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "HM Snacks",
+              "url": "https://hariharanhub.com/business/hm-snacks",
+              "logo": "https://hariharanhub.com/hm-snacks-logo.png",
+              "description": "Authentic traditional snacks from HM Snacks.",
+              "parentOrganization": {
+                "@type": "Person",
+                "name": "Hari Haran Jeyaramamoorthy"
+              }
             })
           }}
         />
