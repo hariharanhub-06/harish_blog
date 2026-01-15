@@ -246,7 +246,7 @@ export default function AffiliateProductCard({ product, featured = false, viewMo
                         </span>
                         <button
                             onClick={handleShare}
-                            className={`p-2.5 rounded-xl backdrop-blur-md border transition-all pointer-events-auto shadow-lg ${copied ? "bg-emerald-500 text-white border-emerald-400" : "bg-white/20 text-white border-white/20 hover:bg-white hover:text-slate-950"}`}
+                            className={`p-2.5 rounded-xl backdrop-blur-md border transition-all pointer-events-auto shadow-lg ${copied ? "bg-emerald-500 text-white border-emerald-400" : "bg-black/30 text-white border-white/20 hover:bg-black/50"}`}
                         >
                             <AnimatePresence mode="wait">
                                 {copied ? (
