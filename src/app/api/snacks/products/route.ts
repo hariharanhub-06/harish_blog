@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
             dimensionTiers: dimensionTiers || null,
         }).returning();
 
-        revalidateTag('snack-products', { expire: 0 });
+        revalidateTag('snack-products');
         return NextResponse.json(product);
     } catch (error) {
         console.error("Create product error:", error);
