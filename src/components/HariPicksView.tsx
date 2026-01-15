@@ -31,7 +31,6 @@ export default function HariPicksView() {
     const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState("featured");
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-    const [showFilters, setShowFilters] = useState(true);
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -238,67 +237,7 @@ export default function HariPicksView() {
             {/* Main Content Grid */}
             <main className="relative z-10 max-w-7xl mx-auto px-4 pb-32">
                 <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Floating Sidebar Filter */}
-                    <motion.aside
-                        initial={{ opacity: 0, x: -30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        className={`lg:w-56 flex-shrink-0 ${showFilters ? "block" : "hidden"}`}
-                    >
-                        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sticky top-24 shadow-2xl">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5">
-                                    <Filter size={12} className="text-purple-500" /> Filters
-                                </h3>
-                                <button
-                                    onClick={() => { setSelectedPlatform("all"); setSelectedCategory("all"); }}
-                                    className="text-[10px] font-bold text-gray-500 hover:text-white transition-colors"
-                                >
-                                    RESET
-                                </button>
-                            </div>
 
-                            {/* Platform */}
-                            <div className="mb-8">
-                                <h4 className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Platform Selection</h4>
-                                <div className="space-y-2">
-                                    {PLATFORMS.map((platform) => (
-                                        <button
-                                            key={platform}
-                                            onClick={() => setSelectedPlatform(platform)}
-                                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all border ${selectedPlatform === platform
-                                                ? "bg-purple-600 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]"
-                                                : "bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:border-white/10"
-                                                }`}
-                                        >
-                                            <span className="capitalize">{platform}</span>
-                                            {selectedPlatform === platform && <div className="w-1.5 h-1.5 rounded-full bg-white shadow-sm" />}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Categories */}
-                            <div>
-                                <h4 className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Category Flow</h4>
-                                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {CATEGORIES.map((category) => (
-                                        <button
-                                            key={category}
-                                            onClick={() => setSelectedCategory(category)}
-                                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all border ${selectedCategory === category
-                                                ? "bg-orange-600 border-orange-400 text-white shadow-[0_0_20px_rgba(249,115,22,0.4)]"
-                                                : "bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:border-white/10"
-                                                }`}
-                                        >
-                                            {category}
-                                            {selectedCategory === category && <div className="w-1.5 h-1.5 rounded-full bg-white shadow-sm" />}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </motion.aside>
 
                     {/* Product Arena */}
                     <div className="flex-1">
@@ -310,12 +249,7 @@ export default function HariPicksView() {
                             className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-4 mb-8 flex items-center justify-between gap-4 shadow-2xl"
                         >
                             <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => setShowFilters(!showFilters)}
-                                    className="lg:hidden p-2.5 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-all"
-                                >
-                                    <SlidersHorizontal size={14} />
-                                </button>
+
                                 <div className="flex flex-col">
                                     <span className="text-lg font-black text-white tracking-tighter">Deal Arena</span>
                                     <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">{products.length} Items Live</span>
@@ -368,7 +302,7 @@ export default function HariPicksView() {
                             <motion.div
                                 layout
                                 className={viewMode === "grid"
-                                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                                    ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6"
                                     : "space-y-6"
                                 }
                             >
