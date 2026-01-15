@@ -20,11 +20,22 @@ export async function PATCH(
             );
         }
 
-        const updateData: any = {
-            ...body,
-            discountPercent: discountPercent || body.discountPercent || null,
-            updatedAt: new Date(),
-        };
+        // Strictly allow only schema columns to prevent "column does not exist" errors
+        const updateData: any = {};
+        const allowedFields = [
+            "title", "description", "originalPrice", "discountedPrice", "discountPercent",
+            "affiliateUrl", "imageUrl", "platform", "category", "rating",
+            "isFeatured", "isActive", "viewsCount", "clicksCount"
+        ];
+
+        for (const field of allowedFields) {
+            if (body[field] !== undefined) {
+                updateData[field] = body[field];
+            }
+        }
+
+        updateData.discountPercent = discountPercent || body.discountPercent || null;
+        updateData.updatedAt = new Date();
 
         const updatedProduct = await db
             .update(affiliateProducts)
