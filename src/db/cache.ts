@@ -53,6 +53,6 @@ export const getCachedVendors = unstable_cache(
  */
 export async function invalidateCache(tags: string[]) {
     const { revalidateTag } = await import('next/cache');
-    // In this project version, revalidateTag requires { expire: 0 } options
-    tags.forEach((tag) => revalidateTag(tag, { expire: 0 }));
+    // In this project version, revalidateTag only accepts the tag string
+    tags.forEach((tag) => revalidateTag(tag));
 }
