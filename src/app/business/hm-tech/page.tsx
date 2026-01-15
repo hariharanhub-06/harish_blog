@@ -3,7 +3,7 @@ import { projects } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import HMTechView from "@/components/HMTechView";
 
-export const revalidate = 300; // Cache for 5 minutes
+export const revalidate = 3600; // Cache for 1 hour (optimized for scaling)
 
 export const metadata = {
     title: "HM Tech | Premium Web & App Development Services",
