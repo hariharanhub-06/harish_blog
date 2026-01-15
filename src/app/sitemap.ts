@@ -1,17 +1,24 @@
-import { Metadata, Viewport } from 'next';
+import { MetadataRoute } from 'next';
 
 const baseUrl = 'https://hariharanhub.com';
 
-export default function sitemap() {
-    const routes = [
-        '',
-        '/business/hm-snacks',
-        '/business/hm-tech',
-        '/business/haripicks',
-    ].map((route) => ({
-        url: `${baseUrl}${route}`,
-        lastModified: new Date().toISOString().split('T')[0],
-    }));
-
-    return [...routes];
+export default function sitemap(): MetadataRoute.Sitemap {
+    return [
+        {
+            url: baseUrl,
+            lastModified: new Date(),
+        },
+        {
+            url: `${baseUrl}/business/hm-snacks`,
+            lastModified: new Date(),
+        },
+        {
+            url: `${baseUrl}/business/hm-tech`,
+            lastModified: new Date(),
+        },
+        {
+            url: `${baseUrl}/business/haripicks`,
+            lastModified: new Date(),
+        },
+    ];
 }
