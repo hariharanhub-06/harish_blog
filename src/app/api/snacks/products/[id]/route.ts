@@ -27,7 +27,7 @@ export async function PATCH(
             .returning();
 
         console.log("Product updated successfully:", updated);
-        revalidateTag('snack-products', { expire: 0 });
+        revalidateTag('snack-products');
         return NextResponse.json(updated);
     } catch (error) {
         console.error("Update product error:", error);
@@ -46,7 +46,7 @@ export async function DELETE(
         const { id } = await params;
 
         await db.delete(snackProducts).where(eq(snackProducts.id, id));
-        revalidateTag('snack-products', { expire: 0 });
+        revalidateTag('snack-products');
 
         return NextResponse.json({ success: true });
     } catch (error) {
