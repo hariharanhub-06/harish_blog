@@ -15,8 +15,11 @@ export async function GET(request: NextRequest) {
         let query = db.select().from(affiliateProducts);
         const conditions = [];
 
-        // Only show active products on public-facing requests
-        conditions.push(eq(affiliateProducts.isActive, true));
+        // Only show active products on public-facing requests unless overridden
+        const includeInactive = searchParams.get("includeInactive") === "true";
+        if (!includeInactive) {
+            conditions.push(eq(affiliateProducts.isActive, true));
+        }
 
         if (platform && platform !== "all") {
             conditions.push(eq(affiliateProducts.platform, platform));

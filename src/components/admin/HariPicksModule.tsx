@@ -44,6 +44,8 @@ export default function HariPicksModule() {
         setFetching(true);
         try {
             const params = new URLSearchParams();
+            // Always fetch inactive products for admin panel
+            params.append("includeInactive", "true");
             // Since we only have Amazon, we might strictly filter or just fetch all (which are now only Amazon)
             if (filterPlatform !== "all") params.append("platform", filterPlatform);
             if (filterCategory !== "all") params.append("category", filterCategory);
@@ -175,6 +177,7 @@ export default function HariPicksModule() {
                     discountedPrice: data.discountedPrice || data.price || editing.discountedPrice,
                     originalPrice: data.originalPrice || editing.originalPrice,
                     rating: data.rating || editing.rating,
+                    category: data.category || editing.category, // Auto-select category
                     imageUrl: finalImageUrl
                 });
             } else {

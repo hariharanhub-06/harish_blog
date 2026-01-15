@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
         let discountedPrice = "";
         let rating = "";
         let reviewsCount = "";
+        let category = "";
 
         if (platform === "amazon") {
             // Discounted Price: prioritize deal price if available
@@ -132,6 +133,13 @@ export async function POST(request: NextRequest) {
             } else {
                 image = landingImage.attr("src") || $("#imgBlkFront").attr("src") || $("#main-image").attr("src") || image;
             }
+
+            // Category extraction from breadcrumbs
+            const breadcrumb = $("#wayfinding-breadcrumbs_container ul li a").first().text().trim() ||
+                $("#wayfinding-breadcrumbs_feature_div ul li a").first().text().trim() ||
+                $(".a-breadcrumb li a").first().text().trim();
+
+            if (breadcrumb) category = breadcrumb;
 
             // CDN fallback for Amazon
             if (!image) {
@@ -192,6 +200,7 @@ export async function POST(request: NextRequest) {
             description: description.trim(),
             image: image,
             platform,
+            category: category || "Electronics", // Default to Electronics if not found
             discountedPrice: discountedPrice || null,
             originalPrice: originalPrice || null,
             rating: rating || null,
