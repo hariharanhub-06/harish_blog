@@ -398,3 +398,30 @@ export const affiliateProducts = pgTable("affiliate_products", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// HM Stories - Stories Table (Playlists/Series)
+export const stories = pgTable("stories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  description: text("description"),
+  thumbnailUrl: text("thumbnail_url"),
+  youtubePlaylistId: text("youtube_playlist_id"), // Optional: for playlist-based stories
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// HM Stories - Story Episodes Table (Individual Videos)
+export const storyEpisodes = pgTable("story_episodes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  storyId: uuid("story_id").notNull(), // Foreign key to stories table
+  title: text("title").notNull(),
+  description: text("description"),
+  youtubeVideoId: text("youtube_video_id").notNull(), // Required for YouTube redirect
+  thumbnailUrl: text("thumbnail_url"),
+  duration: text("duration"), // e.g., "10:24" or "PT10M24S"
+  episodeNumber: integer("episode_number").default(1),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+

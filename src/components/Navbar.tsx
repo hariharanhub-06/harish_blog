@@ -128,6 +128,20 @@ export default function Navbar() {
                                             <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Tech</span>
                                         </div>
                                     </Link>
+                                    <Link
+                                        href="/business/hm-stories"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-primary/5 transition-all group/item mt-0.5"
+                                    >
+                                        <div className="relative w-6 h-6 rounded-md overflow-hidden bg-gradient-to-br from-indigo-600 to-blue-600 shadow-sm border border-gray-100 flex items-center justify-center">
+                                            <span className="text-white font-black text-xs">▶</span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-black text-gray-900 group-hover/item:text-primary">HM Stories</span>
+                                            <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Videos</span>
+                                        </div>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -216,6 +230,21 @@ export default function Navbar() {
                                         <span>HM Tech</span>
                                     </div>
                                     <span className="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-lg">TECH</span>
+                                </Link>
+                                <Link
+                                    href="/business/hm-stories"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`w-full px-6 py-4 rounded-xl font-black shadow-sm border flex items-center justify-between transition-colors ${isTechPage ? "bg-white/5 text-white border-white/10 hover:bg-white/10" : "bg-gray-50 text-gray-900 border-gray-100 hover:bg-gray-100"}`}
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-gradient-to-br from-indigo-600 to-blue-600 shadow-sm border border-gray-100 flex items-center justify-center">
+                                            <span className="text-white font-black text-sm">▶</span>
+                                        </div>
+                                        <span>HM Stories</span>
+                                    </div>
+                                    <span className="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-lg">VIDEOS</span>
                                 </Link>
                                 <Link
                                     href={isSnacksPage || isTechPage ? "#contact" : "/#contact"}
