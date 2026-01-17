@@ -6,9 +6,10 @@ import { notFound } from "next/navigation";
 
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: { params: { storyId: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ storyId: string }> }) {
+    const { storyId } = await params;
     const story = await db.query.stories.findFirst({
-        where: eq(stories.id, params.storyId),
+        where: eq(stories.id, storyId),
     });
 
     if (!story) {
@@ -28,9 +29,10 @@ export async function generateMetadata({ params }: { params: { storyId: string }
     };
 }
 
-export default async function StoryPage({ params }: { params: { storyId: string } }) {
+export default async function StoryPage({ params }: { params: Promise<{ storyId: string }> }) {
+    const { storyId } = await params;
     const story = await db.query.stories.findFirst({
-        where: eq(stories.id, params.storyId),
+        where: eq(stories.id, storyId),
     });
 
     if (!story || !story.isActive) {
@@ -38,7 +40,7 @@ export default async function StoryPage({ params }: { params: { storyId: string 
     }
 
     const allEpisodes = await db.query.storyEpisodes.findMany({
-        where: eq(storyEpisodes.storyId, params.storyId),
+        where: eq(storyEpisodes.storyId, storyId),
         orderBy: [asc(storyEpisodes.episodeNumber)],
     });
 

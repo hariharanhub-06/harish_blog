@@ -7,11 +7,12 @@ import { getVideoDataFromUrl } from "@/lib/services/youtube";
 // GET: Fetch all episodes for a story
 export async function GET(
     request: Request,
-    { params }: { params: { storyId: string } }
+    { params }: { params: Promise<{ storyId: string }> }
 ) {
     try {
+        const { storyId } = await params;
         const episodes = await db.query.storyEpisodes.findMany({
-            where: eq(storyEpisodes.storyId, params.storyId),
+            where: eq(storyEpisodes.storyId, storyId),
             orderBy: [asc(storyEpisodes.episodeNumber)],
         });
 
@@ -25,9 +26,10 @@ export async function GET(
 // POST: Add episode (with YouTube video URL - no API required)
 export async function POST(
     request: Request,
-    { params }: { params: { storyId: string } }
+    { params }: { params: Promise<{ storyId: string }> }
 ) {
     try {
+        const { storyId } = await params;
         const body = await request.json();
         const { title, description, thumbnailUrl, youtubeVideoUrl, episodeNumber, isActive } = body;
 
@@ -57,7 +59,7 @@ export async function POST(
         let newEpisodeNumber = episodeNumber;
         if (!newEpisodeNumber) {
             const existingEpisodes = await db.query.storyEpisodes.findMany({
-                where: eq(storyEpisodes.storyId, params.storyId),
+                where: eq(storyEpisodes.storyId, storyId),
             });
             newEpisodeNumber = existingEpisodes.length + 1;
         }
@@ -66,7 +68,7 @@ export async function POST(
         const [newEpisode] = await db
             .insert(storyEpisodes)
             .values({
-                storyId: params.storyId,
+                storyId: storyId,
                 title,
                 description: description || null,
                 youtubeVideoId: videoData.videoId,
@@ -88,9 +90,10 @@ export async function POST(
 // PUT: Update episode
 export async function PUT(
     request: Request,
-    { params }: { params: { storyId: string } }
+    { params }: { params: Promise<{ storyId: string }> }
 ) {
     try {
+        const { storyId } = await params;
         const body = await request.json();
         const { episodeId, title, description, thumbnailUrl, episodeNumber, isActive } = body;
 
@@ -124,9 +127,10 @@ export async function PUT(
 // DELETE: Delete episode
 export async function DELETE(
     request: Request,
-    { params }: { params: { storyId: string } }
+    { params }: { params: Promise<{ storyId: string }> }
 ) {
     try {
+        const { storyId } = await params;
         const { searchParams } = new URL(request.url);
         const episodeId = searchParams.get("episodeId");
 
