@@ -18,7 +18,8 @@ interface Episode {
     youtubeVideoId: string;
     thumbnailUrl: string | null;
     duration: string | null;
-    episodeNumber: number;
+    episodeNumber: number | null;
+    isActive?: boolean | null;
 }
 
 interface StoryEpisodesViewerProps {
