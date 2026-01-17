@@ -3,7 +3,7 @@ import { stories, storyEpisodes } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import HMStoriesView from "@/components/HMStoriesView";
 
-export const revalidate = 3600; // Cache for 1 hour
+export const revalidate = 0; // Disable cache to show updates immediately
 
 export const metadata = {
     title: "HM Stories | Episodic Content & Video Series",

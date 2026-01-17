@@ -4,7 +4,7 @@ import { eq, asc } from "drizzle-orm";
 import StoryEpisodesViewer from "@/components/StoryEpisodesViewer";
 import { notFound } from "next/navigation";
 
-export const revalidate = 3600;
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: { params: Promise<{ storyId: string }> }) {
     const { storyId } = await params;
