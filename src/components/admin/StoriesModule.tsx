@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Play, Plus, Edit2, Trash2, Eye, EyeOff, GripVertical, Link as LinkIcon, X, Loader2 } from "lucide-react";
+import { Play, Plus, Edit2, Trash2, Eye, EyeOff, GripVertical, Link as LinkIcon, X, Loader2, Upload, Image as ImageIcon } from "lucide-react";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 
 interface Story {
     id: string;
@@ -52,6 +53,7 @@ export default function StoriesModule() {
     });
 
     const [submitting, setSubmitting] = useState(false);
+    const [thumbnailUploading, setThumbnailUploading] = useState(false);
 
     useEffect(() => {
         fetchStories();
@@ -165,6 +167,38 @@ export default function StoriesModule() {
         }
     };
 
+    const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setThumbnailUploading(true);
+        try {
+            const url = await uploadToImageKit(file, 'stories');
+            setStoryForm(prev => ({ ...prev, thumbnailUrl: url }));
+        } catch (error) {
+            console.error("Error uploading story thumbnail:", error);
+            alert("Failed to upload thumbnail");
+        } finally {
+            setThumbnailUploading(false);
+        }
+    };
+
+    const handleEpisodeThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setThumbnailUploading(true);
+        try {
+            const url = await uploadToImageKit(file, 'episodes');
+            setEpisodeForm(prev => ({ ...prev, thumbnailUrl: url }));
+        } catch (error) {
+            console.error("Error uploading episode thumbnail:", error);
+            alert("Failed to upload thumbnail");
+        } finally {
+            setThumbnailUploading(false);
+        }
+    };
+
     const handleCreateEpisode = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedStory) return;
@@ -202,6 +236,35 @@ export default function StoriesModule() {
             }
         } catch (error) {
             console.error("Error deleting episode:", error);
+        }
+    };
+
+    const handleUpdateEpisode = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedStory || !editingEpisode) return;
+
+        setSubmitting(true);
+
+        try {
+            const res = await fetch(`/api/admin/stories/${selectedStory.id}/episodes`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    episodeId: editingEpisode.id,
+                    ...episodeForm,
+                }),
+            });
+
+            if (res.ok) {
+                await fetchEpisodes(selectedStory.id);
+                setShowEpisodeModal(false);
+                setEditingEpisode(null);
+                setEpisodeForm({ title: "", description: "", thumbnailUrl: "", youtubeVideoUrl: "" });
+            }
+        } catch (error) {
+            console.error("Error updating episode:", error);
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -368,6 +431,21 @@ export default function StoriesModule() {
 
                                 {/* Actions */}
                                 <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setEditingEpisode(episode);
+                                            setEpisodeForm({
+                                                title: episode.title,
+                                                description: episode.description || "",
+                                                thumbnailUrl: episode.thumbnailUrl || "",
+                                                youtubeVideoUrl: `https://youtube.com/watch?v=${episode.youtubeVideoId}`,
+                                            });
+                                            setShowEpisodeModal(true);
+                                        }}
+                                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
                                     <a
                                         href={`https://youtube.com/watch?v=${episode.youtubeVideoId}`}
                                         target="_blank"
@@ -440,17 +518,74 @@ export default function StoriesModule() {
 
                             <div>
                                 <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
-                                    Thumbnail URL (Optional)
+                                    Story Thumbnail
                                 </label>
-                                <input
-                                    type="url"
-                                    value={storyForm.thumbnailUrl}
-                                    onChange={(e) => setStoryForm({ ...storyForm, thumbnailUrl: e.target.value })}
-                                    placeholder="https://... (or leave blank)"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">Custom thumbnail for this story collection</p>
+                                <div className="space-y-3">
+                                    <div
+                                        className="relative aspect-video bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 overflow-hidden flex flex-col items-center justify-center group hover:border-blue-500 transition-colors cursor-pointer"
+                                        onClick={() => document.getElementById('story-thumb-upload')?.click()}
+                                    >
+                                        {storyForm.thumbnailUrl ? (
+                                            <>
+                                                <img
+                                                    src={storyForm.thumbnailUrl}
+                                                    alt="Preview"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <Upload className="text-white w-8 h-8" />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="text-center p-6">
+                                                <ImageIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                                                <p className="text-sm font-bold text-gray-500">Click to Upload Thumbnail</p>
+                                                <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
+                                            </div>
+                                        )}
+
+                                        {thumbnailUploading && (
+                                            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                                                <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
+                                                <p className="text-xs font-black text-blue-600 uppercase tracking-widest">Uploading...</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative flex-1">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                                <LinkIcon size={14} />
+                                            </div>
+                                            <input
+                                                type="url"
+                                                value={storyForm.thumbnailUrl}
+                                                onChange={(e) => setStoryForm({ ...storyForm, thumbnailUrl: e.target.value })}
+                                                placeholder="Or paste external image URL"
+                                                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                        {storyForm.thumbnailUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setStoryForm({ ...storyForm, thumbnailUrl: "" })}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <input
+                                        id="story-thumb-upload"
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleThumbnailUpload}
+                                        disabled={thumbnailUploading}
+                                    />
+                                </div>
                             </div>
+                            <p className="text-xs text-gray-500 mt-1">Custom thumbnail for this story collection</p>
                             <div className="flex gap-3 pt-4">
                                 <button
                                     type="button"
@@ -486,13 +621,18 @@ export default function StoriesModule() {
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-black text-gray-900">Add New Episode</h3>
-                            <button onClick={() => setShowEpisodeModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <h3 className="text-xl font-black text-gray-900">
+                                {editingEpisode ? "Edit Episode" : "Add New Episode"}
+                            </h3>
+                            <button onClick={() => {
+                                setShowEpisodeModal(false);
+                                setEditingEpisode(null);
+                            }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
 
-                        <form onSubmit={handleCreateEpisode} className="space-y-4">
+                        <form onSubmit={editingEpisode ? handleUpdateEpisode : handleCreateEpisode} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
                                     YouTube Video URL *
@@ -537,16 +677,73 @@ export default function StoriesModule() {
 
                             <div>
                                 <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">
-                                    Custom Thumbnail URL (Optional)
+                                    Episode Thumbnail
                                 </label>
-                                <input
-                                    type="url"
-                                    value={episodeForm.thumbnailUrl}
-                                    onChange={(e) => setEpisodeForm({ ...episodeForm, thumbnailUrl: e.target.value })}
-                                    placeholder="https://... (leave blank for auto-generated)"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">Override auto-generated thumbnail if needed</p>
+                                <div className="space-y-3">
+                                    <div
+                                        className="relative aspect-video bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 overflow-hidden flex flex-col items-center justify-center group hover:border-green-500 transition-colors cursor-pointer"
+                                        onClick={() => document.getElementById('episode-thumb-upload')?.click()}
+                                    >
+                                        {episodeForm.thumbnailUrl ? (
+                                            <>
+                                                <img
+                                                    src={episodeForm.thumbnailUrl}
+                                                    alt="Preview"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <Upload className="text-white w-8 h-8" />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="text-center p-6">
+                                                <ImageIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                                                <p className="text-sm font-bold text-gray-500">Click to Upload Thumbnail</p>
+                                                <p className="text-xs text-gray-400 mt-1">Will default to YouTube thumbnail if empty</p>
+                                            </div>
+                                        )}
+
+                                        {thumbnailUploading && (
+                                            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                                                <Loader2 className="w-8 h-8 animate-spin text-green-600 mb-2" />
+                                                <p className="text-xs font-black text-green-600 uppercase tracking-widest">Uploading...</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative flex-1">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                                <LinkIcon size={14} />
+                                            </div>
+                                            <input
+                                                type="url"
+                                                value={episodeForm.thumbnailUrl}
+                                                onChange={(e) => setEpisodeForm({ ...episodeForm, thumbnailUrl: e.target.value })}
+                                                placeholder="Or paste external image URL"
+                                                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                        {episodeForm.thumbnailUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setEpisodeForm({ ...episodeForm, thumbnailUrl: "" })}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <input
+                                        id="episode-thumb-upload"
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleEpisodeThumbnailUpload}
+                                        disabled={thumbnailUploading}
+                                    />
+                                </div>
+                                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-bold italic">Note: Thumbnail will be auto-generated from video ID if left blank</p>
                             </div>
                             <div className="flex gap-3 pt-4">
                                 <button
@@ -564,10 +761,10 @@ export default function StoriesModule() {
                                     {submitting ? (
                                         <>
                                             <Loader2 size={18} className="animate-spin" />
-                                            Adding...
+                                            Saving...
                                         </>
                                     ) : (
-                                        "Add Episode"
+                                        editingEpisode ? "Update Episode" : "Add Episode"
                                     )}
                                 </button>
                             </div>
