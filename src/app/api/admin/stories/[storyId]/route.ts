@@ -6,11 +6,12 @@ import { eq } from "drizzle-orm";
 // GET: Fetch single story
 export async function GET(
     request: Request,
-    { params }: { params: { storyId: string } }
+    { params }: { params: Promise<{ storyId: string }> }
 ) {
     try {
+        const { storyId } = await params;
         const story = await db.query.stories.findFirst({
-            where: eq(stories.id, params.storyId),
+            where: eq(stories.id, storyId),
         });
 
         if (!story) {
@@ -27,9 +28,10 @@ export async function GET(
 // PUT: Update story
 export async function PUT(
     request: Request,
-    { params }: { params: { storyId: string } }
+    { params }: { params: Promise<{ storyId: string }> }
 ) {
     try {
+        const { storyId } = await params;
         const body = await request.json();
         const { title, description, thumbnailUrl, isActive, displayOrder } = body;
 
@@ -43,7 +45,7 @@ export async function PUT(
                 displayOrder,
                 updatedAt: new Date(),
             })
-            .where(eq(stories.id, params.storyId))
+            .where(eq(stories.id, storyId))
             .returning();
 
         if (!updatedStory) {
@@ -60,13 +62,14 @@ export async function PUT(
 // DELETE: Delete story and all episodes
 export async function DELETE(
     request: Request,
-    { params }: { params: { storyId: string } }
+    { params }: { params: Promise<{ storyId: string }> }
 ) {
     try {
+        const { storyId } = await params;
         // Delete story (episodes will cascade if foreign key constraint is set)
         const [deletedStory] = await db
             .delete(stories)
-            .where(eq(stories.id, params.storyId))
+            .where(eq(stories.id, storyId))
             .returning();
 
         if (!deletedStory) {
