@@ -49,18 +49,7 @@ export default function HMStoriesView({ stories }: HMStoriesViewProps) {
                 ))}
             </div>
 
-            {/* Top Navigation Overlay */}
-            <div className="fixed top-0 left-0 right-0 z-50 p-6 pointer-events-none">
-                <div className="container mx-auto flex justify-start pointer-events-auto">
-                    <Link
-                        href="/"
-                        className="group flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full backdrop-blur-md transition-all duration-300"
-                    >
-                        <ArrowRight size={16} className="rotate-180 text-gray-400 group-hover:text-white transition-colors" />
-                        <span className="text-sm font-medium text-gray-400 group-hover:text-white">Home</span>
-                    </Link>
-                </div>
-            </div>
+
 
             {/* Content Container */}
             <div className="relative z-10">
@@ -179,18 +168,7 @@ export default function HMStoriesView({ stories }: HMStoriesViewProps) {
                     </div>
                 </section>
 
-                {/* Back to Home Link */}
-                <section className="px-6 pb-12">
-                    <div className="container mx-auto text-center">
-                        <Link
-                            href="/"
-                            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors font-medium"
-                        >
-                            <ArrowRight size={16} className="rotate-180" />
-                            Back to Home
-                        </Link>
-                    </div>
-                </section>
+
             </div>
         </div>
     );

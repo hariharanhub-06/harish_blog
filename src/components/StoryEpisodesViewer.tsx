@@ -65,21 +65,13 @@ export default function StoryEpisodesViewer({ story, episodes }: StoryEpisodesVi
 
             {/* Top Navigation Overlay */}
             <div className="fixed top-0 left-0 right-0 z-50 p-6 pointer-events-none">
-                <div className="container mx-auto flex justify-between pointer-events-auto">
+                <div className="container mx-auto flex justify-start pointer-events-auto">
                     <Link
                         href="/business/hm-stories"
                         className="group flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full backdrop-blur-md transition-all duration-300"
                     >
                         <ArrowLeft size={16} className="text-gray-400 group-hover:text-white transition-transform group-hover:-translate-x-1" />
                         <span className="text-sm font-medium text-gray-400 group-hover:text-white">Back to Stories</span>
-                    </Link>
-
-                    <Link
-                        href="/"
-                        className="group flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full backdrop-blur-md transition-all duration-300"
-                    >
-                        <ArrowRight size={16} className="rotate-180 text-gray-400 group-hover:text-white transition-colors" />
-                        <span className="text-sm font-medium text-gray-400 group-hover:text-white">Home</span>
                     </Link>
                 </div>
             </div>
