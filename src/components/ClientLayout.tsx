@@ -14,19 +14,20 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const isSnacksPage = pathname?.startsWith("/business/hm-snacks");
     const isTechPage = pathname?.startsWith("/business/hm-tech");
     const isHariPicks = pathname?.startsWith("/business/haripicks");
+    const isHMStories = pathname?.startsWith("/business/hm-stories");
 
     return (
         <>
             {!isAdmin && <AnalyticsTracker />}
-            {!isAdmin && !isSnacksPage && !isHariPicks && <BackgroundBlobs />}
+            {!isAdmin && !isSnacksPage && !isHariPicks && !isHMStories && <BackgroundBlobs />}
 
-            {!isAdmin && !isHariPicks && (
+            {!isAdmin && !isHariPicks && !isHMStories && (
                 isSnacksPage ? <SnacksNavbar /> :
                     isTechPage ? <TechNavbar /> :
                         <Navbar />
             )}
 
-            <main className={`min-h-screen ${(!isAdmin && !isHariPicks) ? "pt-24 md:pt-28" : ""}`}>
+            <main className={`min-h-screen ${(!isAdmin && !isHariPicks && !isHMStories) ? "pt-24 md:pt-28" : ""}`}>
                 {children}
             </main>
             {!isAdmin && <Footer minimal={(isSnacksPage || isTechPage || isHariPicks)} />}

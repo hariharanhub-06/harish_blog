@@ -20,5 +20,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
             url: `${baseUrl}/business/haripicks`,
             lastModified: new Date(),
         },
+        {
+            url: `${baseUrl}/business/hm-stories`,
+            lastModified: new Date(),
+        },
     ];
 }
