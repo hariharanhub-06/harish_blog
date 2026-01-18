@@ -1,0 +1,75 @@
+﻿Checking DB connection and counts...
+node.exe : 
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (:String   
+ ) [], RemoteExce    
+ption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+CRITICAL ERROR:
+query.getSQL is not 
+a function
+TypeError: 
+query.getSQL is not 
+a function
+    at 
+LibSQLDatabase.run 
+(C:\Users\Hari Haran\
+Documents\Harishblog\
+node_modules\src\sqli
+te-core\db.ts:534:69)
+    at checkCounts 
+(C:\Users\Hari Haran\
+Documents\Harishblog\
+src\db\check-counts.t
+s:9:33)
+    at <anonymous> 
+(C:\Users\Hari Haran\
+Documents\Harishblog\
+src\db\check-counts.t
+s:40:1)
+    at 
+Object.<anonymous> 
+(C:\Users\Hari Haran\
+Documents\Harishblog\
+src\db\check-counts.t
+s:40:13)
+    at 
+Module._compile (node
+:internal/modules/cjs
+/loader:1761:14)
+    at 
+Object.transformer 
+(C:\Users\Hari Haran\
+AppData\Local\npm-cac
+he\_npx\fd45a72a54555
+7e9\node_modules\tsx\
+dist\register-D46fvsV
+_.cjs:3:1104)
+    at Module.load (n
+ode:internal/modules/
+cjs/loader:1481:32)
+    at Module._load (
+node:internal/modules
+/cjs/loader:1300:12)
+    at TracingChannel
+.traceSync (node:diag
+nostics_channel:328:1
+4)
+    at 
+wrapModuleLoad (node:
+internal/modules/cjs/
+loader:245:24)

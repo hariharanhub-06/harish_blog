@@ -1,0 +1,217 @@
+﻿[dotenv@17.2.3] injecting env (21) from .env.local -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+Seeding started...
+node.exe : 
+DrizzleQueryError: 
+Failed query: insert 
+into "profiles" 
+("id", "name", 
+"headline", "bio", 
+"about", "email", 
+"location", 
+"avatar_url", 
+"hero_image_url", 
+"about_image_url", 
+"social_links", 
+"stats", 
+"updated_at") values 
+(?, ?, ?, ?, ?, 
+null, ?, ?, null, 
+null, ?, ?, 
+(strftime('%s', 
+'now')))
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Drizzle   
+ QueryErr...('%s'    
+, 'now'))):Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+params: d0725e0e-61ff
+-4d0a-9941-9a1cd9042a
+db,Hari Haran Jeyaram
+amoorthy,Web/App 
+Developer | Business 
+Consultant | Job 
+Placement Expert | 
+Operations & 
+Partnerships Manager 
+| Snack Business 
+Owner | Project 
+Management 
+Pro,Versatile 
+professional with 
+expertise in 
+management, soft 
+skills training, 
+coding, and career 
+consulting.,I 
+specialize in 
+leading, managing, 
+and mentoring 
+individuals and 
+teams to achieve 
+professional goals. 
+I integrate 
+technology with 
+business solutions 
+and am passionate 
+about empowering 
+people, fostering 
+growth, and driving 
+innovation.,Tamil 
+Nadu, India,/hari_pho
+to.png,{"linkedin":"h
+ttps://www.linkedin.c
+om/in/hari-haran-jeya
+ramamoorthy/","github
+":"https://github.com
+/startup-digi-3119","
+twitter":"","instagra
+m":""},[{"label":"Yea
+rs Experience","value
+":"3+","icon":"Briefc
+ase"},{"label":"Proje
+cts Completed","value
+":"10+","icon":"Code"
+},{"label":"Clubs Led
+","value":"5+","icon"
+:"Award"},{"label":"C
+olleges Partnered","v
+alue":"42","icon":"Us
+er"}]
+    at LibSQLPrepared
+Query.queryWithCache 
+(C:\Users\Hari Haran\
+Documents\Harishblog\
+node_modules\src\sqli
+te-core\session.ts:80
+:11)
+    at process.proces
+sTicksAndRejections (
+node:internal/process
+/task_queues:103:5)
+    at async LibSQLPr
+eparedQuery.run 
+(C:\Users\Hari Haran\
+Documents\Harishblog\
+node_modules\src\libs
+ql\session.ts:197:10)
+    at async seed 
+(C:\Users\Hari Haran\
+Documents\Harishblog\
+src\db\seed.ts:10:5) 
+{
+  query: `insert 
+into "profiles" 
+("id", "name", 
+"headline", "bio", 
+"about", "email", 
+"location", 
+"avatar_url", 
+"hero_image_url", 
+"about_image_url", 
+"social_links", 
+"stats", 
+"updated_at") values 
+(?, ?, ?, ?, ?, 
+null, ?, ?, null, 
+null, ?, ?, 
+(strftime('%s', 
+'now')))`,
+  params: [
+    'd0725e0e-61ff-4d
+0a-9941-9a1cd9042adb'
+,
+    'Hari Haran 
+Jeyaramamoorthy',
+    'Web/App 
+Developer | Business 
+Consultant | Job 
+Placement Expert | 
+Operations & 
+Partnerships Manager 
+| Snack Business 
+Owner | Project 
+Management Pro',
+    'Versatile 
+professional with 
+expertise in 
+management, soft 
+skills training, 
+coding, and career 
+consulting.',
+    'I specialize in 
+leading, managing, 
+and mentoring 
+individuals and 
+teams to achieve 
+professional goals. 
+I integrate 
+technology with 
+business solutions 
+and am passionate 
+about empowering 
+people, fostering 
+growth, and driving 
+innovation.',
+    'Tamil Nadu, 
+India',
+    
+'/hari_photo.png',
+    '{"linkedin":"htt
+ps://www.linkedin.com
+/in/hari-haran-jeyara
+mamoorthy/","github":
+"https://github.com/s
+tartup-digi-3119","tw
+itter":"","instagram"
+:""}',
+    
+'[{"label":"Years Exp
+erience","value":"3+"
+,"icon":"Briefcase"},
+{"label":"Projects Co
+mpleted","value":"10+
+","icon":"Code"},{"la
+bel":"Clubs Led","val
+ue":"5+","icon":"Awar
+d"},{"label":"College
+s Partnered","value":
+"42","icon":"User"}]'
+  ],
+  cause: TypeError: 
+resp.body?.cancel is 
+not a function
+      at 
+errorFromResponse 
+(C:\Users\Hari Haran\
+Documents\Harishblog\
+node_modules\@libsql\
+hrana-client\lib-cjs\
+http\stream.js:370:22
+)
+      at 
+C:\Users\Hari Haran\D
+ocuments\Harishblog\n
+ode_modules\@libsql\h
+rana-client\lib-cjs\h
+ttp\stream.js:258:24
+      at process.proc
+essTicksAndRejections
+ (node:internal/proce
+ss/task_queues:103:5)
+}
