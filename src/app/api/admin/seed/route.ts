@@ -8,109 +8,16 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
     const diagnostics: any = {
         env: {
-            TURSO_CONNECTION_URL: process.env.TURSO_CONNECTION_URL ? "SET (Starts with " + process.env.TURSO_CONNECTION_URL.substring(0, 10) + ")" : "NOT SET",
-            TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN ? "SET" : "NOT SET",
+            TURSO_CONNECTION_URL: process.env.TURSO_CONNECTION_URL ? "SET" : "NOT SET",
             isUsingDummy: !process.env.TURSO_CONNECTION_URL,
         },
         steps: {}
     };
 
     try {
-        console.log("Remote Seeding Diagnostics started...");
+        console.log("Remote Seeding (Refined One-by-One) started...");
 
-        // 1. Connectivity & Table Check
-        let tableExists = false;
-        try {
-            const tableCheck = await db.run(sql`SELECT name FROM sqlite_master WHERE type='table' AND name='profiles'`);
-            tableExists = tableCheck.rows.length > 0;
-            diagnostics.steps.tableCheck = tableExists ? "EXISTS" : "MISSING";
-        } catch (e: any) {
-            diagnostics.steps.tableCheck = "ERROR: " + e.message;
-            return NextResponse.json({ error: "Failed to query database schema", message: e.message, diagnostics }, { status: 500 });
-        }
-
-        // 2. Self-Healing: Create tables if missing
-        if (!tableExists) {
-            console.log("Profiles table missing. Attempting emergency schema creation...");
-            try {
-                // We create the most critical tables needed for the homepage
-                await db.run(sql`
-                    CREATE TABLE IF NOT EXISTS "profiles" (
-                        "id" text PRIMARY KEY NOT NULL,
-                        "name" text NOT NULL,
-                        "headline" text,
-                        "bio" text,
-                        "about" text,
-                        "email" text,
-                        "location" text,
-                        "avatar_url" text,
-                        "hero_image_url" text,
-                        "about_image_url" text,
-                        "social_links" text,
-                        "stats" text,
-                        "updated_at" integer DEFAULT (strftime('%s', 'now'))
-                    )
-                `);
-
-                await db.run(sql`
-                    CREATE TABLE IF NOT EXISTS "experience" (
-                        "id" text PRIMARY KEY NOT NULL,
-                        "company" text NOT NULL,
-                        "role" text NOT NULL,
-                        "duration" text,
-                        "description" text,
-                        "display_order" integer DEFAULT 0,
-                        "created_at" integer DEFAULT (strftime('%s', 'now'))
-                    )
-                `);
-
-                await db.run(sql`
-                    CREATE TABLE IF NOT EXISTS "education" (
-                        "id" text PRIMARY KEY NOT NULL,
-                        "institution" text NOT NULL,
-                        "degree" text NOT NULL,
-                        "period" text,
-                        "details" text,
-                        "display_order" integer DEFAULT 0
-                    )
-                `);
-
-                await db.run(sql`
-                    CREATE TABLE IF NOT EXISTS "projects" (
-                        "id" text PRIMARY KEY NOT NULL,
-                        "title" text NOT NULL,
-                        "description" text,
-                        "thumbnail" text,
-                        "technologies" text,
-                        "live_url" text,
-                        "repo_url" text,
-                        "category" text,
-                        "featured" integer DEFAULT false,
-                        "display_order" integer DEFAULT 0,
-                        "created_at" integer DEFAULT (strftime('%s', 'now'))
-                    )
-                `);
-
-                await db.run(sql`
-                    CREATE TABLE IF NOT EXISTS "skills" (
-                        "id" text PRIMARY KEY NOT NULL,
-                        "name" text NOT NULL,
-                        "category" text,
-                        "proficiency" integer DEFAULT 0,
-                        "icon" text,
-                        "display_order" integer DEFAULT 0
-                    )
-                `);
-
-                diagnostics.steps.schemaCreation = "SUCCESS";
-            } catch (e: any) {
-                diagnostics.steps.schemaCreation = "FAILED: " + e.message;
-                return NextResponse.json({ error: "Schema creation failed", message: e.message, diagnostics }, { status: 500 });
-            }
-        }
-
-        // 3. Cleanup existing data (now that we're sure tables exist)
-        console.log("Starting data cleanup...");
+        // 1. Cleanup
         try {
             await db.delete(profiles);
             await db.delete(experience);
@@ -120,35 +27,43 @@ export async function GET() {
             diagnostics.steps.cleanup = "OK";
         } catch (e: any) {
             diagnostics.steps.cleanup = "FAILED: " + e.message;
-            return NextResponse.json({ error: "Cleanup failed", message: e.message, diagnostics }, { status: 500 });
+            return NextResponse.json({ error: "Cleanup failed", diagnostics }, { status: 500 });
         }
 
-        // 4. Insert Fresh Data
-        console.log("Starting data insertion...");
-        const profileId = "hari-haran-profile-id";
-        await db.insert(profiles).values({
-            id: profileId,
-            name: "Hari Haran Jeyaramamoorthy",
-            headline: "Web/App Developer | Business Consultant | Job Placement Expert | Operations & Partnerships Manager | Snack Business Owner | Project Management Pro",
-            bio: "Versatile professional with expertise in management, soft skills training, coding, and career consulting.",
-            about: "I specialize in leading, managing, and mentoring individuals and teams to achieve professional goals. I integrate technology with business solutions and am passionate about empowering people, fostering growth, and driving innovation.",
-            location: "Tamil Nadu, India",
-            avatarUrl: "/hari_photo.png",
-            socialLinks: {
-                linkedin: "https://www.linkedin.com/in/hari-haran-jeyaramamoorthy/",
-                github: "https://github.com/startup-digi-3119",
-                twitter: "",
-                instagram: "",
-            },
-            stats: [
-                { label: "Years Experience", value: "3+", icon: "Briefcase" },
-                { label: "Projects Completed", value: "10+", icon: "Code" },
-                { label: "Clubs Led", value: "5+", icon: "Award" },
-                { label: "Colleges Partnered", value: "42", icon: "User" },
-            ],
-        });
+        const now = new Date();
 
-        await db.insert(experience).values([
+        // 2. Insert Profile
+        try {
+            await db.insert(profiles).values({
+                id: "hari-haran-profile-id",
+                name: "Hari Haran Jeyaramamoorthy",
+                headline: "Web/App Developer | Business Consultant | Job Placement Expert | Operations & Partnerships Manager | Snack Business Owner | Project Management Pro",
+                bio: "Versatile professional with expertise in management, soft skills training, coding, and career consulting.",
+                about: "I specialize in leading, managing, and mentoring individuals and teams to achieve professional goals. I integrate technology with business solutions and am passionate about empowering people, fostering growth, and driving innovation.",
+                location: "Tamil Nadu, India",
+                avatarUrl: "/hari_photo.png",
+                socialLinks: {
+                    linkedin: "https://www.linkedin.com/in/hari-haran-jeyaramamoorthy/",
+                    github: "https://github.com/startup-digi-3119",
+                    twitter: "",
+                    instagram: "",
+                },
+                stats: [
+                    { label: "Years Experience", value: "3+", icon: "Briefcase" },
+                    { label: "Projects Completed", value: "10+", icon: "Code" },
+                    { label: "Clubs Led", value: "5+", icon: "Award" },
+                    { label: "Colleges Partnered", value: "42", icon: "User" },
+                ],
+                updatedAt: now
+            });
+            diagnostics.steps.profiles = "OK";
+        } catch (e: any) {
+            diagnostics.steps.profiles = "FAILED: " + e.message;
+            return NextResponse.json({ error: "Profile insertion failed", diagnostics }, { status: 500 });
+        }
+
+        // 3. Insert Experience (One by One)
+        const experienceData = [
             {
                 company: "Handyman Technologies",
                 role: "Partnerships Manager",
@@ -170,9 +85,22 @@ export async function GET() {
                 description: "Trained students in English, Science, and Social subjects.",
                 displayOrder: 3,
             },
-        ]);
+        ];
 
-        await db.insert(education).values([
+        let expCount = 0;
+        for (const exp of experienceData) {
+            try {
+                await db.insert(experience).values({ ...exp, createdAt: now });
+                expCount++;
+            } catch (e: any) {
+                diagnostics.steps.experience = `FAILED at index ${expCount}: ` + e.message;
+                return NextResponse.json({ error: "Experience insertion failed", diagnostics }, { status: 500 });
+            }
+        }
+        diagnostics.steps.experience = `OK (${expCount})`;
+
+        // 4. Insert Education (One by One)
+        const educationData = [
             {
                 institution: "Kathir College of Engineering",
                 degree: "Bachelor of Engineering (BE), Mechanical Engineering",
@@ -187,32 +115,63 @@ export async function GET() {
                 details: "Grade A.",
                 displayOrder: 2,
             },
-        ]);
+        ];
 
-        await db.insert(skills).values([
+        let eduCount = 0;
+        for (const edu of educationData) {
+            try {
+                await db.insert(education).values(edu);
+                eduCount++;
+            } catch (e: any) {
+                diagnostics.steps.education = `FAILED at index ${eduCount}: ` + e.message;
+                return NextResponse.json({ error: "Education insertion failed", diagnostics }, { status: 500 });
+            }
+        }
+        diagnostics.steps.education = `OK (${eduCount})`;
+
+        // 5. Seed Skills
+        const skillsData = [
             { name: "Python", category: "Technology", proficiency: 85, displayOrder: 1 },
             { name: "Firebase", category: "Technology", proficiency: 80, displayOrder: 2 },
             { name: "Razorpay", category: "Technology", proficiency: 75, displayOrder: 3 },
             { name: "Web Development", category: "Technology", proficiency: 90, displayOrder: 4 },
             { name: "Project Management", category: "Management", proficiency: 95, displayOrder: 5 },
             { name: "Public Speaking", category: "Soft Skills", proficiency: 90, displayOrder: 6 },
-        ]);
+        ];
 
-        await db.insert(projects).values([
-            {
+        let skillCount = 0;
+        for (const skill of skillsData) {
+            try {
+                await db.insert(skills).values(skill);
+                skillCount++;
+            } catch (e: any) {
+                diagnostics.steps.skills = `FAILED at index ${skillCount}: ` + e.message;
+                return NextResponse.json({ error: "Skills insertion failed", diagnostics }, { status: 500 });
+            }
+        }
+        diagnostics.steps.skills = `OK (${skillCount})`;
+
+        // 6. Seed Projects
+        try {
+            await db.insert(projects).values({
                 title: "startupmenswear.in",
                 description: "Tech Founder; developed using Python, Firebase, and Razorpay.",
                 liveUrl: "https://startupmenswear.in",
                 technologies: ["Python", "Firebase", "Razorpay"],
                 category: "Web Development",
                 featured: true,
-                displayOrder: 1
-            },
-        ]);
+                displayOrder: 1,
+                createdAt: now
+            });
+            diagnostics.steps.projects = "OK";
+        } catch (e: any) {
+            diagnostics.steps.projects = "FAILED: " + e.message;
+            return NextResponse.json({ error: "Projects insertion failed", diagnostics }, { status: 500 });
+        }
 
         return NextResponse.json({
             success: true,
-            message: "Remote seeding completed successfully! Schema verified and data restored.",
+            message: "Remote seeding (Individual Inserts) completed successfully!",
             diagnostics
         });
     } catch (error: any) {
