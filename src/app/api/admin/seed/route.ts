@@ -6,21 +6,60 @@ import { sql } from "drizzle-orm";
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-    try {
-        console.log("Remote Seeding started (Clean Slate Mode)...");
+    const diagnostics: any = {
+        env: {
+            hasUrl: !!process.env.TURSO_CONNECTION_URL,
+            hasToken: !!process.env.TURSO_AUTH_TOKEN,
+            urlPrefix: process.env.TURSO_CONNECTION_URL?.substring(0, 10),
+        },
+        steps: {}
+    };
 
-        // 1. Clear existing data to ensure a clean start and avoid conflict errors
-        // Note: Using delete without a where clause deletes all rows in the table
-        await db.delete(profiles);
+    try {
+        console.log("Remote Seeding Diagnostics started...");
+
+        // Step 0: Connectivity check
+        try {
+            await db.run(sql`SELECT 1`);
+            diagnostics.steps.connectivity = "OK";
+        } catch (e: any) {
+            diagnostics.steps.connectivity = "FAILED: " + e.message;
+            return NextResponse.json({ error: "Connectivity check failed", diagnostics }, { status: 500 });
+        }
+
+        // Step 1: Check for tables
+        try {
+            const tables = await db.run(sql`SELECT name FROM sqlite_master WHERE type='table' AND name='profiles'`);
+            diagnostics.steps.tableCheck = tables.rows.length > 0 ? "EXISTS" : "MISSING";
+            if (tables.rows.length === 0) {
+                return NextResponse.json({ error: "Profiles table is missing in the database", diagnostics }, { status: 500 });
+            }
+        } catch (e: any) {
+            diagnostics.steps.tableCheck = "ERROR: " + e.message;
+        }
+
+        // Step 2: Cleanup
+        console.log("Starting cleanup...");
+        try {
+            await db.delete(profiles);
+            diagnostics.steps.cleanup = "OK";
+        } catch (e: any) {
+            diagnostics.steps.cleanup = "FAILED: " + e.message;
+            // Provide more detail for the cleanup failure since that's where we're stuck
+            return NextResponse.json({
+                error: "Cleanup failed at 'profiles' table",
+                message: e.message,
+                diagnostics
+            }, { status: 500 });
+        }
+
         await db.delete(experience);
         await db.delete(education);
         await db.delete(skills);
         await db.delete(projects);
 
-        console.log("Cleanup finished. Starting insertions...");
-
-        // 2. Seed Profile
-        // Using a static ID to ensure consistency
+        // Step 3: Insertions
+        console.log("Starting insertions...");
         const profileId = "hari-haran-profile-id";
         await db.insert(profiles).values({
             id: profileId,
@@ -44,7 +83,6 @@ export async function GET() {
             ],
         });
 
-        // 3. Seed Experience
         await db.insert(experience).values([
             {
                 company: "Handyman Technologies",
@@ -69,7 +107,6 @@ export async function GET() {
             },
         ]);
 
-        // 4. Seed Education
         await db.insert(education).values([
             {
                 institution: "Kathir College of Engineering",
@@ -87,7 +124,6 @@ export async function GET() {
             },
         ]);
 
-        // 5. Seed Skills
         await db.insert(skills).values([
             { name: "Python", category: "Technology", proficiency: 85, displayOrder: 1 },
             { name: "Firebase", category: "Technology", proficiency: 80, displayOrder: 2 },
@@ -97,7 +133,6 @@ export async function GET() {
             { name: "Public Speaking", category: "Soft Skills", proficiency: 90, displayOrder: 6 },
         ]);
 
-        // 6. Seed Projects
         await db.insert(projects).values([
             {
                 title: "startupmenswear.in",
@@ -112,13 +147,14 @@ export async function GET() {
 
         return NextResponse.json({
             success: true,
-            message: "Remote seeding completed successfully! All tables refreshed."
+            message: "Remote seeding completed successfully! All tables refreshed.",
+            diagnostics
         });
     } catch (error: any) {
         console.error("Remote Seeding error:", error);
         return NextResponse.json({
             error: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            diagnostics
         }, { status: 500 });
     }
 }
