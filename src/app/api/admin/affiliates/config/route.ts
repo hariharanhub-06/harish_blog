@@ -3,6 +3,8 @@ import { affiliateConfig } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         const [config] = await db.select().from(affiliateConfig).where(eq(affiliateConfig.id, 1)).limit(1);
