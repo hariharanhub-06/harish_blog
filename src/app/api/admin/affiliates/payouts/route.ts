@@ -1,18 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { affiliates, payoutRequests } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 
 export async function GET() {
     try {
-        const payouts = await db.execute(sql`
-            SELECT p.*, a.full_name as "affiliateName"
-            FROM payout_requests p
-            JOIN affiliates a ON p.affiliate_id = a.id
-            ORDER BY p.created_at DESC
-        `);
+        const payouts = await db.select({
+            id: payoutRequests.id,
+            affiliateId: payoutRequests.affiliateId,
+            amount: payoutRequests.amount,
+            status: payoutRequests.status,
+            upiId: payoutRequests.upiId,
+            adminNote: payoutRequests.adminNote,
+            processedAt: payoutRequests.processedAt,
+            createdAt: payoutRequests.createdAt,
+            affiliateName: affiliates.fullName,
+        })
+            .from(payoutRequests)
+            .leftJoin(affiliates, eq(payoutRequests.affiliateId, affiliates.id))
+            .orderBy(desc(payoutRequests.createdAt));
 
-        return NextResponse.json(payouts.rows);
+        return NextResponse.json(payouts);
     } catch (error) {
         console.error("Fetch payouts error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -41,7 +49,6 @@ export async function POST(req: NextRequest) {
                 .where(eq(payoutRequests.id, requestId));
 
             // 2. Update Affiliate paidBalance
-            // Note: We already deducted from availableBalance when request was created.
             await db.update(affiliates)
                 .set({
                     paidBalance: sql`${affiliates.paidBalance} + ${request.amount}`

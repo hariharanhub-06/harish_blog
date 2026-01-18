@@ -9,11 +9,13 @@ export async function GET(req: NextRequest) {
 
         // 1. Prune orphaned transactions (linked to non-existent orders)
         // This ensures balances don't persist after order deletion
-        await db.execute(sql`
-            DELETE FROM ${affiliateTransactions}
-            WHERE order_id NOT IN (SELECT order_id FROM ${snackOrders})
-            AND order_id IS NOT NULL
-        `);
+        await db.delete(affiliateTransactions)
+            .where(
+                and(
+                    sql`${affiliateTransactions.orderId} NOT IN (SELECT ${snackOrders.orderId} FROM ${snackOrders})`,
+                    sql`${affiliateTransactions.orderId} IS NOT NULL`
+                )
+            );
 
         // 2. Fetch all affiliates
         const allAffiliates = await db.select().from(affiliates);

@@ -10,7 +10,7 @@ export async function GET() {
         category: skills.category,
         proficiency: skills.proficiency,
         icon: skills.icon,
-        order: skills.order,
+        displayOrder: skills.displayOrder,
     }).from(skills).orderBy(desc(skills.proficiency));
     return NextResponse.json(allSkills);
 }

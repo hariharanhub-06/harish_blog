@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Play, Clock, ArrowLeft, ExternalLink, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface Story {
     id: string;
@@ -27,7 +28,49 @@ interface StoryEpisodesViewerProps {
     episodes: Episode[];
 }
 
-export default function StoryEpisodesViewer({ story, episodes }: StoryEpisodesViewerProps) {
+export default function StoryEpisodesViewer({ story: initialStory, episodes: initialEpisodes }: StoryEpisodesViewerProps) {
+    const [story, setStory] = useState<Story>(initialStory);
+    const [episodes, setEpisodes] = useState<Episode[]>(initialEpisodes || []);
+    const [loading, setLoading] = useState(initialEpisodes?.length === 0);
+    const [notFound, setNotFound] = useState(false);
+
+    useEffect(() => {
+        if (initialEpisodes?.length === 0) {
+            const fetchStoryData = async () => {
+                try {
+                    const res = await fetch(`/api/stories/${initialStory.id}`);
+                    if (res.status === 404) {
+                        setNotFound(true);
+                        return;
+                    }
+                    const data = await res.json();
+                    if (data.story) {
+                        setStory(data.story);
+                        setEpisodes(data.episodes || []);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch story data:", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchStoryData();
+        }
+    }, [initialStory.id, initialEpisodes]);
+
+    if (notFound) {
+        return (
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center">
+                <Play size={80} className="text-red-500 mb-6 opacity-50" />
+                <h1 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Story Not Found</h1>
+                <p className="text-gray-400 mb-8 max-w-md">The cinematic experience you're looking for might have been moved or removed.</p>
+                <Link href="/business/hm-stories" className="px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition-all">
+                    Return to Library
+                </Link>
+            </div>
+        );
+    }
+
     const handleWatchClick = (youtubeVideoId: string) => {
         window.open(`https://youtube.com/watch?v=${youtubeVideoId}`, "_blank", "noopener,noreferrer");
     };

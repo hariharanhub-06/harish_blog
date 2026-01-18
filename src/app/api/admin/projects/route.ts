@@ -13,9 +13,9 @@ export async function GET() {
         repoUrl: projects.repoUrl,
         category: projects.category,
         featured: projects.featured,
-        order: projects.order,
+        displayOrder: projects.displayOrder,
         createdAt: projects.createdAt,
-    }).from(projects).orderBy(desc(projects.order), desc(projects.createdAt));
+    }).from(projects).orderBy(desc(projects.displayOrder), desc(projects.createdAt));
     return NextResponse.json(allProjects);
 }
 

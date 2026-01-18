@@ -7,8 +7,10 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
     const diag: any = {
         timestamp: new Date().toISOString(),
+        engine: "SQLite (Turso)",
         environment_keys: {
-            DATABASE_URL: !!process.env.DATABASE_URL,
+            TURSO_CONNECTION_URL: !!process.env.TURSO_CONNECTION_URL,
+            TURSO_AUTH_TOKEN: !!process.env.TURSO_AUTH_TOKEN,
             SHIPROCKET_EMAIL: !!process.env.SHIPROCKET_EMAIL,
             SHIPROCKET_PASSWORD: !!process.env.SHIPROCKET_PASSWORD,
             TWILIO_ACCOUNT_SID: !!process.env.TWILIO_ACCOUNT_SID,
@@ -20,23 +22,21 @@ export async function GET() {
 
     // 1. Check DB Connection
     try {
-        const result = await db.execute(sql`SELECT 1 as health`);
-        const rows = (result as any).rows || result;
-        diag.database_connection = { status: "OK", result: (rows as any)[0] };
+        const result = await db.run(sql`SELECT 1 as health`);
+        diag.database_connection = { status: "OK", result };
     } catch (e: any) {
         diag.database_connection = { status: "FAIL", message: e.message };
     }
 
-    // 2. Check Critical Tables
+    // 2. Check Critical Tables (SQLite style)
     try {
-        const tablesResult = await db.execute(sql`
-            SELECT table_name 
-            FROM information_schema.tables 
-            WHERE table_schema = 'public' 
-            AND table_name IN ('snack_products', 'snack_orders', 'abandoned_carts', 'coupons')
+        const tablesResult = await db.all(sql`
+            SELECT name 
+            FROM sqlite_master 
+            WHERE type='table' 
+            AND name IN ('snack_products', 'snack_orders', 'abandoned_carts', 'coupons')
         `);
-        const rows = (tablesResult as any).rows || tablesResult;
-        diag.tables_found = (rows as any).map((t: any) => t.table_name);
+        diag.tables_found = (tablesResult as any).map((t: any) => t.name);
 
         const expected = ['snack_products', 'snack_orders', 'abandoned_carts', 'coupons'];
         diag.tables_missing = expected.filter(t => !diag.tables_found.includes(t));
@@ -49,7 +49,6 @@ export async function GET() {
         const { getShiprocketToken } = await import("@/lib/shiprocket");
         const token = await getShiprocketToken();
 
-        // Try common endpoints
         const endpoints = [
             "https://apiv2.shiprocket.in/v1/external/settings/get/pickup",
             "https://apiv2.shiprocket.in/v1/external/settings/get/all_pickup_locations",
@@ -72,7 +71,6 @@ export async function GET() {
 
         diag.shiprocket_diagnostics = results;
 
-        // Extract names from any successful response
         const successful = results.find(r => r.status === 200);
         if (successful) {
             const addresses = successful.data.data?.shipping_address || successful.data.data || [];

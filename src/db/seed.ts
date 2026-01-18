@@ -35,21 +35,21 @@ async function seed() {
             role: "Partnerships Manager",
             duration: "Mar 2022 – Dec 2025",
             description: "Established and managed partnerships with 42 colleges, broadening market reach. Oversaw a team of 17 members.",
-            order: 1,
+            displayOrder: 1,
         },
         {
             company: "ICA Edu Skills",
             role: "Branch Manager (Freelance)",
             duration: "Dec 2024 – Jun 2025",
             description: "Oversaw branch operations and strategic growth through marketing initiatives. Led and mentored a team.",
-            order: 2,
+            displayOrder: 2,
         },
         {
             company: "Focus Edumatics Pvt Ltd",
             role: "Online Tutor",
             duration: "Mar 2022 – Dec 2022",
             description: "Trained students in English, Science, and Social subjects.",
-            order: 3,
+            displayOrder: 3,
         },
     ]);
 
@@ -60,14 +60,14 @@ async function seed() {
             degree: "Bachelor of Engineering (BE), Mechanical Engineering",
             period: "2017 – 2021",
             details: "Grade A; Class Representative; Basketball Team Captain.",
-            order: 1,
+            displayOrder: 1,
         },
         {
             institution: "Sree Sakthi Matriculation Higher Secondary School",
             degree: "HSC, Computer Science",
             period: "2016 – 2017",
             details: "Grade A.",
-            order: 2,
+            displayOrder: 2,
         },
     ]);
 

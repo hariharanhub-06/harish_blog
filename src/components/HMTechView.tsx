@@ -17,8 +17,9 @@ import {
 import Image from "next/image";
 import TechParticles from "./TechParticles";
 import DNAParticles from "./DNAParticles";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import DinoRunnerGame from "./DinoRunnerGame";
+import { useEffect, useState } from "react";
 
 interface HMTechViewProps {
     projects: any[];
@@ -54,7 +55,29 @@ const scaleIn = {
     }
 };
 
-export default function HMTechView({ projects }: HMTechViewProps) {
+export default function HMTechView({ projects: initialProjects }: HMTechViewProps) {
+    const [projects, setProjects] = useState<any[]>(initialProjects || []);
+    const [loading, setLoading] = useState(initialProjects?.length === 0);
+
+    useEffect(() => {
+        if (initialProjects?.length === 0) {
+            const fetchProjects = async () => {
+                try {
+                    const res = await fetch("/api/tech/projects");
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        setProjects(data);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch projects:", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchProjects();
+        }
+    }, [initialProjects]);
+
     const services = [
         { title: "Static/Dynamic Web", icon: Layout, desc: "High-performance websites tailored to your brand." },
         { title: "3D Animated", icon: Box, desc: "Immersive 3D experiences that captivate users." },
@@ -294,44 +317,70 @@ export default function HMTechView({ projects }: HMTechViewProps) {
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={staggerContainer}
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]"
                     >
-                        {projects.map((project: any) => (
-                            <motion.div
-                                key={project.id}
-                                variants={scaleIn}
-                                className="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-pink-500/30 transition-all duration-500 flex flex-col hover:-translate-y-2 hover:shadow-2xl"
-                            >
-                                <div className="relative h-48 overflow-hidden">
-                                    {project.thumbnail ? (
-                                        <Image
-                                            src={project.thumbnail}
-                                            alt={project.title}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">
-                                            <Layout size={32} />
+                        <AnimatePresence mode="wait">
+                            {loading ? (
+                                <motion.div
+                                    key="loading"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="col-span-full flex flex-col items-center justify-center py-20"
+                                >
+                                    <div className="w-12 h-12 border-4 border-pink-500/20 border-t-pink-500 rounded-full animate-spin mb-4"></div>
+                                    <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Loading Projects...</p>
+                                </motion.div>
+                            ) : projects.length === 0 ? (
+                                <motion.div
+                                    key="empty"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="col-span-full text-center py-20"
+                                >
+                                    <p className="text-gray-500 font-medium">No projects found.</p>
+                                </motion.div>
+                            ) : (
+                                projects.map((project: any) => (
+                                    <motion.div
+                                        key={project.id}
+                                        variants={scaleIn}
+                                        layout
+                                        className="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-pink-500/30 transition-all duration-500 flex flex-col hover:-translate-y-2 hover:shadow-2xl"
+                                    >
+                                        <div className="relative h-48 overflow-hidden">
+                                            {project.thumbnail ? (
+                                                <Image
+                                                    src={project.thumbnail}
+                                                    alt={project.title}
+                                                    fill
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">
+                                                    <Layout size={32} />
+                                                </div>
+                                            )}
+                                            <div className="absolute bottom-3 left-3 flex gap-1.5 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity">
+                                                {project.technologies && Array.isArray(project.technologies) && project.technologies.slice(0, 3).map((tech: string, i: number) => (
+                                                    <span key={i} className="px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-full text-[8px] text-white font-bold border border-white/10 uppercase tracking-wide">{tech}</span>
+                                                ))}
+                                            </div>
                                         </div>
-                                    )}
-                                    <div className="absolute bottom-3 left-3 flex gap-1.5 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {project.technologies?.slice(0, 3).map((tech: string, i: number) => (
-                                            <span key={i} className="px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-full text-[8px] text-white font-bold border border-white/10 uppercase tracking-wide">{tech}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="p-5 flex-1 flex flex-col">
-                                    <h3 className="text-base font-black text-gray-900 mb-1 group-hover:text-pink-500 transition-colors uppercase tracking-tight leading-none line-clamp-1">
-                                        {project.title}
-                                    </h3>
-                                    <p className="text-gray-500 font-medium text-xs line-clamp-2 mb-4 flex-1 leading-relaxed">{project.description}</p>
-                                    <a href={project.liveUrl || project.repoUrl || "#"} target="_blank" className="inline-flex items-center gap-2 text-gray-900 font-bold uppercase tracking-widest text-[10px] hover:text-pink-500 transition-all">
-                                        View Study <ArrowRight size={12} />
-                                    </a>
-                                </div>
-                            </motion.div>
-                        ))}
+                                        <div className="p-5 flex-1 flex flex-col">
+                                            <h3 className="text-base font-black text-gray-900 mb-1 group-hover:text-pink-500 transition-colors uppercase tracking-tight leading-none line-clamp-1">
+                                                {project.title}
+                                            </h3>
+                                            <p className="text-gray-500 font-medium text-xs line-clamp-2 mb-4 flex-1 leading-relaxed">{project.description}</p>
+                                            <a href={project.liveUrl || project.repoUrl || "#"} target="_blank" className="inline-flex items-center gap-2 text-gray-900 font-bold uppercase tracking-widest text-[10px] hover:text-pink-500 transition-all">
+                                                View Study <ArrowRight size={12} />
+                                            </a>
+                                        </div>
+                                    </motion.div>
+                                ))
+                            )}
+                        </AnimatePresence>
                     </motion.div>
                 </div>
             </section>
