@@ -196,7 +196,7 @@ export default function MainContent({
                                     const years = p.match(/\b20\d{2}\b/g);
                                     return years ? Math.max(...years.map(Number)) : 0;
                                 };
-                                return getYear(b.duration) - getYear(a.duration) || (b.order || 0) - (a.displayOrder || 0);
+                                return getYear(b.duration) - getYear(a.duration) || (b.displayOrder || 0) - (a.displayOrder || 0);
                             })}
                             type="experience"
                             onItemClick={(item) => setSelectedItem({ data: item, type: 'experience' })}
@@ -246,7 +246,7 @@ export default function MainContent({
                                     const years = p.match(/\b20\d{2}\b/g);
                                     return years ? Math.max(...years.map(Number)) : 0;
                                 };
-                                return getYear(b.duration) - getYear(a.duration) || (b.order || 0) - (a.displayOrder || 0);
+                                return getYear(b.duration) - getYear(a.duration) || (b.displayOrder || 0) - (a.displayOrder || 0);
                             })}
                             type="volunteering"
                             onItemClick={(item) => setSelectedItem({ data: item, type: 'volunteering' })}
