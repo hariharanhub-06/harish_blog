@@ -1,13 +1,13 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 import * as schema from "./schema";
 
-// Optimize Neon connection with caching and performance settings
-const sql = neon(process.env.DATABASE_URL!);
+const client = createClient({
+    url: process.env.TURSO_CONNECTION_URL!,
+    authToken: process.env.TURSO_AUTH_TOKEN!,
+});
 
-// Enable connection pooling and query caching
-export const db = drizzle(sql, {
+export const db = drizzle(client, {
     schema,
-    // Log queries in development for debugging
     logger: process.env.NODE_ENV === 'development',
 });

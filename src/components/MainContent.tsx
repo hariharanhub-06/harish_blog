@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
     ArrowRight, Code, Briefcase, Award, User,
@@ -15,6 +14,7 @@ import TimelineCarousel from "@/components/TimelineCarousel";
 import Image from "next/image";
 import { InfiniteCarousel } from "./InfiniteCarousel";
 import { Tilt } from "./Tilt";
+import { useEffect, useState } from "react";
 
 interface MainContentProps {
     profile: any;
@@ -31,9 +31,51 @@ const SKILLS = [
     "Digital Marketing", "Automation", "CRM Solutions", "Brand Identity"
 ];
 
-export default function MainContent({ profile, stats, projects, experiences, educations, volunteerings }: MainContentProps) {
+export default function MainContent({
+    profile: initialProfile,
+    stats: initialStats,
+    projects: initialProjects,
+    experiences: initialExperiences,
+    educations: initialEducations,
+    volunteerings: initialVolunteerings
+}: MainContentProps) {
+    const [profile, setProfile] = useState(initialProfile);
+    const [stats, setStats] = useState(initialStats || []);
+    const [projects, setProjects] = useState(initialProjects || []);
+    const [experiences, setExperiences] = useState(initialExperiences || []);
+    const [educations, setEducations] = useState(initialEducations || []);
+    const [volunteerings, setVolunteerings] = useState(initialVolunteerings || []);
+
+    const [loading, setLoading] = useState(!initialProfile || initialProjects?.length === 0);
     const [selectedItem, setSelectedItem] = useState<{ data: any, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
     const [contactStatus, setContactStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+    useEffect(() => {
+        if (!initialProfile || initialProjects?.length === 0) {
+            const fetchHomeData = async () => {
+                try {
+                    const res = await fetch("/api/home");
+                    const data = await res.json();
+                    if (data.profile) setProfile(data.profile);
+                    if (data.projects) setProjects(data.projects);
+                    if (data.experiences) setExperiences(data.experiences);
+                    if (data.educations) setEducations(data.educations);
+                    if (data.volunteerings) setVolunteerings(data.volunteerings);
+
+                    // Re-calculate stats if profile changed
+                    if (data.profile && data.profile.stats) {
+                        setStats(data.profile.stats);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch home data:", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchHomeData();
+        }
+    }, [initialProfile, initialProjects]);
+
 
     const iconMap: any = { Briefcase, Code, Award, User };
 
@@ -78,32 +120,42 @@ export default function MainContent({ profile, stats, projects, experiences, edu
             {/* Stats Section */}
             <section className="container mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {stats.map((stat: any, i: number) => {
-                        const Icon = iconMap[stat.icon] || User;
-                        const colors = [
-                            { color: "text-blue-600", bg: "bg-blue-50" },
-                            { color: "text-emerald-600", bg: "bg-emerald-50" },
-                            { color: "text-amber-600", bg: "bg-amber-50" },
-                            { color: "text-purple-600", bg: "bg-purple-50" },
-                        ];
-                        const color = colors[i % colors.length];
+                    {loading ? (
+                        [...Array(4)].map((_, i) => (
+                            <div key={i} className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm animate-pulse h-32 flex flex-col justify-end">
+                                <div className="w-10 h-10 bg-gray-100 rounded-2xl mb-4"></div>
+                                <div className="h-6 bg-gray-100 rounded-md w-1/2 mb-1"></div>
+                                <div className="h-3 bg-gray-50 rounded-md w-1/3"></div>
+                            </div>
+                        ))
+                    ) : (
+                        stats.map((stat: any, i: number) => {
+                            const Icon = iconMap[stat.icon] || User;
+                            const colors = [
+                                { color: "text-blue-600", bg: "bg-blue-50" },
+                                { color: "text-emerald-600", bg: "bg-emerald-50" },
+                                { color: "text-amber-600", bg: "bg-amber-50" },
+                                { color: "text-purple-600", bg: "bg-purple-50" },
+                            ];
+                            const color = colors[i % colors.length];
 
-                        return (
-                            <CardWrapper key={i} index={i}>
-                                <div className="group p-5 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:border-white transition-all duration-500 overflow-hidden relative h-full">
-                                    <span className="absolute -bottom-4 -right-2 text-8xl font-black text-gray-50 group-hover:text-gray-100 transition-colors -z-10">
-                                        {String(stat.value).replace('+', '')}
-                                    </span>
+                            return (
+                                <CardWrapper key={i} index={i}>
+                                    <div className="group p-5 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:border-white transition-all duration-500 overflow-hidden relative h-full">
+                                        <span className="absolute -bottom-4 -right-2 text-8xl font-black text-gray-50 group-hover:text-gray-100 transition-colors -z-10">
+                                            {String(stat.value).replace('+', '')}
+                                        </span>
 
-                                    <div className={`${color.bg} ${color.color} w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform`}>
-                                        <Icon size={20} />
+                                        <div className={`${color.bg} ${color.color} w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform`}>
+                                            <Icon size={20} />
+                                        </div>
+                                        <h3 className="text-2xl font-black text-gray-900 mb-1">{stat.value}</h3>
+                                        <p className="text-secondary text-[9px] font-black uppercase tracking-widest leading-none">{stat.label}</p>
                                     </div>
-                                    <h3 className="text-2xl font-black text-gray-900 mb-1">{stat.value}</h3>
-                                    <p className="text-secondary text-[9px] font-black uppercase tracking-widest leading-none">{stat.label}</p>
-                                </div>
-                            </CardWrapper>
-                        );
-                    })}
+                                </CardWrapper>
+                            );
+                        })
+                    )}
                 </div>
             </section>
 
@@ -215,54 +267,68 @@ export default function MainContent({ profile, stats, projects, experiences, edu
                     </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {projects.map((project, i) => (
-                        <CardWrapper key={project.id} index={i}>
-                            <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }} className="h-full">
-                                <div
-                                    className="group flex flex-col h-full bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
-                                    onClick={() => setSelectedItem({ data: project, type: "project" })}
-                                >
-                                    <div className="relative h-56 overflow-hidden">
-                                        {project.thumbnail ? (
-                                            <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
-                                        ) : (
-                                            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                                                <span className="text-primary font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
-                                            </div>
-                                        )}
-                                        <div className="absolute top-4 right-4 flex gap-2">
-                                            {project.featured && (
-                                                <span className="bg-accent text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Featured</span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="p-5 flex flex-col flex-grow text-left">
-                                        <div className="flex flex-wrap gap-1.5 mb-3">
-                                            {project.technologies?.slice(0, 3).map((tech: string) => (
-                                                <span key={tech} className="text-[9px] font-black uppercase tracking-widest text-primary bg-blue-50 px-2.5 py-1 rounded-md">{tech}</span>
-                                            ))}
-                                        </div>
-
-                                        <h3 className="text-lg font-black mb-2 group-hover:text-primary transition-colors">{project.title}</h3>
-                                        <p className="text-secondary text-xs leading-relaxed mb-4 line-clamp-2">{project.description}</p>
-
-                                        <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
-                                            <span className="text-primary font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
-                                                View Case Study <ArrowRight size={14} />
-                                            </span>
-                                            <div className="flex gap-3">
-                                                {project.liveUrl && <ExternalLink size={16} className="text-gray-300" />}
-                                                {project.repoUrl && <Github size={16} className="text-gray-300" />}
-                                            </div>
-                                        </div>
-                                    </div>
+                {loading ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i} className="bg-white rounded-3xl overflow-hidden border border-gray-100 h-80 animate-pulse">
+                                <div className="h-56 bg-gray-100"></div>
+                                <div className="p-5 flex flex-col gap-2">
+                                    <div className="w-1/2 h-4 bg-gray-100 rounded"></div>
+                                    <div className="w-full h-8 bg-gray-50 rounded"></div>
                                 </div>
-                            </Tilt>
-                        </CardWrapper>
-                    ))}
-                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {projects.map((project, i) => (
+                            <CardWrapper key={project.id} index={i}>
+                                <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }} className="h-full">
+                                    <div
+                                        className="group flex flex-col h-full bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
+                                        onClick={() => setSelectedItem({ data: project, type: "project" })}
+                                    >
+                                        <div className="relative h-56 overflow-hidden">
+                                            {project.thumbnail ? (
+                                                <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                                            ) : (
+                                                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                                                    <span className="text-primary font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
+                                                </div>
+                                            )}
+                                            <div className="absolute top-4 right-4 flex gap-2">
+                                                {project.featured && (
+                                                    <span className="bg-accent text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Featured</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="p-5 flex flex-col flex-grow text-left">
+                                            <div className="flex flex-wrap gap-1.5 mb-3">
+                                                {project.technologies?.slice(0, 3).map((tech: string) => (
+                                                    <span key={tech} className="text-[9px] font-black uppercase tracking-widest text-primary bg-blue-50 px-2.5 py-1 rounded-md">{tech}</span>
+                                                ))}
+                                            </div>
+
+                                            <h3 className="text-lg font-black mb-2 group-hover:text-primary transition-colors">{project.title}</h3>
+                                            <p className="text-secondary text-xs leading-relaxed mb-4 line-clamp-2">{project.description}</p>
+
+                                            <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                                                <span className="text-primary font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
+                                                    View Case Study <ArrowRight size={14} />
+                                                </span>
+                                                <div className="flex gap-3">
+                                                    {project.liveUrl && <ExternalLink size={16} className="text-gray-300" />}
+                                                    {project.repoUrl && <Github size={16} className="text-gray-300" />}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Tilt>
+                            </CardWrapper>
+                        ))}
+                    </div>
+                )}
             </section>
 
 

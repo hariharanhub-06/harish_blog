@@ -9,8 +9,8 @@ export async function GET() {
         institution: education.institution,
         degree: education.degree,
         period: education.period,
-        order: education.order,
-    }).from(education).orderBy(desc(education.order));
+        displayOrder: education.displayOrder,
+    }).from(education).orderBy(desc(education.displayOrder));
     return NextResponse.json(data);
 }
 

@@ -11,13 +11,8 @@ export const metadata = {
     keywords: ["web development coimbatore", "app development", "HM Tech", "software consulting", "digital transformation"],
 };
 
-export default async function HMTechPage() {
-    // Fetch Projects using Server Component functionality
-    const allProjects = await db.query.projects.findMany({
-        orderBy: [desc(projects.order), desc(projects.createdAt)],
-    });
-
+export default function HMTechPage() {
     return (
-        <HMTechView projects={allProjects} />
+        <HMTechView projects={[]} />
     );
 }

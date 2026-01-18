@@ -10,8 +10,8 @@ export async function GET() {
             role: volunteering.role,
             organization: volunteering.organization,
             duration: volunteering.duration,
-            order: volunteering.order,
-        }).from(volunteering).orderBy(asc(volunteering.order));
+            displayOrder: volunteering.displayOrder,
+        }).from(volunteering).orderBy(asc(volunteering.displayOrder));
         return NextResponse.json(data);
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });

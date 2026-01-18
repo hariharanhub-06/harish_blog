@@ -1,30 +1,10 @@
-import { db } from "@/db"; // Database entry point
-export const revalidate = 3600; // Cache for 1 hour
-import { profiles, projects, experience, education, volunteering } from "@/db/schema";
-import { desc } from "drizzle-orm";
-import { Code, Briefcase, Award, User, Star } from "lucide-react";
 import Hero from "@/components/Hero";
-import CardWrapper from "@/components/CardWrapper";
 import MainContent from "@/components/MainContent";
 
-export default async function Home() {
-  const profileData = await db.query.profiles.findFirst();
-  const allProjects = await db.query.projects.findMany({
-    orderBy: [desc(projects.order), desc(projects.createdAt)],
-  });
-  const experiences = await db.query.experience.findMany({
-    orderBy: [desc(experience.order)],
-  });
-  const educations = await db.query.education.findMany({
-    orderBy: [desc(education.order)],
-  });
-  const volunteerings = await db.query.volunteering.findMany({
-    orderBy: [desc(volunteering.order)],
-  });
-
-  const defaultProfile = {
+export default function Home() {
+  const profile = {
     name: "Hari Haran Jeyaramamoorthy",
-    headline: "Web/App Developer | Business Consultant | Job Placement Expert | Operations & Partnerships Manager | Snack Business Owner | Project Management Pro",
+    headline: "Web/App Developer | Business Consultant | Operations & Partnerships Manager",
     avatarUrl: "/hari_photo.png",
     about: "Passionate developer and business strategist focused on building innovative solutions.",
     location: "Tamil Nadu, India",
@@ -36,9 +16,6 @@ export default async function Home() {
     ]
   };
 
-  const profile = profileData || defaultProfile;
-  const homeStats = (profile.stats || defaultProfile.stats) as any[];
-
   return (
     <div className="flex flex-col gap-0">
       <section id="home">
@@ -46,17 +23,17 @@ export default async function Home() {
           name: profile.name,
           headline: profile.headline,
           avatarUrl: profile.avatarUrl,
-          heroImageUrl: (profile as any).heroImageUrl
+          heroImageUrl: null
         }} />
       </section>
 
       <MainContent
         profile={profile}
-        stats={homeStats}
-        projects={allProjects}
-        experiences={experiences}
-        educations={educations}
-        volunteerings={volunteerings}
+        stats={profile.stats}
+        projects={[]}
+        experiences={[]}
+        educations={[]}
+        volunteerings={[]}
       />
     </div>
   );

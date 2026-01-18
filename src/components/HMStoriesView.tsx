@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Play, Film, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface Story {
     id: string;
@@ -16,7 +17,29 @@ interface HMStoriesViewProps {
     stories: Story[];
 }
 
-export default function HMStoriesView({ stories }: HMStoriesViewProps) {
+export default function HMStoriesView({ stories: initialStories }: HMStoriesViewProps) {
+    const [stories, setStories] = useState<Story[]>(initialStories || []);
+    const [loading, setLoading] = useState(initialStories?.length === 0);
+
+    useEffect(() => {
+        if (initialStories?.length === 0) {
+            const fetchStories = async () => {
+                try {
+                    const res = await fetch("/api/stories");
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        setStories(data);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch stories:", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchStories();
+        }
+    }, [initialStories]);
+
     return (
         <div className="min-h-screen bg-black relative overflow-hidden">
             {/* Cinematic Background */}
@@ -85,7 +108,16 @@ export default function HMStoriesView({ stories }: HMStoriesViewProps) {
                 {/* Stories Grid */}
                 <section className="px-6 pb-20">
                     <div className="container mx-auto">
-                        {stories.length === 0 ? (
+                        {loading ? (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-center py-20"
+                            >
+                                <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-6"></div>
+                                <h3 className="text-xl font-bold text-gray-400 mb-3 uppercase tracking-widest">Scanning Archive...</h3>
+                            </motion.div>
+                        ) : stories.length === 0 ? (
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}

@@ -4,7 +4,7 @@ import { eq, asc } from "drizzle-orm";
 import StoryEpisodesViewer from "@/components/StoryEpisodesViewer";
 import { notFound } from "next/navigation";
 
-export const revalidate = 0;
+export const revalidate = 3600; // Cache for 1 hour (Increased from 0 to reduce ISR writes)
 
 export async function generateMetadata({ params }: { params: Promise<{ storyId: string }> }) {
     const { storyId } = await params;
@@ -31,20 +31,5 @@ export async function generateMetadata({ params }: { params: Promise<{ storyId: 
 
 export default async function StoryPage({ params }: { params: Promise<{ storyId: string }> }) {
     const { storyId } = await params;
-    const story = await db.query.stories.findFirst({
-        where: eq(stories.id, storyId),
-    });
-
-    if (!story || !story.isActive) {
-        notFound();
-    }
-
-    const allEpisodes = await db.query.storyEpisodes.findMany({
-        where: eq(storyEpisodes.storyId, storyId),
-        orderBy: [asc(storyEpisodes.episodeNumber)],
-    });
-
-    const activeEpisodes = allEpisodes.filter((ep) => ep.isActive);
-
-    return <StoryEpisodesViewer story={story} episodes={activeEpisodes} />;
+    return <StoryEpisodesViewer story={{ id: storyId, title: "Loading...", description: null, thumbnailUrl: null }} episodes={[]} />;
 }
