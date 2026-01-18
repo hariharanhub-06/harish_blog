@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { affiliateProducts } from "@/db/schema";
 import { eq, desc, and, ilike, or } from "drizzle-orm";
 
+export const dynamic = 'force-dynamic';
+
 // GET: Fetch all affiliate products with optional filters
 export async function GET(request: NextRequest) {
     try {

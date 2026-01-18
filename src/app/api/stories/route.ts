@@ -3,6 +3,8 @@ import { stories, storyEpisodes } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         // Fetch all active stories
