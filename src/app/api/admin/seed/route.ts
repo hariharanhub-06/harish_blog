@@ -8,9 +8,9 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
     const diagnostics: any = {
         env: {
-            hasUrl: !!process.env.TURSO_CONNECTION_URL,
-            hasToken: !!process.env.TURSO_AUTH_TOKEN,
-            urlPrefix: process.env.TURSO_CONNECTION_URL?.substring(0, 10),
+            TURSO_CONNECTION_URL: process.env.TURSO_CONNECTION_URL ? "SET (Starts with " + process.env.TURSO_CONNECTION_URL.substring(0, 10) + ")" : "NOT SET",
+            TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN ? "SET" : "NOT SET",
+            isUsingDummy: !process.env.TURSO_CONNECTION_URL,
         },
         steps: {}
     };
@@ -18,48 +18,113 @@ export async function GET() {
     try {
         console.log("Remote Seeding Diagnostics started...");
 
-        // Step 0: Connectivity check
+        // 1. Connectivity & Table Check
+        let tableExists = false;
         try {
-            await db.run(sql`SELECT 1`);
-            diagnostics.steps.connectivity = "OK";
-        } catch (e: any) {
-            diagnostics.steps.connectivity = "FAILED: " + e.message;
-            return NextResponse.json({ error: "Connectivity check failed", diagnostics }, { status: 500 });
-        }
-
-        // Step 1: Check for tables
-        try {
-            const tables = await db.run(sql`SELECT name FROM sqlite_master WHERE type='table' AND name='profiles'`);
-            diagnostics.steps.tableCheck = tables.rows.length > 0 ? "EXISTS" : "MISSING";
-            if (tables.rows.length === 0) {
-                return NextResponse.json({ error: "Profiles table is missing in the database", diagnostics }, { status: 500 });
-            }
+            const tableCheck = await db.run(sql`SELECT name FROM sqlite_master WHERE type='table' AND name='profiles'`);
+            tableExists = tableCheck.rows.length > 0;
+            diagnostics.steps.tableCheck = tableExists ? "EXISTS" : "MISSING";
         } catch (e: any) {
             diagnostics.steps.tableCheck = "ERROR: " + e.message;
+            return NextResponse.json({ error: "Failed to query database schema", message: e.message, diagnostics }, { status: 500 });
         }
 
-        // Step 2: Cleanup
-        console.log("Starting cleanup...");
+        // 2. Self-Healing: Create tables if missing
+        if (!tableExists) {
+            console.log("Profiles table missing. Attempting emergency schema creation...");
+            try {
+                // We create the most critical tables needed for the homepage
+                await db.run(sql`
+                    CREATE TABLE IF NOT EXISTS "profiles" (
+                        "id" text PRIMARY KEY NOT NULL,
+                        "name" text NOT NULL,
+                        "headline" text,
+                        "bio" text,
+                        "about" text,
+                        "email" text,
+                        "location" text,
+                        "avatar_url" text,
+                        "hero_image_url" text,
+                        "about_image_url" text,
+                        "social_links" text,
+                        "stats" text,
+                        "updated_at" integer DEFAULT (strftime('%s', 'now'))
+                    )
+                `);
+
+                await db.run(sql`
+                    CREATE TABLE IF NOT EXISTS "experience" (
+                        "id" text PRIMARY KEY NOT NULL,
+                        "company" text NOT NULL,
+                        "role" text NOT NULL,
+                        "duration" text,
+                        "description" text,
+                        "display_order" integer DEFAULT 0,
+                        "created_at" integer DEFAULT (strftime('%s', 'now'))
+                    )
+                `);
+
+                await db.run(sql`
+                    CREATE TABLE IF NOT EXISTS "education" (
+                        "id" text PRIMARY KEY NOT NULL,
+                        "institution" text NOT NULL,
+                        "degree" text NOT NULL,
+                        "period" text,
+                        "details" text,
+                        "display_order" integer DEFAULT 0
+                    )
+                `);
+
+                await db.run(sql`
+                    CREATE TABLE IF NOT EXISTS "projects" (
+                        "id" text PRIMARY KEY NOT NULL,
+                        "title" text NOT NULL,
+                        "description" text,
+                        "thumbnail" text,
+                        "technologies" text,
+                        "live_url" text,
+                        "repo_url" text,
+                        "category" text,
+                        "featured" integer DEFAULT false,
+                        "display_order" integer DEFAULT 0,
+                        "created_at" integer DEFAULT (strftime('%s', 'now'))
+                    )
+                `);
+
+                await db.run(sql`
+                    CREATE TABLE IF NOT EXISTS "skills" (
+                        "id" text PRIMARY KEY NOT NULL,
+                        "name" text NOT NULL,
+                        "category" text,
+                        "proficiency" integer DEFAULT 0,
+                        "icon" text,
+                        "display_order" integer DEFAULT 0
+                    )
+                `);
+
+                diagnostics.steps.schemaCreation = "SUCCESS";
+            } catch (e: any) {
+                diagnostics.steps.schemaCreation = "FAILED: " + e.message;
+                return NextResponse.json({ error: "Schema creation failed", message: e.message, diagnostics }, { status: 500 });
+            }
+        }
+
+        // 3. Cleanup existing data (now that we're sure tables exist)
+        console.log("Starting data cleanup...");
         try {
             await db.delete(profiles);
+            await db.delete(experience);
+            await db.delete(education);
+            await db.delete(skills);
+            await db.delete(projects);
             diagnostics.steps.cleanup = "OK";
         } catch (e: any) {
             diagnostics.steps.cleanup = "FAILED: " + e.message;
-            // Provide more detail for the cleanup failure since that's where we're stuck
-            return NextResponse.json({
-                error: "Cleanup failed at 'profiles' table",
-                message: e.message,
-                diagnostics
-            }, { status: 500 });
+            return NextResponse.json({ error: "Cleanup failed", message: e.message, diagnostics }, { status: 500 });
         }
 
-        await db.delete(experience);
-        await db.delete(education);
-        await db.delete(skills);
-        await db.delete(projects);
-
-        // Step 3: Insertions
-        console.log("Starting insertions...");
+        // 4. Insert Fresh Data
+        console.log("Starting data insertion...");
         const profileId = "hari-haran-profile-id";
         await db.insert(profiles).values({
             id: profileId,
@@ -147,7 +212,7 @@ export async function GET() {
 
         return NextResponse.json({
             success: true,
-            message: "Remote seeding completed successfully! All tables refreshed.",
+            message: "Remote seeding completed successfully! Schema verified and data restored.",
             diagnostics
         });
     } catch (error: any) {
