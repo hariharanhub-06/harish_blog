@@ -9,15 +9,29 @@ export async function GET() {
     const diagnostics: any = {
         env: {
             TURSO_CONNECTION_URL: process.env.TURSO_CONNECTION_URL ? "SET" : "NOT SET",
-            isUsingDummy: !process.env.TURSO_CONNECTION_URL,
         },
-        steps: {}
+        steps: {},
+        tableStats: {}
     };
 
     try {
-        console.log("Remote Seeding (Refined One-by-One) started...");
+        console.log("Remote Seeding (Maximum Robustness) started...");
 
-        // 1. Cleanup
+        // 1. Precise Table Check
+        const tablesToCheck = ['profiles', 'experience', 'education', 'skills', 'projects'];
+        for (const tableName of tablesToCheck) {
+            try {
+                const check = await db.run(sql`SELECT name FROM sqlite_master WHERE type='table' AND name=${tableName}`);
+                diagnostics.tableStats[tableName] = {
+                    exists: check.rows.length > 0,
+                    initialCount: check.rows.length > 0 ? (await db.run(sql`SELECT COUNT(*) as count FROM ${sql.raw(tableName)}`)).rows[0].count : 0
+                };
+            } catch (e: any) {
+                diagnostics.tableStats[tableName] = { error: e.message };
+            }
+        }
+
+        // 2. Cleanup
         try {
             await db.delete(profiles);
             await db.delete(experience);
@@ -32,7 +46,7 @@ export async function GET() {
 
         const now = new Date();
 
-        // 2. Insert Profile
+        // 3. Profiles
         try {
             await db.insert(profiles).values({
                 id: "hari-haran-profile-id",
@@ -59,99 +73,95 @@ export async function GET() {
             diagnostics.steps.profiles = "OK";
         } catch (e: any) {
             diagnostics.steps.profiles = "FAILED: " + e.message;
-            return NextResponse.json({ error: "Profile insertion failed", diagnostics }, { status: 500 });
         }
 
-        // 3. Insert Experience (One by One)
-        const experienceData = [
-            {
-                company: "Handyman Technologies",
-                role: "Partnerships Manager",
-                duration: "Mar 2022 – Dec 2025",
-                description: "Established and managed partnerships with 42 colleges, broadening market reach. Oversaw a team of 17 members.",
-                displayOrder: 1,
-            },
-            {
-                company: "ICA Edu Skills",
-                role: "Branch Manager (Freelance)",
-                duration: "Dec 2024 – Jun 2025",
-                description: "Oversaw branch operations and strategic growth through marketing initiatives. Led and mentored a team.",
-                displayOrder: 2,
-            },
-            {
-                company: "Focus Edumatics Pvt Ltd",
-                role: "Online Tutor",
-                duration: "Mar 2022 – Dec 2022",
-                description: "Trained students in English, Science, and Social subjects.",
-                displayOrder: 3,
-            },
-        ];
-
+        // 4. Experience (Simplified strings)
         let expCount = 0;
-        for (const exp of experienceData) {
-            try {
-                await db.insert(experience).values({ ...exp, createdAt: now });
+        try {
+            const experienceData = [
+                {
+                    company: "Handyman Technologies",
+                    role: "Partnerships Manager",
+                    duration: "Mar 2022 - Dec 2025",
+                    description: "Established and managed partnerships with 42 colleges, broadening market reach. Oversaw a team of 17 members.",
+                    displayOrder: 1,
+                },
+                {
+                    company: "ICA Edu Skills",
+                    role: "Branch Manager (Freelance)",
+                    duration: "Dec 2024 - Jun 2025",
+                    description: "Oversaw branch operations and strategic growth through marketing initiatives. Led and mentored a team.",
+                    displayOrder: 2,
+                },
+                {
+                    company: "Focus Edumatics Pvt Ltd",
+                    role: "Online Tutor",
+                    duration: "Mar 2022 - Dec 2022",
+                    description: "Trained students in English, Science, and Social subjects.",
+                    displayOrder: 3,
+                },
+            ];
+
+            for (const exp of experienceData) {
+                await db.insert(experience).values({ ...exp });
                 expCount++;
-            } catch (e: any) {
-                diagnostics.steps.experience = `FAILED at index ${expCount}: ` + e.message;
-                return NextResponse.json({ error: "Experience insertion failed", diagnostics }, { status: 500 });
             }
+            diagnostics.steps.experience = `OK (${expCount})`;
+        } catch (e: any) {
+            diagnostics.steps.experience = `FAILED at index ${expCount}: ` + e.message;
         }
-        diagnostics.steps.experience = `OK (${expCount})`;
 
-        // 4. Insert Education (One by One)
-        const educationData = [
-            {
-                institution: "Kathir College of Engineering",
-                degree: "Bachelor of Engineering (BE), Mechanical Engineering",
-                period: "2017 – 2021",
-                details: "Grade A; Class Representative; Basketball Team Captain.",
-                displayOrder: 1,
-            },
-            {
-                institution: "Sree Sakthi Matriculation Higher Secondary School",
-                degree: "HSC, Computer Science",
-                period: "2016 – 2017",
-                details: "Grade A.",
-                displayOrder: 2,
-            },
-        ];
-
+        // 5. Education
         let eduCount = 0;
-        for (const edu of educationData) {
-            try {
+        try {
+            const educationData = [
+                {
+                    institution: "Kathir College of Engineering",
+                    degree: "Bachelor of Engineering (BE), Mechanical Engineering",
+                    period: "2017 - 2021",
+                    details: "Grade A; Class Representative; Basketball Team Captain.",
+                    displayOrder: 1,
+                },
+                {
+                    institution: "Sree Sakthi Matriculation Higher Secondary School",
+                    degree: "HSC, Computer Science",
+                    period: "2016 - 2017",
+                    details: "Grade A.",
+                    displayOrder: 2,
+                },
+            ];
+
+            for (const edu of educationData) {
                 await db.insert(education).values(edu);
                 eduCount++;
-            } catch (e: any) {
-                diagnostics.steps.education = `FAILED at index ${eduCount}: ` + e.message;
-                return NextResponse.json({ error: "Education insertion failed", diagnostics }, { status: 500 });
             }
+            diagnostics.steps.education = `OK (${eduCount})`;
+        } catch (e: any) {
+            diagnostics.steps.education = `FAILED at index ${eduCount}: ` + e.message;
         }
-        diagnostics.steps.education = `OK (${eduCount})`;
 
-        // 5. Seed Skills
-        const skillsData = [
-            { name: "Python", category: "Technology", proficiency: 85, displayOrder: 1 },
-            { name: "Firebase", category: "Technology", proficiency: 80, displayOrder: 2 },
-            { name: "Razorpay", category: "Technology", proficiency: 75, displayOrder: 3 },
-            { name: "Web Development", category: "Technology", proficiency: 90, displayOrder: 4 },
-            { name: "Project Management", category: "Management", proficiency: 95, displayOrder: 5 },
-            { name: "Public Speaking", category: "Soft Skills", proficiency: 90, displayOrder: 6 },
-        ];
-
+        // 6. Skills
         let skillCount = 0;
-        for (const skill of skillsData) {
-            try {
+        try {
+            const skillsData = [
+                { name: "Python", category: "Technology", proficiency: 85, displayOrder: 1 },
+                { name: "Firebase", category: "Technology", proficiency: 80, displayOrder: 2 },
+                { name: "Razorpay", category: "Technology", proficiency: 75, displayOrder: 3 },
+                { name: "Web Development", category: "Technology", proficiency: 90, displayOrder: 4 },
+                { name: "Project Management", category: "Management", proficiency: 95, displayOrder: 5 },
+                { name: "Public Speaking", category: "Soft Skills", proficiency: 90, displayOrder: 6 },
+            ];
+
+            for (const skill of skillsData) {
                 await db.insert(skills).values(skill);
                 skillCount++;
-            } catch (e: any) {
-                diagnostics.steps.skills = `FAILED at index ${skillCount}: ` + e.message;
-                return NextResponse.json({ error: "Skills insertion failed", diagnostics }, { status: 500 });
             }
+            diagnostics.steps.skills = `OK (${skillCount})`;
+        } catch (e: any) {
+            diagnostics.steps.skills = `FAILED at index ${skillCount}: ` + e.message;
         }
-        diagnostics.steps.skills = `OK (${skillCount})`;
 
-        // 6. Seed Projects
+        // 7. Projects
         try {
             await db.insert(projects).values({
                 title: "startupmenswear.in",
@@ -160,18 +170,18 @@ export async function GET() {
                 technologies: ["Python", "Firebase", "Razorpay"],
                 category: "Web Development",
                 featured: true,
-                displayOrder: 1,
-                createdAt: now
+                displayOrder: 1
             });
             diagnostics.steps.projects = "OK";
         } catch (e: any) {
             diagnostics.steps.projects = "FAILED: " + e.message;
-            return NextResponse.json({ error: "Projects insertion failed", diagnostics }, { status: 500 });
         }
 
+        const success = Object.values(diagnostics.steps).every(s => (typeof s === 'string' && (s.startsWith('OK') || s === 'OK')));
+
         return NextResponse.json({
-            success: true,
-            message: "Remote seeding (Individual Inserts) completed successfully!",
+            success,
+            message: success ? "Remote seeding completed successfully!" : "Remote seeding completed with partial failures.",
             diagnostics
         });
     } catch (error: any) {
