@@ -1,15 +1,29 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { profiles, experience, education, skills, projects } from "@/db/schema";
+import { sql } from "drizzle-orm";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        console.log("Remote Seeding started...");
+        console.log("Remote Seeding started (Clean Slate Mode)...");
 
-        // Seed Profile
+        // 1. Clear existing data to ensure a clean start and avoid conflict errors
+        // Note: Using delete without a where clause deletes all rows in the table
+        await db.delete(profiles);
+        await db.delete(experience);
+        await db.delete(education);
+        await db.delete(skills);
+        await db.delete(projects);
+
+        console.log("Cleanup finished. Starting insertions...");
+
+        // 2. Seed Profile
+        // Using a static ID to ensure consistency
+        const profileId = "hari-haran-profile-id";
         await db.insert(profiles).values({
+            id: profileId,
             name: "Hari Haran Jeyaramamoorthy",
             headline: "Web/App Developer | Business Consultant | Job Placement Expert | Operations & Partnerships Manager | Snack Business Owner | Project Management Pro",
             bio: "Versatile professional with expertise in management, soft skills training, coding, and career consulting.",
@@ -28,12 +42,9 @@ export async function GET() {
                 { label: "Clubs Led", value: "5+", icon: "Award" },
                 { label: "Colleges Partnered", value: "42", icon: "User" },
             ],
-        }).onConflictDoUpdate({
-            target: profiles.id,
-            set: { name: "Hari Haran Jeyaramamoorthy" } // Just to allow upsert
         });
 
-        // Seed Experience
+        // 3. Seed Experience
         await db.insert(experience).values([
             {
                 company: "Handyman Technologies",
@@ -56,9 +67,9 @@ export async function GET() {
                 description: "Trained students in English, Science, and Social subjects.",
                 displayOrder: 3,
             },
-        ]).onConflictDoNothing();
+        ]);
 
-        // Seed Education
+        // 4. Seed Education
         await db.insert(education).values([
             {
                 institution: "Kathir College of Engineering",
@@ -74,19 +85,19 @@ export async function GET() {
                 details: "Grade A.",
                 displayOrder: 2,
             },
-        ]).onConflictDoNothing();
+        ]);
 
-        // Seed Skills
+        // 5. Seed Skills
         await db.insert(skills).values([
-            { name: "Python", category: "Technology", proficiency: 85 },
-            { name: "Firebase", category: "Technology", proficiency: 80 },
-            { name: "Razorpay", category: "Technology", proficiency: 75 },
-            { name: "Web Development", category: "Technology", proficiency: 90 },
-            { name: "Project Management", category: "Management", proficiency: 95 },
-            { name: "Public Speaking", category: "Soft Skills", proficiency: 90 },
-        ]).onConflictDoNothing();
+            { name: "Python", category: "Technology", proficiency: 85, displayOrder: 1 },
+            { name: "Firebase", category: "Technology", proficiency: 80, displayOrder: 2 },
+            { name: "Razorpay", category: "Technology", proficiency: 75, displayOrder: 3 },
+            { name: "Web Development", category: "Technology", proficiency: 90, displayOrder: 4 },
+            { name: "Project Management", category: "Management", proficiency: 95, displayOrder: 5 },
+            { name: "Public Speaking", category: "Soft Skills", proficiency: 90, displayOrder: 6 },
+        ]);
 
-        // Seed Projects
+        // 6. Seed Projects
         await db.insert(projects).values([
             {
                 title: "startupmenswear.in",
@@ -95,12 +106,19 @@ export async function GET() {
                 technologies: ["Python", "Firebase", "Razorpay"],
                 category: "Web Development",
                 featured: true,
+                displayOrder: 1
             },
-        ]).onConflictDoNothing();
+        ]);
 
-        return NextResponse.json({ success: true, message: "Remote seeding completed successfully!" });
+        return NextResponse.json({
+            success: true,
+            message: "Remote seeding completed successfully! All tables refreshed."
+        });
     } catch (error: any) {
         console.error("Remote Seeding error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 });
     }
 }
