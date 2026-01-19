@@ -20,13 +20,32 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-    const data = await req.json();
-    if (data.id) {
-        await db.update(projects).set(data).where(eq(projects.id, data.id));
-    } else {
-        await db.insert(projects).values(data);
+    try {
+        const body = await req.json();
+        const { id, title, description, thumbnail, technologies, liveUrl, repoUrl, category, featured, displayOrder } = body;
+
+        const projectData = {
+            title,
+            description,
+            thumbnail,
+            technologies,
+            liveUrl,
+            repoUrl,
+            category,
+            featured: featured || false,
+            displayOrder: displayOrder || 0,
+        };
+
+        if (id) {
+            await db.update(projects).set(projectData).where(eq(projects.id, id));
+        } else {
+            await db.insert(projects).values(projectData);
+        }
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Error saving project:", error);
+        return NextResponse.json({ error: "Failed to save project" }, { status: 500 });
     }
-    return NextResponse.json({ success: true });
 }
 
 export async function DELETE(req: Request) {
