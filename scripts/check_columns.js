@@ -22,9 +22,8 @@ async function main() {
         const result = await sql`SELECT * FROM projects LIMIT 1`;
         console.log("Result:", JSON.stringify(result, null, 2));
 
-        // Also try to describe table if passing
-        // const columns = await sql`SELECT column_name FROM information_schema.columns WHERE table_name = 'projects'`;
-        // console.log("Columns:", JSON.stringify(columns, null, 2));
+        const columns = await sql`SELECT column_name, data_type, udt_name FROM information_schema.columns WHERE table_name = 'projects' AND column_name = 'technologies'`;
+        console.log("Columns:", JSON.stringify(columns, null, 2));
 
     } catch (err) {
         console.error("Query Error:", err);
