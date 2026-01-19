@@ -43,12 +43,15 @@ export default async function Home() {
   return (
     <div className="flex flex-col gap-0">
       <section id="home">
-        <Hero profile={{
-          name: profile.name,
-          headline: profile.headline,
-          avatarUrl: profile.avatarUrl,
-          heroImageUrl: profile.heroImageUrl
-        }} />
+        <Hero
+          profile={{
+            name: profile.name,
+            headline: profile.headline,
+            avatarUrl: profile.avatarUrl,
+            heroImageUrl: profile.heroImageUrl
+          }}
+          className="pt-28 md:pt-32"
+        />
       </section>
 
       <MainContent
