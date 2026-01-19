@@ -49,11 +49,11 @@ export default function HMStoriesView({ stories: initialStories }: HMStoriesView
                     loop
                     muted
                     playsInline
-                    className="absolute inset-0 w-full h-full object-cover opacity-60"
+                    className="absolute inset-0 w-full h-full object-cover"
                 >
                     <source src="https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1610-large.mp4" type="video/mp4" />
                 </video>
-                <div className="absolute inset-0 bg-black/60" /> {/* Dark Overlay */}
+                <div className="absolute inset-0 bg-black/40" /> {/* Dark Overlay */}
 
                 {/* Glowing Blobs */}
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
