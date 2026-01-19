@@ -42,9 +42,9 @@ export async function POST(req: Request) {
             await db.insert(projects).values(projectData);
         }
         return NextResponse.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error saving project:", error);
-        return NextResponse.json({ error: "Failed to save project" }, { status: 500 });
+        return NextResponse.json({ error: error.message || "Failed to save project" }, { status: 500 });
     }
 }
 

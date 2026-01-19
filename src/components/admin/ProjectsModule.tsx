@@ -23,6 +23,8 @@ export default function ProjectsModule() {
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
 
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
         fetchProjects();
     }, []);
@@ -40,6 +42,7 @@ export default function ProjectsModule() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
+        setError(null);
         try {
             const res = await fetch("/api/admin/projects", {
                 method: "POST",
@@ -52,10 +55,13 @@ export default function ProjectsModule() {
                 fetchProjects();
             } else {
                 const errorData = await res.json();
-                alert(`Failed to save project: ${errorData.error || 'Unknown error'}`);
+                const errorMessage = errorData.error || 'Unknown error';
+                setError(errorMessage);
+                alert(`Failed to save project: ${errorMessage}`);
             }
         } catch (error) {
             console.error(error);
+            setError("An error occurred while saving. Please try again.");
             alert("An error occurred while saving. Please try again.");
         } finally {
             setSaving(false);
@@ -157,6 +163,14 @@ export default function ProjectsModule() {
                     </div>
 
                     <form onSubmit={handleSave} className="space-y-8">
+                        {/* Error Display */}
+                        {error && (
+                            <div className="bg-red-50 border-1 border-red-200 p-4 rounded-xl flex items-center space-x-3 text-red-600 font-bold animate-pulse">
+                                <X size={20} />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
                         <div className="grid md:grid-cols-2 gap-12">
                             <div className="space-y-6">
                                 <div className="space-y-2">
