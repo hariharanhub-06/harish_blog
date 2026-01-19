@@ -29,6 +29,14 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error("Experience POST error:", error);
+        // Log detailed error for debugging
+        if (error && typeof error === 'object') {
+            try {
+                console.error("Experience POST error details:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
+            } catch (e) {
+                // Ignore circular reference errors during JSON.stringify
+            }
+        }
         return NextResponse.json({ error: String(error) }, { status: 500 });
     }
 }

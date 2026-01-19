@@ -37,7 +37,7 @@ export const projects = pgTable("projects", {
   repoUrl: text("repo_url"),
   category: text("category"),
   featured: boolean("featured").default(false),
-  displayOrder: integer("display_order").default(0),
+  displayOrder: integer("order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -61,7 +61,7 @@ export const skills = pgTable("skills", {
   category: text("category"),
   proficiency: integer("proficiency").default(0),
   icon: text("icon"),
-  displayOrder: integer("display_order").default(0),
+  displayOrder: integer("order").default(0),
 });
 
 export const experience = pgTable("experience", {
@@ -70,7 +70,7 @@ export const experience = pgTable("experience", {
   role: text("role").notNull(),
   duration: text("duration"),
   description: text("description"),
-  displayOrder: integer("display_order").default(0),
+  displayOrder: integer("order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -80,7 +80,7 @@ export const education = pgTable("education", {
   degree: text("degree").notNull(),
   period: text("period"),
   details: text("details"),
-  displayOrder: integer("display_order").default(0),
+  displayOrder: integer("order").default(0),
 });
 
 export const achievements = pgTable("achievements", {
@@ -90,7 +90,7 @@ export const achievements = pgTable("achievements", {
   date: text("date"),
   description: text("description"),
   link: text("link"),
-  displayOrder: integer("display_order").default(0),
+  displayOrder: integer("order").default(0),
 });
 
 export const contactSubmissions = pgTable("contact_submissions", {
@@ -114,7 +114,7 @@ export const volunteering = pgTable("volunteering", {
   organization: text("organization").notNull(),
   duration: text("duration"),
   description: text("description"),
-  displayOrder: integer("display_order").default(0),
+  displayOrder: integer("order").default(0),
 });
 
 export const gallery = pgTable("gallery", {
