@@ -44,6 +44,17 @@ export default function HMStoriesView({ stories: initialStories }: HMStoriesView
         <div className="min-h-screen bg-black relative overflow-hidden">
             {/* Cinematic Background */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover opacity-60"
+                >
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1610-large.mp4" type="video/mp4" />
+                </video>
+                <div className="absolute inset-0 bg-black/60" /> {/* Dark Overlay */}
+
                 {/* Glowing Blobs */}
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "2s" }} />
@@ -77,7 +88,7 @@ export default function HMStoriesView({ stories: initialStories }: HMStoriesView
             {/* Content Container */}
             <div className="relative z-10">
                 {/* Hero Section */}
-                <section className="relative overflow-hidden pt-32 pb-16 px-6">
+                <section className="relative overflow-hidden pt-12 pb-16 px-6">
                     <div className="container mx-auto relative z-10">
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
