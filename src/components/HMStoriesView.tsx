@@ -43,47 +43,74 @@ export default function HMStoriesView({ stories: initialStories }: HMStoriesView
     return (
         <div className="min-h-screen bg-black relative overflow-hidden">
             {/* Cinematic Background */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
-                >
-                    <source src="https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1610-large.mp4" type="video/mp4" />
-                </video>
-                <div className="absolute inset-0 bg-black/40" /> {/* Dark Overlay */}
-
-                {/* Glowing Blobs */}
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "2s" }} />
-                <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-pink-600/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "4s" }} />
-
-                {/* Floating Particles/Nodes */}
-                {[...Array(20)].map((_, i) => (
-                    <motion.div
+            {/* CSS Based Star Field - Guaranteed Visibility */}
+            <div className="absolute inset-0 z-0">
+                {[...Array(50)].map((_, i) => (
+                    <div
                         key={i}
-                        className="absolute w-1 h-1 bg-blue-400/20 rounded-full"
-                        initial={{
-                            x: Math.random() * 100 + "%",
-                            y: Math.random() * 100 + "%",
-                            opacity: Math.random() * 0.5
+                        className="absolute bg-white rounded-full animate-pulse"
+                        style={{
+                            width: Math.random() * 3 + 1 + "px",
+                            height: Math.random() * 3 + 1 + "px",
+                            top: Math.random() * 100 + "%",
+                            left: Math.random() * 100 + "%",
+                            opacity: Math.random() * 0.7 + 0.3,
+                            animationDuration: Math.random() * 3 + 2 + "s",
+                            animationDelay: Math.random() * 5 + "s"
+                        }}
+                    />
+                ))}
+                {/* Shooting Stars */}
+                {[...Array(5)].map((_, i) => (
+                    <motion.div
+                        key={`shooting-${i}`}
+                        className="absolute h-px bg-gradient-to-r from-transparent via-white to-transparent"
+                        style={{
+                            width: Math.random() * 100 + 50 + "px",
+                            top: Math.random() * 50 + "%",
+                            left: Math.random() * 100 + "%",
                         }}
                         animate={{
-                            y: [null, Math.random() * -100 - 50],
-                            opacity: [0, 0.5, 0]
+                            x: [-200, -1000],
+                            y: [0, 200],
+                            opacity: [0, 1, 0]
                         }}
                         transition={{
-                            duration: Math.random() * 10 + 10,
+                            duration: 2,
                             repeat: Infinity,
+                            repeatDelay: Math.random() * 10 + 5,
                             ease: "linear"
                         }}
                     />
                 ))}
             </div>
 
+            {/* Glowing Blobs */}
+            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "2s" }} />
+            <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-pink-600/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "4s" }} />
 
+            {/* Floating Particles/Nodes */}
+            {[...Array(20)].map((_, i) => (
+                <motion.div
+                    key={i}
+                    className="absolute w-1 h-1 bg-blue-400/20 rounded-full"
+                    initial={{
+                        x: Math.random() * 100 + "%",
+                        y: Math.random() * 100 + "%",
+                        opacity: Math.random() * 0.5
+                    }}
+                    animate={{
+                        y: [null, Math.random() * -100 - 50],
+                        opacity: [0, 0.5, 0]
+                    }}
+                    transition={{
+                        duration: Math.random() * 10 + 10,
+                        repeat: Infinity,
+                        ease: "linear"
+                    }}
+                />
+            ))}
 
             {/* Content Container */}
             <div className="relative z-10">
@@ -213,6 +240,6 @@ export default function HMStoriesView({ stories: initialStories }: HMStoriesView
 
 
             </div>
-        </div>
+        </div >
     );
 }
