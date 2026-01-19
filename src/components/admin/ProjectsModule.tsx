@@ -46,12 +46,17 @@ export default function ProjectsModule() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(editing),
             });
+
             if (res.ok) {
                 setEditing(null);
                 fetchProjects();
+            } else {
+                const errorData = await res.json();
+                alert(`Failed to save project: ${errorData.error || 'Unknown error'}`);
             }
         } catch (error) {
             console.error(error);
+            alert("An error occurred while saving. Please try again.");
         } finally {
             setSaving(false);
         }
@@ -133,7 +138,7 @@ export default function ProjectsModule() {
                 <h2 className="text-2xl font-black text-gray-900">Portfolio Items</h2>
                 {!editing && (
                     <button
-                        onClick={() => setEditing({ title: "", description: "", technologies: [], featured: false, order: 0 })}
+                        onClick={() => setEditing({ title: "", description: "", technologies: [], featured: false, displayOrder: 0 })}
                         className="flex items-center space-x-2 bg-primary text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
                     >
                         <Plus size={20} />
