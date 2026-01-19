@@ -7,6 +7,8 @@ import Image from "next/image";
 import { MagneticButton } from "./MagneticButton";
 import { Tilt } from "./Tilt";
 
+import { cn } from "@/lib/utils";
+
 interface HeroProps {
     profile: {
         name: string;
@@ -14,11 +16,12 @@ interface HeroProps {
         avatarUrl: string | null;
         heroImageUrl: string | null;
     };
+    className?: string;
 }
 
-export default function Hero({ profile }: HeroProps) {
+export default function Hero({ profile, className }: HeroProps) {
     return (
-        <section className="relative container mx-auto px-6 pt-12 md:pt-14 pb-8 md:pb-10 flex flex-col items-center text-center overflow-hidden">
+        <section className={cn("relative container mx-auto px-6 pt-12 md:pt-14 pb-8 md:pb-10 flex flex-col items-center text-center overflow-hidden", className)}>
             {/* Background decorative elements */}
             {/* Background Image */}
             <div className="absolute inset-0 -z-10 pointer-events-none">
