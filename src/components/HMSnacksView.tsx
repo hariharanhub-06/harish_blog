@@ -614,6 +614,104 @@ function HMSnacksContent() {
                 </div>
             </section >
 
+            {/* FSSAI Certification & Trust Badges */}
+            <section className="py-16 bg-gradient-to-b from-white to-gray-50" >
+                <div className="container mx-auto px-6">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="text-center mb-12">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                className="inline-block px-4 py-1.5 bg-emerald-500/10 backdrop-blur-md rounded-full text-emerald-600 text-[10px] font-black uppercase tracking-[0.3em] border border-emerald-500/20 mb-4"
+                            >
+                                Certified & Trusted
+                            </motion.div>
+                            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3 tracking-tight">
+                                Food Safety <span className="text-emerald-500 italic">Guaranteed</span>
+                            </h2>
+                            <p className="text-gray-500 font-medium max-w-2xl mx-auto">
+                                Officially licensed by FSSAI, adhering to the highest standards of food safety and hygiene.
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-8 items-center">
+                            {/* FSSAI Certificate Image */}
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                className="relative group"
+                            >
+                                <div className="absolute -inset-4 bg-emerald-100/30 rounded-3xl -z-10 group-hover:scale-105 transition-transform duration-500" />
+                                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-2 border-emerald-100">
+                                    <Image
+                                        src="/fssai-certificate.png"
+                                        alt="FSSAI Registration Certificate - HM Snacks"
+                                        fill
+                                        className="object-contain bg-white p-4"
+                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                    />
+                                </div>
+                            </motion.div>
+
+                            {/* Registration Details */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.3 }}
+                                className="space-y-6"
+                            >
+                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 space-y-4">
+                                    <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
+                                        <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-200">
+                                            ✓
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-black text-gray-900">FSSAI Licensed</h3>
+                                            <p className="text-xs font-medium text-gray-400">Officially Registered</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs font-black uppercase tracking-widest text-gray-400">License No.</span>
+                                            <span className="text-sm font-black text-gray-900 font-mono">22426553000011</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs font-black uppercase tracking-widest text-gray-400">Valid Until</span>
+                                            <span className="text-sm font-black text-emerald-500">10-01-2027</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs font-black uppercase tracking-widest text-gray-400">Issued By</span>
+                                            <span className="text-sm font-black text-gray-900">Coimbatore</span>
+                                        </div>
+                                        <div className="flex justify-between items-start">
+                                            <span className="text-xs font-black uppercase tracking-widest text-gray-400">Business</span>
+                                            <span className="text-sm font-black text-gray-900 text-right">Distributor</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Trust Indicators */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-emerald-50 rounded-xl p-4 text-center border border-emerald-100">
+                                        <div className="text-2xl font-black text-emerald-500 mb-1">100%</div>
+                                        <div className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Hygienic</div>
+                                    </div>
+                                    <div className="bg-emerald-50 rounded-xl p-4 text-center border border-emerald-100">
+                                        <div className="text-2xl font-black text-emerald-500 mb-1">100%</div>
+                                        <div className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Safe</div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Contact Support Section */}
             <section id="contact" className="py-12 bg-white" >
                 <div className="container mx-auto px-6">
