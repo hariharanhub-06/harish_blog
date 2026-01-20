@@ -690,6 +690,22 @@ export default function CartPage() {
                             </div>
                         </div>
 
+                        {/* FSSAI Trust Badge */}
+                        <div className="mt-6 p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-lg shadow-emerald-200">
+                                    ✓
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-black text-emerald-700 uppercase tracking-wide">FSSAI Certified</h4>
+                                    <p className="text-[9px] font-bold text-emerald-600">Lic: 22426553000011</p>
+                                </div>
+                            </div>
+                            <p className="text-[10px] font-medium text-emerald-600 leading-relaxed">
+                                Your order is prepared in FSSAI certified facilities following the highest food safety standards.
+                            </p>
+                        </div>
+
                         {step === 1 && (
                             <button onClick={() => setStep(2)} className="w-full bg-pink-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-pink-200 hover:bg-pink-600 transition-all mt-10">
                                 Checkout
