@@ -277,36 +277,7 @@ export default function AffiliateDashboard() {
 
     return (
         <div className="min-h-screen bg-[#FDFCFB] text-gray-900 pb-20">
-            {/* Top Navbar */}
-            <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 px-6 py-4">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-200">
-                            <Star size={18} fill="currentColor" />
-                        </div>
-                        <div>
-                            <h1 className="text-sm sm:text-lg font-black tracking-tight leading-tight">HM Partner Central</h1>
-                            <p className="text-[8px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest">Business Dashboard</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">
-                            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                            Live Payout System
-                        </div>
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-500 hover:text-red-500 rounded-xl font-bold text-sm transition-all"
-                        >
-                            <LogOut size={18} />
-                            <span className="hidden sm:inline">Logout</span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            <main className="max-w-7xl mx-auto px-6 mt-10 space-y-8">
+            <main className="max-w-7xl mx-auto px-6 pt-10 space-y-8">
                 {/* Welcome & Navigation */}
                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                     <div className="space-y-1">
