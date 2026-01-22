@@ -3,9 +3,11 @@
 @theme {
   --color-primary: #1e40af;
   --color-secondary: #64748b;
-  --color-accent: #f59e0b;
-  --color-background: #f8fafc;
-  --color-text: #1f2937;
+  --color-accent: #f97316;
+  /* Updated to more vibrant orange */
+  --color-background: #0a0a0a;
+  /* Darker background */
+  --color-text: #f8fafc;
 
   --font-sans: var(--font-inter), "Poppins", ui-sans-serif, system-ui;
   --font-poppins: var(--font-poppins), sans-serif;
@@ -13,7 +15,7 @@
 
 @layer base {
   body {
-    background-color: transparent;
+    background-color: var(--color-background);
     color: var(--color-text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -33,16 +35,26 @@
 
 @layer components {
   .glass {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .text-gradient {
-    background: linear-gradient(to right, #1e40af, #3b82f6);
+    background: linear-gradient(to right, #3b82f6, #6366f1);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  .text-outline {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+    color: transparent;
+  }
+
+  .text-outline-vibrant {
+    -webkit-text-stroke: 1px rgba(249, 115, 22, 0.3);
+    color: transparent;
   }
 }

@@ -40,8 +40,14 @@ export default async function Home() {
     socialLinks: dbProfile?.socialLinks || defaultProfile.socialLinks
   };
 
+  // Fetch videos
+  const videos = await db.query.youtubeVideos.findMany({
+    where: (videos, { eq }) => eq(videos.isActive, true),
+    orderBy: (videos, { desc }) => [desc(videos.displayOrder), desc(videos.createdAt)]
+  });
+
   return (
-    <div className="flex flex-col gap-0">
+    <div className="flex flex-col gap-0 bg-[#0e0e0e]">
       <section id="home">
         <Hero
           profile={{
@@ -50,7 +56,7 @@ export default async function Home() {
             avatarUrl: profile.avatarUrl,
             heroImageUrl: profile.heroImageUrl
           }}
-          className="pt-28 md:pt-32"
+          className=""
         />
       </section>
 
@@ -58,6 +64,7 @@ export default async function Home() {
         profile={profile}
         stats={profile.stats}
         projects={[]}
+        videos={videos}
         experiences={[]}
         educations={[]}
         volunteerings={[]}

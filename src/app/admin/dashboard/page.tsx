@@ -49,11 +49,10 @@ import VendorSettlementsModule from "@/components/admin/VendorSettlementsModule"
 import PartnershipsModule from "@/components/admin/PartnershipsModule";
 import HariPicksModule from "@/components/admin/HariPicksModule";
 import StoriesModule from "@/components/admin/StoriesModule";
-import { Handshake, Film } from "lucide-react";
+import YouTubeModule from "@/components/admin/YouTubeModule";
+import { Handshake, Film, Youtube } from "lucide-react";
 
-
-
-type Tab = "overview" | "profile" | "professional-journey" | "messages" | "snack-central" | "billing" | "partner-network" | "vendor-central" | "public-assets" | "haripicks" | "hm-stories";
+type Tab = "overview" | "profile" | "messages" | "snack-central" | "billing" | "partner-network" | "vendor-central" | "public-assets" | "haripicks" | "hm-stories" | "youtube-manager" | "portfolio";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -67,7 +66,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "professional-journey", "messages", "snack-central", "billing", "partner-network", "vendor-central", "public-assets", "haripicks", "hm-stories"];
+        const validTabs = ["overview", "profile", "messages", "snack-central", "billing", "partner-network", "vendor-central", "public-assets", "haripicks", "hm-stories", "youtube-manager", "portfolio"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -115,7 +114,8 @@ export default function AdminDashboard() {
     const menuItems = [
         { id: "overview", title: "Command Center", icon: Home, color: "bg-blue-500" },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500" },
-        { id: "professional-journey", title: "Professional Journey", icon: Briefcase, color: "bg-amber-600" },
+        { id: "portfolio", title: "Portfolio Manager", icon: Layout, color: "bg-amber-600" },
+        { id: "youtube-manager", title: "YouTube Manager", icon: Youtube, color: "bg-red-600" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
         { id: "divider", title: "BUSINESS SECTION", icon: null, color: "" },
         { id: "snack-central", title: "Snack Central", icon: Package, color: "bg-pink-600", badge: pendingOrdersCount },
@@ -130,14 +130,8 @@ export default function AdminDashboard() {
     const renderContent = () => {
         switch (activeTab) {
             case "profile": return <ProfileModule />;
-            case "professional-journey": return (
-                <div className="space-y-16 animate-in fade-in duration-700">
-                    <ProjectsModule />
-                    <div className="pt-16 border-t border-gray-100">
-                        <TimelineModule />
-                    </div>
-                </div>
-            );
+            case "portfolio": return <ProjectsModule />;
+            case "youtube-manager": return <YouTubeModule />;
             case "messages": return <MessagesModule />;
             case "snack-central": return (
                 <div className="space-y-16 animate-in fade-in duration-700">
