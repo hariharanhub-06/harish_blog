@@ -5,12 +5,11 @@ import {
     ArrowRight, Code, Briefcase, Award, User,
     MapPin, Calendar, Mail, Phone, Send,
     CheckCircle2, Star, Github, ExternalLink,
-    GraduationCap, Linkedin, HeartHandshake
+    GraduationCap, Linkedin, HeartHandshake, Play
 } from "lucide-react";
 import CardWrapper from "@/components/CardWrapper";
 import DetailModal from "@/components/DetailModal";
 import AboutHero from "@/components/AboutHero";
-import TimelineCarousel from "@/components/TimelineCarousel";
 import Image from "next/image";
 import { InfiniteCarousel } from "./InfiniteCarousel";
 import { Tilt } from "./Tilt";
@@ -20,6 +19,7 @@ interface MainContentProps {
     profile: any;
     stats: any[];
     projects: any[];
+    videos: any[];
     experiences: any[];
     educations: any[];
     volunteerings: any[];
@@ -35,6 +35,7 @@ export default function MainContent({
     profile: initialProfile,
     stats: initialStats,
     projects: initialProjects,
+    videos: initialVideos,
     experiences: initialExperiences,
     educations: initialEducations,
     volunteerings: initialVolunteerings
@@ -42,6 +43,7 @@ export default function MainContent({
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
     const [projects, setProjects] = useState(initialProjects || []);
+    const [videos, setVideos] = useState(initialVideos || []);
     const [experiences, setExperiences] = useState(initialExperiences || []);
     const [educations, setEducations] = useState(initialEducations || []);
     const [volunteerings, setVolunteerings] = useState(initialVolunteerings || []);
@@ -58,6 +60,7 @@ export default function MainContent({
                     const data = await res.json();
                     if (data.profile) setProfile(data.profile);
                     if (data.projects) setProjects(data.projects);
+                    if (data.videos) setVideos(data.videos);
                     if (data.experiences) setExperiences(data.experiences);
                     if (data.educations) setEducations(data.educations);
                     if (data.volunteerings) setVolunteerings(data.volunteerings);
@@ -118,39 +121,39 @@ export default function MainContent({
     return (
         <div className="flex flex-col gap-8 pb-4">
             {/* Stats Section */}
-            <section className="container mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <section className="container mx-auto px-6 py-12">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {loading ? (
                         [...Array(4)].map((_, i) => (
-                            <div key={i} className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm animate-pulse h-32 flex flex-col justify-end">
-                                <div className="w-10 h-10 bg-gray-100 rounded-2xl mb-4"></div>
-                                <div className="h-6 bg-gray-100 rounded-md w-1/2 mb-1"></div>
-                                <div className="h-3 bg-gray-50 rounded-md w-1/3"></div>
+                            <div key={i} className="p-6 bg-white/5 rounded-3xl border border-white/10 shadow-sm animate-pulse h-32 flex flex-col justify-end">
+                                <div className="w-10 h-10 bg-white/10 rounded-2xl mb-4"></div>
+                                <div className="h-6 bg-white/10 rounded-md w-1/2 mb-1"></div>
+                                <div className="h-3 bg-white/5 rounded-md w-1/3"></div>
                             </div>
                         ))
                     ) : (
                         stats.map((stat: any, i: number) => {
                             const Icon = iconMap[stat.icon] || User;
                             const colors = [
-                                { color: "text-blue-600", bg: "bg-blue-50" },
-                                { color: "text-emerald-600", bg: "bg-emerald-50" },
-                                { color: "text-amber-600", bg: "bg-amber-50" },
-                                { color: "text-purple-600", bg: "bg-purple-50" },
+                                { color: "text-blue-400", bg: "bg-blue-500/10" },
+                                { color: "text-orange-500", bg: "bg-orange-500/10" },
+                                { color: "text-purple-400", bg: "bg-purple-500/10" },
+                                { color: "text-pink-400", bg: "bg-pink-500/10" },
                             ];
                             const color = colors[i % colors.length];
 
                             return (
                                 <CardWrapper key={i} index={i}>
-                                    <div className="group p-5 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:border-white transition-all duration-500 overflow-hidden relative h-full">
-                                        <span className="absolute -bottom-4 -right-2 text-8xl font-black text-gray-50 group-hover:text-gray-100 transition-colors -z-10">
+                                    <div className="group p-6 bg-white/5 rounded-3xl border border-white/10 shadow-sm hover:shadow-2xl hover:border-white/20 transition-all duration-500 overflow-hidden relative h-full">
+                                        <span className="absolute -bottom-4 -right-2 text-8xl font-black text-white/5 group-hover:text-white/10 transition-colors -z-10">
                                             {String(stat.value).replace('+', '')}
                                         </span>
 
-                                        <div className={`${color.bg} ${color.color} w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform`}>
-                                            <Icon size={20} />
+                                        <div className={`${color.bg} ${color.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform`}>
+                                            <Icon size={24} />
                                         </div>
-                                        <h3 className="text-2xl font-black text-gray-900 mb-1">{stat.value}</h3>
-                                        <p className="text-secondary text-[9px] font-black uppercase tracking-widest leading-none">{stat.label}</p>
+                                        <h3 className="text-3xl font-black text-white mb-1 tracking-tighter">{stat.value}</h3>
+                                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest leading-none">{stat.label}</p>
                                     </div>
                                 </CardWrapper>
                             );
@@ -160,11 +163,11 @@ export default function MainContent({
             </section>
 
             {/* Infinite Skill Carousel */}
-            <div className="py-2 border-y border-gray-50 bg-white/50 backdrop-blur-sm">
+            <div className="py-4 border-y border-white/5 bg-white/5 backdrop-blur-sm">
                 <InfiniteCarousel
                     speed={120}
                     items={SKILLS.map(skill => (
-                        <span key={skill} className="text-sm font-black uppercase tracking-[0.3em] text-gray-400/60 hover:text-primary transition-colors cursor-default select-none">
+                        <span key={skill} className="text-sm font-black uppercase tracking-[0.3em] text-white/20 hover:text-orange-500 transition-colors cursor-default select-none">
                             {skill}
                         </span>
                     ))}
@@ -181,88 +184,71 @@ export default function MainContent({
                     experience={profile.stats?.find((s: any) => s.label === "Years Experience")?.value || "3+"}
                 />
 
-                {/* Professional Experience Section */}
-                {experiences.length > 0 && (
-                    <div className="mt-6 md:mt-8">
-                        <div className="text-center mb-8 px-4">
-                            <h2 className="text-xl md:text-3xl font-black mb-3 tracking-tight uppercase break-words px-2 leading-tight">Professional Experience</h2>
-                            <div className="w-12 md:w-16 h-1 md:h-1.5 bg-blue-500 mx-auto rounded-full"></div>
+                {/* YouTube Videos Section */}
+                {videos.length > 0 && (
+                    <section className="container mx-auto px-6 py-20 bg-black/20 rounded-[3rem] border border-white/5 my-12">
+                        <div className="flex flex-col items-center mb-16">
+                            <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-20">STUDIO</h2>
+                            <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter text-center relative z-10">
+                                Watch My <span className="text-orange-600">Videos</span>
+                            </h2>
+                            <div className="w-24 h-2 bg-orange-600 mt-6 rounded-full" />
                         </div>
-                        <TimelineCarousel
-                            items={[...experiences].sort((a, b) => {
-                                const getYear = (p: string) => {
-                                    if (!p) return 0;
-                                    if (p.includes("Present")) return 9999;
-                                    const years = p.match(/\b20\d{2}\b/g);
-                                    return years ? Math.max(...years.map(Number)) : 0;
-                                };
-                                return getYear(b.duration) - getYear(a.duration) || (b.displayOrder || 0) - (a.displayOrder || 0);
-                            })}
-                            type="experience"
-                            onItemClick={(item) => setSelectedItem({ data: item, type: 'experience' })}
-                            colorClass="bg-blue-500"
-                            Icon={Briefcase}
-                        />
-                    </div>
-                )}
 
-                {/* Education Section */}
-                {educations.length > 0 && (
-                    <div className="mt-6 md:mt-8">
-                        <div className="text-center mb-8 px-4">
-                            <h2 className="text-xl md:text-3xl font-black mb-3 tracking-tight uppercase break-words px-2 leading-tight">Education</h2>
-                            <div className="w-12 md:w-16 h-1 md:h-1.5 bg-amber-500 mx-auto rounded-full"></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                            {videos.map((video, i) => (
+                                <CardWrapper key={video.id} index={i}>
+                                    <div className="group relative bg-[#1a1a1a] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/40 transition-all duration-500 flex flex-col h-full">
+                                        <div className="relative aspect-video overflow-hidden">
+                                            <img
+                                                src={`https://img.youtube.com/vi/${video.youtubeVideoId}/maxresdefault.jpg`}
+                                                alt={video.title}
+                                                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100">
+                                                <div className="bg-orange-600 p-6 rounded-full shadow-[0_0_40px_rgba(234,88,12,0.5)]">
+                                                    <Play size={36} fill="white" className="text-white ml-1" />
+                                                </div>
+                                            </div>
+                                            <div className="absolute top-4 left-4">
+                                                <div className="bg-orange-600/90 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 shadow-lg">
+                                                    <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none">{video.category || "Main"}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="p-8 flex flex-col flex-grow">
+                                            <h3 className="text-2xl font-black text-white line-clamp-2 leading-tight group-hover:text-orange-500 transition-colors mb-4">
+                                                {video.title}
+                                            </h3>
+                                            <p className="text-gray-400 text-sm font-bold line-clamp-2 mb-8 leading-relaxed italic opacity-60">
+                                                {video.description || "Check out this video on my channel where I explore digital excellence and innovation."}
+                                            </p>
+                                            <div className="mt-auto pt-6 border-t border-white/5">
+                                                <a
+                                                    href={`https://youtube.com/watch?v=${video.youtubeVideoId}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-3 text-orange-600 font-black text-xs uppercase tracking-[0.2em] group-hover:gap-5 transition-all"
+                                                >
+                                                    Watch Now <ArrowRight size={16} />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardWrapper>
+                            ))}
                         </div>
-                        <TimelineCarousel
-                            items={[...educations].sort((a, b) => {
-                                const getYear = (p: string) => {
-                                    if (!p) return 0;
-                                    if (p.includes("Present")) return 9999;
-                                    const years = p.match(/\b20\d{2}\b/g);
-                                    return years ? Math.max(...years.map(Number)) : 0;
-                                };
-                                return getYear(b.period) - getYear(a.period) || (b.displayOrder || 0) - (a.displayOrder || 0);
-                            })}
-                            type="education"
-                            onItemClick={(item) => setSelectedItem({ data: item, type: 'education' })}
-                            colorClass="bg-amber-500"
-                            Icon={GraduationCap}
-                        />
-                    </div>
-                )}
-
-                {/* Volunteering Section */}
-                {volunteerings && volunteerings.length > 0 && (
-                    <div className="mt-6 md:mt-8">
-                        <div className="text-center mb-8 px-4">
-                            <h2 className="text-xl md:text-3xl font-black mb-3 tracking-tight uppercase break-words px-2 leading-tight">Volunteering</h2>
-                            <div className="w-12 md:w-16 h-1 md:h-1.5 bg-teal-500 mx-auto rounded-full"></div>
-                        </div>
-                        <TimelineCarousel
-                            items={[...volunteerings].sort((a, b) => {
-                                const getYear = (p: string) => {
-                                    if (!p) return 0;
-                                    if (p.includes("Present")) return 9999;
-                                    const years = p.match(/\b20\d{2}\b/g);
-                                    return years ? Math.max(...years.map(Number)) : 0;
-                                };
-                                return getYear(b.duration) - getYear(a.duration) || (b.displayOrder || 0) - (a.displayOrder || 0);
-                            })}
-                            type="volunteering"
-                            onItemClick={(item) => setSelectedItem({ data: item, type: 'volunteering' })}
-                            colorClass="bg-teal-500"
-                            Icon={HeartHandshake}
-                        />
-                    </div>
+                    </section>
                 )}
             </section>
 
             {/* Projects Section */}
-            <section id="portfolio" className="container mx-auto px-6 scroll-mt-20">
-                <div className="flex flex-col items-center mb-8">
-                    <h2 className="text-xl md:text-3xl font-black mb-3 tracking-tight uppercase">Featured Projects</h2>
-                    <div className="w-16 h-1.5 bg-accent rounded-full"></div>
-                    <p className="mt-4 text-secondary text-sm max-w-xl text-center font-medium">
+            <section id="portfolio" className="container mx-auto px-6 scroll-mt-20 py-20">
+                <div className="flex flex-col items-center mb-12">
+                    <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">Featured <span className="text-orange-600">Projects</span></h2>
+                    <div className="w-20 h-1.5 bg-orange-600 mt-4 rounded-full"></div>
+                    <p className="mt-6 text-gray-400 text-base max-w-xl text-center font-bold">
                         Building digital products that combine stunning design with robust business logic.
                     </p>
                 </div>
@@ -270,11 +256,11 @@ export default function MainContent({
                 {loading ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[...Array(3)].map((_, i) => (
-                            <div key={i} className="bg-white rounded-3xl overflow-hidden border border-gray-100 h-80 animate-pulse">
-                                <div className="h-56 bg-gray-100"></div>
+                            <div key={i} className="bg-white/5 rounded-3xl overflow-hidden border border-white/10 h-80 animate-pulse">
+                                <div className="h-56 bg-white/10"></div>
                                 <div className="p-5 flex flex-col gap-2">
-                                    <div className="w-1/2 h-4 bg-gray-100 rounded"></div>
-                                    <div className="w-full h-8 bg-gray-50 rounded"></div>
+                                    <div className="w-1/2 h-4 bg-white/10 rounded"></div>
+                                    <div className="w-full h-8 bg-white/5 rounded"></div>
                                 </div>
                             </div>
                         ))}
@@ -283,43 +269,43 @@ export default function MainContent({
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {projects.map((project, i) => (
                             <CardWrapper key={project.id} index={i}>
-                                <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }} className="h-full">
+                                <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.1 }} className="h-full">
                                     <div
-                                        className="group flex flex-col h-full bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
+                                        className="group flex flex-col h-full bg-[#1a1a1a] rounded-3xl overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/30 transition-all duration-500 cursor-pointer"
                                         onClick={() => setSelectedItem({ data: project, type: "project" })}
                                     >
-                                        <div className="relative h-56 overflow-hidden">
+                                        <div className="relative h-64 overflow-hidden">
                                             {project.thumbnail ? (
-                                                <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                                                <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100" />
                                             ) : (
-                                                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                                                    <span className="text-primary font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
+                                                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
+                                                    <span className="text-white font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
                                                 </div>
                                             )}
                                             <div className="absolute top-4 right-4 flex gap-2">
                                                 {project.featured && (
-                                                    <span className="bg-accent text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Featured</span>
+                                                    <span className="bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">Featured</span>
                                                 )}
                                             </div>
                                         </div>
 
-                                        <div className="p-5 flex flex-col flex-grow text-left">
-                                            <div className="flex flex-wrap gap-1.5 mb-3">
+                                        <div className="p-6 flex flex-col flex-grow text-left">
+                                            <div className="flex flex-wrap gap-2 mb-4">
                                                 {project.technologies?.slice(0, 3).map((tech: string) => (
-                                                    <span key={tech} className="text-[9px] font-black uppercase tracking-widest text-primary bg-blue-50 px-2.5 py-1 rounded-md">{tech}</span>
+                                                    <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/10 px-3 py-1.5 rounded-md">{tech}</span>
                                                 ))}
                                             </div>
 
-                                            <h3 className="text-lg font-black mb-2 group-hover:text-primary transition-colors">{project.title}</h3>
-                                            <p className="text-secondary text-xs leading-relaxed mb-4 line-clamp-2">{project.description}</p>
+                                            <h3 className="text-2xl font-black text-white mb-2 group-hover:text-orange-500 transition-colors leading-tight">{project.title}</h3>
+                                            <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2 font-bold">{project.description}</p>
 
-                                            <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
-                                                <span className="text-primary font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
-                                                    View Case Study <ArrowRight size={14} />
+                                            <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
+                                                <span className="text-orange-600 font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
+                                                    View Case Study <ArrowRight size={16} />
                                                 </span>
-                                                <div className="flex gap-3">
-                                                    {project.liveUrl && <ExternalLink size={16} className="text-gray-300" />}
-                                                    {project.repoUrl && <Github size={16} className="text-gray-300" />}
+                                                <div className="flex gap-4">
+                                                    {project.liveUrl && <ExternalLink size={18} className="text-gray-600 hover:text-white transition-colors" />}
+                                                    {project.repoUrl && <Github size={18} className="text-gray-600 hover:text-white transition-colors" />}
                                                 </div>
                                             </div>
                                         </div>
@@ -333,104 +319,67 @@ export default function MainContent({
 
 
             {/* Contact Section */}
-            <section id="contact" className="container mx-auto px-6 scroll-mt-20">
-                <div className="bg-primary rounded-3xl p-6 md:p-8 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
+            <section id="contact" className="container mx-auto px-6 scroll-mt-20 py-20">
+                <div className="bg-orange-600 rounded-[3rem] p-8 md:p-12 text-center relative overflow-hidden shadow-2xl shadow-orange-600/30">
                     <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-                    <div className="grid lg:grid-cols-2 gap-8 items-center text-left">
-                        <div className="space-y-6">
-                            <h2 className="text-2xl md:text-4xl font-black text-white leading-tight tracking-tighter">
-                                Let&apos;s Build <br /> Something <span className="text-accent italic">Extraordinary</span> Together.
+                    <div className="grid lg:grid-cols-2 gap-12 items-center text-left">
+                        <div className="space-y-8">
+                            <h2 className="text-4xl md:text-6xl font-black text-white leading-[0.9] tracking-tighter">
+                                Let&apos;s Build <br /> Something <span className="italic opacity-80 underline decoration-white/30 truncate">Extraordinary</span> Together.
                             </h2>
-                            <p className="text-white/70 text-base leading-relaxed max-w-lg">
+                            <p className="text-white/80 text-lg leading-relaxed max-w-lg font-bold">
                                 I assist startups and established businesses in building scalable digital identities and automated workflows.
                             </p>
 
-                            <div className="flex flex-col gap-4">
-                                <a href="mailto:hariharanjeyaramoorthy@gmail.com" className="flex items-center space-x-4 group">
-                                    <div className="bg-white/10 p-3 rounded-2xl text-accent border border-white/10 group-hover:bg-white/20 transition-colors">
-                                        <Mail size={20} />
+                            <div className="flex flex-col gap-6">
+                                <a href="mailto:hariharanjeyaramoorthy@gmail.com" className="flex items-center space-x-5 group">
+                                    <div className="bg-white/10 p-4 rounded-2xl text-white border border-white/10 group-hover:bg-white/20 transition-colors">
+                                        <Mail size={24} />
                                     </div>
-                                    <p className="text-lg font-bold text-white break-all">hariharanjeyaramoorthy@gmail.com</p>
+                                    <p className="text-xl font-bold text-white break-all">hariharanjeyaramoorthy@gmail.com</p>
                                 </a>
 
-                                <a href="https://wa.me/919042387152" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
-                                    <div className="bg-white/10 p-3 rounded-2xl text-green-400 border border-white/10 group-hover:bg-white/20 transition-colors">
-                                        <Phone size={20} />
+                                <a href="https://wa.me/919042387152" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-5 group">
+                                    <div className="bg-white/10 p-4 rounded-2xl text-white border border-white/10 group-hover:bg-white/20 transition-colors">
+                                        <Phone size={24} />
                                     </div>
-                                    <p className="text-lg font-bold text-white">+91 90423 87152</p>
-                                </a>
-
-                                <a href="https://www.linkedin.com/in/hari-haran-jeyaramamoorthy/" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
-                                    <div className="bg-white/10 p-3 rounded-2xl text-blue-400 border border-white/10 group-hover:bg-white/20 transition-colors">
-                                        <Linkedin size={20} />
-                                    </div>
-                                    <p className="text-lg font-bold text-white">LinkedIn</p>
-                                </a>
-
-                                <a href="https://www.instagram.com/_mr_vibrant/" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
-                                    <div className="bg-white/10 p-3 rounded-2xl text-pink-400 border border-white/10 group-hover:bg-white/20 transition-colors">
-                                        <div className="w-5 h-5 flex items-center justify-center font-black">IG</div>
-                                    </div>
-                                    <p className="text-lg font-bold text-white">Instagram</p>
-                                </a>
-
-                                <a href="https://www.facebook.com/profile.php?id=61573749598737" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
-                                    <div className="bg-white/10 p-3 rounded-2xl text-blue-600 border border-white/10 group-hover:bg-white/20 transition-colors">
-                                        <div className="w-5 h-5 flex items-center justify-center font-black">FB</div>
-                                    </div>
-                                    <p className="text-lg font-bold text-white">Facebook</p>
+                                    <p className="text-xl font-bold text-white">+91 90423 87152</p>
                                 </a>
                             </div>
                         </div>
 
-                        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl relative">
+                        <div className="bg-[#1a1a1a] p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative border border-white/5">
                             {contactStatus === "success" ? (
                                 <div className="py-12 flex flex-col items-center text-center animate-in fade-in zoom-in duration-500">
-                                    <div className="bg-green-50 text-green-600 p-8 rounded-full mb-8">
+                                    <div className="bg-green-500/10 text-green-500 p-8 rounded-full mb-8">
                                         <CheckCircle2 size={64} />
                                     </div>
-                                    <p className="text-2xl font-black text-gray-900 mb-4">Message Sent!</p>
-                                    <p className="text-secondary font-medium mb-8">I&apos;ll get back to you within 24 hours.</p>
-                                    <button onClick={() => setContactStatus("idle")} className="text-primary font-black uppercase tracking-widest text-sm hover:underline">
+                                    <p className="text-3xl font-black text-white mb-4">Message Sent!</p>
+                                    <p className="text-gray-400 font-bold mb-8">I&apos;ll get back to you within 24 hours.</p>
+                                    <button onClick={() => setContactStatus("idle")} className="text-orange-500 font-black uppercase tracking-widest text-sm hover:underline">
                                         Send another
                                     </button>
                                 </div>
                             ) : (
-                                <form className="space-y-4 md:space-y-6" onSubmit={handleContactSubmit}>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Name</label>
-                                        <input name="name" required placeholder="Your Name or Organization" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Company Name <span className="text-gray-300 lowercase text-[9px]">(optional)</span></label>
-                                        <input name="company" placeholder="Ex: Acme Corp" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mail ID</label>
-                                        <input name="email" required type="email" placeholder="example@email.com" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile Number</label>
-                                        <input name="mobile" required type="tel" placeholder="+91 90423 87152" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                <form className="space-y-6" onSubmit={handleContactSubmit}>
+                                    <div className="grid md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Website <span className="text-gray-300 lowercase text-[9px]">(opt)</span></label>
-                                            <input name="website" placeholder="https://" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-sm" />
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Name</label>
+                                            <input name="name" required placeholder="Full Name" className="w-full bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-white" />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Social Media <span className="text-gray-300 lowercase text-[9px]">(opt)</span></label>
-                                            <input name="socialMedia" placeholder="@handle" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-sm" />
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Mail ID</label>
+                                            <input name="email" required type="email" placeholder="example@email.com" className="w-full bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-white" />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Message</label>
-                                        <textarea name="message" required rows={4} placeholder="How can I help you grow?" className="w-full bg-gray-50 border-0 rounded-2xl p-4 md:p-5 focus:ring-2 focus:ring-primary transition-all font-bold" />
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Message</label>
+                                        <textarea name="message" required rows={4} placeholder="How can I help you grow?" className="w-full bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-white" />
                                     </div>
                                     <button
                                         disabled={contactStatus === "loading"}
-                                        className="w-full bg-primary text-white py-4 rounded-xl font-black text-lg md:text-xl flex items-center justify-center space-x-3 shadow-xl hover:shadow-primary/30 transition-all disabled:opacity-50"
+                                        className="w-full bg-orange-600 text-white py-5 rounded-2xl font-black text-xl flex items-center justify-center space-x-3 shadow-xl hover:shadow-orange-600/30 transition-all disabled:opacity-50"
                                     >
                                         {contactStatus === "loading" ? <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <span>Start Conversation</span>}
                                     </button>

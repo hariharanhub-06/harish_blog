@@ -38,6 +38,7 @@ export const projects = pgTable("projects", {
   category: text("category"),
   featured: boolean("featured").default(false),
   displayOrder: integer("order").default(0),
+  tags: jsonb("tags"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -401,4 +402,16 @@ export const storyEpisodes = pgTable("story_episodes", {
   episodeNumber: integer("episode_number").default(1),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const youtubeVideos = pgTable("youtube_videos", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text("title").notNull(),
+  youtubeVideoId: text("youtube_video_id").notNull(),
+  thumbnailUrl: text("thumbnail_url"),
+  description: text("description"),
+  category: text("category"),
+  displayOrder: integer("order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
