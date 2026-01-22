@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Youtube, Twitter, Instagram, MessageCircle, ArrowRight } from "lucide-react";
+import { Mail, Instagram, MessageCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { MagneticButton } from "./MagneticButton";
@@ -20,10 +20,9 @@ interface HeroProps {
 
 export default function Hero({ profile, className }: HeroProps) {
     const socialLinks = [
-        { icon: MessageCircle, href: "#", color: "hover:bg-blue-500" },
-        { icon: Twitter, href: "#", color: "hover:bg-blue-400" },
-        { icon: Instagram, href: "#", color: "hover:bg-pink-500" },
-        { icon: Youtube, href: "#", color: "hover:bg-red-600" },
+        { icon: MessageCircle, href: "https://wa.me/919042387152", color: "hover:bg-green-500" },
+        { icon: Instagram, href: "https://instagram.com/_mr_vibrant", color: "hover:bg-pink-500" },
+        { icon: Mail, href: "mailto:hariharanjeyaramamoorthy@gmail.com", color: "hover:bg-orange-600" },
     ];
 
     return (
@@ -40,10 +39,10 @@ export default function Hero({ profile, className }: HeroProps) {
                 </motion.h2>
             </div>
 
-            <div className="container mx-auto px-4 relative z-10 w-full max-w-7xl">
-                <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12">
+            <div className="container mx-auto px-4 relative z-10 w-full max-w-[1400px]">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
                     {/* Character/Portrait Side */}
-                    <div className="w-full lg:w-2/5 flex justify-center lg:justify-center">
+                    <div className="w-full lg:w-1/2 flex justify-center">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -54,7 +53,7 @@ export default function Hero({ profile, className }: HeroProps) {
                             <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent rounded-full blur-3xl -z-10" />
 
                             <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
-                                <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[420px] lg:h-[420px] rounded-full overflow-hidden border-4 md:border-8 border-white/5 shadow-2xl">
+                                <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[480px] lg:h-[480px] rounded-full overflow-hidden border-4 md:border-8 border-white/5 shadow-2xl">
                                     {profile.avatarUrl ? (
                                         <Image
                                             src={profile.avatarUrl}
@@ -74,7 +73,7 @@ export default function Hero({ profile, className }: HeroProps) {
                     </div>
 
                     {/* Content Side */}
-                    <div className="w-full lg:w-3/5 space-y-6 lg:space-y-8 text-center lg:text-left">
+                    <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -83,11 +82,11 @@ export default function Hero({ profile, className }: HeroProps) {
                         >
                             <span className="text-orange-500 font-black uppercase tracking-[0.4em] text-[10px] md:text-xs">Hello, my name is</span>
                             <h1 className="flex flex-col mt-4 font-black tracking-tighter text-white w-full overflow-visible">
-                                <span className="text-[clamp(2.5rem,7vw,6rem)] leading-[1.1] whitespace-nowrap block">Hari Haran</span>
-                                <span className="text-[clamp(1.5rem,6.2vw,5.5rem)] leading-[1] text-orange-600 whitespace-nowrap block mt-1">Jeyaramamoorthy</span>
+                                <span className="text-[clamp(2.5rem,5.5vw,5rem)] leading-[1] whitespace-nowrap block">Hari Haran</span>
+                                <span className="text-[clamp(1.5rem,4.8vw,4.5rem)] leading-[1] text-orange-600 whitespace-nowrap block mt-2">Jeyaramamoorthy</span>
                             </h1>
-                            <p className="max-w-xl mx-auto mt-8 text-xs font-bold leading-relaxed tracking-[0.2em] text-gray-400 uppercase md:text-sm lg:text-base lg:mx-0 opacity-80">
-                                {profile.headline || "I'm a Developer & Creative"}
+                            <p className="max-w-2xl mx-auto mt-10 text-[10px] md:text-sm font-bold leading-relaxed tracking-[0.2em] text-gray-400 uppercase lg:mx-0 opacity-80">
+                                {profile.headline?.replace(/ PRO$/i, "") || "Web/App Developer | Business Consultant | Job Placement Expert | Operations & Partnerships Manager | Snack Business Owner | Project Management"}
                             </p>
                         </motion.div>
 
@@ -102,6 +101,8 @@ export default function Hero({ profile, className }: HeroProps) {
                                 <Link
                                     key={i}
                                     href={social.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className={cn(
                                         "w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/60 transition-all duration-300 border border-white/10 shadow-lg",
                                         social.color,
