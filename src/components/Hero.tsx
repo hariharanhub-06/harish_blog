@@ -81,12 +81,11 @@ export default function Hero({ profile, className }: HeroProps) {
                             transition={{ duration: 0.6 }}
                         >
                             <span className="text-orange-500 font-black uppercase tracking-[0.4em] text-[10px] md:text-xs">Hello, my name is</span>
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white mt-4 leading-[1.1] md:leading-[1] tracking-tighter overflow-visible">
-                                {profile.name.split(" ").map((word, i) => (
-                                    <span key={i} className="block last:text-orange-600 break-words">{word}</span>
-                                ))}
+                            <h1 className="flex flex-col mt-4 font-black tracking-tighter text-white">
+                                <span className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl leading-none whitespace-nowrap">Hari Haran</span>
+                                <span className="text-[6.5vw] md:text-6xl lg:text-7xl xl:text-8xl leading-none text-orange-600 whitespace-nowrap">Jeyaramamoorthy</span>
                             </h1>
-                            <p className="text-gray-400 font-bold text-xs md:text-sm lg:text-base mt-6 uppercase tracking-[0.2em] max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                            <p className="max-w-2xl mx-auto mt-6 text-xs font-bold leading-relaxed tracking-widest text-gray-400 uppercase md:text-sm lg:text-base lg:mx-0">
                                 {profile.headline || "I'm a Developer & Creative"}
                             </p>
                         </motion.div>
