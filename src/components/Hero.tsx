@@ -82,11 +82,11 @@ export default function Hero({ profile, className }: HeroProps) {
                             className="w-full"
                         >
                             <span className="text-orange-500 font-black uppercase tracking-[0.4em] text-[10px] md:text-xs">Hello, my name is</span>
-                            <h1 className="flex flex-col mt-4 font-black tracking-tighter text-white w-full">
-                                <span className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl leading-none whitespace-nowrap">Hari Haran</span>
-                                <span className="text-[min(8.5vw,5.5rem)] md:text-6xl lg:text-7xl xl:text-8xl leading-[1.1] text-orange-600 whitespace-nowrap block w-full overflow-visible">Jeyaramamoorthy</span>
+                            <h1 className="flex flex-col mt-4 font-black tracking-tighter text-white w-full overflow-visible">
+                                <span className="text-[clamp(2.5rem,7vw,6rem)] leading-[1.1] whitespace-nowrap block">Hari Haran</span>
+                                <span className="text-[clamp(1.5rem,6.2vw,5.5rem)] leading-[1] text-orange-600 whitespace-nowrap block mt-1">Jeyaramamoorthy</span>
                             </h1>
-                            <p className="max-w-xl mx-auto mt-8 text-xs font-bold leading-relaxed tracking-[0.15em] text-gray-400 uppercase md:text-sm lg:text-base lg:mx-0">
+                            <p className="max-w-xl mx-auto mt-8 text-xs font-bold leading-relaxed tracking-[0.2em] text-gray-400 uppercase md:text-sm lg:text-base lg:mx-0 opacity-80">
                                 {profile.headline || "I'm a Developer & Creative"}
                             </p>
                         </motion.div>
