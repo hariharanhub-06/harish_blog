@@ -29,33 +29,32 @@ export default function Hero({ profile, className }: HeroProps) {
     return (
         <section className={cn("relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#0e0e0e] pt-20", className)}>
             {/* Large Background Outline Text */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
+            <div className="absolute inset-0 flex items-center justify-start pointer-events-none select-none overflow-hidden z-0 pl-[10%] opacity-10">
                 <motion.h2
-                    initial={{ opacity: 0, x: -100 }}
+                    initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                    className="text-[20vw] font-black text-outline uppercase leading-none whitespace-nowrap opacity-20"
+                    transition={{ duration: 2, ease: "easeOut" }}
+                    className="text-[10vw] font-black text-outline uppercase leading-none whitespace-nowrap"
                 >
-                    {profile.name.split(" ")[0]}
-                    <span className="text-outline-vibrant ml-10">{profile.name.split(" ")[1] || "PERSONA"}</span>
+                    {profile.name.split(" ").slice(0, 1).join(" ")}
                 </motion.h2>
             </div>
 
             <div className="container mx-auto px-6 relative z-10">
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div className="grid lg:grid-cols-2 gap-8 lg:gap-20 items-center">
                     {/* Character/Portrait Side */}
-                    <div className="order-2 lg:order-1 flex justify-center">
+                    <div className="order-2 lg:order-1 flex justify-center lg:justify-end">
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
+                            initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 1, type: "spring" }}
                             className="relative"
                         >
                             {/* Decorative circular element */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 to-transparent rounded-full blur-3xl -z-10 animate-pulse" />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent rounded-full blur-3xl -z-10" />
 
-                            <Tilt options={{ max: 15, speed: 400, glare: true, "max-glare": 0.2 }}>
-                                <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-full overflow-hidden border-8 border-white/5 shadow-2xl">
+                            <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
+                                <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[380px] lg:h-[380px] rounded-full overflow-hidden border-4 md:border-8 border-white/5 shadow-2xl">
                                     {profile.avatarUrl ? (
                                         <Image
                                             src={profile.avatarUrl}
@@ -75,19 +74,19 @@ export default function Hero({ profile, className }: HeroProps) {
                     </div>
 
                     {/* Content Side */}
-                    <div className="order-1 lg:order-2 space-y-8 text-center lg:text-left">
+                    <div className="order-1 lg:order-2 space-y-6 lg:space-y-8 text-center lg:text-left">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
                         >
-                            <span className="text-orange-500 font-black uppercase tracking-[0.3em] text-xs">Hello, my name is</span>
-                            <h1 className="text-6xl md:text-8xl font-black text-white mt-4 leading-[0.9] tracking-tighter">
+                            <span className="text-orange-500 font-black uppercase tracking-[0.4em] text-[10px] md:text-xs">Hello, my name is</span>
+                            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white mt-4 leading-[1.1] md:leading-[1] tracking-tighter overflow-visible">
                                 {profile.name.split(" ").map((word, i) => (
-                                    <span key={i} className="block">{word}</span>
+                                    <span key={i} className="block last:text-orange-600 break-words">{word}</span>
                                 ))}
                             </h1>
-                            <p className="text-gray-400 font-bold text-lg mt-6 uppercase tracking-widest max-w-md mx-auto lg:mx-0">
+                            <p className="text-gray-400 font-bold text-xs md:text-sm lg:text-base mt-6 uppercase tracking-[0.2em] max-w-xl mx-auto lg:mx-0 leading-relaxed">
                                 {profile.headline || "I'm a Developer & Creative"}
                             </p>
                         </motion.div>

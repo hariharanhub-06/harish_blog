@@ -67,16 +67,16 @@ export default function AboutHero({ name, about, location, imageUrl, experience 
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1, ease: "easeOut" }}
-                className="space-y-10 order-1 lg:order-2"
+                className="space-y-8 order-1 lg:order-2"
             >
                 <div className="space-y-4">
                     <span className="text-orange-600 font-black uppercase tracking-[0.3em] text-xs">My Background</span>
-                    <h2 className="text-4xl md:text-7xl font-black text-white leading-[0.9] tracking-tighter">
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1] tracking-tighter">
                         Innovating <br /> The <span className="text-outline-vibrant">Digital</span> <br /> Frontier.
                     </h2>
                 </div>
 
-                <p className="text-gray-400 text-lg md:text-xl leading-relaxed font-bold max-w-xl">
+                <p className="text-gray-400 text-base md:text-lg leading-relaxed font-bold max-w-xl">
                     {about}
                 </p>
 
