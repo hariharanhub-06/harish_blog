@@ -12,7 +12,7 @@ export default async function Home() {
   // Default fallback data
   const defaultProfile = {
     name: "Hari Haran Jeyaramamoorthy",
-    headline: "Web/App Developer | Business Consultant | Operations & Partnerships Manager",
+    headline: "Web/App Developer | Business Consultant | Job Placement Expert | Operations & Partnerships Manager | Snack Business Owner | Project Management",
     avatarUrl: "/hari_photo.png",
     heroImageUrl: null,
     about: "Passionate developer and business strategist focused on building innovative solutions.",
