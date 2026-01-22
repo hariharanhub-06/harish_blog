@@ -29,21 +29,21 @@ export default function Hero({ profile, className }: HeroProps) {
     return (
         <section className={cn("relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#0e0e0e] pt-20", className)}>
             {/* Large Background Outline Text */}
-            <div className="absolute inset-0 flex items-center justify-start pointer-events-none select-none overflow-hidden z-0 pl-[10%] opacity-10">
+            <div className="absolute inset-0 flex items-center justify-start pointer-events-none select-none overflow-hidden z-0 pl-[5%] opacity-5">
                 <motion.h2
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 2, ease: "easeOut" }}
-                    className="text-[10vw] font-black text-outline uppercase leading-none whitespace-nowrap"
+                    className="text-[12vw] font-black text-outline uppercase leading-none whitespace-nowrap"
                 >
                     {profile.name.split(" ").slice(0, 1).join(" ")}
                 </motion.h2>
             </div>
 
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="grid lg:grid-cols-2 gap-8 lg:gap-20 items-center">
+            <div className="container mx-auto px-4 relative z-10 w-full max-w-7xl">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12">
                     {/* Character/Portrait Side */}
-                    <div className="order-2 lg:order-1 flex justify-center lg:justify-end">
+                    <div className="w-full lg:w-2/5 flex justify-center lg:justify-center">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -54,7 +54,7 @@ export default function Hero({ profile, className }: HeroProps) {
                             <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent rounded-full blur-3xl -z-10" />
 
                             <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
-                                <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[380px] lg:h-[380px] rounded-full overflow-hidden border-4 md:border-8 border-white/5 shadow-2xl">
+                                <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[420px] lg:h-[420px] rounded-full overflow-hidden border-4 md:border-8 border-white/5 shadow-2xl">
                                     {profile.avatarUrl ? (
                                         <Image
                                             src={profile.avatarUrl}
@@ -74,18 +74,19 @@ export default function Hero({ profile, className }: HeroProps) {
                     </div>
 
                     {/* Content Side */}
-                    <div className="order-1 lg:order-2 space-y-6 lg:space-y-8 text-center lg:text-left">
+                    <div className="w-full lg:w-3/5 space-y-6 lg:space-y-8 text-center lg:text-left">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
+                            className="w-full"
                         >
                             <span className="text-orange-500 font-black uppercase tracking-[0.4em] text-[10px] md:text-xs">Hello, my name is</span>
-                            <h1 className="flex flex-col mt-4 font-black tracking-tighter text-white">
+                            <h1 className="flex flex-col mt-4 font-black tracking-tighter text-white w-full">
                                 <span className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl leading-none whitespace-nowrap">Hari Haran</span>
-                                <span className="text-[6.5vw] md:text-6xl lg:text-7xl xl:text-8xl leading-none text-orange-600 whitespace-nowrap">Jeyaramamoorthy</span>
+                                <span className="text-[min(8.5vw,5.5rem)] md:text-6xl lg:text-7xl xl:text-8xl leading-[1.1] text-orange-600 whitespace-nowrap block w-full overflow-visible">Jeyaramamoorthy</span>
                             </h1>
-                            <p className="max-w-2xl mx-auto mt-6 text-xs font-bold leading-relaxed tracking-widest text-gray-400 uppercase md:text-sm lg:text-base lg:mx-0">
+                            <p className="max-w-xl mx-auto mt-8 text-xs font-bold leading-relaxed tracking-[0.15em] text-gray-400 uppercase md:text-sm lg:text-base lg:mx-0">
                                 {profile.headline || "I'm a Developer & Creative"}
                             </p>
                         </motion.div>
