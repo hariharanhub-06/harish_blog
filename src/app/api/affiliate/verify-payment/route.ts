@@ -4,6 +4,7 @@ import { affiliates, affiliateTransactions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
 import { generatePassword, findBinaryPlacement, generateCouponCode } from "@/lib/affiliate-utils";
+import { sendAffiliateCredentialsEmail } from "@/lib/mail";
 
 export async function POST(req: Request) {
     try {
@@ -69,6 +70,20 @@ export async function POST(req: Request) {
                 position: position,
             })
             .where(eq(affiliates.id, affiliateId));
+
+        // Send Automated Email with Credentials
+        if (affiliate.email) {
+            try {
+                await sendAffiliateCredentialsEmail(
+                    affiliate.email,
+                    affiliate.fullName,
+                    couponCode,
+                    password
+                );
+            } catch (emailError) {
+                console.error("Failed to send credentials email after payment:", emailError);
+            }
+        }
 
         // Referrer Bonus
         if (affiliate.referrerId) {
