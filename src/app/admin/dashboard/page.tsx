@@ -48,11 +48,10 @@ import VendorProductAssignmentModule from "@/components/admin/VendorProductAssig
 import VendorSettlementsModule from "@/components/admin/VendorSettlementsModule";
 import PartnershipsModule from "@/components/admin/PartnershipsModule";
 import HariPicksModule from "@/components/admin/HariPicksModule";
-import StoriesModule from "@/components/admin/StoriesModule";
 import YouTubeModule from "@/components/admin/YouTubeModule";
-import { Handshake, Film, Youtube } from "lucide-react";
+import { Handshake, Youtube } from "lucide-react";
 
-type Tab = "overview" | "profile" | "messages" | "snack-central" | "billing" | "partner-network" | "vendor-central" | "public-assets" | "haripicks" | "hm-stories" | "youtube-manager" | "portfolio";
+type Tab = "overview" | "profile" | "messages" | "snack-central" | "billing" | "partner-network" | "vendor-central" | "public-assets" | "haripicks" | "youtube-manager" | "portfolio";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -66,7 +65,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "snack-central", "billing", "partner-network", "vendor-central", "public-assets", "haripicks", "hm-stories", "youtube-manager", "portfolio"];
+        const validTabs = ["overview", "profile", "messages", "snack-central", "billing", "partner-network", "vendor-central", "public-assets", "haripicks", "youtube-manager", "portfolio"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         }
@@ -120,7 +119,6 @@ export default function AdminDashboard() {
         { id: "divider", title: "BUSINESS SECTION", icon: null, color: "" },
         { id: "snack-central", title: "Snack Central", icon: Package, color: "bg-pink-600", badge: pendingOrdersCount },
         { id: "haripicks", title: "HariPicks Manager", icon: ShoppingCart, color: "bg-purple-600" },
-        { id: "hm-stories", title: "HM Stories", icon: Film, color: "bg-indigo-600" },
         { id: "billing", title: "Billing / Invoice", icon: FileText, color: "bg-orange-500" },
         { id: "partner-network", title: "Partner Network", icon: Users, color: "bg-orange-600" },
         { id: "vendor-central", title: "Vendor Central", icon: Building, color: "bg-teal-600" },
@@ -155,7 +153,6 @@ export default function AdminDashboard() {
             );
             case "vendor-central": return <VendorsModule />;
             case "haripicks": return <HariPicksModule />;
-            case "hm-stories": return <StoriesModule />;
             case "public-assets": return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <ReviewsModule />
