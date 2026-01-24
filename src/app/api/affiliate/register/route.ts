@@ -11,9 +11,9 @@ export async function POST(req: Request) {
         const { fullName, mobile, upiId, email, socialLink, referrerCode } = body;
 
         // Validate required fields
-        if (!fullName || !mobile || !upiId) {
+        if (!fullName || !mobile || !upiId || !email) {
             return NextResponse.json(
-                { error: "Full name, mobile number, and UPI ID are required" },
+                { error: "Full name, mobile number, UPI ID, and email address are required" },
                 { status: 400 }
             );
         }
@@ -27,10 +27,19 @@ export async function POST(req: Request) {
         }
 
         // Check if mobile already exists
-        const existing = await db.select().from(affiliates).where(eq(affiliates.mobile, mobile));
-        if (existing.length > 0) {
+        const existingMobile = await db.select().from(affiliates).where(eq(affiliates.mobile, mobile));
+        if (existingMobile.length > 0) {
             return NextResponse.json(
                 { error: "This mobile number is already registered" },
+                { status: 400 }
+            );
+        }
+
+        // Check if email already exists
+        const existingEmail = await db.select().from(affiliates).where(eq(affiliates.email, email));
+        if (existingEmail.length > 0) {
+            return NextResponse.json(
+                { error: "This email address is already registered" },
                 { status: 400 }
             );
         }

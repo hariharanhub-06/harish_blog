@@ -387,7 +387,17 @@ Start promoting and tracking your binary team growth today! 🚀
                     </button>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center flex-1 max-w-md">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                            type="text"
+                            placeholder="Search by name, mobile or email..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary outline-none transition-all"
+                        />
+                    </div>
                     <button
                         onClick={fetchAffiliates}
                         className="p-2 bg-gray-50 text-gray-500 rounded-lg hover:bg-gray-100 transition-all"

@@ -4,6 +4,7 @@ import { affiliates, snackOrders, affiliateTransactions, payoutRequests } from "
 import { eq, desc, sql, count, or, and, inArray } from "drizzle-orm";
 import { generatePassword, findBinaryPlacement, generateCouponCode } from "@/lib/affiliate-utils";
 import { getAffiliateTier } from "@/lib/affiliate-tiers";
+import { sendAffiliateCredentialsEmail } from "@/lib/mail";
 
 
 // GET - Fetch all affiliates with stats
@@ -97,10 +98,25 @@ export async function POST(req: NextRequest) {
                 .where(eq(affiliates.id, id))
                 .returning();
 
+            // Send Automated Email with Credentials
+            if (updated.email) {
+                try {
+                    await sendAffiliateCredentialsEmail(
+                        updated.email,
+                        updated.fullName,
+                        couponCode,
+                        password
+                    );
+                } catch (emailError) {
+                    console.error("Failed to send credentials email:", emailError);
+                    // We don't fail the approval if email fails, but log it
+                }
+            }
+
             return NextResponse.json({
                 success: true,
                 affiliate: updated,
-                message: "Affiliate approved with password and placement"
+                message: "Affiliate approved with password and placement. Credentials email sent."
             });
 
         } else if (action === "reject") {
