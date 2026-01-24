@@ -176,7 +176,7 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-[#fcfcfd] flex relative overflow-hidden font-poppins">
+        <div className="min-h-screen bg-[#fcfcfd] flex relative overflow-hidden font-poppins text-gray-900">
             {/* Soft Background Decorative Blobs */}
             <div className="fixed top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="fixed bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />

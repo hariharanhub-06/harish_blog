@@ -29,7 +29,7 @@ export default function AdminLogin() {
     };
 
     return (
-        <div className="container mx-auto px-6 py-20 flex flex-col items-center">
+        <div className="container mx-auto px-6 py-20 flex flex-col items-center text-gray-900">
             <div className="w-full max-w-md bg-white p-12 rounded-[2.5rem] shadow-2xl border border-gray-100">
                 <div className="text-center mb-10">
                     <div className="inline-flex p-4 bg-blue-50 text-primary rounded-2xl mb-6">
