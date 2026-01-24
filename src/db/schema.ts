@@ -379,31 +379,6 @@ export const affiliateProducts = pgTable("affiliate_products", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const stories = pgTable("stories", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  title: text("title").notNull(),
-  description: text("description"),
-  thumbnailUrl: text("thumbnail_url"),
-  youtubePlaylistId: text("youtube_playlist_id"),
-  displayOrder: integer("display_order").default(0),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const storyEpisodes = pgTable("story_episodes", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  storyId: text("story_id").notNull(),
-  title: text("title").notNull(),
-  description: text("description"),
-  youtubeVideoId: text("youtube_video_id").notNull(),
-  thumbnailUrl: text("thumbnail_url"),
-  duration: text("duration"),
-  episodeNumber: integer("episode_number").default(1),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
 export const youtubeVideos = pgTable("youtube_videos", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   title: text("title").notNull(),

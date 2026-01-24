@@ -121,20 +121,6 @@ export default function Navbar() {
                                             <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Tech</span>
                                         </div>
                                     </Link>
-                                    <Link
-                                        href="/business/hm-stories"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`flex items-center space-x-3 p-3 rounded-xl transition-all group/item mt-1 ${isDarkTheme ? "hover:bg-white/5" : "hover:bg-primary/5"}`}
-                                    >
-                                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-gradient-to-br from-indigo-600 to-blue-600 shadow-sm border border-gray-100 flex items-center justify-center">
-                                            <span className="text-white font-black text-xs">▶</span>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className={`text-xs font-black ${isDarkTheme ? "text-white" : "text-gray-900"} group-hover/item:text-orange-500`}>HM Stories</span>
-                                            <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Videos</span>
-                                        </div>
-                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -221,6 +207,6 @@ export default function Navbar() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </nav>
+        </nav >
     );
 }
