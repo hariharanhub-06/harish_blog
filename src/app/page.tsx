@@ -47,6 +47,37 @@ export default async function Home() {
     orderBy: (videos, { desc }) => [desc(videos.displayOrder), desc(videos.createdAt)]
   });
 
+  // Fetch Projects
+  const dbProjects = await db.query.projects.findMany({
+    orderBy: (projects, { desc }) => [desc(projects.featured), desc(projects.displayOrder), desc(projects.createdAt)]
+  });
+
+  // Fetch Experience
+  const experiences = await db.query.experience.findMany({
+    orderBy: (experience, { desc }) => [desc(experience.displayOrder), desc(experience.createdAt)]
+  });
+
+  // Fetch Education
+  const educations = await db.query.education.findMany({
+    orderBy: (education, { desc }) => [desc(education.displayOrder)]
+  });
+
+  // Fetch Volunteering
+  const volunteerings = await db.query.volunteering.findMany({
+    orderBy: (volunteering, { desc }) => [desc(volunteering.displayOrder)]
+  });
+
+  // Fetch Skills
+  const dbSkills = await db.query.skills.findMany({
+    orderBy: (skills, { desc }) => [desc(skills.displayOrder)]
+  });
+
+  // Fetch Partnerships
+  const partnerships = await db.query.partnerships.findMany({
+    where: (p, { eq }) => eq(p.isActive, true),
+    orderBy: (p, { desc }) => [desc(p.displayOrder)]
+  });
+
   return (
     <div className="flex flex-col gap-0 bg-[#0e0e0e] relative">
       <MatrixBackground />
@@ -65,11 +96,13 @@ export default async function Home() {
       <MainContent
         profile={profile}
         stats={profile.stats}
-        projects={[]}
+        projects={dbProjects}
         videos={videos}
-        experiences={[]}
-        educations={[]}
-        volunteerings={[]}
+        experiences={experiences}
+        educations={educations}
+        volunteerings={volunteerings}
+        skills={dbSkills}
+        partnerships={partnerships}
       />
     </div>
   );
