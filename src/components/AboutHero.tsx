@@ -54,7 +54,7 @@ export default function AboutHero({ name, about, location, imageUrl, experience 
                     </Tilt>
 
                     {/* Quick Stats Floating Card */}
-                    <div className="absolute -bottom-10 -right-6 md:-right-10 bg-white/5 backdrop-blur-xl p-8 rounded-[2rem] border border-white/10 shadow-2xl animate-in fade-in slide-in-from-right-10 duration-1000 delay-500">
+                    <div className="absolute -bottom-10 right-0 md:-right-10 bg-white/5 backdrop-blur-xl p-6 md:p-8 rounded-[2rem] border border-white/10 shadow-2xl animate-in fade-in slide-in-from-right-10 duration-1000 delay-500">
                         <div className="text-orange-600 font-black text-4xl mb-1">{experience}</div>
                         <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Years <br />Experience</div>
                     </div>

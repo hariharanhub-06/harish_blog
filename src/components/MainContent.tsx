@@ -129,7 +129,7 @@ export default function MainContent({
 
 
     return (
-        <div className="flex flex-col gap-8 pb-4">
+        <div className="flex flex-col gap-8 pb-4 overflow-x-hidden">
             {/* Stats Section */}
             <section className="container mx-auto px-6 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -296,7 +296,7 @@ export default function MainContent({
 
                 {/* YouTube Videos Section */}
                 {videos.length > 0 && (
-                    <section className="container mx-auto px-6 py-20 bg-black/20 rounded-[3rem] border border-white/5 my-12">
+                    <section className="container mx-auto px-6 py-20 bg-black/20 rounded-[3rem] border border-white/5 my-12 overflow-hidden relative">
                         <div className="flex flex-col items-center mb-16">
                             <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-20">STUDIO</h2>
                             <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter text-center relative z-10">
