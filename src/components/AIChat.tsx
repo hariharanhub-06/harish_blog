@@ -20,7 +20,15 @@ export default function AIChat() {
 
     useEffect(() => {
         const captured = localStorage.getItem("chatLeadCaptured_PROD_V1");
-        if (captured) setLeadCaptured(true);
+        const storedName = localStorage.getItem("chatUserName");
+        if (captured) {
+            setLeadCaptured(true);
+            if (storedName) {
+                setLeadData(prev => ({ ...prev, name: storedName }));
+                // Use a more natural greeting for returning users
+                setMessages([{ role: "ai", content: `Welcome back, ${storedName}! How can I assist you today?` }]);
+            }
+        }
     }, []);
 
     useEffect(() => {
@@ -65,7 +73,8 @@ export default function AIChat() {
             if (res.ok) {
                 setLeadCaptured(true);
                 localStorage.setItem("chatLeadCaptured_PROD_V1", "true");
-                setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! I am Thenali, Hari's official AI assistant. How can I help you today?` }]);
+                localStorage.setItem("chatUserName", leadData.name);
+                setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! How can I help you today?` }]);
             }
         } catch (error) {
             console.error("Lead submission error", error);
@@ -88,6 +97,7 @@ export default function AIChat() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    userName: leadData.name,
                     messages: messages
                         .filter(m => m.role === "user" || m.role === "ai")
                         .concat([{ role: "user", content: userMsg }])
