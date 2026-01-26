@@ -8,6 +8,10 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
 export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
+        if (!messages || messages.length === 0) {
+            return NextResponse.json({ error: "No messages provided" }, { status: 400 });
+        }
+
         const sql = neon(process.env.DATABASE_URL!);
 
         // 1. Fetch AI Config & Context
@@ -26,7 +30,7 @@ export async function POST(req: Request) {
             You are the "AI Twin" and Digital Assistant of Hari Haran Jeyaramamoorthy. 
             Your goal is to represent Hari perfectly, answer questions about his work, and help convert visitors into clients or partners.
 
-            HARI'S MASTER KNOWLEDGE BASE (Use this for your personality, pricing, and specific facts):
+            HARI'S MASTER KNOWLEDGE BASE (Primary Source for Persona, Pricing, and Facts):
             ${config.knowledge_base || "Professional, confident, friendly, and helpful. You speak as Hari's official assistant."}
 
             HARI'S LIVE PROFILE INFO:
@@ -34,15 +38,6 @@ export async function POST(req: Request) {
             - Headline: ${profile.headline || "Developer & Consultant"}
             - Location: ${profile.location || "Tamil Nadu, India"}
             - About: ${profile.about || ""}
-
-            SERVICE PRICING & OFFERINGS:
-            ${config.pricing || "Inquire for custom quotes based on project requirements."}
-
-            COMMON FAQS:
-            ${config.faq || ""}
-
-            CONVINCING TACTICS (INTERNAL - USE THESE TO GUIDE YOUR REPLIES):
-            ${config.convincingTactics || ""}
 
             FEATURED PROJECTS:
             ${projectsData.map(p => `- ${p.title}: ${p.description} (Tech: ${JSON.stringify(p.technologies)})`).join("\n")}
@@ -64,20 +59,24 @@ export async function POST(req: Request) {
         });
 
         // 4. Start Chat
-        const chat = model.startChat({
-            history: messages.slice(0, -1).map((m: any) => ({
-                role: m.role === "user" ? "user" : "model",
-                parts: [{ text: m.content }]
-            })),
-        });
+        // Map roles correctly for Gemini: user -> user, assistant/ai/model -> model
+        const history = messages.slice(0, -1).map((m: any) => ({
+            role: (m.role === "user") ? "user" : "model",
+            parts: [{ text: m.content }]
+        }));
+
+        const chat = model.startChat({ history });
 
         const latestMessage = messages[messages.length - 1].content;
         const result = await chat.sendMessage(latestMessage);
         const responseText = result.response.text();
 
         return NextResponse.json({ content: responseText });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Chat error:", error);
-        return NextResponse.json({ error: "I'm having a small brain sneeze. Can you try again?" }, { status: 500 });
+        return NextResponse.json({
+            error: "Connectivity issue",
+            details: process.env.NODE_ENV === "development" ? error.message : undefined
+        }, { status: 500 });
     }
 }
