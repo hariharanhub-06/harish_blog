@@ -32,13 +32,13 @@ export default function Navbar() {
 
     return (
         <nav
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 py-6`}
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 py-4 md:py-6`}
         >
             <div className={`container mx-auto max-w-5xl h-14 rounded-2xl flex justify-between items-center transition-all duration-500 border ${scrolled
                 ? (isDarkTheme ? "bg-black/80 backdrop-blur-md border-white/10 px-6 shadow-2xl" : "bg-white/95 backdrop-blur-md border-gray-100 px-6 shadow-xl")
                 : (isDarkTheme ? "bg-white/5 backdrop-blur-sm border-white/10 px-5" : "bg-white/80 backdrop-blur-sm border-gray-100 px-5 shadow-sm")
                 }`}>
-                <Link href="/" className="flex items-center gap-2 text-xl font-black tracking-tighter group">
+                <Link href="/" className="flex items-center gap-2 text-lg md:text-xl font-black tracking-tighter group shrink-0">
                     <div className="flex items-baseline">
                         <span className="text-white group-hover:text-orange-500 transition-colors">Hari</span>
                         <span className="text-white font-black opacity-80 group-hover:opacity-100 transition-opacity">Haran</span>
@@ -58,15 +58,15 @@ export default function Navbar() {
                         </Link>
                     ))}
                 </div>
-            </div>
 
-            {/* Mobile Toggle */}
-            <button
-                className="md:hidden p-3 rounded-xl border transition-all text-white bg-white/5 border-white/10"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                {isOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+                {/* Mobile Toggle */}
+                <button
+                    className="md:hidden p-2.5 rounded-xl border transition-all text-white bg-white/5 border-white/10 hover:bg-white/10 active:scale-95"
+                    onClick={() => setIsOpen(!isOpen)}
+                >
+                    {isOpen ? <X size={18} /> : <Menu size={18} />}
+                </button>
+            </div>
 
             {/* Mobile Menu */}
             <AnimatePresence>

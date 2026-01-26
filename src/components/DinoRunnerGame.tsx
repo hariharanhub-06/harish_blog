@@ -183,13 +183,13 @@ export default function DinoRunnerGame() {
     }, [gameState, score, highScore]);
 
     return (
-        <section id="dino-runner" className="py-24 px-6 bg-[#0a0a0a] relative overflow-hidden flex flex-col items-center justify-center min-h-[850px]">
-            <div className="text-center mb-12 space-y-4">
-                <span className="text-emerald-500 font-bold tracking-[0.5em] uppercase text-[10px] animate-pulse">Retro Arcade</span>
-                <h2 className="text-6xl md:text-7xl font-black text-white tracking-widest uppercase italic">
+        <section id="dino-runner" className="py-16 md:py-24 px-4 md:px-6 bg-[#0a0a0a] relative overflow-hidden flex flex-col items-center justify-center min-h-[700px] md:min-h-[850px]">
+            <div className="text-center mb-8 md:mb-12 space-y-2 md:space-y-4 px-4 w-full">
+                <span className="text-emerald-500 font-bold tracking-[0.3em] md:tracking-[0.5em] uppercase text-[9px] md:text-[10px] animate-pulse block">Retro Arcade</span>
+                <h2 className="text-[12vw] md:text-7xl font-black text-white tracking-widest uppercase italic leading-none">
                     Pixel <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Jump</span>
                 </h2>
-                <p className="text-gray-500 font-medium text-[10px] uppercase tracking-widest">A tribute to the classics • Jump over obstacles</p>
+                <p className="text-gray-500 font-medium text-[8px] md:text-[10px] uppercase tracking-widest">A tribute to the classics • Jump over obstacles</p>
             </div>
 
             <div
@@ -213,19 +213,19 @@ export default function DinoRunnerGame() {
                         >
                             {gameState === "gameover" ? (
                                 <>
-                                    <h3 className="text-4xl font-black text-rose-500 tracking-tighter mb-2 italic">GAME OVER</h3>
-                                    <div className="flex gap-6 mb-8 mt-2">
+                                    <h3 className="text-2xl md:text-4xl font-black text-rose-500 tracking-tighter mb-2 italic">GAME OVER</h3>
+                                    <div className="flex gap-4 md:gap-6 mb-6 md:mb-8 mt-2">
                                         <div className="text-center">
-                                            <p className="text-[9px] uppercase tracking-widest text-gray-400">Distance</p>
-                                            <p className="text-2xl font-black text-white">{score}</p>
+                                            <p className="text-[8px] md:text-[9px] uppercase tracking-widest text-gray-400">Distance</p>
+                                            <p className="text-xl md:text-2xl font-black text-white">{score}</p>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-[9px] uppercase tracking-widest text-gray-400">Record</p>
-                                            <p className="text-2xl font-black text-emerald-400">{highScore}</p>
+                                            <p className="text-[8px] md:text-[9px] uppercase tracking-widest text-gray-400">Record</p>
+                                            <p className="text-xl md:text-2xl font-black text-emerald-400">{highScore}</p>
                                         </div>
                                     </div>
-                                    <button className="flex items-center gap-2 px-8 py-3 bg-white text-black rounded-xl font-black uppercase text-xs tracking-widest">
-                                        <RefreshCcw size={16} /> Try Again
+                                    <button className="flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 bg-white text-black rounded-xl font-black uppercase text-[10px] md:text-xs tracking-widest active:scale-95 transition-transform">
+                                        <RefreshCcw size={14} /> Try Again
                                     </button>
                                 </>
                             ) : (
@@ -311,18 +311,18 @@ export default function DinoRunnerGame() {
                 )}
             </div>
 
-            <div className="mt-12 flex gap-8">
-                <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
-                    <Flame className="text-orange-500" size={16} />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Fast Paced</span>
+            <div className="mt-8 md:mt-12 flex flex-wrap justify-center gap-4 md:gap-8 px-6">
+                <div className="px-4 md:px-6 py-2 md:py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
+                    <Flame className="text-orange-500" size={14} />
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/60">Fast Paced</span>
                 </div>
-                <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
-                    <Trophy className="text-yellow-500" size={16} />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Skill Based</span>
+                <div className="px-4 md:px-6 py-2 md:py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
+                    <Trophy className="text-yellow-500" size={14} />
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/60">Skill Based</span>
                 </div>
-                <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
-                    <Zap className="text-blue-500" size={16} />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Infinite Run</span>
+                <div className="px-4 md:px-6 py-2 md:py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
+                    <Zap className="text-blue-500" size={14} />
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/60">Infinite Run</span>
                 </div>
             </div>
         </section>
