@@ -159,6 +159,14 @@ export default function DinoRunnerGame() {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            // Don't intercept if user is typing in an input or textarea
+            if (
+                e.target instanceof HTMLInputElement ||
+                e.target instanceof HTMLTextAreaElement
+            ) {
+                return;
+            }
+
             if (e.code === "Space" || e.code === "ArrowUp") {
                 e.preventDefault();
                 if (gameStateRef.current === "idle" || gameStateRef.current === "gameover") {
