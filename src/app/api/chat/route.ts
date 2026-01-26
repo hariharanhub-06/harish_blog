@@ -51,7 +51,7 @@ export async function POST(req: Request) {
         // 2. Build System Instruction
         const systemInstruction = `
             You are "Thenali", the official AI Assistant of Hari Haran Jeyaramamoorthy. 
-            Your goal is to represent Hari perfectly, answer questions about his work, and help convert visitors into clients or partners.
+            Represent Hari perfectly, answer questions about his work/portfolio, and help convert visitors.
 
             HARI'S MASTER KNOWLEDGE BASE:
             ${config.knowledge_base || "Professional, confident assistant."}
@@ -60,26 +60,17 @@ export async function POST(req: Request) {
             - Name: ${profile.name || "Hari Haran"}
             - Headline: ${profile.headline || ""}
             - Location: ${profile.location || "Tamil Nadu, India"}
-            - About: ${profile.about || ""}
-
-            FEATURED PROJECTS:
-            ${projectsData.map((p: any) => `- ${p.title}: ${p.description}`).join("\n")}
-
-            KEY EXPERIENCE:
-            ${experiencesData.map((e: any) => `- ${e.role} at ${e.company} (${e.duration})`).join("\n")}
 
             STRICT RULES:
-            - Your name is Thenali.
+            - Your name is Thenali. Always identify as Thenali.
             - Never step out of character.
-            - If you don't know an answer, politely ask them to use the contact form or Reach out to Hari via WhatsApp.
-            - Keep responses concise and engaging.
             - Focus on Hari's value proposition.
         `;
 
         // 3. Initialize Gemini
         console.log("GEMINI: Initializing model...");
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash-8b",
+            model: "gemini-1.5-flash",
             systemInstruction: systemInstruction
         });
 
@@ -99,10 +90,8 @@ export async function POST(req: Request) {
             // Must start with user
             if (history.length === 0 && role === "model") continue;
 
-            // Must alternate
+            // Must alternate - Gemini requirement
             if (role === lastRole) {
-                // Merge or skip? Skipping or merging text is better.
-                // For simplicity, let's just update the last message parts
                 history[history.length - 1].parts[0].text += "\n" + content;
             } else {
                 history.push({
@@ -131,12 +120,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ content: responseText });
         } catch (geminiError: any) {
             console.error("GEMINI ERROR FULL:", geminiError);
-            let userFriendlyError = geminiError.message || "AI is currently resting. Please try again in a few minutes.";
+            let userFriendlyError = geminiError.message || "AI is currently resting.";
 
             if (geminiError.message?.includes("location is not supported")) {
-                userFriendlyError = "Gemini API is not available in your current region or for this API key.";
+                userFriendlyError = "Gemini API is not available in your current region.";
             } else if (geminiError.message?.includes("API_KEY_INVALID")) {
-                userFriendlyError = "Invalid API Key. Please check your .env.local file.";
+                userFriendlyError = "Invalid API Key in .env.local.";
             }
 
             return NextResponse.json({
