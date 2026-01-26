@@ -19,7 +19,7 @@ export default function AIChat() {
     const chatRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const captured = localStorage.getItem("chatLeadCaptured_v3");
+        const captured = localStorage.getItem("chatLeadCaptured_FINAL");
         if (captured) setLeadCaptured(true);
     }, []);
 
@@ -64,7 +64,7 @@ export default function AIChat() {
             });
             if (res.ok) {
                 setLeadCaptured(true);
-                localStorage.setItem("chatLeadCaptured_v3", "true");
+                localStorage.setItem("chatLeadCaptured_FINAL", "true");
                 setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! I am Thenali, Hari's AI assistant. How can I help you today?` }]);
             }
         } catch (error) {

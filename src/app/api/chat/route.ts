@@ -85,18 +85,32 @@ export async function POST(req: Request) {
 
         // 4. Start Chat
         console.log("GEMINI: Preparing history...");
-        // Ensure alternating roles and non-empty content
-        let history = messages
-            .slice(0, -1)
-            .filter((m: any) => m.content && String(m.content).trim() !== "")
-            .map((m: any) => ({
-                role: (m.role === "user") ? "user" : "model",
-                parts: [{ text: String(m.content).trim() }]
-            }));
 
-        // If history starts with 'model', remove it (Gemini requirement)
-        if (history.length > 0 && history[0].role === "model") {
-            history.shift();
+        let history: any[] = [];
+        let lastRole: string | null = null;
+
+        // Process messages to ensure they start with 'user' and alternate roles
+        for (const m of messages.slice(0, -1)) {
+            const role = (m.role === "user") ? "user" : "model";
+            const content = String(m.content || "").trim();
+
+            if (!content) continue;
+
+            // Must start with user
+            if (history.length === 0 && role === "model") continue;
+
+            // Must alternate
+            if (role === lastRole) {
+                // Merge or skip? Skipping or merging text is better.
+                // For simplicity, let's just update the last message parts
+                history[history.length - 1].parts[0].text += "\n" + content;
+            } else {
+                history.push({
+                    role,
+                    parts: [{ text: content }]
+                });
+                lastRole = role;
+            }
         }
 
         try {
