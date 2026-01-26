@@ -27,6 +27,20 @@ export default function Hero({ profile, className }: HeroProps) {
 
     return (
         <section className={cn("relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#0e0e0e] pt-20", className)}>
+            {/* Hero Background Image */}
+            {profile.heroImageUrl && (
+                <div className="absolute inset-0 z-0">
+                    <Image
+                        src={profile.heroImageUrl}
+                        alt="Hero background"
+                        fill
+                        className="object-cover opacity-10"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#0e0e0e]/80 via-[#0e0e0e]/60 to-[#0e0e0e]" />
+                </div>
+            )}
+
             {/* Large Background Outline Text */}
             <div className="absolute inset-0 flex items-center justify-start pointer-events-none select-none overflow-hidden z-0 pl-[5%] opacity-5">
                 <motion.h2
