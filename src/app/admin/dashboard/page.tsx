@@ -28,7 +28,7 @@ import PartnershipsModule from "@/components/admin/PartnershipsModule";
 import TrainingAcademyModule from "@/components/admin/TrainingAcademyModule";
 import YouTubeModule from "@/components/admin/YouTubeModule";
 
-type Tab = "overview" | "profile" | "messages" | "partner-network" | "youtube-manager" | "portfolio" | "training-academy" | "timeline";
+type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "portfolio" | "training-academy" | "timeline";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "partner-network", "youtube-manager", "portfolio", "training-academy", "timeline"];
+        const validTabs = ["overview", "profile", "messages", "youtube-manager", "portfolio", "training-academy", "timeline"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -92,7 +92,6 @@ export default function AdminDashboard() {
         { id: "youtube-manager", title: "YouTube Manager", icon: Youtube, color: "bg-red-600" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
-        { id: "partner-network", title: "Partnerships", icon: Users, color: "bg-orange-600" },
     ];
 
     const renderContent = () => {
@@ -103,7 +102,6 @@ export default function AdminDashboard() {
             case "messages": return <MessagesModule />;
             case "training-academy": return <TrainingAcademyModule />;
             case "timeline": return <TimelineModule />;
-            case "partner-network": return <PartnershipsModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <OverviewModule />
