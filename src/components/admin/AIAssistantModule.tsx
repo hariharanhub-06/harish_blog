@@ -5,10 +5,7 @@ import { Sparkles, Save, Loader2, Brain, DollarSign, CircleHelp, MessageSquareTe
 
 export default function AIAssistantModule() {
     const [config, setConfig] = useState({
-        persona: "",
-        pricing: "",
-        faq: "",
-        convincingTactics: ""
+        knowledgeBase: ""
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -23,7 +20,7 @@ export default function AIAssistantModule() {
             const res = await fetch("/api/admin/ai-config");
             if (res.ok) {
                 const data = await res.json();
-                if (data) setConfig(data);
+                if (data) setConfig({ knowledgeBase: data.knowledgeBase || "" });
             }
         } catch (error) {
             console.error("Failed to fetch AI config", error);
@@ -74,102 +71,48 @@ export default function AIAssistantModule() {
                             <Brain size={32} />
                         </div>
                         <div>
-                            <h2 className="text-3xl font-black text-gray-900 tracking-tight">AI Assistant <span className="text-orange-600 italic">Settings</span></h2>
-                            <p className="text-secondary font-medium text-xs uppercase tracking-[0.2em]">Train your "Digital Twin" with your persona, pricing, and sales tactics.</p>
+                            <h2 className="text-3xl font-black text-gray-900 tracking-tight">AI Master <span className="text-orange-600 italic">Knowledge Base</span></h2>
+                            <p className="text-secondary font-medium text-xs uppercase tracking-[0.2em]">Upload your stories, pricing, strategies, and facts in one place.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <form onSubmit={handleSave} className="space-y-8">
-                <div className="grid lg:grid-cols-2 gap-8">
-                    {/* Persona & Character */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm space-y-6">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
-                                <Sparkles size={20} />
+                <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-100 shadow-sm space-y-8 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-600 via-orange-400 to-orange-600" />
+
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-orange-50 text-orange-600 rounded-xl">
+                                    <Sparkles size={20} />
+                                </div>
+                                <h3 className="text-2xl font-black">Full Knowledge Training</h3>
                             </div>
-                            <h3 className="text-xl font-black">AI Persona & Character</h3>
+                            <p className="text-gray-500 text-sm font-bold leading-relaxed max-w-2xl">
+                                Paste your detailed background, exact service pricing, convincing strategies, and FAQs here.
+                                The AI will read this entire block to act as your digital twin.
+                            </p>
                         </div>
-                        <p className="text-gray-500 text-xs font-bold leading-relaxed">
-                            Describe how the bot should behave. (e.g., "Professional, confident, uses business terminology, but remains humble and helpful.")
-                        </p>
-                        <textarea
-                            value={config.persona}
-                            onChange={(e) => setConfig({ ...config, persona: e.target.value })}
-                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold min-h-[200px]"
-                            placeholder="I am the AI assistant of Hari Haran. My character is..."
-                        />
+
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className={`flex items-center space-x-3 px-10 py-5 rounded-[2rem] font-black text-xl shadow-2xl transition-all disabled:opacity-50 shrink-0 ${status === "success" ? "bg-emerald-500 text-white" : "bg-orange-600 text-white hover:scale-105 active:scale-95"
+                                }`}
+                        >
+                            {saving ? <Loader2 className="animate-spin" /> : status === "success" ? <Sparkles size={24} /> : <Save size={24} />}
+                            <span>{saving ? "Deploying..." : status === "success" ? "Sync Complete!" : "Update AI"}</span>
+                        </button>
                     </div>
 
-                    {/* Pricing Knowledge */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm space-y-6">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-                                <DollarSign size={20} />
-                            </div>
-                            <h3 className="text-xl font-black">Service Pricing</h3>
-                        </div>
-                        <p className="text-gray-500 text-xs font-bold leading-relaxed">
-                            List your services and their rough pricing. The AI will use this to answer project inquiries.
-                        </p>
-                        <textarea
-                            value={config.pricing}
-                            onChange={(e) => setConfig({ ...config, pricing: e.target.value })}
-                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold min-h-[200px]"
-                            placeholder="Web Design: ₹XX,XXX&#10;Consulting: ₹X,XXX/hour..."
-                        />
-                    </div>
-
-                    {/* FAQ & Knowledge */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm space-y-6">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-purple-50 text-purple-600 rounded-xl">
-                                <CircleHelp size={20} />
-                            </div>
-                            <h3 className="text-xl font-black">Common FAQs</h3>
-                        </div>
-                        <p className="text-gray-500 text-xs font-bold leading-relaxed">
-                            Common questions users ask and how Hari answers them specifically.
-                        </p>
-                        <textarea
-                            value={config.faq}
-                            onChange={(e) => setConfig({ ...config, faq: e.target.value })}
-                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold min-h-[200px]"
-                            placeholder="Q: Do you work with international clients?&#10;A: Yes, I have worked with..."
-                        />
-                    </div>
-
-                    {/* Convincing Tactics */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm space-y-6">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 bg-orange-50 text-orange-600 rounded-xl">
-                                <MessageSquareText size={20} />
-                            </div>
-                            <h3 className="text-xl font-black">Convincing Tactics</h3>
-                        </div>
-                        <p className="text-gray-500 text-xs font-bold leading-relaxed">
-                            Strategies the AI should use to convert visitors. (e.g., "Mention how Hari's strategies saved client X 40% on overhead.")
-                        </p>
-                        <textarea
-                            value={config.convincingTactics}
-                            onChange={(e) => setConfig({ ...config, convincingTactics: e.target.value })}
-                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold min-h-[200px]"
-                            placeholder="When a user asks about X, always mention Y to build trust..."
-                        />
-                    </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className={`flex items-center space-x-3 px-10 py-5 rounded-[2rem] font-black text-xl shadow-2xl transition-all disabled:opacity-50 ${status === "success" ? "bg-emerald-500 text-white" : "bg-orange-600 text-white hover:scale-105 active:scale-95"
-                            }`}
-                    >
-                        {saving ? <Loader2 className="animate-spin" /> : status === "success" ? <Sparkles size={24} /> : <Save size={24} />}
-                        <span>{saving ? "Deploying Knowledge..." : status === "success" ? "Persona Updated!" : "Sync with AI"}</span>
-                    </button>
+                    <textarea
+                        value={config.knowledgeBase}
+                        onChange={(e) => setConfig({ ...config, knowledgeBase: e.target.value })}
+                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-[2rem] p-8 md:p-10 focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold min-h-[500px] text-lg leading-relaxed placeholder:text-gray-300 outline-none"
+                        placeholder="Paste everything about yourself here...&#10;&#10;1. Who am I?&#10;2. My professional character...&#10;3. Service Pricing List...&#10;4. My sales strategies...&#10;5. Common Questions & Answers..."
+                    />
                 </div>
             </form>
         </div>

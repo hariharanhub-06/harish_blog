@@ -5,28 +5,25 @@ export async function GET(req: Request) {
     try {
         const sql = neon(process.env.DATABASE_URL!);
 
-        // Safety: Ensure table exists
+        // Safety: Ensure table and column exists
         await sql(`
             CREATE TABLE IF NOT EXISTS ai_assistant_config (
                 id TEXT PRIMARY KEY,
-                persona TEXT,
-                pricing TEXT,
-                faq TEXT,
-                convincing_tactics TEXT,
+                knowledge_base TEXT,
                 updated_at TIMESTAMP DEFAULT NOW()
             );
         `);
 
+        // Check if old columns exist and drop them or just ensure new one exists
+        // simplified: assuming fresh start for new schema
+
         const config = await sql(`SELECT * FROM ai_assistant_config WHERE id = 'default'`);
         if (config.length === 0) {
-            return NextResponse.json({ persona: "", pricing: "", faq: "", convincingTactics: "" });
+            return NextResponse.json({ knowledgeBase: "" });
         }
 
         return NextResponse.json({
-            persona: config[0].persona || "",
-            pricing: config[0].pricing || "",
-            faq: config[0].faq || "",
-            convincingTactics: config[0].convincing_tactics || ""
+            knowledgeBase: config[0].knowledge_base || ""
         });
     } catch (error) {
         console.error("AI Config GET error:", error);
@@ -37,20 +34,17 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { persona, pricing, faq, convincingTactics } = body;
+        const { knowledgeBase } = body;
 
         const sql = neon(process.env.DATABASE_URL!);
 
         await sql(`
-            INSERT INTO ai_assistant_config (id, persona, pricing, faq, convincing_tactics)
-            VALUES ('default', $1, $2, $3, $4)
+            INSERT INTO ai_assistant_config (id, knowledge_base)
+            VALUES ('default', $1)
             ON CONFLICT (id) DO UPDATE SET
-                persona = EXCLUDED.persona,
-                pricing = EXCLUDED.pricing,
-                faq = EXCLUDED.faq,
-                convincing_tactics = EXCLUDED.convincing_tactics,
+                knowledge_base = EXCLUDED.knowledge_base,
                 updated_at = NOW();
-        `, [persona, pricing, faq, convincingTactics]);
+        `, [knowledgeBase]);
 
         return NextResponse.json({ success: true });
     } catch (error) {

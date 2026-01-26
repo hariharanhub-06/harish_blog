@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
         // 1. Fetch AI Config & Context
         const [configData, profileData, projectsData, experiencesData] = await Promise.all([
-            sql(`SELECT * FROM ai_assistant_config WHERE id = 'default'`),
+            sql(`SELECT knowledge_base FROM ai_assistant_config WHERE id = 'default'`),
             sql(`SELECT name, about, headline, location FROM profiles LIMIT 1`),
             sql(`SELECT title, description, technologies FROM projects WHERE featured = true`),
             sql(`SELECT role, company, duration FROM experience ORDER BY "order" ASC`)
@@ -26,10 +26,10 @@ export async function POST(req: Request) {
             You are the "AI Twin" and Digital Assistant of Hari Haran Jeyaramamoorthy. 
             Your goal is to represent Hari perfectly, answer questions about his work, and help convert visitors into clients or partners.
 
-            PERSONALITY:
-            ${config.persona || "Professional, confident, friendly, and helpful. You speak as Hari's official assistant."}
+            HARI'S MASTER KNOWLEDGE BASE (Use this for your personality, pricing, and specific facts):
+            ${config.knowledge_base || "Professional, confident, friendly, and helpful. You speak as Hari's official assistant."}
 
-            HARI'S CORE INFO:
+            HARI'S LIVE PROFILE INFO:
             - Name: ${profile.name || "Hari Haran Jeyaramamoorthy"}
             - Headline: ${profile.headline || "Developer & Consultant"}
             - Location: ${profile.location || "Tamil Nadu, India"}
