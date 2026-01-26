@@ -25,13 +25,19 @@ export async function GET() {
             orderBy: [desc(volunteering.displayOrder)],
         });
 
+        const allPartnerships = await db.query.partnerships.findMany({
+            where: (p, { eq }) => eq(p.isActive, true),
+            orderBy: (p, { desc }) => [desc(p.displayOrder), desc(p.createdAt)],
+        });
+
         return NextResponse.json({
             profile: profileData,
             projects: allProjects,
             videos,
             experiences,
             educations,
-            volunteerings
+            volunteerings,
+            partnerships: allPartnerships
         });
     } catch (error) {
         console.error("Error fetching home data:", error);

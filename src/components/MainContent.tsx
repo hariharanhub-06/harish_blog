@@ -23,6 +23,7 @@ interface MainContentProps {
     experiences: any[];
     educations: any[];
     volunteerings: any[];
+    partnerships?: any[];
 }
 
 const SKILLS = [
@@ -38,7 +39,8 @@ export default function MainContent({
     videos: initialVideos,
     experiences: initialExperiences,
     educations: initialEducations,
-    volunteerings: initialVolunteerings
+    volunteerings: initialVolunteerings,
+    partnerships: initialPartnerships = []
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -47,6 +49,7 @@ export default function MainContent({
     const [experiences, setExperiences] = useState(initialExperiences || []);
     const [educations, setEducations] = useState(initialEducations || []);
     const [volunteerings, setVolunteerings] = useState(initialVolunteerings || []);
+    const [partnerships, setPartnerships] = useState(initialPartnerships || []);
 
     const [loading, setLoading] = useState(!initialProfile || initialProjects?.length === 0);
     const [selectedItem, setSelectedItem] = useState<{ data: any, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
@@ -64,6 +67,7 @@ export default function MainContent({
                     if (data.experiences) setExperiences(data.experiences);
                     if (data.educations) setEducations(data.educations);
                     if (data.volunteerings) setVolunteerings(data.volunteerings);
+                    if (data.partnerships) setPartnerships(data.partnerships);
 
                     // Re-calculate stats if profile changed
                     if (data.profile && data.profile.stats) {
@@ -163,7 +167,10 @@ export default function MainContent({
             </section>
 
             {/* Training Programs Section (Replaces Skill Carousel) */}
-            <TrainingPrograms />
+            <TrainingPrograms
+                stats={stats}
+                partnerships={partnerships}
+            />
 
             {/* About Section */}
             <section id="about" className="container mx-auto px-6 scroll-mt-20">

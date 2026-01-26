@@ -13,12 +13,12 @@ interface TrainingStatProps {
 }
 
 const TrainingStat = ({ icon: Icon, value, label, color }: TrainingStatProps) => (
-    <div className="flex flex-col items-center justify-center p-6 bg-white/5 rounded-3xl border border-white/10 hover:border-orange-500/30 transition-all duration-500 group">
-        <div className={`w-12 h-12 ${color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-            <Icon size={24} className="text-white" />
+    <div className="flex flex-col items-center justify-center p-4 md:p-6 bg-white/5 rounded-2xl md:rounded-3xl border border-white/10 hover:border-orange-500/30 transition-all duration-500 group">
+        <div className={`w-10 h-10 md:w-12 md:h-12 ${color} rounded-xl md:rounded-2xl flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform`}>
+            <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
         </div>
-        <h3 className="text-3xl font-black text-white mb-1 tracking-tighter">{value}</h3>
-        <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest text-center">{label}</p>
+        <h3 className="text-2xl md:text-3xl font-black text-white mb-0.5 md:mb-1 tracking-tighter">{value}</h3>
+        <p className="text-gray-400 text-[8px] md:text-[10px] font-black uppercase tracking-widest text-center">{label}</p>
     </div>
 );
 
@@ -40,76 +40,97 @@ const SKILLS = [
     { name: "Strategy", icon: "📈" }
 ];
 
-export function TrainingPrograms() {
+interface TrainingProgramsProps {
+    stats: any[];
+    partnerships: any[];
+}
+
+export function TrainingPrograms({ stats, partnerships }: TrainingProgramsProps) {
+    // Filter for academic partners
+    const academicPartners = partnerships.filter(p => p.partnerType === "Academic Partner" && p.isActive);
+
+    // Find training-specific stats or use defaults if not found
+    const sessionsStat = stats.find(s => s.label.toLowerCase().includes("session") || s.label.toLowerCase().includes("masterclass")) || { value: "150+", label: "Expert Sessions" };
+    const collegesStat = stats.find(s => s.label.toLowerCase().includes("college") || s.label.toLowerCase().includes("partner")) || { value: "42+", label: "Partnered Colleges" };
+    const studentsStat = stats.find(s => s.label.toLowerCase().includes("student") || s.label.toLowerCase().includes("leader") || s.label.toLowerCase().includes("mind")) || { value: "5000+", label: "Minds Empowered" };
+
     return (
-        <div className="w-full flex flex-col gap-12 py-12">
+        <div className="w-full flex flex-col gap-6 md:gap-12 py-8 md:py-12">
             {/* Stats Section */}
-            <div className="container mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="container mx-auto px-4 md:px-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
                     <TrainingStat
                         icon={Presentation}
-                        value="150+"
-                        label="Expert Sessions"
+                        value={sessionsStat.value}
+                        label={sessionsStat.label}
                         color="bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.3)]"
                     />
                     <TrainingStat
                         icon={GraduationCap}
-                        value="42+"
-                        label="Partnered Colleges"
+                        value={collegesStat.value}
+                        label={collegesStat.label}
                         color="bg-orange-600 shadow-[0_0_20px_rgba(234,88,12,0.3)]"
                     />
                     <TrainingStat
                         icon={Users}
-                        value="5000+"
-                        label="Future Leaders Mentored"
+                        value={studentsStat.value}
+                        label={studentsStat.label}
                         color="bg-purple-600 shadow-[0_0_20px_rgba(147,51,234,0.3)]"
                     />
                 </div>
             </div>
 
             {/* Marquees Section */}
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
                 {/* College Logos */}
-                <div className="py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
-                    <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
-                    <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
+                {academicPartners.length > 0 && (
+                    <div className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                        <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
+                        <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                    <div className="flex flex-col gap-2 px-6 mb-4">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500/80">Collaborations</span>
-                        <h4 className="text-xl font-black text-white uppercase tracking-tighter">Trusted Institutions</h4>
-                    </div>
+                        <div className="flex flex-col gap-1 md:gap-2 px-6 mb-3 md:mb-4">
+                            <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-orange-500/80">Collaborations</span>
+                            <h4 className="text-lg md:text-xl font-black text-white uppercase tracking-tighter">Academic Partners</h4>
+                        </div>
 
-                    <InfiniteCarousel
-                        speed={30}
-                        items={COLLEGES.map((college) => (
-                            <div key={college} className="flex items-center gap-4 px-8 py-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                                <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-xl font-bold text-white/40">
-                                    {college.charAt(0)}
+                        <InfiniteCarousel
+                            speed={30}
+                            items={academicPartners.map((partner) => (
+                                <div key={partner.id} className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+                                    {partner.logo && (
+                                        <div className="relative w-8 h-8 md:w-10 md:h-10">
+                                            <img src={partner.logo} alt={partner.name} className="object-contain w-full h-full" />
+                                        </div>
+                                    )}
+                                    <span className="text-sm md:text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap">
+                                        {partner.name}
+                                    </span>
                                 </div>
-                                <span className="text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap">
-                                    {college}
-                                </span>
-                            </div>
-                        ))}
-                    />
-                </div>
+                            ))}
+                        />
+                    </div>
+                )}
 
-                {/* Skills Logos */}
-                <div className="py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                {/* Domain Expertise Marquee - Optional, kept as requested in first turn but user said "Only College Logos With Name" in latest turn. 
+            Waiting to see if I should remove it. Actually the user said "Also session orineted also i will add the skills logo with the name that should also scroll same as college logos" in first turn.
+            In latest turn: "Only College Logos With Name I am going to add". This might mean they only want the college one or they are clarifying the content of the college one.
+            I'll keep the skills one but reduce size too. 
+        */}
+                <div className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
                     <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                    <div className="flex flex-col gap-2 px-6 mb-4 text-right">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500/80">Skillset Sharing</span>
-                        <h4 className="text-xl font-black text-white uppercase tracking-tighter">Domain Expertise</h4>
+                    <div className="flex flex-col gap-1 md:gap-2 px-6 mb-3 md:mb-4 text-right">
+                        <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-blue-500/80">Expertise Sharing</span>
+                        <h4 className="text-lg md:text-xl font-black text-white uppercase tracking-tighter">Domain Skills</h4>
                     </div>
 
                     <InfiniteCarousel
                         speed={30}
                         items={SKILLS.map((skill) => (
-                            <div key={skill.name} className="flex items-center gap-4 px-8 py-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                                <span className="text-2xl">{skill.icon}</span>
-                                <span className="text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap">
+                            <div key={skill.name} className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+                                <span className="text-lg md:text-2xl">{skill.icon}</span>
+                                <span className="text-sm md:text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap">
                                     {skill.name}
                                 </span>
                             </div>
