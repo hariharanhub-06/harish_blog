@@ -19,7 +19,7 @@ export default function AIChat() {
     const chatRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const captured = localStorage.getItem("chatLeadCaptured_V5");
+        const captured = localStorage.getItem("chatLeadCaptured_REBRAND_STABLE");
         if (captured) setLeadCaptured(true);
     }, []);
 
@@ -64,8 +64,8 @@ export default function AIChat() {
             });
             if (res.ok) {
                 setLeadCaptured(true);
-                localStorage.setItem("chatLeadCaptured_V5", "true");
-                setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! I am Thenali. How can I help you today?` }]);
+                localStorage.setItem("chatLeadCaptured_REBRAND_STABLE", "true");
+                setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! I am Thenali, your AI assistant. How can I help you?` }]);
             }
         } catch (error) {
             console.error("Lead submission error", error);
