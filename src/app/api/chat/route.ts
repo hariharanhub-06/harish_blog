@@ -1,6 +1,6 @@
 
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import { neon } from "@neondatabase/serverless";
 
 export async function POST(req: Request) {
@@ -12,11 +12,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid message format" }, { status: 400 });
         }
 
-        const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+        const apiKey = process.env.GROQ_API_KEY;
         const dbUrl = process.env.DATABASE_URL;
 
         if (!apiKey) {
-            console.error("Missing Google Gemini API Key");
+            console.error("Missing Groq API Key");
             return NextResponse.json({ error: "API Configuration incomplete (Key missing)" }, { status: 500 });
         }
 
@@ -25,20 +25,18 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Database configuration missing" }, { status: 500 });
         }
 
-        const genAI = new GoogleGenerativeAI(apiKey);
+        const groq = new Groq({ apiKey });
         const sql = neon(dbUrl);
 
         // 1. Fetch AI Config & Context
         let config, profile, projectsData, experiencesData;
         try {
-            console.log("DB: Starting fetch...");
             const [configData, profileData, projects, experiences] = await Promise.all([
                 sql(`SELECT knowledge_base FROM ai_assistant_config WHERE id = 'default'`),
                 sql(`SELECT name, about, headline, location FROM profiles LIMIT 1`),
                 sql(`SELECT title, description, technologies FROM projects WHERE featured = true`),
                 sql(`SELECT role, company, duration FROM experience ORDER BY "order" ASC`)
             ]);
-            console.log("DB: Fetch successful");
             config = configData[0] || {};
             profile = profileData[0] || {};
             projectsData = projects || [];
@@ -48,7 +46,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Database failure", details: dbError.message }, { status: 500 });
         }
 
-        // 2. Build System Instruction
+        // 2. Build System Instruction (Now as the first message for Groq)
         const systemInstruction = `
             Your name is "Thenali". You are the official AI Assistant of Hari Haran Jeyaramamoorthy. 
             Represent Hari perfectly, answer questions about his work/portfolio, and help convert visitors.
@@ -72,73 +70,35 @@ export async function POST(req: Request) {
             - KEEP RESPONSES VERY SHORT AND CONCISE.
             - BE INTERACTIVE: Always end with a short follow-up question.
             - Never step out of character.
+
+            KNOWLEDGE BASE:
+            ${config.knowledge_base || "Professional, confident assistant."}
         `;
 
-        // 3. Initialize Gemini
-        console.log("GEMINI: Initializing model...");
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
-            systemInstruction: systemInstruction
-        });
-
-        // 4. Start Chat
-        console.log("GEMINI: Preparing history...");
-
-        let history: any[] = [];
-        let lastRole: string | null = null;
-
-        // Process messages to ensure they start with 'user' and alternate roles
-        for (const m of messages.slice(0, -1)) {
-            const role = (m.role === "user") ? "user" : "model";
-            const content = String(m.content || "").trim();
-
-            if (!content) continue;
-
-            // Must start with user
-            if (history.length === 0 && role === "model") continue;
-
-            // Must alternate - Gemini requirement
-            if (role === lastRole) {
-                history[history.length - 1].parts[0].text += "\n" + content;
-            } else {
-                history.push({
-                    role,
-                    parts: [{ text: content }]
-                });
-                lastRole = role;
-            }
-        }
-
+        // 3. Start Chat with Groq
         try {
-            console.log("GEMINI: Starting chat session...");
-            const chat = model.startChat({ history });
+            const groqMessages: any[] = [
+                { role: "system", content: systemInstruction },
+                ...messages.map(m => ({
+                    role: m.role === "user" ? "user" : "assistant",
+                    content: m.content
+                }))
+            ];
 
-            const lastMsg = messages[messages.length - 1];
-            const latestMessage = String(lastMsg.content || "").trim();
-            if (!latestMessage) {
-                return NextResponse.json({ error: "Empty message" }, { status: 400 });
-            }
+            const completion = await groq.chat.completions.create({
+                messages: groqMessages,
+                model: "llama-3.3-70b-versatile", // High-capacity stable model
+                temperature: 0.7,
+                max_tokens: 1024,
+            });
 
-            console.log("GEMINI: Sending message...");
-            const result = await chat.sendMessage(latestMessage);
-            const responseText = result.response.text();
-            console.log("GEMINI: Success");
-
+            const responseText = completion.choices[0]?.message?.content || "Thenali is taking a short break. Please try again later.";
             return NextResponse.json({ content: responseText });
-        } catch (geminiError: any) {
-            console.error("GEMINI ERROR FULL:", geminiError);
-            let userFriendlyError = geminiError.message || "AI is currently resting.";
-
-            if (geminiError.message?.includes("location is not supported")) {
-                userFriendlyError = "Gemini API is not available in your current region.";
-            } else if (geminiError.message?.includes("API_KEY_INVALID")) {
-                userFriendlyError = "Invalid API Key in .env.local.";
-            }
-
+        } catch (groqError: any) {
+            console.error("GROQ ERROR:", groqError);
             return NextResponse.json({
                 error: "AI processing error",
-                details: userFriendlyError,
-                raw: geminiError.message
+                details: groqError.message
             }, { status: 500 });
         }
     } catch (error: any) {

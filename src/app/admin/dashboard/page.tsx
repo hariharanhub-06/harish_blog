@@ -17,7 +17,8 @@ import {
     Users,
     Youtube,
     GraduationCap,
-    Sparkles
+    Sparkles,
+    HeartHandshake
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -28,8 +29,9 @@ import PartnershipsModule from "@/components/admin/PartnershipsModule";
 import TrainingAcademyModule from "@/components/admin/TrainingAcademyModule";
 import YouTubeModule from "@/components/admin/YouTubeModule";
 import AIAssistantModule from "@/components/admin/AIAssistantModule";
+import FeedbackModule from "@/components/admin/FeedbackModule";
 
-type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "ai-assistant";
+type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "ai-assistant" | "feedbacks";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -41,7 +43,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "youtube-manager", "training-academy", "timeline", "ai-assistant"];
+        const validTabs = ["overview", "profile", "messages", "youtube-manager", "training-academy", "timeline", "ai-assistant", "feedbacks"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -51,8 +53,7 @@ export default function AdminDashboard() {
                 const res = await fetch("/api/admin/notifications");
                 if (res.ok) {
                     const data = await res.json();
-                    setUnreadCount(data.unreadMessages || 0);
-                    setUnreadCount(data.unreadMessages || 0);
+                    setUnreadCount((data.unreadMessages || 0) + (data.pendingFeedbacks || 0));
                 }
             } catch (err) {
                 console.error("Failed to fetch notification counts", err);
@@ -92,6 +93,7 @@ export default function AdminDashboard() {
         { id: "youtube-manager", title: "YouTube Manager", icon: Youtube, color: "bg-red-600" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500" },
         { id: "ai-assistant", title: "AI Assistant", icon: Sparkles, color: "bg-orange-600" },
+        { id: "feedbacks", title: "Testimonials", icon: HeartHandshake, color: "bg-pink-500" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
     ];
 
@@ -103,6 +105,7 @@ export default function AdminDashboard() {
             case "training-academy": return <TrainingAcademyModule />;
             case "ai-assistant": return <AIAssistantModule />;
             case "timeline": return <TimelineModule />;
+            case "feedbacks": return <FeedbackModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <OverviewModule />

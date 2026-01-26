@@ -15,6 +15,7 @@ import Image from "next/image";
 import { TrainingPrograms } from "./TrainingPrograms";
 import { Tilt } from "./Tilt";
 import { useEffect, useState } from "react";
+import FeedbackSection from "./FeedbackSection";
 import DinoRunnerGame from "./DinoRunnerGame";
 
 interface MainContentProps {
@@ -386,6 +387,9 @@ export default function MainContent({
                     </div>
                 )}
             </section>
+
+            {/* Feedback Section */}
+            <FeedbackSection />
 
             {/* DinoRunnerGame Section */}
             <DinoRunnerGame />
