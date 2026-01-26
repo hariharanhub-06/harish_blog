@@ -7,6 +7,7 @@ export default function AIAssistantModule() {
     const [config, setConfig] = useState({
         knowledgeBase: ""
     });
+    const [lastUpdated, setLastUpdated] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -20,7 +21,10 @@ export default function AIAssistantModule() {
             const res = await fetch("/api/admin/ai-config");
             if (res.ok) {
                 const data = await res.json();
-                if (data) setConfig({ knowledgeBase: data.knowledgeBase || "" });
+                if (data) {
+                    setConfig({ knowledgeBase: data.knowledgeBase || "" });
+                    if (data.updatedAt) setLastUpdated(new Date(data.updatedAt).toLocaleString());
+                }
             }
         } catch (error) {
             console.error("Failed to fetch AI config", error);
@@ -41,7 +45,8 @@ export default function AIAssistantModule() {
             });
             if (res.ok) {
                 setStatus("success");
-                setTimeout(() => setStatus("idle"), 3000);
+                setLastUpdated(new Date().toLocaleString());
+                setTimeout(() => setStatus("idle"), 5000);
             } else {
                 setStatus("error");
             }
@@ -79,6 +84,14 @@ export default function AIAssistantModule() {
             </div>
 
             <form onSubmit={handleSave} className="space-y-8">
+                {status !== "idle" && (
+                    <div className={`p-6 rounded-[2rem] border animate-in slide-in-from-top-4 duration-500 font-bold text-center ${status === "success" ? "bg-emerald-50 border-emerald-100 text-emerald-800" : "bg-red-50 border-red-100 text-red-800"
+                        }`}>
+                        {status === "success"
+                            ? "✨ AI Brain Sync Successful! Your Knowledge Base is now live."
+                            : "❌ Sync Failed! Please check your internet connection and try again."}
+                    </div>
+                )}
                 <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-100 shadow-sm space-y-8 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-600 via-orange-400 to-orange-600" />
 
@@ -94,6 +107,12 @@ export default function AIAssistantModule() {
                                 Paste your detailed background, exact service pricing, convincing strategies, and FAQs here.
                                 The AI will read this entire block to act as your digital twin.
                             </p>
+                            {lastUpdated && (
+                                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-2 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    Last Synced: {lastUpdated}
+                                </p>
+                            )}
                         </div>
 
                         <button
