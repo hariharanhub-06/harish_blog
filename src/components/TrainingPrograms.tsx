@@ -89,7 +89,7 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                         </div>
 
                         <InfiniteCarousel
-                            speed={100}
+                            speed={40}
                             items={academicPartners.map((partner) => (
                                 <div key={partner.id} className="flex items-center gap-3 md:gap-4 px-3 md:px-6 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[60vw] md:w-[20vw] h-full min-h-[80px]">
                                     {partner.logo && (

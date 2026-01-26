@@ -190,9 +190,9 @@ export default function MainContent({
                     </div>
 
                     <InfiniteCarousel
-                        speed={80}
+                        speed={40}
                         items={experiences.map((exp: any) => (
-                            <div key={exp.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[80vw] md:w-[28vw] h-full min-h-[140px] md:min-h-[120px] justify-start text-left">
+                            <div key={exp.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[85vw] md:w-[32vw] h-full min-h-[140px] justify-start text-left">
                                 {exp.logo ? (
                                     <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1 shadow-sm">
                                         <Image src={exp.logo} alt={exp.company} fill className="object-contain" />
@@ -203,8 +203,8 @@ export default function MainContent({
                                     </div>
                                 )}
                                 <div className="flex flex-col text-center md:text-left flex-1 min-w-0 w-full">
-                                    <h4 className="text-sm font-black text-white uppercase tracking-tight leading-snug break-words">{exp.role}</h4>
-                                    <p className="text-[10px] md:text-xs font-bold text-white/50 uppercase tracking-widest mt-1.5 leading-relaxed break-words">{exp.company}</p>
+                                    <h4 className="text-sm font-black text-white uppercase tracking-tight leading-snug break-words whitespace-normal">{exp.role}</h4>
+                                    <p className="text-[10px] md:text-xs font-bold text-white/50 uppercase tracking-wide mt-1.5 leading-relaxed break-words whitespace-normal">{exp.company}</p>
                                     <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest mt-2">{exp.duration}</span>
                                 </div>
                             </div>
@@ -225,9 +225,9 @@ export default function MainContent({
                     </div>
 
                     <InfiniteCarousel
-                        speed={90}
+                        speed={40}
                         items={educations.map((edu: any) => (
-                            <div key={edu.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[80vw] md:w-[28vw] h-full min-h-[140px] md:min-h-[120px] justify-start text-left">
+                            <div key={edu.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[85vw] md:w-[32vw] h-full min-h-[140px] justify-start text-left">
                                 {edu.logo ? (
                                     <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1 shadow-sm">
                                         <Image src={edu.logo} alt={edu.institution} fill className="object-contain" />
@@ -238,8 +238,8 @@ export default function MainContent({
                                     </div>
                                 )}
                                 <div className="flex flex-col text-center md:text-left flex-1 min-w-0 w-full">
-                                    <h4 className="text-sm font-black text-white uppercase tracking-tight leading-snug break-words">{edu.degree}</h4>
-                                    <p className="text-[10px] md:text-xs font-bold text-white/50 uppercase tracking-widest mt-1.5 leading-relaxed break-words">{edu.institution}</p>
+                                    <h4 className="text-sm font-black text-white uppercase tracking-tight leading-snug break-words whitespace-normal">{edu.degree}</h4>
+                                    <p className="text-[10px] md:text-xs font-bold text-white/50 uppercase tracking-wide mt-1.5 leading-relaxed break-words whitespace-normal">{edu.institution}</p>
                                     <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest mt-2">{edu.period}</span>
                                 </div>
                             </div>
@@ -260,9 +260,9 @@ export default function MainContent({
                     </div>
 
                     <InfiniteCarousel
-                        speed={100}
+                        speed={40}
                         items={volunteerings.map((vol: any) => (
-                            <div key={vol.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[80vw] md:w-[28vw] h-full min-h-[140px] md:min-h-[120px] justify-start text-left">
+                            <div key={vol.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[85vw] md:w-[32vw] h-full min-h-[140px] justify-start text-left">
                                 {vol.logo ? (
                                     <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1 shadow-sm">
                                         <Image src={vol.logo} alt={vol.organization} fill className="object-contain" />
@@ -273,8 +273,8 @@ export default function MainContent({
                                     </div>
                                 )}
                                 <div className="flex flex-col text-center md:text-left flex-1 min-w-0 w-full">
-                                    <h4 className="text-sm font-black text-white uppercase tracking-tight leading-snug break-words">{vol.role}</h4>
-                                    <p className="text-[10px] md:text-xs font-bold text-white/50 uppercase tracking-widest mt-1.5 leading-relaxed break-words">{vol.organization}</p>
+                                    <h4 className="text-sm font-black text-white uppercase tracking-tight leading-snug break-words whitespace-normal">{vol.role}</h4>
+                                    <p className="text-[10px] md:text-xs font-bold text-white/50 uppercase tracking-wide mt-1.5 leading-relaxed break-words whitespace-normal">{vol.organization}</p>
                                     <span className="text-[10px] font-black text-teal-500 uppercase tracking-widest mt-2">{vol.duration}</span>
                                 </div>
                             </div>
