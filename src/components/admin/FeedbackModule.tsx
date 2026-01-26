@@ -173,8 +173,8 @@ export default function FeedbackModule() {
                         key={tab}
                         onClick={() => setActiveTab(tab as any)}
                         className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab
-                                ? "bg-white text-primary shadow-sm border border-gray-100"
-                                : "text-secondary hover:text-primary"
+                            ? "bg-white text-primary shadow-sm border border-gray-100"
+                            : "text-secondary hover:text-primary"
                             }`}
                     >
                         {tab === "Fresh" ? "Pending" : tab}
@@ -188,62 +188,58 @@ export default function FeedbackModule() {
             </div>
 
             {/* List */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                 {filteredFeedbacks.map((f) => (
                     <div
                         key={f.id}
-                        className={`group bg-white p-6 rounded-[2.5rem] border transition-all duration-300 relative flex flex-col ${f.status === "Fresh" ? "border-orange-200 bg-orange-50/20" : "border-gray-100 hover:border-primary/20 hover:shadow-xl shadow-sm"
+                        className={`group bg-white p-4 rounded-[2rem] border transition-all duration-300 relative flex flex-col min-h-[320px] ${f.status === "Fresh" ? "border-orange-200 bg-orange-50/20" : "border-gray-100 hover:border-primary/20 hover:shadow-lg shadow-sm"
                             }`}
                     >
-                        <Quote className="absolute top-6 right-8 text-gray-50 group-hover:text-primary/5 transition-colors" size={48} />
-
-                        <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center justify-between mb-3">
                             <div className="flex text-amber-500">
                                 {[...Array(5)].map((_, i) => (
-                                    <Star key={i} size={14} fill={i < f.rating ? "currentColor" : "none"} />
+                                    <Star key={i} size={10} fill={i < f.rating ? "currentColor" : "none"} />
                                 ))}
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${f.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-orange-100 text-orange-600 border-orange-200 animate-pulse"
+                            <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border ${f.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-orange-100 text-orange-600 border-orange-200"
                                 }`}>
-                                {f.status === "Fresh" ? "Pending Approval" : f.status}
+                                {f.status === "Fresh" ? "PND" : "APR"}
                             </span>
                         </div>
 
-                        <p className="text-gray-700 text-sm font-bold leading-relaxed mb-8 flex-1 italic group-hover:text-gray-900 transition-colors">
+                        <p className="text-gray-700 text-[11px] font-bold leading-relaxed mb-4 flex-1 italic line-clamp-6 group-hover:text-gray-900 transition-colors">
                             &ldquo;{f.content}&rdquo;
                         </p>
 
-                        <div className="flex items-center justify-between pt-6 border-t border-gray-50">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-secondary/40 group-hover:bg-primary/5 group-hover:text-primary transition-colors">
-                                    {f.role === "Student" ? <GraduationCap size={20} /> : f.role === "Professional" ? <Briefcase size={20} /> : <Lightbulb size={20} />}
+                        <div className="pt-3 border-t border-gray-50 mt-auto">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-secondary/40 group-hover:bg-primary/5 group-hover:text-primary transition-colors shrink-0">
+                                    {f.role === "Student" ? <GraduationCap size={16} /> : f.role === "Professional" ? <Briefcase size={16} /> : <Lightbulb size={16} />}
                                 </div>
-                                <div>
-                                    <h4 className="text-xs font-black text-gray-900 uppercase tracking-tight">{f.name}</h4>
-                                    <p className="text-[9px] font-bold text-secondary uppercase tracking-widest mt-0.5">
-                                        {f.role} • {f.organization}
+                                <div className="min-w-0">
+                                    <h4 className="text-[10px] font-black text-gray-900 uppercase tracking-tight truncate">{f.name}</h4>
+                                    <p className="text-[8px] font-bold text-secondary uppercase tracking-widest mt-0.5 truncate">
+                                        {f.organization}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 w-full">
                                 {f.status === "Fresh" && (
                                     <button
                                         onClick={() => handleApprove(f.id)}
                                         disabled={updatingId === f.id}
-                                        className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50"
-                                        title="Approve Testimony"
+                                        className="flex-1 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-lg transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center justify-center"
                                     >
-                                        {updatingId === f.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                                        {updatingId === f.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={14} />}
                                     </button>
                                 )}
                                 <button
                                     onClick={() => handleDelete(f.id)}
                                     disabled={updatingId === f.id}
-                                    className="p-2.5 bg-red-50 text-red-300 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50"
-                                    title="Delete Testimony"
+                                    className="flex-1 py-2 bg-red-50 text-red-300 hover:bg-red-500 hover:text-white rounded-lg transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center justify-center"
                                 >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={14} />
                                 </button>
                             </div>
                         </div>

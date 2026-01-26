@@ -113,7 +113,7 @@ export default function FeedbackSection() {
                     <InfiniteCarousel
                         speed={20} // 3 RPM (60s / 3 = 20s)
                         items={feedbacks.map((f) => (
-                            <div key={f.id} className="w-[85vw] md:w-[400px] p-8 bg-black/40 border border-white/10 rounded-[2.5rem] flex flex-col h-full relative group hover:border-orange-600/30 transition-all duration-500">
+                            <div key={f.id} className="w-[85vw] md:w-[400px] p-8 bg-black/40 border border-white/10 rounded-[2.5rem] flex flex-col h-[400px] relative group hover:border-orange-600/30 transition-all duration-500 overflow-hidden">
                                 <Quote className="absolute top-6 right-8 text-white/5 group-hover:text-orange-600/10 transition-colors" size={64} />
 
                                 <div className="flex text-orange-500 mb-6">
@@ -122,7 +122,7 @@ export default function FeedbackSection() {
                                     ))}
                                 </div>
 
-                                <p className="text-white/80 text-sm font-bold leading-relaxed mb-8 flex-1 italic whitespace-normal text-left">
+                                <p className="text-white/80 text-sm font-bold leading-relaxed mb-8 flex-1 italic whitespace-normal text-left line-clamp-[7]">
                                     &ldquo;{f.content}&rdquo;
                                 </p>
 
