@@ -1,5 +1,6 @@
 import Hero from "@/components/Hero";
 import MainContent from "@/components/MainContent";
+import { MatrixBackground } from "@/components/MatrixBackground";
 import { db } from "@/db";
 
 // Force dynamic rendering to ensure we get the latest data
@@ -47,7 +48,8 @@ export default async function Home() {
   });
 
   return (
-    <div className="flex flex-col gap-0 bg-[#0e0e0e]">
+    <div className="flex flex-col gap-0 bg-[#0e0e0e] relative">
+      <MatrixBackground />
       <section id="home">
         <Hero
           profile={{

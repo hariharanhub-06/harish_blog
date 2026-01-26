@@ -9,7 +9,6 @@ import Image from "next/image";
 
 const navLinks = [
     { name: "About", href: "#about", icon: User },
-    { name: "Portfolio", href: "#portfolio", icon: Briefcase },
     { name: "Videos", href: "#videos", icon: FileText },
     { name: "Contact", href: "#contact", icon: Mail },
 ];
@@ -194,6 +193,21 @@ export default function Navbar() {
                                         <span className="text-xs uppercase tracking-widest">HariPicks</span>
                                     </div>
                                     <span className="text-[9px] bg-purple-500 text-white px-3 py-1 rounded-full font-black">DEALS</span>
+                                </Link>
+                                <Link
+                                    href="/business/hm-tech"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`w-full px-6 py-4 rounded-2xl font-black shadow-sm border flex items-center justify-between transition-colors ${isDarkTheme ? "bg-white/5 text-white border-white/10" : "bg-gray-50 text-gray-900 border-gray-100"}`}
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-white shadow-sm border border-gray-100 p-1">
+                                            <Image src="/hm-tech-logo.png" alt="HM Tech" fill className="object-contain" />
+                                        </div>
+                                        <span className="text-xs uppercase tracking-widest">HM Tech</span>
+                                    </div>
+                                    <span className="text-[9px] bg-blue-500 text-white px-3 py-1 rounded-full font-black">TECH</span>
                                 </Link>
                                 <Link
                                     href="#contact"
