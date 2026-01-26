@@ -15,6 +15,7 @@ import Image from "next/image";
 import { TrainingPrograms } from "./TrainingPrograms";
 import { Tilt } from "./Tilt";
 import { useEffect, useState } from "react";
+import DinoRunnerGame from "./DinoRunnerGame";
 
 interface MainContentProps {
     profile: any;
@@ -425,6 +426,9 @@ export default function MainContent({
                     </div>
                 )}
             </section>
+
+            {/* DinoRunnerGame Section */}
+            <DinoRunnerGame />
 
 
             {/* Contact Section */}
