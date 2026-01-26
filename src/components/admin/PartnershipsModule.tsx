@@ -134,7 +134,13 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
                     <p className="text-secondary font-medium mt-0.5 text-[10px] uppercase tracking-widest">Manage brand partners and sponsors.</p>
                 </div>
                 <button
-                    onClick={() => setEditing({ name: "", logo: "", partnerType: "Supplier", displayOrder: 0, isActive: true })}
+                    onClick={() => setEditing({
+                        name: "",
+                        logo: "",
+                        partnerType: allowedTypes ? allowedTypes[0] : "Supplier",
+                        displayOrder: 0,
+                        isActive: true
+                    })}
                     className="flex items-center space-x-2 bg-primary text-white px-4 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95"
                 >
                     <Plus size={16} />
