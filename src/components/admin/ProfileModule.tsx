@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Camera, Save, Loader2, User } from "lucide-react";
+import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users } from "lucide-react";
 import Image from "next/image";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 
@@ -230,8 +230,59 @@ export default function ProfileModule() {
                         />
                     </div>
 
+                    {/* Training Program Stats Section */}
+                    <div className="space-y-6 pt-12 border-t border-gray-100">
+                        <div className="flex items-center space-x-3 ml-2">
+                            <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                                <GraduationCap size={20} />
+                            </div>
+                            <h2 className="text-xl font-black text-gray-900">Training Program Stats</h2>
+                        </div>
+                        <p className="text-secondary text-xs ml-2 max-w-2xl font-medium">Configure the counters shown in the Training Programs section. Use keywords like <span className="text-primary italic">"Session"</span>, <span className="text-primary italic">"College"</span>, and <span className="text-primary italic">"Student"</span> in labels for auto-detection.</p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {[0, 1, 2].map((i) => {
+                                const stat = profile.stats?.[i] || { label: "", value: "" };
+                                return (
+                                    <div key={i} className="bg-gray-50 p-6 rounded-2xl space-y-4 border border-gray-100">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-gray-400">Stat Label</label>
+                                            <input
+                                                type="text"
+                                                value={stat.label}
+                                                placeholder={i === 0 ? "Expert Sessions" : i === 1 ? "Partnered Colleges" : "Minds Empowered"}
+                                                onChange={(e) => {
+                                                    const newStats = [...(profile.stats || [])];
+                                                    if (!newStats[i]) newStats[i] = { label: "", value: "", icon: i === 0 ? "Presentation" : i === 1 ? "GraduationCap" : "Users" };
+                                                    newStats[i].label = e.target.value;
+                                                    setProfile({ ...profile, stats: newStats });
+                                                }}
+                                                className="w-full bg-white border-gray-100 border rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-primary transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-gray-400">Stat Value</label>
+                                            <input
+                                                type="text"
+                                                value={stat.value}
+                                                placeholder="e.g. 150+"
+                                                onChange={(e) => {
+                                                    const newStats = [...(profile.stats || [])];
+                                                    if (!newStats[i]) newStats[i] = { label: "", value: "", icon: i === 0 ? "Presentation" : i === 1 ? "GraduationCap" : "Users" };
+                                                    newStats[i].value = e.target.value;
+                                                    setProfile({ ...profile, stats: newStats });
+                                                }}
+                                                className="w-full bg-white border-gray-100 border rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-primary transition-all"
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
                     {/* Quick Stats Section */}
-                    <div className="space-y-6">
+                    <div className="space-y-6 pt-12 border-t border-gray-100">
                         <h2 className="text-xl font-black text-gray-900 ml-2">Quick Stats (Home Page)</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {(profile.stats || []).map((stat: any, index: number) => (
