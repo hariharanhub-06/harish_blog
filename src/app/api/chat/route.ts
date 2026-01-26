@@ -89,49 +89,45 @@ export async function POST(req: Request) {
 
             let completion;
             try {
-                // LAYER 1: Premier Groq (Llama 3.3 70B)
+                // LAYER 1: High-Speed Instant Groq (Llama 3.1 8B) - SUB-SECOND SPEED
                 completion = await groq.chat.completions.create({
                     messages: groqMessages,
-                    model: "llama-3.3-70b-versatile",
-                    temperature: 0.7,
-                    max_tokens: 1024,
+                    model: "llama-3.1-8b-instant",
+                    temperature: 0.6,
+                    max_tokens: 150,
                 });
             } catch (limitError: any) {
-                // If Rate Limit (429) hit, try LAYER 2: Fast Groq (Llama 3.1 8B)
-                if (limitError.status === 429) {
-                    console.warn("70B Fallback: Rate limit, trying 8B.");
-                    try {
-                        completion = await groq.chat.completions.create({
-                            messages: groqMessages,
-                            model: "llama-3.1-8b-instant",
-                            temperature: 0.7,
-                            max_tokens: 1024,
-                        });
-                    } catch (innerError: any) {
-                        // If Groq completely exhausted, try LAYER 3: Gemini (1,500/day free limit)
-                        console.warn("Groq Exhausted: Trying Gemini Safety Net.");
-                        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
-                        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                // If 8B fails or is busy, try LAYER 2: Premier Groq (Llama 3.3 70B)
+                console.warn("8B Busy: Trying 70B Fallback.");
+                try {
+                    completion = await groq.chat.completions.create({
+                        messages: groqMessages,
+                        model: "llama-3.3-70b-versatile",
+                        temperature: 0.7,
+                        max_tokens: 150,
+                    });
+                } catch (innerError: any) {
+                    // LAYER 3: Gemini Safety Net
+                    console.warn("Groq Exhausted: Trying Gemini Safety Net.");
+                    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
+                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-                        const result = await model.generateContent({
-                            contents: [
-                                { role: "user", parts: [{ text: systemInstruction }] },
-                                ...messages.map(m => ({
-                                    role: m.role === "user" ? "user" : "model",
-                                    parts: [{ text: m.content }]
-                                }))
-                            ]
-                        });
+                    const result = await model.generateContent({
+                        contents: [
+                            { role: "user", parts: [{ text: systemInstruction }] },
+                            ...messages.map(m => ({
+                                role: m.role === "user" ? "user" : "model",
+                                parts: [{ text: m.content }]
+                            }))
+                        ]
+                    });
 
-                        const responseText = result.response.text();
-                        return NextResponse.json({ content: responseText });
-                    }
-                } else {
-                    throw limitError;
+                    const responseText = result.response.text();
+                    return NextResponse.json({ content: responseText });
                 }
             }
 
-            const responseText = completion?.choices[0]?.message?.content || "Thenali is taking a short break. Please try again later.";
+            const responseText = completion?.choices[0]?.message?.content || "Thenali is online!";
             return NextResponse.json({ content: responseText });
         } catch (groqError: any) {
             console.error("GROQ ERROR:", groqError);
