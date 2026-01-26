@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export function InfiniteCarousel({
     items,
-    speed = 120,
+    speed = 12, // Default to 12s per pass (5 RPM: 60s / 12s = 5 revolutions per minute)
     className = "",
 }: {
     items: React.ReactNode[];

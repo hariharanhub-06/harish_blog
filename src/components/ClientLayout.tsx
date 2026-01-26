@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import { BackgroundBlobs } from "@/components/BackgroundBlobs";
+import AIChat from "@/components/AIChat";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -20,6 +21,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 {children}
             </main>
             {!isAdmin && <Footer />}
+            {!isAdmin && <AIChat />}
         </>
     );
 }

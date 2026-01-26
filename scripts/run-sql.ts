@@ -9,7 +9,7 @@ const sql = neon(process.env.DATABASE_URL!);
 
 async function main() {
     console.log('Reading SQL file...');
-    const sqlContent = fs.readFileSync('training_academy_setup.sql', 'utf8');
+    const sqlContent = fs.readFileSync('ai_setup.sql', 'utf8');
 
     // Split by statements (simple split by semicolon, might need more robust parsing if complex)
     const statements = sqlContent
