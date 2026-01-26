@@ -191,7 +191,6 @@ export default function MainContent({
                     </div>
 
                     <InfiniteCarousel
-                        speed={80}
                         items={experiences.map((exp: any) => (
                             <div key={exp.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[85vw] md:w-[32vw] h-full min-h-[140px] justify-start text-left">
                                 {exp.logo ? (
@@ -226,7 +225,6 @@ export default function MainContent({
                     </div>
 
                     <InfiniteCarousel
-                        speed={40}
                         items={educations.map((edu: any) => (
                             <div key={edu.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[85vw] md:w-[32vw] h-full min-h-[140px] justify-start text-left">
                                 {edu.logo ? (
@@ -261,7 +259,6 @@ export default function MainContent({
                     </div>
 
                     <InfiniteCarousel
-                        speed={40}
                         items={volunteerings.map((vol: any) => (
                             <div key={vol.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[85vw] md:w-[32vw] h-full min-h-[140px] justify-start text-left">
                                 {vol.logo ? (

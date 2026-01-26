@@ -399,3 +399,12 @@ export const youtubeVideos = pgTable("youtube_videos", {
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export const aiAssistantConfig = pgTable("ai_assistant_config", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  persona: text("persona"),
+  pricing: text("pricing"),
+  faq: text("faq"),
+  convincingTactics: text("convincing_tactics"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
