@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Star, MessageSquare, User, Building, Send, Loader2, Quote } from "lucide-react";
+import { Star, MessageSquare, User, Building, Send, Loader2, Quote, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { InfiniteCarousel } from "./InfiniteCarousel";
 
@@ -21,6 +21,7 @@ export default function FeedbackSection() {
     const [loading, setLoading] = useState(true);
     const [formLoading, setFormLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -65,7 +66,12 @@ export default function FeedbackSection() {
             if (res.ok) {
                 setSubmitted(true);
                 setFormData({ name: "", role: "Student", organization: "", rating: 5, content: "" });
-                // Note: It won't show in the carousel until admin approves
+
+                // Auto close after 3 seconds
+                setTimeout(() => {
+                    setIsOpen(false);
+                    setSubmitted(false);
+                }, 3000);
             }
         } catch (error) {
             console.error("Feedback submit error", error);
@@ -81,20 +87,29 @@ export default function FeedbackSection() {
                 <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-6">
                     Minds <span className="text-orange-600">Empowered</span>
                 </h2>
-                <div className="flex items-center gap-4 bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
-                    <div className="flex text-orange-500">
-                        {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={18} fill={i < Math.round(Number(averageRating)) ? "currentColor" : "none"} />
-                        ))}
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                    <div className="flex items-center gap-4 bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
+                        <div className="flex text-orange-500">
+                            {[...Array(5)].map((_, i) => (
+                                <Star key={i} size={18} fill={i < Math.round(Number(averageRating)) ? "currentColor" : "none"} />
+                            ))}
+                        </div>
+                        <span className="text-xl font-black text-white">{averageRating} / 5.0</span>
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest border-l border-white/10 pl-4">{feedbacks.length} Reviews</span>
                     </div>
-                    <span className="text-xl font-black text-white">{averageRating} / 5.0</span>
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-widest border-l border-white/10 pl-4">{feedbacks.length} Reviews</span>
+
+                    <button
+                        onClick={() => setIsOpen(true)}
+                        className="px-8 py-4 bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-orange-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group"
+                    >
+                        Give Feedback <MessageSquare size={16} className="group-hover:rotate-12 transition-transform" />
+                    </button>
                 </div>
             </div>
 
             {/* Testimonials Carousel */}
             {feedbacks.length > 0 ? (
-                <div className="mb-24 py-12 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                <div className="py-12 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
                     <InfiniteCarousel
                         speed={20} // 3 RPM (60s / 3 = 20s)
                         items={feedbacks.map((f) => (
@@ -107,7 +122,7 @@ export default function FeedbackSection() {
                                     ))}
                                 </div>
 
-                                <p className="text-white/80 text-sm font-bold leading-relaxed mb-8 flex-1 italic">
+                                <p className="text-white/80 text-sm font-bold leading-relaxed mb-8 flex-1 italic whitespace-normal text-left">
                                     &ldquo;{f.content}&rdquo;
                                 </p>
 
@@ -115,7 +130,7 @@ export default function FeedbackSection() {
                                     <div className="w-12 h-12 rounded-2xl bg-orange-600/20 flex items-center justify-center text-orange-600">
                                         <User size={24} />
                                     </div>
-                                    <div>
+                                    <div className="text-left">
                                         <h4 className="text-sm font-black text-white uppercase tracking-tight">{f.name}</h4>
                                         <p className="text-[10px] font-bold text-orange-500/80 uppercase tracking-widest mt-1">
                                             {f.role} • {f.organization}
@@ -132,138 +147,152 @@ export default function FeedbackSection() {
                 </div>
             )}
 
-            {/* Feedback Submission Form */}
-            <div className="max-w-4xl mx-auto">
-                <div className="bg-[#1a1a1a] border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl relative">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-orange-600/5 rounded-full blur-[80px] -mr-32 -mt-32" />
+            {/* Feedback Submission Modal */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="bg-[#1a1a1a] border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl relative max-w-4xl w-full"
+                        >
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="absolute top-8 right-8 text-white/20 hover:text-white transition-colors z-20"
+                            >
+                                <X size={32} />
+                            </button>
 
-                    <div className="p-8 md:p-16 relative z-10 flex flex-col md:flex-row gap-12">
-                        <div className="md:w-1/3">
-                            <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">Share Your <span className="text-orange-600">Impact</span></h3>
-                            <p className="text-gray-400 text-sm font-bold leading-relaxed mb-8">
-                                Your feedback helps me improve and inspires other students. It only takes a minute!
-                            </p>
-                            <div className="flex flex-col gap-4">
-                                <div className="flex items-center gap-3 text-white/40">
-                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-orange-600"><Star size={16} /></div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Rate Experience</span>
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-600/5 rounded-full blur-[80px] -mr-32 -mt-32" />
+
+                            <div className="p-8 md:p-16 relative z-10 flex flex-col md:flex-row gap-12">
+                                <div className="md:w-1/3">
+                                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4 text-left">Share Your <span className="text-orange-600">Impact</span></h3>
+                                    <p className="text-gray-400 text-sm font-bold leading-relaxed mb-8 text-left">
+                                        Your feedback helps me improve and inspires other students. It only takes a minute!
+                                    </p>
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center gap-3 text-white/40">
+                                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-orange-600"><Star size={16} /></div>
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Rate Experience</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 text-white/40">
+                                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-orange-600"><Building size={16} /></div>
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Mention Org</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-3 text-white/40">
-                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-orange-600"><Building size={16} /></div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Mention Org</span>
+
+                                <div className="md:w-2/3">
+                                    <AnimatePresence mode="wait">
+                                        {submitted ? (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                className="h-full flex flex-col items-center justify-center text-center py-12"
+                                            >
+                                                <div className="w-20 h-20 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mb-6">
+                                                    <Send size={40} />
+                                                </div>
+                                                <h4 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Thank You!</h4>
+                                                <p className="text-gray-400 font-bold text-sm">Thanks for the feedback! Returning to home soon...</p>
+                                            </motion.div>
+                                        ) : (
+                                            <motion.form
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                onSubmit={handleSubmit}
+                                                className="space-y-6"
+                                            >
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div className="space-y-2 text-left">
+                                                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-4">Full Name</label>
+                                                        <input
+                                                            required
+                                                            type="text"
+                                                            value={formData.name}
+                                                            onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-orange-600 transition-all font-bold"
+                                                            placeholder="Hari Haran"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2 text-left">
+                                                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-4">Tell us who you are</label>
+                                                        <select
+                                                            value={formData.role}
+                                                            onChange={e => setFormData(prev => ({ ...prev, role: e.target.value }))}
+                                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-orange-600 transition-all font-bold appearance-none cursor-pointer"
+                                                        >
+                                                            <option value="Student" className="bg-[#1a1a1a]">Student</option>
+                                                            <option value="Professional" className="bg-[#1a1a1a]">Professional</option>
+                                                            <option value="Entrepreneur" className="bg-[#1a1a1a]">Entrepreneur</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2 text-left">
+                                                    <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-4">College / Company Name</label>
+                                                    <input
+                                                        required
+                                                        type="text"
+                                                        value={formData.organization}
+                                                        onChange={e => setFormData(prev => ({ ...prev, organization: e.target.value }))}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-orange-600 transition-all font-bold"
+                                                        placeholder="Example University / Tech Corp"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-2 text-left">
+                                                    <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-4">Rating</label>
+                                                    <div className="flex gap-4 items-center bg-white/5 border border-white/10 rounded-2xl px-6 py-4">
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <button
+                                                                key={star}
+                                                                type="button"
+                                                                onClick={() => setFormData(prev => ({ ...prev, rating: star }))}
+                                                                className={`transition-all ${star <= formData.rating ? "text-orange-500 scale-110" : "text-white/10 hover:text-white/30"}`}
+                                                            >
+                                                                <Star size={24} fill={star <= formData.rating ? "currentColor" : "none"} />
+                                                            </button>
+                                                        ))}
+                                                        <span className="text-xs font-black text-white ml-auto uppercase tracking-widest">{formData.rating} Star{formData.rating > 1 ? 's' : ''}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2 text-left">
+                                                    <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-4">Your Feedback</label>
+                                                    <textarea
+                                                        required
+                                                        rows={4}
+                                                        value={formData.content}
+                                                        onChange={e => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-orange-600 transition-all font-bold resize-none"
+                                                        placeholder="Describe your experience with Hari's training or services..."
+                                                    />
+                                                </div>
+
+                                                <button
+                                                    type="submit"
+                                                    disabled={formLoading}
+                                                    className="w-full bg-orange-600 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-orange-600/20 disabled:opacity-50"
+                                                >
+                                                    {formLoading ? <Loader2 className="animate-spin" size={18} /> : <>Submit Feedback <Send size={18} /></>}
+                                                </button>
+                                            </motion.form>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="md:w-2/3">
-                            <AnimatePresence mode="wait">
-                                {submitted ? (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        className="h-full flex flex-col items-center justify-center text-center py-12"
-                                    >
-                                        <div className="w-20 h-20 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mb-6">
-                                            <Send size={40} />
-                                        </div>
-                                        <h4 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Thank You!</h4>
-                                        <p className="text-gray-400 font-bold text-sm">Your feedback has been submitted for review.</p>
-                                        <button
-                                            onClick={() => setSubmitted(false)}
-                                            className="mt-8 text-orange-600 font-black text-[10px] uppercase tracking-widest hover:text-white transition-colors"
-                                        >
-                                            Submit Another?
-                                        </button>
-                                    </motion.div>
-                                ) : (
-                                    <motion.form
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        onSubmit={handleSubmit}
-                                        className="space-y-6"
-                                    >
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-4">Full Name</label>
-                                                <input
-                                                    required
-                                                    type="text"
-                                                    value={formData.name}
-                                                    onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-orange-600 transition-all font-bold"
-                                                    placeholder="Hari Haran"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-4">Tell us who you are</label>
-                                                <select
-                                                    value={formData.role}
-                                                    onChange={e => setFormData(prev => ({ ...prev, role: e.target.value }))}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-orange-600 transition-all font-bold appearance-none cursor-pointer"
-                                                >
-                                                    <option value="Student" className="bg-[#1a1a1a]">Student</option>
-                                                    <option value="Professional" className="bg-[#1a1a1a]">Professional</option>
-                                                    <option value="Entrepreneur" className="bg-[#1a1a1a]">Entrepreneur</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-4">College / Company Name</label>
-                                            <input
-                                                required
-                                                type="text"
-                                                value={formData.organization}
-                                                onChange={e => setFormData(prev => ({ ...prev, organization: e.target.value }))}
-                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-orange-600 transition-all font-bold"
-                                                placeholder="Example University / Tech Corp"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-4">Rating</label>
-                                            <div className="flex gap-4 items-center bg-white/5 border border-white/10 rounded-2xl px-6 py-4">
-                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                    <button
-                                                        key={star}
-                                                        type="button"
-                                                        onClick={() => setFormData(prev => ({ ...prev, rating: star }))}
-                                                        className={`transition-all ${star <= formData.rating ? "text-orange-500 scale-110" : "text-white/10 hover:text-white/30"}`}
-                                                    >
-                                                        <Star size={24} fill={star <= formData.rating ? "currentColor" : "none"} />
-                                                    </button>
-                                                ))}
-                                                <span className="text-xs font-black text-white ml-auto uppercase tracking-widest">{formData.rating} Star{formData.rating > 1 ? 's' : ''}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-4">Your Feedback</label>
-                                            <textarea
-                                                required
-                                                rows={4}
-                                                value={formData.content}
-                                                onChange={e => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-orange-600 transition-all font-bold resize-none"
-                                                placeholder="Describe your experience with Hari's training or services..."
-                                            />
-                                        </div>
-
-                                        <button
-                                            type="submit"
-                                            disabled={formLoading}
-                                            className="w-full bg-orange-600 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-orange-600/20 disabled:opacity-50"
-                                        >
-                                            {formLoading ? <Loader2 className="animate-spin" size={18} /> : <>Submit Feedback <Send size={18} /></>}
-                                        </button>
-                                    </motion.form>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </section>
     );
 }
-
