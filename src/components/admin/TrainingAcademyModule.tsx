@@ -6,13 +6,12 @@ import ProfileModule from "./ProfileModule";
 import PartnershipsModule from "./PartnershipsModule";
 import SkillsModule from "./SkillsModule";
 
-type SubTab = "stats" | "colleges" | "skills";
+type SubTab = "colleges" | "skills";
 
 export default function TrainingAcademyModule() {
-    const [activeSubTab, setActiveSubTab] = useState<SubTab>("stats");
+    const [activeSubTab, setActiveSubTab] = useState<SubTab>("colleges");
 
     const tabs = [
-        { id: "stats", title: "Stats & Metrics", icon: Sparkles, color: "text-orange-500", bg: "bg-orange-50" },
         { id: "colleges", title: "Academic Partners", icon: GraduationCap, color: "text-blue-500", bg: "bg-blue-50" },
         { id: "skills", title: "Domain Skills", icon: BookOpen, color: "text-purple-500", bg: "bg-purple-50" },
     ];
@@ -58,23 +57,6 @@ export default function TrainingAcademyModule() {
 
             {/* Dynamic Content Area */}
             <div className="relative">
-                {activeSubTab === "stats" && (
-                    <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                        {/* We reuse the ProfileModule but it has the training stats section inside. 
-                            If the UI feels cluttered, we can extract the training stats part to a standalone component later.
-                        */}
-                        <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm">
-                            <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
-                                <div className="p-4 bg-orange-50 text-orange-500 rounded-2xl">
-                                    <Settings2 size={32} />
-                                </div>
-                                <h3 className="text-xl font-black text-gray-900">Configure Impact Counters</h3>
-                                <p className="text-secondary text-sm font-medium max-w-md">Use the Training Stats section within your Profile settings to update the numbers shown on your home page.</p>
-                                <ProfileModule />
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {activeSubTab === "colleges" && (
                     <div className="animate-in fade-in slide-in-from-right-4 duration-500">
