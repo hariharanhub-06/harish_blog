@@ -10,6 +10,7 @@ export async function GET() {
         role: experience.role,
         duration: experience.duration,
         displayOrder: experience.displayOrder,
+        logo: experience.logo,
         createdAt: experience.createdAt,
     }).from(experience).orderBy(desc(experience.displayOrder));
     return NextResponse.json(data);

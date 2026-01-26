@@ -9,6 +9,7 @@ export async function GET() {
             id: volunteering.id,
             role: volunteering.role,
             organization: volunteering.organization,
+            logo: volunteering.logo,
             duration: volunteering.duration,
             displayOrder: volunteering.displayOrder,
         }).from(volunteering).orderBy(asc(volunteering.displayOrder));

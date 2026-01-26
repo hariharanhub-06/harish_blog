@@ -7,6 +7,7 @@ import {
     CheckCircle2, Star, Github, ExternalLink,
     GraduationCap, Linkedin, HeartHandshake, Play
 } from "lucide-react";
+import { InfiniteCarousel } from "./InfiniteCarousel";
 import CardWrapper from "@/components/CardWrapper";
 import DetailModal from "@/components/DetailModal";
 import AboutHero from "@/components/AboutHero";
@@ -176,6 +177,111 @@ export default function MainContent({
                 partnerships={partnerships}
                 skills={skills}
             />
+
+            {/* Experience Section */}
+            {experiences.length > 0 && (
+                <section className="py-12 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                    <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
+                    <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
+
+                    <div className="flex flex-col items-center mb-8 text-center">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500/80">Professional Journey</span>
+                        <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Experience</h4>
+                    </div>
+
+                    <InfiniteCarousel
+                        speed={80}
+                        items={experiences.map((exp: any) => (
+                            <div key={exp.id} className="flex items-center gap-4 px-6 py-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[80vw] md:w-[25vw] h-full min-h-[100px]">
+                                {exp.logo ? (
+                                    <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1">
+                                        <Image src={exp.logo} alt={exp.company} fill className="object-contain" />
+                                    </div>
+                                ) : (
+                                    <div className="w-12 h-12 shrink-0 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-500">
+                                        <Briefcase size={20} />
+                                    </div>
+                                )}
+                                <div className="flex flex-col">
+                                    <h4 className="text-sm font-black text-white uppercase tracking-tight leading-tight">{exp.role}</h4>
+                                    <p className="text-xs font-bold text-white/50 uppercase tracking-widest mt-0.5">{exp.company}</p>
+                                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest mt-1">{exp.duration}</span>
+                                </div>
+                            </div>
+                        ))}
+                    />
+                </section>
+            )}
+
+            {/* Education Section */}
+            {educations.length > 0 && (
+                <section className="py-12 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
+                    <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
+
+                    <div className="flex flex-col items-center mb-8 text-center">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/80">Academic Background</span>
+                        <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Education</h4>
+                    </div>
+
+                    <InfiniteCarousel
+                        speed={90}
+                        items={educations.map((edu: any) => (
+                            <div key={edu.id} className="flex items-center gap-4 px-6 py-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[80vw] md:w-[25vw] h-full min-h-[100px]">
+                                {edu.logo ? (
+                                    <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1">
+                                        <Image src={edu.logo} alt={edu.institution} fill className="object-contain" />
+                                    </div>
+                                ) : (
+                                    <div className="w-12 h-12 shrink-0 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-500">
+                                        <GraduationCap size={20} />
+                                    </div>
+                                )}
+                                <div className="flex flex-col">
+                                    <h4 className="text-sm font-black text-white uppercase tracking-tight leading-tight">{edu.degree}</h4>
+                                    <p className="text-xs font-bold text-white/50 uppercase tracking-widest mt-0.5">{edu.institution}</p>
+                                    <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest mt-1">{edu.period}</span>
+                                </div>
+                            </div>
+                        ))}
+                    />
+                </section>
+            )}
+
+            {/* Volunteering Section */}
+            {volunteerings.length > 0 && (
+                <section className="py-12 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                    <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
+                    <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
+
+                    <div className="flex flex-col items-center mb-8 text-center">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-teal-500/80">Community Impact</span>
+                        <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Volunteering</h4>
+                    </div>
+
+                    <InfiniteCarousel
+                        speed={100}
+                        items={volunteerings.map((vol: any) => (
+                            <div key={vol.id} className="flex items-center gap-4 px-6 py-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[80vw] md:w-[25vw] h-full min-h-[100px]">
+                                {vol.logo ? (
+                                    <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1">
+                                        <Image src={vol.logo} alt={vol.organization} fill className="object-contain" />
+                                    </div>
+                                ) : (
+                                    <div className="w-12 h-12 shrink-0 bg-teal-500/20 rounded-xl flex items-center justify-center text-teal-500">
+                                        <HeartHandshake size={20} />
+                                    </div>
+                                )}
+                                <div className="flex flex-col">
+                                    <h4 className="text-sm font-black text-white uppercase tracking-tight leading-tight">{vol.role}</h4>
+                                    <p className="text-xs font-bold text-white/50 uppercase tracking-widest mt-0.5">{vol.organization}</p>
+                                    <span className="text-[10px] font-black text-teal-500 uppercase tracking-widest mt-1">{vol.duration}</span>
+                                </div>
+                            </div>
+                        ))}
+                    />
+                </section>
+            )}
 
             {/* About Section */}
             <section id="about" className="container mx-auto px-6 scroll-mt-20">

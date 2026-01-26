@@ -74,6 +74,7 @@ export const skills = pgTable("skills", {
 export const experience = pgTable("experience", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   company: text("company").notNull(),
+  logo: text("logo"),
   role: text("role").notNull(),
   duration: text("duration"),
   description: text("description"),
@@ -84,6 +85,7 @@ export const experience = pgTable("experience", {
 export const education = pgTable("education", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   institution: text("institution").notNull(),
+  logo: text("logo"),
   degree: text("degree").notNull(),
   period: text("period"),
   details: text("details"),
@@ -119,6 +121,7 @@ export const volunteering = pgTable("volunteering", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   role: text("role").notNull(),
   organization: text("organization").notNull(),
+  logo: text("logo"),
   duration: text("duration"),
   description: text("description"),
   displayOrder: integer("order").default(0),
