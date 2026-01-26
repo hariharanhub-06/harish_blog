@@ -43,7 +43,7 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
     return (
         <div className="w-full flex flex-col gap-6 md:gap-12 py-8 md:py-12">
             {/* Main Section Header */}
-            <div className="flex flex-col items-center mb-4 md:mb-8">
+            <div className="flex flex-col items-center mb-4 md:mb-8 relative overflow-hidden w-full">
                 <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-8 md:-mt-12">ACADEMY</h2>
                 <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter text-center relative z-10">
                     Training <span className="text-orange-600">Programs</span>

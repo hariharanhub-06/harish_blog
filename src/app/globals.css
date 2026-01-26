@@ -10,6 +10,11 @@
   --color-text: #f8fafc;
 }
 
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
 @layer base {
   body {
     @apply bg-[#0a0a0a] text-[#f8fafc];
