@@ -12,12 +12,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid message format" }, { status: 400 });
         }
 
-        const apiKey = process.env.GROQ_API_KEY;
+        const apiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
         const dbUrl = process.env.DATABASE_URL;
 
         if (!apiKey) {
-            console.error("Missing Groq API Key");
-            return NextResponse.json({ error: "API Configuration incomplete (Key missing)" }, { status: 500 });
+            console.error("Missing Groq API Key in environment");
+            return NextResponse.json({ error: "SERVICE ERROR: API Configuration incomplete (Key missing)" }, { status: 500 });
         }
 
         if (!dbUrl) {
