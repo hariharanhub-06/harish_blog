@@ -14,6 +14,9 @@ export async function GET(req: Request) {
             );
         `);
 
+        // Migration: Ensure the knowledge_base column exists even if table was created with old schema
+        await sql(`ALTER TABLE ai_assistant_config ADD COLUMN IF NOT EXISTS knowledge_base TEXT`);
+
         // Check if old columns exist and drop them or just ensure new one exists
         // simplified: assuming fresh start for new schema
 
