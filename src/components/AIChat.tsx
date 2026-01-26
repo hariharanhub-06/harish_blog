@@ -11,7 +11,7 @@ export default function AIChat() {
     const [leadLoading, setLeadLoading] = useState(false);
 
     const [messages, setMessages] = useState<{ role: "user" | "ai", content: string }[]>([
-        { role: "ai", content: "Hey there! I am Thenali, your official AI assistant. Before we begin, I'd love to know who I'm chatting with!" }
+        { role: "ai", content: "Hey there! I am Hari's AI assistant. Before we begin, I'd love to know who I'm chatting with!" }
     ]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
