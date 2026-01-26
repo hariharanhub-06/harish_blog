@@ -56,6 +56,15 @@ export function TrainingPrograms({ stats, partnerships }: TrainingProgramsProps)
 
     return (
         <div className="w-full flex flex-col gap-6 md:gap-12 py-8 md:py-12">
+            {/* Main Section Header */}
+            <div className="flex flex-col items-center mb-4 md:mb-8">
+                <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-8 md:-mt-12">ACADEMY</h2>
+                <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter text-center relative z-10">
+                    Training <span className="text-orange-600">Programs</span>
+                </h2>
+                <div className="w-16 md:w-20 h-1.5 md:h-2 bg-orange-600 mt-3 md:mt-4 rounded-full" />
+            </div>
+
             {/* Stats Section */}
             <div className="container mx-auto px-4 md:px-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
@@ -88,7 +97,7 @@ export function TrainingPrograms({ stats, partnerships }: TrainingProgramsProps)
                         <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                         <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                        <div className="flex flex-col gap-1 md:gap-2 px-6 mb-3 md:mb-4">
+                        <div className="flex flex-col gap-1 md:gap-2 px-6 mb-3 md:mb-4 text-center">
                             <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-orange-500/80">Collaborations</span>
                             <h4 className="text-lg md:text-xl font-black text-white uppercase tracking-tighter">Academic Partners</h4>
                         </div>
@@ -120,7 +129,7 @@ export function TrainingPrograms({ stats, partnerships }: TrainingProgramsProps)
                     <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                    <div className="flex flex-col gap-1 md:gap-2 px-6 mb-3 md:mb-4 text-right">
+                    <div className="flex flex-col gap-1 md:gap-2 px-6 mb-3 md:mb-4 text-center">
                         <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-blue-500/80">Expertise Sharing</span>
                         <h4 className="text-lg md:text-xl font-black text-white uppercase tracking-tighter">Domain Skills</h4>
                     </div>
