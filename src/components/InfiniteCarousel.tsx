@@ -15,8 +15,8 @@ export function InfiniteCarousel({
     // Speed is duration in seconds for one full pass
     return (
         <div className={`overflow-hidden whitespace-nowrap relative flex ${className}`}>
-            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
-            <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
+            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0e0e0e] via-[#0e0e0e]/80 to-transparent z-10" />
+            <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#0e0e0e] via-[#0e0e0e]/80 to-transparent z-10" />
 
             <motion.div
                 className="flex gap-12 items-center px-6 shrink-0"
