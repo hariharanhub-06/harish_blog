@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users } from "lucide-react";
 import Image from "next/image";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
+import TimelineModule from "./TimelineModule";
 
 export default function ProfileModule() {
     const [profile, setProfile] = useState<any>(null);
@@ -328,6 +329,11 @@ export default function ProfileModule() {
                         <span>Save Profile Changes</span>
                     </button>
                 </form>
+            </div>
+
+            {/* Timeline Module Integration */}
+            <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-8 md:p-12">
+                <TimelineModule />
             </div>
         </div>
     )
