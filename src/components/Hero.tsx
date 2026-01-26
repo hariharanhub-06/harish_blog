@@ -66,7 +66,7 @@ export default function Hero({ profile, className }: HeroProps) {
                             {/* Decorative circular element */}
                             <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent rounded-full blur-3xl -z-10" />
 
-                            <Tilt options={{ max: 10, speed: 400, glare: true, "max-glare": 0.2 }}>
+                            <Tilt options={{ max: 10, speed: 400, glare: false }}>
                                 <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[480px] lg:h-[480px] rounded-full overflow-hidden shadow-2xl">
                                     {profile.avatarUrl ? (
                                         <Image
