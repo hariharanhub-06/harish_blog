@@ -102,7 +102,8 @@ export async function POST(req: Request) {
             console.log("GEMINI: Starting chat session...");
             const chat = model.startChat({ history });
 
-            const latestMessage = String(messages[messages.length - 1].content || "").trim();
+            const lastMsg = messages[messages.length - 1];
+            const latestMessage = String(lastMsg.content || "").trim();
             if (!latestMessage) {
                 return NextResponse.json({ error: "Empty message" }, { status: 400 });
             }
@@ -114,11 +115,26 @@ export async function POST(req: Request) {
 
             return NextResponse.json({ content: responseText });
         } catch (geminiError: any) {
-            console.error("GEMINI Error:", geminiError.message);
-            return NextResponse.json({ error: "AI processing error", details: geminiError.message }, { status: 500 });
+            console.error("GEMINI ERROR FULL:", geminiError);
+            let userFriendlyError = "AI is currently resting. Please try again in a few minutes.";
+
+            if (geminiError.message?.includes("location is not supported")) {
+                userFriendlyError = "Gemini API is not available in your current region or for this API key.";
+            } else if (geminiError.message?.includes("API_KEY_INVALID")) {
+                userFriendlyError = "Invalid API Key. Please check your .env.local file.";
+            }
+
+            return NextResponse.json({
+                error: "AI processing error",
+                details: userFriendlyError,
+                raw: geminiError.message
+            }, { status: 500 });
         }
     } catch (error: any) {
         console.error("GLOBAL Chat Error:", error.message);
-        return NextResponse.json({ error: "Internal Server Error", details: error.message }, { status: 500 });
+        return NextResponse.json({
+            error: "Internal Server Error",
+            details: error.message
+        }, { status: 500 });
     }
 }

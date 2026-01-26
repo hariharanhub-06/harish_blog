@@ -1,18 +1,27 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare, X, Send, Sparkles, Loader2, MinusCircle, User } from "lucide-react";
+import { MessageSquare, X, Send, Sparkles, Loader2, MinusCircle, User, Mail, Phone, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function AIChat() {
     const [isOpen, setIsOpen] = useState(false);
+    const [leadCaptured, setLeadCaptured] = useState(false);
+    const [leadData, setLeadData] = useState({ name: "", email: "", mobile: "" });
+    const [leadLoading, setLeadLoading] = useState(false);
+
     const [messages, setMessages] = useState<{ role: "user" | "ai", content: string }[]>([
-        { role: "ai", content: "Hey there! I'm Hari's AI assistant. How can I help you today?" }
+        { role: "ai", content: "Hey there! I'm Hari's AI assistant. Before we start, I'd love to know who I'm chatting with!" }
     ]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const chatRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const captured = localStorage.getItem("chatLeadCaptured");
+        if (captured) setLeadCaptured(true);
+    }, []);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -44,6 +53,27 @@ export default function AIChat() {
         };
     }, [isOpen]);
 
+    const handleLeadSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLeadLoading(true);
+        try {
+            const res = await fetch("/api/chat/lead", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(leadData)
+            });
+            if (res.ok) {
+                setLeadCaptured(true);
+                localStorage.setItem("chatLeadCaptured", "true");
+                setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! How can I help you regarding my services or portfolio today?` }]);
+            }
+        } catch (error) {
+            console.error("Lead submission error", error);
+        } finally {
+            setLeadLoading(false);
+        }
+    };
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || loading) return;
@@ -58,10 +88,13 @@ export default function AIChat() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    messages: [...messages, { role: "user", content: userMsg }].map(m => ({
-                        role: m.role === "user" ? "user" : "assistant",
-                        content: m.content
-                    }))
+                    messages: messages
+                        .filter(m => m.role === "user" || m.role === "ai")
+                        .concat([{ role: "user", content: userMsg }])
+                        .map(m => ({
+                            role: m.role === "user" ? "user" : "assistant",
+                            content: m.content
+                        }))
                 })
             });
 
@@ -69,7 +102,9 @@ export default function AIChat() {
                 const data = await res.json();
                 setMessages(prev => [...prev, { role: "ai", content: data.content }]);
             } else {
-                setMessages(prev => [...prev, { role: "ai", content: "I'm sorry, I'm experiencing some connectivity issues. Please try again later." }]);
+                const errorData = await res.json();
+                const errorMessage = errorData.details || errorData.error || "I'm having trouble connecting to my brain right now. Please try again later.";
+                setMessages(prev => [...prev, { role: "ai", content: `SERVICE ERROR: ${errorMessage}` }]);
             }
         } catch (error) {
             setMessages(prev => [...prev, { role: "ai", content: "Oops! Something went wrong. Let's try that again." }]);
@@ -113,13 +148,64 @@ export default function AIChat() {
                             {messages.map((m, i) => (
                                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                                     <div className={`max-w-[90%] p-4 rounded-3xl text-xs font-bold leading-relaxed shadow-sm ${m.role === "user"
-                                            ? "bg-orange-600 text-white rounded-tr-none shadow-orange-600/20"
-                                            : "bg-white/5 text-white/90 border border-white/10 rounded-tl-none"
+                                        ? "bg-orange-600 text-white rounded-tr-none shadow-orange-600/20"
+                                        : "bg-white/5 text-white/90 border border-white/10 rounded-tl-none"
                                         }`}>
                                         {m.content}
                                     </div>
                                 </div>
                             ))}
+
+                            {!leadCaptured && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-white/5 border border-white/10 rounded-[2rem] p-6 space-y-5"
+                                >
+                                    <div className="space-y-4">
+                                        <div className="relative">
+                                            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600" size={16} />
+                                            <input
+                                                required
+                                                placeholder="Your Name"
+                                                value={leadData.name}
+                                                onChange={e => setLeadData(prev => ({ ...prev, name: e.target.value }))}
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold"
+                                            />
+                                        </div>
+                                        <div className="relative">
+                                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600" size={16} />
+                                            <input
+                                                required
+                                                type="email"
+                                                placeholder="Email ID"
+                                                value={leadData.email}
+                                                onChange={e => setLeadData(prev => ({ ...prev, email: e.target.value }))}
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold"
+                                            />
+                                        </div>
+                                        <div className="relative">
+                                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600" size={16} />
+                                            <input
+                                                required
+                                                type="tel"
+                                                placeholder="Mobile No"
+                                                value={leadData.mobile}
+                                                onChange={e => setLeadData(prev => ({ ...prev, mobile: e.target.value }))}
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold"
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleLeadSubmit}
+                                        disabled={!leadData.name || !leadData.email || !leadData.mobile || leadLoading}
+                                        className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 shadow-xl shadow-orange-600/20"
+                                    >
+                                        {leadLoading ? <Loader2 className="animate-spin" size={16} /> : <>Start Chatting <ArrowRight size={16} /></>}
+                                    </button>
+                                </motion.div>
+                            )}
+
                             {loading && (
                                 <div className="flex justify-start">
                                     <div className="bg-white/5 border border-white/10 p-4 rounded-3xl rounded-tl-none flex gap-2 items-center">
@@ -134,28 +220,30 @@ export default function AIChat() {
                         </div>
 
                         {/* Input Area */}
-                        <form onSubmit={handleSend} className="p-4 bg-white/5 border-t border-white/5 flex gap-3 items-end">
-                            <textarea
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleSend(e as any);
-                                    }
-                                }}
-                                rows={1}
-                                placeholder="Message Hari's Twin..."
-                                className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold placeholder:text-white/20 resize-none max-h-24 overflow-y-auto"
-                            />
-                            <button
-                                type="submit"
-                                disabled={!input.trim() || loading}
-                                className="bg-orange-600 p-3.5 rounded-xl text-white hover:scale-105 active:scale-95 transition-all shadow-xl shadow-orange-600/30 disabled:opacity-50 h-[44px] w-[44px] flex items-center justify-center shrink-0"
-                            >
-                                <Send size={20} />
-                            </button>
-                        </form>
+                        {leadCaptured && (
+                            <form onSubmit={handleSend} className="p-4 bg-white/5 border-t border-white/5 flex gap-3 items-end">
+                                <textarea
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSend(e as any);
+                                        }
+                                    }}
+                                    rows={1}
+                                    placeholder="Message Hari's Twin..."
+                                    className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold placeholder:text-white/20 resize-none max-h-24 overflow-y-auto"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={!input.trim() || loading}
+                                    className="bg-orange-600 p-3.5 rounded-xl text-white hover:scale-105 active:scale-95 transition-all shadow-xl shadow-orange-600/30 disabled:opacity-50 h-[44px] w-[44px] flex items-center justify-center shrink-0"
+                                >
+                                    <Send size={20} />
+                                </button>
+                            </form>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
