@@ -71,40 +71,12 @@ export default function RootLayout({
               "name": "Hari Haran Jeyaramamoorthy",
               "url": "https://hariharanhub.com",
               "jobTitle": "Founder & Developer",
-              "worksFor": [
-                {
-                  "@type": "Organization",
-                  "name": "HM Tech",
-                  "url": "https://hariharanhub.com/business/hm-tech"
-                },
-                {
-                  "@type": "Organization",
-                  "name": "HM Snacks",
-                  "url": "https://hariharanhub.com/business/hm-snacks"
-                }
-              ],
+              "worksFor": [],
               "knowsAbout": ["Web Development", "E-commerce", "Business Strategy", "Software Engineering"],
               "sameAs": [
                 "https://linkedin.com/in/hari-haran-j",
                 "https://github.com/startup-digi-3119"
               ]
-            })
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "HM Snacks",
-              "url": "https://hariharanhub.com/business/hm-snacks",
-              "logo": "https://hariharanhub.com/hm-snacks-logo.png",
-              "description": "Authentic traditional snacks from HM Snacks.",
-              "parentOrganization": {
-                "@type": "Person",
-                "name": "Hari Haran Jeyaramamoorthy"
-              }
             })
           }}
         />
