@@ -21,15 +21,23 @@ export default function AIChat() {
     useEffect(() => {
         const captured = localStorage.getItem("chatLeadCaptured_PROD_V1");
         const storedName = localStorage.getItem("chatUserName");
-        if (captured) {
+        if (captured && storedName) {
             setLeadCaptured(true);
-            if (storedName) {
-                setLeadData(prev => ({ ...prev, name: storedName }));
-                // Use a more natural greeting for returning users
-                setMessages([{ role: "ai", content: `Welcome back, ${storedName}! How can I assist you today?` }]);
-            }
+            setLeadData(prev => ({ ...prev, name: storedName }));
+            setMessages([{ role: "ai", content: `Welcome back, ${storedName}! How can I assist you today?` }]);
+        } else {
+            // Force reset if state is inconsistent
+            setLeadCaptured(false);
         }
     }, []);
+
+    const handleReset = () => {
+        localStorage.removeItem("chatLeadCaptured_PROD_V1");
+        localStorage.removeItem("chatUserName");
+        setLeadCaptured(false);
+        setLeadData({ name: "", email: "", mobile: "" });
+        setMessages([{ role: "ai", content: "Hey there! I am Hari's AI assistant. Before we begin, I'd love to know who I'm chatting with!" }]);
+    };
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -230,30 +238,38 @@ export default function AIChat() {
                         </div>
 
                         {/* Input Area */}
-                        {leadCaptured && (
-                            <form onSubmit={handleSend} className="p-4 bg-white/5 border-t border-white/5 flex gap-3 items-end">
-                                <textarea
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleSend(e as any);
-                                        }
-                                    }}
-                                    rows={1}
-                                    placeholder="Message Thenali..."
-                                    className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold placeholder:text-white/20 resize-none max-h-24 overflow-y-auto"
-                                />
+                        {leadCaptured ? (
+                            <div className="flex flex-col border-t border-white/5">
+                                <form onSubmit={handleSend} className="p-4 bg-white/5 flex gap-3 items-end">
+                                    <textarea
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleSend(e as any);
+                                            }
+                                        }}
+                                        rows={1}
+                                        placeholder="Message Thenali..."
+                                        className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold placeholder:text-white/20 resize-none max-h-24 overflow-y-auto"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!input.trim() || loading}
+                                        className="bg-orange-600 p-3.5 rounded-xl text-white hover:scale-105 active:scale-95 transition-all shadow-xl shadow-orange-600/30 disabled:opacity-50 h-[44px] w-[44px] flex items-center justify-center shrink-0"
+                                    >
+                                        <Send size={20} />
+                                    </button>
+                                </form>
                                 <button
-                                    type="submit"
-                                    disabled={!input.trim() || loading}
-                                    className="bg-orange-600 p-3.5 rounded-xl text-white hover:scale-105 active:scale-95 transition-all shadow-xl shadow-orange-600/30 disabled:opacity-50 h-[44px] w-[44px] flex items-center justify-center shrink-0"
+                                    onClick={handleReset}
+                                    className="text-[8px] font-black uppercase text-white/20 hover:text-orange-600/60 pb-3 transition-colors uppercase tracking-widest text-center"
                                 >
-                                    <Send size={20} />
+                                    Not {leadData.name}? Reset Chat
                                 </button>
-                            </form>
-                        )}
+                            </div>
+                        ) : null}
                     </motion.div>
                 )}
             </AnimatePresence>
