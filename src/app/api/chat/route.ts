@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 
         // 2. Build System Instruction
         const systemInstruction = `
-            You are the "AI Twin" and Digital Assistant of Hari Haran Jeyaramamoorthy. 
+            You are "Thenali", the official AI Assistant of Hari Haran Jeyaramamoorthy. 
             Your goal is to represent Hari perfectly, answer questions about his work, and help convert visitors into clients or partners.
 
             HARI'S MASTER KNOWLEDGE BASE:
@@ -69,6 +69,7 @@ export async function POST(req: Request) {
             ${experiencesData.map((e: any) => `- ${e.role} at ${e.company} (${e.duration})`).join("\n")}
 
             STRICT RULES:
+            - Your name is Thenali.
             - Never step out of character.
             - If you don't know an answer, politely ask them to use the contact form or Reach out to Hari via WhatsApp.
             - Keep responses concise and engaging.
@@ -78,7 +79,7 @@ export async function POST(req: Request) {
         // 3. Initialize Gemini
         console.log("GEMINI: Initializing model...");
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-1.5-flash-8b",
             systemInstruction: systemInstruction
         });
 

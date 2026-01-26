@@ -19,7 +19,7 @@ export default function AIChat() {
     const chatRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const captured = localStorage.getItem("chatLeadCaptured");
+        const captured = localStorage.getItem("chatLeadCaptured_v3");
         if (captured) setLeadCaptured(true);
     }, []);
 
@@ -64,8 +64,8 @@ export default function AIChat() {
             });
             if (res.ok) {
                 setLeadCaptured(true);
-                localStorage.setItem("chatLeadCaptured", "true");
-                setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! How can I help you regarding my services or portfolio today?` }]);
+                localStorage.setItem("chatLeadCaptured_v3", "true");
+                setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! I am Thenali, Hari's AI assistant. How can I help you today?` }]);
             }
         } catch (error) {
             console.error("Lead submission error", error);
@@ -131,7 +131,7 @@ export default function AIChat() {
                                     <Sparkles size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-black text-white tracking-widest uppercase italic leading-none">Digital Hari</h3>
+                                    <h3 className="text-sm font-black text-white tracking-widest uppercase italic leading-none">Thenali</h3>
                                     <div className="flex items-center gap-1.5 mt-1">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                         <span className="text-[9px] font-black text-emerald-500/80 uppercase tracking-widest">Always Online</span>
@@ -232,7 +232,7 @@ export default function AIChat() {
                                         }
                                     }}
                                     rows={1}
-                                    placeholder="Message Hari's Twin..."
+                                    placeholder="Message Thenali..."
                                     className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold placeholder:text-white/20 resize-none max-h-24 overflow-y-auto"
                                 />
                                 <button
