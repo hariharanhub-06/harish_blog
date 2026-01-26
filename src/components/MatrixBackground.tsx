@@ -74,7 +74,7 @@ export function MatrixBackground() {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]"
+            className="fixed inset-0 pointer-events-none z-0 opacity-[0.08]"
             style={{ mixBlendMode: "screen" }}
         />
     );
