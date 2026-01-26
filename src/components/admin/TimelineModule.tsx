@@ -13,8 +13,12 @@ import {
     HeartHandshake, // Use HeartHandshake for Volunteering
     Calendar,
     ArrowUp,
-    ArrowDown
+    ArrowDown,
+    Image as ImageIcon
 } from "lucide-react";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
+import Image from "next/image";
+import imageKitLoader from "@/lib/imagekitLoader";
 
 export default function TimelineModule() {
     const [experiences, setExperiences] = useState<any[]>([]);
@@ -23,6 +27,7 @@ export default function TimelineModule() {
     const [editing, setEditing] = useState<any>(null);
     const [fetching, setFetching] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [activeTab, setActiveTab] = useState<"experience" | "education" | "volunteering">("experience"); // Added volunteering
 
     useEffect(() => {
@@ -85,6 +90,20 @@ export default function TimelineModule() {
         if (res.ok) fetchTimeline();
     };
 
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const url = await uploadToImageKit(file);
+            setEditing({ ...editing, logo: url });
+        } catch (error) {
+            alert("Image upload failed");
+        } finally {
+            setUploading(false);
+        }
+    };
+
     if (fetching) {
         return (
             <div className="flex items-center justify-center p-20">
@@ -105,7 +124,7 @@ export default function TimelineModule() {
                     <button
                         onClick={() => {
                             setActiveTab("experience");
-                            setEditing({ role: "", company: "", duration: "", description: "", order: 0 });
+                            setEditing({ role: "", company: "", logo: "", duration: "", description: "", order: 0 });
                         }}
                         className="flex items-center space-x-2 bg-primary text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
                     >
@@ -118,9 +137,18 @@ export default function TimelineModule() {
                     {experiences.map((item) => (
                         <div key={item.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                             <div>
-                                <h3 className="text-xl font-black">{item.role}</h3>
-                                <p className="text-secondary font-bold">{item.company}</p>
-                                <p className="text-xs font-black uppercase tracking-widest text-secondary/60 mt-1">{item.duration}</p>
+                                <div className="flex items-center gap-4">
+                                    {item.logo && (
+                                        <div className="relative w-12 h-12 rounded-xl bg-gray-50 p-2 overflow-hidden border border-gray-100">
+                                            <Image loader={imageKitLoader} src={item.logo} alt={item.company} fill className="object-contain" />
+                                        </div>
+                                    )}
+                                    <div>
+                                        <h3 className="text-xl font-black">{item.role}</h3>
+                                        <p className="text-secondary font-bold">{item.company}</p>
+                                    </div>
+                                </div>
+                                <p className="text-xs font-black uppercase tracking-widest text-secondary/60 mt-1 ml-[64px]">{item.duration}</p>
                             </div>
                             <div className="flex space-x-2">
                                 <button
@@ -161,7 +189,7 @@ export default function TimelineModule() {
                     <button
                         onClick={() => {
                             setActiveTab("education");
-                            setEditing({ degree: "", institution: "", period: "", details: "", order: 0 });
+                            setEditing({ degree: "", institution: "", logo: "", period: "", details: "", order: 0 });
                         }}
                         className="flex items-center space-x-2 bg-accent text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
                     >
@@ -174,9 +202,18 @@ export default function TimelineModule() {
                     {educations.map((item) => (
                         <div key={item.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                             <div>
-                                <h3 className="text-xl font-black">{item.degree}</h3>
-                                <p className="text-secondary font-bold">{item.institution}</p>
-                                <p className="text-xs font-black uppercase tracking-widest text-secondary/60 mt-1">{item.period}</p>
+                                <div className="flex items-center gap-4">
+                                    {item.logo && (
+                                        <div className="relative w-12 h-12 rounded-xl bg-gray-50 p-2 overflow-hidden border border-gray-100">
+                                            <Image loader={imageKitLoader} src={item.logo} alt={item.institution} fill className="object-contain" />
+                                        </div>
+                                    )}
+                                    <div>
+                                        <h3 className="text-xl font-black">{item.degree}</h3>
+                                        <p className="text-secondary font-bold">{item.institution}</p>
+                                    </div>
+                                </div>
+                                <p className="text-xs font-black uppercase tracking-widest text-secondary/60 mt-1 ml-[64px]">{item.period}</p>
                             </div>
                             <div className="flex space-x-2">
                                 <button
@@ -217,7 +254,7 @@ export default function TimelineModule() {
                     <button
                         onClick={() => {
                             setActiveTab("volunteering");
-                            setEditing({ role: "", organization: "", duration: "", description: "", order: 0 });
+                            setEditing({ role: "", organization: "", logo: "", duration: "", description: "", order: 0 });
                         }}
                         className="flex items-center space-x-2 bg-teal-600 text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
                     >
@@ -230,9 +267,18 @@ export default function TimelineModule() {
                     {volunteerings.map((item) => (
                         <div key={item.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                             <div>
-                                <h3 className="text-xl font-black">{item.role}</h3>
-                                <p className="text-secondary font-bold">{item.organization}</p>
-                                <p className="text-xs font-black uppercase tracking-widest text-secondary/60 mt-1">{item.duration}</p>
+                                <div className="flex items-center gap-4">
+                                    {item.logo && (
+                                        <div className="relative w-12 h-12 rounded-xl bg-gray-50 p-2 overflow-hidden border border-gray-100">
+                                            <Image loader={imageKitLoader} src={item.logo} alt={item.organization} fill className="object-contain" />
+                                        </div>
+                                    )}
+                                    <div>
+                                        <h3 className="text-xl font-black">{item.role}</h3>
+                                        <p className="text-secondary font-bold">{item.organization}</p>
+                                    </div>
+                                </div>
+                                <p className="text-xs font-black uppercase tracking-widest text-secondary/60 mt-1 ml-[64px]">{item.duration}</p>
                             </div>
                             <div className="flex space-x-2">
                                 <button
@@ -276,6 +322,32 @@ export default function TimelineModule() {
                         </div>
 
                         <form onSubmit={handleSave} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Logo / Icon</label>
+                                <div className="relative w-full h-32 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden flex flex-col items-center justify-center group hover:border-primary transition-colors cursor-pointer" onClick={() => document.getElementById('logo-upload')?.click()}>
+                                    {editing.logo ? (
+                                        <Image
+                                            loader={imageKitLoader}
+                                            src={editing.logo}
+                                            alt="Logo Preview"
+                                            fill
+                                            className="object-contain p-4"
+                                        />
+                                    ) : (
+                                        <div className="text-center p-6">
+                                            <ImageIcon size={24} className="mx-auto text-gray-400 mb-2" />
+                                            <p className="text-xs font-black text-secondary group-hover:text-primary">Click to Upload Logo</p>
+                                        </div>
+                                    )}
+                                    {uploading && (
+                                        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                                            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                        </div>
+                                    )}
+                                </div>
+                                <input id="logo-upload" type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} disabled={uploading} />
+                            </div>
+
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">
