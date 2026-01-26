@@ -47,7 +47,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Database failure", details: dbError.message }, { status: 500 });
         }
 
-        // 2. Build System Instruction (Now as the first message for Groq)
+        // 2. Build System Instruction
         const systemInstruction = `
             Your name is "Thenali". You are the official AI Assistant of Hari Haran Jeyaramamoorthy. 
             Represent Hari perfectly, answer questions about his work/portfolio, and help convert visitors.
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
             ${config.knowledge_base || "Professional, confident assistant."}
         `;
 
-        // 3. Start Chat with Groq (with Fallback)
+        // 3. Start Chat with Groq (with Guaranteed 2.0s Total AI Window)
         try {
             const groqMessages: any[] = [
                 { role: "system", content: systemInstruction },
@@ -87,32 +87,41 @@ export async function POST(req: Request) {
                 }))
             ];
 
+            const fetchWithTimeout = async (modelName: string, timeoutMs: number) => {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+                try {
+                    const response = await groq.chat.completions.create({
+                        messages: groqMessages,
+                        model: modelName,
+                        temperature: 0.6,
+                        max_tokens: 150,
+                    }, { signal: controller.signal } as any);
+                    clearTimeout(timeoutId);
+                    return response;
+                } catch (e: any) {
+                    clearTimeout(timeoutId);
+                    throw e;
+                }
+            };
+
             let completion;
             try {
-                // LAYER 1: High-Speed Instant Groq (Llama 3.1 8B) - SUB-SECOND SPEED
-                completion = await groq.chat.completions.create({
-                    messages: groqMessages,
-                    model: "llama-3.1-8b-instant",
-                    temperature: 0.6,
-                    max_tokens: 150,
-                });
-            } catch (limitError: any) {
-                // If 8B fails or is busy, try LAYER 2: Premier Groq (Llama 3.3 70B)
-                console.warn("8B Busy: Trying 70B Fallback.");
+                // LAYER 1: Rapid 8B Model (1.2s Limit)
+                completion = await fetchWithTimeout("llama-3.1-8b-instant", 1200);
+            } catch (err: any) {
+                console.warn(`Layer 1 (8B) failed or timed out. Trying Layer 2.`);
                 try {
-                    completion = await groq.chat.completions.create({
-                        messages: groqMessages,
-                        model: "llama-3.3-70b-versatile",
-                        temperature: 0.7,
-                        max_tokens: 150,
-                    });
-                } catch (innerError: any) {
-                    // LAYER 3: Gemini Safety Net
-                    console.warn("Groq Exhausted: Trying Gemini Safety Net.");
+                    // LAYER 2: Versatile 70B Model (1.5s Limit)
+                    completion = await fetchWithTimeout("llama-3.3-70b-versatile", 1500);
+                } catch (innerErr: any) {
+                    // LAYER 3: Gemini Final Fallback (Fastest fallback)
+                    console.warn("Groq Exhausted or Slow: Activating Gemini Safety Net.");
                     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
-                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const genModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-                    const result = await model.generateContent({
+                    const result = await genModel.generateContent({
                         contents: [
                             { role: "user", parts: [{ text: systemInstruction }] },
                             ...messages.map(m => ({
@@ -122,26 +131,25 @@ export async function POST(req: Request) {
                         ]
                     });
 
-                    const responseText = result.response.text();
-                    return NextResponse.json({ content: responseText });
+                    return NextResponse.json({ content: result.response.text() });
                 }
             }
 
-            const responseText = completion?.choices[0]?.message?.content || "Thenali is online!";
+            const responseText = completion?.choices[0]?.message?.content || "Thenali is here!";
             return NextResponse.json({ content: responseText });
-        } catch (groqError: any) {
-            console.error("GROQ ERROR:", groqError);
-            // Even more robust: Final safety fallback
+
+        } catch (aiError: any) {
+            console.error("AI Error:", aiError.message);
             return NextResponse.json({
                 error: "AI processing error",
-                details: groqError.status === 429 ? "System busy: Please try again in 60 seconds." : groqError.message
-            }, { status: groqError.status || 500 });
+                details: "System busy. Please try again."
+            }, { status: 500 });
         }
-    } catch (error: any) {
-        console.error("GLOBAL Chat Error:", error.message);
+    } catch (globalError: any) {
+        console.error("GLOBAL Chat Error:", globalError.message);
         return NextResponse.json({
             error: "Internal Server Error",
-            details: error.message
+            details: globalError.message
         }, { status: 500 });
     }
 }
