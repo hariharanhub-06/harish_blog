@@ -34,7 +34,7 @@ export default function Hero({ profile, className }: HeroProps) {
                         src={profile.heroImageUrl}
                         alt="Hero background"
                         fill
-                        className="object-cover opacity-10"
+                        className="object-cover opacity-30"
                         priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-[#0e0e0e]/80 via-[#0e0e0e]/60 to-[#0e0e0e]" />
