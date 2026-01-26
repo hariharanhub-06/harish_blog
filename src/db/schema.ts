@@ -402,9 +402,6 @@ export const youtubeVideos = pgTable("youtube_videos", {
 
 export const aiAssistantConfig = pgTable("ai_assistant_config", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  persona: text("persona"),
-  pricing: text("pricing"),
-  faq: text("faq"),
-  convincingTactics: text("convincing_tactics"),
+  knowledgeBase: text("knowledge_base"),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
