@@ -4,7 +4,6 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import ClientLayout from "@/components/ClientLayout";
-import { CartProvider } from "@/context/CartContext";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -16,8 +15,8 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://hariharanhub.com'),
-  title: "Hari Haran's Blog | Developer, Consultant & Entrepreneur",
-  description: "Official Blog & Portfolio of Hari Haran Jeyaramamoorthy. Insights on Web Development, HM Snacks (E-commerce), HM Tech, and HariPicks.",
+  title: "Hari Haran's Blog | Developer & Consultant",
+  description: "Official Blog & Portfolio of Hari Haran Jeyaramamoorthy. Insights on Web Development, Software Engineering, and Entrepreneurship.",
   keywords: [
     "Hari Haran Jeyaramamoorthy",
     "Hari Haran Blog",
@@ -41,8 +40,8 @@ export const metadata: Metadata = {
     apple: "/hh-gold-logo.png",
   },
   openGraph: {
-    title: "Hari Haran's Blog | Developer, Consultant & Entrepreneur",
-    description: "Read my latest thoughts on Technology, Business, and E-commerce. Featuring HM Snacks, HM Tech, and HariPicks.",
+    title: "Hari Haran's Blog | Developer & Consultant",
+    description: "Read my latest thoughts on Technology, Business, and Software Development.",
     url: 'https://hariharanhub.com',
     siteName: 'Hari Haran Jeyaramamoorthy',
     locale: 'en_US',
@@ -112,12 +111,10 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased text-text`}>
         <AuthProvider>
-          <CartProvider>
-            <ClientLayout>
-              {children}
-              <Analytics />
-            </ClientLayout>
-          </CartProvider>
+          <ClientLayout>
+            {children}
+            <Analytics />
+          </ClientLayout>
         </AuthProvider>
       </body>
     </html>

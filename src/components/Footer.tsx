@@ -11,16 +11,7 @@ const socialLinks = [
     { name: "Mail", href: "mailto:hariharanjeyaramoorthy@gmail.com", icon: Mail },
 ];
 
-export default function Footer({ minimal = false }: { minimal?: boolean }) {
-    if (minimal) {
-        return (
-            <footer className="bg-white border-t border-gray-50 py-6 relative z-50 overflow-hidden">
-                <div className="container mx-auto px-6 text-center text-[11px] text-secondary relative z-10 text-gray-500">
-                    <p>© {new Date().getFullYear()} Hari Haran Jeyaramamoorthy. All rights reserved.</p>
-                </div>
-            </footer>
-        );
-    }
+export default function Footer() {
 
     return (
         <footer className="bg-white border-t border-gray-100 py-4 transition-colors duration-300 relative z-50">

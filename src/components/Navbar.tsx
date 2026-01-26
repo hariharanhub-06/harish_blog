@@ -17,9 +17,7 @@ const navLinks = [
 export default function Navbar() {
     const pathname = usePathname();
     const isHomePage = pathname === "/";
-    const isSnacksPage = pathname?.startsWith("/business/hm-snacks");
-    const isTechPage = pathname?.startsWith("/business/hm-tech");
-    const isDarkTheme = isHomePage || isTechPage;
+    const isDarkTheme = true; // Always dark theme for the main blog
 
     const [scrolled, setScrolled] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -42,8 +40,8 @@ export default function Navbar() {
                 }`}>
                 <Link href="/" className="flex items-center gap-2 text-xl font-black tracking-tighter group">
                     <div className="flex items-baseline">
-                        <span className={`${isDarkTheme ? "text-white" : (isSnacksPage ? "text-pink-500" : "text-primary")} group-hover:text-orange-500 transition-colors`}>Hari</span>
-                        <span className={`${isDarkTheme ? "text-white" : "text-gray-900"} font-black opacity-80 group-hover:opacity-100 transition-opacity`}>Haran</span>
+                        <span className="text-white group-hover:text-orange-500 transition-colors">Hari</span>
+                        <span className="text-white font-black opacity-80 group-hover:opacity-100 transition-opacity">Haran</span>
                         <span className="text-orange-600 animate-pulse ml-0.5">.</span>
                     </div>
                 </Link>
@@ -64,7 +62,7 @@ export default function Navbar() {
 
             {/* Mobile Toggle */}
             <button
-                className={`md:hidden p-3 rounded-xl border transition-all ${isDarkTheme ? "text-white bg-white/5 border-white/10" : "text-gray-900 bg-gray-100 border-gray-200"}`}
+                className="md:hidden p-3 rounded-xl border transition-all text-white bg-white/5 border-white/10"
                 onClick={() => setIsOpen(!isOpen)}
             >
                 {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -77,14 +75,14 @@ export default function Navbar() {
                         initial={{ opacity: 0, y: -20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        className={`absolute top-28 left-6 right-6 rounded-3xl shadow-2xl overflow-hidden md:hidden border transition-all z-50 ${isDarkTheme ? "bg-[#0e0e0e]/95 border-white/10" : "bg-white border-gray-100"}`}
+                        className="absolute top-28 left-6 right-6 rounded-3xl shadow-2xl overflow-hidden md:hidden border transition-all z-50 bg-[#0e0e0e]/95 border-white/10"
                     >
                         <div className="flex flex-col p-6 space-y-2">
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
                                     href={link.href}
-                                    className={`flex items-center space-x-4 p-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all ${isDarkTheme ? "text-white/60 hover:text-orange-500 hover:bg-white/5" : "text-gray-600 hover:text-primary hover:bg-primary/5"}`}
+                                    className="flex items-center space-x-4 p-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all text-white/60 hover:text-orange-500 hover:bg-white/5"
                                     onClick={() => setIsOpen(false)}
                                 >
                                     <link.icon size={18} className="text-orange-600/60" />
@@ -94,7 +92,7 @@ export default function Navbar() {
                             <div className="flex flex-col gap-3 mt-4 pt-6 border-t border-white/5">
                                 <Link
                                     href="#contact"
-                                    className={`w-full text-center py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-lg transition-all ${isDarkTheme ? "bg-orange-600 text-white shadow-orange-600/20" : "bg-primary text-white shadow-primary/20"}`}
+                                    className="w-full text-center py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-lg transition-all bg-orange-600 text-white shadow-orange-600/20"
                                     onClick={() => setIsOpen(false)}
                                 >
                                     Hire Me
