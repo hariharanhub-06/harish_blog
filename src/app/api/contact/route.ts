@@ -1,7 +1,6 @@
 import { db } from "@/db";
 import { contactSubmissions } from "@/db/schema";
 import { NextResponse } from "next/server";
-import { sendWhatsAppAlert } from "@/lib/whatsapp-twilio";
 
 export async function POST(req: Request) {
     try {
@@ -23,10 +22,6 @@ export async function POST(req: Request) {
             category: body.category || "Not Determined",
             status: "Fresh"
         });
-
-        // Trigger WhatsApp Alert to Admin
-        const alertMessage = `🚀 *New Inquiry Received!*\n\n*Page:* ${body.category || 'Portfolio'}\n*From:* ${body.name}\n*Mobile:* ${body.mobile}\n*Subject:* ${body.subject || 'No Subject'}\n\n*Message:* ${body.message}`;
-        await sendWhatsAppAlert(alertMessage);
 
         return NextResponse.json({ success: true });
     } catch (error) {
