@@ -207,9 +207,11 @@ export default function FeedbackModule() {
                             </span>
                         </div>
 
-                        <p className="text-gray-700 text-[11px] font-bold leading-relaxed mb-4 flex-1 italic line-clamp-6 group-hover:text-gray-900 transition-colors">
-                            &ldquo;{f.content}&rdquo;
-                        </p>
+                        <div className="flex-1 overflow-y-auto scrollbar-hide mb-4 pr-1">
+                            <p className="text-gray-700 text-[11px] font-bold leading-relaxed italic group-hover:text-gray-900 transition-colors">
+                                &ldquo;{f.content}&rdquo;
+                            </p>
+                        </div>
 
                         <div className="pt-3 border-t border-gray-50 mt-auto">
                             <div className="flex items-center gap-2 mb-3">
