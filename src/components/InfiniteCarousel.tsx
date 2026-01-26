@@ -1,35 +1,39 @@
+
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
 
 export function InfiniteCarousel({
     items,
-    speed = 12, // Default to 12s per pass (5 RPM: 60s / 12s = 5 revolutions per minute)
+    speed = 12,
     className = "",
 }: {
     items: React.ReactNode[];
     speed?: number;
     className?: string;
 }) {
-    // Speed is duration in seconds for one full pass
-    return (
-        <div className={`overflow-hidden whitespace-nowrap relative flex ${className}`}>
-            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0e0e0e] via-[#0e0e0e]/80 to-transparent z-10" />
-            <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#0e0e0e] via-[#0e0e0e]/80 to-transparent z-10" />
+    const [isPaused, setIsPaused] = useState(false);
 
-            <motion.div
+    return (
+        <div
+            className={`overflow-hidden whitespace-nowrap relative flex ${className}`}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+        >
+            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0e0e0e] via-[#0e0e0e]/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#0e0e0e] via-[#0e0e0e]/80 to-transparent z-10 pointer-events-none" />
+
+            <div
                 className="flex gap-12 items-center px-6 shrink-0"
-                animate={{
-                    x: ["0%", "-50%"],
-                }}
-                transition={{
-                    x: {
-                        repeat: Infinity,
-                        repeatType: "loop",
-                        duration: speed,
-                        ease: "linear",
-                    },
+                style={{
+                    animationName: 'marquee',
+                    animationDuration: `${speed}s`,
+                    animationIterationCount: 'infinite',
+                    animationTimingFunction: 'linear',
+                    animationPlayState: isPaused ? 'paused' : 'running',
+                    width: 'max-content'
                 }}
             >
                 {/* Render items twice for a perfect loop */}
@@ -43,7 +47,8 @@ export function InfiniteCarousel({
                         {item}
                     </div>
                 ))}
-            </motion.div>
+            </div>
         </div>
     );
 }
+
