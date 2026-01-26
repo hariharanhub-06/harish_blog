@@ -100,7 +100,7 @@ export async function POST(req: Request) {
                     console.warn("70B Fallback: Rate limit hit, switching to 8B.");
                     completion = await groq.chat.completions.create({
                         messages: groqMessages,
-                        model: "llama-3-8b-8192",
+                        model: "llama-3.1-8b-instant",
                         temperature: 0.7,
                         max_tokens: 1024,
                     });
