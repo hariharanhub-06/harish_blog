@@ -77,7 +77,7 @@ export async function POST(req: Request) {
         // 3. Initialize Gemini
         console.log("GEMINI: Initializing model...");
         const model = genAI.getGenerativeModel({
-            model: "gemini-flash-latest",
+            model: "gemini-2.0-flash",
             systemInstruction: systemInstruction
         });
 
