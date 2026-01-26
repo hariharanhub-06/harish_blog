@@ -89,15 +89,15 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                         </div>
 
                         <InfiniteCarousel
-                            speed={30}
+                            speed={100}
                             items={academicPartners.map((partner) => (
-                                <div key={partner.id} className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[60vw] md:w-[20vw]">
+                                <div key={partner.id} className="flex items-center gap-3 md:gap-4 px-3 md:px-6 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[60vw] md:w-[20vw] h-full min-h-[80px]">
                                     {partner.logo && (
                                         <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
                                             <img src={partner.logo} alt={partner.name} className="object-contain w-full h-full" />
                                         </div>
                                     )}
-                                    <span className="text-sm md:text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis">
+                                    <span className="text-xs md:text-sm font-black text-white/70 uppercase tracking-widest whitespace-normal leading-tight">
                                         {partner.name}
                                     </span>
                                 </div>
@@ -116,9 +116,9 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                     </div>
 
                     <InfiniteCarousel
-                        speed={30}
+                        speed={100}
                         items={skills.map((skill) => (
-                            <div key={skill.id} className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[45vw] md:w-[16vw]">
+                            <div key={skill.id} className="flex items-center gap-3 md:gap-4 px-3 md:px-6 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[45vw] md:w-[16vw] h-full min-h-[70px]">
                                 <span className="text-lg md:text-2xl w-8 h-8 md:w-10 md:h-10 flex items-center justify-center overflow-hidden shrink-0">
                                     {skill.icon && skill.icon.startsWith('http') ? (
                                         <img src={skill.icon} alt="" className="w-full h-full object-contain" />
@@ -126,7 +126,7 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                                         <span>{skill.icon || "⚙️"}</span>
                                     )}
                                 </span>
-                                <span className="text-sm md:text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis">
+                                <span className="text-xs md:text-sm font-black text-white/70 uppercase tracking-widest whitespace-normal leading-tight">
                                     {skill.name}
                                 </span>
                             </div>
