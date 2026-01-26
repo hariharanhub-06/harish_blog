@@ -11,22 +11,12 @@ import {
     LogOut,
     ExternalLink,
     Loader2,
-    ChevronRight,
     Home,
     X,
     Menu,
-    Image as ImageIcon,
-    Ticket,
-    ShoppingBag,
-    Package,
-    PieChart,
-    FileText,
-    Star,
-    ShoppingCart,
     Users,
-    DollarSign,
-    Building,
-    Banknote
+    Youtube,
+    GraduationCap
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -34,25 +24,11 @@ import ProjectsModule from "@/components/admin/ProjectsModule";
 import TimelineModule from "@/components/admin/TimelineModule";
 import MessagesModule from "@/components/admin/MessagesModule";
 import OverviewModule from "@/components/admin/OverviewModule";
-import SnacksProductModule from "@/components/admin/SnacksProductModule";
-import SnacksOrdersModule from "@/components/admin/SnacksOrdersModule";
-import SnacksOverviewModule from "@/components/admin/SnacksOverviewModule";
-import CouponsModule from "@/components/admin/CouponsModule";
-import BillingModule from "@/components/admin/BillingModule";
-import ReviewsModule from "@/components/admin/ReviewsModule";
-import AbandonedCartsModule from "@/components/admin/AbandonedCartsModule";
-import AffiliatesModule from "@/components/admin/AffiliatesModule";
-import AffiliatePayoutsModule from "@/components/admin/AffiliatePayoutsModule";
-import VendorsModule from "@/components/admin/VendorsModule";
-import VendorProductAssignmentModule from "@/components/admin/VendorProductAssignmentModule";
-import VendorSettlementsModule from "@/components/admin/VendorSettlementsModule";
 import PartnershipsModule from "@/components/admin/PartnershipsModule";
-import HariPicksModule from "@/components/admin/HariPicksModule";
-import { Handshake, Youtube, BookOpen, GraduationCap } from "lucide-react";
 import TrainingAcademyModule from "@/components/admin/TrainingAcademyModule";
 import YouTubeModule from "@/components/admin/YouTubeModule";
 
-type Tab = "overview" | "profile" | "messages" | "snack-central" | "billing" | "partner-network" | "vendor-central" | "public-assets" | "haripicks" | "youtube-manager" | "portfolio" | "training-academy";
+type Tab = "overview" | "profile" | "messages" | "partner-network" | "youtube-manager" | "portfolio" | "training-academy" | "timeline";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -60,14 +36,12 @@ export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<Tab>("overview");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
-    const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
-    const [pendingReviewsCount, setPendingReviewsCount] = useState(0);
 
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "snack-central", "billing", "partner-network", "vendor-central", "public-assets", "haripicks", "youtube-manager", "portfolio", "training-academy"];
-        if (hash && validTabs.includes(hash)) {
+        const validTabs = ["overview", "profile", "messages", "partner-network", "youtube-manager", "portfolio", "training-academy", "timeline"];
+        if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
 
@@ -77,8 +51,7 @@ export default function AdminDashboard() {
                 if (res.ok) {
                     const data = await res.json();
                     setUnreadCount(data.unreadMessages || 0);
-                    setPendingOrdersCount(data.pendingOrders || 0);
-                    setPendingReviewsCount(data.pendingReviews || 0);
+                    setUnreadCount(data.unreadMessages || 0);
                 }
             } catch (err) {
                 console.error("Failed to fetch notification counts", err);
@@ -117,14 +90,9 @@ export default function AdminDashboard() {
         { id: "portfolio", title: "Portfolio Manager", icon: Layout, color: "bg-amber-600" },
         { id: "training-academy", title: "Training Academy", icon: GraduationCap, color: "bg-orange-500" },
         { id: "youtube-manager", title: "YouTube Manager", icon: Youtube, color: "bg-red-600" },
+        { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
-        { id: "divider", title: "BUSINESS SECTION", icon: null, color: "" },
-        { id: "snack-central", title: "Snack Central", icon: Package, color: "bg-pink-600", badge: pendingOrdersCount },
-        { id: "haripicks", title: "HariPicks Manager", icon: ShoppingCart, color: "bg-purple-600" },
-        { id: "billing", title: "Billing / Invoice", icon: FileText, color: "bg-orange-500" },
-        { id: "partner-network", title: "Partner Network", icon: Users, color: "bg-orange-600" },
-        { id: "vendor-central", title: "Vendor Central", icon: Building, color: "bg-teal-600" },
-        { id: "public-assets", title: "Public Assets", icon: Handshake, color: "bg-blue-400", badge: pendingReviewsCount },
+        { id: "partner-network", title: "Partnerships", icon: Users, color: "bg-orange-600" },
     ];
 
     const renderContent = () => {
@@ -134,42 +102,11 @@ export default function AdminDashboard() {
             case "youtube-manager": return <YouTubeModule />;
             case "messages": return <MessagesModule />;
             case "training-academy": return <TrainingAcademyModule />;
-            case "snack-central": return (
-                <div className="space-y-16 animate-in fade-in duration-700">
-                    <SnacksOrdersModule />
-                    <div className="pt-16 border-t border-gray-100">
-                        <SnacksProductModule />
-                    </div>
-                    <div className="pt-16 border-t border-gray-100">
-                        <CouponsModule />
-                    </div>
-                </div>
-            );
-            case "billing": return <BillingModule />;
-            case "partner-network": return (
-                <div className="space-y-16 animate-in fade-in duration-700">
-                    <AffiliatesModule />
-                    <div className="pt-16 border-t border-gray-100">
-                        <AffiliatePayoutsModule />
-                    </div>
-                </div>
-            );
-            case "vendor-central": return <VendorsModule />;
-            case "haripicks": return <HariPicksModule />;
-            case "public-assets": return (
-                <div className="space-y-16 animate-in fade-in duration-700">
-                    <ReviewsModule />
-                    <div className="pt-16 border-t border-gray-100">
-                        <PartnershipsModule excludedTypes={['Academic Partner']} />
-                    </div>
-                </div>
-            );
+            case "timeline": return <TimelineModule />;
+            case "partner-network": return <PartnershipsModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
-                    <SnacksOverviewModule />
-                    <div className="pt-16 border-t border-gray-100">
-                        <OverviewModule />
-                    </div>
+                    <OverviewModule />
                 </div>
             );
         }
