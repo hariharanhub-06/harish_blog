@@ -91,13 +91,13 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                         <InfiniteCarousel
                             speed={30}
                             items={academicPartners.map((partner) => (
-                                <div key={partner.id} className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+                                <div key={partner.id} className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[60vw] md:w-[20vw]">
                                     {partner.logo && (
-                                        <div className="relative w-8 h-8 md:w-10 md:h-10">
+                                        <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
                                             <img src={partner.logo} alt={partner.name} className="object-contain w-full h-full" />
                                         </div>
                                     )}
-                                    <span className="text-sm md:text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap">
+                                    <span className="text-sm md:text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis">
                                         {partner.name}
                                     </span>
                                 </div>
@@ -106,11 +106,6 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                     </div>
                 )}
 
-                {/* Domain Expertise Marquee - Optional, kept as requested in first turn but user said "Only College Logos With Name" in latest turn. 
-            Waiting to see if I should remove it. Actually the user said "Also session orineted also i will add the skills logo with the name that should also scroll same as college logos" in first turn.
-            In latest turn: "Only College Logos With Name I am going to add". This might mean they only want the college one or they are clarifying the content of the college one.
-            I'll keep the skills one but reduce size too. 
-        */}
                 <div className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
                     <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
@@ -123,15 +118,15 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                     <InfiniteCarousel
                         speed={30}
                         items={skills.map((skill) => (
-                            <div key={skill.id} className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                                <span className="text-lg md:text-2xl w-8 h-8 md:w-10 md:h-10 flex items-center justify-center overflow-hidden">
+                            <div key={skill.id} className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[45vw] md:w-[16vw]">
+                                <span className="text-lg md:text-2xl w-8 h-8 md:w-10 md:h-10 flex items-center justify-center overflow-hidden shrink-0">
                                     {skill.icon && skill.icon.startsWith('http') ? (
                                         <img src={skill.icon} alt="" className="w-full h-full object-contain" />
                                     ) : (
                                         <span>{skill.icon || "⚙️"}</span>
                                     )}
                                 </span>
-                                <span className="text-sm md:text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap">
+                                <span className="text-sm md:text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis">
                                     {skill.name}
                                 </span>
                             </div>
