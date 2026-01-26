@@ -75,7 +75,7 @@ export async function POST(req: Request) {
             ${config.knowledge_base || "Professional, confident assistant."}
         `;
 
-        // 3. Start Chat with Groq
+        // 3. Start Chat with Groq (with Fallback)
         try {
             const groqMessages: any[] = [
                 { role: "system", content: systemInstruction },
@@ -85,21 +85,39 @@ export async function POST(req: Request) {
                 }))
             ];
 
-            const completion = await groq.chat.completions.create({
-                messages: groqMessages,
-                model: "llama-3.3-70b-versatile", // High-capacity stable model
-                temperature: 0.7,
-                max_tokens: 1024,
-            });
+            let completion;
+            try {
+                // Primary high-power model
+                completion = await groq.chat.completions.create({
+                    messages: groqMessages,
+                    model: "llama-3.3-70b-versatile",
+                    temperature: 0.7,
+                    max_tokens: 1024,
+                });
+            } catch (limitError: any) {
+                // If Rate Limit (429) happens, fallback to high-speed 8B model
+                if (limitError.status === 429) {
+                    console.warn("70B Fallback: Rate limit hit, switching to 8B.");
+                    completion = await groq.chat.completions.create({
+                        messages: groqMessages,
+                        model: "llama-3-8b-8192",
+                        temperature: 0.7,
+                        max_tokens: 1024,
+                    });
+                } else {
+                    throw limitError;
+                }
+            }
 
-            const responseText = completion.choices[0]?.message?.content || "Thenali is taking a short break. Please try again later.";
+            const responseText = completion?.choices[0]?.message?.content || "Thenali is taking a short break. Please try again later.";
             return NextResponse.json({ content: responseText });
         } catch (groqError: any) {
             console.error("GROQ ERROR:", groqError);
+            // Even more robust: Final safety fallback
             return NextResponse.json({
                 error: "AI processing error",
-                details: groqError.message
-            }, { status: 500 });
+                details: groqError.status === 429 ? "System busy: Please try again in 60 seconds." : groqError.message
+            }, { status: groqError.status || 500 });
         }
     } catch (error: any) {
         console.error("GLOBAL Chat Error:", error.message);
