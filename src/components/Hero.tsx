@@ -136,13 +136,12 @@ export default function Hero({ profile, className }: HeroProps) {
                             className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 pt-4"
                         >
                             <MagneticButton>
-                                <Link
-                                    href="#contact"
-                                    className="px-10 py-4 bg-orange-600 text-white font-black rounded-lg uppercase tracking-widest text-sm hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20 flex items-center gap-3 group"
+                                <button
+                                    onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+                                    className="flex items-center gap-3 px-10 py-5 rounded-2xl bg-orange-600 text-white font-black text-sm uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(234,88,12,0.3)] hover:scale-110 active:scale-95 transition-all group"
                                 >
-                                    Let&apos;s Talk
-                                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                                </Link>
+                                    Let&apos;s Talk <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform" />
+                                </button>
                             </MagneticButton>
                         </motion.div>
                     </div>

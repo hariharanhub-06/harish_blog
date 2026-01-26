@@ -391,69 +391,6 @@ export default function MainContent({
             <DinoRunnerGame />
 
 
-            {/* Contact Section */}
-            <section id="contact" className="container mx-auto px-6 scroll-mt-20 py-20">
-                <div className="bg-orange-600 rounded-[3rem] p-8 md:p-12 text-center relative overflow-hidden shadow-2xl shadow-orange-600/30">
-                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-                    <div className="grid lg:grid-cols-2 gap-12 items-center text-left">
-                        <div className="space-y-8">
-                            <h2 className="text-4xl md:text-6xl font-black text-white leading-[0.9] tracking-tighter">
-                                Let&apos;s Build <br /> Something <span className="italic opacity-80 underline decoration-white/30 truncate">Extraordinary</span> Together.
-                            </h2>
-                            <p className="text-white/80 text-lg leading-relaxed max-w-lg font-bold">
-                                I assist startups and established businesses in building scalable digital identities and automated workflows.
-                            </p>
-
-                            <div className="flex flex-col gap-6">
-                                <a href="mailto:hariharanjeyaramoorthy@gmail.com" className="flex items-center space-x-5 group">
-                                    <div className="bg-white/10 p-4 rounded-2xl text-white border border-white/10 group-hover:bg-white/20 transition-colors">
-                                        <Mail size={24} />
-                                    </div>
-                                    <p className="text-xl font-bold text-white break-all">hariharanjeyaramoorthy@gmail.com</p>
-                                </a>
-
-                                <a href="https://wa.me/919042387152" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-5 group">
-                                    <div className="bg-white/10 p-4 rounded-2xl text-white border border-white/10 group-hover:bg-white/20 transition-colors">
-                                        <Phone size={24} />
-                                    </div>
-                                    <p className="text-xl font-bold text-white">+91 90423 87152</p>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div className="bg-[#1a1a1a] p-10 md:p-14 rounded-[3rem] shadow-2xl relative border border-white/5 flex flex-col items-center text-center justify-center space-y-8 overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/10 rounded-full blur-[50px] -mr-16 -mt-16 group-hover:bg-orange-600/20 transition-all duration-700" />
-
-                            <div className="w-24 h-24 bg-orange-600 rounded-full flex items-center justify-center text-white shadow-[0_0_50px_rgba(234,88,12,0.3)] mb-2 relative">
-                                <div className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-20" />
-                                <Sparkles size={48} />
-                            </div>
-
-                            <div className="space-y-4">
-                                <h3 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter">Instant <span className="text-orange-600">Consultation</span></h3>
-                                <p className="text-gray-400 font-bold leading-relaxed max-w-sm">
-                                    My Digital Twin is trained on my pricing, strategies, and portfolio. Get answers instantly.
-                                </p>
-                            </div>
-
-                            <button
-                                onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
-                                className="w-full bg-white text-black py-6 rounded-2xl font-black text-xl flex items-center justify-center space-x-4 shadow-2xl hover:bg-orange-600 hover:text-white transition-all duration-500 scale-100 hover:scale-105"
-                            >
-                                <MessageSquare size={24} />
-                                <span>Chat with Digital Hari</span>
-                            </button>
-
-                            <div className="pt-4 flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                <span className="text-[10px] font-black text-emerald-500/80 uppercase tracking-widest">Available 24/7 for you</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             {selectedItem && (
                 <DetailModal
                     isOpen={!!selectedItem}

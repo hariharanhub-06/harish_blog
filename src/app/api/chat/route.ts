@@ -31,19 +31,21 @@ export async function POST(req: Request) {
         // 1. Fetch AI Config & Context
         let config, profile, projectsData, experiencesData;
         try {
+            console.log("DB: Starting fetch...");
             const [configData, profileData, projects, experiences] = await Promise.all([
                 sql(`SELECT knowledge_base FROM ai_assistant_config WHERE id = 'default'`),
                 sql(`SELECT name, about, headline, location FROM profiles LIMIT 1`),
                 sql(`SELECT title, description, technologies FROM projects WHERE featured = true`),
                 sql(`SELECT role, company, duration FROM experience ORDER BY "order" ASC`)
             ]);
+            console.log("DB: Fetch successful");
             config = configData[0] || {};
             profile = profileData[0] || {};
             projectsData = projects || [];
             experiencesData = experiences || [];
         } catch (dbError: any) {
-            console.error("Database fetch error:", dbError);
-            return NextResponse.json({ error: "Knowledge base offline", details: dbError.message }, { status: 500 });
+            console.error("DB Error:", dbError.message);
+            return NextResponse.json({ error: "Database failure", details: dbError.message }, { status: 500 });
         }
 
         // 2. Build System Instruction
@@ -52,11 +54,11 @@ export async function POST(req: Request) {
             Your goal is to represent Hari perfectly, answer questions about his work, and help convert visitors into clients or partners.
 
             HARI'S MASTER KNOWLEDGE BASE:
-            ${config.knowledge_base || "Professional, confident, friendly, and helpful. You speak as Hari's official assistant."}
+            ${config.knowledge_base || "Professional, confident assistant."}
 
             HARI'S LIVE PROFILE INFO:
-            - Name: ${profile.name || "Hari Haran Jeyaramamoorthy"}
-            - Headline: ${profile.headline || "Developer & Consultant"}
+            - Name: ${profile.name || "Hari Haran"}
+            - Headline: ${profile.headline || ""}
             - Location: ${profile.location || "Tamil Nadu, India"}
             - About: ${profile.about || ""}
 
@@ -74,37 +76,49 @@ export async function POST(req: Request) {
         `;
 
         // 3. Initialize Gemini
+        console.log("GEMINI: Initializing model...");
         const model = genAI.getGenerativeModel({
             model: "gemini-1.5-flash",
             systemInstruction: systemInstruction
         });
 
         // 4. Start Chat
-        // Map roles correctly for Gemini: user -> user, assistant/ai/model -> model
-        // CRITICAL: History must start with 'user' role or be empty.
-        let history = messages.slice(0, -1).map((m: any) => ({
-            role: (m.role === "user") ? "user" : "model",
-            parts: [{ text: String(m.content) }]
-        }));
+        console.log("GEMINI: Preparing history...");
+        // Ensure alternating roles and non-empty content
+        let history = messages
+            .slice(0, -1)
+            .filter((m: any) => m.content && String(m.content).trim() !== "")
+            .map((m: any) => ({
+                role: (m.role === "user") ? "user" : "model",
+                parts: [{ text: String(m.content).trim() }]
+            }));
 
         // If history starts with 'model', remove it (Gemini requirement)
         if (history.length > 0 && history[0].role === "model") {
             history.shift();
         }
 
-        const chat = model.startChat({ history });
+        try {
+            console.log("GEMINI: Starting chat session...");
+            const chat = model.startChat({ history });
 
-        const latestMessage = messages[messages.length - 1].content;
-        const result = await chat.sendMessage(String(latestMessage));
-        const responseText = result.response.text();
+            const latestMessage = String(messages[messages.length - 1].content || "").trim();
+            if (!latestMessage) {
+                return NextResponse.json({ error: "Empty message" }, { status: 400 });
+            }
 
-        return NextResponse.json({ content: responseText });
+            console.log("GEMINI: Sending message...");
+            const result = await chat.sendMessage(latestMessage);
+            const responseText = result.response.text();
+            console.log("GEMINI: Success");
+
+            return NextResponse.json({ content: responseText });
+        } catch (geminiError: any) {
+            console.error("GEMINI Error:", geminiError.message);
+            return NextResponse.json({ error: "AI processing error", details: geminiError.message }, { status: 500 });
+        }
     } catch (error: any) {
-        console.error("Chat Global Error:", error);
-        return NextResponse.json({
-            error: "Connectivity issue",
-            details: error.message,
-            stack: process.env.NODE_ENV === "development" ? error.stack : undefined
-        }, { status: 500 });
+        console.error("GLOBAL Chat Error:", error.message);
+        return NextResponse.json({ error: "Internal Server Error", details: error.message }, { status: 500 });
     }
 }

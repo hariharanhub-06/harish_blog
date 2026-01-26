@@ -49,13 +49,19 @@ export default function Navbar() {
                 {/* Desktop Menu */}
                 <div className="hidden md:flex space-x-2 items-center">
                     {navLinks.map((link) => (
-                        <Link
+                        <button
                             key={link.name}
-                            href={link.href}
+                            onClick={() => {
+                                if (link.name === "Contact") {
+                                    window.dispatchEvent(new CustomEvent("open-ai-chat"));
+                                } else {
+                                    window.location.href = link.href;
+                                }
+                            }}
                             className={`px-4 py-2 font-black text-[10px] uppercase tracking-[0.2em] transition-all rounded-xl hover:bg-white/5 ${isDarkTheme ? "text-white/60 hover:text-orange-500" : "text-gray-600 hover:text-primary"}`}
                         >
                             {link.name}
-                        </Link>
+                        </button>
                     ))}
                 </div>
 
@@ -79,24 +85,32 @@ export default function Navbar() {
                     >
                         <div className="flex flex-col p-6 space-y-2">
                             {navLinks.map((link) => (
-                                <Link
+                                <button
                                     key={link.name}
-                                    href={link.href}
-                                    className="flex items-center space-x-4 p-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all text-white/60 hover:text-orange-500 hover:bg-white/5"
-                                    onClick={() => setIsOpen(false)}
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        if (link.name === "Contact") {
+                                            window.dispatchEvent(new CustomEvent("open-ai-chat"));
+                                        } else {
+                                            window.location.href = link.href;
+                                        }
+                                    }}
+                                    className="flex items-center space-x-4 p-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all text-white/60 hover:text-orange-500 hover:bg-white/5 w-full text-left"
                                 >
                                     <link.icon size={18} className="text-orange-600/60" />
                                     <span>{link.name}</span>
-                                </Link>
+                                </button>
                             ))}
                             <div className="flex flex-col gap-3 mt-4 pt-6 border-t border-white/5">
-                                <Link
-                                    href="#contact"
+                                <button
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        window.dispatchEvent(new CustomEvent("open-ai-chat"));
+                                    }}
                                     className="w-full text-center py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-lg transition-all bg-orange-600 text-white shadow-orange-600/20"
-                                    onClick={() => setIsOpen(false)}
                                 >
                                     Hire Me
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     </motion.div>
