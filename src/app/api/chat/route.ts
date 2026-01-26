@@ -116,7 +116,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ content: responseText });
         } catch (geminiError: any) {
             console.error("GEMINI ERROR FULL:", geminiError);
-            let userFriendlyError = "AI is currently resting. Please try again in a few minutes.";
+            let userFriendlyError = geminiError.message || "AI is currently resting. Please try again in a few minutes.";
 
             if (geminiError.message?.includes("location is not supported")) {
                 userFriendlyError = "Gemini API is not available in your current region or for this API key.";
