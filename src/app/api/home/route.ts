@@ -30,6 +30,10 @@ export async function GET() {
             orderBy: (p, { desc }) => [desc(p.displayOrder), desc(p.createdAt)],
         });
 
+        const allSkills = await db.query.skills.findMany({
+            orderBy: (s, { asc, desc }) => [desc(s.proficiency), asc(s.displayOrder)],
+        });
+
         return NextResponse.json({
             profile: profileData,
             projects: allProjects,
@@ -37,7 +41,8 @@ export async function GET() {
             experiences,
             educations,
             volunteerings,
-            partnerships: allPartnerships
+            partnerships: allPartnerships,
+            skills: allSkills
         });
     } catch (error) {
         console.error("Error fetching home data:", error);

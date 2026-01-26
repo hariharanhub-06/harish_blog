@@ -17,7 +17,11 @@ export default function PartnershipCarousel() {
     useEffect(() => {
         fetch("/api/snacks/partnerships")
             .then((res) => res.json())
-            .then((data) => setPartnerships(data))
+            .then((data) => {
+                // Filter out academic partners to keep them exclusive to Training Academy
+                const brandPartners = data.filter((p: Partnership) => p.partnerType !== "Academic Partner");
+                setPartnerships(brandPartners);
+            })
             .catch((err) => console.error("Failed to load partnerships:", err));
     }, []);
 
