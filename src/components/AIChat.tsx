@@ -19,6 +19,12 @@ export default function AIChat() {
         }
     }, [messages]);
 
+    useEffect(() => {
+        const handleOpen = () => setIsOpen(true);
+        window.addEventListener("open-ai-chat", handleOpen);
+        return () => window.removeEventListener("open-ai-chat", handleOpen);
+    }, []);
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || loading) return;
@@ -87,8 +93,8 @@ export default function AIChat() {
                             {messages.map((m, i) => (
                                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                                     <div className={`max-w-[85%] p-5 rounded-3xl text-sm font-bold leading-relaxed shadow-sm ${m.role === "user"
-                                            ? "bg-orange-600 text-white rounded-tr-none shadow-orange-600/20"
-                                            : "bg-white/5 text-white/90 border border-white/10 rounded-tl-none"
+                                        ? "bg-orange-600 text-white rounded-tr-none shadow-orange-600/20"
+                                        : "bg-white/5 text-white/90 border border-white/10 rounded-tl-none"
                                         }`}>
                                         {m.content}
                                     </div>
