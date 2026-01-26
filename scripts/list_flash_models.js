@@ -8,20 +8,16 @@ async function listModels() {
         return;
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-
     try {
-        // We use a dummy model call or the internal list function if available
-        // but the easiest way to see what the SDK accepts is to try a common one or list
-        console.log("Fetching accessible models...");
-        // Use the native fetch to see the raw response if SDK list fails
+        console.log("Fetching flash-capable models...");
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
         const data = await response.json();
 
         if (data.models) {
-            console.log("AVAILABLE MODELS:");
-            data.models.forEach(m => {
-                console.log(`- ${m.name} (Methods: ${m.supportedGenerationMethods.join(", ")})`);
+            const flashModels = data.models.filter(m => m.name.toLowerCase().includes("flash"));
+            console.log("ACCESSIBLE FLASH MODELS:");
+            flashModels.forEach(m => {
+                console.log(`- ${m.name}`);
             });
         } else {
             console.log("No models returned. Response:", JSON.stringify(data, null, 2));
