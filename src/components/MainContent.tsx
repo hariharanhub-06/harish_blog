@@ -11,7 +11,7 @@ import CardWrapper from "@/components/CardWrapper";
 import DetailModal from "@/components/DetailModal";
 import AboutHero from "@/components/AboutHero";
 import Image from "next/image";
-import { InfiniteCarousel } from "./InfiniteCarousel";
+import { TrainingPrograms } from "./TrainingPrograms";
 import { Tilt } from "./Tilt";
 import { useEffect, useState } from "react";
 
@@ -162,17 +162,8 @@ export default function MainContent({
                 </div>
             </section>
 
-            {/* Infinite Skill Carousel */}
-            <div className="py-4 border-y border-white/5 bg-white/5 backdrop-blur-sm">
-                <InfiniteCarousel
-                    speed={120}
-                    items={SKILLS.map(skill => (
-                        <span key={skill} className="text-sm font-black uppercase tracking-[0.3em] text-white/20 hover:text-orange-500 transition-colors cursor-default select-none">
-                            {skill}
-                        </span>
-                    ))}
-                />
-            </div>
+            {/* Training Programs Section (Replaces Skill Carousel) */}
+            <TrainingPrograms />
 
             {/* About Section */}
             <section id="about" className="container mx-auto px-6 scroll-mt-20">
