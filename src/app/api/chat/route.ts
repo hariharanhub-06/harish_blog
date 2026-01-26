@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { neon } from "@neondatabase/serverless";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: Request) {
     try {
@@ -87,7 +88,7 @@ export async function POST(req: Request) {
 
             let completion;
             try {
-                // Primary high-power model
+                // LAYER 1: Premier Groq (Llama 3.3 70B)
                 completion = await groq.chat.completions.create({
                     messages: groqMessages,
                     model: "llama-3.3-70b-versatile",
@@ -95,15 +96,35 @@ export async function POST(req: Request) {
                     max_tokens: 1024,
                 });
             } catch (limitError: any) {
-                // If Rate Limit (429) happens, fallback to high-speed 8B model
+                // If Rate Limit (429) hit, try LAYER 2: Fast Groq (Llama 3.1 8B)
                 if (limitError.status === 429) {
-                    console.warn("70B Fallback: Rate limit hit, switching to 8B.");
-                    completion = await groq.chat.completions.create({
-                        messages: groqMessages,
-                        model: "llama-3.1-8b-instant",
-                        temperature: 0.7,
-                        max_tokens: 1024,
-                    });
+                    console.warn("70B Fallback: Rate limit, trying 8B.");
+                    try {
+                        completion = await groq.chat.completions.create({
+                            messages: groqMessages,
+                            model: "llama-3.1-8b-instant",
+                            temperature: 0.7,
+                            max_tokens: 1024,
+                        });
+                    } catch (innerError: any) {
+                        // If Groq completely exhausted, try LAYER 3: Gemini (1,500/day free limit)
+                        console.warn("Groq Exhausted: Trying Gemini Safety Net.");
+                        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
+                        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+                        const result = await model.generateContent({
+                            contents: [
+                                { role: "user", parts: [{ text: systemInstruction }] },
+                                ...messages.map(m => ({
+                                    role: m.role === "user" ? "user" : "model",
+                                    parts: [{ text: m.content }]
+                                }))
+                            ]
+                        });
+
+                        const responseText = result.response.text();
+                        return NextResponse.json({ content: responseText });
+                    }
                 } else {
                     throw limitError;
                 }
