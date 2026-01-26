@@ -405,3 +405,14 @@ export const aiAssistantConfig = pgTable("ai_assistant_config", {
   knowledgeBase: text("knowledge_base"),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const feedbacks = pgTable("feedbacks", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  role: text("role").notNull(), // Student, Professional, Entrepreneur
+  organization: text("organization").notNull(), // College or Company
+  rating: integer("rating").notNull().default(5),
+  content: text("content").notNull(),
+  status: text("status").notNull().default("Fresh"), // Fresh (Pending), Approved
+  createdAt: timestamp("created_at").defaultNow(),
+});
