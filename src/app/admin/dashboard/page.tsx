@@ -160,7 +160,7 @@ export default function AdminDashboard() {
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <ReviewsModule />
                     <div className="pt-16 border-t border-gray-100">
-                        <PartnershipsModule />
+                        <PartnershipsModule excludedTypes={['Academic Partner']} />
                     </div>
                 </div>
             );

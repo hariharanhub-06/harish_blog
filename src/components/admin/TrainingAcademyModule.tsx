@@ -78,7 +78,7 @@ export default function TrainingAcademyModule() {
 
                 {activeSubTab === "colleges" && (
                     <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                        <PartnershipsModule />
+                        <PartnershipsModule allowedTypes={['Academic Partner']} />
                     </div>
                 )}
 

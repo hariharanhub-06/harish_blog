@@ -172,7 +172,7 @@ export default function MainContent({
 
             {/* Training Programs Section (Replaces Skill Carousel) */}
             <TrainingPrograms
-                stats={stats}
+                trainingStats={profile.trainingStats}
                 partnerships={partnerships}
                 skills={skills}
             />
