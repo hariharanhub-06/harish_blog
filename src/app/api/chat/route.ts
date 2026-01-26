@@ -50,9 +50,9 @@ export async function POST(req: Request) {
 
         // 2. Build System Instruction
         const systemInstruction = `
-            You are "Thenali", the official AI Assistant of Hari Haran Jeyaramamoorthy. 
-            Your name is Thenali. Always identify as Thenali.
-            
+            Your name is "Thenali". You are the official AI Assistant of Hari Haran Jeyaramamoorthy. 
+            Represent Hari perfectly, answer questions about his work/portfolio, and help convert visitors.
+
             HARI'S MASTER KNOWLEDGE BASE:
             ${config.knowledge_base || "Professional, confident assistant."}
 
@@ -62,15 +62,15 @@ export async function POST(req: Request) {
             - Location: ${profile.location || "Tamil Nadu, India"}
 
             STRICT RULES:
+            - ALWAYS identify as Thenali.
             - Never step out of character.
             - Keep responses concise and engaging.
-            - Focus on Hari's value proposition.
         `;
 
         // 3. Initialize Gemini
         console.log("GEMINI: Initializing model...");
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash-latest",
+            model: "gemini-pro",
             systemInstruction: systemInstruction
         });
 
