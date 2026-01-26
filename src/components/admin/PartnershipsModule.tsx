@@ -17,7 +17,12 @@ import imageKitLoader from "@/lib/imagekitLoader";
 
 const PARTNER_TYPES = ["Academic Partner", "Supplier", "Distributor", "Sponsor", "Production Partner", "Logistics Partner", "Payment Gateway Partner"];
 
-export default function PartnershipsModule() {
+interface PartnershipsModuleProps {
+    allowedTypes?: string[];
+    excludedTypes?: string[];
+}
+
+export default function PartnershipsModule({ allowedTypes, excludedTypes }: PartnershipsModuleProps) {
     const [partnerships, setPartnerships] = useState<any[]>([]);
     const [editing, setEditing] = useState<any>(null);
     const [fetching, setFetching] = useState(true);
@@ -33,9 +38,17 @@ export default function PartnershipsModule() {
         try {
             const res = await fetch(`/api/admin/partnerships?t=${Date.now()}`);
             if (res.ok) {
-                const data = await res.json();
-                console.log("[Partnerships] Fetched data:", data);
-                setPartnerships(data);
+                let fetchedData = await res.json();
+                console.log("[Partnerships] Fetched data:", fetchedData);
+
+                if (allowedTypes) {
+                    fetchedData = fetchedData.filter((p: any) => allowedTypes.includes(p.partnerType));
+                }
+                if (excludedTypes) {
+                    fetchedData = fetchedData.filter((p: any) => !excludedTypes.includes(p.partnerType));
+                }
+
+                setPartnerships(fetchedData);
             } else {
                 const err = await res.json();
                 console.error("Fetch error:", err);
@@ -246,7 +259,10 @@ export default function PartnershipsModule() {
                                         onChange={(e) => setEditing({ ...editing, partnerType: e.target.value })}
                                         className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 font-black text-sm focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all"
                                     >
-                                        {PARTNER_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+                                        {PARTNER_TYPES
+                                            .filter(type => !allowedTypes || allowedTypes.includes(type))
+                                            .filter(type => !excludedTypes || !excludedTypes.includes(type))
+                                            .map(type => <option key={type} value={type}>{type}</option>)}
                                     </select>
                                 </div>
                             </div>

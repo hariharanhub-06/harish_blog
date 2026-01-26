@@ -242,7 +242,7 @@ export default function ProfileModule() {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {[0, 1, 2].map((i) => {
-                                const stat = profile.stats?.[i] || { label: "", value: "" };
+                                const stat = profile.trainingStats?.[i] || { label: "", value: "", icon: i === 0 ? "Presentation" : i === 1 ? "GraduationCap" : "Users" };
                                 return (
                                     <div key={i} className="bg-gray-50 p-6 rounded-2xl space-y-4 border border-gray-100">
                                         <div className="space-y-1">
@@ -252,10 +252,10 @@ export default function ProfileModule() {
                                                 value={stat.label}
                                                 placeholder={i === 0 ? "Expert Sessions" : i === 1 ? "Partnered Colleges" : "Minds Empowered"}
                                                 onChange={(e) => {
-                                                    const newStats = [...(profile.stats || [])];
+                                                    const newStats = [...(profile.trainingStats || [])];
                                                     if (!newStats[i]) newStats[i] = { label: "", value: "", icon: i === 0 ? "Presentation" : i === 1 ? "GraduationCap" : "Users" };
                                                     newStats[i].label = e.target.value;
-                                                    setProfile({ ...profile, stats: newStats });
+                                                    setProfile({ ...profile, trainingStats: newStats });
                                                 }}
                                                 className="w-full bg-white border-gray-100 border rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-primary transition-all"
                                             />
@@ -267,10 +267,10 @@ export default function ProfileModule() {
                                                 value={stat.value}
                                                 placeholder="e.g. 150+"
                                                 onChange={(e) => {
-                                                    const newStats = [...(profile.stats || [])];
+                                                    const newStats = [...(profile.trainingStats || [])];
                                                     if (!newStats[i]) newStats[i] = { label: "", value: "", icon: i === 0 ? "Presentation" : i === 1 ? "GraduationCap" : "Users" };
                                                     newStats[i].value = e.target.value;
-                                                    setProfile({ ...profile, stats: newStats });
+                                                    setProfile({ ...profile, trainingStats: newStats });
                                                 }}
                                                 className="w-full bg-white border-gray-100 border rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-primary transition-all"
                                             />

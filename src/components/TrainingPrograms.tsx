@@ -26,19 +26,19 @@ const COLLEGES = [];
 const SKILLS = [];
 
 interface TrainingProgramsProps {
-    stats: any[];
+    trainingStats?: any[];
     partnerships: any[];
     skills: any[];
 }
 
-export function TrainingPrograms({ stats, partnerships, skills }: TrainingProgramsProps) {
+export function TrainingPrograms({ trainingStats = [], partnerships, skills }: TrainingProgramsProps) {
     // Filter for academic partners
     const academicPartners = partnerships.filter(p => p.partnerType === "Academic Partner" && p.isActive);
 
     // Find training-specific stats or use defaults if not found
-    const sessionsStat = stats.find(s => s.label.toLowerCase().includes("session") || s.label.toLowerCase().includes("masterclass")) || { value: "150+", label: "Expert Sessions" };
-    const collegesStat = stats.find(s => s.label.toLowerCase().includes("college") || s.label.toLowerCase().includes("partner")) || { value: "42+", label: "Partnered Colleges" };
-    const studentsStat = stats.find(s => s.label.toLowerCase().includes("student") || s.label.toLowerCase().includes("leader") || s.label.toLowerCase().includes("mind")) || { value: "5000+", label: "Minds Empowered" };
+    const sessionsStat = trainingStats.find(s => s.icon === "Presentation") || { value: "150+", label: "Expert Sessions" };
+    const collegesStat = trainingStats.find(s => s.icon === "GraduationCap") || { value: "42+", label: "Partnered Colleges" };
+    const studentsStat = trainingStats.find(s => s.icon === "Users") || { value: "5000+", label: "Minds Empowered" };
 
     return (
         <div className="w-full flex flex-col gap-6 md:gap-12 py-8 md:py-12">
@@ -85,7 +85,7 @@ export function TrainingPrograms({ stats, partnerships, skills }: TrainingProgra
 
                         <div className="flex flex-col gap-1 md:gap-2 px-6 mb-3 md:mb-4 text-center">
                             <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-orange-500/80">Collaborations</span>
-                            <h4 className="text-lg md:text-xl font-black text-white uppercase tracking-tighter">Academic Partners</h4>
+                            <h4 className="text-lg md:text-xl font-black text-white uppercase tracking-tighter">Institution Experienced</h4>
                         </div>
 
                         <InfiniteCarousel
