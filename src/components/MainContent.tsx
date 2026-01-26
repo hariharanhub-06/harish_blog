@@ -24,6 +24,7 @@ interface MainContentProps {
     educations: any[];
     volunteerings: any[];
     partnerships?: any[];
+    skills?: any[];
 }
 
 const SKILLS = [
@@ -40,7 +41,8 @@ export default function MainContent({
     experiences: initialExperiences,
     educations: initialEducations,
     volunteerings: initialVolunteerings,
-    partnerships: initialPartnerships = []
+    partnerships: initialPartnerships = [],
+    skills: initialSkills = []
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -50,6 +52,7 @@ export default function MainContent({
     const [educations, setEducations] = useState(initialEducations || []);
     const [volunteerings, setVolunteerings] = useState(initialVolunteerings || []);
     const [partnerships, setPartnerships] = useState(initialPartnerships || []);
+    const [skills, setSkills] = useState(initialSkills || []);
 
     const [loading, setLoading] = useState(!initialProfile || initialProjects?.length === 0);
     const [selectedItem, setSelectedItem] = useState<{ data: any, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
@@ -68,6 +71,7 @@ export default function MainContent({
                     if (data.educations) setEducations(data.educations);
                     if (data.volunteerings) setVolunteerings(data.volunteerings);
                     if (data.partnerships) setPartnerships(data.partnerships);
+                    if (data.skills) setSkills(data.skills);
 
                     // Re-calculate stats if profile changed
                     if (data.profile && data.profile.stats) {
@@ -170,6 +174,7 @@ export default function MainContent({
             <TrainingPrograms
                 stats={stats}
                 partnerships={partnerships}
+                skills={skills}
             />
 
             {/* About Section */}

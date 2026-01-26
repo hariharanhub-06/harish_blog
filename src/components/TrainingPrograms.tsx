@@ -22,30 +22,16 @@ const TrainingStat = ({ icon: Icon, value, label, color }: TrainingStatProps) =>
     </div>
 );
 
-const COLLEGES = [
-    "IIT Madras", "Anna University", "PSG Tech", "Sathyabama", "VIT Vellore",
-    "SRM University", "Loyola College", "Christ University", "MIT Manipal", "SSN College"
-];
-
-const SKILLS = [
-    { name: "Next.js", icon: "⚡" },
-    { name: "React", icon: "⚛️" },
-    { name: "Node.js", icon: "🟢" },
-    { name: "TypeScript", icon: "📘" },
-    { name: "Tailwind", icon: "🎨" },
-    { name: "Prisma", icon: "💎" },
-    { name: "Drizzle", icon: "💧" },
-    { name: "Automation", icon: "🤖" },
-    { name: "CRM", icon: "🤝" },
-    { name: "Strategy", icon: "📈" }
-];
+const COLLEGES = [];
+const SKILLS = [];
 
 interface TrainingProgramsProps {
     stats: any[];
     partnerships: any[];
+    skills: any[];
 }
 
-export function TrainingPrograms({ stats, partnerships }: TrainingProgramsProps) {
+export function TrainingPrograms({ stats, partnerships, skills }: TrainingProgramsProps) {
     // Filter for academic partners
     const academicPartners = partnerships.filter(p => p.partnerType === "Academic Partner" && p.isActive);
 
@@ -136,9 +122,15 @@ export function TrainingPrograms({ stats, partnerships }: TrainingProgramsProps)
 
                     <InfiniteCarousel
                         speed={30}
-                        items={SKILLS.map((skill) => (
-                            <div key={skill.name} className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                                <span className="text-lg md:text-2xl">{skill.icon}</span>
+                        items={skills.map((skill) => (
+                            <div key={skill.id} className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+                                <span className="text-lg md:text-2xl w-8 h-8 md:w-10 md:h-10 flex items-center justify-center overflow-hidden">
+                                    {skill.icon && skill.icon.startsWith('http') ? (
+                                        <img src={skill.icon} alt="" className="w-full h-full object-contain" />
+                                    ) : (
+                                        <span>{skill.icon || "⚙️"}</span>
+                                    )}
+                                </span>
                                 <span className="text-sm md:text-lg font-black text-white/60 uppercase tracking-widest whitespace-nowrap">
                                     {skill.name}
                                 </span>
