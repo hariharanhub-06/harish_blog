@@ -10,7 +10,7 @@ import {
     MessageSquare,
     ChevronDown,
     X,
-    Filter,
+    SlidersHorizontal,
     Phone,
     Briefcase,
     Eye,
@@ -150,7 +150,7 @@ export default function MessagesModule() {
 
                 <div className="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-xl border border-gray-100 shadow-sm">
                     <div className="flex items-center gap-1.5 px-2">
-                        <Filter size={12} className="text-secondary" />
+                        <SlidersHorizontal size={12} className="text-secondary" />
                         <span className="text-[8px] font-black uppercase text-secondary">Filter</span>
                     </div>
                     <select
