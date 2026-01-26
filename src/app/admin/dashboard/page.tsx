@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
-import ProjectsModule from "@/components/admin/ProjectsModule";
 import TimelineModule from "@/components/admin/TimelineModule";
 import MessagesModule from "@/components/admin/MessagesModule";
 import OverviewModule from "@/components/admin/OverviewModule";
@@ -28,7 +27,7 @@ import PartnershipsModule from "@/components/admin/PartnershipsModule";
 import TrainingAcademyModule from "@/components/admin/TrainingAcademyModule";
 import YouTubeModule from "@/components/admin/YouTubeModule";
 
-type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "portfolio" | "training-academy" | "timeline";
+type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -40,7 +39,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "youtube-manager", "portfolio", "training-academy", "timeline"];
+        const validTabs = ["overview", "profile", "messages", "youtube-manager", "training-academy", "timeline"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -87,7 +86,6 @@ export default function AdminDashboard() {
     const menuItems = [
         { id: "overview", title: "Command Center", icon: Home, color: "bg-blue-500" },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500" },
-        { id: "portfolio", title: "Portfolio Manager", icon: Layout, color: "bg-amber-600" },
         { id: "training-academy", title: "Training Academy", icon: GraduationCap, color: "bg-orange-500" },
         { id: "youtube-manager", title: "YouTube Manager", icon: Youtube, color: "bg-red-600" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500" },
@@ -97,7 +95,6 @@ export default function AdminDashboard() {
     const renderContent = () => {
         switch (activeTab) {
             case "profile": return <ProfileModule />;
-            case "portfolio": return <ProjectsModule />;
             case "youtube-manager": return <YouTubeModule />;
             case "messages": return <MessagesModule />;
             case "training-academy": return <TrainingAcademyModule />;
