@@ -1,13 +1,8 @@
 
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { auth } from "@/lib/auth-admin";
-
 export async function GET(req: Request) {
     try {
-        const user = await auth();
-        if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
         const sql = neon(process.env.DATABASE_URL!);
 
         // Safety: Ensure table exists
@@ -41,9 +36,6 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const user = await auth();
-        if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
         const body = await req.json();
         const { persona, pricing, faq, convincingTactics } = body;
 
