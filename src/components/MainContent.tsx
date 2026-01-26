@@ -5,7 +5,7 @@ import {
     ArrowRight, Code, Briefcase, Award, User,
     MapPin, Calendar, Mail, Phone, Send,
     CheckCircle2, Star, Github, ExternalLink,
-    GraduationCap, Linkedin, HeartHandshake, Play
+    GraduationCap, Linkedin, HeartHandshake, Play, Sparkles, MessageSquare
 } from "lucide-react";
 import { InfiniteCarousel } from "./InfiniteCarousel";
 import CardWrapper from "@/components/CardWrapper";
@@ -58,7 +58,6 @@ export default function MainContent({
 
     const [loading, setLoading] = useState(!initialProfile || initialProjects?.length === 0);
     const [selectedItem, setSelectedItem] = useState<{ data: any, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
-    const [contactStatus, setContactStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
     useEffect(() => {
         if (!initialProfile || initialProjects?.length === 0) {
@@ -75,7 +74,6 @@ export default function MainContent({
                     if (data.partnerships) setPartnerships(data.partnerships);
                     if (data.skills) setSkills(data.skills);
 
-                    // Re-calculate stats if profile changed
                     if (data.profile && data.profile.stats) {
                         setStats(data.profile.stats);
                     }
@@ -89,42 +87,7 @@ export default function MainContent({
         }
     }, [initialProfile, initialProjects]);
 
-
     const iconMap: any = { Briefcase, Code, Award, User };
-
-    const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setContactStatus("loading");
-
-        const formData = new FormData(e.currentTarget);
-        const data = {
-            name: formData.get("name"),
-            company: formData.get("company"),
-            email: formData.get("email"), // Mail ID
-            mobile: formData.get("mobile"),
-            website: formData.get("website"),
-            socialMedia: formData.get("socialMedia"),
-            subject: "Portfolio Contact Form",
-            message: formData.get("message"),
-        };
-
-        try {
-            const res = await fetch("/api/contact", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-
-            if (res.ok) {
-                setContactStatus("success");
-            } else {
-                setContactStatus("error");
-            }
-        } catch (error) {
-            console.error("Contact form error:", error);
-            setContactStatus("error");
-        }
-    };
 
 
 
@@ -459,52 +422,33 @@ export default function MainContent({
                             </div>
                         </div>
 
-                        <div className="bg-[#1a1a1a] p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative border border-white/5">
-                            {contactStatus === "success" ? (
-                                <div className="py-12 flex flex-col items-center text-center animate-in fade-in zoom-in duration-500">
-                                    <div className="bg-green-500/10 text-green-500 p-8 rounded-full mb-8">
-                                        <CheckCircle2 size={64} />
-                                    </div>
-                                    <p className="text-3xl font-black text-white mb-4">Message Sent!</p>
-                                    <p className="text-gray-400 font-bold mb-8">I&apos;ll get back to you within 24 hours.</p>
-                                    <button onClick={() => setContactStatus("idle")} className="text-orange-500 font-black uppercase tracking-widest text-sm hover:underline">
-                                        Send another
-                                    </button>
-                                </div>
-                            ) : (
-                                <form className="space-y-6" onSubmit={handleContactSubmit}>
-                                    <div className="grid md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Name</label>
-                                            <input name="name" required placeholder="Full Name" className="w-full bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-white" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Mail ID</label>
-                                            <input name="email" required type="email" placeholder="example@email.com" className="w-full bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-white" />
-                                        </div>
-                                    </div>
-                                    <div className="grid md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Mobile</label>
-                                            <input name="mobile" required type="tel" placeholder="+91 1234567890" className="w-full bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-white" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Company (Optional)</label>
-                                            <input name="company" placeholder="Your Company" className="w-full bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-white" />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Message</label>
-                                        <textarea name="message" required rows={4} placeholder="How can I help you grow?" className="w-full bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-orange-500 transition-all font-bold text-white" />
-                                    </div>
-                                    <button
-                                        disabled={contactStatus === "loading"}
-                                        className="w-full bg-orange-600 text-white py-5 rounded-2xl font-black text-xl flex items-center justify-center space-x-3 shadow-xl hover:shadow-orange-600/30 transition-all disabled:opacity-50"
-                                    >
-                                        {contactStatus === "loading" ? <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <span>Start Conversation</span>}
-                                    </button>
-                                </form>
-                            )}
+                        <div className="bg-[#1a1a1a] p-10 md:p-14 rounded-[3rem] shadow-2xl relative border border-white/5 flex flex-col items-center text-center justify-center space-y-8 overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/10 rounded-full blur-[50px] -mr-16 -mt-16 group-hover:bg-orange-600/20 transition-all duration-700" />
+
+                            <div className="w-24 h-24 bg-orange-600 rounded-full flex items-center justify-center text-white shadow-[0_0_50px_rgba(234,88,12,0.3)] mb-2 relative">
+                                <div className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-20" />
+                                <Sparkles size={48} />
+                            </div>
+
+                            <div className="space-y-4">
+                                <h3 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter">Instant <span className="text-orange-600">Consultation</span></h3>
+                                <p className="text-gray-400 font-bold leading-relaxed max-w-sm">
+                                    My Digital Twin is trained on my pricing, strategies, and portfolio. Get answers instantly.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+                                className="w-full bg-white text-black py-6 rounded-2xl font-black text-xl flex items-center justify-center space-x-4 shadow-2xl hover:bg-orange-600 hover:text-white transition-all duration-500 scale-100 hover:scale-105"
+                            >
+                                <MessageSquare size={24} />
+                                <span>Chat with Digital Hari</span>
+                            </button>
+
+                            <div className="pt-4 flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-[10px] font-black text-emerald-500/80 uppercase tracking-widest">Available 24/7 for you</span>
+                            </div>
                         </div>
                     </div>
                 </div>
