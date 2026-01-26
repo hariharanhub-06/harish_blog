@@ -188,61 +188,62 @@ export default function FeedbackModule() {
             </div>
 
             {/* List */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {filteredFeedbacks.map((f) => (
-                    <div
-                        key={f.id}
-                        className={`group bg-white p-4 rounded-[2rem] border transition-all duration-300 relative flex flex-col min-h-[320px] ${f.status === "Fresh" ? "border-orange-200 bg-orange-50/20" : "border-gray-100 hover:border-primary/20 hover:shadow-lg shadow-sm"
-                            }`}
-                    >
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="flex text-amber-500">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} size={10} fill={i < f.rating ? "currentColor" : "none"} />
-                                ))}
-                            </div>
-                            <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border ${f.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-orange-100 text-orange-600 border-orange-200"
-                                }`}>
-                                {f.status === "Fresh" ? "PND" : "APR"}
-                            </span>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto scrollbar-hide mb-4 pr-1">
-                            <p className="text-gray-700 text-[11px] font-bold leading-relaxed italic group-hover:text-gray-900 transition-colors">
-                                &ldquo;{f.content}&rdquo;
-                            </p>
-                        </div>
-
-                        <div className="pt-3 border-t border-gray-50 mt-auto">
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-secondary/40 group-hover:bg-primary/5 group-hover:text-primary transition-colors shrink-0">
-                                    {f.role === "Student" ? <GraduationCap size={16} /> : f.role === "Professional" ? <Briefcase size={16} /> : <Lightbulb size={16} />}
+                    <div key={f.id} className="relative h-[120px] w-full">
+                        <div
+                            className={`absolute inset-x-0 top-0 group bg-white p-4 rounded-[2rem] border transition-all duration-300 flex flex-col overflow-hidden z-10 hover:z-50 hover:shadow-2xl hover:border-primary/30 h-[120px] hover:h-auto min-h-[120px] ${f.status === "Fresh" ? "border-orange-100 bg-orange-50/30 shadow-sm shadow-orange-100/20" : "border-gray-100 shadow-sm"
+                                }`}
+                        >
+                            <div className="flex items-center justify-between mb-2 shrink-0">
+                                <div className="flex text-amber-500">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} size={8} fill={i < f.rating ? "currentColor" : "none"} />
+                                    ))}
                                 </div>
-                                <div className="min-w-0">
-                                    <h4 className="text-[10px] font-black text-gray-900 uppercase tracking-tight truncate">{f.name}</h4>
-                                    <p className="text-[8px] font-bold text-secondary uppercase tracking-widest mt-0.5 truncate">
+                                <span className={`px-2 py-0.5 rounded-full text-[6px] font-black uppercase tracking-widest border shrink-0 ${f.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-orange-100 text-orange-600 border-orange-200"
+                                    }`}>
+                                    {f.status === "Fresh" ? "PND" : "APR"}
+                                </span>
+                            </div>
+
+                            <div className="min-w-0 mb-1">
+                                <h4 className="text-[10px] font-black text-gray-900 uppercase tracking-tight truncate group-hover:whitespace-normal group-hover:line-clamp-2">{f.name}</h4>
+                            </div>
+
+                            {/* Hidden by default, shown on hover */}
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2 space-y-3">
+                                <p className="text-gray-600 text-[10px] font-medium leading-relaxed italic border-t border-gray-50 pt-3">
+                                    &ldquo;{f.content}&rdquo;
+                                </p>
+
+                                <div className="flex items-center gap-2 pb-2">
+                                    <div className="w-6 h-6 rounded-lg bg-gray-50 flex items-center justify-center text-secondary/40 shrink-0">
+                                        {f.role === "Student" ? <GraduationCap size={12} /> : f.role === "Professional" ? <Briefcase size={12} /> : <Lightbulb size={12} />}
+                                    </div>
+                                    <p className="text-[8px] font-bold text-secondary uppercase tracking-widest truncate">
                                         {f.organization}
                                     </p>
                                 </div>
-                            </div>
 
-                            <div className="flex items-center gap-1.5 w-full">
-                                {f.status === "Fresh" && (
+                                <div className="flex items-center gap-1.5 w-full pt-1">
+                                    {f.status === "Fresh" && (
+                                        <button
+                                            onClick={() => handleApprove(f.id)}
+                                            disabled={updatingId === f.id}
+                                            className="flex-1 py-2 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center justify-center"
+                                        >
+                                            {updatingId === f.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={14} />}
+                                        </button>
+                                    )}
                                     <button
-                                        onClick={() => handleApprove(f.id)}
+                                        onClick={() => handleDelete(f.id)}
                                         disabled={updatingId === f.id}
-                                        className="flex-1 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-lg transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center justify-center"
+                                        className="flex-1 py-2 bg-red-50 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center justify-center"
                                     >
-                                        {updatingId === f.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={14} />}
+                                        <Trash2 size={14} />
                                     </button>
-                                )}
-                                <button
-                                    onClick={() => handleDelete(f.id)}
-                                    disabled={updatingId === f.id}
-                                    className="flex-1 py-2 bg-red-50 text-red-300 hover:bg-red-500 hover:text-white rounded-lg transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center justify-center"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
+                                </div>
                             </div>
                         </div>
                     </div>
