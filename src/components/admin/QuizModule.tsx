@@ -19,12 +19,14 @@ import {
     Image as ImageIcon,
     Upload,
     FileText,
-    Users
+    Users,
+    BarChart2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { uploadToImageKit } from "@/lib/imagekit-upload"; // Import ImageKit helper
+import QuizResultsModal from "./QuizResultsModal";
 
 interface Quiz {
     id: string;
@@ -42,6 +44,7 @@ export default function QuizModule() {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [currentQuiz, setCurrentQuiz] = useState<Partial<Quiz> | null>(null);
+    const [selectedStatsQuiz, setSelectedStatsQuiz] = useState<Quiz | null>(null);
     const [saving, setSaving] = useState(false);
     const router = useRouter(); // Import needed
 
@@ -79,6 +82,10 @@ export default function QuizModule() {
     const handleEdit = (quiz: Quiz) => {
         setCurrentQuiz(quiz);
         setIsEditing(true);
+    };
+
+    const handleStats = (quiz: Quiz) => {
+        setSelectedStatsQuiz(quiz);
     };
 
     const handleHostLive = async (quizId: string) => {
