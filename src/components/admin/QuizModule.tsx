@@ -197,20 +197,20 @@ export default function QuizModule() {
                             <h3 className="font-bold text-gray-900 group-hover:text-primary transition-colors">{quiz.title}</h3>
                             <p className="text-sm text-gray-500 line-clamp-2 mt-1">{quiz.description}</p>
 
-                            <div className="mt-4 flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                <span className="flex items-center gap-1"><Clock size={12} /> {quiz.timeLimit}s</span>
-                                <span className="flex items-center gap-1"><Target size={12} /> {quiz.questions?.length || 0} Questions</span>
-                                <span className={`flex items-center gap-1 ${quiz.isPublished ? 'text-emerald-500' : 'text-orange-500'}`}>
-                                    {quiz.isPublished ? <Check size={12} /> : <X size={12} />}
+                            <div className="mt-4 flex flex-wrap items-center gap-2 text-[9px] font-black uppercase tracking-widest text-gray-400">
+                                <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md"><Clock size={10} /> {quiz.timeLimit}s</span>
+                                <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md"><Target size={10} /> {quiz.questions?.length || 0} Qs</span>
+                                <span className={`flex items-center gap-1 px-2 py-1 rounded-md border ${quiz.isPublished ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100'}`}>
+                                    {quiz.isPublished ? <Check size={10} /> : <X size={10} />}
                                     {quiz.isPublished ? 'Published' : 'Draft'}
                                 </span>
                             </div>
 
                             <button
                                 onClick={() => handleHostLive(quiz.id)}
-                                className="w-full mt-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all mt-auto"
+                                className="w-full mt-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-100 hover:border-blue-600 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all mt-auto"
                             >
-                                <Users size={14} /> Host Live Session
+                                <Users size={14} /> Host Live
                             </button>
                         </div>
                     ))}
