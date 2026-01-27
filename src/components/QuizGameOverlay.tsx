@@ -430,10 +430,10 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                             exit={{ opacity: 0 }}
                             className="flex-1 flex flex-col p-6 md:p-12 z-10"
                         >
-                            <div className="flex justify-between items-center mb-12">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center border-2 transition-all border-primary text-primary">
-                                        <span className="text-2xl font-black">{timeLeft}</span>
+                            <div className="flex justify-between items-center mb-6 md:mb-12">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center border-2 transition-all border-primary text-primary">
+                                        <span className="text-xl md:text-2xl font-black">{timeLeft}</span>
                                     </div>
                                     <div className="hidden md:block">
                                         {!isLive && (
@@ -465,11 +465,10 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                     exit={{ opacity: 0, x: -20 }}
                                     className="space-y-12"
                                 >
-                                    <div className="flex flex-col items-center">
-                                        <h2 className="text-3xl md:text-5xl font-black tracking-tight text-center leading-tight mb-4">
+                                    <div className="flex flex-col items-center px-4">
+                                        <h2 className="text-2xl md:text-5xl font-black tracking-tight text-center leading-tight mb-8">
                                             {activeQuestion.questionText}
                                         </h2>
-                                        {/* Since isCorrect is hidden in live, we can't show "Multiple Correct" hint easily unless API sends it, assuming single for now or logic handles it */}
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-24">

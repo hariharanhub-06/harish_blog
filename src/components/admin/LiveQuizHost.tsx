@@ -47,7 +47,7 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
             await fetch("/api/quiz/live/update", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sessionId, action })
+                body: JSON.stringify({ sessionId, action, currentQuestionIndex })
             });
             fetchStatus();
         } catch (error) {
