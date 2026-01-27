@@ -107,31 +107,44 @@ export async function POST(req: Request) {
             };
 
             let completion;
+            let usedModel = "";
+
             try {
                 // LAYER 1: Rapid 8B Model (1.2s Limit)
-                completion = await fetchWithTimeout("llama-3.1-8b-instant", 1200);
+                usedModel = "llama-3.1-8b-instant";
+                completion = await fetchWithTimeout(usedModel, 1200);
             } catch (err: any) {
-                console.warn(`Layer 1 (8B) failed or timed out. Trying Layer 2.`);
+                console.warn(`Layer 1 (${usedModel}) failed: ${err.message}. Trying Layer 2.`);
                 try {
                     // LAYER 2: Versatile 70B Model (1.5s Limit)
-                    completion = await fetchWithTimeout("llama-3.3-70b-versatile", 1500);
+                    usedModel = "llama-3.3-70b-versatile";
+                    completion = await fetchWithTimeout(usedModel, 1500);
                 } catch (innerErr: any) {
                     // LAYER 3: Gemini Final Fallback (Fastest fallback)
-                    console.warn("Groq Exhausted or Slow: Activating Gemini Safety Net.");
-                    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
-                    const genModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    console.warn(`Layer 2 (${usedModel}) failed: ${innerErr.message}. Activating Gemini Safety Net.`);
+                    try {
+                        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
+                        const genModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-                    const result = await genModel.generateContent({
-                        contents: [
-                            { role: "user", parts: [{ text: systemInstruction }] },
-                            ...messages.map(m => ({
-                                role: m.role === "user" ? "user" : "model",
-                                parts: [{ text: m.content }]
-                            }))
-                        ]
-                    });
+                        const result = await genModel.generateContent({
+                            contents: [
+                                { role: "user", parts: [{ text: systemInstruction }] },
+                                ...messages.map(m => ({
+                                    role: m.role === "user" ? "user" : "model",
+                                    parts: [{ text: m.content }]
+                                }))
+                            ]
+                        });
 
-                    return NextResponse.json({ content: result.response.text() });
+                        const text = result.response.text();
+                        if (text) {
+                            return NextResponse.json({ content: text });
+                        }
+                        throw new Error("Gemini returned empty response");
+                    } catch (geminiErr: any) {
+                        console.error("Layer 3 (Gemini) Critical Failure:", geminiErr.message);
+                        throw geminiErr; // Bubble up to global catch
+                    }
                 }
             }
 
@@ -139,7 +152,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ content: responseText });
 
         } catch (aiError: any) {
-            console.error("AI Error:", aiError.message);
+            console.error("CRYSTAL AI ERROR:", aiError.message);
             return NextResponse.json({
                 error: "AI processing error",
                 details: "System busy. Please try again."
