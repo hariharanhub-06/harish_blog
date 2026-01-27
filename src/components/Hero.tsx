@@ -149,7 +149,7 @@ export default function Hero({ profile, className }: HeroProps) {
             </div>
 
             {/* Bottom Gradient Fade */}
-            <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#0e0e0e] to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-16 md:h-32 bg-gradient-to-t from-[#0e0e0e] to-transparent pointer-events-none" />
         </section>
     );
 }
