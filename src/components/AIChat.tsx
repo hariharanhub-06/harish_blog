@@ -149,16 +149,7 @@ function AIChatInner() {
         setLoading(true);
 
         // Update message count
-        updateState({ messageCount: state.messageCount + 1 });
-
-        // Classify intent
-        const intent = classifyIntent(msg);
-        if (intent) {
-            updateState({
-                intentPrimary: intent,
-                interestLevel: msg.length > 20 ? "HOT" : state.interestLevel
-            });
-        }
+        updateState({ messageCount: state.messageCount + 1 }); \r\n\r\n        // Classify intent and update stage\r\n        const intent = classifyIntent(msg);\r\n        let newStage: ConversationStage | undefined;\r\n\r\n        // Determine next stage based on current context\r\n        if (intent === "CASUAL" || /(happy|bored|tired|stressed|motivated)/i.test(msg)) {\r\n            if (!state.lastStage || state.lastStage === "WELCOME") {\r\n                newStage = "CASUAL_MOOD";\r\n            }\r\n        } else if (intent === "LEARNING") {\r\n            if (!state.lastStage || state.lastStage === "WELCOME") {\r\n                newStage = "LEARNING_CATEGORY";\r\n            } else if (state.lastStage === "LEARNING_CATEGORY") {\r\n                newStage = "LEARNING_SUBJECT";\r\n            }\r\n        } else if (intent === "BOOKING") {\r\n            if (state.bookingStage === "NONE") {\r\n                updateState({ bookingStage: "MODE" });\r\n            }\r\n        } else if (intent === "PRICE") {\r\n            if (!state.lastStage || state.lastStage === "WELCOME") {\r\n                newStage = "PRICE_CATEGORY";\r\n            } else if (state.lastStage === "PRICE_CATEGORY") {\r\n                newStage = "PRICE_PLANS";\r\n            }\r\n        } else if (intent === "CERT") {\r\n            if (!state.lastStage || state.lastStage === "WELCOME") {\r\n                newStage = "CERT_REASON";\r\n            } else if (state.lastStage === "CERT_REASON") {\r\n                newStage = "CERT_DETAIL";\r\n            }\r\n        } else if (intent === "CONFUSED" || intent === "NEGATIVE") {\r\n            if (!state.lastStage || state.lastStage === "WELCOME") {\r\n                newStage = "NEGATIVE_CONCERN";\r\n            } else if (state.lastStage === "NEGATIVE_CONCERN") {\r\n                newStage = "NEGATIVE_RESOLVE";\r\n            }\r\n        }\r\n\r\n        if (intent) {\r\n            updateState({\r\n                intentPrimary: intent,\r\n                interestLevel: msg.length > 20 ? "HOT" : state.interestLevel,\r\n                lastStage: newStage || state.lastStage\r\n            });\r\n        }
 
         setTimeout(() => {
             const response = generateResponse(msg, state);
@@ -193,8 +184,8 @@ function AIChatInner() {
                             {messages.map((m, i) => (
                                 <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
                                     <div className={`max-w-[85%] p-4 rounded-3xl text-sm leading-relaxed whitespace-pre-wrap ${m.role === "user"
-                                            ? "bg-orange-600 text-white rounded-tr-none"
-                                            : "bg-[#1a1a1a] text-white/90 border border-white/5 rounded-tl-none"
+                                        ? "bg-orange-600 text-white rounded-tr-none"
+                                        : "bg-[#1a1a1a] text-white/90 border border-white/5 rounded-tl-none"
                                         }`}>
                                         {m.content}
                                     </div>
@@ -261,14 +252,50 @@ function AIChatInner() {
 function generateResponse(message: string, state: UserState): Message {
     const lower = message.toLowerCase();
     const intent = state.intentPrimary;
+    const stage = state.lastStage;
+
+    // HANDLE MOOD RESPONSES
+    if (stage === "CASUAL_MOOD") {
+        if (lower.includes("bored")) {
+            return {
+                role: "bot",
+                content: "Haha 😄 boredom is dangerous you know 😉\n\nBut also powerful…\nbecause many people discover new skills when bored ✨\n\nFun fact 😄\nMost successful people started learning during boredom!\n\nWant to:",
+                options: ["Casual chat", "Hear something interesting", "Explore courses", "Try free demo"]
+            };
+        } else if (lower.includes("stressed")) {
+            return {
+                role: "bot",
+                content: "Hmm 😅 heavy day ah…\n\nSmall truth for you 💙\nEven the strongest people feel like this sometimes.\n\nJust remember:\n✨ You're improving\n✨ You're learning\n✨ You're not behind\n\nTake a deep breath first 🌬️\n\nBy the way 😉\nLearning new skill is the BEST stress therapy.\n\nWant to:",
+                options: ["Talk about goals", "Try free demo", "Casual chat", "Main menu"]
+            };
+        } else if (lower.includes("happy") || lower.includes("motivated")) {
+            return {
+                role: "bot",
+                content: "Yesss 😄🔥 that's the energy!\n\nWhen you're in this mood —\nyou can achieve ANYTHING ✨\n\nPerfect time to:\n✔ Learn something new\n✔ Book a session\n✔ Start a course\n\nWhat would you like to do?",
+                options: ["Learn something", "Book session", "Know prices", "Just chat"]
+            };
+        } else {
+            return {
+                role: "bot",
+                content: "I understand 😊\n\nWhatever your mood —\nI'm here to help you feel better ✨\n\nWhat would you like?",
+                options: ["Talk casually", "Explore courses", "Book session", "Main menu"]
+            };
+        }
+    }
 
     // LEARNING FLOW
     if (intent === "LEARNING" || lower.includes("learn")) {
-        if (!state.lastStage || state.lastStage === "WELCOME") {
+        if (stage === "WELCOME" || !stage) {
             return {
                 role: "bot",
                 content: "Nice 😄✨ learning is always a power move!\n\nJust so I guide you perfectly…\nTell me one thing 😊\n\nAre you mainly:",
                 options: ["School student", "College student", "Working professional", "Career switcher", "Just curious"]
+            };
+        } else if (stage === "LEARNING_CATEGORY") {
+            return {
+                role: "bot",
+                content: `Perfect 😄 now I understand you better!\n\nMost people at your stage usually want:\n✔ Strong basics\n✔ Clear concepts\n✔ Confidence boost\n✔ Career advantage\n\nTell me 😊\nWhich area are you most interested in right now?`,
+                options: ["Maths", "Science", "English", "Soft skills", "Management", "Technical skills", "Career guidance"]
             };
         }
     }
@@ -281,43 +308,75 @@ function generateResponse(message: string, state: UserState): Message {
                 content: "Wonderful 😄👏 booking early is a very smart decision!\n\nBefore I proceed, just one quick question 😊\nWhat kind of session do you prefer?",
                 options: ["Online", "Offline", "Personal coaching", "Group class", "Just demo"]
             };
+        } else if (state.bookingStage === "MODE") {
+            return {
+                role: "bot",
+                content: "Nice 😄 good choice!\n\nTo book correctly, I need a few details 🙏\nThis helps us give you the right trainer & timing.\n\n👤 Full name\n📞 Mobile number\n📍 City / Location\n\nDon't worry — your details are safe with us 😊",
+                options: ["I'll provide details", "Change mode", "Main menu"]
+            };
         }
     }
 
     // PRICING FLOW
     if (intent === "PRICE" || lower.includes("fee") || lower.includes("price")) {
-        return {
-            role: "bot",
-            content: "Great question 😄💰 very practical thinking!\n\nFees depend on your goal, level & duration.\nSo first tell me honestly 😊\n\nThis is mainly for:",
-            options: ["School studies", "College studies", "Job skills", "Career growth", "Company training"]
-        };
+        if (stage === "WELCOME" || stage === "PRICE_CATEGORY") {
+            return {
+                role: "bot",
+                content: "Great question 😄💰 very practical thinking!\n\nFees depend on your goal, level & duration.\nSo first tell me honestly 😊\n\nThis is mainly for:",
+                options: ["School studies", "College studies", "Job skills", "Career growth", "Company training"]
+            };
+        } else if (stage === "PRICE_PLANS") {
+            return {
+                role: "bot",
+                content: "Perfect 👍 now I'll explain clearly 😄\n\nWe mainly offer three smart options:\n\n1️⃣ Free trial – test quality\n2️⃣ Certified short program – best value\n3️⃣ Long program – best results\n\nMost students start with free trial\nand then move to certified programs 👍\n\nWould you like me to:",
+                options: ["Explain free option", "Explain certified option", "Suggest best plan", "Direct booking"]
+            };
+        }
     }
 
     // CERTIFICATION FLOW
     if (intent === "CERT" || lower.includes("certificate")) {
-        return {
-            role: "bot",
-            content: "Very smart thinking 😄🎓\nCertificates really make a BIG difference in career.\n\nTell me one thing honestly 😊\nYou mainly want certificate for:",
-            options: ["Resume", "Job interview", "Internship", "College", "Skill proof", "Knowledge"]
-        };
+        if (stage === "WELCOME" || stage === "CERT_REASON") {
+            return {
+                role: "bot",
+                content: "Very smart thinking 😄🎓\nCertificates really make a BIG difference in career.\n\nTell me one thing honestly 😊\nYou mainly want certificate for:",
+                options: ["Resume", "Job interview", "Internship", "College", "Skill proof", "Knowledge"]
+            };
+        } else if (stage === "CERT_DETAIL") {
+            return {
+                role: "bot",
+                content: "Perfect 👍 now I understand your goal 😄\n\nOur certificates are:\n✔ Physical hard copy\n✔ Institution stamped\n✔ Trainer signed\n✔ Accepted by many companies\n✔ Valid for resume & interviews\n\nMany students used this successfully and got shortlisted ✨\n\nIf career growth is your aim —\nthis will definitely help you 👍\n\nWould you like:",
+                options: ["Certified course details", "Pricing", "Booking", "Career advice"]
+            };
+        }
     }
 
     // CASUAL/MOOD
-    if (intent === "CASUAL" || /^(hi|hello|hey)$/i.test(lower)) {
-        return {
-            role: "bot",
-            content: "Haha 😄 nice to relax a bit!\n\nTell me 😉\nRight now your mood is more like:",
-            options: ["Happy 😄", "Bored 😐", "Tired 😴", "Stressed 😵", "Motivated 🔥"]
-        };
+    if (intent === "CASUAL" || /^(hi|hello|hey|casual)$/i.test(lower)) {
+        if (stage !== "CASUAL_MOOD") {
+            return {
+                role: "bot",
+                content: "Haha 😄 nice to relax a bit!\n\nTell me 😉\nRight now your mood is more like:",
+                options: ["Happy 😄", "Bored 😐", "Tired 😴", "Stressed 😵", "Motivated 🔥"]
+            };
+        }
     }
 
     // CONFUSED/NEGATIVE
     if (intent === "CONFUSED" || intent === "NEGATIVE") {
-        return {
-            role: "bot",
-            content: "I understand 🙂 totally normal to feel unsure.\n\nActually…\nPeople who ask questions usually become the MOST successful 😄\n\nLet me help you calmly ✨\nWhat is your biggest concern right now?",
-            options: ["Fees", "Time", "Difficulty", "Usefulness", "Career outcome"]
-        };
+        if (stage === "WELCOME" || stage === "NEGATIVE_CONCERN") {
+            return {
+                role: "bot",
+                content: "I understand 🙂 totally normal to feel unsure.\n\nActually…\nPeople who ask questions usually become the MOST successful 😄\n\nLet me help you calmly ✨\nWhat is your biggest concern right now?",
+                options: ["Fees", "Time", "Difficulty", "Usefulness", "Career outcome"]
+            };
+        } else if (stage === "NEGATIVE_RESOLVE") {
+            return {
+                role: "bot",
+                content: "Very good doubt 😄👏\n\nHonestly speaking:\n✔ Skills never go waste\n✔ Learning always pays back\n✔ Confidence changes everything\n\nYou're thinking in the RIGHT direction 👍\n\nWould you like:",
+                options: ["Free demo to test", "Career guidance", "Course suggestion", "Just explore more"]
+            };
+        }
     }
 
     // DEFAULT FALLBACK
