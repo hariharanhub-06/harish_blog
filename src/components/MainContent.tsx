@@ -142,6 +142,7 @@ export default function MainContent({
 
     const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
     const [isLiveJoin, setIsLiveJoin] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState("All");
 
     const [loading, setLoading] = useState(!initialProfile || initialProjects?.length === 0);
     const [selectedItem, setSelectedItem] = useState<{ data: Project | Experience | Education | Volunteering, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
@@ -488,74 +489,99 @@ export default function MainContent({
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Challenge Area</span>
                             <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Interactive <span className="text-primary italic">Quizzes</span></h2>
                         </div>
-                        <button
-                            onClick={() => setIsLiveJoin(true)}
-                            className="flex items-center gap-3 px-8 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-black hover:text-white hover:border hover:border-white/20 transition-all shadow-xl shadow-white/5 group"
-                        >
-                            <Users size={18} className="group-hover:scale-110 transition-transform" /> Join Live Game
-                        </button>
+
+                        <div className="flex flex-col md:flex-row items-center gap-4">
+                            {/* Category Dropdown */}
+                            <div className="relative group/dropdown">
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    className="appearance-none bg-white/5 border border-white/10 rounded-2xl px-6 py-4 pr-12 font-black text-xs uppercase tracking-[0.3em] text-white hover:border-primary/50 focus:border-primary transition-all outline-none cursor-pointer min-w-[200px]"
+                                >
+                                    <option value="All" className="bg-[#0e0e0e]">All Categories</option>
+                                    {Array.from(new Set(quizzes.map(q => q.category))).filter(Boolean).map(cat => (
+                                        <option key={cat} value={cat} className="bg-[#0e0e0e]">{cat}</option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40 group-hover/dropdown:text-primary transition-colors">
+                                    <ArrowRight size={16} className="rotate-90" />
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setIsLiveJoin(true)}
+                                className="flex items-center gap-3 px-8 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-black hover:text-white hover:border hover:border-white/20 transition-all shadow-xl shadow-white/5 group h-[58px]"
+                            >
+                                <Users size={18} className="group-hover:scale-110 transition-transform" /> Join Live Game
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Quizzes Section */}
+                    {/* Quizzes Carousel */}
                     {quizzes.length > 0 && (
-                        <section className="container mx-auto px-4 py-8 relative z-20">
-                            <div className="flex flex-col items-center mb-8 text-center">
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Challenge Yourself</span>
-                                <h4 className="text-3xl font-black text-white uppercase tracking-tighter mt-2">Latest <span className="text-blue-500">Quizzes</span></h4>
+                        <section className="w-full relative z-20 overflow-hidden">
+                            <div className="container mx-auto px-6 mb-8">
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Slide to explore</span>
+                                <h4 className="text-2xl font-black text-white uppercase tracking-tighter mt-1">Available <span className="text-blue-500">Challenges</span></h4>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-                                {quizzes.map((quiz, i) => (
-                                    <div
-                                        key={quiz.id}
-                                        onClick={() => setActiveQuiz(quiz)}
-                                        className="group relative bg-[#0e0e0e] rounded-[1.5rem] overflow-hidden border border-white/10 hover:border-primary/50 transition-all cursor-pointer flex flex-col h-full shadow-lg hover:-translate-y-1 duration-300"
-                                    >
-                                        {/* Image Section - Fixed 16:9 Aspect Ratio */}
-                                        <div className="relative w-full aspect-[16/9] overflow-hidden">
-                                            {quiz.coverImage ? (
-                                                <Image src={quiz.coverImage} alt={quiz.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-                                            ) : (
-                                                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-white/10">
-                                                    <Gamepad2 size={40} />
+                            <InfiniteCarousel
+                                items={(() => {
+                                    const filteredQuizzes = selectedCategory === "All"
+                                        ? quizzes
+                                        : quizzes.filter(q => q.category === selectedCategory);
+
+                                    // Group quizzes into pairs for columns
+                                    const columns = [];
+                                    for (let i = 0; i < filteredQuizzes.length; i += 2) {
+                                        columns.push(filteredQuizzes.slice(i, i + 2));
+                                    }
+
+                                    return columns.map((pair, colIdx) => (
+                                        <div key={colIdx} className="flex flex-col gap-6 w-[350px] md:w-[450px]">
+                                            {pair.map((quiz, i) => (
+                                                <div
+                                                    key={quiz.id}
+                                                    onClick={() => setActiveQuiz(quiz)}
+                                                    className="group relative bg-[#0e0e0e] rounded-[2rem] overflow-hidden border border-white/10 hover:border-primary/50 transition-all cursor-pointer flex flex-col shadow-2xl hover:-translate-y-1 duration-300 h-full"
+                                                >
+                                                    <div className="relative w-full aspect-[21/9] overflow-hidden">
+                                                        {quiz.coverImage ? (
+                                                            <Image src={quiz.coverImage} alt={quiz.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-60 group-hover:opacity-100" />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-primary/10 flex items-center justify-center text-white/10">
+                                                                <Gamepad2 size={40} />
+                                                            </div>
+                                                        )}
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+
+                                                        <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+                                                            <span className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[10px] font-black uppercase tracking-widest text-primary border border-white/5">
+                                                                {quiz.category || "General"}
+                                                            </span>
+                                                            <div className="flex gap-2">
+                                                                <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-lg border border-white/5 flex items-center gap-2">
+                                                                    <Clock size={12} className="text-primary" /> {quiz.timeLimit}s
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="absolute bottom-4 left-4 right-4 z-10">
+                                                            <h3 className="text-lg font-black text-white group-hover:text-primary transition-colors leading-tight uppercase italic tracking-tighter line-clamp-1">
+                                                                {quiz.title}
+                                                            </h3>
+                                                        </div>
+                                                    </div>
                                                 </div>
+                                            ))}
+                                            {/* Spacer if only one quiz in column */}
+                                            {pair.length === 1 && (
+                                                <div className="invisible h-[115px] md:h-[150px]" />
                                             )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60" />
-
-                                            {/* Overlaid Badges on Image */}
-                                            <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
-                                                <div className="flex flex-col gap-1">
-                                                    <span className="px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-md text-[8px] font-black uppercase tracking-widest text-primary border border-white/10">
-                                                        {quiz.category || "General"}
-                                                    </span>
-                                                </div>
-                                                <div className="flex flex-col gap-1 items-end">
-                                                    <span className="px-2 py-0.5 bg-black/60 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest rounded-md border border-white/10 flex items-center gap-1">
-                                                        <Clock size={8} className="text-primary" /> {quiz.timeLimit}s
-                                                    </span>
-                                                    <span className="text-[8px] font-bold text-white/80 uppercase tracking-wider flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded-md backdrop-blur-md">
-                                                        <Target size={8} /> {quiz.questions.length} Qs
-                                                    </span>
-                                                </div>
-                                            </div>
                                         </div>
-
-                                        {/* Content Section - Below Image */}
-                                        <div className="p-4 flex flex-col gap-2 bg-[#121212] flex-grow">
-                                            <h3 className="text-sm font-black text-white group-hover:text-primary transition-colors leading-tight uppercase italic tracking-tighter line-clamp-2">
-                                                {quiz.title}
-                                            </h3>
-
-                                            <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
-                                                <span className="text-[8px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">Play Now</span>
-                                                <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary text-white transition-all">
-                                                    <ArrowRight size={10} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ));
+                                })()}
+                            />
                         </section>
                     )}
                 </section>
