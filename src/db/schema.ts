@@ -531,6 +531,8 @@ export const financeDebts = pgTable("finance_debts", {
   initialAmount: real("initial_amount").notNull().default(0),
   remainingAmount: real("remaining_amount").notNull().default(0),
   notes: text("notes"), // For payment structure/method
+  repaymentType: text("repayment_type").default("single"), // single or split
+  dueDate: timestamp("due_date"),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

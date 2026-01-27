@@ -31,14 +31,24 @@ export async function GET(req: Request) {
             .from(financeDebts)
             .where(eq(financeDebts.isActive, true));
 
-        // 3. Category Breakdown (Expenses only)
+        // 3. Category Breakdown (All types, grouped by category)
         const categories = await db.select({
             category: financeTransactions.category,
             value: sql<number>`sum(${financeTransactions.amount})`,
+            type: financeTransactions.type,
         })
             .from(financeTransactions)
-            .where(and(whereClause, eq(financeTransactions.type, "expense")))
-            .groupBy(financeTransactions.category);
+            .where(whereClause)
+            .groupBy(financeTransactions.category, financeTransactions.type);
+
+        // 5. Active Debts (for dynamic category filtering)
+        const activeDebts = await db.select({
+            id: financeDebts.id,
+            name: financeDebts.name,
+            remainingAmount: financeDebts.remainingAmount,
+        })
+            .from(financeDebts)
+            .where(sql`${financeDebts.remainingAmount} > 0`);
 
         // 4. Monthly Trend (Last 6 months)
         const sixMonthsAgo = new Date();
@@ -59,6 +69,7 @@ export async function GET(req: Request) {
             summary: stats,
             debtBalance: debts[0]?.total || 0,
             categories,
+            activeDebts,
             trend
         });
     } catch (error) {

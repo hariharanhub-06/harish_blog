@@ -53,6 +53,8 @@ interface Debt {
     initialAmount: number;
     remainingAmount: number;
     notes: string;
+    repaymentType: "single" | "split";
+    dueDate: string | null;
     isActive: boolean;
 }
 
@@ -79,12 +81,18 @@ export default function FinanceModule() {
     // Debt Modal States
     const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
     const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
-    const [debtForm, setDebtForm] = useState({ name: "", initialAmount: "", notes: "" });
+    const [debtForm, setDebtForm] = useState({
+        name: "",
+        initialAmount: "",
+        notes: "",
+        repaymentType: "single" as "single" | "split",
+        dueDate: ""
+    });
 
     // Fetch initial data
     useEffect(() => {
         fetchData();
-    }, [dateRange]);
+    }, [dateRange, selectedCategory]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -92,7 +100,7 @@ export default function FinanceModule() {
             const [debtsRes, statsRes, transRes] = await Promise.all([
                 fetch("/api/admin/finance/debts"),
                 fetch(`/api/admin/finance/summary?range=${dateRange}`),
-                fetch(`/api/admin/finance/transactions?limit=50`)
+                fetch(`/api/admin/finance/transactions?limit=100${selectedCategory !== 'All' ? `&category=${selectedCategory}` : ''}`)
             ]);
 
             if (debtsRes.ok) setDebts(await debtsRes.json());
@@ -142,12 +150,13 @@ export default function FinanceModule() {
                 const amount = parseFloat(match[2]);
 
                 if (item && !isNaN(amount)) {
+                    const matchedDebt = debts.find(d => d.name.toLowerCase() === item.toLowerCase());
                     entries.push({
                         type: currentType,
                         item,
                         amount,
-                        category: currentType === "debt_pay" ? "Transfer" : (currentType === "income" ? "Revenue" : item),
-                        debtId: currentType === "debt_pay" ? debts.find(d => d.name.toLowerCase() === item.toLowerCase())?.id : undefined,
+                        category: currentType === "debt_pay" ? (matchedDebt?.name || "Transfer") : (currentType === "income" ? "Revenue" : item),
+                        debtId: currentType === "debt_pay" ? matchedDebt?.id : undefined,
                         isValid: true
                     });
                     found = true;
@@ -216,7 +225,7 @@ export default function FinanceModule() {
             if (res.ok) {
                 setIsDebtModalOpen(false);
                 setEditingDebt(null);
-                setDebtForm({ name: "", initialAmount: "", notes: "" });
+                setDebtForm({ name: "", initialAmount: "", notes: "", repaymentType: "single", dueDate: "" });
                 fetchData();
             }
         } catch (error) {
@@ -228,7 +237,7 @@ export default function FinanceModule() {
 
     const openAddDebt = () => {
         setEditingDebt(null);
-        setDebtForm({ name: "", initialAmount: "", notes: "" });
+        setDebtForm({ name: "", initialAmount: "", notes: "", repaymentType: "single", dueDate: "" });
         setIsDebtModalOpen(true);
     };
 
@@ -237,7 +246,9 @@ export default function FinanceModule() {
         setDebtForm({
             name: debt.name,
             initialAmount: debt.initialAmount.toString(),
-            notes: debt.notes
+            notes: debt.notes,
+            repaymentType: (debt.repaymentType as any) || "single",
+            dueDate: debt.dueDate ? new Date(debt.dueDate).toISOString().split('T')[0] : ""
         });
         setIsDebtModalOpen(true);
     };
@@ -455,6 +466,16 @@ export default function FinanceModule() {
                                             </div>
                                         </div>
                                         <h4 className="text-lg font-black text-gray-900 mb-1">{debt.name}</h4>
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${debt.repaymentType === 'split' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                {debt.repaymentType || 'Single'}
+                                            </span>
+                                            {debt.dueDate && (
+                                                <span className="text-[10px] font-bold text-gray-400">
+                                                    Due {new Date(debt.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">{debt.notes || 'No payment notes'}</p>
 
                                         <div className="space-y-4 pt-6 border-t border-gray-100">
@@ -585,9 +606,21 @@ export default function FinanceModule() {
                                             className="w-full pl-12 pr-4 py-3 bg-gray-50 border-0 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-primary/20"
                                         />
                                     </div>
-                                    <button className="p-3 bg-gray-50 border-0 rounded-2xl text-gray-400 hover:text-primary transition-all">
-                                        <Filter size={18} />
-                                    </button>
+                                    <select
+                                        value={selectedCategory}
+                                        onChange={(e) => setSelectedCategory(e.target.value)}
+                                        className="p-3 bg-gray-50 border-0 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 focus:ring-2 focus:ring-primary/20"
+                                    >
+                                        <option value="All">All Categories</option>
+                                        {/* Dynamic categories from stats */}
+                                        {stats?.categories?.map((cat: any) => (
+                                            <option key={cat.category} value={cat.category}>{cat.category}</option>
+                                        ))}
+                                        {/* Dynamic active debts */}
+                                        {stats?.activeDebts?.map((debt: any) => (
+                                            <option key={debt.id} value={debt.name}>{debt.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 
@@ -706,6 +739,30 @@ export default function FinanceModule() {
                                         className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
                                     />
                                 </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Repayment</label>
+                                        <select
+                                            value={debtForm.repaymentType}
+                                            onChange={(e) => setDebtForm({ ...debtForm, repaymentType: e.target.value as any })}
+                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                        >
+                                            <option value="single">Single Payment</option>
+                                            <option value="split">Split / EMI</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Target Date</label>
+                                        <input
+                                            type="date"
+                                            value={debtForm.dueDate}
+                                            onChange={(e) => setDebtForm({ ...debtForm, dueDate: e.target.value })}
+                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                        />
+                                    </div>
+                                </div>
+
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Payment Notes / Structure</label>
                                     <textarea
