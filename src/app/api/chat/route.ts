@@ -14,11 +14,12 @@ export async function POST(req: Request) {
         }
 
         const apiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+        const geminiKey = process.env.GOOGLE_GEMINI_API_KEY;
         const dbUrl = process.env.DATABASE_URL;
 
-        if (!apiKey) {
-            console.error("Missing Groq API Key in environment");
-            return NextResponse.json({ error: "SERVICE ERROR: API Configuration incomplete (Key missing)" }, { status: 500 });
+        if (!apiKey && !geminiKey) {
+            console.error("Missing all AI API Keys");
+            return NextResponse.json({ error: "SERVICE ERROR: AI Configuration incomplete" }, { status: 500 });
         }
 
         if (!dbUrl) {
@@ -79,9 +80,12 @@ export async function POST(req: Request) {
 
         // 3. Start Chat with Groq (with Guaranteed 2.0s Total AI Window)
         try {
+            // Truncate history to last 10 messages to save quota/tokens and improve speed
+            const recentMessages = messages.slice(-10);
+
             const groqMessages: any[] = [
                 { role: "system", content: systemInstruction },
-                ...messages.map(m => ({
+                ...recentMessages.map(m => ({
                     role: m.role === "user" ? "user" : "assistant",
                     content: m.content
                 }))
@@ -110,26 +114,28 @@ export async function POST(req: Request) {
             let usedModel = "";
 
             try {
-                // LAYER 1: Rapid 8B Model (1.2s Limit)
+                // LAYER 1: Rapid 8B Model (1.5s Limit)
                 usedModel = "llama-3.1-8b-instant";
-                completion = await fetchWithTimeout(usedModel, 1200);
+                completion = await fetchWithTimeout(usedModel, 1500);
             } catch (err: any) {
-                console.warn(`Layer 1 (${usedModel}) failed: ${err.message}. Trying Layer 2.`);
+                console.warn(`Layer 1 (${usedModel}) failed: ${err.message}`);
                 try {
-                    // LAYER 2: Versatile 70B Model (1.5s Limit)
+                    // LAYER 2: Versatile 70B Model (2.5s Limit)
                     usedModel = "llama-3.3-70b-versatile";
-                    completion = await fetchWithTimeout(usedModel, 1500);
+                    completion = await fetchWithTimeout(usedModel, 2500);
                 } catch (innerErr: any) {
-                    // LAYER 3: Gemini Final Fallback (Fastest fallback)
-                    console.warn(`Layer 2 (${usedModel}) failed: ${innerErr.message}. Activating Gemini Safety Net.`);
+                    // LAYER 3: Gemini Final Fallback
+                    console.warn(`Layer 2 (${usedModel}) failed: ${innerErr.message}. Trying Gemini.`);
+                    if (!geminiKey) throw new Error("No Gemini key available for fallback");
+
                     try {
-                        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
+                        const genAI = new GoogleGenerativeAI(geminiKey);
                         const genModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
                         const result = await genModel.generateContent({
                             contents: [
                                 { role: "user", parts: [{ text: systemInstruction }] },
-                                ...messages.map(m => ({
+                                ...recentMessages.map(m => ({
                                     role: m.role === "user" ? "user" : "model",
                                     parts: [{ text: m.content }]
                                 }))
@@ -143,7 +149,7 @@ export async function POST(req: Request) {
                         throw new Error("Gemini returned empty response");
                     } catch (geminiErr: any) {
                         console.error("Layer 3 (Gemini) Critical Failure:", geminiErr.message);
-                        throw geminiErr; // Bubble up to global catch
+                        throw geminiErr;
                     }
                 }
             }
