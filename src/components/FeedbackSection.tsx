@@ -110,6 +110,8 @@ export default function FeedbackSection() {
             {/* Testimonials Carousel */}
             {feedbacks.length > 0 ? (
                 <div className="py-12 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                    <div className="absolute top-0 left-0 h-full w-8 md:w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
+                    <div className="absolute top-0 right-0 h-full w-8 md:w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
                     <InfiniteCarousel
                         speed={20} // 3 RPM (60s / 3 = 20s)
                         items={feedbacks.map((f) => (
