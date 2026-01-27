@@ -211,8 +211,17 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
 
     const startQuiz = () => {
         if (!userName) return alert("Please enter your name");
+        console.log("Starting Quiz:", quiz);
+        console.log("Global Time Limit:", quiz?.timeLimit);
+        console.log("First Question Time Limit:", quiz?.questions[0]?.timeLimit);
+
         setGameState("playing");
-        setTimeLeft(quiz?.questions[0]?.timeLimit || quiz?.timeLimit || 30);
+        // Ensure we prioritize question limit only if valid (>0), else use global
+        const firstQTime = quiz?.questions[0]?.timeLimit;
+        const initialTime = (firstQTime && firstQTime > 0) ? firstQTime : (quiz?.timeLimit || 30);
+
+        console.log("Setting initial time to:", initialTime);
+        setTimeLeft(initialTime);
     };
 
     const handleOptionToggle = (optionId: string) => {
@@ -262,17 +271,24 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
             selectedOptionIds.every(id => correctOptionIds.includes(id));
 
         if (isCorrect) {
-            const timeBonus = Math.floor((timeLeft / (currentQuestion?.timeLimit || 30)) * 500);
+            const currentQ = quiz?.questions[currentQuestionIndex];
+            const qTime = (currentQ?.timeLimit && currentQ.timeLimit > 0) ? currentQ.timeLimit : (quiz?.timeLimit || 30);
+
+            const timeBonus = Math.floor((timeLeft / qTime) * 500);
             setScore(prev => prev + (currentQuestion?.points || 1000) + timeBonus);
             setCorrectCount(prev => prev + 1);
         }
 
         setTimeout(() => {
             if (currentQuestionIndex < (quiz?.questions.length || 0) - 1) {
+                const nextIndex = currentQuestionIndex + 1;
                 setCurrentQuestionIndex(prev => prev + 1);
                 setSelectedOptionIds([]);
                 setIsSubmitted(false);
-                setTimeLeft(quiz?.questions[currentQuestionIndex + 1]?.timeLimit || quiz?.timeLimit || 30);
+
+                const nextQ = quiz?.questions[nextIndex];
+                const nextTime = (nextQ?.timeLimit && nextQ.timeLimit > 0) ? nextQ.timeLimit : (quiz?.timeLimit || 30);
+                setTimeLeft(nextTime);
             } else {
                 setGameState("results");
                 submitScore();
@@ -456,7 +472,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                         {/* Since isCorrect is hidden in live, we can't show "Multiple Correct" hint easily unless API sends it, assuming single for now or logic handles it */}
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-24">
                                         {activeQuestion.options.map((option: any, idx: number) => {
                                             const isSelected = selectedOptionIds.includes(option.id);
                                             const isCorrect = option.isCorrect; // Undefined in live
@@ -502,11 +518,11 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                         <motion.div
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className="flex justify-center pt-8"
+                                            className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/90 to-transparent z-50 flex justify-center"
                                         >
                                             <button
                                                 onClick={handleSubmit}
-                                                className="px-12 py-5 bg-white text-black rounded-3xl font-black uppercase tracking-[0.3em] text-xs hover:scale-110 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)]"
+                                                className="w-full max-w-md px-12 py-5 bg-white text-black rounded-3xl font-black uppercase tracking-[0.3em] text-xs hover:scale-105 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)]"
                                             >
                                                 Submit Answer
                                             </button>
@@ -514,14 +530,16 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                     )}
 
                                     {isLive && isSubmitted && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="flex justify-center pt-8 text-center flex-col items-center"
-                                        >
-                                            <Loader2 className="animate-spin text-white mb-2" />
-                                            <p className="font-bold text-gray-400">Answer Submitted! Waiting for next question...</p>
-                                        </motion.div>
+                                        <div className="pb-24">
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="flex justify-center pt-8 text-center flex-col items-center"
+                                            >
+                                                <Loader2 className="animate-spin text-white mb-2" />
+                                                <p className="font-bold text-gray-400">Answer Submitted! Waiting for next question...</p>
+                                            </motion.div>
+                                        </div>
                                     )}
                                 </motion.div>
                             </div>

@@ -205,7 +205,7 @@ export default function MainContent({
 
                             return (
                                 <CardWrapper key={i} index={i}>
-                                    <div className="group p-6 bg-white/5 rounded-3xl border border-white/10 shadow-sm hover:shadow-2xl hover:border-white/20 transition-all duration-500 overflow-hidden relative h-full">
+                                    <div className="group p-6 bg-white/5 rounded-3xl border border-white/10 shadow-sm hover:shadow-2xl hover:border-white/20 transition-all duration-500 overflow-hidden relative h-full flex flex-col items-center text-center justify-center">
                                         <span className="absolute -bottom-4 -right-2 text-8xl font-black text-white/5 group-hover:text-white/10 transition-colors -z-10">
                                             {String(stat.value).replace('+', '')}
                                         </span>
