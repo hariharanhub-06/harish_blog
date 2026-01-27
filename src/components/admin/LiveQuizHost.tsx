@@ -38,14 +38,15 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
 
     // Local countdown timer for the host
     useEffect(() => {
-        let timer: any;
-        if (status === "active" && timeLeft > 0) {
-            timer = setInterval(() => {
-                setTimeLeft(prev => Math.max(0, prev - 1));
-            }, 1000);
-        }
+        if (status !== "active") return;
+        const timer = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 0) return 0;
+                return prev - 1;
+            });
+        }, 1000);
         return () => clearInterval(timer);
-    }, [status, timeLeft]);
+    }, [status]);
 
     // Auto-advance logic: Trigger reveal and start 10s countdown
     useEffect(() => {
@@ -290,10 +291,10 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
                                 {players.map((player: any, i) => (
                                     <motion.div
                                         key={player.name}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
                                         layout
-                                        className={`flex items-center justify-between p-4 rounded-2xl border ${i === 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'}`}
+                                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-500 ${i === 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'}`}
                                     >
                                         <div className="flex items-center gap-3">
                                             <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] ${i === 0 ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
