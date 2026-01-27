@@ -130,7 +130,8 @@ export async function POST(req: Request) {
                 console.warn(`Layer 1 (${usedModel}) failed: ${message}`);
                 try {
                     // LAYER 2: Versatile 70B Model (4.0s Limit)
-                    usedModel = "llama-3.3-70b-versatile";
+                    // Fallback to 3.1-70b as 3.3-70b might be unstable/unavailable
+                    usedModel = "llama-3.1-70b-versatile";
                     completion = await fetchWithTimeout(usedModel, 4000);
                 } catch (innerErr: unknown) {
                     const innerMsg = innerErr instanceof Error ? innerErr.message : String(innerErr);
@@ -140,34 +141,40 @@ export async function POST(req: Request) {
 
                     try {
                         const genAI = new GoogleGenerativeAI(geminiKey);
-                        // Correct way to use System Instruction in Gemini
                         const genModel = genAI.getGenerativeModel({
                             model: "gemini-1.5-flash",
                             systemInstruction: systemInstruction
                         });
 
-                        // Ensure roles alternate and handle potential double-user message at start
-                        const geminiContents = [];
-                        let lastRole = "";
+                        // Robust Message Merging for Gemini
+                        // Merges consecutive messages of the same role to prevent dropping content
+                        const geminiContents: { role: string; parts: { text: string }[] }[] = [];
 
                         for (const m of recentMessages) {
                             const currentRole = m.role === "user" ? "user" : "model";
-                            if (currentRole === lastRole) continue; // Skip if same role as last
 
-                            geminiContents.push({
-                                role: currentRole,
-                                parts: [{ text: m.content }]
-                            });
-                            lastRole = currentRole;
+                            if (geminiContents.length > 0 && geminiContents[geminiContents.length - 1].role === currentRole) {
+                                // Merge with previous message
+                                const lastMsg = geminiContents[geminiContents.length - 1];
+                                lastMsg.parts[0].text += `\n\n${m.content}`;
+                            } else {
+                                // Push new message
+                                geminiContents.push({
+                                    role: currentRole,
+                                    parts: [{ text: m.content }]
+                                });
+                            }
                         }
 
                         // Gemini requires the first message to be "user"
+                        // If it starts with model, we filter it out (or could prepend a dummy user msg, but shifting is safer for context validity)
                         if (geminiContents.length > 0 && geminiContents[0].role !== "user") {
                             geminiContents.shift();
                         }
 
                         if (geminiContents.length === 0) {
-                            throw new Error("No valid messages for Gemini fallback");
+                            // Fallback if no valid history remains (unlikely but possible)
+                            geminiContents.push({ role: "user", parts: [{ text: messages[messages.length - 1]?.content || "Hello" }] });
                         }
 
                         const result = await genModel.generateContent({
