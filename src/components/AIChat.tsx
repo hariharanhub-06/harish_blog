@@ -149,7 +149,54 @@ function AIChatInner() {
         setLoading(true);
 
         // Update message count
-        updateState({ messageCount: state.messageCount + 1 }); \r\n\r\n        // Classify intent and update stage\r\n        const intent = classifyIntent(msg);\r\n        let newStage: ConversationStage | undefined;\r\n\r\n        // Determine next stage based on current context\r\n        if (intent === "CASUAL" || /(happy|bored|tired|stressed|motivated)/i.test(msg)) {\r\n            if (!state.lastStage || state.lastStage === "WELCOME") {\r\n                newStage = "CASUAL_MOOD";\r\n            }\r\n        } else if (intent === "LEARNING") {\r\n            if (!state.lastStage || state.lastStage === "WELCOME") {\r\n                newStage = "LEARNING_CATEGORY";\r\n            } else if (state.lastStage === "LEARNING_CATEGORY") {\r\n                newStage = "LEARNING_SUBJECT";\r\n            }\r\n        } else if (intent === "BOOKING") {\r\n            if (state.bookingStage === "NONE") {\r\n                updateState({ bookingStage: "MODE" });\r\n            }\r\n        } else if (intent === "PRICE") {\r\n            if (!state.lastStage || state.lastStage === "WELCOME") {\r\n                newStage = "PRICE_CATEGORY";\r\n            } else if (state.lastStage === "PRICE_CATEGORY") {\r\n                newStage = "PRICE_PLANS";\r\n            }\r\n        } else if (intent === "CERT") {\r\n            if (!state.lastStage || state.lastStage === "WELCOME") {\r\n                newStage = "CERT_REASON";\r\n            } else if (state.lastStage === "CERT_REASON") {\r\n                newStage = "CERT_DETAIL";\r\n            }\r\n        } else if (intent === "CONFUSED" || intent === "NEGATIVE") {\r\n            if (!state.lastStage || state.lastStage === "WELCOME") {\r\n                newStage = "NEGATIVE_CONCERN";\r\n            } else if (state.lastStage === "NEGATIVE_CONCERN") {\r\n                newStage = "NEGATIVE_RESOLVE";\r\n            }\r\n        }\r\n\r\n        if (intent) {\r\n            updateState({\r\n                intentPrimary: intent,\r\n                interestLevel: msg.length > 20 ? "HOT" : state.interestLevel,\r\n                lastStage: newStage || state.lastStage\r\n            });\r\n        }
+        updateState({ messageCount: state.messageCount + 1 });
+
+        // Classify intent and update stage
+        const intent = classifyIntent(msg);
+        let newStage: ConversationStage | undefined;
+
+        // Determine next stage based on current context
+        if (intent === "CASUAL" || /(happy|bored|tired|stressed|motivated)/i.test(msg)) {
+            if (!state.lastStage || state.lastStage === "WELCOME") {
+                newStage = "CASUAL_MOOD";
+            }
+        } else if (intent === "LEARNING") {
+            if (!state.lastStage || state.lastStage === "WELCOME") {
+                newStage = "LEARNING_CATEGORY";
+            } else if (state.lastStage === "LEARNING_CATEGORY") {
+                newStage = "LEARNING_SUBJECT";
+            }
+        } else if (intent === "BOOKING") {
+            if (state.bookingStage === "NONE") {
+                updateState({ bookingStage: "MODE" });
+            }
+        } else if (intent === "PRICE") {
+            if (!state.lastStage || state.lastStage === "WELCOME") {
+                newStage = "PRICE_CATEGORY";
+            } else if (state.lastStage === "PRICE_CATEGORY") {
+                newStage = "PRICE_PLANS";
+            }
+        } else if (intent === "CERT") {
+            if (!state.lastStage || state.lastStage === "WELCOME") {
+                newStage = "CERT_REASON";
+            } else if (state.lastStage === "CERT_REASON") {
+                newStage = "CERT_DETAIL";
+            }
+        } else if (intent === "CONFUSED" || intent === "NEGATIVE") {
+            if (!state.lastStage || state.lastStage === "WELCOME") {
+                newStage = "NEGATIVE_CONCERN";
+            } else if (state.lastStage === "NEGATIVE_CONCERN") {
+                newStage = "NEGATIVE_RESOLVE";
+            }
+        }
+
+        if (intent) {
+            updateState({
+                intentPrimary: intent,
+                interestLevel: msg.length > 20 ? "HOT" : state.interestLevel,
+                lastStage: newStage || state.lastStage
+            });
+        }
 
         setTimeout(() => {
             const response = generateResponse(msg, state);
