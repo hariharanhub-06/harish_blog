@@ -524,3 +524,36 @@ export const quizParticipantRelations = relations(quizParticipants, ({ one }) =>
     references: [quizSessions.id],
   }),
 }));
+
+export const financeDebts = pgTable("finance_debts", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  initialAmount: real("initial_amount").notNull().default(0),
+  remainingAmount: real("remaining_amount").notNull().default(0),
+  notes: text("notes"), // For payment structure/method
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const financeTransactions = pgTable("finance_transactions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  amount: real("amount").notNull(),
+  description: text("description"),
+  category: text("category").notNull(), // Food, Fuel, Salary, etc.
+  type: text("type").notNull(), // expense, income, debt_pay
+  debtId: text("debt_id"),
+  date: timestamp("date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const financeDebtRelations = relations(financeDebts, ({ many }) => ({
+  transactions: many(financeTransactions),
+}));
+
+export const financeTransactionRelations = relations(financeTransactions, ({ one }) => ({
+  debt: one(financeDebts, {
+    fields: [financeTransactions.debtId],
+    references: [financeDebts.id],
+  }),
+}));
