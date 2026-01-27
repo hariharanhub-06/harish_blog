@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { uploadToImageKit } from "@/lib/imagekit-upload"; // Import ImageKit helper
 
 interface Quiz {
     id: string;
@@ -194,6 +195,23 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
     const [activeSection, setActiveSection] = useState("basic"); // basic, questions
     const [bulkInput, setBulkInput] = useState("");
     const [showBulk, setShowBulk] = useState(false);
+    const [uploading, setUploading] = useState(false);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const url = await uploadToImageKit(file, "quizzes");
+            onChange({ ...quiz, coverImage: url });
+        } catch (error) {
+            console.error("Upload failed", error);
+            alert("Failed to upload image");
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const parseBulkQuestions = () => {
         if (!bulkInput.trim()) return;
@@ -334,14 +352,34 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        <div className="flex gap-4">
-                                            <input
-                                                type="text"
-                                                value={quiz.coverImage}
-                                                onChange={(e) => onChange({ ...quiz, coverImage: e.target.value })}
-                                                className="flex-1 bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
-                                                placeholder="Paste cover image URL..."
-                                            />
+                                        <div className="flex gap-4 items-center">
+                                            <div className="flex-1">
+                                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all">
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        {uploading ? (
+                                                            <Loader2 className="animate-spin text-primary" size={24} />
+                                                        ) : (
+                                                            <>
+                                                                <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                                                                <p className="text-xs text-gray-500 font-bold">Click to upload thumbnail</p>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                    <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+                                                </label>
+                                            </div>
+                                            <div className="flex flex-col items-center gap-2">
+                                                <span className="text-[10px] font-black uppercase text-gray-300">OR</span>
+                                            </div>
+                                            <div className="w-1/3">
+                                                <input
+                                                    type="text"
+                                                    value={quiz.coverImage}
+                                                    onChange={(e) => onChange({ ...quiz, coverImage: e.target.value })}
+                                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-primary/20 transition-all font-bold"
+                                                    placeholder="Paste URL..."
+                                                />
+                                            </div>
                                         </div>
                                         <p className="text-[10px] uppercase font-black tracking-widest text-gray-400">Optimal: 19:6 Aspect Ratio</p>
                                     </div>
