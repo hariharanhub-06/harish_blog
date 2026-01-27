@@ -47,8 +47,9 @@ interface QuizGameOverlayProps {
     onClose: () => void;
 }
 
+
 export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizGameOverlayProps) {
-    const [gameState, setGameState] = useState<"intro" | "playing" | "results" | "penalty">("intro");
+    const [gameState, setGameState] = useState<"intro" | "lobby" | "playing" | "results" | "penalty">("intro");
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [score, setScore] = useState(0);
     const [correctCount, setCorrectCount] = useState(0);
@@ -59,8 +60,16 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
     const [pin, setPin] = useState("");
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
-    // Anti-cheat: Tab visibility change
+    // Live Quiz State
+    const [sessionId, setSessionId] = useState("");
+    const [participantId, setParticipantId] = useState("");
+    const [liveStatus, setLiveStatus] = useState("waiting");
+    const [liveQuestion, setLiveQuestion] = useState<any>(null);
+
+    // Anti-cheat: Tab visibility change (Only for self-paced, disable for live to avoid false positives on mobile)
     useEffect(() => {
+        if (isLive) return;
+
         const handleVisibilityChange = () => {
             if (document.hidden && gameState === "playing") {
                 handlePenalty();
@@ -80,11 +89,11 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
             window.removeEventListener("visibilitychange", handleVisibilityChange);
             window.removeEventListener("blur", handleBlur);
         };
-    }, [gameState]);
+    }, [gameState, isLive]);
 
     const handlePenalty = () => {
         setGameState("penalty");
-        submitScore();
+        if (!isLive) submitScore();
     };
 
     const submitScore = async () => {
@@ -121,6 +130,68 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
         }
     };
 
+    // Live Quiz Logic
+    const joinLiveSession = async () => {
+        if (!pin || !userName) return alert("PIN and Name required");
+
+        try {
+            const res = await fetch("/api/quiz/live/join", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pin, name: userName })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                setSessionId(data.sessionId);
+                setParticipantId(data.participantId);
+                setGameState("lobby");
+            } else {
+                alert(data.error || "Failed to join");
+            }
+        } catch (error) {
+            console.error("Join failed", error);
+            alert("Failed to join session");
+        }
+    };
+
+    // Polling for live game status
+    useEffect(() => {
+        if (!isLive || !sessionId) return;
+
+        const pollStatus = async () => {
+            try {
+                const res = await fetch(`/api/quiz/live/status?sessionId=${sessionId}`);
+                if (res.ok) {
+                    const data = await res.json();
+
+                    // Update leaderboard
+                    if (data.leaderboard) setLeaderboard(data.leaderboard);
+
+                    // Handle Status Changes
+                    if (data.status === "active" && data.currentQuestion) {
+                        if (gameState === "lobby" || (liveQuestion && liveQuestion.id !== data.currentQuestion.id)) {
+                            // New Question
+                            setLiveQuestion(data.currentQuestion);
+                            setGameState("playing");
+                            setIsSubmitted(false);
+                            setSelectedOptionIds([]);
+                            setTimeLeft(data.currentQuestion.timeLimit || 30);
+                        }
+                    } else if (data.status === "finished") {
+                        setGameState("results");
+                    }
+                }
+            } catch (error) {
+                console.error("Poll failed", error);
+            }
+        };
+
+        const interval = setInterval(pollStatus, 1000);
+        return () => clearInterval(interval);
+    }, [isLive, sessionId, gameState, liveQuestion]);
+
+
     useEffect(() => {
         let timer: any;
         if (gameState === "playing" && timeLeft > 0 && !isSubmitted) {
@@ -128,10 +199,15 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                 setTimeLeft(prev => prev - 1);
             }, 1000);
         } else if (timeLeft === 0 && !isSubmitted && gameState === "playing") {
-            handleSubmit();
+            if (isLive) {
+                // Auto-submit empty answer or just disable
+                setIsSubmitted(true);
+            } else {
+                handleSubmit();
+            }
         }
         return () => clearInterval(timer);
-    }, [gameState, timeLeft, isSubmitted]);
+    }, [gameState, timeLeft, isSubmitted, isLive]);
 
     const startQuiz = () => {
         if (!userName) return alert("Please enter your name");
@@ -148,10 +224,35 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
         );
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (isSubmitted) return;
         setIsSubmitted(true);
 
+        if (isLive) {
+            // Live Submission
+            try {
+                const res = await fetch("/api/quiz/live/answer", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        sessionId,
+                        participantId,
+                        answerIds: selectedOptionIds,
+                        timeLeft
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setScore(data.newScore);
+                    if (data.isCorrect) setCorrectCount(prev => prev + 1);
+                }
+            } catch (error) {
+                console.error("Live submit failed", error);
+            }
+            return;
+        }
+
+        // Self-paced Logic
         const currentQuestion = quiz?.questions[currentQuestionIndex];
         if (!currentQuestion) return;
 
@@ -179,12 +280,23 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
         }, 2000);
     };
 
+    // Helper to get current Question (Live or Self-Paced)
+    const activeQuestion = isLive ? liveQuestion : quiz?.questions[currentQuestionIndex];
+
+    // Lock Body Scroll
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, []);
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black flex flex-col font-poppins text-white overflow-hidden"
+            className="fixed inset-0 z-[100] bg-black flex flex-col font-poppins text-white overflow-y-auto"
         >
             <div className="absolute top-6 right-6 z-[110]">
                 <button
@@ -226,9 +338,12 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                         <input
                                             type="text"
                                             placeholder="YOUR NICKNAME"
+                                            value={userName}
+                                            onChange={(e) => setUserName(e.target.value)}
                                             className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-center font-bold text-xl tracking-widest focus:ring-2 focus:ring-blue-500 outline-none transition-all uppercase"
                                         />
                                         <button
+                                            onClick={joinLiveSession}
                                             className="w-full bg-blue-600 text-white rounded-2xl py-4 font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/20"
                                         >
                                             Join Lobby
@@ -274,7 +389,24 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                         </motion.div>
                     )}
 
-                    {gameState === "playing" && quiz && (
+                    {gameState === "lobby" && (
+                        <motion.div
+                            key="lobby"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-2xl mx-auto z-10"
+                        >
+                            <Loader2 className="animate-spin text-primary mb-8" size={64} />
+                            <h2 className="text-4xl font-black tracking-tight mb-4">You're In!</h2>
+                            <p className="text-xl font-bold text-gray-400">Waiting for host to start...</p>
+                            <div className="mt-12 bg-white/5 px-8 py-4 rounded-full border border-white/10">
+                                <span className="text-xs font-black uppercase tracking-widest text-primary">Your Name</span>
+                                <p className="text-2xl font-black mt-1">{userName}</p>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {gameState === "playing" && activeQuestion && (
                         <motion.div
                             key="playing"
                             initial={{ opacity: 0 }}
@@ -288,14 +420,18 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                         <span className="text-2xl font-black">{timeLeft}</span>
                                     </div>
                                     <div className="hidden md:block">
-                                        <div className="h-2 w-64 bg-white/5 rounded-full overflow-hidden">
-                                            <motion.div
-                                                className="h-full bg-primary"
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` }}
-                                            />
-                                        </div>
-                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">{currentQuestionIndex + 1} OF {quiz.questions.length}</span>
+                                        {!isLive && (
+                                            <>
+                                                <div className="h-2 w-64 bg-white/5 rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        className="h-full bg-primary"
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${((currentQuestionIndex + 1) / (quiz ? quiz.questions.length : 1)) * 100}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">{currentQuestionIndex + 1} OF {quiz ? quiz.questions.length : '?'}</span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 
@@ -307,7 +443,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
 
                             <div className="flex-1 flex flex-col justify-center max-w-4xl mx-auto w-full">
                                 <motion.div
-                                    key={currentQuestionIndex}
+                                    key={activeQuestion.id}
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -20 }}
@@ -315,20 +451,16 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                 >
                                     <div className="flex flex-col items-center">
                                         <h2 className="text-3xl md:text-5xl font-black tracking-tight text-center leading-tight mb-4">
-                                            {quiz.questions[currentQuestionIndex].questionText}
+                                            {activeQuestion.questionText}
                                         </h2>
-                                        {quiz.questions[currentQuestionIndex].options.filter(o => o.isCorrect).length > 1 && (
-                                            <span className="text-primary font-black uppercase tracking-[0.2em] text-[10px] mb-8 animate-pulse italic">
-                                                (Multiple Correct Answers)
-                                            </span>
-                                        )}
+                                        {/* Since isCorrect is hidden in live, we can't show "Multiple Correct" hint easily unless API sends it, assuming single for now or logic handles it */}
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                                        {quiz.questions[currentQuestionIndex].options.map((option, idx) => {
+                                        {activeQuestion.options.map((option: any, idx: number) => {
                                             const isSelected = selectedOptionIds.includes(option.id);
-                                            const isCorrect = option.isCorrect;
-                                            const showResult = isSubmitted;
+                                            const isCorrect = option.isCorrect; // Undefined in live
+                                            const showResult = isSubmitted && !isLive; // Only show result immediately in self-paced
 
                                             let borderClass = "border-white/10 hover:border-primary bg-white/5";
                                             if (showResult) {
@@ -339,11 +471,17 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                                 borderClass = "border-primary bg-primary/10";
                                             }
 
+                                            // Live Submitted State
+                                            if (isLive && isSubmitted) {
+                                                if (isSelected) borderClass = "border-primary bg-primary/20 opacity-100";
+                                                else borderClass = "border-white/5 bg-white/5 opacity-30";
+                                            }
+
                                             return (
                                                 <button
                                                     key={option.id}
                                                     onClick={() => handleOptionToggle(option.id)}
-                                                    disabled={showResult}
+                                                    disabled={isSubmitted}
                                                     className={`p-6 md:p-8 rounded-[2rem] border-2 transition-all text-left flex items-center gap-6 group relative overflow-hidden ${borderClass}`}
                                                 >
                                                     <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center font-black text-sm md:text-xl transition-all ${isSelected ? 'bg-primary text-white' : 'bg-white/10'}`}>
@@ -372,6 +510,17 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                             >
                                                 Submit Answer
                                             </button>
+                                        </motion.div>
+                                    )}
+
+                                    {isLive && isSubmitted && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="flex justify-center pt-8 text-center flex-col items-center"
+                                        >
+                                            <Loader2 className="animate-spin text-white mb-2" />
+                                            <p className="font-bold text-gray-400">Answer Submitted! Waiting for next question...</p>
                                         </motion.div>
                                     )}
                                 </motion.div>

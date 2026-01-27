@@ -472,9 +472,46 @@ export const quizQuestionRelations = relations(quizQuestions, ({ one, many }) =>
   options: many(quizOptions),
 }));
 
+
 export const quizOptionRelations = relations(quizOptions, ({ one }) => ({
   question: one(quizQuestions, {
     fields: [quizOptions.questionId],
     references: [quizQuestions.id],
+  }),
+}));
+
+export const quizSessions = pgTable("quiz_sessions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  quizId: text("quiz_id").notNull(),
+  pin: text("pin").notNull().unique(), // 6-digit PIN
+  status: text("status").notNull().default("waiting"), // waiting, active, finished
+  currentQuestionIndex: integer("current_question_index").default(-1), // -1 = lobby
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const quizParticipants = pgTable("quiz_participants", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  sessionId: text("session_id").notNull(),
+  name: text("name").notNull(),
+  score: integer("score").default(0),
+  streak: integer("streak").default(0), // For streak bonuses
+  lastAnsweredQuestionIndex: integer("last_answered_question_index").default(-1),
+  lastActive: timestamp("last_active").defaultNow(),
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
+export const quizSessionRelations = relations(quizSessions, ({ one, many }) => ({
+  quiz: one(quizzes, {
+    fields: [quizSessions.quizId],
+    references: [quizzes.id],
+  }),
+  participants: many(quizParticipants),
+}));
+
+export const quizParticipantRelations = relations(quizParticipants, ({ one }) => ({
+  session: one(quizSessions, {
+    fields: [quizParticipants.sessionId],
+    references: [quizSessions.id],
   }),
 }));
