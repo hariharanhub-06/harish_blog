@@ -1,166 +1,218 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare, X, Send, Sparkles, Loader2, MinusCircle, User, Mail, Phone, ArrowRight } from "lucide-react";
+import { X, Send, User, MinusCircle, MessageSquare, Sparkles, Phone, Mail, ArrowRight, Loader2, Calendar, Check, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import knowledgeBase from "../data/knowledge_base.json";
+
+interface Message {
+    role: "user" | "ai";
+    content: string;
+    options?: string[]; // For buttons
+}
+
+interface LeadData {
+    name: string;
+    email: string;
+    mobile: string;
+}
+
+type ChatFlowState =
+    | "INITIAL"
+    | "FREE_CHAT"
+    | "BOOKING_SERVICE_SELECT"
+    | "BOOKING_DATE_SELECT"
+    | "BOOKING_CONFIRM"
+    | "BOOKING_PAYMENT_INFO"
+    | "COMPLETED";
+
+// Booking Options
+const SERVICES = [
+    { id: "training_free", label: "2hr Training (No Cert) - Free", price: 0 },
+    { id: "training_cert", label: "2hr Training (Certificate) - ₹150", price: 150 },
+    { id: "consulting", label: "Consulting (1hr) - ₹1200", price: 1200 },
+    { id: "web_dev", label: "Web Dev - From ₹4500", price: 4500 },
+    { id: "ai_bot", label: "AI Bot Build - From ₹5600", price: 5600 },
+];
 
 export default function AIChat() {
     const [isOpen, setIsOpen] = useState(false);
     const [leadCaptured, setLeadCaptured] = useState(false);
-    const [leadData, setLeadData] = useState({ name: "", email: "", mobile: "" });
+    const [leadData, setLeadData] = useState<LeadData>({ name: "", email: "", mobile: "" });
     const [leadLoading, setLeadLoading] = useState(false);
 
-    // CHAT STATE
-    const [messages, setMessages] = useState<{ role: "user" | "ai", content: string }[]>([
-        { role: "ai", content: "Hey! I'm Thenali, Hari's automated assistant 🤖. I can help you connect with him faster. What brings you here today?" }
+    const [messages, setMessages] = useState<Message[]>([
+        { role: "ai", content: "Hello! I'm Hari Haran's virtual assistant 🤖. I can help you with training sessions, consulting, development projects, and bookings. How can I assist you today?" }
     ]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // FLOW STATE
-    type ChatFlowState = "INITIAL" | "ASK_PROJECT_DETAILS" | "ASK_COLLAB_DETAILS" | "ASK_GENERAL_MSG" | "COMPLETED";
+    // Flow State
     const [flowState, setFlowState] = useState<ChatFlowState>("INITIAL");
+    const [bookingDetails, setBookingDetails] = useState<any>({});
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const chatRef = useRef<HTMLDivElement>(null);
 
+    // --- EFFECT: Load Lead ---
     useEffect(() => {
         const captured = localStorage.getItem("chatLeadCaptured_PROD_V1");
         const storedName = localStorage.getItem("chatUserName");
         if (captured && storedName) {
             setLeadCaptured(true);
             setLeadData(prev => ({ ...prev, name: storedName }));
-            setMessages(prev => [
-                ...prev,
-                { role: "ai", content: `Welcome back, ${storedName}! 👋 Please select an option below.` }
-            ]);
+            setFlowState("FREE_CHAT"); // Go straight to chat if lead known
+            setMessages([{ role: "ai", content: `Welcome back, ${storedName}! 👋 How can I help you today? (Ask me anything or say "Book a session")` }]);
         }
     }, []);
 
+    // --- EFFECT: Auto Scroll ---
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages, loading]);
+
+    // --- SEARCH LOGIC (Simple Keyword Match) ---
+    const findBestMatch = (query: string): string | null => {
+        const tokens = query.toLowerCase().replace(/[^\w\s]/g, "").split(" ");
+        let bestMatch = null;
+        let maxScore = 0;
+
+        knowledgeBase.forEach((item: any) => {
+            let score = 0;
+            const qTokens = item.question.toLowerCase().split(" ");
+
+            // Check keyword overlap
+            tokens.forEach(t => {
+                if (qTokens.includes(t)) score += 1;
+                // Boost for exact phrase match if implemented, simplified here
+            });
+
+            // Normalize score by length
+            const confidence = score / qTokens.length;
+
+            if (confidence > 0.3 && score > maxScore) { // Threshold
+                maxScore = score;
+                bestMatch = item.answer;
+            }
+        });
+
+        return bestMatch;
+    };
+
+    // --- HANDLERS ---
     const handleReset = () => {
         localStorage.removeItem("chatLeadCaptured_PROD_V1");
         localStorage.removeItem("chatUserName");
         setLeadCaptured(false);
         setLeadData({ name: "", email: "", mobile: "" });
-        setMessages([{ role: "ai", content: "Hey! I'm Thenali. Before we begin, I'd love to know who I'm chatting with!" }]);
+        setMessages([{ role: "ai", content: "Hello! I'm Hari's assistant. Before we begin, I'd love to know who I'm chatting with!" }]);
         setFlowState("INITIAL");
     };
-
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-    }, [messages]);
-
-    useEffect(() => {
-        const handleOpen = () => setIsOpen(true);
-        window.addEventListener("open-ai-chat", handleOpen);
-        return () => window.removeEventListener("open-ai-chat", handleOpen);
-    }, []);
-
-    // ... (Click Outside Logic remains same) ...
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (chatRef.current && !chatRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        };
-        if (isOpen) document.addEventListener("mousedown", handleClickOutside);
-        else document.removeEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [isOpen]);
-
 
     const handleLeadSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLeadLoading(true);
+        // Optimistic Capture
+        setLeadCaptured(true);
+        localStorage.setItem("chatLeadCaptured_PROD_V1", "true");
+        localStorage.setItem("chatUserName", leadData.name);
+        setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! What are you looking for today? 👇`, options: ["Book a Session", "Ask a Question", "Just Saying Hi"] }]);
+        setFlowState("FREE_CHAT");
+
         try {
-            const res = await fetch("/api/chat/lead", { // Ensuring we reuse the existing endpoint if it works, or fallback
+            await fetch("/api/chat/lead", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(leadData)
             });
-            // We'll optimistically succeed for UI speed
-            setLeadCaptured(true);
-            localStorage.setItem("chatLeadCaptured_PROD_V1", "true");
-            localStorage.setItem("chatUserName", leadData.name);
-            setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! What are you looking for? 👇` }]);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLeadLoading(false);
-        }
-    };
-
-    const saveMessageToDB = async (msg: string, category: string) => {
-        try {
-            await fetch("/api/chat/offline", { // Reusing our offline saver as the main saver
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: leadData.name || "Guest",
-                    email: leadData.email || "No Email",
-                    mobile: leadData.mobile || "No Mobile",
-                    message: `[${category}] ${msg}`
-                })
-            });
-        } catch (e) {
-            console.warn("Failed to save msg", e);
-        }
+        } catch (e) { console.error(e); }
+        setLeadLoading(false);
     };
 
     const handleOptionClick = (option: string) => {
-        const userMsg = option;
-        setMessages(prev => [...prev, { role: "user", content: userMsg }]);
-
-        setTimeout(() => {
-            if (option === "Hire Hari / Project") {
-                setMessages(prev => [...prev, { role: "ai", content: "Great! Hari loves building new things. 🚀\n\nPlease briefly describe your project or requirement below." }]);
-                setFlowState("ASK_PROJECT_DETAILS");
-            } else if (option === "Collab / Partnership") {
-                setMessages(prev => [...prev, { role: "ai", content: "Awesome! Partnerships are key. 🤝\n\nWhat kind of collaboration do you have in mind?" }]);
-                setFlowState("ASK_COLLAB_DETAILS");
-            } else {
-                setMessages(prev => [...prev, { role: "ai", content: "Sure thing. How can I assist you? You can ask me anything or leave a message for Hari." }]);
-                setFlowState("ASK_GENERAL_MSG");
-            }
-        }, 500);
+        handleSend(null, option);
     };
 
-    const handleSend = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!input.trim() || loading) return;
+    const handleSend = async (e: React.FormEvent | null, textOverride?: string) => {
+        if (e) e.preventDefault();
+        const userMsg = textOverride || input.trim();
+        if (!userMsg) return;
 
-        const userMsg = input.trim();
         setInput("");
         setMessages(prev => [...prev, { role: "user", content: userMsg }]);
         setLoading(true);
 
-        // Simulate "Thinking"
+        // --- CORE BOT LOGIC ---
         setTimeout(async () => {
+            const lowerMsg = userMsg.toLowerCase();
             let reply = "";
-            let category = "General";
+            let nextState = flowState;
+            let options: string[] | undefined;
 
-            if (flowState === "ASK_PROJECT_DETAILS") {
-                reply = "Thanks for sharing! 📝 I've prioritized this and sent it to Hari. He'll review your requirement and get back to you shortly.\n\nAnything else?";
-                category = "Project Inquiry";
-                setFlowState("COMPLETED");
-            } else if (flowState === "ASK_COLLAB_DETAILS") {
-                reply = "Got it! 🤝 I've notified Hari about this partnership opportunity. Expect a response soon!\n\nAnything else?";
-                category = "Partnership";
-                setFlowState("COMPLETED");
-            } else {
-                reply = "Message received! ✅ I've forwarded this to Hari. He typically replies within 24 hours.";
-                category = "General Message";
-                setFlowState("COMPLETED");
+            // 1. GLOBAL INTENT CHECK (Booking)
+            if (lowerMsg.includes("book") || lowerMsg.includes("schedule") || lowerMsg.includes("appointment")) {
+                reply = "Sure! Which service would you like to book with Hari? Please choose from the options below:";
+                options = SERVICES.map(s => s.label);
+                nextState = "BOOKING_SERVICE_SELECT";
+            }
+            // 2. STATE SPECIFIC LOGIC
+            else if (flowState === "BOOKING_SERVICE_SELECT") {
+                const service = SERVICES.find(s => userMsg.includes(s.label) || userMsg.toLowerCase().includes(s.label.toLowerCase().split(" ")[0]));
+                if (service) {
+                    setBookingDetails({ ...bookingDetails, service: service });
+                    reply = `Great! You selected ${service.label}. When would you like to have this session? (e.g., "Monday at 10 AM" or "Tomorrow evening")`;
+                    nextState = "BOOKING_DATE_SELECT";
+                } else {
+                    reply = "I didn't catch that. Please select one of the services below.";
+                    options = SERVICES.map(s => s.label);
+                }
+            }
+            else if (flowState === "BOOKING_DATE_SELECT") {
+                setBookingDetails({ ...bookingDetails, date: userMsg });
+                reply = `Got it. Here's a summary:\n\n📌 Service: ${bookingDetails.service?.label}\n🗓️ Date/Time: ${userMsg}\n👤 Name: ${leadData.name}\n\nShall I confirm this booking?`;
+                options = ["Yes, Confirm", "No, Change Details"];
+                nextState = "BOOKING_CONFIRM";
+            }
+            else if (flowState === "BOOKING_CONFIRM") {
+                if (lowerMsg.includes("yes")) {
+                    const amount = bookingDetails.service?.price;
+                    reply = `Booking Confirmed! ✅\n\nThe total fee is ₹${amount}. You can pay via UPI/GPay. Hari looks forward to seeing you!\n\nAnything else?`;
+                    // Send confirmation to backend (offline route)
+                    await fetch("/api/chat/offline", {
+                        method: "POST",
+                        body: JSON.stringify({ ...leadData, message: `BOOKING CONFIRMED: ${JSON.stringify(bookingDetails)}` })
+                    });
+                    nextState = "FREE_CHAT";
+                    options = ["Start New Chat", "Done"];
+                } else {
+                    reply = "No problem. Let's start over. Which service would you like?";
+                    options = SERVICES.map(s => s.label);
+                    nextState = "BOOKING_SERVICE_SELECT";
+                }
+            }
+            // 3. FREE CHAT / KNOWLEDGE BASE
+            else {
+                // Search in KB
+                const kbMatch = findBestMatch(userMsg);
+                if (kbMatch) {
+                    reply = kbMatch;
+                } else {
+                    // Fallback
+                    reply = "I'm not 100% sure about that, but I've noted your message and forwarded it to Hari directly! he'll reply via email.";
+                    await fetch("/api/chat/offline", {
+                        method: "POST",
+                        body: JSON.stringify({ ...leadData, message: `UNANSWERED: ${userMsg}` })
+                    });
+                }
             }
 
-            // Save to DB
-            await saveMessageToDB(userMsg, category);
-
-            setMessages(prev => [...prev, { role: "ai", content: reply }]);
+            setMessages(prev => [...prev, { role: "ai", content: reply, options }]);
+            setFlowState(nextState);
             setLoading(false);
-        }, 800);
+        }, 600); // Simulate typing delay
     };
 
     return (
@@ -172,10 +224,10 @@ export default function AIChat() {
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="mb-4 w-[320px] md:w-[400px] h-[550px] max-h-[80vh] bg-[#0e0e0e] border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
+                        className="mb-4 w-[320px] md:w-[400px] h-[600px] max-h-[85vh] bg-[#0e0e0e] border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
                     >
                         {/* Header */}
-                        <div className="p-6 bg-gradient-to-r from-orange-600/20 to-transparent border-b border-white/5 flex justify-between items-center">
+                        <div className="p-5 bg-gradient-to-r from-orange-600/20 to-transparent border-b border-white/5 flex justify-between items-center">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center text-white shadow-xl shadow-orange-600/30">
                                     <Sparkles size={20} />
@@ -184,7 +236,7 @@ export default function AIChat() {
                                     <h3 className="text-sm font-black text-white tracking-widest uppercase italic leading-none">Thenali</h3>
                                     <div className="flex items-center gap-1.5 mt-1">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span className="text-[9px] font-black text-emerald-500/80 uppercase tracking-widest">Always Online</span>
+                                        <span className="text-[9px] font-black text-emerald-500/80 uppercase tracking-widest">Online</span>
                                     </div>
                                 </div>
                             </div>
@@ -193,142 +245,78 @@ export default function AIChat() {
                             </button>
                         </div>
 
-                        {/* Messages Box */}
-                        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth">
+                        {/* Messages */}
+                        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth bg-black/20">
                             {messages.map((m, i) => (
-                                <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                                    <div className={`max-w-[90%] p-4 rounded-3xl text-xs font-bold leading-relaxed shadow-sm whitespace-pre-wrap ${m.role === "user"
+                                <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
+                                    <div className={`max-w-[90%] p-4 rounded-3xl text-sm font-medium leading-relaxed shadow-sm whitespace-pre-wrap ${m.role === "user"
                                         ? "bg-orange-600 text-white rounded-tr-none shadow-orange-600/20"
-                                        : "bg-white/5 text-white/90 border border-white/10 rounded-tl-none"
+                                        : "bg-[#1a1a1a] text-white/90 border border-white/5 rounded-tl-none"
                                         }`}>
                                         {m.content}
                                     </div>
+                                    {/* Options Chips */}
+                                    {m.options && (
+                                        <div className="flex flex-wrap gap-2 mt-3 max-w-[90%]">
+                                            {m.options.map((opt, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => handleOptionClick(opt)}
+                                                    className="px-3 py-1.5 bg-white/5 hover:bg-orange-600/20 border border-white/10 hover:border-orange-600/50 rounded-full text-xs text-orange-200 transition-all active:scale-95"
+                                                >
+                                                    {opt}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
 
-                            {loading && (
-                                <div className="flex justify-start">
-                                    <div className="bg-white/5 border border-white/10 p-4 rounded-3xl rounded-tl-none flex gap-2 items-center">
-                                        <div className="flex gap-1">
-                                            <div className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                            <div className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                            <div className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-bounce" />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* MENU OPTIONS (Only show if lead captured and in INITIAL state) */}
-                            {leadCaptured && flowState === "INITIAL" && messages.length > 0 && !loading && (
-                                <div className="flex flex-wrap gap-2 mt-2 ml-1">
-                                    <button onClick={() => handleOptionClick("Hire Hari / Project")} className="px-4 py-2 bg-white/5 hover:bg-orange-600 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-wider text-white transition-all">
-                                        🚀 Hire / Project
-                                    </button>
-                                    <button onClick={() => handleOptionClick("Collab / Partnership")} className="px-4 py-2 bg-white/5 hover:bg-blue-600 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-wider text-white transition-all">
-                                        🤝 Collab
-                                    </button>
-                                    <button onClick={() => handleOptionClick("General Inquiry")} className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-wider text-white transition-all">
-                                        👋 Just Saying Hi
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* LEAD FORM (If not captured) */}
+                            {/* Lead Form */}
                             {!leadCaptured && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="bg-white/5 border border-white/10 rounded-[2rem] p-6 space-y-5"
-                                >
-                                    <div className="space-y-4">
-                                        <div className="relative">
-                                            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600" size={16} />
-                                            <input
-                                                required
-                                                placeholder="Your Name"
-                                                value={leadData.name}
-                                                onChange={e => setLeadData(prev => ({ ...prev, name: e.target.value }))}
-                                                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold"
-                                            />
-                                        </div>
-                                        <div className="relative">
-                                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600" size={16} />
-                                            <input
-                                                required
-                                                type="email"
-                                                placeholder="Email ID"
-                                                value={leadData.email}
-                                                onChange={e => setLeadData(prev => ({ ...prev, email: e.target.value }))}
-                                                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold"
-                                            />
-                                        </div>
-                                        <div className="relative">
-                                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600" size={16} />
-                                            <input
-                                                required
-                                                type="tel"
-                                                placeholder="Mobile No"
-                                                value={leadData.mobile}
-                                                onChange={e => setLeadData(prev => ({ ...prev, mobile: e.target.value }))}
-                                                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold"
-                                            />
-                                        </div>
+                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-[#1a1a1a] border border-white/5 rounded-[2rem] p-6 space-y-4">
+                                    <h4 className="text-white text-sm font-bold mb-2">Let's get started! 👇</h4>
+                                    <div className="space-y-3">
+                                        <input required placeholder="Your Name" value={leadData.name} onChange={e => setLeadData({ ...leadData, name: e.target.value })} className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs text-white focus:border-orange-600 outline-none" />
+                                        <input required type="email" placeholder="Email" value={leadData.email} onChange={e => setLeadData({ ...leadData, email: e.target.value })} className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs text-white focus:border-orange-600 outline-none" />
+                                        <input required type="tel" placeholder="Mobile" value={leadData.mobile} onChange={e => setLeadData({ ...leadData, mobile: e.target.value })} className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs text-white focus:border-orange-600 outline-none" />
                                     </div>
-                                    <button
-                                        onClick={handleLeadSubmit}
-                                        disabled={!leadData.name || !leadData.email || !leadData.mobile || leadLoading}
-                                        className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 shadow-xl shadow-orange-600/20"
-                                    >
-                                        {leadLoading ? <Loader2 className="animate-spin" size={16} /> : <>Start Chatting <ArrowRight size={16} /></>}
+                                    <button onClick={handleLeadSubmit} disabled={!leadData.name || !leadData.email || !leadData.mobile || leadLoading} className="w-full bg-orange-600 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-orange-700 transition-all disabled:opacity-50">
+                                        {leadLoading ? <Loader2 className="animate-spin" size={14} /> : "Start Chatting"}
                                     </button>
                                 </motion.div>
                             )}
 
+                            {loading && (
+                                <div className="flex justify-start">
+                                    <div className="bg-[#1a1a1a] p-3 rounded-2xl rounded-tl-none flex gap-1">
+                                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" />
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Input Area (Only visible when flow allows input) */}
-                        {leadCaptured && (flowState !== "INITIAL" && flowState !== "COMPLETED") && (
-                            <div className="flex flex-col border-t border-white/5">
-                                <form onSubmit={handleSend} className="p-4 bg-white/5 flex gap-3 items-end">
-                                    <textarea
+                        {/* Input */}
+                        {leadCaptured && (
+                            <div className="p-4 border-t border-white/5 bg-[#1a1a1a]/50">
+                                <form onSubmit={(e) => handleSend(e)} className="flex gap-2">
+                                    <input
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                                e.preventDefault();
-                                                handleSend(e as any);
-                                            }
-                                        }}
-                                        rows={1}
                                         placeholder="Type your message..."
-                                        className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold placeholder:text-white/20 resize-none max-h-24 overflow-y-auto"
+                                        className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:border-orange-600 outline-none"
                                     />
-                                    <button
-                                        type="submit"
-                                        disabled={!input.trim() || loading}
-                                        className="bg-orange-600 p-3.5 rounded-xl text-white hover:scale-105 active:scale-95 transition-all shadow-xl shadow-orange-600/30 disabled:opacity-50 h-[44px] w-[44px] flex items-center justify-center shrink-0"
-                                    >
-                                        <Send size={20} />
+                                    <button type="submit" disabled={!input.trim() || loading} className="bg-orange-600 p-3 rounded-xl text-white hover:bg-orange-700 transition-all disabled:opacity-50">
+                                        <Send size={18} />
                                     </button>
                                 </form>
+                                <div className="flex justify-center mt-2">
+                                    <button onClick={handleReset} className="text-[10px] text-white/30 hover:text-white transition-colors uppercase tracking-wider">Reset Chat</button>
+                                </div>
                             </div>
                         )}
-
-                        {/* RESET / Completed State Footer  */}
-                        {leadCaptured && (flowState === "INITIAL" || flowState === "COMPLETED") && (
-                            <div className="p-2 border-t border-white/5 bg-white/5 text-center">
-                                {flowState === "COMPLETED" && (
-                                    <button onClick={() => setFlowState("INITIAL")} className="text-[10px] text-orange-500 font-bold uppercase tracking-wider mb-2 hover:text-orange-400">Start New Topic</button>
-                                )}
-                                <button
-                                    onClick={handleReset}
-                                    className="block w-full text-[8px] font-black uppercase text-white/20 hover:text-orange-600/60 py-2 transition-colors uppercase tracking-widest text-center"
-                                >
-                                    Reset Chat
-                                </button>
-                            </div>
-                        )}
-
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -339,14 +327,12 @@ export default function AIChat() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsOpen(true)}
-                    className="w-16 h-16 bg-white text-black rounded-full shadow-2xl flex items-center justify-center border-4 border-orange-600 group relative"
+                    className="w-14 h-14 md:w-16 md:h-16 bg-white text-black rounded-full shadow-2xl flex items-center justify-center border-4 border-orange-600 group relative"
                 >
-                    <MessageSquare size={28} className="group-hover:rotate-12 transition-transform" />
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center text-[10px] font-black text-white animate-bounce">
-                        1
-                    </div>
+                    <MessageSquare size={24} className="md:w-7 md:h-7 group-hover:scale-110 transition-transform" />
                 </motion.button>
             )}
         </div>
     );
 }
+
