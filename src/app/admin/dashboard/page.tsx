@@ -17,25 +17,20 @@ import {
     Users,
     Youtube,
     GraduationCap,
-    Sparkles,
     HeartHandshake,
-    Gamepad2,
-    Code
+    Gamepad2
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
 import TimelineModule from "@/components/admin/TimelineModule";
 import MessagesModule from "@/components/admin/MessagesModule";
 import OverviewModule from "@/components/admin/OverviewModule";
-import PartnershipsModule from "@/components/admin/PartnershipsModule";
 import TrainingAcademyModule from "@/components/admin/TrainingAcademyModule";
 import YouTubeModule from "@/components/admin/YouTubeModule";
 import QuizModule from "@/components/admin/QuizModule";
 import FeedbackModule from "@/components/admin/FeedbackModule";
-import SkillsModule from "@/components/admin/SkillsModule";
-import ProjectsModule from "@/components/admin/ProjectsModule";
 
-type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "projects" | "skills" | "partnerships";
+type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -95,10 +90,7 @@ export default function AdminDashboard() {
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500" },
         { id: "training-academy", title: "Training Academy", icon: GraduationCap, color: "bg-orange-500" },
         { id: "youtube-manager", title: "YouTube Manager", icon: Youtube, color: "bg-red-600" },
-        { id: "projects", title: "Projects", icon: Code, color: "bg-emerald-500" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500" },
-        { id: "skills", title: "Skills", icon: Sparkles, color: "bg-yellow-500" },
-        { id: "partnerships", title: "Partnerships", icon: HeartHandshake, color: "bg-blue-600" },
         { id: "feedbacks", title: "Testimonials", icon: HeartHandshake, color: "bg-pink-500" },
         { id: "quiz-manager", title: "Quiz Manager", icon: Gamepad2, color: "bg-cyan-500" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
@@ -113,9 +105,6 @@ export default function AdminDashboard() {
             case "timeline": return <TimelineModule />;
             case "feedbacks": return <FeedbackModule />;
             case "quiz-manager": return <QuizModule />;
-            case "projects": return <ProjectsModule />;
-            case "skills": return <SkillsModule />;
-            case "partnerships": return <PartnershipsModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <OverviewModule />

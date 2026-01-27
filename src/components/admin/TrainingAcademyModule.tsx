@@ -5,15 +5,13 @@ import { GraduationCap, BookOpen, Settings2, Sparkles, Layout } from "lucide-rea
 import ProfileModule from "./ProfileModule";
 import PartnershipsModule from "./PartnershipsModule";
 import SkillsModule from "./SkillsModule";
-import ProjectsModule from "./ProjectsModule";
 
-type SubTab = "portfolio" | "colleges" | "skills";
+type SubTab = "colleges" | "skills";
 
 export default function TrainingAcademyModule() {
-    const [activeSubTab, setActiveSubTab] = useState<SubTab>("portfolio");
+    const [activeSubTab, setActiveSubTab] = useState<SubTab>("colleges");
 
     const tabs = [
-        { id: "portfolio", title: "Portfolio Projects", icon: Layout, color: "text-amber-600", bg: "bg-amber-50" },
         { id: "colleges", title: "Academic Partners", icon: GraduationCap, color: "text-blue-500", bg: "bg-blue-50" },
         { id: "skills", title: "Domain Skills", icon: BookOpen, color: "text-purple-500", bg: "bg-purple-50" },
     ];
@@ -59,11 +57,6 @@ export default function TrainingAcademyModule() {
 
             {/* Dynamic Content Area */}
             <div className="relative">
-                {activeSubTab === "portfolio" && (
-                    <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                        <ProjectsModule />
-                    </div>
-                )}
 
                 {activeSubTab === "colleges" && (
                     <div className="animate-in fade-in slide-in-from-right-4 duration-500">
