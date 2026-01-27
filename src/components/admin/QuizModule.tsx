@@ -178,43 +178,78 @@ export default function QuizModule() {
                     saving={saving}
                 />
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {quizzes.map((quiz) => (
-                        <div key={quiz.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group flex flex-col h-full">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${quiz.isPublished ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-400'}`}>
+                        <div key={quiz.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className={`p-4 rounded-2xl ${quiz.timeLimit === 60 ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
                                     <Gamepad2 size={24} />
                                 </div>
                                 <div className="flex gap-2">
-                                    <button onClick={() => handleEdit(quiz)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-primary transition-colors">
-                                        <Edit size={16} />
+                                    <button
+                                        onClick={() => handleStats(quiz)}
+                                        className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors"
+                                        title="View Analytics"
+                                    >
+                                        <BarChart2 size={18} />
                                     </button>
-                                    <button onClick={() => handleDelete(quiz.id)} className="p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors">
-                                        <Trash2 size={16} />
+                                    <button
+                                        onClick={() => handleEdit(quiz)}
+                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                                    >
+                                        <Edit size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(quiz.id)}
+                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                                    >
+                                        <Trash2 size={18} />
                                     </button>
                                 </div>
                             </div>
-                            <h3 className="font-bold text-gray-900 group-hover:text-primary transition-colors">{quiz.title}</h3>
-                            <p className="text-sm text-gray-500 line-clamp-2 mt-1">{quiz.description}</p>
 
-                            <div className="mt-4 flex flex-wrap items-center gap-2 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                                <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md"><Clock size={10} /> {quiz.timeLimit}s</span>
-                                <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md"><Target size={10} /> {quiz.questions?.length || 0} Qs</span>
-                                <span className={`flex items-center gap-1 px-2 py-1 rounded-md border ${quiz.isPublished ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100'}`}>
-                                    {quiz.isPublished ? <Check size={10} /> : <X size={10} />}
-                                    {quiz.isPublished ? 'Published' : 'Draft'}
-                                </span>
+                            <h3 className="font-black text-xl text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem] leading-tight">
+                                {quiz.title}
+                            </h3>
+                            <p className="text-gray-500 text-sm mb-6 line-clamp-2 min-h-[2.5rem] font-medium">
+                                {quiz.description}
+                            </p>
+
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400">
+                                    <Clock size={14} />
+                                    <span>{quiz.timeLimit}s</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400">
+                                    <Target size={14} />
+                                    <span>{quiz.questions?.length || 0} Qs</span>
+                                </div>
                             </div>
 
-                            <button
-                                onClick={() => handleHostLive(quiz.id)}
-                                className="w-full mt-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-100 hover:border-blue-600 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all mt-auto"
-                            >
-                                <Users size={14} /> Host Live
-                            </button>
+                            <div className="flex items-center justify-between">
+                                <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${quiz.isPublished ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                    {quiz.isPublished ? 'Published' : 'Draft'}
+                                </span>
+                                <button
+                                    onClick={() => handleHostLive(quiz)}
+                                    className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
+                                >
+                                    <Users size={14} />
+                                    Host Live
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
+            )}
+
+            {selectedStatsQuiz && (
+                <QuizResultsModal
+                    quizId={selectedStatsQuiz.id}
+                    quizTitle={selectedStatsQuiz.title}
+                    onClose={() => setSelectedStatsQuiz(null)}
+                />
             )}
         </div>
     );
