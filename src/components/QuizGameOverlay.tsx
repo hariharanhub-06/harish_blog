@@ -671,13 +671,136 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                         </motion.div>
                     )}
 
-                    {gameState === "results" && (
-                        <motion.div
-                            key="results"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="flex-1 flex flex-col md:flex-row p-6 md:p-12 gap-12 z-10 items-center justify-center"
-                        >
+                    {/* PODIUM START */}
+                    {isLive && gameState === "results" ? (
+                        <div className="flex-1 flex flex-col items-center justify-center min-h-[600px] w-full relative overflow-hidden">
+                            {/* Spotlights */}
+                            <div className="absolute inset-0 pointer-events-none">
+                                <motion.div
+                                    animate={{
+                                        opacity: [0.2, 0.4, 0.2],
+                                        rotate: [-10, 10, -10]
+                                    }}
+                                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                                    className="absolute -top-20 left-1/4 w-32 h-[800px] bg-gradient-to-b from-primary/30 to-transparent blur-3xl origin-top"
+                                />
+                                <motion.div
+                                    animate={{
+                                        opacity: [0.2, 0.4, 0.2],
+                                        rotate: [10, -10, 10]
+                                    }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    className="absolute -top-20 right-1/4 w-32 h-[800px] bg-gradient-to-b from-blue-500/30 to-transparent blur-3xl origin-top"
+                                />
+                            </div>
+
+                            <div className="text-center mb-12 relative z-10">
+                                <motion.div
+                                    initial={{ y: -50, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    className="inline-block px-6 py-2 bg-primary/10 border border-primary/20 rounded-full mb-4"
+                                >
+                                    <span className="text-xs font-black text-primary uppercase tracking-[0.3em]">Grand Finale</span>
+                                </motion.div>
+                                <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-2">Podium</h2>
+                                <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">Congratulations to the winners!</p>
+                            </div>
+
+                            {/* Podium Platforms */}
+                            <div className="flex items-end justify-center gap-2 md:gap-4 w-full max-w-4xl px-4 mt-20 relative z-10">
+                                {/* 2nd Place */}
+                                {leaderboard[1] && (
+                                    <motion.div
+                                        initial={{ y: 100, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.5, type: "spring" }}
+                                        className="flex flex-col items-center flex-1"
+                                    >
+                                        <div className="mb-4 text-center">
+                                            <p className="font-black text-lg md:text-xl truncate w-24 md:w-32">{leaderboard[1].name || leaderboard[1].userName}</p>
+                                            <p className="text-primary font-black text-sm">{leaderboard[1].score}</p>
+                                        </div>
+                                        <div className="w-full bg-gradient-to-b from-gray-400/20 to-gray-400/5 border-x border-t border-white/10 h-32 md:h-48 rounded-t-3xl flex items-center justify-center relative group">
+                                            <div className="absolute -top-10 w-16 h-16 bg-gray-400/20 rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-sm group-hover:scale-110 transition-transform">
+                                                <Trophy className="text-gray-400" size={32} />
+                                            </div>
+                                            <span className="text-6xl md:text-8xl font-black text-white/10">2</span>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* 1st Place */}
+                                {leaderboard[0] && (
+                                    <motion.div
+                                        initial={{ y: 100, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 1, type: "spring" }}
+                                        className="flex flex-col items-center flex-1 z-20"
+                                    >
+                                        <div className="mb-6 text-center">
+                                            <div className="w-20 h-20 bg-yellow-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_50px_rgba(234,179,8,0.5)] animate-bounce">
+                                                <Trophy className="text-yellow-900" size={40} />
+                                            </div>
+                                            <p className="font-black text-xl md:text-3xl truncate w-32 md:w-48 text-yellow-500 uppercase tracking-tighter">{leaderboard[0].name || leaderboard[0].userName}</p>
+                                            <p className="text-white font-black text-lg md:text-2xl mt-1">{leaderboard[0].score}</p>
+                                        </div>
+                                        <div className="w-full bg-gradient-to-b from-yellow-500/30 to-yellow-500/5 border-x border-t border-yellow-500/30 h-48 md:h-64 rounded-t-[3rem] flex items-center justify-center relative">
+                                            <span className="text-8xl md:text-9xl font-black text-yellow-500/20">1</span>
+                                            {/* Particles/Confetti effect would go here */}
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* 3rd Place */}
+                                {leaderboard[2] && (
+                                    <motion.div
+                                        initial={{ y: 100, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.2, type: "spring" }}
+                                        className="flex flex-col items-center flex-1"
+                                    >
+                                        <div className="mb-4 text-center">
+                                            <p className="font-black text-lg md:text-xl truncate w-24 md:w-32">{leaderboard[2].name || leaderboard[2].userName}</p>
+                                            <p className="text-primary font-black text-sm">{leaderboard[2].score}</p>
+                                        </div>
+                                        <div className="w-full bg-gradient-to-b from-orange-800/20 to-orange-800/5 border-x border-t border-white/10 h-24 md:h-32 rounded-t-3xl flex items-center justify-center relative group">
+                                            <div className="absolute -top-10 w-14 h-14 bg-orange-800/20 rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-sm group-hover:scale-110 transition-transform">
+                                                <Trophy className="text-orange-800" size={28} />
+                                            </div>
+                                            <span className="text-5xl md:text-7xl font-black text-white/10">3</span>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </div>
+
+                            {/* Self Result for players NOT in top 3 */}
+                            {!leaderboard.slice(0, 3).some(p => (p.name || p.userName) === userName) && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 1.5 }}
+                                    className="mt-12 p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm text-center"
+                                >
+                                    <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-1">Your Rank</p>
+                                    <p className="text-2xl font-black text-white">#{currentRank || '?'}</p>
+                                    <p className="text-primary font-black mt-1">{score} Points</p>
+                                </motion.div>
+                            )}
+
+                            {/* Close Button at bottom */}
+                            <motion.button
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 2 }}
+                                onClick={onClose}
+                                className="mt-12 px-12 py-4 bg-white/10 hover:bg-white/20 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all border border-white/10"
+                            >
+                                Leave Session
+                            </motion.button>
+                        </div>
+                    ) : (
+                        /* ORIGINAL RESULTS VIEW (for self-paced or fallback) */
+                        <div className="flex-1 flex flex-col md:flex-row p-6 md:p-12 gap-12 z-10 items-center justify-center">
                             <div className="flex-1 flex flex-col items-center justify-center text-center">
                                 <motion.div
                                     initial={{ y: 20 }}
@@ -739,8 +862,9 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                     )}
                                 </div>
                             </div>
-                        </motion.div>
+                        </div>
                     )}
+                    {/* PODIUM END */}
                 </AnimatePresence>
             </div>
         </motion.div>
