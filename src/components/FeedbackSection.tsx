@@ -81,8 +81,8 @@ export default function FeedbackSection() {
     };
 
     return (
-        <section id="feedback" className="container mx-auto px-6 py-24 scroll-mt-20">
-            <div className="flex flex-col items-center mb-16 text-center">
+        <section id="feedback" className="container mx-auto px-6 py-12 md:py-16 scroll-mt-20">
+            <div className="flex flex-col items-center mb-8 md:mb-12 text-center">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-600 mb-4">Testimonials</span>
                 <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-6">
                     Minds <span className="text-orange-600">Empowered</span>

@@ -22,7 +22,7 @@ export default function AboutHero({ name, about, location, imageUrl, experience 
     ];
 
     return (
-        <div className="grid lg:grid-cols-2 gap-16 items-center py-20">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center py-12 md:py-16">
             {/* Image Side (Left) */}
             <motion.div
                 initial={{ opacity: 0, x: -50 }}

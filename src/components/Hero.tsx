@@ -26,7 +26,7 @@ export default function Hero({ profile, className }: HeroProps) {
     ];
 
     return (
-        <section className={cn("relative min-h-[100vh] lg:min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#0e0e0e] pt-24 md:pt-20", className)}>
+        <section className={cn("relative min-h-[90vh] lg:min-h-[85vh] flex items-center justify-center overflow-hidden bg-[#0e0e0e] pt-16 md:pt-12", className)}>
             {/* Hero Background Image */}
             {profile.heroImageUrl && (
                 <div className="absolute inset-0 z-0">
@@ -95,11 +95,11 @@ export default function Hero({ profile, className }: HeroProps) {
                             className="w-full"
                         >
                             <span className="text-orange-500 font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-xs">Hello, my name is</span>
-                            <h1 className="flex flex-col mt-4 font-black tracking-tighter text-white w-full overflow-visible">
+                            <h1 className="flex flex-col mt-2 font-black tracking-tighter text-white w-full overflow-visible">
                                 <span className="text-[clamp(2rem,10vw,5rem)] leading-[1] whitespace-nowrap block">Hari Haran</span>
-                                <span className="text-[clamp(1.2rem,8.5vw,4.5rem)] leading-[1] text-orange-600 whitespace-nowrap block mt-1.5 md:mt-2">Jeyaramamoorthy</span>
+                                <span className="text-[clamp(1.2rem,8.5vw,4.5rem)] leading-[1] text-orange-600 whitespace-nowrap block mt-1 md:mt-1.5">Jeyaramamoorthy</span>
                             </h1>
-                            <p className="max-w-2xl mx-auto mt-6 md:mt-10 text-[8px] md:text-sm font-bold leading-relaxed tracking-[0.1em] md:tracking-[0.2em] text-gray-400 uppercase lg:mx-0 opacity-80">
+                            <p className="max-w-2xl mx-auto mt-4 md:mt-6 text-[8px] md:text-sm font-bold leading-relaxed tracking-[0.1em] md:tracking-[0.2em] text-gray-400 uppercase lg:mx-0 opacity-80">
                                 {profile.headline?.replace(/ PRO$/i, "") || "Web/App Developer | Business Consultant | Job Placement Expert | Operations & Partnerships Manager | Snack Business Owner | Project Management"}
                             </p>
                         </motion.div>
@@ -133,7 +133,7 @@ export default function Hero({ profile, className }: HeroProps) {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.4 }}
-                            className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 pt-4"
+                            className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 pt-2"
                         >
                             <MagneticButton>
                                 <button

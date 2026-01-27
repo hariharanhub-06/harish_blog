@@ -41,9 +41,9 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
     const studentsStat = trainingStats.find(s => s.icon === "Users") || { value: "5000+", label: "Minds Empowered" };
 
     return (
-        <div className="w-full flex flex-col gap-6 md:gap-12 py-8 md:py-12">
+        <div className="w-full flex flex-col gap-4 md:gap-8 py-6 md:py-10">
             {/* Main Section Header */}
-            <div className="flex flex-col items-center mb-4 md:mb-8 relative overflow-hidden w-full">
+            <div className="flex flex-col items-center mb-2 md:mb-6 relative overflow-hidden w-full">
                 <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-8 md:-mt-12">ACADEMY</h2>
                 <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter text-center relative z-10">
                     Training <span className="text-orange-600">Programs</span>
@@ -53,7 +53,7 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
 
             {/* Stats Section */}
             <div className="container mx-auto px-4 md:px-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
                     <TrainingStat
                         icon={Presentation}
                         value={sessionsStat.value}
@@ -79,7 +79,7 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
             <div className="space-y-4 md:space-y-6">
                 {/* College Logos */}
                 {academicPartners.length > 0 && (
-                    <div className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                    <div className="py-4 md:py-6 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
                         <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                         <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
@@ -105,7 +105,7 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                     </div>
                 )}
 
-                <div className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                <div className="py-4 md:py-6 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
                     <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
