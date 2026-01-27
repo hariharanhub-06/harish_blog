@@ -64,23 +64,26 @@ export default function QuizResultsModal({ quizId, quizTitle, onClose }: QuizRes
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
         >
             <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white rounded-3xl w-full max-w-4xl max-h-[80vh] flex flex-col overflow-hidden shadow-2xl"
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col relative"
             >
+                {/* Close Button */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-colors z-[70]"
+                >
+                    <X size={24} className="text-gray-400" />
+                </button>
                 {/* Header */}
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                     <div>
                         <h2 className="text-xl font-black uppercase tracking-tight text-gray-900">Quiz Analytics</h2>
                         <p className="text-sm font-bold text-gray-400">{quizTitle}</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
-                        <X size={20} className="text-gray-500" />
-                    </button>
                 </div>
 
                 {/* Toolbar */}
@@ -125,9 +128,9 @@ export default function QuizResultsModal({ quizId, quizTitle, onClose }: QuizRes
                                     <tr key={sub.id} className="group hover:bg-gray-50 transition-colors">
                                         <td className="py-4 pl-4">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                                                    index === 1 ? 'bg-gray-200 text-gray-700' :
-                                                        index === 2 ? 'bg-orange-100 text-orange-700' :
-                                                            'bg-white border border-gray-100 text-gray-500'
+                                                index === 1 ? 'bg-gray-200 text-gray-700' :
+                                                    index === 2 ? 'bg-orange-100 text-orange-700' :
+                                                        'bg-white border border-gray-100 text-gray-500'
                                                 }`}>
                                                 {index + 1}
                                             </div>
