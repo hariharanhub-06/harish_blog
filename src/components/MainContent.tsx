@@ -558,36 +558,38 @@ export default function MainContent({
                             </div>
                         </section>
                     )}
+                </section>
+            )}
 
-                    <FeedbackSection />
+            <FeedbackSection />
 
-                    {/* DinoRunnerGame Section */}
-                    <DinoRunnerGame />
+            {/* DinoRunnerGame Section */}
+            <DinoRunnerGame />
 
 
-                    {activeQuiz && (
-                        <QuizGameOverlay
-                            quiz={activeQuiz}
-                            onClose={() => setActiveQuiz(null)}
-                        />
-                    )}
+            {activeQuiz && (
+                <QuizGameOverlay
+                    quiz={activeQuiz}
+                    onClose={() => setActiveQuiz(null)}
+                />
+            )}
 
-                    {isLiveJoin && (
-                        <QuizGameOverlay
-                            quiz={null}
-                            isLive={true}
-                            onClose={() => setIsLiveJoin(false)}
-                        />
-                    )}
+            {isLiveJoin && (
+                <QuizGameOverlay
+                    quiz={null}
+                    isLive={true}
+                    onClose={() => setIsLiveJoin(false)}
+                />
+            )}
 
-                    {selectedItem && (
-                        <DetailModal
-                            isOpen={!!selectedItem}
-                            onClose={() => setSelectedItem(null)}
-                            type={selectedItem.type}
-                            data={selectedItem.data as any}
-                        />
-                    )}
-                </div>
-            );
+            {selectedItem && (
+                <DetailModal
+                    isOpen={!!selectedItem}
+                    onClose={() => setSelectedItem(null)}
+                    type={selectedItem.type}
+                    data={selectedItem.data as any}
+                />
+            )}
+        </div>
+    );
 }
