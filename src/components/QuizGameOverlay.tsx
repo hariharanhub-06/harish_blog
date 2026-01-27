@@ -53,7 +53,8 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
     const [score, setScore] = useState(0);
     const [correctCount, setCorrectCount] = useState(0);
     const [timeLeft, setTimeLeft] = useState(30);
-    const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+    const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
+    const [isSubmitted, setIsSubmitted] = useState(false);
     const [userName, setUserName] = useState("");
     const [pin, setPin] = useState("");
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -122,15 +123,15 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
 
     useEffect(() => {
         let timer: any;
-        if (gameState === "playing" && timeLeft > 0 && !selectedOptionId) {
+        if (gameState === "playing" && timeLeft > 0 && !isSubmitted) {
             timer = setInterval(() => {
                 setTimeLeft(prev => prev - 1);
             }, 1000);
-        } else if (timeLeft === 0 && !selectedOptionId && gameState === "playing") {
-            handleOptionSelect("");
+        } else if (timeLeft === 0 && !isSubmitted && gameState === "playing") {
+            handleSubmit();
         }
         return () => clearInterval(timer);
-    }, [gameState, timeLeft, selectedOptionId]);
+    }, [gameState, timeLeft, isSubmitted]);
 
     const startQuiz = () => {
         if (!userName) return alert("Please enter your name");
@@ -138,14 +139,28 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
         setTimeLeft(quiz?.questions[0]?.timeLimit || quiz?.timeLimit || 30);
     };
 
-    const handleOptionSelect = (optionId: string) => {
-        if (selectedOptionId) return;
+    const handleOptionToggle = (optionId: string) => {
+        if (isSubmitted) return;
+        setSelectedOptionIds(prev =>
+            prev.includes(optionId)
+                ? prev.filter(id => id !== optionId)
+                : [...prev, optionId]
+        );
+    };
 
-        setSelectedOptionId(optionId);
+    const handleSubmit = () => {
+        if (isSubmitted) return;
+        setIsSubmitted(true);
+
         const currentQuestion = quiz?.questions[currentQuestionIndex];
-        const selectedOption = currentQuestion?.options.find(o => o.id === optionId);
+        if (!currentQuestion) return;
 
-        if (selectedOption?.isCorrect) {
+        const correctOptionIds = currentQuestion.options.filter(o => o.isCorrect).map(o => o.id);
+        const isCorrect = correctOptionIds.length > 0 &&
+            selectedOptionIds.length === correctOptionIds.length &&
+            selectedOptionIds.every(id => correctOptionIds.includes(id));
+
+        if (isCorrect) {
             const timeBonus = Math.floor((timeLeft / (currentQuestion?.timeLimit || 30)) * 500);
             setScore(prev => prev + (currentQuestion?.points || 1000) + timeBonus);
             setCorrectCount(prev => prev + 1);
@@ -154,13 +169,14 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
         setTimeout(() => {
             if (currentQuestionIndex < (quiz?.questions.length || 0) - 1) {
                 setCurrentQuestionIndex(prev => prev + 1);
-                setSelectedOptionId(null);
+                setSelectedOptionIds([]);
+                setIsSubmitted(false);
                 setTimeLeft(quiz?.questions[currentQuestionIndex + 1]?.timeLimit || quiz?.timeLimit || 30);
             } else {
                 setGameState("results");
                 submitScore();
             }
-        }, 1500);
+        }, 2000);
     };
 
     return (
@@ -297,38 +313,67 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                     exit={{ opacity: 0, x: -20 }}
                                     className="space-y-12"
                                 >
-                                    <h2 className="text-3xl md:text-5xl font-black tracking-tight text-center leading-tight">
-                                        {quiz.questions[currentQuestionIndex].questionText}
-                                    </h2>
+                                    <div className="flex flex-col items-center">
+                                        <h2 className="text-3xl md:text-5xl font-black tracking-tight text-center leading-tight mb-4">
+                                            {quiz.questions[currentQuestionIndex].questionText}
+                                        </h2>
+                                        {quiz.questions[currentQuestionIndex].options.filter(o => o.isCorrect).length > 1 && (
+                                            <span className="text-primary font-black uppercase tracking-[0.2em] text-[10px] mb-8 animate-pulse italic">
+                                                (Multiple Correct Answers)
+                                            </span>
+                                        )}
+                                    </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                         {quiz.questions[currentQuestionIndex].options.map((option, idx) => {
-                                            const isSelected = selectedOptionId === option.id;
+                                            const isSelected = selectedOptionIds.includes(option.id);
                                             const isCorrect = option.isCorrect;
-                                            const showResult = selectedOptionId !== null;
+                                            const showResult = isSubmitted;
 
                                             let borderClass = "border-white/10 hover:border-primary bg-white/5";
                                             if (showResult) {
                                                 if (isCorrect) borderClass = "border-emerald-500 bg-emerald-500/20";
                                                 else if (isSelected) borderClass = "border-red-500 bg-red-500/20";
                                                 else borderClass = "border-white/5 bg-white/2 opacity-30";
+                                            } else if (isSelected) {
+                                                borderClass = "border-primary bg-primary/10";
                                             }
 
                                             return (
                                                 <button
                                                     key={option.id}
-                                                    onClick={() => handleOptionSelect(option.id)}
+                                                    onClick={() => handleOptionToggle(option.id)}
                                                     disabled={showResult}
-                                                    className={`p-6 md:p-8 rounded-[2rem] border-2 transition-all text-left flex items-center gap-6 group ${borderClass}`}
+                                                    className={`p-6 md:p-8 rounded-[2rem] border-2 transition-all text-left flex items-center gap-6 group relative overflow-hidden ${borderClass}`}
                                                 >
-                                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center font-black text-sm md:text-xl transition-all ${isSelected ? 'bg-white text-primary' : 'bg-white/10'}`}>
+                                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center font-black text-sm md:text-xl transition-all ${isSelected ? 'bg-primary text-white' : 'bg-white/10'}`}>
                                                         {String.fromCharCode(65 + idx)}
                                                     </div>
                                                     <span className="text-base md:text-xl font-bold">{option.optionText}</span>
+                                                    {isSelected && !showResult && (
+                                                        <div className="absolute top-4 right-4 text-primary">
+                                                            <CheckCircle2 size={16} />
+                                                        </div>
+                                                    )}
                                                 </button>
                                             )
                                         })}
                                     </div>
+
+                                    {!isSubmitted && selectedOptionIds.length > 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="flex justify-center pt-8"
+                                        >
+                                            <button
+                                                onClick={handleSubmit}
+                                                className="px-12 py-5 bg-white text-black rounded-3xl font-black uppercase tracking-[0.3em] text-xs hover:scale-110 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)]"
+                                            >
+                                                Submit Answer
+                                            </button>
+                                        </motion.div>
+                                    )}
                                 </motion.div>
                             </div>
                         </motion.div>

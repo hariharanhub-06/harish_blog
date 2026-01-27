@@ -15,10 +15,13 @@ import {
     X,
     Save,
     PlusCircle,
-    ChevronRight,
-    Loader2
+    Loader2,
+    Image as ImageIcon,
+    Upload,
+    FileText
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface Quiz {
     id: string;
@@ -88,7 +91,13 @@ export default function QuizModule() {
 
     const handleSave = async () => {
         if (!currentQuiz?.title) return alert("Title is required");
+        if (!currentQuiz.questions || currentQuiz.questions.length === 0) {
+            return alert("Please add at least one question to the quiz.");
+        }
+
         setSaving(true);
+        console.log("Saving quiz data:", currentQuiz);
+
         try {
             const method = currentQuiz.id ? "PUT" : "POST";
             const url = currentQuiz.id ? `/api/admin/quizzes/${currentQuiz.id}` : "/api/admin/quizzes";
@@ -99,12 +108,18 @@ export default function QuizModule() {
                 body: JSON.stringify(currentQuiz)
             });
 
+            const result = await res.json();
+            console.log("Save result:", result);
+
             if (res.ok) {
                 setIsEditing(false);
                 fetchQuizzes();
+            } else {
+                alert(`Failed to save: ${result.error || 'Unknown error'}`);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Save failed", error);
+            alert(`Save failed: ${error.message}`);
         } finally {
             setSaving(false);
         }
@@ -177,6 +192,52 @@ export default function QuizModule() {
 
 function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
     const [activeSection, setActiveSection] = useState("basic"); // basic, questions
+    const [bulkInput, setBulkInput] = useState("");
+    const [showBulk, setShowBulk] = useState(false);
+
+    const parseBulkQuestions = () => {
+        if (!bulkInput.trim()) return;
+        const questionBlocks = bulkInput.split(/\n\s*\n/).filter(block => block.trim());
+        const newQuestions = questionBlocks.map((block, idx) => {
+            const lines = block.trim().split('\n');
+            const questionText = lines[0].replace(/^\d+[\.\)]\s*/, '').trim();
+            const options: any[] = [];
+            let correctLetters: string[] = [];
+
+            lines.forEach(line => {
+                if (line.match(/^[A-H]\)/i)) {
+                    options.push({
+                        id: Math.random().toString(36).substr(2, 9),
+                        optionText: line.replace(/^[A-H]\)/i, '').trim(),
+                        isCorrect: false
+                    });
+                } else if (line.toLowerCase().startsWith('answer:')) {
+                    const ansText = line.split(':')[1].trim().toUpperCase();
+                    correctLetters = ansText.split(/[\s,]+/).filter(Boolean);
+                }
+            });
+
+            // Map the correct answer letters to the options
+            correctLetters.forEach(letter => {
+                const charToIndex = letter.charCodeAt(0) - 65;
+                if (options[charToIndex]) {
+                    options[charToIndex].isCorrect = true;
+                }
+            });
+
+            return {
+                id: Math.random().toString(36).substr(2, 9),
+                questionText,
+                points: 1000,
+                timeLimit: 30,
+                displayOrder: (quiz.questions?.length || 0) + idx,
+                options
+            };
+        });
+        onChange({ ...quiz, questions: [...(quiz.questions || []), ...newQuestions] });
+        setBulkInput("");
+        setShowBulk(false);
+    };
 
     const addQuestion = () => {
         const newQuestion = {
@@ -231,7 +292,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                     type="text"
                                     value={quiz.title}
                                     onChange={(e) => onChange({ ...quiz, title: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
                                     placeholder="Enter quiz title..."
                                 />
                             </div>
@@ -241,19 +302,51 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                     type="text"
                                     value={quiz.category}
                                     onChange={(e) => onChange({ ...quiz, category: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Description</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Quiz Description</label>
                             <textarea
                                 value={quiz.description}
                                 onChange={(e) => onChange({ ...quiz, description: e.target.value })}
-                                className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all h-32"
+                                className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all h-24"
                                 placeholder="What is this quiz about?"
                             />
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Thumbnail (19:6 Aspect Ratio)</label>
+                            <div className="flex flex-col gap-4">
+                                {quiz.coverImage ? (
+                                    <div className="relative w-full aspect-[19/6] rounded-2xl overflow-hidden border border-gray-100 group">
+                                        <Image src={quiz.coverImage} alt="Thumbnail" fill className="object-cover" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button
+                                                onClick={() => onChange({ ...quiz, coverImage: "" })}
+                                                className="p-3 bg-red-500 text-white rounded-full hover:scale-110 transition-transform"
+                                            >
+                                                <Trash2 size={20} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="flex gap-4">
+                                            <input
+                                                type="text"
+                                                value={quiz.coverImage}
+                                                onChange={(e) => onChange({ ...quiz, coverImage: e.target.value })}
+                                                className="flex-1 bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
+                                                placeholder="Paste cover image URL..."
+                                            />
+                                        </div>
+                                        <p className="text-[10px] uppercase font-black tracking-widest text-gray-400">Optimal: 19:6 Aspect Ratio</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-8">
@@ -273,86 +366,104 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                 <input
                                     type="number"
                                     value={quiz.timeLimit}
-                                    onChange={(e) => onChange({ ...quiz, timeLimit: parseInt(e.target.value) })}
-                                    className="w-20 bg-gray-50 border-0 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                                    onChange={(e) => onChange({ ...quiz, timeLimit: parseInt(e.target.value) || 30 })}
+                                    className="w-20 bg-gray-50 border-0 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
                                 />
                             </div>
                         </div>
                     </div>
                 ) : (
                     <div className="space-y-8">
-                        {quiz.questions?.map((q: any, qIdx: number) => (
-                            <div key={q.id || qIdx} className="bg-gray-50 rounded-2xl p-6 relative border border-gray-100">
-                                <button
-                                    onClick={() => removeQuestion(q.id)}
-                                    className="absolute top-4 right-4 p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-black text-gray-900 uppercase tracking-tight text-lg">Manage Questions</h3>
+                            <button
+                                onClick={() => setShowBulk(!showBulk)}
+                                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold text-xs hover:bg-gray-200 transition-all"
+                            >
+                                <FileText size={14} />
+                                {showBulk ? "Cancel Import" : "Bulk Import Questions"}
+                            </button>
+                        </div>
 
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-black text-xs">{qIdx + 1}</span>
-                                        <input
-                                            type="text"
-                                            value={q.questionText}
-                                            onChange={(e) => updateQuestion(q.id, { questionText: e.target.value })}
-                                            className="flex-1 bg-transparent border-b-2 border-gray-200 focus:border-primary px-0 py-1 text-base font-bold transition-all outline-none"
-                                            placeholder="Enter question text..."
-                                        />
-                                    </div>
+                        {showBulk && (
+                            <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 space-y-4 mb-8">
+                                <div className="flex justify-between items-start">
+                                    <h4 className="font-bold text-primary text-sm uppercase">Bulk Import</h4>
+                                    <button
+                                        onClick={parseBulkQuestions}
+                                        className="px-4 py-2 bg-primary text-white rounded-lg font-bold text-xs"
+                                    >
+                                        Import
+                                    </button>
+                                </div>
+                                <textarea
+                                    value={bulkInput}
+                                    onChange={(e) => setBulkInput(e.target.value)}
+                                    className="w-full h-48 bg-white border border-gray-200 rounded-xl p-4 text-xs font-mono"
+                                    placeholder="1. Question... Answer: A"
+                                />
+                            </div>
+                        )}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                                        {q.options?.map((opt: any, oIdx: number) => (
-                                            <div key={opt.id || oIdx} className={`flex items-center gap-3 p-3 rounded-xl transition-all border ${opt.isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-100'}`}>
-                                                <button
-                                                    onClick={() => {
-                                                        const newOpts = q.options.map((o: any, idx: number) => ({
-                                                            ...o, isCorrect: idx === oIdx
-                                                        }));
-                                                        updateQuestion(q.id, { options: newOpts });
-                                                    }}
-                                                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${opt.isCorrect ? 'bg-emerald-500 text-white' : 'border-2 border-gray-200'}`}
-                                                >
-                                                    {opt.isCorrect && <Check size={14} />}
-                                                </button>
-                                                <input
-                                                    type="text"
-                                                    value={opt.optionText}
-                                                    onChange={(e) => {
-                                                        const newOpts = q.options.map((o: any, idx: number) =>
-                                                            idx === oIdx ? { ...o, optionText: e.target.value } : o
-                                                        );
-                                                        updateQuestion(q.id, { options: newOpts });
-                                                    }}
-                                                    className="flex-1 bg-transparent text-sm font-bold outline-none"
-                                                    placeholder={`Option ${oIdx + 1}`}
-                                                />
-                                            </div>
-                                        ))}
-                                        {q.options?.length < 4 && (
-                                            <button
-                                                onClick={() => {
-                                                    const newOpts = [...q.options, { id: Math.random().toString(), optionText: "", isCorrect: false }];
-                                                    updateQuestion(q.id, { options: newOpts });
-                                                }}
-                                                className="flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 hover:text-primary hover:border-primary/20 transition-all font-bold text-xs"
-                                            >
-                                                <PlusCircle size={14} /> Add Option
-                                            </button>
-                                        )}
+                        <div className="space-y-12">
+                            {quiz.questions?.map((q: any, qIdx: number) => (
+                                <div key={q.id || qIdx} className="bg-gray-50 rounded-2xl p-6 relative border border-gray-100">
+                                    <button
+                                        onClick={() => removeQuestion(q.id)}
+                                        className="absolute top-4 right-4 p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-3">
+                                            <span className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-black text-xs shrink-0">{qIdx + 1}</span>
+                                            <input
+                                                type="text"
+                                                value={q.questionText}
+                                                onChange={(e) => updateQuestion(q.id, { questionText: e.target.value })}
+                                                className="flex-1 bg-transparent border-b-2 border-gray-200 focus:border-primary px-0 py-1 text-base font-bold outline-none"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {q.options?.map((opt: any, oIdx: number) => (
+                                                <div key={opt.id || oIdx} className={`flex items-center gap-3 p-3 rounded-xl border ${opt.isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-100'}`}>
+                                                    <button
+                                                        onClick={() => {
+                                                            const newOpts = q.options.map((o: any, idx: number) =>
+                                                                idx === oIdx ? { ...o, isCorrect: !o.isCorrect } : o
+                                                            );
+                                                            updateQuestion(q.id, { options: newOpts });
+                                                        }}
+                                                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${opt.isCorrect ? 'bg-emerald-500 text-white' : 'border-2 border-gray-200'}`}
+                                                    >
+                                                        {opt.isCorrect && <Check size={14} />}
+                                                    </button>
+                                                    <input
+                                                        type="text"
+                                                        value={opt.optionText}
+                                                        onChange={(e) => {
+                                                            const newOpts = q.options.map((o: any, idx: number) =>
+                                                                idx === oIdx ? { ...o, optionText: e.target.value } : o
+                                                            );
+                                                            updateQuestion(q.id, { options: newOpts });
+                                                        }}
+                                                        className="flex-1 bg-transparent text-sm font-bold outline-none"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-
-                        <button
-                            onClick={addQuestion}
-                            className="w-full py-8 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-primary hover:border-primary/20 hover:bg-primary/5 transition-all group"
-                        >
-                            <PlusCircle size={32} className="group-hover:scale-110 transition-transform" />
-                            <span className="font-bold text-sm tracking-tight">Add Question</span>
-                        </button>
+                            ))}
+                            <button
+                                onClick={addQuestion}
+                                className="w-full py-8 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-primary hover:border-primary/20 hover:bg-primary/5 transition-all group"
+                            >
+                                <PlusCircle size={32} />
+                                <span className="font-bold text-sm">Add Question</span>
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
@@ -360,7 +471,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
             <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
                 <button
                     onClick={onCancel}
-                    className="px-6 py-2.5 rounded-xl font-bold text-sm text-gray-500 hover:bg-gray-100 transition-all"
+                    className="px-6 py-2.5 rounded-xl font-bold text-sm text-gray-500 hover:bg-gray-100 transition-all font-bold"
                 >
                     Cancel
                 </button>

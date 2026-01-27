@@ -1,0 +1,3 @@
+All Quiz Columns: updated_at, is_published, time_limit, play_count, published_at, created_at, title, description, category, cover_image, id
+SUCCESS: 'cover_image' column EXISTS.
+Tables in DB: blog_posts, profiles, achievements, skills, contact_submissions, gallery, projects, experience, education, volunteering, visitor_analytics, snack_orders, snack_products, affiliate_transactions, vendor_payouts, partnerships, order_shipments, payout_requests, affiliate_config, vendors, affiliates, affiliate_products, coupons, admin_push_tokens, abandoned_carts, snack_reviews, youtube_videos, quiz_options, ai_assistant_config, feedbacks, quiz_questions, quiz_submissions, quizzes
