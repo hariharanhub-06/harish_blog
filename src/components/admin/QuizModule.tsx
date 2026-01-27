@@ -28,6 +28,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { uploadToImageKit } from "@/lib/imagekit-upload"; // Import ImageKit helper
 import QuizResultsModal from "./QuizResultsModal";
+import ImageCropper from "./ImageCropper";
 
 interface Quiz {
     id: string;
@@ -307,13 +308,25 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
     const [bulkInput, setBulkInput] = useState("");
     const [showBulk, setShowBulk] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [imageToCrop, setImageToCrop] = useState<string | null>(null);
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        const reader = new FileReader();
+        reader.onload = () => {
+            setImageToCrop(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleCropComplete = async (croppedBlob: Blob) => {
+        setImageToCrop(null);
         setUploading(true);
         try {
+            // Create a File object from the Blob
+            const file = new File([croppedBlob], "thumbnail.jpg", { type: "image/jpeg" });
             const url = await uploadToImageKit(file, "quizzes");
             onChange({ ...quiz, coverImage: url });
         } catch (error) {
@@ -412,6 +425,13 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
             </div>
 
             <div className="p-6">
+                {imageToCrop && (
+                    <ImageCropper
+                        image={imageToCrop}
+                        onCropComplete={handleCropComplete}
+                        onCancel={() => setImageToCrop(null)}
+                    />
+                )}
                 {activeSection === "basic" ? (
                     <div className="space-y-6 max-w-2xl">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
