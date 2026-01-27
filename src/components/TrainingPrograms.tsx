@@ -132,7 +132,7 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
 
                     <InfiniteCarousel
                         items={skills.map((skill) => (
-                            <div key={skill.id} className="flex items-center gap-3 md:gap-4 px-3 md:px-6 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[45vw] md:w-[16vw] h-full min-h-[70px]">
+                            <div key={skill.id} className="flex items-center gap-3 md:gap-4 px-3 md:px-6 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[280px] md:w-[320px] h-full min-h-[70px]">
                                 <span className="text-lg md:text-2xl w-8 h-8 md:w-10 md:h-10 flex items-center justify-center overflow-hidden shrink-0">
                                     {skill.icon && skill.icon.startsWith('http') ? (
                                         <Image src={skill.icon} alt={skill.name} fill className="object-contain" />
