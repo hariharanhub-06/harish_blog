@@ -400,7 +400,8 @@ function generateResponse(message: string, state: UserState): Message {
 
     // CASUAL/MOOD
     if (intent === "CASUAL" || /^(hi|hello|hey|casual)$/i.test(lower)) {
-        if (stage !== "CASUAL_MOOD") {
+        const isCasualStage = stage === "CASUAL_MOOD" || stage === "CASUAL_CHAT";
+        if (!isCasualStage) {
             return {
                 role: "bot",
                 content: "Haha 😄 nice to relax a bit!\n\nTell me 😉\nRight now your mood is more like:",
