@@ -752,10 +752,16 @@ export default function FinanceModule() {
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Initial Amount (₹)</label>
                                     <input
-                                        type="number"
+                                        type="text"
+                                        inputMode="decimal"
                                         required
                                         value={debtForm.initialAmount}
-                                        onChange={(e) => setDebtForm({ ...debtForm, initialAmount: e.target.value })}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                setDebtForm({ ...debtForm, initialAmount: val });
+                                            }
+                                        }}
                                         placeholder="0.00"
                                         className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
                                     />
