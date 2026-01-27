@@ -28,10 +28,9 @@ import OverviewModule from "@/components/admin/OverviewModule";
 import PartnershipsModule from "@/components/admin/PartnershipsModule";
 import TrainingAcademyModule from "@/components/admin/TrainingAcademyModule";
 import YouTubeModule from "@/components/admin/YouTubeModule";
-import AIAssistantModule from "@/components/admin/AIAssistantModule";
 import FeedbackModule from "@/components/admin/FeedbackModule";
 
-type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "ai-assistant" | "feedbacks";
+type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "feedbacks";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -43,7 +42,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "youtube-manager", "training-academy", "timeline", "ai-assistant", "feedbacks"];
+        const validTabs = ["overview", "profile", "messages", "youtube-manager", "training-academy", "timeline", "feedbacks"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -92,7 +91,6 @@ export default function AdminDashboard() {
         { id: "training-academy", title: "Training Academy", icon: GraduationCap, color: "bg-orange-500" },
         { id: "youtube-manager", title: "YouTube Manager", icon: Youtube, color: "bg-red-600" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500" },
-        { id: "ai-assistant", title: "AI Assistant", icon: Sparkles, color: "bg-orange-600" },
         { id: "feedbacks", title: "Testimonials", icon: HeartHandshake, color: "bg-pink-500" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
     ];
@@ -103,7 +101,6 @@ export default function AdminDashboard() {
             case "youtube-manager": return <YouTubeModule />;
             case "messages": return <MessagesModule />;
             case "training-academy": return <TrainingAcademyModule />;
-            case "ai-assistant": return <AIAssistantModule />;
             case "timeline": return <TimelineModule />;
             case "feedbacks": return <FeedbackModule />;
             default: return (
