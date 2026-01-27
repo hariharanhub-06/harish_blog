@@ -76,6 +76,11 @@ export default function FinanceModule() {
     const [dateRange, setDateRange] = useState("This Month");
     const [selectedCategory, setSelectedCategory] = useState("All");
 
+    // Debt Modal States
+    const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
+    const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
+    const [debtForm, setDebtForm] = useState({ name: "", initialAmount: "", notes: "" });
+
     // Fetch initial data
     useEffect(() => {
         fetchData();
@@ -190,6 +195,51 @@ export default function FinanceModule() {
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleSaveDebt = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const url = "/api/admin/finance/debts";
+            const method = editingDebt ? "PUT" : "POST";
+            const body = editingDebt
+                ? { ...editingDebt, ...debtForm, initialAmount: parseFloat(debtForm.initialAmount) }
+                : { ...debtForm, initialAmount: parseFloat(debtForm.initialAmount) };
+
+            const res = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                setIsDebtModalOpen(false);
+                setEditingDebt(null);
+                setDebtForm({ name: "", initialAmount: "", notes: "" });
+                fetchData();
+            }
+        } catch (error) {
+            console.error("Failed to save debt", error);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const openAddDebt = () => {
+        setEditingDebt(null);
+        setDebtForm({ name: "", initialAmount: "", notes: "" });
+        setIsDebtModalOpen(true);
+    };
+
+    const openEditDebt = (debt: Debt) => {
+        setEditingDebt(debt);
+        setDebtForm({
+            name: debt.name,
+            initialAmount: debt.initialAmount.toString(),
+            notes: debt.notes
+        });
+        setIsDebtModalOpen(true);
     };
 
     if (loading && !stats) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary" /></div>;
@@ -369,19 +419,7 @@ export default function FinanceModule() {
                                     <p className="text-sm font-bold text-gray-400 mt-2">Manage your creditors and payment structures.</p>
                                 </div>
                                 <button
-                                    onClick={async () => {
-                                        const name = prompt("Creditor Name:");
-                                        const amount = prompt("Initial Amount:");
-                                        const notes = prompt("Payment Notes:");
-                                        if (name && amount) {
-                                            await fetch("/api/admin/finance/debts", {
-                                                method: "POST",
-                                                headers: { "Content-Type": "application/json" },
-                                                body: JSON.stringify({ name, initialAmount: amount, notes })
-                                            });
-                                            fetchData();
-                                        }
-                                    }}
+                                    onClick={openAddDebt}
                                     className="px-6 py-3 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 transition-all"
                                 >
                                     <Plus size={16} />
@@ -397,6 +435,12 @@ export default function FinanceModule() {
                                                 <CreditCard className="text-primary" size={24} />
                                             </div>
                                             <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => openEditDebt(debt)}
+                                                    className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-primary transition-all"
+                                                >
+                                                    <ArrowRight size={16} />
+                                                </button>
                                                 <button
                                                     onClick={async () => {
                                                         if (confirm(`Delete debt ${debt.name}?`)) {
@@ -605,6 +649,95 @@ export default function FinanceModule() {
                     </div>
                 )}
             </main>
+
+            {/* Debt Management Modal */}
+            <AnimatePresence>
+                {isDebtModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-12">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsDebtModalOpen(false)}
+                            className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center mb-8">
+                                <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                                    <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                        <CreditCard size={24} />
+                                    </div>
+                                    {editingDebt ? "Edit Debt Profile" : "New Debt Profile"}
+                                </h3>
+                                <button
+                                    onClick={() => setIsDebtModalOpen(false)}
+                                    className="p-3 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-2xl transition-all"
+                                >
+                                    <Plus className="rotate-45" size={20} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleSaveDebt} className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Creditor Name</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={debtForm.name}
+                                        onChange={(e) => setDebtForm({ ...debtForm, name: e.target.value })}
+                                        placeholder="e.g. Bank Loan, Friend X"
+                                        className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Initial Amount (₹)</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        value={debtForm.initialAmount}
+                                        onChange={(e) => setDebtForm({ ...debtForm, initialAmount: e.target.value })}
+                                        placeholder="0.00"
+                                        className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Payment Notes / Structure</label>
+                                    <textarea
+                                        value={debtForm.notes}
+                                        onChange={(e) => setDebtForm({ ...debtForm, notes: e.target.value })}
+                                        placeholder="e.g. 5% Interest, Monthly EMI of 2000"
+                                        className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all h-24 resize-none"
+                                    />
+                                </div>
+
+                                <div className="pt-4 flex gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsDebtModalOpen(false)}
+                                        className="flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={saving}
+                                        className="flex-[2] py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                                        {editingDebt ? "Update Profile" : "Create Profile"}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
