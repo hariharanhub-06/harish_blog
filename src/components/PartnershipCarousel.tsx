@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import imageKitLoader from "@/lib/imagekitLoader";
 
@@ -30,6 +31,28 @@ export default function PartnershipCarousel() {
             .catch((err) => console.error("Failed to load partnerships:", err));
     }, []);
 
+    // Function to handle seamless loop reset
+    const handleScroll = useCallback(() => {
+        if (!containerRef.current || isDragging) return;
+
+        const { scrollLeft, scrollWidth } = containerRef.current;
+        const oneThird = scrollWidth / 3;
+
+        if (scrollLeft <= 0) {
+            containerRef.current.scrollLeft = oneThird;
+        } else if (scrollLeft >= oneThird * 2) {
+            containerRef.current.scrollLeft = oneThird;
+        }
+    }, [isDragging]);
+
+    // Initial positioning to the middle set
+    useEffect(() => {
+        if (containerRef.current && partnerships.length > 0) {
+            const { scrollWidth } = containerRef.current;
+            containerRef.current.scrollLeft = scrollWidth / 3;
+        }
+    }, [partnerships.length]);
+
     const handleMouseDown = (e: React.MouseEvent) => {
         if (!containerRef.current) return;
         setIsDragging(true);
@@ -41,9 +64,25 @@ export default function PartnershipCarousel() {
     const handleMouseMove = (e: React.MouseEvent) => {
         if (!isDragging || !containerRef.current) return;
         e.preventDefault();
+        const { scrollWidth } = containerRef.current;
+        const oneThird = scrollWidth / 3;
         const x = e.pageX - containerRef.current.offsetLeft;
         const walk = (x - startX) * 2;
-        containerRef.current.scrollLeft = scrollLeft - walk;
+        const newScrollLeft = scrollLeft - walk;
+
+        if (newScrollLeft <= 0) {
+            const wrappedScroll = oneThird + newScrollLeft;
+            containerRef.current.scrollLeft = wrappedScroll;
+            setScrollLeft(wrappedScroll);
+            setStartX(e.pageX - containerRef.current.offsetLeft);
+        } else if (newScrollLeft >= oneThird * 2) {
+            const wrappedScroll = newScrollLeft - oneThird;
+            containerRef.current.scrollLeft = wrappedScroll;
+            setScrollLeft(wrappedScroll);
+            setStartX(e.pageX - containerRef.current.offsetLeft);
+        } else {
+            containerRef.current.scrollLeft = newScrollLeft;
+        }
     };
 
     const handleMouseUp = () => {
@@ -62,8 +101,8 @@ export default function PartnershipCarousel() {
 
     // For a seamless infinite scroll, we need enough items to fill the width.
     // We'll duplicate the list multiple times if it's very short.
-    const displayPartners = partnerships.length > 0
-        ? (partnerships.length < 6 ? [...partnerships, ...partnerships, ...partnerships, ...partnerships] : [...partnerships, ...partnerships])
+    const basePartners = partnerships.length > 0
+        ? (partnerships.length < 6 ? [...partnerships, ...partnerships] : partnerships)
         : [];
 
     return (
@@ -80,6 +119,7 @@ export default function PartnershipCarousel() {
                 className={`relative group flex overflow-x-auto scrollbar-hide ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={handleMouseLeave}
+                onScroll={handleScroll}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -87,69 +127,40 @@ export default function PartnershipCarousel() {
                     scrollBehavior: isDragging ? 'auto' : 'smooth'
                 }}
             >
-                <div
-                    className="flex whitespace-nowrap"
-                    style={{
-                        animation: `scroll 50s linear infinite`,
-                        animationPlayState: isPaused ? 'paused' : 'running'
-                    }}
-                >
-                    {displayPartners.map((partner, idx) => (
-                        <div
-                            key={`${partner.id}-${idx}`}
-                            className="flex-shrink-0 w-[240px] md:w-[300px] mx-3"
-                        >
-                            <div className="bg-white rounded-[1.5rem] p-6 md:p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 group/card">
-                                <div className="relative h-20 md:h-24 w-full flex items-center justify-center">
-                                    <Image
-                                        loader={imageKitLoader}
-                                        src={partner.logo}
-                                        alt={partner.name}
-                                        fill
-                                        className="object-contain group-hover/card:scale-110 transition-transform duration-700"
-                                    />
-                                </div>
-                                <div className="mt-6 text-center italic">
-                                    <h3 className="text-base font-black text-gray-900 uppercase tracking-tight">{partner.name}</h3>
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-primary opacity-60 mt-1">{partner.partnerType}</p>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Second track for seamlessness */}
-                <div
-                    className="flex whitespace-nowrap"
-                    aria-hidden="true"
-                    style={{
-                        animation: `scroll 50s linear infinite`,
-                        animationPlayState: isPaused ? 'paused' : 'running'
-                    }}
-                >
-                    {displayPartners.map((partner, idx) => (
-                        <div
-                            key={`dup-${partner.id}-${idx}`}
-                            className="flex-shrink-0 w-[240px] md:w-[300px] mx-3"
-                        >
-                            <div className="bg-white rounded-[1.5rem] p-6 md:p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 group/card">
-                                <div className="relative h-20 md:h-24 w-full flex items-center justify-center">
-                                    <Image
-                                        loader={imageKitLoader}
-                                        src={partner.logo}
-                                        alt={partner.name}
-                                        fill
-                                        className="object-contain group-hover/card:scale-110 transition-transform duration-700"
-                                    />
-                                </div>
-                                <div className="mt-6 text-center italic">
-                                    <h3 className="text-base font-black text-gray-900 uppercase tracking-tight">{partner.name}</h3>
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-primary opacity-60 mt-1">{partner.partnerType}</p>
+                {/* Render three tracks for infinite manual dragging */}
+                {[1, 2, 3].map((setIdx) => (
+                    <div
+                        key={`set-${setIdx}`}
+                        className="flex whitespace-nowrap"
+                        style={{
+                            animation: `scroll 50s linear infinite`,
+                            animationPlayState: isPaused ? 'paused' : 'running'
+                        }}
+                    >
+                        {basePartners.map((partner, idx) => (
+                            <div
+                                key={`${setIdx}-${partner.id}-${idx}`}
+                                className="flex-shrink-0 w-[240px] md:w-[300px] mx-3"
+                            >
+                                <div className="bg-white rounded-[1.5rem] p-6 md:p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 group/card">
+                                    <div className="relative h-20 md:h-24 w-full flex items-center justify-center">
+                                        <Image
+                                            loader={imageKitLoader}
+                                            src={partner.logo}
+                                            alt={partner.name}
+                                            fill
+                                            className="object-contain group-hover/card:scale-110 transition-transform duration-700"
+                                        />
+                                    </div>
+                                    <div className="mt-6 text-center italic">
+                                        <h3 className="text-base font-black text-gray-900 uppercase tracking-tight">{partner.name}</h3>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-primary opacity-60 mt-1">{partner.partnerType}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ))}
             </div>
 
             <style jsx>{`

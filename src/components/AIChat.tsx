@@ -23,6 +23,13 @@ export default function ContactForm() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, setError] = useState("");
 
+    // Listen for global open event
+    useEffect(() => {
+        const handleOpen = () => setIsOpen(true);
+        window.addEventListener("open-ai-chat", handleOpen);
+        return () => window.removeEventListener("open-ai-chat", handleOpen);
+    }, []);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData(prev => ({
             ...prev,
