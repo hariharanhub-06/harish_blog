@@ -1,5 +1,5 @@
 import { pgTable, text, integer, real, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 
 export const profiles = pgTable("profiles", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -416,3 +416,65 @@ export const feedbacks = pgTable("feedbacks", {
   status: text("status").notNull().default("Fresh"), // Fresh (Pending), Approved
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const quizzes = pgTable("quizzes", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category"),
+  coverImage: text("cover_image"),
+  isPublished: boolean("is_published").default(false),
+  timeLimit: integer("time_limit").default(30), // default seconds per question
+  playCount: integer("play_count").default(0),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const quizQuestions = pgTable("quiz_questions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  quizId: text("quiz_id").notNull(),
+  questionText: text("question_text").notNull(),
+  imageUrl: text("image_url"),
+  timeLimit: integer("time_limit"), // specific timer for this question
+  points: integer("points").default(1000),
+  displayOrder: integer("order").default(0),
+});
+
+export const quizOptions = pgTable("quiz_options", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  questionId: text("question_id").notNull(),
+  optionText: text("option_text").notNull(),
+  isCorrect: boolean("is_correct").default(false),
+});
+
+export const quizSubmissions = pgTable("quiz_submissions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  quizId: text("quiz_id").notNull(),
+  userName: text("user_name").notNull(),
+  score: integer("score").default(0),
+  correctAnswers: integer("correct_answers").default(0),
+  totalQuestions: integer("total_questions").notNull(),
+  attempts: integer("attempts").default(1),
+  timeTaken: integer("time_taken"),
+  completedAt: timestamp("completed_at").defaultNow(),
+});
+
+export const quizRelations = relations(quizzes, ({ many }) => ({
+  questions: many(quizQuestions),
+}));
+
+export const quizQuestionRelations = relations(quizQuestions, ({ one, many }) => ({
+  quiz: one(quizzes, {
+    fields: [quizQuestions.quizId],
+    references: [quizzes.id],
+  }),
+  options: many(quizOptions),
+}));
+
+export const quizOptionRelations = relations(quizOptions, ({ one }) => ({
+  question: one(quizQuestions, {
+    fields: [quizOptions.questionId],
+    references: [quizQuestions.id],
+  }),
+}));

@@ -34,6 +34,18 @@ export async function GET() {
             orderBy: (s, { asc, desc }) => [desc(s.proficiency), asc(s.displayOrder)],
         });
 
+        const allQuizzes = await db.query.quizzes.findMany({
+            where: (q, { eq }) => eq(q.isPublished, true),
+            with: {
+                questions: {
+                    with: {
+                        options: true
+                    }
+                }
+            },
+            orderBy: (q, { desc }) => [desc(q.createdAt)]
+        });
+
         return NextResponse.json({
             profile: profileData,
             projects: allProjects,
@@ -42,7 +54,8 @@ export async function GET() {
             educations,
             volunteerings,
             partnerships: allPartnerships,
-            skills: allSkills
+            skills: allSkills,
+            quizzes: allQuizzes
         });
     } catch (error) {
         console.error("Error fetching home data:", error);
