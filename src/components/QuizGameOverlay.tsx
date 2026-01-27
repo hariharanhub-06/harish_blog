@@ -344,12 +344,12 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] bg-black flex flex-col font-poppins text-white overflow-y-auto"
         >
-            <div className="absolute top-4 right-4 md:top-6 md:right-6 z-[110]">
+            <div className="absolute top-6 left-6 md:left-auto md:right-6 z-[110]">
                 <button
                     onClick={onClose}
-                    className="p-2 md:p-3 bg-white/5 hover:bg-white/10 rounded-xl md:rounded-2xl transition-all border border-white/10 group"
+                    className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl transition-all border border-white/10 group"
                 >
-                    <X size={20} className="md:w-6 md:h-6 group-hover:rotate-90 transition-transform" />
+                    <X size={24} className="group-hover:rotate-90 transition-transform" />
                 </button>
             </div>
 
@@ -379,7 +379,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                             placeholder="ENTER GAME PIN"
                                             value={pin}
                                             onChange={(e) => setPin(e.target.value)}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-2 py-4 text-center font-black text-lg md:text-4xl tracking-tighter md:tracking-[0.3em] focus:ring-2 focus:ring-blue-500 outline-none transition-all uppercase placeholder:text-[10px] md:placeholder:text-xl"
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 text-center font-black text-xl md:text-4xl tracking-normal md:tracking-[0.3em] focus:ring-2 focus:ring-blue-500 outline-none transition-all uppercase placeholder:text-xs md:placeholder:text-xl"
                                         />
                                         <input
                                             type="text"
