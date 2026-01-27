@@ -10,10 +10,10 @@ import { cn } from "@/lib/utils";
 
 interface HeroProps {
     profile: {
-        name: string;
-        headline: string | null;
-        avatarUrl: string | null;
-        heroImageUrl: string | null;
+        name: any;
+        headline: any;
+        avatarUrl: any;
+        heroImageUrl: any;
     };
     className?: string;
 }
@@ -49,7 +49,7 @@ export default function Hero({ profile, className }: HeroProps) {
                     transition={{ duration: 2, ease: "easeOut" }}
                     className="text-[20vw] md:text-[12vw] font-black text-outline uppercase leading-none whitespace-nowrap"
                 >
-                    {profile.name.split(" ").slice(0, 1).join(" ")}
+                    {(profile.name || "").split(" ").slice(0, 1).join(" ")}
                 </motion.h2>
             </div>
 
@@ -78,7 +78,7 @@ export default function Hero({ profile, className }: HeroProps) {
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                                            <span className="text-white text-6xl font-black">{profile.name.charAt(0)}</span>
+                                            <span className="text-white text-6xl font-black">{(profile.name || "").charAt(0)}</span>
                                         </div>
                                     )}
                                 </div>

@@ -88,21 +88,21 @@ export default async function Home() {
             headline: profile.headline,
             avatarUrl: profile.avatarUrl,
             heroImageUrl: profile.heroImageUrl
-          }}
+          } as any}
           className=""
         />
       </section>
 
       <MainContent
-        profile={profile}
-        stats={profile.stats}
-        projects={dbProjects}
-        videos={videos}
-        experiences={experiences}
-        educations={educations}
-        volunteerings={volunteerings}
-        skills={dbSkills}
-        partnerships={partnerships}
+        profile={profile as any}
+        stats={profile.stats as any}
+        projects={dbProjects as any}
+        videos={videos as any}
+        experiences={experiences as any}
+        educations={educations as any}
+        volunteerings={volunteerings as any}
+        skills={dbSkills as any}
+        partnerships={partnerships as any}
       />
     </div>
   );

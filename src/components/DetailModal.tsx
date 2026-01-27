@@ -133,46 +133,51 @@ export default function DetailModal({ isOpen, onClose, data, type }: DetailModal
 
                         <div className="overflow-y-auto custom-scrollbar">
                             {type === "project" ? (
-                                <div className="flex flex-col">
-                                    <div className="relative h-64 md:h-96 w-full">
-                                        {data.thumbnail ? (
-                                            <Image src={data.thumbnail} alt={data.title} fill className="object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-primary/20 text-8xl font-black">
-                                                {data.title.charAt(0)}
+                                (() => {
+                                    const projectData = data as Project;
+                                    return (
+                                        <div className="flex flex-col">
+                                            <div className="relative h-64 md:h-96 w-full">
+                                                {projectData.thumbnail ? (
+                                                    <Image src={projectData.thumbnail} alt={projectData.title} fill className="object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-primary/20 text-8xl font-black">
+                                                        {projectData.title.charAt(0)}
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                                <div className="absolute bottom-8 left-8 right-8">
+                                                    <div className="flex flex-wrap gap-2 mb-4">
+                                                        {projectData.technologies?.map((tech: string) => (
+                                                            <span key={tech} className="text-[10px] font-black uppercase tracking-widest bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-full border border-white/20">{tech}</span>
+                                                        ))}
+                                                    </div>
+                                                    <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">{projectData.title}</h2>
+                                                </div>
                                             </div>
-                                        )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                        <div className="absolute bottom-8 left-8 right-8">
-                                            <div className="flex flex-wrap gap-2 mb-4">
-                                                {data.technologies?.map((tech: string) => (
-                                                    <span key={tech} className="text-[10px] font-black uppercase tracking-widest bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-full border border-white/20">{tech}</span>
-                                                ))}
-                                            </div>
-                                            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">{data.title}</h2>
-                                        </div>
-                                    </div>
-                                    <div className="p-8 md:p-12 space-y-8">
-                                        <div className="prose prose-lg max-w-none text-secondary">
-                                            <p className="whitespace-pre-wrap leading-relaxed">{data.description}</p>
-                                        </div>
+                                            <div className="p-8 md:p-12 space-y-8">
+                                                <div className="prose prose-lg max-w-none text-secondary">
+                                                    <p className="whitespace-pre-wrap leading-relaxed">{projectData.description}</p>
+                                                </div>
 
-                                        <div className="flex flex-wrap gap-4 pt-8 border-t border-gray-100">
-                                            {data.liveUrl && (
-                                                <a href={data.liveUrl} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 bg-primary text-white px-8 py-4 rounded-2xl font-black transition-all hover:bg-blue-800 hover:shadow-xl hover:shadow-primary/25 hover:-translate-y-1">
-                                                    <ExternalLink size={20} />
-                                                    <span>View Live Site</span>
-                                                </a>
-                                            )}
-                                            {data.repoUrl && (
-                                                <a href={data.repoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 bg-gray-900 text-white px-8 py-4 rounded-2xl font-black transition-all hover:bg-black hover:shadow-xl hover:-translate-y-1">
-                                                    <Github size={20} />
-                                                    <span>View Code</span>
-                                                </a>
-                                            )}
+                                                <div className="flex flex-wrap gap-4 pt-8 border-t border-gray-100">
+                                                    {projectData.liveUrl && (
+                                                        <a href={projectData.liveUrl} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 bg-primary text-white px-8 py-4 rounded-2xl font-black transition-all hover:bg-blue-800 hover:shadow-xl hover:shadow-primary/25 hover:-translate-y-1">
+                                                            <ExternalLink size={20} />
+                                                            <span>View Live Site</span>
+                                                        </a>
+                                                    )}
+                                                    {projectData.repoUrl && (
+                                                        <a href={projectData.repoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 bg-gray-900 text-white px-8 py-4 rounded-2xl font-black transition-all hover:bg-black hover:shadow-xl hover:-translate-y-1">
+                                                            <Github size={20} />
+                                                            <span>View Code</span>
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
+                                    );
+                                })()
                             ) : (
                                 <div className="p-8 md:p-16">
                                     <div className="flex flex-col md:flex-row md:items-center gap-6 mb-12">
@@ -197,7 +202,7 @@ export default function DetailModal({ isOpen, onClose, data, type }: DetailModal
                                             <MapPin className="text-accent" size={24} />
                                             <div>
                                                 <p className="text-xs font-black uppercase text-secondary tracking-widest">Location</p>
-                                                <p className="text-lg font-bold text-gray-900">{data.location || "Remote"}</p>
+                                                <p className="text-lg font-bold text-gray-900">{(data as Experience | Education | Volunteering).location || "Remote"}</p>
                                             </div>
                                         </div>
                                     </div>
