@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2 } from "lucide-react";
+import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 const navLinks = [
     { name: "About", href: "#about", icon: User },
+    { name: "Portfolio", href: "#portfolio", icon: Briefcase },
     { name: "Academy", href: "#academy", icon: GraduationCap },
     { name: "Videos", href: "#videos", icon: FileText },
     { name: "Quiz", href: "#quiz", icon: Gamepad2 },

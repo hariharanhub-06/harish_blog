@@ -7,8 +7,74 @@ import { db } from "@/db";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  // Fetch profile from DB
-  const dbProfile = await db.query.profiles.findFirst();
+  // Fetch all data with safe fallbacks
+  let dbProfile = null;
+  let videos = [];
+  let dbProjects = [];
+  let experiences = [];
+  let educations = [];
+  let volunteerings = [];
+  let dbSkills = [];
+  let partnerships = [];
+  let quizzes = [];
+
+  try {
+    // Parallel fetch for basic data
+    const [p, v, pr, exp, edu, vol, sk, part] = await Promise.all([
+      db.query.profiles.findFirst(),
+      db.query.youtubeVideos.findMany({
+        where: (videos, { eq }) => eq(videos.isActive, true),
+        orderBy: (videos, { desc }) => [desc(videos.displayOrder), desc(videos.createdAt)]
+      }),
+      db.query.projects.findMany({
+        orderBy: (projects, { desc }) => [desc(projects.featured), desc(projects.displayOrder), desc(projects.createdAt)]
+      }),
+      db.query.experience.findMany({
+        orderBy: (experience, { desc }) => [desc(experience.displayOrder), desc(experience.createdAt)]
+      }),
+      db.query.education.findMany({
+        orderBy: (education, { desc }) => [desc(education.displayOrder)]
+      }),
+      db.query.volunteering.findMany({
+        orderBy: (volunteering, { desc }) => [desc(volunteering.displayOrder)]
+      }),
+      db.query.skills.findMany({
+        orderBy: (skills, { desc }) => [desc(skills.displayOrder)]
+      }),
+      db.query.partnerships.findMany({
+        where: (p, { eq }) => eq(p.isActive, true),
+        orderBy: (p, { desc }) => [desc(p.displayOrder)]
+      })
+    ]);
+
+    dbProfile = p;
+    videos = v;
+    dbProjects = pr;
+    experiences = exp;
+    educations = edu;
+    volunteerings = vol;
+    dbSkills = sk;
+    partnerships = part;
+
+    // Fetch Quizzes separately as it has relations that might fail if not pushed
+    try {
+      quizzes = await db.query.quizzes.findMany({
+        where: (q, { eq }) => eq(q.isPublished, true),
+        with: {
+          questions: {
+            with: {
+              options: true
+            }
+          }
+        },
+        orderBy: (q, { desc }) => [desc(q.createdAt)]
+      });
+    } catch (e) {
+      console.error("Quiz query failed:", e);
+    }
+  } catch (error) {
+    console.error("Database query failed:", error);
+  }
 
   // Default fallback data
   const defaultProfile = {
@@ -29,67 +95,23 @@ export default async function Home() {
       { label: "Projects Completed", value: "10+", icon: "Code" },
       { label: "Clubs Led", value: "5+", icon: "Award" },
       { label: "Colleges Partnered", value: "42", icon: "User" },
+    ],
+    trainingStats: [
+      { label: "Expert Sessions", value: "150+", icon: "Presentation" },
+      { label: "Partnered Colleges", value: "42+", icon: "GraduationCap" },
+      { label: "Minds Empowered", value: "5000+", icon: "Users" },
     ]
   };
 
   // Merge DB data with default (DB takes precedence if fields exist)
   const profile = {
     ...defaultProfile,
-    ...dbProfile,
+    ...(dbProfile || {}),
     // Ensure stats is an array even if DB returns something else (though schema says jsonb array)
     stats: Array.isArray(dbProfile?.stats) ? dbProfile.stats : defaultProfile.stats,
+    trainingStats: Array.isArray(dbProfile?.trainingStats) ? dbProfile.trainingStats : defaultProfile.trainingStats,
     socialLinks: dbProfile?.socialLinks || defaultProfile.socialLinks
   };
-
-  // Fetch videos
-  const videos = await db.query.youtubeVideos.findMany({
-    where: (videos, { eq }) => eq(videos.isActive, true),
-    orderBy: (videos, { desc }) => [desc(videos.displayOrder), desc(videos.createdAt)]
-  });
-
-  // Fetch Projects
-  const dbProjects = await db.query.projects.findMany({
-    orderBy: (projects, { desc }) => [desc(projects.featured), desc(projects.displayOrder), desc(projects.createdAt)]
-  });
-
-  // Fetch Experience
-  const experiences = await db.query.experience.findMany({
-    orderBy: (experience, { desc }) => [desc(experience.displayOrder), desc(experience.createdAt)]
-  });
-
-  // Fetch Education
-  const educations = await db.query.education.findMany({
-    orderBy: (education, { desc }) => [desc(education.displayOrder)]
-  });
-
-  // Fetch Volunteering
-  const volunteerings = await db.query.volunteering.findMany({
-    orderBy: (volunteering, { desc }) => [desc(volunteering.displayOrder)]
-  });
-
-  // Fetch Skills
-  const dbSkills = await db.query.skills.findMany({
-    orderBy: (skills, { desc }) => [desc(skills.displayOrder)]
-  });
-
-  // Fetch Partnerships
-  const partnerships = await db.query.partnerships.findMany({
-    where: (p, { eq }) => eq(p.isActive, true),
-    orderBy: (p, { desc }) => [desc(p.displayOrder)]
-  });
-
-  // Fetch Quizzes
-  const quizzes = await db.query.quizzes.findMany({
-    where: (q, { eq }) => eq(q.isPublished, true),
-    with: {
-      questions: {
-        with: {
-          options: true
-        }
-      }
-    },
-    orderBy: (q, { desc }) => [desc(q.createdAt)]
-  });
 
   return (
     <div className="flex flex-col gap-0 bg-[#0e0e0e] relative">
