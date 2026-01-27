@@ -145,9 +145,9 @@ export default function MainContent({
 
             {/* Experience Section */}
             {experiences.length > 0 && (
-                <section className="py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
-                    <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
-                    <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
+                <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                    <div className="absolute top-0 left-0 h-full w-8 md:w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
+                    <div className="absolute top-0 right-0 h-full w-8 md:w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
                     <div className="flex flex-col items-center mb-6 text-center">
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500/80">Professional Journey</span>
