@@ -34,7 +34,7 @@ export async function GET() {
             orderBy: (s, { asc, desc }) => [desc(s.proficiency), asc(s.displayOrder)],
         });
 
-        let allQuizzes = [];
+        let allQuizzes: any[] = [];
         try {
             allQuizzes = await db.query.quizzes.findMany({
                 where: (q, { eq }) => eq(q.isPublished, true),
