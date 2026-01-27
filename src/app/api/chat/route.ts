@@ -130,20 +130,43 @@ export async function POST(req: Request) {
 
                     try {
                         const genAI = new GoogleGenerativeAI(geminiKey);
-                        const genModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                        // Correct way to use System Instruction in Gemini
+                        const genModel = genAI.getGenerativeModel({
+                            model: "gemini-1.5-flash",
+                            systemInstruction: systemInstruction
+                        });
+
+                        // Ensure roles alternate and handle potential double-user message at start
+                        const geminiContents = [];
+                        let lastRole = "";
+
+                        for (const m of recentMessages) {
+                            const currentRole = m.role === "user" ? "user" : "model";
+                            if (currentRole === lastRole) continue; // Skip if same role as last
+
+                            geminiContents.push({
+                                role: currentRole,
+                                parts: [{ text: m.content }]
+                            });
+                            lastRole = currentRole;
+                        }
+
+                        // Gemini requires the first message to be "user"
+                        if (geminiContents.length > 0 && geminiContents[0].role !== "user") {
+                            geminiContents.shift();
+                        }
+
+                        if (geminiContents.length === 0) {
+                            throw new Error("No valid messages for Gemini fallback");
+                        }
 
                         const result = await genModel.generateContent({
-                            contents: [
-                                { role: "user", parts: [{ text: systemInstruction }] },
-                                ...recentMessages.map(m => ({
-                                    role: m.role === "user" ? "user" : "model",
-                                    parts: [{ text: m.content }]
-                                }))
-                            ]
+                            contents: geminiContents
                         });
 
                         const text = result.response.text();
                         if (text) {
+                            console.log("Success: Gemini Safety Net caught the fall.");
                             return NextResponse.json({ content: text });
                         }
                         throw new Error("Gemini returned empty response");
