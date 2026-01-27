@@ -1,13 +1,15 @@
 
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { quizSessions, quizParticipants, quizQuestions, quizLiveAnswers } from "@/db/schema";
+import { quizSessions, quizParticipants, quizQuestions, quizLiveAnswers, quizzes } from "@/db/schema";
 import { eq, desc, asc, and } from "drizzle-orm";
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const pin = searchParams.get("pin");
     const sessionId = searchParams.get("sessionId");
+    const isHost = searchParams.get("host") === "true";
+    const participantId = searchParams.get("participantId");
 
     if (!pin && !sessionId) {
         return NextResponse.json({ error: "PIN or Session ID required" }, { status: 400 });
@@ -49,6 +51,9 @@ export async function GET(req: Request) {
 
         // Get current question if active and index is valid
         let currentQuestion = null;
+        let showResults = false;
+        let isParticipantCorrect = false;
+
         if (session.status === "active" && session.currentQuestionIndex !== null && session.currentQuestionIndex >= 0) {
             const quizData = await db.query.quizzes.findFirst({
                 where: eq(quizzes.id, session.quizId)
@@ -74,6 +79,24 @@ export async function GET(req: Request) {
                     )
                 });
 
+                // Determine if results should be revealed
+                const timeLimit = q.timeLimit || quizData?.timeLimit || 30;
+                const startTime = session.updatedAt ? new Date(session.updatedAt).getTime() : 0;
+                const now = Date.now();
+                const timeExpired = startTime > 0 && (now - startTime) > (timeLimit * 1000);
+                const allAnswered = allParticipants.length > 0 && answers.length >= allParticipants.length;
+
+                showResults = allAnswered || timeExpired;
+
+                // Check if this specific participant was correct
+                if (participantId) {
+                    const participantAnswers = answers.filter(a => a.participantId === participantId);
+                    const correctOptionIds = q.options.filter(o => o.isCorrect).map(o => o.id);
+                    isParticipantCorrect = participantAnswers.length > 0 &&
+                        participantAnswers.length === correctOptionIds.length &&
+                        participantAnswers.every(pa => correctOptionIds.includes(pa.optionId));
+                }
+
                 const distribution = q.options.map(opt => ({
                     optionId: opt.id,
                     count: answers.filter(a => a.optionId === opt.id).length
@@ -83,14 +106,13 @@ export async function GET(req: Request) {
                     id: q.id,
                     questionText: q.questionText,
                     imageUrl: q.imageUrl,
-                    // Fallback: question limit -> quiz limit -> 30
-                    timeLimit: q.timeLimit || quizData?.timeLimit || 30,
+                    timeLimit: timeLimit,
                     points: q.points,
-                    // Show correct for host (when pin is not provided in search params)
+                    // Reveal isCorrect only if results are out or requester is host
                     options: q.options.map(o => ({
                         id: o.id,
                         optionText: o.optionText,
-                        isCorrect: !pin ? o.isCorrect : undefined
+                        isCorrect: (showResults || isHost) ? o.isCorrect : undefined
                     })),
                     distribution,
                     totalAnswers: answers.length
@@ -103,6 +125,8 @@ export async function GET(req: Request) {
             currentQuestionIndex: session.currentQuestionIndex,
             leaderboard,
             totalParticipants: allParticipants.length,
+            showResults,
+            isCorrect: isParticipantCorrect,
             currentQuestion
         });
 

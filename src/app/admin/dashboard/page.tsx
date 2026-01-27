@@ -185,7 +185,7 @@ export default function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 lg:ml-64 w-full overflow-x-hidden min-h-screen relative z-10 print:ml-0">
+            <main className="flex-1 lg:ml-64 w-full overflow-x-hidden min-h-screen relative print:ml-0">
                 <header className="bg-white/60 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-40 print:hidden shadow-sm">
                     <div className="max-w-7xl mx-auto px-6 md:px-8 py-3.5 flex justify-between items-center">
                         <div className="flex items-center gap-4">

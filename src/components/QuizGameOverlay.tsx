@@ -66,6 +66,8 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
     const [participantId, setParticipantId] = useState("");
     const [liveStatus, setLiveStatus] = useState("waiting");
     const [liveQuestion, setLiveQuestion] = useState<any>(null);
+    const [serverShowResults, setServerShowResults] = useState(false);
+    const [isPlayerCorrect, setIsPlayerCorrect] = useState(false);
 
     // Anti-cheat: Tab visibility change (Only for self-paced, disable for live to avoid false positives on mobile)
     useEffect(() => {
@@ -162,12 +164,15 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
 
         const pollStatus = async () => {
             try {
-                const res = await fetch(`/api/quiz/live/status?sessionId=${sessionId}`);
+                const res = await fetch(`/api/quiz/live/status?sessionId=${sessionId}&participantId=${participantId}`);
                 if (res.ok) {
                     const data = await res.json();
 
                     // Update leaderboard
                     if (data.leaderboard) setLeaderboard(data.leaderboard);
+
+                    setServerShowResults(data.showResults || false);
+                    setIsPlayerCorrect(data.isCorrect || false);
 
                     // Handle Status Changes
                     if (data.status === "active" && data.currentQuestion) {
@@ -176,9 +181,14 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                             setLiveQuestion(data.currentQuestion);
                             setGameState("playing");
                             setIsSubmitted(false);
+                            setServerShowResults(false);
+                            setIsPlayerCorrect(false);
                             setSelectedOptionIds([]);
                             // Consistent fallback: Question Limit -> Global Limit -> 30
                             setTimeLeft(data.currentQuestion.timeLimit || quiz?.timeLimit || 30);
+                        } else if (data.showResults) {
+                            // Question ended, update options to show correct mapping
+                            setLiveQuestion(data.currentQuestion);
                         }
                     } else if (data.status === "finished") {
                         setGameState("results");
@@ -490,20 +500,20 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-24">
                                         {activeQuestion.options.map((option: any, idx: number) => {
                                             const isSelected = selectedOptionIds.includes(option.id);
-                                            const isCorrect = option.isCorrect; // Undefined in live
-                                            const showResult = isSubmitted && !isLive; // Only show result immediately in self-paced
+                                            const isCorrect = option.isCorrect; // Now populated in live when serverShowResults is true
+                                            const showResult = (isSubmitted && !isLive) || (isLive && serverShowResults);
 
                                             let borderClass = "border-white/10 hover:border-primary bg-white/5";
                                             if (showResult) {
-                                                if (isCorrect) borderClass = "border-emerald-500 bg-emerald-500/20";
-                                                else if (isSelected) borderClass = "border-red-500 bg-red-500/20";
+                                                if (isCorrect) borderClass = "border-emerald-500 bg-emerald-500/20 opacity-100";
+                                                else if (isSelected) borderClass = "border-red-500 bg-red-500/20 opacity-100";
                                                 else borderClass = "border-white/5 bg-white/2 opacity-30";
                                             } else if (isSelected) {
                                                 borderClass = "border-primary bg-primary/10";
                                             }
 
-                                            // Live Submitted State
-                                            if (isLive && isSubmitted) {
+                                            // Live Submitted State (before reveal)
+                                            if (isLive && isSubmitted && !serverShowResults) {
                                                 if (isSelected) borderClass = "border-primary bg-primary/20 opacity-100";
                                                 else borderClass = "border-white/5 bg-white/5 opacity-30";
                                             }
@@ -551,8 +561,25 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                                 animate={{ opacity: 1, y: 0 }}
                                                 className="flex justify-center pt-8 text-center flex-col items-center"
                                             >
-                                                <Loader2 className="animate-spin text-white mb-2" />
-                                                <p className="font-bold text-gray-400">Answer Submitted! Waiting for next question...</p>
+                                                {serverShowResults ? (
+                                                    <motion.div
+                                                        initial={{ scale: 0.9, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        className="flex flex-col items-center"
+                                                    >
+                                                        {isPlayerCorrect ? (
+                                                            <h3 className="text-4xl md:text-6xl font-black text-emerald-500 mb-2 tracking-tighter uppercase animate-bounce">Correct! 🔥</h3>
+                                                        ) : (
+                                                            <h3 className="text-4xl md:text-6xl font-black text-red-500 mb-2 tracking-tighter uppercase">Incorrect</h3>
+                                                        )}
+                                                        <p className="font-bold text-gray-400">Next question starting soon...</p>
+                                                    </motion.div>
+                                                ) : (
+                                                    <>
+                                                        <Loader2 className="animate-spin text-white mb-2" />
+                                                        <p className="font-bold text-gray-400">Answer Submitted! Waiting for next question...</p>
+                                                    </>
+                                                )}
                                             </motion.div>
                                         </div>
                                     )}
