@@ -85,6 +85,7 @@ export default function FinanceModule() {
     const [debtForm, setDebtForm] = useState({
         name: "",
         initialAmount: "",
+        remainingAmount: "",
         notes: "",
         repaymentType: "single" as "single" | "split",
         dueDate: ""
@@ -214,8 +215,17 @@ export default function FinanceModule() {
             const url = "/api/admin/finance/debts";
             const method = editingDebt ? "PUT" : "POST";
             const body = editingDebt
-                ? { ...editingDebt, ...debtForm, initialAmount: parseFloat(debtForm.initialAmount) }
-                : { ...debtForm, initialAmount: parseFloat(debtForm.initialAmount) };
+                ? {
+                    ...editingDebt,
+                    ...debtForm,
+                    initialAmount: parseFloat(debtForm.initialAmount),
+                    remainingAmount: parseFloat(debtForm.remainingAmount || debtForm.initialAmount)
+                }
+                : {
+                    ...debtForm,
+                    initialAmount: parseFloat(debtForm.initialAmount),
+                    remainingAmount: parseFloat(debtForm.initialAmount)
+                };
 
             const res = await fetch(url, {
                 method,
@@ -226,7 +236,7 @@ export default function FinanceModule() {
             if (res.ok) {
                 setIsDebtModalOpen(false);
                 setEditingDebt(null);
-                setDebtForm({ name: "", initialAmount: "", notes: "", repaymentType: "single", dueDate: "" });
+                setDebtForm({ name: "", initialAmount: "", remainingAmount: "", notes: "", repaymentType: "single", dueDate: "" });
                 setError(null);
                 fetchData();
             } else {
@@ -243,7 +253,7 @@ export default function FinanceModule() {
 
     const openAddDebt = () => {
         setEditingDebt(null);
-        setDebtForm({ name: "", initialAmount: "", notes: "", repaymentType: "single", dueDate: "" });
+        setDebtForm({ name: "", initialAmount: "", remainingAmount: "", notes: "", repaymentType: "single", dueDate: "" });
         setError(null);
         setIsDebtModalOpen(true);
     };
@@ -253,6 +263,7 @@ export default function FinanceModule() {
         setDebtForm({
             name: debt.name,
             initialAmount: debt.initialAmount.toString(),
+            remainingAmount: debt.remainingAmount.toString(),
             notes: debt.notes,
             repaymentType: (debt.repaymentType as any) || "single",
             dueDate: debt.dueDate ? new Date(debt.dueDate).toISOString().split('T')[0] : ""
@@ -446,6 +457,55 @@ export default function FinanceModule() {
                                 </button>
                             </div>
 
+                            {/* Overall Debt Payoff Status */}
+                            {debts.length > 0 && (
+                                <div className="mb-12 bg-gray-50/50 p-8 md:p-10 rounded-[2.5rem] border border-gray-100">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                                        <h4 className="text-xl font-black uppercase tracking-tight text-gray-900">Debt Payoff Status</h4>
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Total Remaining</p>
+                                                <p className="text-lg font-black text-primary">₹{debts.reduce((acc, d) => acc + d.remainingAmount, 0).toLocaleString()}</p>
+                                            </div>
+                                            <div className="w-px h-10 bg-gray-200" />
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Overall Progress</p>
+                                                <p className="text-lg font-black text-emerald-600">
+                                                    {debts.reduce((acc, d) => acc + d.initialAmount, 0) > 0
+                                                        ? Math.round((1 - (debts.reduce((acc, d) => acc + d.remainingAmount, 0) / debts.reduce((acc, d) => acc + d.initialAmount, 0))) * 100)
+                                                        : 0}%
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                                        {debts.map(debt => {
+                                            const paid = debt.initialAmount - debt.remainingAmount;
+                                            const progress = debt.initialAmount > 0 ? (paid / debt.initialAmount) * 100 : 0;
+                                            return (
+                                                <div key={debt.id} className="space-y-3">
+                                                    <div className="flex justify-between items-end">
+                                                        <span className="text-xs font-black uppercase tracking-widest text-gray-900 truncate pr-4">{debt.name}</span>
+                                                        <span className="text-xs font-black text-gray-900">{Math.round(progress)}%</span>
+                                                    </div>
+                                                    <div className="h-3 bg-white rounded-full overflow-hidden border border-gray-100">
+                                                        <div
+                                                            className="h-full bg-primary rounded-full transition-all duration-1000"
+                                                            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                                        <span className="text-gray-400">Paid: <span className="text-gray-900">₹{paid.toLocaleString()}</span></span>
+                                                        <span className="text-gray-400">Left: <span className="text-primary">₹{debt.remainingAmount.toLocaleString()}</span></span>
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="space-y-4">
                                 {debts.map(debt => (
                                     <div key={debt.id} className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
@@ -508,321 +568,349 @@ export default function FinanceModule() {
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    </div>
-                )}
+                        </div >
+                    </div >
+                )
+                }
 
-                {activeTab === "log" && (
-                    <div className="lg:col-span-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Smart Log Input */}
-                        <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm space-y-8">
-                            <div>
-                                <h3 className="text-2xl font-black tracking-tight">AI Smart Log</h3>
-                                <p className="text-sm font-bold text-gray-400 mt-2">Type your daily entries. I'll automatically detect the amounts and categories.</p>
-                            </div>
-
-                            <textarea
-                                value={logInput}
-                                onChange={(e) => setLogInput(e.target.value)}
-                                placeholder="Debts Paid: X - 5000&#10;Expense Food 500 Lunch 200&#10;Income Extra - 1000"
-                                className="w-full h-64 bg-gray-50 border-0 rounded-[2rem] p-8 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-medium leading-relaxed"
-                            />
-
-                            <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-2 flex items-center gap-2">
-                                    <AlertCircle size={12} />
-                                    Tips
-                                </h4>
-                                <ul className="text-[11px] font-bold text-gray-500 space-y-1">
-                                    <li>• Use headers like "Debts Paid:", "Expense", "Income"</li>
-                                    <li>• Format: "Item Name - Amount" or "Item Name Amount"</li>
-                                    <li>• Multiple entries per line are supported</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        {/* Live Preview */}
-                        <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm flex flex-col h-full">
-                            <div className="flex justify-between items-center mb-8">
-                                <h3 className="text-xl font-black uppercase tracking-tight">Live Intent Preview</h3>
-                                <div className="px-4 py-1.5 bg-gray-50 rounded-full text-[10px] font-black uppercase text-gray-400">
-                                    {parsedEntries.length} Items Detected
-                                </div>
-                            </div>
-
-                            <div className="flex-1 overflow-auto space-y-3 pr-2">
-                                <AnimatePresence mode="popLayout">
-                                    {parsedEntries.map((entry, idx) => (
-                                        <motion.div
-                                            key={idx}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 20 }}
-                                            className={`flex items-center justify-between p-4 rounded-2xl border ${entry.isValid ? 'bg-gray-50 border-gray-100' : 'bg-red-50 border-red-100'}`}
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className={`p-2.5 rounded-xl ${entry.type === 'income' ? 'bg-emerald-500 text-white' : entry.type === 'debt_pay' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'}`}>
-                                                    {entry.type === 'income' ? <TrendingUp size={16} /> : entry.type === 'debt_pay' ? <CreditCard size={16} /> : <TrendingDown size={16} />}
-                                                </div>
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-sm font-black text-gray-900">{entry.item}</span>
-                                                        {entry.debtId && <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[8px] font-black uppercase rounded">Linked: Debt</span>}
-                                                    </div>
-                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{entry.category}</span>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-sm font-black text-gray-900">₹{entry.amount.toLocaleString()}</p>
-                                                {!entry.isValid && <p className="text-[8px] font-black text-red-500 uppercase">Invalid Amount</p>}
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
-
-                                {parsedEntries.length === 0 && (
-                                    <div className="flex flex-col items-center justify-center h-full text-center p-12 opacity-50">
-                                        <LayoutDashboard size={48} className="text-gray-200 mb-4" />
-                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Waiting for input...</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            <button
-                                disabled={parsedEntries.length === 0 || parsedEntries.some(e => !e.isValid) || saving}
-                                onClick={handleSaveLog}
-                                className={`w-full mt-8 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3 ${parsedEntries.length > 0 && !parsedEntries.some(e => !e.isValid) ? 'bg-primary text-white shadow-xl shadow-primary/30 hover:scale-105 active:scale-95' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
-                            >
-                                {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                                Confirm and Post Entries
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {activeTab === "history" && (
-                    <div className="lg:col-span-12">
-                        <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm overflow-hidden">
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                {
+                    activeTab === "log" && (
+                        <div className="lg:col-span-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Smart Log Input */}
+                            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm space-y-8">
                                 <div>
-                                    <h3 className="text-2xl font-black tracking-tight">Audit Log</h3>
-                                    <p className="text-sm font-bold text-gray-400 mt-2">Browse and filter all financial transactions.</p>
+                                    <h3 className="text-2xl font-black tracking-tight">AI Smart Log</h3>
+                                    <p className="text-sm font-bold text-gray-400 mt-2">Type your daily entries. I'll automatically detect the amounts and categories.</p>
                                 </div>
-                                <div className="flex items-center gap-4 w-full md:w-auto">
-                                    <div className="relative flex-1 md:w-64">
-                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                        <input
-                                            type="text"
-                                            placeholder="Search items..."
-                                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border-0 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-primary/20"
-                                        />
-                                    </div>
-                                    <select
-                                        value={selectedCategory}
-                                        onChange={(e) => setSelectedCategory(e.target.value)}
-                                        className="p-3 bg-gray-50 border-0 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 focus:ring-2 focus:ring-primary/20"
-                                    >
-                                        <option value="All">All Categories</option>
-                                        {/* Dynamic categories from stats */}
-                                        {stats?.categories?.map((cat: any) => (
-                                            <option key={cat.category} value={cat.category}>{cat.category}</option>
-                                        ))}
-                                        {/* Dynamic active debts */}
-                                        {stats?.activeDebts?.map((debt: any) => (
-                                            <option key={debt.id} value={debt.name}>{debt.name}</option>
-                                        ))}
-                                    </select>
+
+                                <textarea
+                                    value={logInput}
+                                    onChange={(e) => setLogInput(e.target.value)}
+                                    placeholder="Debts Paid: X - 5000&#10;Expense Food 500 Lunch 200&#10;Income Extra - 1000"
+                                    className="w-full h-64 bg-gray-50 border-0 rounded-[2rem] p-8 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-medium leading-relaxed"
+                                />
+
+                                <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-2 flex items-center gap-2">
+                                        <AlertCircle size={12} />
+                                        Tips
+                                    </h4>
+                                    <ul className="text-[11px] font-bold text-gray-500 space-y-1">
+                                        <li>• Use headers like "Debts Paid:", "Expense", "Income"</li>
+                                        <li>• Format: "Item Name - Amount" or "Item Name Amount"</li>
+                                        <li>• Multiple entries per line are supported</li>
+                                    </ul>
                                 </div>
                             </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left">
-                                    <thead>
-                                        <tr className="border-b border-gray-50">
-                                            <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest pl-4">Date</th>
-                                            <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Description</th>
-                                            <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Category</th>
-                                            <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Type</th>
-                                            <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right pr-4">Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-50">
-                                        {transactions.map((tx) => (
-                                            <tr key={tx.id} className="group hover:bg-gray-50 transition-all">
-                                                <td className="py-6 pl-4">
-                                                    <span className="text-xs font-bold text-gray-900">{new Date(tx.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
-                                                </td>
-                                                <td className="py-6">
-                                                    <span className="text-sm font-black text-gray-900 group-hover:text-primary transition-all">{tx.description}</span>
-                                                </td>
-                                                <td className="py-6">
-                                                    <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-black text-gray-500 uppercase tracking-widest">{tx.category}</span>
-                                                </td>
-                                                <td className="py-6">
-                                                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${tx.type === 'income' ? 'bg-emerald-50 text-emerald-600' :
-                                                        tx.type === 'debt_pay' ? 'bg-blue-50 text-blue-600' :
-                                                            'bg-red-50 text-red-600'
-                                                        }`}>
-                                                        {tx.type}
-                                                    </span>
-                                                </td>
-                                                <td className="py-6 text-right pr-4">
-                                                    <div className="flex items-center justify-end gap-3">
-                                                        <span className={`text-sm font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-gray-900'}`}>
-                                                            {tx.type === 'income' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
-                                                        </span>
-                                                        <button
-                                                            onClick={async () => {
-                                                                if (confirm("Delete this entry?")) {
-                                                                    await fetch(`/api/admin/finance/transactions?id=${tx.id}`, { method: 'DELETE' });
-                                                                    fetchData();
-                                                                }
-                                                            }}
-                                                            className="opacity-0 group-hover:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-all"
-                                                        >
-                                                            <Trash2 size={14} />
-                                                        </button>
+                            {/* Live Preview */}
+                            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm flex flex-col h-full">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h3 className="text-xl font-black uppercase tracking-tight">Live Intent Preview</h3>
+                                    <div className="px-4 py-1.5 bg-gray-50 rounded-full text-[10px] font-black uppercase text-gray-400">
+                                        {parsedEntries.length} Items Detected
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 overflow-auto space-y-3 pr-2">
+                                    <AnimatePresence mode="popLayout">
+                                        {parsedEntries.map((entry, idx) => (
+                                            <motion.div
+                                                key={idx}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 20 }}
+                                                className={`flex items-center justify-between p-4 rounded-2xl border ${entry.isValid ? 'bg-gray-50 border-gray-100' : 'bg-red-50 border-red-100'}`}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`p-2.5 rounded-xl ${entry.type === 'income' ? 'bg-emerald-500 text-white' : entry.type === 'debt_pay' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'}`}>
+                                                        {entry.type === 'income' ? <TrendingUp size={16} /> : entry.type === 'debt_pay' ? <CreditCard size={16} /> : <TrendingDown size={16} />}
                                                     </div>
-                                                </td>
-                                            </tr>
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-sm font-black text-gray-900">{entry.item}</span>
+                                                            {entry.debtId && <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[8px] font-black uppercase rounded">Linked: Debt</span>}
+                                                        </div>
+                                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{entry.category}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-sm font-black text-gray-900">₹{entry.amount.toLocaleString()}</p>
+                                                    {!entry.isValid && <p className="text-[8px] font-black text-red-500 uppercase">Invalid Amount</p>}
+                                                </div>
+                                            </motion.div>
                                         ))}
-                                    </tbody>
-                                </table>
+                                    </AnimatePresence>
+
+                                    {parsedEntries.length === 0 && (
+                                        <div className="flex flex-col items-center justify-center h-full text-center p-12 opacity-50">
+                                            <LayoutDashboard size={48} className="text-gray-200 mb-4" />
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Waiting for input...</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    disabled={parsedEntries.length === 0 || parsedEntries.some(e => !e.isValid) || saving}
+                                    onClick={handleSaveLog}
+                                    className={`w-full mt-8 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3 ${parsedEntries.length > 0 && !parsedEntries.some(e => !e.isValid) ? 'bg-primary text-white shadow-xl shadow-primary/30 hover:scale-105 active:scale-95' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                                >
+                                    {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                                    Confirm and Post Entries
+                                </button>
                             </div>
                         </div>
-                    </div>
-                )}
-            </main>
+                    )
+                }
+
+                {
+                    activeTab === "history" && (
+                        <div className="lg:col-span-12">
+                            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm overflow-hidden">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                                    <div>
+                                        <h3 className="text-2xl font-black tracking-tight">Audit Log</h3>
+                                        <p className="text-sm font-bold text-gray-400 mt-2">Browse and filter all financial transactions.</p>
+                                    </div>
+                                    <div className="flex items-center gap-4 w-full md:w-auto">
+                                        <div className="relative flex-1 md:w-64">
+                                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                            <input
+                                                type="text"
+                                                placeholder="Search items..."
+                                                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-0 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-primary/20"
+                                            />
+                                        </div>
+                                        <select
+                                            value={selectedCategory}
+                                            onChange={(e) => setSelectedCategory(e.target.value)}
+                                            className="p-3 bg-gray-50 border-0 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 focus:ring-2 focus:ring-primary/20"
+                                        >
+                                            <option value="All">All Categories</option>
+                                            {/* Dynamic categories from stats */}
+                                            {stats?.categories?.map((cat: any) => (
+                                                <option key={cat.category} value={cat.category}>{cat.category}</option>
+                                            ))}
+                                            {/* Dynamic active debts */}
+                                            {stats?.activeDebts?.map((debt: any) => (
+                                                <option key={debt.id} value={debt.name}>{debt.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left">
+                                        <thead>
+                                            <tr className="border-b border-gray-50">
+                                                <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest pl-4">Date</th>
+                                                <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Description</th>
+                                                <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Category</th>
+                                                <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Type</th>
+                                                <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right pr-4">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-50">
+                                            {transactions.map((tx) => (
+                                                <tr key={tx.id} className="group hover:bg-gray-50 transition-all">
+                                                    <td className="py-6 pl-4">
+                                                        <span className="text-xs font-bold text-gray-900">{new Date(tx.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                                                    </td>
+                                                    <td className="py-6">
+                                                        <span className="text-sm font-black text-gray-900 group-hover:text-primary transition-all">{tx.description}</span>
+                                                    </td>
+                                                    <td className="py-6">
+                                                        <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-black text-gray-500 uppercase tracking-widest">{tx.category}</span>
+                                                    </td>
+                                                    <td className="py-6">
+                                                        <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${tx.type === 'income' ? 'bg-emerald-50 text-emerald-600' :
+                                                            tx.type === 'debt_pay' ? 'bg-blue-50 text-blue-600' :
+                                                                'bg-red-50 text-red-600'
+                                                            }`}>
+                                                            {tx.type}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-6 text-right pr-4">
+                                                        <div className="flex items-center justify-end gap-3">
+                                                            <span className={`text-sm font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-gray-900'}`}>
+                                                                {tx.type === 'income' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
+                                                            </span>
+                                                            <button
+                                                                onClick={async () => {
+                                                                    if (confirm("Delete this entry?")) {
+                                                                        await fetch(`/api/admin/finance/transactions?id=${tx.id}`, { method: 'DELETE' });
+                                                                        fetchData();
+                                                                    }
+                                                                }}
+                                                                className="opacity-0 group-hover:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-all"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+            </main >
 
             {/* Debt Management Modal */}
             <AnimatePresence>
-                {isDebtModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-12">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsDebtModalOpen(false)}
-                            className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="flex justify-between items-center mb-8">
-                                <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
-                                    <div className="p-3 bg-primary/10 rounded-2xl text-primary">
-                                        <CreditCard size={24} />
-                                    </div>
-                                    {editingDebt ? "Edit Debt Profile" : "New Debt Profile"}
-                                </h3>
-                                <button
-                                    onClick={() => setIsDebtModalOpen(false)}
-                                    className="p-3 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-2xl transition-all"
-                                >
-                                    <Plus className="rotate-45" size={20} />
-                                </button>
-                            </div>
-
-                            {error && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-red-500 text-center"
-                                >
-                                    {error}
-                                </motion.div>
-                            )}
-
-                            <form onSubmit={handleSaveDebt} className="space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Creditor Name</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={debtForm.name}
-                                        onChange={(e) => setDebtForm({ ...debtForm, name: e.target.value })}
-                                        placeholder="e.g. Bank Loan, Friend X"
-                                        className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Initial Amount (₹)</label>
-                                    <input
-                                        type="text"
-                                        inputMode="decimal"
-                                        required
-                                        value={debtForm.initialAmount}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                                                setDebtForm({ ...debtForm, initialAmount: val });
-                                            }
-                                        }}
-                                        placeholder="0.00"
-                                        className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
-                                    />
+                {
+                    isDebtModalOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-12">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setIsDebtModalOpen(false)}
+                                className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="flex justify-between items-center mb-8">
+                                    <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                                        <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                            <CreditCard size={24} />
+                                        </div>
+                                        {editingDebt ? "Edit Debt Profile" : "New Debt Profile"}
+                                    </h3>
+                                    <button
+                                        onClick={() => setIsDebtModalOpen(false)}
+                                        className="p-3 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-2xl transition-all"
+                                    >
+                                        <Plus className="rotate-45" size={20} />
+                                    </button>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-red-500 text-center"
+                                    >
+                                        {error}
+                                    </motion.div>
+                                )}
+
+                                <form onSubmit={handleSaveDebt} className="space-y-6">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Repayment</label>
-                                        <select
-                                            value={debtForm.repaymentType}
-                                            onChange={(e) => setDebtForm({ ...debtForm, repaymentType: e.target.value as any })}
-                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
-                                        >
-                                            <option value="single">Single Payment</option>
-                                            <option value="split">Split / EMI</option>
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Target Date</label>
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Creditor Name</label>
                                         <input
-                                            type="date"
-                                            value={debtForm.dueDate}
-                                            onChange={(e) => setDebtForm({ ...debtForm, dueDate: e.target.value })}
+                                            type="text"
+                                            required
+                                            value={debtForm.name}
+                                            onChange={(e) => setDebtForm({ ...debtForm, name: e.target.value })}
+                                            placeholder="e.g. Bank Loan, Friend X"
                                             className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
                                         />
                                     </div>
-                                </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Initial Amount (₹)</label>
+                                        <input
+                                            type="text"
+                                            inputMode="decimal"
+                                            required
+                                            value={debtForm.initialAmount}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                    setDebtForm({ ...debtForm, initialAmount: val });
+                                                }
+                                            }}
+                                            placeholder="0.00"
+                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
+                                        />
+                                    </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Payment Notes / Structure</label>
-                                    <textarea
-                                        value={debtForm.notes}
-                                        onChange={(e) => setDebtForm({ ...debtForm, notes: e.target.value })}
-                                        placeholder="e.g. 5% Interest, Monthly EMI of 2000"
-                                        className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all h-24 resize-none"
-                                    />
-                                </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Repayment</label>
+                                            <select
+                                                value={debtForm.repaymentType}
+                                                onChange={(e) => setDebtForm({ ...debtForm, repaymentType: e.target.value as any })}
+                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                            >
+                                                <option value="single">Single Payment</option>
+                                                <option value="split">Split / EMI</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Target Date</label>
+                                            <input
+                                                type="date"
+                                                value={debtForm.dueDate}
+                                                onChange={(e) => setDebtForm({ ...debtForm, dueDate: e.target.value })}
+                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                            />
+                                        </div>
+                                    </div>
 
-                                <div className="pt-4 flex gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsDebtModalOpen(false)}
-                                        className="flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={saving}
-                                        className="flex-[2] py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                                        {editingDebt ? "Update Profile" : "Create Profile"}
-                                    </button>
-                                </div>
-                            </form>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-        </div>
+                                    {editingDebt && (
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Current Remaining Balance (₹)</label>
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                required
+                                                value={debtForm.remainingAmount}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                        setDebtForm({ ...debtForm, remainingAmount: val });
+                                                    }
+                                                }}
+                                                placeholder="0.00"
+                                                className="w-full px-6 py-4 bg-primary/5 border-2 border-primary/10 rounded-2xl text-sm font-black text-primary focus:ring-2 focus:ring-primary/20 transition-all font-mono"
+                                            />
+                                            <p className="text-[9px] font-bold text-gray-400 pl-4 italic">* Correction only. Use Smart Log for daily payments.</p>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Payment Notes / Structure</label>
+                                        <textarea
+                                            value={debtForm.notes}
+                                            onChange={(e) => setDebtForm({ ...debtForm, notes: e.target.value })}
+                                            placeholder="e.g. 5% Interest, Monthly EMI of 2000"
+                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all h-24 resize-none"
+                                        />
+                                    </div>
+
+                                    <div className="pt-4 flex gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsDebtModalOpen(false)}
+                                            className="flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={saving}
+                                            className="flex-[2] py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                                            {editingDebt ? "Update Profile" : "Create Profile"}
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        </div >
+                    )
+                }
+            </AnimatePresence >
+        </div >
     );
 }
 
