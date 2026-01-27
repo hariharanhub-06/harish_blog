@@ -446,17 +446,49 @@ export default function FinanceModule() {
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="space-y-4">
                                 {debts.map(debt => (
-                                    <div key={debt.id} className="bg-gray-50 p-8 rounded-[2rem] border border-gray-100 relative group">
-                                        <div className="flex justify-between items-start mb-6">
-                                            <div className="p-3 bg-white rounded-2xl shadow-sm">
-                                                <CreditCard className="text-primary" size={24} />
+                                    <div key={debt.id} className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
+                                        <div className="flex items-center gap-5 flex-1">
+                                            <div className="p-3 bg-white rounded-2xl shadow-sm group-hover:bg-primary group-hover:text-white transition-all">
+                                                <CreditCard size={20} />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-3 mb-1">
+                                                    <h4 className="text-base font-black text-gray-900 truncate">{debt.name}</h4>
+                                                    <span className={`px-2 py-0.5 rounded-[4px] text-[8px] font-black uppercase ${debt.repaymentType === 'split' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                        {debt.repaymentType || 'Single'}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">
+                                                    {debt.notes || 'No payment notes'}
+                                                    {debt.dueDate && ` • Due ${new Date(debt.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}`}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-8 md:gap-12">
+                                            <div className="text-right">
+                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Remaining</p>
+                                                <p className="text-sm font-black text-primary">₹{debt.remainingAmount.toLocaleString()}</p>
+                                            </div>
+                                            <div className="text-right hidden sm:block">
+                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total</p>
+                                                <p className="text-xs font-bold text-gray-600">₹{debt.initialAmount.toLocaleString()}</p>
+                                            </div>
+                                            <div className="w-24 hidden lg:block">
+                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Progress</p>
+                                                <div className="h-1.5 bg-white rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-primary"
+                                                        style={{ width: `${Math.min(100, Math.max(0, ((debt.initialAmount - debt.remainingAmount) / debt.initialAmount) * 100))}%` }}
+                                                    />
+                                                </div>
                                             </div>
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => openEditDebt(debt)}
-                                                    className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-primary transition-all"
+                                                    className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-primary transition-all border border-transparent hover:border-gray-100"
                                                 >
                                                     <ArrowRight size={16} />
                                                 </button>
@@ -467,39 +499,10 @@ export default function FinanceModule() {
                                                             fetchData();
                                                         }
                                                     }}
-                                                    className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-red-500 transition-all"
+                                                    className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-red-500 transition-all border border-transparent hover:border-gray-100"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
-                                            </div>
-                                        </div>
-                                        <h4 className="text-lg font-black text-gray-900 mb-1">{debt.name}</h4>
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${debt.repaymentType === 'split' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                                                {debt.repaymentType || 'Single'}
-                                            </span>
-                                            {debt.dueDate && (
-                                                <span className="text-[10px] font-bold text-gray-400">
-                                                    Due {new Date(debt.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">{debt.notes || 'No payment notes'}</p>
-
-                                        <div className="space-y-4 pt-6 border-t border-gray-100">
-                                            <div className="flex justify-between">
-                                                <span className="text-[10px] font-black text-gray-400 uppercase">Initial</span>
-                                                <span className="text-xs font-black text-gray-900">₹{debt.initialAmount.toLocaleString()}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-[10px] font-black text-gray-400 uppercase">Remaining</span>
-                                                <span className="text-sm font-black text-primary">₹{debt.remainingAmount.toLocaleString()}</span>
-                                            </div>
-                                            <div className="h-2 bg-white rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-primary"
-                                                    style={{ width: `${Math.min(100, Math.max(0, ((debt.initialAmount - debt.remainingAmount) / debt.initialAmount) * 100))}%` }}
-                                                />
                                             </div>
                                         </div>
                                     </div>
