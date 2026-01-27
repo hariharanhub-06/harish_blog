@@ -239,7 +239,7 @@ export default function QuizModule() {
                                     {quiz.isPublished ? 'Published' : 'Draft'}
                                 </span>
                                 <button
-                                    onClick={() => handleHostLive(quiz)}
+                                    onClick={() => handleHostLive(quiz.id)}
                                     className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
                                 >
                                     <Users size={14} />
