@@ -18,7 +18,8 @@ import {
     Youtube,
     GraduationCap,
     HeartHandshake,
-    Gamepad2
+    Gamepad2,
+    Wallet
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -29,8 +30,9 @@ import TrainingAcademyModule from "@/components/admin/TrainingAcademyModule";
 import YouTubeModule from "@/components/admin/YouTubeModule";
 import QuizModule from "@/components/admin/QuizModule";
 import FeedbackModule from "@/components/admin/FeedbackModule";
+import FinanceModule from "@/components/admin/FinanceModule";
 
-type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager";
+type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -42,7 +44,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "youtube-manager", "training-academy", "timeline", "feedbacks", "quiz-manager"];
+        const validTabs = ["overview", "profile", "messages", "youtube-manager", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -93,6 +95,7 @@ export default function AdminDashboard() {
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500" },
         { id: "feedbacks", title: "Testimonials", icon: HeartHandshake, color: "bg-pink-500" },
         { id: "quiz-manager", title: "Quiz Manager", icon: Gamepad2, color: "bg-cyan-500" },
+        { id: "finance-hub", title: "Finance Hub", icon: Wallet, color: "bg-amber-500" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
     ];
 
@@ -105,6 +108,7 @@ export default function AdminDashboard() {
             case "timeline": return <TimelineModule />;
             case "feedbacks": return <FeedbackModule />;
             case "quiz-manager": return <QuizModule />;
+            case "finance-hub": return <FinanceModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <OverviewModule />
