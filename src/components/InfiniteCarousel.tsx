@@ -47,46 +47,55 @@ export function InfiniteCarousel({
     };
 
     return (
-        <div
-            ref={containerRef}
-            className={`overflow-x-auto whitespace-nowrap relative flex ${className} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} scrollbar-hide`}
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={handleMouseLeave}
-            onTouchStart={() => setIsPaused(true)}
-            onTouchEnd={() => setIsPaused(false)}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            style={{
-                scrollBehavior: isDragging ? 'auto' : 'smooth'
-            }}
-        >
-            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0e0e0e] via-[#0e0e0e]/80 to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#0e0e0e] via-[#0e0e0e]/80 to-transparent z-10 pointer-events-none" />
-
+        <div className={`relative ${className} group overflow-hidden`}>
             <div
-                className="flex gap-12 items-center px-6 shrink-0"
+                ref={containerRef}
+                className={`overflow-x-auto whitespace-nowrap flex ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} scrollbar-hide`}
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={handleMouseLeave}
+                onTouchStart={() => setIsPaused(true)}
+                onTouchEnd={() => setIsPaused(false)}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
                 style={{
-                    animationName: 'marquee',
-                    animationDuration: `${speed}s`,
-                    animationIterationCount: 'infinite',
-                    animationTimingFunction: 'linear',
-                    animationPlayState: isPaused ? 'paused' : 'running',
-                    width: 'max-content'
+                    scrollBehavior: isDragging ? 'auto' : 'smooth'
                 }}
             >
-                {/* Render items twice for a perfect loop */}
-                {items.map((item, idx) => (
-                    <div key={`idx-${idx}`} className="shrink-0">
-                        {item}
-                    </div>
-                ))}
-                {items.map((item, idx) => (
-                    <div key={`dup-${idx}`} className="shrink-0">
-                        {item}
-                    </div>
-                ))}
+                <div
+                    className="flex gap-12 items-center px-6 shrink-0"
+                    style={{
+                        animationName: 'marquee',
+                        animationDuration: `${speed}s`,
+                        animationIterationCount: 'infinite',
+                        animationTimingFunction: 'linear',
+                        animationPlayState: isPaused ? 'paused' : 'running',
+                        width: 'max-content'
+                    }}
+                >
+                    {/* Render items twice for a perfect loop */}
+                    {items.map((item, idx) => (
+                        <div key={`idx-${idx}`} className="shrink-0">
+                            {item}
+                        </div>
+                    ))}
+                    {items.map((item, idx) => (
+                        <div key={`dup-${idx}`} className="shrink-0">
+                            {item}
+                        </div>
+                    ))}
+                </div>
             </div>
+
+            <style jsx>{`
+                .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                }
+            `}</style>
         </div>
     );
 }
