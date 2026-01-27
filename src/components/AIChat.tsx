@@ -120,12 +120,29 @@ export default function AIChat() {
                 const data = await res.json();
                 setMessages(prev => [...prev, { role: "ai", content: data.content }]);
             } else {
-                const errorData = await res.json();
-                const errorMessage = errorData.details || errorData.error || "I'm having trouble connecting to my brain right now. Please try again later.";
-                setMessages(prev => [...prev, { role: "ai", content: `SERVICE ERROR: ${errorMessage}` }]);
+                throw new Error("AI Service Unavailable");
             }
         } catch (error) {
-            setMessages(prev => [...prev, { role: "ai", content: "Oops! Something went wrong. Let's try that again." }]);
+            // OFFLINE FALLBACK
+            console.warn("Switching to Offline Mode", error);
+            try {
+                await fetch("/api/chat/offline", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name: leadData.name,
+                        email: leadData.email,
+                        mobile: leadData.mobile,
+                        message: userMsg
+                    })
+                });
+                setMessages(prev => [...prev, {
+                    role: "ai",
+                    content: "⚡ I'm having trouble connecting to my brain right now, but I've **saved your message** and forwarded it to Hari directly! He will read it and get back to you soon via email/phone. is there anything else? (Your next messages will also be saved)."
+                }]);
+            } catch (fallbackError) {
+                setMessages(prev => [...prev, { role: "ai", content: "I'm having connection issues. Please reach out via WhatsApp or Email listed below." }]);
+            }
         } finally {
             setLoading(false);
         }
