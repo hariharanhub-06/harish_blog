@@ -78,6 +78,19 @@ export default async function Home() {
     orderBy: (p, { desc }) => [desc(p.displayOrder)]
   });
 
+  // Fetch Quizzes
+  const quizzes = await db.query.quizzes.findMany({
+    where: (q, { eq }) => eq(q.isPublished, true),
+    with: {
+      questions: {
+        with: {
+          options: true
+        }
+      }
+    },
+    orderBy: (q, { desc }) => [desc(q.createdAt)]
+  });
+
   return (
     <div className="flex flex-col gap-0 bg-[#0e0e0e] relative">
       <MatrixBackground />
@@ -103,6 +116,7 @@ export default async function Home() {
         volunteerings={volunteerings as any}
         skills={dbSkills as any}
         partnerships={partnerships as any}
+        quizzes={quizzes as any}
       />
     </div>
   );

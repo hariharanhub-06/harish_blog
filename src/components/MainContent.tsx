@@ -5,7 +5,8 @@ import {
     ArrowRight, Code, Briefcase, Award, User,
     MapPin, Calendar, Mail, Phone, Send,
     CheckCircle2, Star, Github, ExternalLink,
-    GraduationCap, Linkedin, HeartHandshake, Play, Sparkles, MessageSquare
+    GraduationCap, Linkedin, HeartHandshake, Play, Sparkles,
+    MessageSquare, Gamepad2, Users, Clock, Target
 } from "lucide-react";
 import { InfiniteCarousel } from "./InfiniteCarousel";
 import CardWrapper from "@/components/CardWrapper";
@@ -16,7 +17,8 @@ import { TrainingPrograms } from "./TrainingPrograms";
 import { Tilt } from "./Tilt";
 import { useEffect, useState } from "react";
 import FeedbackSection from "./FeedbackSection";
-import DinoRunnerGame from "./DinoRunnerGame";
+import DinoRunnerGame from "@/components/DinoRunnerGame";
+import QuizGameOverlay from "@/components/QuizGameOverlay";
 
 interface Stat {
     icon: string;
@@ -85,6 +87,16 @@ interface Partnership {
     isActive: boolean;
 }
 
+interface Quiz {
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    coverImage: string;
+    timeLimit: number;
+    questions: any[];
+}
+
 interface Skill {
     id: string;
     name: string;
@@ -101,6 +113,7 @@ interface MainContentProps {
     volunteerings: Volunteering[];
     partnerships?: Partnership[];
     skills?: Skill[];
+    quizzes?: Quiz[];
 }
 
 
@@ -113,7 +126,8 @@ export default function MainContent({
     educations: initialEducations,
     volunteerings: initialVolunteerings,
     partnerships: initialPartnerships = [],
-    skills: initialSkills = []
+    skills: initialSkills = [],
+    quizzes: initialQuizzes = []
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -124,6 +138,10 @@ export default function MainContent({
     const [volunteerings, setVolunteerings] = useState(initialVolunteerings || []);
     const [partnerships, setPartnerships] = useState(initialPartnerships || []);
     const [skills, setSkills] = useState(initialSkills || []);
+    const [quizzes, setQuizzes] = useState(initialQuizzes || []);
+
+    const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
+    const [isLiveJoin, setIsLiveJoin] = useState(false);
 
     const [loading, setLoading] = useState(!initialProfile || initialProjects?.length === 0);
     const [selectedItem, setSelectedItem] = useState<{ data: Project | Experience | Education | Volunteering, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
@@ -142,6 +160,7 @@ export default function MainContent({
                     if (data.volunteerings) setVolunteerings(data.volunteerings);
                     if (data.partnerships) setPartnerships(data.partnerships);
                     if (data.skills) setSkills(data.skills);
+                    if (data.quizzes) setQuizzes(data.quizzes);
 
                     if (data.profile && data.profile.stats) {
                         setStats(data.profile.stats);
@@ -458,11 +477,85 @@ export default function MainContent({
             </section>
 
             {/* Feedback Section */}
+            {/* Quiz Section */}
+            {quizzes.length > 0 && (
+                <section id="quiz" className="py-12 md:py-20 bg-gradient-to-b from-transparent to-primary/5 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
+                    <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
+
+                    <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center mb-12 gap-6 relative z-10">
+                        <div className="text-center md:text-left">
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Challenge Area</span>
+                            <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Interactive <span className="text-primary italic">Quizzes</span></h2>
+                        </div>
+                        <button
+                            onClick={() => setIsLiveJoin(true)}
+                            className="flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all shadow-xl group"
+                        >
+                            <Users size={18} className="group-hover:scale-110 transition-transform" /> Join Live Game
+                        </button>
+                    </div>
+
+                    <InfiniteCarousel
+                        items={quizzes.map((quiz, i) => (
+                            <div
+                                key={quiz.id}
+                                onClick={() => setActiveQuiz(quiz)}
+                                className="group relative bg-[#1a1111] rounded-[2.5rem] border border-white/5 overflow-hidden hover:border-primary/50 transition-all cursor-pointer w-[85vw] md:w-[32vw] aspect-[4/3] flex flex-col"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10" />
+                                <div className="h-full w-full relative">
+                                    {quiz.coverImage ? (
+                                        <Image src={quiz.coverImage} alt={quiz.title} fill className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-transform duration-700" />
+                                    ) : (
+                                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-white/10 group-hover:scale-110 transition-all duration-700">
+                                            <Gamepad2 size={120} />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="absolute inset-0 p-8 flex flex-col justify-end z-20">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <span className="px-3 py-1 bg-primary text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-lg">{quiz.category}</span>
+                                        <span className="text-[8px] font-black text-white/50 uppercase tracking-[0.2em]">{quiz.questions.length} Questions</span>
+                                    </div>
+                                    <h3 className="text-2xl font-black text-white group-hover:text-primary transition-colors leading-tight mb-2 uppercase italic tracking-tighter">{quiz.title}</h3>
+                                    <p className="text-white/60 text-[10px] font-bold line-clamp-2 mb-6 uppercase tracking-wider">{quiz.description}</p>
+
+                                    <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                                        <div className="flex items-center gap-3 text-[8px] font-black uppercase tracking-widest text-white/40">
+                                            <span className="flex items-center gap-1.5"><Clock size={12} className="text-primary" /> {quiz.timeLimit}s/Q</span>
+                                        </div>
+                                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-primary transition-all">
+                                            <ArrowRight size={16} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    />
+                </section>
+            )}
+
             <FeedbackSection />
 
             {/* DinoRunnerGame Section */}
             <DinoRunnerGame />
 
+
+            {activeQuiz && (
+                <QuizGameOverlay
+                    quiz={activeQuiz}
+                    onClose={() => setActiveQuiz(null)}
+                />
+            )}
+
+            {isLiveJoin && (
+                <QuizGameOverlay
+                    quiz={null}
+                    isLive={true}
+                    onClose={() => setIsLiveJoin(false)}
+                />
+            )}
 
             {selectedItem && (
                 <DetailModal

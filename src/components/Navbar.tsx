@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, Briefcase, FileText, Mail, Home } from "lucide-react";
+import { Menu, X, User, Briefcase, FileText, Mail, Home, Gamepad2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
@@ -11,6 +11,7 @@ const navLinks = [
     { name: "About", href: "#about", icon: User },
     { name: "Portfolio", href: "#portfolio", icon: Briefcase },
     { name: "Videos", href: "#videos", icon: FileText },
+    { name: "Quiz", href: "#quiz", icon: Gamepad2 },
     { name: "Contact", href: "#contact", icon: Mail },
 ];
 
