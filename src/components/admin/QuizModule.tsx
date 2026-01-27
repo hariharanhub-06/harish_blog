@@ -18,10 +18,12 @@ import {
     Loader2,
     Image as ImageIcon,
     Upload,
-    FileText
+    FileText,
+    Users
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { uploadToImageKit } from "@/lib/imagekit-upload"; // Import ImageKit helper
 
 interface Quiz {
@@ -41,6 +43,7 @@ export default function QuizModule() {
     const [isEditing, setIsEditing] = useState(false);
     const [currentQuiz, setCurrentQuiz] = useState<Partial<Quiz> | null>(null);
     const [saving, setSaving] = useState(false);
+    const router = useRouter(); // Import needed
 
     useEffect(() => {
         fetchQuizzes();
@@ -76,6 +79,25 @@ export default function QuizModule() {
     const handleEdit = (quiz: Quiz) => {
         setCurrentQuiz(quiz);
         setIsEditing(true);
+    };
+
+    const handleHostLive = async (quizId: string) => {
+        try {
+            const res = await fetch("/api/quiz/live/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ quizId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                router.push(`/admin/live/${data.sessionId}`);
+            } else {
+                alert("Failed to create live session");
+            }
+        } catch (error) {
+            console.error("Host live failed", error);
+            alert("Failed to start live session");
+        }
     };
 
     const handleDelete = async (id: string) => {
@@ -156,14 +178,14 @@ export default function QuizModule() {
                     saving={saving}
                 />
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {quizzes.map((quiz) => (
-                        <div key={quiz.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                        <div key={quiz.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group flex flex-col h-full">
                             <div className="flex justify-between items-start mb-4">
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${quiz.isPublished ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-400'}`}>
                                     <Gamepad2 size={24} />
                                 </div>
-                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex gap-2">
                                     <button onClick={() => handleEdit(quiz)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-primary transition-colors">
                                         <Edit size={16} />
                                     </button>
@@ -183,6 +205,13 @@ export default function QuizModule() {
                                     {quiz.isPublished ? 'Published' : 'Draft'}
                                 </span>
                             </div>
+
+                            <button
+                                onClick={() => handleHostLive(quiz.id)}
+                                className="w-full mt-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all mt-auto"
+                            >
+                                <Users size={14} /> Host Live Session
+                            </button>
                         </div>
                     ))}
                 </div>

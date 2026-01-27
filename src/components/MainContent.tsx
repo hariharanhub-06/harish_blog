@@ -490,7 +490,7 @@ export default function MainContent({
                         </div>
                         <button
                             onClick={() => setIsLiveJoin(true)}
-                            className="flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all shadow-xl group"
+                            className="flex items-center gap-3 px-8 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-black hover:text-white hover:border hover:border-white/20 transition-all shadow-xl shadow-white/5 group"
                         >
                             <Users size={18} className="group-hover:scale-110 transition-transform" /> Join Live Game
                         </button>
@@ -501,32 +501,45 @@ export default function MainContent({
                             <div
                                 key={quiz.id}
                                 onClick={() => setActiveQuiz(quiz)}
-                                className="group relative bg-[#1a1111] rounded-[2.5rem] border border-white/5 overflow-hidden hover:border-primary/50 transition-all cursor-pointer w-[85vw] md:w-[32vw] aspect-[4/3] flex flex-col"
+                                className="group relative bg-black/20 rounded-[1.5rem] overflow-hidden border border-white/10 hover:border-primary/50 transition-all cursor-pointer w-[60vw] md:w-[19vw] flex flex-col h-auto aspect-[3/4]"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10" />
-                                <div className="h-full w-full relative">
+                                <div className="absolute inset-0">
                                     {quiz.coverImage ? (
-                                        <Image src={quiz.coverImage} alt={quiz.title} fill className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-transform duration-700" />
+                                        <Image src={quiz.coverImage} alt={quiz.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                                     ) : (
-                                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-white/10 group-hover:scale-110 transition-all duration-700">
-                                            <Gamepad2 size={120} />
+                                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-white/10">
+                                            <Gamepad2 size={60} />
                                         </div>
                                     )}
+                                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/90 opacity-90" />
                                 </div>
-                                <div className="absolute inset-0 p-8 flex flex-col justify-end z-20">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <span className="px-3 py-1 bg-primary text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-lg">{quiz.category}</span>
-                                        <span className="text-[8px] font-black text-white/50 uppercase tracking-[0.2em]">{quiz.questions.length} Questions</span>
-                                    </div>
-                                    <h3 className="text-2xl font-black text-white group-hover:text-primary transition-colors leading-tight mb-2 uppercase italic tracking-tighter">{quiz.title}</h3>
-                                    <p className="text-white/60 text-[10px] font-bold line-clamp-2 mb-6 uppercase tracking-wider">{quiz.description}</p>
 
-                                    <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                                        <div className="flex items-center gap-3 text-[8px] font-black uppercase tracking-widest text-white/40">
-                                            <span className="flex items-center gap-1.5"><Clock size={12} className="text-primary" /> {quiz.timeLimit}s/Q</span>
+                                <div className="relative z-10 flex flex-col justify-between h-full p-5">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="px-2 py-1 bg-white/10 backdrop-blur-md rounded-lg text-[8px] font-black uppercase tracking-widest text-primary border border-white/5">
+                                                {quiz.category || "General"}
+                                            </span>
+                                            <span className="text-[9px] font-bold text-white/60 uppercase tracking-wider flex items-center gap-1">
+                                                <Target size={10} /> {quiz.questions.length} Qs
+                                            </span>
                                         </div>
-                                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-primary transition-all">
-                                            <ArrowRight size={16} />
+                                        <span className="px-2 py-1 bg-black/40 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-lg border border-white/10 flex items-center gap-1">
+                                            <Clock size={10} className="text-primary" /> {quiz.timeLimit}s
+                                        </span>
+                                    </div>
+
+                                    {/* Middle is empty for image text */}
+
+                                    <div className="mt-auto pt-8">
+                                        <h3 className="text-lg font-black text-white group-hover:text-primary transition-colors leading-tight mb-2 uppercase italic tracking-tighter line-clamp-2">
+                                            {quiz.title}
+                                        </h3>
+                                        <div className="flex items-center justify-between mt-2">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">Play Now</span>
+                                            <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-primary text-white transition-all">
+                                                <ArrowRight size={12} />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

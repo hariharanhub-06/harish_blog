@@ -109,7 +109,7 @@ export function InfiniteCarousel({
                     className="flex gap-12 items-center px-6 shrink-0"
                     style={{
                         animationName: 'marquee',
-                        animationDuration: `${speed}s`,
+                        animationDuration: `${items.length * 1}s`, // 1 second per item
                         animationIterationCount: 'infinite',
                         animationTimingFunction: 'linear',
                         animationPlayState: isPaused ? 'paused' : 'running',
