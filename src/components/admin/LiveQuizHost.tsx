@@ -66,7 +66,7 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
 
     const fetchStatus = async () => {
         try {
-            const res = await fetch(`/api/quiz/live/status?sessionId=${sessionId}`);
+            const res = await fetch(`/api/quiz/live/status?sessionId=${sessionId}&host=true`);
             if (res.ok) {
                 const data = await res.json();
                 setStatus(data.status);
