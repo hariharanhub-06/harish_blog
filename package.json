@@ -7,7 +7,10 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "vercel-build": "next build"
+        "vercel-build": "next build",
+        "db:push": "drizzle-kit push",
+        "db:studio": "drizzle-kit studio",
+        "db:generate": "drizzle-kit generate"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",
