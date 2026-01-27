@@ -36,7 +36,8 @@ export async function GET(req: Request) {
             limit: 5,
             columns: {
                 name: true,
-                score: true
+                score: true,
+                streak: true
             }
         });
 
@@ -49,6 +50,10 @@ export async function GET(req: Request) {
         // Get current question if active and index is valid
         let currentQuestion = null;
         if (session.status === "active" && session.currentQuestionIndex !== null && session.currentQuestionIndex >= 0) {
+            const quizData = await db.query.quizzes.findFirst({
+                where: eq(quizzes.id, session.quizId)
+            });
+
             const questions = await db.query.quizQuestions.findMany({
                 where: eq(quizQuestions.quizId, session.quizId),
                 orderBy: [asc(quizQuestions.displayOrder)],
@@ -78,7 +83,8 @@ export async function GET(req: Request) {
                     id: q.id,
                     questionText: q.questionText,
                     imageUrl: q.imageUrl,
-                    timeLimit: q.timeLimit,
+                    // Fallback: question limit -> quiz limit -> 30
+                    timeLimit: q.timeLimit || quizData?.timeLimit || 30,
                     points: q.points,
                     // Show correct for host (when pin is not provided in search params)
                     options: q.options.map(o => ({

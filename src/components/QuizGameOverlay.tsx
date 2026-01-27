@@ -53,6 +53,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [score, setScore] = useState(0);
     const [correctCount, setCorrectCount] = useState(0);
+    const [streak, setStreak] = useState(0);
     const [timeLeft, setTimeLeft] = useState(30);
     const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -176,7 +177,8 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                             setGameState("playing");
                             setIsSubmitted(false);
                             setSelectedOptionIds([]);
-                            setTimeLeft(data.currentQuestion.timeLimit || 30);
+                            // Consistent fallback: Question Limit -> Global Limit -> 30
+                            setTimeLeft(data.currentQuestion.timeLimit || quiz?.timeLimit || 30);
                         }
                     } else if (data.status === "finished") {
                         setGameState("results");
@@ -253,6 +255,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                 const data = await res.json();
                 if (data.success) {
                     setScore(data.newScore);
+                    setStreak(data.streak || 0);
                     if (data.isCorrect) setCorrectCount(prev => prev + 1);
                 }
             } catch (error) {
@@ -277,6 +280,9 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
             const timeBonus = Math.floor((timeLeft / qTime) * 500);
             setScore(prev => prev + (currentQuestion?.points || 1000) + timeBonus);
             setCorrectCount(prev => prev + 1);
+            setStreak(prev => prev + 1);
+        } else {
+            setStreak(0);
         }
 
         setTimeout(() => {
@@ -451,9 +457,19 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                     </div>
                                 </div>
 
-                                <div className="text-right">
-                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block leading-none mb-1">Live Score</span>
-                                    <span className="text-3xl font-black tracking-tighter leading-none">{score}</span>
+                                <div className="flex gap-4 items-center">
+                                    {streak > 1 && (
+                                        <div className="text-right">
+                                            <span className="text-[10px] font-black text-primary uppercase tracking-widest block leading-none mb-1">Streak</span>
+                                            <span className="text-2xl font-black text-primary flex items-center justify-end gap-1">
+                                                {streak} <span className="text-xl">🔥</span>
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className="text-right">
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block leading-none mb-1">Live Score</span>
+                                        <span className="text-3xl font-black tracking-tighter leading-none">{score}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -600,20 +616,31 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                     Leaderboard
                                 </h3>
                                 <div className="flex-1 space-y-3 overflow-y-auto pr-2">
-                                    {leaderboard.length > 0 ? leaderboard.map((entry, i) => (
-                                        <div key={i} className={`flex items-center justify-between p-4 rounded-2xl border ${i === 0 ? 'bg-primary/10 border-primary/20' : 'bg-white/5 border-white/5'}`}>
-                                            <div className="flex items-center gap-4">
-                                                <span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs ${i === 0 ? 'bg-yellow-500 text-black' : 'bg-white/10'}`}>
-                                                    {i + 1}
-                                                </span>
-                                                <div>
-                                                    <p className="font-bold text-sm uppercase">{entry.userName}</p>
-                                                    <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">{entry.attempts} ATTEMPTS</p>
+                                    {leaderboard.length > 0 ? leaderboard.map((entry: any, i) => {
+                                        const name = entry.name || entry.userName;
+                                        const streakCount = entry.streak || 0;
+
+                                        return (
+                                            <div key={i} className={`flex items-center justify-between p-4 rounded-2xl border ${i === 0 ? 'bg-primary/10 border-primary/20' : 'bg-white/5 border-white/5'}`}>
+                                                <div className="flex items-center gap-4">
+                                                    <span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs ${i === 0 ? 'bg-yellow-500 text-black' : 'bg-white/10'}`}>
+                                                        {i + 1}
+                                                    </span>
+                                                    <div>
+                                                        <p className="font-bold text-sm uppercase">{name}</p>
+                                                        {streakCount > 1 ? (
+                                                            <p className="text-[10px] font-black text-primary uppercase flex items-center gap-1">
+                                                                {streakCount} STREAK 🔥
+                                                            </p>
+                                                        ) : entry.attempts && (
+                                                            <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">{entry.attempts} ATTEMPTS</p>
+                                                        )}
+                                                    </div>
                                                 </div>
+                                                <span className="font-black text-lg">{entry.score}</span>
                                             </div>
-                                            <span className="font-black text-lg">{entry.score}</span>
-                                        </div>
-                                    )) : (
+                                        );
+                                    }) : (
                                         <div className="flex flex-col items-center justify-center py-20 text-gray-500">
                                             <Loader2 className="animate-spin mb-4" />
                                             <p className="text-[10px] font-black uppercase tracking-widest">Calculating Standings...</p>

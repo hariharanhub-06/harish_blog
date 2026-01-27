@@ -23,6 +23,7 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
     const [playerCount, setPlayerCount] = useState(0);
     const [liveQuestion, setLiveQuestion] = useState<any>(null);
     const [timeLeft, setTimeLeft] = useState(0);
+    const [autoAdvanceTimer, setAutoAdvanceTimer] = useState<number | null>(null);
 
     useEffect(() => {
         const interval = setInterval(fetchStatus, 2000);
@@ -40,6 +41,29 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
         return () => clearInterval(timer);
     }, [status, timeLeft]);
 
+    // Auto-advance logic
+    useEffect(() => {
+        let timer: any;
+        const isAllAnswered = liveQuestion?.totalAnswers >= playerCount && playerCount > 0;
+        const showResults = (timeLeft === 0 || isAllAnswered) && status === "active";
+
+        if (showResults) {
+            if (autoAdvanceTimer === null) {
+                setAutoAdvanceTimer(10);
+            } else if (autoAdvanceTimer > 0) {
+                timer = setInterval(() => {
+                    setAutoAdvanceTimer(prev => (prev !== null ? prev - 1 : 0));
+                }, 1000);
+            } else if (autoAdvanceTimer === 0) {
+                handleAction("next");
+                setAutoAdvanceTimer(null);
+            }
+        } else {
+            setAutoAdvanceTimer(null);
+        }
+        return () => clearInterval(timer);
+    }, [timeLeft, liveQuestion, playerCount, status, autoAdvanceTimer]);
+
     const fetchStatus = async () => {
         try {
             const res = await fetch(`/api/quiz/live/status?sessionId=${sessionId}`);
@@ -53,6 +77,7 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
                     if (data.currentQuestion) {
                         setLiveQuestion(data.currentQuestion);
                         setTimeLeft(data.currentQuestion.timeLimit || 30);
+                        setAutoAdvanceTimer(null);
                     }
                 } else if (data.currentQuestion) {
                     // Just update live data (distribution)
@@ -152,7 +177,7 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
                                         <div className="flex flex-col items-end">
                                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Status</span>
                                             <span className={`px-3 py-1 ${showResults ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'} rounded-full text-[10px] font-black uppercase tracking-widest`}>
-                                                {showResults ? 'Time Up' : 'Live'}
+                                                {showResults ? (autoAdvanceTimer !== null ? `Moving in ${autoAdvanceTimer}s` : 'Time Up') : 'Live'}
                                             </span>
                                         </div>
                                     </div>
@@ -247,7 +272,7 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
 
                         <div className="space-y-3 overflow-y-auto pr-2 flex-1">
                             <AnimatePresence>
-                                {players.map((player, i) => (
+                                {players.map((player: any, i) => (
                                     <motion.div
                                         key={player.name}
                                         initial={{ opacity: 0, x: -20 }}
@@ -259,7 +284,14 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
                                             <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] ${i === 0 ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
                                                 {i + 1}
                                             </span>
-                                            <span className="font-bold text-sm text-gray-900">{player.name}</span>
+                                            <div>
+                                                <span className="font-bold text-sm text-gray-900 block leading-tight">{player.name}</span>
+                                                {player.streak > 1 && (
+                                                    <span className="text-[9px] font-black text-primary uppercase flex items-center gap-1">
+                                                        {player.streak} Streak 🔥
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <span className="font-black text-gray-900">{player.score}</span>
                                     </motion.div>
