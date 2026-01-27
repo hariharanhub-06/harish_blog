@@ -1,8 +1,8 @@
 
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { quizSessions, quizParticipants, quizQuestions } from "@/db/schema";
-import { eq, desc, asc } from "drizzle-orm";
+import { quizSessions, quizParticipants, quizQuestions, quizLiveAnswers } from "@/db/schema";
+import { eq, desc, asc, and } from "drizzle-orm";
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
@@ -60,14 +60,34 @@ export async function GET(req: Request) {
             // Safety check for index
             if (session.currentQuestionIndex < questions.length) {
                 const q = questions[session.currentQuestionIndex];
+
+                // Get answer distribution
+                const answers = await db.query.quizLiveAnswers.findMany({
+                    where: and(
+                        eq(quizLiveAnswers.sessionId, session.id),
+                        eq(quizLiveAnswers.questionId, q.id)
+                    )
+                });
+
+                const distribution = q.options.map(opt => ({
+                    optionId: opt.id,
+                    count: answers.filter(a => a.optionId === opt.id).length
+                }));
+
                 currentQuestion = {
                     id: q.id,
                     questionText: q.questionText,
                     imageUrl: q.imageUrl,
                     timeLimit: q.timeLimit,
                     points: q.points,
-                    // Map options to hide isCorrect
-                    options: q.options.map(o => ({ id: o.id, optionText: o.optionText }))
+                    // Show correct for host (when pin is not provided in search params)
+                    options: q.options.map(o => ({
+                        id: o.id,
+                        optionText: o.optionText,
+                        isCorrect: !pin ? o.isCorrect : undefined
+                    })),
+                    distribution,
+                    totalAnswers: answers.length
                 };
             }
         }

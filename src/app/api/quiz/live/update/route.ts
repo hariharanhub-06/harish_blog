@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
         if (action === "start") {
             updates = { status: "active", currentQuestionIndex: 0 };
-        } else if (action === "next") {
+        } else if (action === "next" || action === "skip") {
             updates = { currentQuestionIndex: (typeof currentQuestionIndex === 'number' ? currentQuestionIndex + 1 : 0) };
         } else if (action === "end") {
             updates = { status: "finished" };

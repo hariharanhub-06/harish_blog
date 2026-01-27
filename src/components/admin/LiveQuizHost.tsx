@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, Play, ArrowRight, Trophy, StopCircle, RefreshCcw, Copy } from "lucide-react";
+import { Users, Play, ArrowRight, Trophy, StopCircle, RefreshCcw, Copy, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Player {
@@ -21,11 +21,24 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1);
     const [players, setPlayers] = useState<Player[]>([]);
     const [playerCount, setPlayerCount] = useState(0);
+    const [liveQuestion, setLiveQuestion] = useState<any>(null);
+    const [timeLeft, setTimeLeft] = useState(0);
 
     useEffect(() => {
         const interval = setInterval(fetchStatus, 2000);
         return () => clearInterval(interval);
     }, []);
+
+    // Local countdown timer for the host
+    useEffect(() => {
+        let timer: any;
+        if (status === "active" && timeLeft > 0) {
+            timer = setInterval(() => {
+                setTimeLeft(prev => Math.max(0, prev - 1));
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, [status, timeLeft]);
 
     const fetchStatus = async () => {
         try {
@@ -33,7 +46,19 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
             if (res.ok) {
                 const data = await res.json();
                 setStatus(data.status);
-                setCurrentQuestionIndex(data.currentQuestionIndex);
+
+                // If question changed, reset timer
+                if (data.currentQuestionIndex !== currentQuestionIndex) {
+                    setCurrentQuestionIndex(data.currentQuestionIndex);
+                    if (data.currentQuestion) {
+                        setLiveQuestion(data.currentQuestion);
+                        setTimeLeft(data.currentQuestion.timeLimit || 30);
+                    }
+                } else if (data.currentQuestion) {
+                    // Just update live data (distribution)
+                    setLiveQuestion(data.currentQuestion);
+                }
+
                 if (data.leaderboard) setPlayers(data.leaderboard);
                 setPlayerCount(data.totalParticipants || 0);
             }
@@ -60,27 +85,30 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
         alert("PIN copied to clipboard!");
     };
 
+    const isAllAnswered = liveQuestion?.totalAnswers >= playerCount && playerCount > 0;
+    const showResults = timeLeft === 0 || isAllAnswered;
+
     return (
-        <div className="min-h-screen bg-gray-50 p-8 font-poppins">
-            <div className="max-w-6xl mx-auto space-y-8">
+        <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-poppins">
+            <div className="max-w-6xl mx-auto space-y-4 md:space-y-8">
                 {/* Header */}
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex justify-between items-center">
-                    <div>
-                        <span className="text-xs font-black text-primary uppercase tracking-widest">Live Session</span>
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight mt-1">{quizTitle}</h1>
+                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col md:row justify-between items-center gap-4">
+                    <div className="text-center md:text-left w-full">
+                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">Live Session</span>
+                        <h1 className="text-xl md:text-3xl font-black text-gray-900 tracking-tight mt-1">{quizTitle}</h1>
                     </div>
-                    <div className="flex items-center gap-6">
-                        <div className="text-right">
+                    <div className="flex items-center justify-center md:justify-end gap-4 md:gap-10 w-full">
+                        <div className="text-center md:text-right">
                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Join PIN</span>
-                            <button onClick={copyPin} className="text-4xl font-black text-primary tracking-widest hover:scale-105 transition-transform flex items-center gap-2">
-                                {initialPin} <Copy size={20} className="text-gray-300" />
+                            <button onClick={copyPin} className="text-2xl md:text-4xl font-black text-primary tracking-widest hover:scale-105 transition-transform flex items-center gap-2">
+                                {initialPin} <Copy size={16} className="text-gray-300" />
                             </button>
                         </div>
-                        <div className="h-12 w-px bg-gray-100" />
-                        <div className="text-right">
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Players</span>
-                            <span className="text-4xl font-black text-gray-900 tracking-tight flex items-center gap-2 justify-end">
-                                <Users className="text-gray-300" size={28} /> {playerCount}
+                        <div className="h-10 w-px bg-gray-100 hidden md:block" />
+                        <div className="text-center md:text-right">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Players joined</span>
+                            <span className="text-2xl md:text-4xl font-black text-gray-900 tracking-tight flex items-center gap-2 justify-center md:justify-end">
+                                <Users className="text-gray-300" size={24} /> {playerCount}
                             </span>
                         </div>
                     </div>
@@ -89,15 +117,15 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Controls & Status */}
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 min-h-[400px] flex flex-col justify-center items-center text-center">
+                        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 min-h-[400px] flex flex-col items-center">
                             {status === "waiting" && (
-                                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6">
-                                    <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                                        <Users className="text-blue-500" size={48} />
+                                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 flex flex-col justify-center items-center text-center space-y-6">
+                                    <div className="w-20 h-20 md:w-24 md:h-24 bg-blue-50 rounded-full flex items-center justify-center mb-4 animate-pulse">
+                                        <Users className="text-blue-500" size={40} />
                                     </div>
                                     <h2 className="text-2xl font-black text-gray-900">Waiting for players...</h2>
                                     <p className="text-gray-400 text-sm font-bold max-w-md mx-auto">
-                                        Share the PIN <span className="text-primary">{initialPin}</span> with your students.
+                                        Share the PIN <span className="text-primary font-black">{initialPin}</span> with your students.
                                         Once everyone has joined, click Start Game.
                                     </p>
                                     <button
@@ -109,31 +137,85 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
                                 </motion.div>
                             )}
 
-                            {status === "active" && (
-                                <div className="w-full space-y-8">
-                                    <div className="flex justify-between items-center w-full px-4">
-                                        <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Question {currentQuestionIndex + 1} of {totalQuestions}</span>
-                                        <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">Live</span>
+                            {status === "active" && liveQuestion && (
+                                <div className="w-full h-full flex flex-col">
+                                    <div className="flex justify-between items-center w-full mb-8">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-14 h-14 rounded-2xl bg-gray-900 text-white flex items-center justify-center text-2xl font-black">
+                                                {timeLeft}
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Time Left</span>
+                                                <span className="text-xs font-black uppercase tracking-widest text-gray-900">Question {currentQuestionIndex + 1} of {totalQuestions}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Status</span>
+                                            <span className={`px-3 py-1 ${showResults ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'} rounded-full text-[10px] font-black uppercase tracking-widest`}>
+                                                {showResults ? 'Time Up' : 'Live'}
+                                            </span>
+                                        </div>
                                     </div>
 
-                                    <div className="py-12">
-                                        <h2 className="text-4xl font-black text-gray-900 mb-2">Question is LIVE!</h2>
-                                        <p className="text-gray-400 font-bold">Check player screens for the current question.</p>
-                                    </div>
+                                    <div className="flex-1 space-y-10">
+                                        <div className="text-center">
+                                            <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight">
+                                                {liveQuestion.questionText}
+                                            </h2>
+                                        </div>
 
-                                    <div className="flex justify-center gap-4">
-                                        <button
-                                            onClick={() => handleAction("next")}
-                                            className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 transition-all flex items-center gap-2"
-                                        >
-                                            Next Question <ArrowRight size={20} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleAction("end")}
-                                            className="px-8 py-4 bg-red-50 text-red-500 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-100 transition-all flex items-center gap-2"
-                                        >
-                                            <StopCircle size={20} /> End Game
-                                        </button>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {liveQuestion.options.map((opt: any) => {
+                                                const voteCount = liveQuestion.distribution?.find((d: any) => d.optionId === opt.id)?.count || 0;
+                                                const percentage = liveQuestion.totalAnswers > 0 ? (voteCount / liveQuestion.totalAnswers) * 100 : 0;
+
+                                                return (
+                                                    <div key={opt.id} className={`relative p-5 rounded-2xl border-2 transition-all overflow-hidden ${showResults && opt.isCorrect ? 'border-emerald-500 bg-emerald-50' : 'border-gray-100 bg-white'
+                                                        }`}>
+                                                        {/* Progress Bar Background */}
+                                                        {showResults && (
+                                                            <div
+                                                                className={`absolute inset-0 opacity-10 transition-all duration-1000 ${opt.isCorrect ? 'bg-emerald-500' : 'bg-primary'}`}
+                                                                style={{ width: `${percentage}%` }}
+                                                            />
+                                                        )}
+
+                                                        <div className="relative flex justify-between items-center">
+                                                            <span className={`font-bold text-sm ${showResults && opt.isCorrect ? 'text-emerald-700' : 'text-gray-900'}`}>
+                                                                {opt.optionText}
+                                                            </span>
+                                                            <div className="flex items-center gap-2">
+                                                                {showResults && opt.isCorrect && <CheckCircle2 size={16} className="text-emerald-500" />}
+                                                                <span className="text-xs font-black text-gray-400">{voteCount}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <div className="flex flex-col md:flex-row justify-center gap-4 pt-4 pb-2">
+                                            <button
+                                                onClick={() => handleAction("next")}
+                                                className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                Next Question <ArrowRight size={20} />
+                                            </button>
+                                            <div className="flex gap-4">
+                                                <button
+                                                    onClick={() => handleAction("skip")}
+                                                    className="flex-1 px-8 py-4 bg-white border-2 border-gray-100 text-gray-600 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <RefreshCcw size={18} /> Skip
+                                                </button>
+                                                <button
+                                                    onClick={() => handleAction("end")}
+                                                    className="flex-1 px-8 py-4 bg-red-50 text-red-500 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-100 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <StopCircle size={20} /> End
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
