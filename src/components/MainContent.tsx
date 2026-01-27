@@ -504,15 +504,15 @@ export default function MainContent({
                                 <h4 className="text-3xl font-black text-white uppercase tracking-tighter mt-2">Latest <span className="text-blue-500">Quizzes</span></h4>
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
                                 {quizzes.map((quiz, i) => (
                                     <div
                                         key={quiz.id}
                                         onClick={() => setActiveQuiz(quiz)}
                                         className="group relative bg-[#0e0e0e] rounded-[1.5rem] overflow-hidden border border-white/10 hover:border-primary/50 transition-all cursor-pointer flex flex-col h-full shadow-lg hover:-translate-y-1 duration-300"
                                     >
-                                        {/* Image Section - Fixed 19:6 Aspect Ratio */}
-                                        <div className="relative w-full aspect-[19/6] overflow-hidden">
+                                        {/* Image Section - Fixed 16:9 Aspect Ratio */}
+                                        <div className="relative w-full aspect-[16/9] overflow-hidden">
                                             {quiz.coverImage ? (
                                                 <Image src={quiz.coverImage} alt={quiz.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                                             ) : (
