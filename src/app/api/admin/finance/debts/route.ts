@@ -21,6 +21,8 @@ export async function POST(req: Request) {
             initialAmount: parseFloat(data.initialAmount),
             remainingAmount: parseFloat(data.initialAmount),
             notes: data.notes,
+            repaymentType: data.repaymentType || "single",
+            dueDate: data.dueDate ? new Date(data.dueDate) : null,
         }).returning();
         return NextResponse.json(newDebt[0]);
     } catch (error) {
@@ -38,6 +40,8 @@ export async function PUT(req: Request) {
                 initialAmount: parseFloat(data.initialAmount),
                 remainingAmount: parseFloat(data.remainingAmount),
                 notes: data.notes,
+                repaymentType: data.repaymentType,
+                dueDate: data.dueDate ? new Date(data.dueDate) : null,
                 isActive: data.isActive,
                 updatedAt: new Date(),
             })
