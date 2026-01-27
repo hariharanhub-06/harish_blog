@@ -72,7 +72,7 @@ interface Profile {
     name: string | null;
     about: string | null;
     location: string | null;
-    aboutImageUrl?: string;
+    aboutImageUrl?: string | null;
     trainingStats?: Stat[];
     stats?: Stat[];
 }
@@ -206,9 +206,9 @@ export default function MainContent({
 
             {/* Training Programs Section (Replaces Skill Carousel) */}
             <TrainingPrograms
-                trainingStats={profile.trainingStats}
-                partnerships={partnerships}
-                skills={skills}
+                trainingStats={profile.trainingStats as any}
+                partnerships={partnerships as any}
+                skills={skills as any}
             />
 
             {/* Experience Section */}
@@ -223,7 +223,7 @@ export default function MainContent({
                     </div>
 
                     <InfiniteCarousel
-                        items={experiences.map((exp: Experience) => (
+                        items={experiences.map((exp: any) => (
                             <div key={exp.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[85vw] md:w-[32vw] h-full min-h-[140px] justify-start text-left">
                                 {exp.logo ? (
                                     <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1 shadow-sm">
@@ -316,10 +316,10 @@ export default function MainContent({
             {/* About Section */}
             <section id="about" className="container mx-auto px-6 scroll-mt-20">
                 <AboutHero
-                    name={profile.name}
-                    about={profile.about}
-                    location={profile.location}
-                    imageUrl={profile.aboutImageUrl}
+                    name={profile.name as any}
+                    about={profile.about as any}
+                    location={profile.location as any}
+                    imageUrl={profile.aboutImageUrl as any}
                     experience={profile.stats?.find((s: Stat) => s.label === "Years Experience")?.value?.toString() || "3+"}
                 />
 
@@ -469,7 +469,7 @@ export default function MainContent({
                     isOpen={!!selectedItem}
                     onClose={() => setSelectedItem(null)}
                     type={selectedItem.type}
-                    data={selectedItem.data}
+                    data={selectedItem.data as any}
                 />
             )}
         </div>
