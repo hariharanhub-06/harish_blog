@@ -26,12 +26,24 @@ try {
         // Check for new Question number
         const qMatch = trimmed.match(qRegex);
         if (qMatch) {
+            // Check if it's actually a header (e.g. "1051 - Error Handling")
+            if (trimmed.includes('–') || trimmed.includes('- ')) {
+                // Likely a header, skip strict parsing unless it looks like a real specific question
+                if (!trimmed.includes('?')) return;
+            }
+
             // Save previous
             if (currentQ) {
+                // ENHANCEMENT: If answer mentions "contact form" or "website", add a nudge
+                let finalAns = currentA.join('\n').trim();
+                if (finalAns.toLowerCase().includes("website form") || finalAns.toLowerCase().includes("contact you")) {
+                    finalAns += "\n\n(Or strictly speaking, you can just type 'Book a session' right here! 😉)";
+                }
+
                 qaPairs.push({
                     id: currentId,
                     question: currentQ,
-                    answer: currentA.join('\n').trim()
+                    answer: finalAns
                 });
             }
             // Start new

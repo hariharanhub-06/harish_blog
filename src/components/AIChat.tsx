@@ -195,24 +195,49 @@ export default function AIChat() {
             }
             // 3. FREE CHAT / KNOWLEDGE BASE
             else {
-                // Search in KB
-                const kbMatch = findBestMatch(userMsg);
-                if (kbMatch) {
-                    reply = kbMatch;
-                } else {
-                    // Fallback
-                    reply = "I'm not 100% sure about that, but I've noted your message and forwarded it to Hari directly! he'll reply via email.";
-                    await fetch("/api/chat/offline", {
-                        method: "POST",
-                        body: JSON.stringify({ ...leadData, message: `UNANSWERED: ${userMsg}` })
-                    });
+                // SUGGESTION LOGIC
+                if (lowerMsg.includes("ask a question")) {
+                    reply = "Sure! What would you like to know about? 👇";
+                    options = ["Who is Hari?", "Pricing & Services", "Rotaract Journey", "Business Advice"];
+                    nextState = "FREE_CHAT";
                 }
-            }
+                else if (lowerMsg.includes("who is hari")) {
+                    const kbMatch = findBestMatch("Describe yourself in one line");
+                    reply = kbMatch || "Hari is a confident, hardworking, people-oriented person.";
+                    options = ["What is his vision?", "Is he a foodie?", "Back to Menu"];
+                }
+                else if (lowerMsg.includes("pricing") || lowerMsg.includes("services")) {
+                    reply = "Hari offers Training, Consulting, and Development services. What specific price do you need?";
+                    options = ["Consulting Fee", "Training Cost", "Web Dev Price", "Book a Session"];
+                }
+                else if (lowerMsg.includes("just saying hi")) {
+                    reply = "Hello! 👋 Great to see you here. I'm always ready to chat. You can ask me anything about Hari's work, life, or just say 'Tell me a joke'!";
+                    options = ["Tell me a joke", "Book a Session"];
+                }
+                else if (lowerMsg.includes("joke") || lowerMsg.includes("funny")) {
+                    const jokes = ["Why do I love Dosa? Because happiness comes round and crispy! 🥞", "My biggest enemy? The Alarm Clock. ⏰", "My secret talent? Sleeping anywhere. 😴"];
+                    reply = jokes[Math.floor(Math.random() * jokes.length)];
+                    options = ["Another one", "Back to Business"];
+                }
+                else {
+                    // Search in KB
+                    const kbMatch = findBestMatch(userMsg);
+                    if (kbMatch) {
+                        reply = kbMatch;
+                    } else {
+                        // Fallback
+                        reply = "I'm not 100% sure about that, but I've noted your message and forwarded it to Hari directly! he'll reply via email.";
+                        await fetch("/api/chat/offline", {
+                            method: "POST",
+                            body: JSON.stringify({ ...leadData, message: `UNANSWERED: ${userMsg}` })
+                        });
+                    }
+                }
 
-            setMessages(prev => [...prev, { role: "ai", content: reply, options }]);
-            setFlowState(nextState);
-            setLoading(false);
-        }, 600); // Simulate typing delay
+                setMessages(prev => [...prev, { role: "ai", content: reply, options }]);
+                setFlowState(nextState);
+                setLoading(false);
+            }, 600); // Simulate typing delay
     };
 
     return (
