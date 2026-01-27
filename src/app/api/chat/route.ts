@@ -114,15 +114,15 @@ export async function POST(req: Request) {
             let usedModel = "";
 
             try {
-                // LAYER 1: Rapid 8B Model (1.5s Limit)
+                // LAYER 1: Rapid 8B Model (2.5s Limit)
                 usedModel = "llama-3.1-8b-instant";
-                completion = await fetchWithTimeout(usedModel, 1500);
+                completion = await fetchWithTimeout(usedModel, 2500);
             } catch (err: any) {
                 console.warn(`Layer 1 (${usedModel}) failed: ${err.message}`);
                 try {
-                    // LAYER 2: Versatile 70B Model (2.5s Limit)
+                    // LAYER 2: Versatile 70B Model (4.0s Limit)
                     usedModel = "llama-3.3-70b-versatile";
-                    completion = await fetchWithTimeout(usedModel, 2500);
+                    completion = await fetchWithTimeout(usedModel, 4000);
                 } catch (innerErr: any) {
                     // LAYER 3: Gemini Final Fallback
                     console.warn(`Layer 2 (${usedModel}) failed: ${innerErr.message}. Trying Gemini.`);
