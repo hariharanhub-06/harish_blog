@@ -604,6 +604,41 @@ export default function FinanceModule() {
                                     className="w-full h-64 bg-gray-50 border-0 rounded-[2rem] p-8 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-medium leading-relaxed"
                                 />
 
+                                {/* Smart Context Suggestions */}
+                                {(() => {
+                                    // Determine context based on the last header typed
+                                    const lines = logInput.toLowerCase().split('\n');
+                                    let currentContext = 'expense';
+                                    for (let i = lines.length - 1; i >= 0; i--) {
+                                        if (lines[i].includes('debts paid:') || lines[i].includes('debt:')) {
+                                            currentContext = 'debt_pay';
+                                            break;
+                                        }
+                                        if (lines[i].includes('expense:') || lines[i].includes('income:')) {
+                                            currentContext = 'other';
+                                            break;
+                                        }
+                                    }
+
+                                    if (currentContext === 'debt_pay') {
+                                        return (
+                                            <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 py-2">Quick Add:</span>
+                                                {debts.filter(d => d.remainingAmount > 0).map(debt => (
+                                                    <button
+                                                        key={debt.id}
+                                                        onClick={() => setLogInput(prev => `${prev}${prev.endsWith('\n') || prev === '' ? '' : '\n'}${debt.name} - `)}
+                                                        className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs font-bold transition-all border border-blue-100"
+                                                    >
+                                                        {debt.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })()}
+
                                 <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
                                     <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-2 flex items-center gap-2">
                                         <AlertCircle size={12} />
