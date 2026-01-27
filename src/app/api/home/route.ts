@@ -34,17 +34,22 @@ export async function GET() {
             orderBy: (s, { asc, desc }) => [desc(s.proficiency), asc(s.displayOrder)],
         });
 
-        const allQuizzes = await db.query.quizzes.findMany({
-            where: (q, { eq }) => eq(q.isPublished, true),
-            with: {
-                questions: {
-                    with: {
-                        options: true
+        let allQuizzes = [];
+        try {
+            allQuizzes = await db.query.quizzes.findMany({
+                where: (q, { eq }) => eq(q.isPublished, true),
+                with: {
+                    questions: {
+                        with: {
+                            options: true
+                        }
                     }
-                }
-            },
-            orderBy: (q, { desc }) => [desc(q.createdAt)]
-        });
+                },
+                orderBy: (q, { desc }) => [desc(q.createdAt)]
+            });
+        } catch (e) {
+            console.error("Quiz fetch failed in API:", e);
+        }
 
         return NextResponse.json({
             profile: profileData,

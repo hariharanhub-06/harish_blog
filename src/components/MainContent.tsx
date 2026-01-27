@@ -402,6 +402,80 @@ export default function MainContent({
                 )}
             </section>
 
+            {/* Projects/Portfolio Section */}
+            <section id="portfolio" className="container mx-auto px-6 scroll-mt-20 py-12">
+                <div className="flex flex-col items-center mb-8">
+                    <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">Featured <span className="text-orange-600">Projects</span></h2>
+                    <div className="w-16 h-1.5 bg-orange-600 mt-2 rounded-full"></div>
+                    <p className="mt-4 text-gray-400 text-base max-w-xl text-center font-bold">
+                        Building digital products that combine stunning design with robust business logic.
+                    </p>
+                </div>
+
+                {loading ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i} className="bg-white/5 rounded-3xl overflow-hidden border border-white/10 h-80 animate-pulse">
+                                <div className="h-56 bg-white/10"></div>
+                                <div className="p-5 flex flex-col gap-2">
+                                    <div className="w-1/2 h-4 bg-white/10 rounded"></div>
+                                    <div className="w-full h-8 bg-white/5 rounded"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {projects.map((project, i) => (
+                            <CardWrapper key={project.id} index={i}>
+                                <Tilt options={{ max: 10, speed: 400, glare: false }} className="h-full">
+                                    <div
+                                        className="group flex flex-col h-full bg-[#1a1a1a] rounded-3xl overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/30 transition-all duration-500 cursor-pointer"
+                                        onClick={() => setSelectedItem({ data: project, type: "project" })}
+                                    >
+                                        <div className="relative h-64 overflow-hidden">
+                                            {project.thumbnail ? (
+                                                <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100" />
+                                            ) : (
+                                                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
+                                                    <span className="text-white font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
+                                                </div>
+                                            )}
+                                            <div className="absolute top-4 right-4 flex gap-2">
+                                                {project.featured && (
+                                                    <span className="bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">Featured</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6 flex flex-col flex-grow text-left">
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                {project.technologies?.slice(0, 3).map((tech: string) => (
+                                                    <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/10 px-3 py-1.5 rounded-md">{tech}</span>
+                                                ))}
+                                            </div>
+
+                                            <h3 className="text-2xl font-black text-white mb-2 group-hover:text-orange-500 transition-colors leading-tight">{project.title}</h3>
+                                            <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2 font-bold">{project.description}</p>
+
+                                            <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
+                                                <span className="text-orange-600 font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
+                                                    View Case Study <ArrowRight size={16} />
+                                                </span>
+                                                <div className="flex gap-4">
+                                                    <ExternalLink size={18} className="text-gray-600 hover:text-white transition-colors" />
+                                                    <Github size={18} className="text-gray-600 hover:text-white transition-colors" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Tilt>
+                            </CardWrapper>
+                        ))}
+                    </div>
+                )}
+            </section>
+
             {/* Feedback Section */}
             {/* Quiz Section */}
             {quizzes.length > 0 && (
