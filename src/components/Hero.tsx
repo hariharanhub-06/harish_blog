@@ -26,7 +26,7 @@ export default function Hero({ profile, className }: HeroProps) {
     ];
 
     return (
-        <section className={cn("relative min-h-[90vh] lg:min-h-[85vh] flex items-center justify-center overflow-hidden bg-[#0e0e0e] pt-32 md:pt-40", className)}>
+        <section className={cn("relative min-h-[90vh] lg:min-h-[85vh] flex items-center justify-center overflow-hidden bg-[#0e0e0e] pt-5", className)}>
             {/* Hero Background Image */}
             {profile.heroImageUrl && (
                 <div className="absolute inset-0 z-0">
