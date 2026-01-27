@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Users, Play, ArrowRight, Trophy, StopCircle, RefreshCcw, Copy, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -24,11 +24,17 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
     const [liveQuestion, setLiveQuestion] = useState<any>(null);
     const [timeLeft, setTimeLeft] = useState(0);
     const [autoAdvanceTimer, setAutoAdvanceTimer] = useState<number | null>(null);
+    const indexRef = useRef(currentQuestionIndex);
+    const hasAdvancedRef = useRef(-2);
+
+    useEffect(() => {
+        indexRef.current = currentQuestionIndex;
+    }, [currentQuestionIndex]);
 
     useEffect(() => {
         const interval = setInterval(fetchStatus, 2000);
         return () => clearInterval(interval);
-    }, [sessionId, currentQuestionIndex]);
+    }, [sessionId]);
 
     // Local countdown timer for the host
     useEffect(() => {
@@ -46,20 +52,23 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
         const isAllAnswered = liveQuestion?.totalAnswers >= playerCount && playerCount > 0;
         const shouldReveal = (timeLeft === 0 || isAllAnswered) && status === "active";
 
-        if (shouldReveal && autoAdvanceTimer === null) {
+        if (shouldReveal && autoAdvanceTimer === null && hasAdvancedRef.current !== currentQuestionIndex) {
             setAutoAdvanceTimer(10);
         } else if (!shouldReveal) {
             setAutoAdvanceTimer(null);
         }
-    }, [timeLeft, liveQuestion, playerCount, status, autoAdvanceTimer]);
+    }, [timeLeft, liveQuestion, playerCount, status, autoAdvanceTimer, currentQuestionIndex]);
 
     // Independent countdown for auto-advance
     useEffect(() => {
-        if (autoAdvanceTimer === null || autoAdvanceTimer <= 0) {
-            if (autoAdvanceTimer === 0) {
+        if (autoAdvanceTimer === null || autoAdvanceTimer < 0) return;
+
+        if (autoAdvanceTimer === 0) {
+            if (hasAdvancedRef.current !== currentQuestionIndex) {
+                hasAdvancedRef.current = currentQuestionIndex;
                 handleAction("next");
-                setAutoAdvanceTimer(null);
             }
+            setAutoAdvanceTimer(null);
             return;
         }
 
@@ -68,7 +77,7 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [autoAdvanceTimer]);
+    }, [autoAdvanceTimer, currentQuestionIndex]);
 
     const fetchStatus = async () => {
         try {
@@ -78,7 +87,7 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
                 setStatus(data.status);
 
                 // If question changed, reset timer
-                if (data.currentQuestionIndex !== currentQuestionIndex) {
+                if (data.currentQuestionIndex !== indexRef.current) {
                     setCurrentQuestionIndex(data.currentQuestionIndex);
                     if (data.currentQuestion) {
                         setLiveQuestion(data.currentQuestion);
@@ -103,7 +112,7 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
             await fetch("/api/quiz/live/update", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sessionId, action, currentQuestionIndex })
+                body: JSON.stringify({ sessionId, action, currentQuestionIndex: indexRef.current })
             });
             fetchStatus();
         } catch (error) {

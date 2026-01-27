@@ -381,7 +381,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                             placeholder="ENTER GAME PIN"
                                             value={pin}
                                             onChange={(e) => setPin(e.target.value)}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-center font-black text-2xl md:text-4xl tracking-[0.1em] md:tracking-[0.3em] focus:ring-2 focus:ring-blue-500 outline-none transition-all uppercase"
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-4 text-center font-black text-xl md:text-4xl tracking-normal md:tracking-[0.3em] focus:ring-2 focus:ring-blue-500 outline-none transition-all uppercase placeholder:text-sm md:placeholder:text-xl"
                                         />
                                         <input
                                             type="text"
