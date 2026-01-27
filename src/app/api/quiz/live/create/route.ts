@@ -48,6 +48,10 @@ export async function POST(req: Request) {
 
     } catch (error) {
         console.error("Failed to create live session:", error);
+        if (error instanceof Error) {
+            console.error(error.message);
+            console.error(error.stack);
+        }
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
