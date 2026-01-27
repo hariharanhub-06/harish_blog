@@ -1,7 +1,7 @@
 
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { quizSessions, quizParticipants, quizQuestions, quizOptions } from "@/db/schema";
+import { quizSessions, quizParticipants, quizQuestions, quizOptions, quizLiveAnswers } from "@/db/schema";
 import { eq, and, asc } from "drizzle-orm";
 
 export async function POST(req: Request) {
@@ -90,6 +90,18 @@ export async function POST(req: Request) {
             lastAnsweredQuestionIndex: session.currentQuestionIndex,
             lastActive: new Date()
         }).where(eq(quizParticipants.id, participantId));
+
+        // Record the actual picks for distribution stats
+        if (answerIds && answerIds.length > 0) {
+            await db.insert(quizLiveAnswers).values(
+                answerIds.map((optId: string) => ({
+                    sessionId,
+                    questionId: currentQuestion.id,
+                    participantId,
+                    optionId: optId
+                }))
+            );
+        }
 
         return NextResponse.json({
             success: true,

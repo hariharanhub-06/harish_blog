@@ -501,6 +501,15 @@ export const quizParticipants = pgTable("quiz_participants", {
   joinedAt: timestamp("joined_at").defaultNow(),
 });
 
+export const quizLiveAnswers = pgTable("quiz_live_answers", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  sessionId: text("session_id").notNull(),
+  questionId: text("question_id").notNull(),
+  participantId: text("participant_id").notNull(),
+  optionId: text("option_id").notNull(), // The ID of the option picked
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const quizSessionRelations = relations(quizSessions, ({ one, many }) => ({
   quiz: one(quizzes, {
     fields: [quizSessions.quizId],
