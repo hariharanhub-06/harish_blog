@@ -6,13 +6,13 @@ import { notFound } from "next/navigation";
 import LiveQuizHost from "@/components/admin/LiveQuizHost";
 
 interface PageProps {
-    params: {
+    params: Promise<{
         sessionId: string;
-    };
+    }>;
 }
 
 export default async function HostLivePage({ params }: PageProps) {
-    const { sessionId } = params;
+    const { sessionId } = await params;
 
     const session = await db.query.quizSessions.findFirst({
         where: eq(quizSessions.id, sessionId)
