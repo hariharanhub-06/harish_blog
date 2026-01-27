@@ -531,17 +531,13 @@ export default function MainContent({
                                         ? quizzes
                                         : quizzes.filter(q => q.category === selectedCategory);
 
-                                    // Group quizzes into pairs for columns
-                                    const columns = [];
-                                    for (let i = 0; i < filteredQuizzes.length; i += 2) {
-                                        columns.push(filteredQuizzes.slice(i, i + 2));
-                                    }
+                                    const count = filteredQuizzes.length;
 
-                                    return columns.map((pair, colIdx) => (
-                                        <div key={colIdx} className="flex flex-col gap-6 w-[350px] md:w-[450px]">
-                                            {pair.map((quiz, i) => (
+                                    // If <= 5 quizzes, render in a single row
+                                    if (count <= 5) {
+                                        return filteredQuizzes.map((quiz) => (
+                                            <div key={quiz.id} className="w-[350px] md:w-[450px]">
                                                 <div
-                                                    key={quiz.id}
                                                     onClick={() => setActiveQuiz(quiz)}
                                                     className="group relative bg-[#0e0e0e] rounded-[2rem] overflow-hidden border border-white/10 hover:border-primary/50 transition-all cursor-pointer flex flex-col shadow-2xl hover:-translate-y-1 duration-300 h-full"
                                                 >
@@ -554,18 +550,14 @@ export default function MainContent({
                                                             </div>
                                                         )}
                                                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-
                                                         <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
                                                             <span className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[10px] font-black uppercase tracking-widest text-primary border border-white/5">
                                                                 {quiz.category || "General"}
                                                             </span>
-                                                            <div className="flex gap-2">
-                                                                <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-lg border border-white/5 flex items-center gap-2">
-                                                                    <Clock size={12} className="text-primary" /> {quiz.timeLimit}s
-                                                                </span>
-                                                            </div>
+                                                            <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-lg border border-white/5 flex items-center gap-2">
+                                                                <Clock size={12} className="text-primary" /> {quiz.timeLimit}s
+                                                            </span>
                                                         </div>
-
                                                         <div className="absolute bottom-4 left-4 right-4 z-10">
                                                             <h3 className="text-lg font-black text-white group-hover:text-primary transition-colors leading-tight uppercase italic tracking-tighter line-clamp-1">
                                                                 {quiz.title}
@@ -573,10 +565,88 @@ export default function MainContent({
                                                         </div>
                                                     </div>
                                                 </div>
-                                            ))}
-                                            {/* Spacer if only one quiz in column */}
-                                            {pair.length === 1 && (
-                                                <div className="invisible h-[115px] md:h-[150px]" />
+                                            </div>
+                                        ));
+                                    }
+
+                                    // If > 5 quizzes, distribute into two rows balanced
+                                    // Example: 7 items -> 4 in first, 3 in second. 8 items -> 4 in first, 4 in second.
+                                    const half = Math.ceil(count / 2);
+                                    const firstRow = filteredQuizzes.slice(0, half);
+                                    const secondRow = filteredQuizzes.slice(half);
+
+                                    const columns = [];
+                                    for (let i = 0; i < firstRow.length; i++) {
+                                        columns.push({
+                                            top: firstRow[i],
+                                            bottom: secondRow[i] // Can be undefined if firstRow is longer
+                                        });
+                                    }
+
+                                    return columns.map((col, colIdx) => (
+                                        <div key={colIdx} className="flex flex-col gap-6 w-[350px] md:w-[450px]">
+                                            {/* Top Quiz */}
+                                            <div
+                                                onClick={() => setActiveQuiz(col.top)}
+                                                className="group relative bg-[#0e0e0e] rounded-[2rem] overflow-hidden border border-white/10 hover:border-primary/50 transition-all cursor-pointer flex flex-col shadow-2xl hover:-translate-y-1 duration-300 h-full"
+                                            >
+                                                <div className="relative w-full aspect-[21/9] overflow-hidden">
+                                                    {col.top.coverImage ? (
+                                                        <Image src={col.top.coverImage} alt={col.top.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-60 group-hover:opacity-100" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-white/10">
+                                                            <Gamepad2 size={40} />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                                                    <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+                                                        <span className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[10px] font-black uppercase tracking-widest text-primary border border-white/5">
+                                                            {col.top.category || "General"}
+                                                        </span>
+                                                        <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-lg border border-white/5 flex items-center gap-2">
+                                                            <Clock size={12} className="text-primary" /> {col.top.timeLimit}s
+                                                        </span>
+                                                    </div>
+                                                    <div className="absolute bottom-4 left-4 right-4 z-10">
+                                                        <h3 className="text-lg font-black text-white group-hover:text-primary transition-colors leading-tight uppercase italic tracking-tighter line-clamp-1">
+                                                            {col.top.title}
+                                                        </h3>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Bottom Quiz (if exists) */}
+                                            {col.bottom ? (
+                                                <div
+                                                    onClick={() => setActiveQuiz(col.bottom)}
+                                                    className="group relative bg-[#0e0e0e] rounded-[2rem] overflow-hidden border border-white/10 hover:border-primary/50 transition-all cursor-pointer flex flex-col shadow-2xl hover:-translate-y-1 duration-300 h-full"
+                                                >
+                                                    <div className="relative w-full aspect-[21/9] overflow-hidden">
+                                                        {col.bottom.coverImage ? (
+                                                            <Image src={col.bottom.coverImage} alt={col.bottom.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-60 group-hover:opacity-100" />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-primary/10 flex items-center justify-center text-white/10">
+                                                                <Gamepad2 size={40} />
+                                                            </div>
+                                                        )}
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                                                        <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+                                                            <span className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[10px] font-black uppercase tracking-widest text-primary border border-white/5">
+                                                                {col.bottom.category || "General"}
+                                                            </span>
+                                                            <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-lg border border-white/5 flex items-center gap-2">
+                                                                <Clock size={12} className="text-primary" /> {col.bottom.timeLimit}s
+                                                            </span>
+                                                        </div>
+                                                        <div className="absolute bottom-4 left-4 right-4 z-10">
+                                                            <h3 className="text-lg font-black text-white group-hover:text-primary transition-colors leading-tight uppercase italic tracking-tighter line-clamp-1">
+                                                                {col.bottom.title}
+                                                            </h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="invisible h-full min-h-[150px]" />
                                             )}
                                         </div>
                                     ));
