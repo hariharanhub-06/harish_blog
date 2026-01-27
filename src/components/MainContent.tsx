@@ -69,9 +69,9 @@ interface Video {
 }
 
 interface Profile {
-    name: string;
-    about: string;
-    location: string;
+    name: string | null;
+    about: string | null;
+    location: string | null;
     aboutImageUrl?: string;
     trainingStats?: Stat[];
     stats?: Stat[];
@@ -103,11 +103,6 @@ interface MainContentProps {
     skills?: Skill[];
 }
 
-const SKILLS = [
-    "Next.js", "React", "Typescript", "Tailwind CSS", "Node.js",
-    "PostgreSQL", "Prisma", "Drizzle", "Framer Motion", "Three.js",
-    "Digital Marketing", "Automation", "CRM Solutions", "Brand Identity"
-];
 
 export default function MainContent({
     profile: initialProfile,
