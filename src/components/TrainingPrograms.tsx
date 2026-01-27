@@ -57,7 +57,7 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
     const studentsStat = trainingStats.find(s => s.icon === "Users") || { value: "5000+", label: "Minds Empowered" };
 
     return (
-        <div className="w-full flex flex-col gap-4 md:gap-8 py-6 md:py-10">
+        <div id="academy" className="w-full flex flex-col gap-4 md:gap-8 py-6 md:py-10 scroll-mt-20">
             {/* Main Section Header */}
             <div className="flex flex-col items-center mb-2 md:mb-6 relative overflow-hidden w-full">
                 <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-8 md:-mt-12">ACADEMY</h2>
