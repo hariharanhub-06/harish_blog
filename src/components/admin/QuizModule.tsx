@@ -20,7 +20,8 @@ import {
     Upload,
     FileText,
     Users,
-    BarChart2
+    BarChart2,
+    ArrowRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -46,7 +47,9 @@ export default function QuizModule() {
     const [currentQuiz, setCurrentQuiz] = useState<Partial<Quiz> | null>(null);
     const [selectedStatsQuiz, setSelectedStatsQuiz] = useState<Quiz | null>(null);
     const [saving, setSaving] = useState(false);
-    const router = useRouter(); // Import needed
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("All");
+    const router = useRouter();
 
     useEffect(() => {
         fetchQuizzes();
@@ -176,89 +179,126 @@ export default function QuizModule() {
                 </button>
             </div>
 
-            {isEditing ? (
-                <QuizEditor
-                    quiz={currentQuiz as Quiz}
-                    onSave={handleSave}
-                    onCancel={() => setIsEditing(false)}
-                    onChange={setCurrentQuiz}
-                    saving={saving}
-                />
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {quizzes.map((quiz) => (
-                        <div key={quiz.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
-                            <div className="flex justify-between items-start mb-6">
-                                <div className={`p-4 rounded-2xl ${quiz.timeLimit === 60 ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
-                                    <Gamepad2 size={24} />
-                                </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleStats(quiz)}
-                                        className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors"
-                                        title="View Analytics"
-                                    >
-                                        <BarChart2 size={18} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleEdit(quiz)}
-                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
-                                    >
-                                        <Edit size={18} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(quiz.id)}
-                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <h3 className="font-black text-xl text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem] leading-tight">
-                                {quiz.title}
-                            </h3>
-                            <p className="text-gray-500 text-sm mb-6 line-clamp-2 min-h-[2.5rem] font-medium">
-                                {quiz.description}
-                            </p>
-
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400">
-                                    <Clock size={14} />
-                                    <span>{quiz.timeLimit}s</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400">
-                                    <Target size={14} />
-                                    <span>{quiz.questions?.length || 0} Qs</span>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${quiz.isPublished ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
-                                    }`}>
-                                    {quiz.isPublished ? 'Published' : 'Draft'}
-                                </span>
-                                <button
-                                    onClick={() => handleHostLive(quiz.id)}
-                                    className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
-                                >
-                                    <Users size={14} />
-                                    Host Live
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+            <div className="flex flex-col md:flex-row gap-4 mb-8">
+                <div className="relative flex-1 group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
+                    <input
+                        type="text"
+                        placeholder="Search quizzes by title or category..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-white border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
+                    />
                 </div>
-            )}
+                <div className="relative w-full md:w-64">
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full appearance-none pl-4 pr-10 py-3 bg-white border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium cursor-pointer"
+                    >
+                        <option value="All">All Categories</option>
+                        {Array.from(new Set(quizzes.map(q => q.category))).filter(Boolean).map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                        <ArrowRight size={14} className="rotate-90" />
+                    </div>
+                </div>
+            </div>
 
-            {selectedStatsQuiz && (
-                <QuizResultsModal
-                    quizId={selectedStatsQuiz.id}
-                    quizTitle={selectedStatsQuiz.title}
-                    onClose={() => setSelectedStatsQuiz(null)}
-                />
-            )}
-        </div>
+            {
+                isEditing ? (
+                    <QuizEditor
+                        quiz={currentQuiz as Quiz}
+                        onSave={handleSave}
+                        onCancel={() => setIsEditing(false)}
+                        onChange={setCurrentQuiz}
+                        saving={saving}
+                    />
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {quizzes.filter(quiz => {
+                            const matchesSearch = quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                quiz.category.toLowerCase().includes(searchQuery.toLowerCase());
+                            const matchesCategory = selectedCategory === "All" || quiz.category === selectedCategory;
+                            return matchesSearch && matchesCategory;
+                        }).map((quiz) => (
+                            <div key={quiz.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className={`p-4 rounded-2xl ${quiz.timeLimit === 60 ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
+                                        <Gamepad2 size={24} />
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleStats(quiz)}
+                                            className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors"
+                                            title="View Analytics"
+                                        >
+                                            <BarChart2 size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleEdit(quiz)}
+                                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                                        >
+                                            <Edit size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(quiz.id)}
+                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <h3 className="font-black text-xl text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem] leading-tight">
+                                    {quiz.title}
+                                </h3>
+                                <p className="text-gray-500 text-sm mb-6 line-clamp-2 min-h-[2.5rem] font-medium">
+                                    {quiz.description}
+                                </p>
+
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400">
+                                        <Clock size={14} />
+                                        <span>{quiz.timeLimit}s</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400">
+                                        <Target size={14} />
+                                        <span>{quiz.questions?.length || 0} Qs</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${quiz.isPublished ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
+                                        }`}>
+                                        {quiz.isPublished ? 'Published' : 'Draft'}
+                                    </span>
+                                    <button
+                                        onClick={() => handleHostLive(quiz.id)}
+                                        className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
+                                    >
+                                        <Users size={14} />
+                                        Host Live
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )
+            }
+
+            {
+                selectedStatsQuiz && (
+                    <QuizResultsModal
+                        quizId={selectedStatsQuiz.id}
+                        quizTitle={selectedStatsQuiz.title}
+                        onClose={() => setSelectedStatsQuiz(null)}
+                    />
+                )
+            }
+        </div >
     );
 }
 
