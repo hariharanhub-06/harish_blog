@@ -81,6 +81,7 @@ export default function FinanceModule() {
     // Debt Modal States
     const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
     const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const [debtForm, setDebtForm] = useState({
         name: "",
         initialAmount: "",
@@ -226,10 +227,15 @@ export default function FinanceModule() {
                 setIsDebtModalOpen(false);
                 setEditingDebt(null);
                 setDebtForm({ name: "", initialAmount: "", notes: "", repaymentType: "single", dueDate: "" });
+                setError(null);
                 fetchData();
+            } else {
+                const errData = await res.json();
+                setError(errData.error || "Failed to save debt");
             }
         } catch (error) {
             console.error("Failed to save debt", error);
+            setError("A network error occurred. Please try again.");
         } finally {
             setSaving(false);
         }
@@ -238,6 +244,7 @@ export default function FinanceModule() {
     const openAddDebt = () => {
         setEditingDebt(null);
         setDebtForm({ name: "", initialAmount: "", notes: "", repaymentType: "single", dueDate: "" });
+        setError(null);
         setIsDebtModalOpen(true);
     };
 
@@ -250,6 +257,7 @@ export default function FinanceModule() {
             repaymentType: (debt.repaymentType as any) || "single",
             dueDate: debt.dueDate ? new Date(debt.dueDate).toISOString().split('T')[0] : ""
         });
+        setError(null);
         setIsDebtModalOpen(true);
     };
 
@@ -715,6 +723,16 @@ export default function FinanceModule() {
                                     <Plus className="rotate-45" size={20} />
                                 </button>
                             </div>
+
+                            {error && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-red-500 text-center"
+                                >
+                                    {error}
+                                </motion.div>
+                            )}
 
                             <form onSubmit={handleSaveDebt} className="space-y-6">
                                 <div className="space-y-2">
