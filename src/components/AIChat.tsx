@@ -233,11 +233,12 @@ export default function AIChat() {
                         });
                     }
                 }
+            }
 
-                setMessages(prev => [...prev, { role: "ai", content: reply, options }]);
-                setFlowState(nextState);
-                setLoading(false);
-            }, 600); // Simulate typing delay
+            setMessages(prev => [...prev, { role: "ai", content: reply, options }]);
+            setFlowState(nextState);
+            setLoading(false);
+        }, 600); // Simulate typing delay
     };
 
     return (
