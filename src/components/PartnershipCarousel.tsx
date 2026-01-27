@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import imageKitLoader from "@/lib/imagekitLoader";
 
@@ -13,6 +13,11 @@ interface Partnership {
 
 export default function PartnershipCarousel() {
     const [partnerships, setPartnerships] = useState<Partnership[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         fetch("/api/snacks/partnerships")
@@ -24,6 +29,34 @@ export default function PartnershipCarousel() {
             })
             .catch((err) => console.error("Failed to load partnerships:", err));
     }, []);
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (!containerRef.current) return;
+        setIsDragging(true);
+        setStartX(e.pageX - containerRef.current.offsetLeft);
+        setScrollLeft(containerRef.current.scrollLeft);
+        setIsPaused(true);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging || !containerRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - containerRef.current.offsetLeft;
+        const walk = (x - startX) * 2;
+        containerRef.current.scrollLeft = scrollLeft - walk;
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+        setIsPaused(false);
+    };
+
+    const handleMouseLeave = () => {
+        if (isDragging) {
+            setIsDragging(false);
+        }
+        setIsPaused(false);
+    };
 
     if (partnerships.length === 0) return null;
 
@@ -42,11 +75,23 @@ export default function PartnershipCarousel() {
                 </div>
             </div>
 
-            <div className="relative group flex overflow-hidden">
+            <div
+                ref={containerRef}
+                className={`relative group flex overflow-x-auto scrollbar-hide ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={handleMouseLeave}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                style={{
+                    scrollBehavior: isDragging ? 'auto' : 'smooth'
+                }}
+            >
                 <div
-                    className="flex animate-scroll hover:[animation-play-state:paused] whitespace-nowrap"
+                    className="flex whitespace-nowrap"
                     style={{
-                        animation: `scroll 30s linear infinite`
+                        animation: `scroll 50s linear infinite`,
+                        animationPlayState: isPaused ? 'paused' : 'running'
                     }}
                 >
                     {displayPartners.map((partner, idx) => (
@@ -75,10 +120,11 @@ export default function PartnershipCarousel() {
 
                 {/* Second track for seamlessness */}
                 <div
-                    className="flex animate-scroll hover:[animation-play-state:paused] whitespace-nowrap"
+                    className="flex whitespace-nowrap"
                     aria-hidden="true"
                     style={{
-                        animation: `scroll 30s linear infinite`
+                        animation: `scroll 50s linear infinite`,
+                        animationPlayState: isPaused ? 'paused' : 'running'
                     }}
                 >
                     {displayPartners.map((partner, idx) => (
@@ -111,13 +157,12 @@ export default function PartnershipCarousel() {
                     0% { transform: translateX(0); }
                     100% { transform: translateX(-100%); }
                 }
-                .animate-scroll {
-                    display: flex;
-                    width: max-content;
+                .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
                 }
-
-                .animate-scroll:hover {
-                    animation-play-state: paused;
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
                 }
             `}</style>
         </section>

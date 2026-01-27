@@ -1,11 +1,11 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 export function InfiniteCarousel({
     items,
-    speed = 12,
+    speed = 20,
     className = "",
 }: {
     items: React.ReactNode[];
@@ -13,14 +13,53 @@ export function InfiniteCarousel({
     className?: string;
 }) {
     const [isPaused, setIsPaused] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (!containerRef.current) return;
+        setIsDragging(true);
+        setStartX(e.pageX - containerRef.current.offsetLeft);
+        setScrollLeft(containerRef.current.scrollLeft);
+        setIsPaused(true);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging || !containerRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - containerRef.current.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll speed multiplier
+        containerRef.current.scrollLeft = scrollLeft - walk;
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+        setIsPaused(false);
+    };
+
+    const handleMouseLeave = () => {
+        if (isDragging) {
+            setIsDragging(false);
+            setIsPaused(false);
+        }
+    };
 
     return (
         <div
-            className={`overflow-hidden whitespace-nowrap relative flex ${className}`}
+            ref={containerRef}
+            className={`overflow-x-auto whitespace-nowrap relative flex ${className} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} scrollbar-hide`}
             onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
+            onMouseLeave={handleMouseLeave}
             onTouchStart={() => setIsPaused(true)}
             onTouchEnd={() => setIsPaused(false)}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            style={{
+                scrollBehavior: isDragging ? 'auto' : 'smooth'
+            }}
         >
             <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0e0e0e] via-[#0e0e0e]/80 to-transparent z-10 pointer-events-none" />
             <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#0e0e0e] via-[#0e0e0e]/80 to-transparent z-10 pointer-events-none" />
