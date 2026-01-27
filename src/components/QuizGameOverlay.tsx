@@ -70,6 +70,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
     const [isPlayerCorrect, setIsPlayerCorrect] = useState(false);
     const [lastPointsEarned, setLastPointsEarned] = useState(0);
     const [currentRank, setCurrentRank] = useState<number | null>(null);
+    const [autoAdvanceCountdown, setAutoAdvanceCountdown] = useState<number | null>(null);
 
     // Anti-cheat: Tab visibility change (Only for self-paced, disable for live to avoid false positives on mobile)
     useEffect(() => {
@@ -173,6 +174,13 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                     // Update leaderboard
                     if (data.leaderboard) setLeaderboard(data.leaderboard);
 
+                    // Sync Auto-advance timer visually
+                    if (data.showResults && !serverShowResults) {
+                        setAutoAdvanceCountdown(10);
+                    } else if (!data.showResults) {
+                        setAutoAdvanceCountdown(null);
+                    }
+
                     setServerShowResults(data.showResults || false);
                     setIsPlayerCorrect(data.isCorrect || false);
                     setCurrentRank(data.currentRank || null);
@@ -221,6 +229,15 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
         }, 1000);
         return () => clearInterval(timer);
     }, [gameState, isSubmitted, isLive]);
+
+    // Independent countdown for auto-advance visual sync
+    useEffect(() => {
+        if (autoAdvanceCountdown === null || autoAdvanceCountdown <= 0) return;
+        const timer = setInterval(() => {
+            setAutoAdvanceCountdown(prev => (prev !== null && prev > 0) ? prev - 1 : 0);
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [autoAdvanceCountdown]);
 
     const startQuiz = () => {
         if (!userName) return alert("Please enter your name");
@@ -505,53 +522,70 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                     exit={{ opacity: 0, x: -20 }}
                                     className="space-y-12"
                                 >
-                                    <div className="flex flex-col items-center px-4">
-                                        <h2 className="text-2xl md:text-5xl font-black tracking-tight text-center leading-tight mb-8">
-                                            {activeQuestion.questionText}
-                                        </h2>
-                                    </div>
+                                    {/* Question & Options Area - Hidden when waiting for results in live mode */}
+                                    {!(isLive && isSubmitted && !serverShowResults) ? (
+                                        <>
+                                            <div className="flex flex-col items-center px-4">
+                                                <h2 className="text-2xl md:text-5xl font-black tracking-tight text-center leading-tight mb-8">
+                                                    {activeQuestion.questionText}
+                                                </h2>
+                                            </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-24">
-                                        {activeQuestion.options.map((option: any, idx: number) => {
-                                            const isSelected = selectedOptionIds.includes(option.id);
-                                            const isCorrect = option.isCorrect; // Now populated in live when serverShowResults is true
-                                            const showResult = (isSubmitted && !isLive) || (isLive && serverShowResults);
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-24">
+                                                {activeQuestion.options.map((option: any, idx: number) => {
+                                                    const isSelected = selectedOptionIds.includes(option.id);
+                                                    const isCorrect = option.isCorrect; // Now populated in live when serverShowResults is true
+                                                    const showResult = (isSubmitted && !isLive) || (isLive && serverShowResults);
 
-                                            let borderClass = "border-white/10 hover:border-primary bg-white/5";
-                                            if (showResult) {
-                                                if (isCorrect) borderClass = "border-emerald-500 bg-emerald-500/20 opacity-100";
-                                                else if (isSelected) borderClass = "border-red-500 bg-red-500/20 opacity-100";
-                                                else borderClass = "border-white/5 bg-white/2 opacity-30";
-                                            } else if (isSelected) {
-                                                borderClass = "border-primary bg-primary/10";
-                                            }
+                                                    let borderClass = "border-white/10 hover:border-primary bg-white/5";
+                                                    if (showResult) {
+                                                        if (isCorrect) borderClass = "border-emerald-500 bg-emerald-500/20 opacity-100";
+                                                        else if (isSelected) borderClass = "border-red-500 bg-red-500/20 opacity-100";
+                                                        else borderClass = "border-white/5 bg-white/2 opacity-30";
+                                                    } else if (isSelected) {
+                                                        borderClass = "border-primary bg-primary/10";
+                                                    }
 
-                                            // Live Submitted State (before reveal)
-                                            if (isLive && isSubmitted && !serverShowResults) {
-                                                if (isSelected) borderClass = "border-primary bg-primary/20 opacity-100";
-                                                else borderClass = "border-white/5 bg-white/5 opacity-30";
-                                            }
+                                                    // Live Submitted State (before reveal)
+                                                    if (isLive && isSubmitted && !serverShowResults) {
+                                                        if (isSelected) borderClass = "border-primary bg-primary/20 opacity-100";
+                                                        else borderClass = "border-white/5 bg-white/5 opacity-30";
+                                                    }
 
-                                            return (
-                                                <button
-                                                    key={option.id}
-                                                    onClick={() => handleOptionToggle(option.id)}
-                                                    disabled={isSubmitted}
-                                                    className={`p-6 md:p-8 rounded-[2rem] border-2 transition-all text-left flex items-center gap-6 group relative overflow-hidden ${borderClass}`}
-                                                >
-                                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center font-black text-sm md:text-xl transition-all ${isSelected ? 'bg-primary text-white' : 'bg-white/10'}`}>
-                                                        {String.fromCharCode(65 + idx)}
-                                                    </div>
-                                                    <span className="text-base md:text-xl font-bold">{option.optionText}</span>
-                                                    {isSelected && !showResult && (
-                                                        <div className="absolute top-4 right-4 text-primary">
-                                                            <CheckCircle2 size={16} />
-                                                        </div>
-                                                    )}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
+                                                    return (
+                                                        <button
+                                                            key={option.id}
+                                                            onClick={() => handleOptionToggle(option.id)}
+                                                            disabled={isSubmitted}
+                                                            className={`p-6 md:p-8 rounded-[2rem] border-2 transition-all text-left flex items-center gap-6 group relative overflow-hidden ${borderClass}`}
+                                                        >
+                                                            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center font-black text-sm md:text-xl transition-all ${isSelected ? 'bg-primary text-white' : 'bg-white/10'}`}>
+                                                                {String.fromCharCode(65 + idx)}
+                                                            </div>
+                                                            <span className="text-base md:text-xl font-bold">{option.optionText}</span>
+                                                            {isSelected && !showResult && (
+                                                                <div className="absolute top-4 right-4 text-primary">
+                                                                    <CheckCircle2 size={16} />
+                                                                </div>
+                                                            )}
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        /* Waiting Screen after submission */
+                                        <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
+                                            <div className="relative mb-8">
+                                                <Loader2 className="animate-spin text-primary" size={64} />
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <span className="text-xs font-black text-white">{timeLeft}</span>
+                                                </div>
+                                            </div>
+                                            <p className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter mb-2 animate-pulse">Answer Submitted!</p>
+                                            <p className="text-lg font-bold text-gray-400">Waiting for others to finish...</p>
+                                        </div>
+                                    )}
 
                                     {!isSubmitted && !isLive && selectedOptionIds.length > 0 && (
                                         <motion.div
@@ -575,7 +609,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                                 animate={{ opacity: 1, y: 0 }}
                                                 className="flex justify-center pt-8 text-center flex-col items-center"
                                             >
-                                                {serverShowResults ? (
+                                                {serverShowResults && (
                                                     <motion.div
                                                         initial={{ scale: 0.9, opacity: 0 }}
                                                         animate={{ scale: 1, opacity: 1 }}
@@ -595,28 +629,28 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                                         {!isPlayerCorrect && (
                                                             <div className="mb-6 flex flex-col items-center">
                                                                 <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Correct Answer</span>
-                                                                <p className="text-lg font-bold text-emerald-400">
+                                                                <p className="text-xl font-black text-emerald-400">
                                                                     {activeQuestion.options.find((o: any) => o.isCorrect)?.optionText}
                                                                 </p>
                                                             </div>
                                                         )}
 
                                                         {currentRank && (
-                                                            <div className="flex flex-col items-center">
+                                                            <div className="flex flex-col items-center mb-8">
                                                                 <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-1">Current Standing</span>
-                                                                <p className="text-2xl font-black text-white uppercase tracking-tighter">
+                                                                <p className="text-3xl font-black text-white uppercase tracking-tighter">
                                                                     {currentRank}{currentRank === 1 ? 'st' : currentRank === 2 ? 'nd' : currentRank === 3 ? 'rd' : 'th'} Place
                                                                 </p>
                                                             </div>
                                                         )}
-                                                        <p className="font-bold text-gray-400 mt-8">Next question starting soon...</p>
+
+                                                        <div className="flex flex-col items-center">
+                                                            <p className="font-bold text-gray-400">Next question starting soon...</p>
+                                                            {autoAdvanceCountdown !== null && (
+                                                                <p className="text-primary font-black text-xl mt-2 animate-pulse">In {autoAdvanceCountdown}s</p>
+                                                            )}
+                                                        </div>
                                                     </motion.div>
-                                                ) : (
-                                                    <>
-                                                        <Loader2 className="animate-spin text-white mb-4" size={32} />
-                                                        <p className="text-xl font-black text-white uppercase tracking-tighter mb-2">Answer Submitted!</p>
-                                                        <p className="font-bold text-gray-400">Waiting for others to finish...</p>
-                                                    </>
                                                 )}
                                             </motion.div>
                                         </div>
