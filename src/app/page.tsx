@@ -8,15 +8,15 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   // Fetch all data with safe fallbacks
-  let dbProfile = null;
-  let videos = [];
-  let dbProjects = [];
-  let experiences = [];
-  let educations = [];
-  let volunteerings = [];
-  let dbSkills = [];
-  let partnerships = [];
-  let quizzes = [];
+  let dbProfile: any = null;
+  let videos: any[] = [];
+  let dbProjects: any[] = [];
+  let experiences: any[] = [];
+  let educations: any[] = [];
+  let volunteerings: any[] = [];
+  let dbSkills: any[] = [];
+  let partnerships: any[] = [];
+  let quizzes: any[] = [];
 
   try {
     // Parallel fetch for basic data
