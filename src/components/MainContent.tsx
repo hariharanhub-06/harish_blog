@@ -18,16 +18,89 @@ import { useEffect, useState } from "react";
 import FeedbackSection from "./FeedbackSection";
 import DinoRunnerGame from "./DinoRunnerGame";
 
+interface Stat {
+    icon: string;
+    value: string | number;
+    label: string;
+}
+
+interface Project {
+    id: string;
+    title: string;
+    description: string;
+    thumbnail?: string;
+    imageUrl?: string;
+    technologies?: string[];
+    liveUrl?: string;
+    repoUrl?: string;
+    featured?: boolean;
+}
+
+interface Experience {
+    id: string;
+    role: string;
+    company: string;
+    duration: string;
+    logo?: string;
+}
+
+interface Education {
+    id: string;
+    degree: string;
+    institution: string;
+    period: string;
+    logo?: string;
+}
+
+interface Volunteering {
+    id: string;
+    role: string;
+    organization: string;
+    duration: string;
+    logo?: string;
+}
+
+interface Video {
+    id: string;
+    youtubeVideoId: string;
+    title: string;
+    description?: string;
+    category?: string;
+}
+
+interface Profile {
+    name: string;
+    about: string;
+    location: string;
+    aboutImageUrl?: string;
+    trainingStats?: Stat[];
+    stats?: Stat[];
+}
+
+interface Partnership {
+    id: string;
+    name: string;
+    logo: string | null;
+    partnerType: string;
+    isActive: boolean;
+}
+
+interface Skill {
+    id: string;
+    name: string;
+    icon: string | null;
+}
+
 interface MainContentProps {
-    profile: any;
-    stats: any[];
-    projects: any[];
-    videos: any[];
-    experiences: any[];
-    educations: any[];
-    volunteerings: any[];
-    partnerships?: any[];
-    skills?: any[];
+    profile: Profile;
+    stats: Stat[];
+    projects: Project[];
+    videos: Video[];
+    experiences: Experience[];
+    educations: Education[];
+    volunteerings: Volunteering[];
+    partnerships?: Partnership[];
+    skills?: Skill[];
 }
 
 const SKILLS = [
@@ -58,7 +131,7 @@ export default function MainContent({
     const [skills, setSkills] = useState(initialSkills || []);
 
     const [loading, setLoading] = useState(!initialProfile || initialProjects?.length === 0);
-    const [selectedItem, setSelectedItem] = useState<{ data: any, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
+    const [selectedItem, setSelectedItem] = useState<{ data: Project | Experience | Education | Volunteering, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
 
     useEffect(() => {
         if (!initialProfile || initialProjects?.length === 0) {
@@ -88,7 +161,7 @@ export default function MainContent({
         }
     }, [initialProfile, initialProjects]);
 
-    const iconMap: any = { Briefcase, Code, Award, User };
+    const iconMap: Record<string, React.ElementType> = { Briefcase, Code, Award, User };
 
 
 
@@ -106,7 +179,7 @@ export default function MainContent({
                             </div>
                         ))
                     ) : (
-                        stats.map((stat: any, i: number) => {
+                        stats.map((stat: Stat, i: number) => {
                             const Icon = iconMap[stat.icon] || User;
                             const colors = [
                                 { color: "text-blue-400", bg: "bg-blue-500/10" },
@@ -155,7 +228,7 @@ export default function MainContent({
                     </div>
 
                     <InfiniteCarousel
-                        items={experiences.map((exp: any) => (
+                        items={experiences.map((exp: Experience) => (
                             <div key={exp.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[85vw] md:w-[32vw] h-full min-h-[140px] justify-start text-left">
                                 {exp.logo ? (
                                     <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1 shadow-sm">
@@ -189,7 +262,7 @@ export default function MainContent({
                     </div>
 
                     <InfiniteCarousel
-                        items={educations.map((edu: any) => (
+                        items={educations.map((edu: Education) => (
                             <div key={edu.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[85vw] md:w-[32vw] h-full min-h-[140px] justify-start text-left">
                                 {edu.logo ? (
                                     <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1 shadow-sm">
@@ -223,7 +296,7 @@ export default function MainContent({
                     </div>
 
                     <InfiniteCarousel
-                        items={volunteerings.map((vol: any) => (
+                        items={volunteerings.map((vol: Volunteering) => (
                             <div key={vol.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-6 py-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[85vw] md:w-[32vw] h-full min-h-[140px] justify-start text-left">
                                 {vol.logo ? (
                                     <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1 shadow-sm">
@@ -252,7 +325,7 @@ export default function MainContent({
                     about={profile.about}
                     location={profile.location}
                     imageUrl={profile.aboutImageUrl}
-                    experience={profile.stats?.find((s: any) => s.label === "Years Experience")?.value || "3+"}
+                    experience={profile.stats?.find((s: Stat) => s.label === "Years Experience")?.value?.toString() || "3+"}
                 />
 
                 {/* YouTube Videos Section */}
@@ -271,10 +344,11 @@ export default function MainContent({
                                 <CardWrapper key={video.id} index={i}>
                                     <div className="group relative bg-[#1a1a1a] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/40 transition-all duration-500 flex flex-col h-full">
                                         <div className="relative aspect-video overflow-hidden">
-                                            <img
+                                            <Image
                                                 src={`https://img.youtube.com/vi/${video.youtubeVideoId}/maxresdefault.jpg`}
                                                 alt={video.title}
-                                                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                                                fill
+                                                className="object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100">

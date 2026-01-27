@@ -52,7 +52,7 @@ export default function AdminDashboard() {
             try {
                 const res = await fetch("/api/admin/notifications");
                 if (res.ok) {
-                    const data = await res.json();
+                    const data: { unreadMessages?: number; pendingFeedbacks?: number } = await res.json();
                     setUnreadCount((data.unreadMessages || 0) + (data.pendingFeedbacks || 0));
                 }
             } catch (err) {

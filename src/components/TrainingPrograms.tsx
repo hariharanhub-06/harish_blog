@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
-import { GraduationCap, Users, Presentation, Layers } from "lucide-react";
+import Image from "next/image";
+import { GraduationCap, Users, Presentation } from "lucide-react";
 import { InfiniteCarousel } from "./InfiniteCarousel";
 
 interface TrainingStatProps {
@@ -22,13 +21,30 @@ const TrainingStat = ({ icon: Icon, value, label, color }: TrainingStatProps) =>
     </div>
 );
 
-const COLLEGES = [];
-const SKILLS = [];
+interface Partnership {
+    id: string;
+    name: string;
+    logo: string | null;
+    partnerType: string;
+    isActive: boolean;
+}
+
+interface Skill {
+    id: string;
+    name: string;
+    icon: string | null;
+}
+
+interface TrainingStat {
+    value: string;
+    label: string;
+    icon: string;
+}
 
 interface TrainingProgramsProps {
-    trainingStats?: any[];
-    partnerships: any[];
-    skills: any[];
+    trainingStats?: TrainingStat[];
+    partnerships: Partnership[];
+    skills: Skill[];
 }
 
 export function TrainingPrograms({ trainingStats = [], partnerships, skills }: TrainingProgramsProps) {
@@ -93,7 +109,7 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                                 <div key={partner.id} className="flex items-center gap-3 md:gap-4 px-3 md:px-6 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[60vw] md:w-[20vw] h-full min-h-[80px]">
                                     {partner.logo && (
                                         <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
-                                            <img src={partner.logo} alt={partner.name} className="object-contain w-full h-full" />
+                                            <Image src={partner.logo} alt={partner.name} fill className="object-contain" />
                                         </div>
                                     )}
                                     <span className="text-xs md:text-sm font-black text-white/70 uppercase tracking-widest whitespace-normal leading-tight">
@@ -119,7 +135,7 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                             <div key={skill.id} className="flex items-center gap-3 md:gap-4 px-3 md:px-6 py-3 md:py-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[45vw] md:w-[16vw] h-full min-h-[70px]">
                                 <span className="text-lg md:text-2xl w-8 h-8 md:w-10 md:h-10 flex items-center justify-center overflow-hidden shrink-0">
                                     {skill.icon && skill.icon.startsWith('http') ? (
-                                        <img src={skill.icon} alt="" className="w-full h-full object-contain" />
+                                        <Image src={skill.icon} alt={skill.name} fill className="object-contain" />
                                     ) : (
                                         <span>{skill.icon || "⚙️"}</span>
                                     )}

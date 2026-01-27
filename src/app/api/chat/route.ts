@@ -7,7 +7,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { messages, userName } = body;
+        const { messages, userName }: { messages: { role: string; content: string }[], userName?: string } = body;
 
         if (!messages || !Array.isArray(messages) || messages.length === 0) {
             return NextResponse.json({ error: "Invalid message format" }, { status: 400 });
@@ -31,21 +31,29 @@ export async function POST(req: Request) {
         const sql = neon(dbUrl);
 
         // 1. Fetch AI Config & Context
-        let config, profile, projectsData, experiencesData;
+        let config: { knowledge_base?: string };
+        let profile: { name?: string; about?: string; headline?: string; location?: string };
+        let projectsData: { title: string; description: string; technologies: string[] | null }[];
+        let experiencesData: { role: string; company: string; duration: string }[];
+
+        type QueryResult = Record<string, any>[];
+
         try {
             const [configData, profileData, projects, experiences] = await Promise.all([
                 sql(`SELECT knowledge_base FROM ai_assistant_config WHERE id = 'default'`),
                 sql(`SELECT name, about, headline, location FROM profiles LIMIT 1`),
                 sql(`SELECT title, description, technologies FROM projects WHERE featured = true`),
                 sql(`SELECT role, company, duration FROM experience ORDER BY "order" ASC`)
-            ]);
-            config = configData[0] || {};
-            profile = profileData[0] || {};
-            projectsData = projects || [];
-            experiencesData = experiences || [];
-        } catch (dbError: any) {
-            console.error("DB Error:", dbError.message);
-            return NextResponse.json({ error: "Database failure", details: dbError.message }, { status: 500 });
+            ]) as [QueryResult, QueryResult, QueryResult, QueryResult];
+
+            config = (configData[0] as any) || {};
+            profile = (profileData[0] as any) || {};
+            projectsData = projects as any[] || [];
+            experiencesData = experiences as any[] || [];
+        } catch (dbError: unknown) {
+            const message = dbError instanceof Error ? dbError.message : "Unknown database error";
+            console.error("DB Error:", message);
+            return NextResponse.json({ error: "Database failure", details: message }, { status: 500 });
         }
 
         // 2. Build System Instruction
@@ -83,10 +91,10 @@ export async function POST(req: Request) {
             // Truncate history to last 10 messages to save quota/tokens and improve speed
             const recentMessages = messages.slice(-10);
 
-            const groqMessages: any[] = [
+            const groqMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
                 { role: "system", content: systemInstruction },
                 ...recentMessages.map(m => ({
-                    role: m.role === "user" ? "user" : "assistant",
+                    role: (m.role === "user" ? "user" : "assistant") as "user" | "assistant",
                     content: m.content
                 }))
             ];
@@ -97,14 +105,14 @@ export async function POST(req: Request) {
 
                 try {
                     const response = await groq.chat.completions.create({
-                        messages: groqMessages,
+                        messages: groqMessages as any,
                         model: modelName,
                         temperature: 0.6,
                         max_tokens: 150,
-                    }, { signal: controller.signal } as any);
+                    }, { signal: controller.signal });
                     clearTimeout(timeoutId);
                     return response;
-                } catch (e: any) {
+                } catch (e: unknown) {
                     clearTimeout(timeoutId);
                     throw e;
                 }
@@ -117,15 +125,17 @@ export async function POST(req: Request) {
                 // LAYER 1: Rapid 8B Model (2.5s Limit)
                 usedModel = "llama-3.1-8b-instant";
                 completion = await fetchWithTimeout(usedModel, 2500);
-            } catch (err: any) {
-                console.warn(`Layer 1 (${usedModel}) failed: ${err.message}`);
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : String(err);
+                console.warn(`Layer 1 (${usedModel}) failed: ${message}`);
                 try {
                     // LAYER 2: Versatile 70B Model (4.0s Limit)
                     usedModel = "llama-3.3-70b-versatile";
                     completion = await fetchWithTimeout(usedModel, 4000);
-                } catch (innerErr: any) {
+                } catch (innerErr: unknown) {
+                    const innerMsg = innerErr instanceof Error ? innerErr.message : String(innerErr);
                     // LAYER 3: Gemini Final Fallback
-                    console.warn(`Layer 2 (${usedModel}) failed: ${innerErr.message}. Trying Gemini.`);
+                    console.warn(`Layer 2 (${usedModel}) failed: ${innerMsg}. Trying Gemini.`);
                     if (!geminiKey) throw new Error("No Gemini key available for fallback");
 
                     try {
@@ -170,8 +180,9 @@ export async function POST(req: Request) {
                             return NextResponse.json({ content: text });
                         }
                         throw new Error("Gemini returned empty response");
-                    } catch (geminiErr: any) {
-                        console.error("Layer 3 (Gemini) Critical Failure:", geminiErr.message);
+                    } catch (geminiErr: unknown) {
+                        const gemMsg = geminiErr instanceof Error ? geminiErr.message : String(geminiErr);
+                        console.error("Layer 3 (Gemini) Critical Failure:", gemMsg);
                         throw geminiErr;
                     }
                 }
@@ -180,18 +191,20 @@ export async function POST(req: Request) {
             const responseText = completion?.choices[0]?.message?.content || "Thenali is here!";
             return NextResponse.json({ content: responseText });
 
-        } catch (aiError: any) {
-            console.error("CRYSTAL AI ERROR:", aiError.message);
+        } catch (aiError: unknown) {
+            const aiMsg = aiError instanceof Error ? aiError.message : String(aiError);
+            console.error("CRYSTAL AI ERROR:", aiMsg);
             return NextResponse.json({
                 error: "AI processing error",
                 details: "System busy. Please try again."
             }, { status: 500 });
         }
-    } catch (globalError: any) {
-        console.error("GLOBAL Chat Error:", globalError.message);
+    } catch (globalError: unknown) {
+        const globalMsg = globalError instanceof Error ? globalError.message : String(globalError);
+        console.error("GLOBAL Chat Error:", globalMsg);
         return NextResponse.json({
             error: "Internal Server Error",
-            details: globalError.message
+            details: globalMsg
         }, { status: 500 });
     }
 }
