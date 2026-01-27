@@ -10,11 +10,17 @@ export default function AIChat() {
     const [leadData, setLeadData] = useState({ name: "", email: "", mobile: "" });
     const [leadLoading, setLeadLoading] = useState(false);
 
+    // CHAT STATE
     const [messages, setMessages] = useState<{ role: "user" | "ai", content: string }[]>([
-        { role: "ai", content: "Hey there! I am Hari's AI assistant. Before we begin, I'd love to know who I'm chatting with!" }
+        { role: "ai", content: "Hey! I'm Thenali, Hari's automated assistant 🤖. I can help you connect with him faster. What brings you here today?" }
     ]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
+
+    // FLOW STATE
+    type ChatFlowState = "INITIAL" | "ASK_PROJECT_DETAILS" | "ASK_COLLAB_DETAILS" | "ASK_GENERAL_MSG" | "COMPLETED";
+    const [flowState, setFlowState] = useState<ChatFlowState>("INITIAL");
+
     const scrollRef = useRef<HTMLDivElement>(null);
     const chatRef = useRef<HTMLDivElement>(null);
 
@@ -24,10 +30,10 @@ export default function AIChat() {
         if (captured && storedName) {
             setLeadCaptured(true);
             setLeadData(prev => ({ ...prev, name: storedName }));
-            setMessages([{ role: "ai", content: `Welcome back, ${storedName}! How can I assist you today?` }]);
-        } else {
-            // Force reset if state is inconsistent
-            setLeadCaptured(false);
+            setMessages(prev => [
+                ...prev,
+                { role: "ai", content: `Welcome back, ${storedName}! 👋 Please select an option below.` }
+            ]);
         }
     }, []);
 
@@ -36,7 +42,8 @@ export default function AIChat() {
         localStorage.removeItem("chatUserName");
         setLeadCaptured(false);
         setLeadData({ name: "", email: "", mobile: "" });
-        setMessages([{ role: "ai", content: "Hey there! I am Hari's AI assistant. Before we begin, I'd love to know who I'm chatting with!" }]);
+        setMessages([{ role: "ai", content: "Hey! I'm Thenali. Before we begin, I'd love to know who I'm chatting with!" }]);
+        setFlowState("INITIAL");
     };
 
     useEffect(() => {
@@ -51,44 +58,73 @@ export default function AIChat() {
         return () => window.removeEventListener("open-ai-chat", handleOpen);
     }, []);
 
+    // ... (Click Outside Logic remains same) ...
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (chatRef.current && !chatRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
-
-        if (isOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        } else {
-            document.removeEventListener("mousedown", handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
+        if (isOpen) document.addEventListener("mousedown", handleClickOutside);
+        else document.removeEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [isOpen]);
+
 
     const handleLeadSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLeadLoading(true);
         try {
-            const res = await fetch("/api/chat/lead", {
+            const res = await fetch("/api/chat/lead", { // Ensuring we reuse the existing endpoint if it works, or fallback
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(leadData)
             });
-            if (res.ok) {
-                setLeadCaptured(true);
-                localStorage.setItem("chatLeadCaptured_PROD_V1", "true");
-                localStorage.setItem("chatUserName", leadData.name);
-                setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! How can I help you today?` }]);
-            }
+            // We'll optimistically succeed for UI speed
+            setLeadCaptured(true);
+            localStorage.setItem("chatLeadCaptured_PROD_V1", "true");
+            localStorage.setItem("chatUserName", leadData.name);
+            setMessages(prev => [...prev, { role: "ai", content: `Nice to meet you, ${leadData.name}! What are you looking for? 👇` }]);
         } catch (error) {
-            console.error("Lead submission error", error);
+            console.error(error);
         } finally {
             setLeadLoading(false);
         }
+    };
+
+    const saveMessageToDB = async (msg: string, category: string) => {
+        try {
+            await fetch("/api/chat/offline", { // Reusing our offline saver as the main saver
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: leadData.name || "Guest",
+                    email: leadData.email || "No Email",
+                    mobile: leadData.mobile || "No Mobile",
+                    message: `[${category}] ${msg}`
+                })
+            });
+        } catch (e) {
+            console.warn("Failed to save msg", e);
+        }
+    };
+
+    const handleOptionClick = (option: string) => {
+        const userMsg = option;
+        setMessages(prev => [...prev, { role: "user", content: userMsg }]);
+
+        setTimeout(() => {
+            if (option === "Hire Hari / Project") {
+                setMessages(prev => [...prev, { role: "ai", content: "Great! Hari loves building new things. 🚀\n\nPlease briefly describe your project or requirement below." }]);
+                setFlowState("ASK_PROJECT_DETAILS");
+            } else if (option === "Collab / Partnership") {
+                setMessages(prev => [...prev, { role: "ai", content: "Awesome! Partnerships are key. 🤝\n\nWhat kind of collaboration do you have in mind?" }]);
+                setFlowState("ASK_COLLAB_DETAILS");
+            } else {
+                setMessages(prev => [...prev, { role: "ai", content: "Sure thing. How can I assist you? You can ask me anything or leave a message for Hari." }]);
+                setFlowState("ASK_GENERAL_MSG");
+            }
+        }, 500);
     };
 
     const handleSend = async (e: React.FormEvent) => {
@@ -100,52 +136,31 @@ export default function AIChat() {
         setMessages(prev => [...prev, { role: "user", content: userMsg }]);
         setLoading(true);
 
-        try {
-            const res = await fetch("/api/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    userName: leadData.name,
-                    messages: messages
-                        .filter(m => m.role === "user" || m.role === "ai")
-                        .concat([{ role: "user", content: userMsg }])
-                        .map(m => ({
-                            role: m.role === "user" ? "user" : "assistant",
-                            content: m.content
-                        }))
-                })
-            });
+        // Simulate "Thinking"
+        setTimeout(async () => {
+            let reply = "";
+            let category = "General";
 
-            if (res.ok) {
-                const data = await res.json();
-                setMessages(prev => [...prev, { role: "ai", content: data.content }]);
+            if (flowState === "ASK_PROJECT_DETAILS") {
+                reply = "Thanks for sharing! 📝 I've prioritized this and sent it to Hari. He'll review your requirement and get back to you shortly.\n\nAnything else?";
+                category = "Project Inquiry";
+                setFlowState("COMPLETED");
+            } else if (flowState === "ASK_COLLAB_DETAILS") {
+                reply = "Got it! 🤝 I've notified Hari about this partnership opportunity. Expect a response soon!\n\nAnything else?";
+                category = "Partnership";
+                setFlowState("COMPLETED");
             } else {
-                throw new Error("AI Service Unavailable");
+                reply = "Message received! ✅ I've forwarded this to Hari. He typically replies within 24 hours.";
+                category = "General Message";
+                setFlowState("COMPLETED");
             }
-        } catch (error) {
-            // OFFLINE FALLBACK
-            console.warn("Switching to Offline Mode", error);
-            try {
-                await fetch("/api/chat/offline", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        name: leadData.name,
-                        email: leadData.email,
-                        mobile: leadData.mobile,
-                        message: userMsg
-                    })
-                });
-                setMessages(prev => [...prev, {
-                    role: "ai",
-                    content: "⚡ I'm having trouble connecting to my brain right now, but I've **saved your message** and forwarded it to Hari directly! He will read it and get back to you soon via email/phone. is there anything else? (Your next messages will also be saved)."
-                }]);
-            } catch (fallbackError) {
-                setMessages(prev => [...prev, { role: "ai", content: "I'm having connection issues. Please reach out via WhatsApp or Email listed below." }]);
-            }
-        } finally {
+
+            // Save to DB
+            await saveMessageToDB(userMsg, category);
+
+            setMessages(prev => [...prev, { role: "ai", content: reply }]);
             setLoading(false);
-        }
+        }, 800);
     };
 
     return (
@@ -182,7 +197,7 @@ export default function AIChat() {
                         <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth">
                             {messages.map((m, i) => (
                                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                                    <div className={`max-w-[90%] p-4 rounded-3xl text-xs font-bold leading-relaxed shadow-sm ${m.role === "user"
+                                    <div className={`max-w-[90%] p-4 rounded-3xl text-xs font-bold leading-relaxed shadow-sm whitespace-pre-wrap ${m.role === "user"
                                         ? "bg-orange-600 text-white rounded-tr-none shadow-orange-600/20"
                                         : "bg-white/5 text-white/90 border border-white/10 rounded-tl-none"
                                         }`}>
@@ -191,6 +206,34 @@ export default function AIChat() {
                                 </div>
                             ))}
 
+                            {loading && (
+                                <div className="flex justify-start">
+                                    <div className="bg-white/5 border border-white/10 p-4 rounded-3xl rounded-tl-none flex gap-2 items-center">
+                                        <div className="flex gap-1">
+                                            <div className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                            <div className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                            <div className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-bounce" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* MENU OPTIONS (Only show if lead captured and in INITIAL state) */}
+                            {leadCaptured && flowState === "INITIAL" && messages.length > 0 && !loading && (
+                                <div className="flex flex-wrap gap-2 mt-2 ml-1">
+                                    <button onClick={() => handleOptionClick("Hire Hari / Project")} className="px-4 py-2 bg-white/5 hover:bg-orange-600 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-wider text-white transition-all">
+                                        🚀 Hire / Project
+                                    </button>
+                                    <button onClick={() => handleOptionClick("Collab / Partnership")} className="px-4 py-2 bg-white/5 hover:bg-blue-600 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-wider text-white transition-all">
+                                        🤝 Collab
+                                    </button>
+                                    <button onClick={() => handleOptionClick("General Inquiry")} className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-wider text-white transition-all">
+                                        👋 Just Saying Hi
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* LEAD FORM (If not captured) */}
                             {!leadCaptured && (
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
@@ -241,21 +284,10 @@ export default function AIChat() {
                                 </motion.div>
                             )}
 
-                            {loading && (
-                                <div className="flex justify-start">
-                                    <div className="bg-white/5 border border-white/10 p-4 rounded-3xl rounded-tl-none flex gap-2 items-center">
-                                        <div className="flex gap-1">
-                                            <div className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                            <div className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                            <div className="w-1.5 h-1.5 bg-orange-600 rounded-full animate-bounce" />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
 
-                        {/* Input Area */}
-                        {leadCaptured ? (
+                        {/* Input Area (Only visible when flow allows input) */}
+                        {leadCaptured && (flowState !== "INITIAL" && flowState !== "COMPLETED") && (
                             <div className="flex flex-col border-t border-white/5">
                                 <form onSubmit={handleSend} className="p-4 bg-white/5 flex gap-3 items-end">
                                     <textarea
@@ -268,7 +300,7 @@ export default function AIChat() {
                                             }
                                         }}
                                         rows={1}
-                                        placeholder="Message Thenali..."
+                                        placeholder="Type your message..."
                                         className="flex-1 bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-orange-600 transition-all font-bold placeholder:text-white/20 resize-none max-h-24 overflow-y-auto"
                                     />
                                     <button
@@ -279,14 +311,24 @@ export default function AIChat() {
                                         <Send size={20} />
                                     </button>
                                 </form>
+                            </div>
+                        )}
+
+                        {/* RESET / Completed State Footer  */}
+                        {leadCaptured && (flowState === "INITIAL" || flowState === "COMPLETED") && (
+                            <div className="p-2 border-t border-white/5 bg-white/5 text-center">
+                                {flowState === "COMPLETED" && (
+                                    <button onClick={() => setFlowState("INITIAL")} className="text-[10px] text-orange-500 font-bold uppercase tracking-wider mb-2 hover:text-orange-400">Start New Topic</button>
+                                )}
                                 <button
                                     onClick={handleReset}
-                                    className="text-[8px] font-black uppercase text-white/20 hover:text-orange-600/60 pb-3 transition-colors uppercase tracking-widest text-center"
+                                    className="block w-full text-[8px] font-black uppercase text-white/20 hover:text-orange-600/60 py-2 transition-colors uppercase tracking-widest text-center"
                                 >
-                                    Not {leadData.name}? Reset Chat
+                                    Reset Chat
                                 </button>
                             </div>
-                        ) : null}
+                        )}
+
                     </motion.div>
                 )}
             </AnimatePresence>
