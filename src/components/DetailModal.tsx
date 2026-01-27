@@ -5,10 +5,47 @@ import { X, ExternalLink, Github, Calendar, MapPin, Briefcase, GraduationCap, He
 import Image from "next/image";
 import { useEffect } from "react";
 
+interface Project {
+    id: string;
+    title: string;
+    description: string;
+    thumbnail?: string;
+    technologies?: string[];
+    liveUrl?: string;
+    repoUrl?: string;
+}
+
+interface Experience {
+    id: string;
+    role: string;
+    company: string;
+    duration: string;
+    location?: string;
+    description?: string;
+}
+
+interface Education {
+    id: string;
+    degree: string;
+    institution: string;
+    period: string;
+    location?: string;
+    details?: string;
+}
+
+interface Volunteering {
+    id: string;
+    role: string;
+    organization: string;
+    duration: string;
+    location?: string;
+    description?: string;
+}
+
 interface DetailModalProps {
     isOpen: boolean;
     onClose: () => void;
-    data: any;
+    data: Project | Experience | Education | Volunteering | null;
     type: "project" | "experience" | "education" | "volunteering";
 }
 
@@ -39,26 +76,30 @@ export default function DetailModal({ isOpen, onClose, data, type }: DetailModal
         return <HeartHandshake size={32} />;
     };
 
-    const getTitle = (t: string, d: any) => {
-        if (t === 'experience') return d.role;
-        if (t === 'education') return d.degree;
-        return d.role;
+    const getTitle = (t: string, d: Project | Experience | Education | Volunteering) => {
+        if (t === 'project') return (d as Project).title;
+        if (t === 'experience') return (d as Experience).role;
+        if (t === 'education') return (d as Education).degree;
+        return (d as Volunteering).role;
     };
 
-    const getSubtitle = (t: string, d: any) => {
-        if (t === 'experience') return d.company;
-        if (t === 'education') return d.institution;
-        return d.organization;
+    const getSubtitle = (t: string, d: Project | Experience | Education | Volunteering) => {
+        if (t === 'experience') return (d as Experience).company;
+        if (t === 'education') return (d as Education).institution;
+        if (t === 'volunteering') return (d as Volunteering).organization;
+        return "";
     };
 
-    const getPeriod = (t: string, d: any) => {
-        if (t === 'education') return d.period;
-        return d.duration;
+    const getPeriod = (t: string, d: Project | Experience | Education | Volunteering) => {
+        if (t === 'education') return (d as Education).period;
+        if (t === 'project') return "";
+        return (d as Experience | Volunteering).duration;
     };
 
-    const getDescription = (t: string, d: any) => {
-        if (t === 'education') return d.details;
-        return d.description;
+    const getDescription = (t: string, d: Project | Experience | Education | Volunteering) => {
+        if (t === 'education') return (d as Education).details;
+        if (t === 'project') return (d as Project).description;
+        return (d as Experience | Volunteering).description;
     };
 
     return (
