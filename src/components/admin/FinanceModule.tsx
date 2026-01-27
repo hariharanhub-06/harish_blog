@@ -356,49 +356,63 @@ export default function FinanceModule() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                                    <h3 className="font-black text-lg uppercase tracking-tight mb-8">Category Breakdown</h3>
+                                    <h3 className="font-black text-lg uppercase tracking-tight mb-8">Net Cash Flow</h3>
                                     <div className="h-[250px]">
                                         <ResponsiveContainer width="100%" height="100%">
-                                            <PieChart>
-                                                <Pie
-                                                    data={stats?.categories || []}
-                                                    innerRadius={60}
-                                                    outerRadius={80}
-                                                    paddingAngle={5}
-                                                    dataKey="value"
-                                                >
-                                                    {(stats?.categories || []).map((entry: any, index: number) => (
-                                                        <Cell key={`cell-${index}`} fill={['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
-                                                    ))}
-                                                </Pie>
-                                                <Tooltip />
-                                                <Legend />
-                                            </PieChart>
+                                            <BarChart data={
+                                                // Group trend by month to calculate net flow
+                                                Array.from((stats?.trend || []).reduce((acc: any, curr: any) => {
+                                                    if (!acc.has(curr.month)) acc.set(curr.month, { month: curr.month, income: 0, expense: 0 });
+                                                    const entry = acc.get(curr.month);
+                                                    if (curr.type === 'income') entry.income += curr.total;
+                                                    else entry.expense += curr.total;
+                                                    return acc;
+                                                }, new Map()).values()).map((m: any) => ({
+                                                    ...m,
+                                                    net: m.income - m.expense
+                                                }))
+                                            }>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
+                                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
+                                                <Tooltip content={<CustomTooltip />} />
+                                                <Bar dataKey="net" radius={[4, 4, 0, 0]}>
+                                                    {
+                                                        // Color based on value
+                                                        (stats?.trend || []).map((entry: any, index: number) => (
+                                                            <Cell key={`cell-${index}`} fill={entry.net >= 0 ? '#10b981' : '#ef4444'} />
+                                                        ))
+                                                    }
+                                                </Bar>
+                                            </BarChart>
                                         </ResponsiveContainer>
                                     </div>
                                 </div>
                                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                                    <h3 className="font-black text-lg uppercase tracking-tight mb-8">Debt Payoff Status</h3>
-                                    <div className="space-y-6">
-                                        {debts.map(debt => (
-                                            <div key={debt.id} className="space-y-2">
-                                                <div className="flex justify-between text-xs font-bold uppercase">
-                                                    <span>{debt.name}</span>
-                                                    <span>{Math.round(((debt.initialAmount - debt.remainingAmount) / debt.initialAmount) * 100)}%</span>
-                                                </div>
-                                                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                    <motion.div
-                                                        initial={{ width: 0 }}
-                                                        animate={{ width: `${((debt.initialAmount - debt.remainingAmount) / debt.initialAmount) * 100}%` }}
-                                                        className="h-full bg-primary rounded-full"
-                                                    />
-                                                </div>
-                                                <div className="flex justify-between text-[10px] text-gray-400 font-bold">
-                                                    <span>Paid: ₹{(debt.initialAmount - debt.remainingAmount).toLocaleString()}</span>
-                                                    <span>Left: ₹{debt.remainingAmount.toLocaleString()}</span>
-                                                </div>
-                                            </div>
-                                        ))}
+                                    <h3 className="font-black text-lg uppercase tracking-tight mb-8">Top Expenses</h3>
+                                    <div className="space-y-4">
+                                        {(stats?.categories || [])
+                                            .filter((c: any) => c.type === 'expense')
+                                            .sort((a: any, b: any) => b.value - a.value)
+                                            .slice(0, 5)
+                                            .map((cat: any, i: number) => {
+                                                const max = Math.max(...(stats?.categories || []).filter((c: any) => c.type === 'expense').map((c: any) => c.value));
+                                                return (
+                                                    <div key={i} className="space-y-2">
+                                                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                                                            <span>{cat.category}</span>
+                                                            <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                                        </div>
+                                                        <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
+                                                            <motion.div
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${(cat.value / max) * 100}%` }}
+                                                                className="h-full bg-red-400 rounded-full"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                     </div>
                                 </div>
                             </div>
