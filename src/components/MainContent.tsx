@@ -93,9 +93,9 @@ export default function MainContent({
 
 
     return (
-        <div className="flex flex-col gap-8 pb-4 overflow-x-hidden">
+        <div className="flex flex-col gap-4 pb-4 overflow-x-hidden">
             {/* Stats Section */}
-            <section className="container mx-auto px-6 py-12">
+            <section className="container mx-auto px-6 py-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {loading ? (
                         [...Array(4)].map((_, i) => (
@@ -145,11 +145,11 @@ export default function MainContent({
 
             {/* Experience Section */}
             {experiences.length > 0 && (
-                <section className="py-12 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                <section className="py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
                     <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                    <div className="flex flex-col items-center mb-8 text-center">
+                    <div className="flex flex-col items-center mb-6 text-center">
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500/80">Professional Journey</span>
                         <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Experience</h4>
                     </div>
@@ -179,11 +179,11 @@ export default function MainContent({
 
             {/* Education Section */}
             {educations.length > 0 && (
-                <section className="py-12 relative overflow-hidden">
+                <section className="py-8 relative overflow-hidden">
                     <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                    <div className="flex flex-col items-center mb-8 text-center">
+                    <div className="flex flex-col items-center mb-6 text-center">
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/80">Academic Background</span>
                         <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Education</h4>
                     </div>
@@ -213,11 +213,11 @@ export default function MainContent({
 
             {/* Volunteering Section */}
             {volunteerings.length > 0 && (
-                <section className="py-12 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                <section className="py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
                     <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                    <div className="flex flex-col items-center mb-8 text-center">
+                    <div className="flex flex-col items-center mb-6 text-center">
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-teal-500/80">Community Impact</span>
                         <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Volunteering</h4>
                     </div>
@@ -257,13 +257,13 @@ export default function MainContent({
 
                 {/* YouTube Videos Section */}
                 {videos.length > 0 && (
-                    <section className="container mx-auto px-6 py-20 bg-black/20 rounded-[3rem] border border-white/5 my-12 overflow-hidden relative">
-                        <div className="flex flex-col items-center mb-16">
-                            <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-20">STUDIO</h2>
+                    <section className="container mx-auto px-6 py-12 bg-black/20 rounded-[3rem] border border-white/5 my-8 overflow-hidden relative">
+                        <div className="flex flex-col items-center mb-10">
+                            <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-16">STUDIO</h2>
                             <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter text-center relative z-10">
                                 Watch My <span className="text-orange-600">Videos</span>
                             </h2>
-                            <div className="w-24 h-2 bg-orange-600 mt-6 rounded-full" />
+                            <div className="w-24 h-2 bg-orange-600 mt-4 rounded-full" />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -315,11 +315,11 @@ export default function MainContent({
             </section>
 
             {/* Projects/Portfolio Section */}
-            <section id="portfolio" className="container mx-auto px-6 scroll-mt-20 py-20">
-                <div className="flex flex-col items-center mb-12">
+            <section id="portfolio" className="container mx-auto px-6 scroll-mt-20 py-12">
+                <div className="flex flex-col items-center mb-8">
                     <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">Featured <span className="text-orange-600">Projects</span></h2>
-                    <div className="w-20 h-1.5 bg-orange-600 mt-4 rounded-full"></div>
-                    <p className="mt-6 text-gray-400 text-base max-w-xl text-center font-bold">
+                    <div className="w-16 h-1.5 bg-orange-600 mt-2 rounded-full"></div>
+                    <p className="mt-4 text-gray-400 text-base max-w-xl text-center font-bold">
                         Building digital products that combine stunning design with robust business logic.
                     </p>
                 </div>

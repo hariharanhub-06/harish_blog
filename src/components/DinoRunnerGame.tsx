@@ -191,8 +191,8 @@ export default function DinoRunnerGame() {
     }, [gameState, score, highScore]);
 
     return (
-        <section id="dino-runner" className="py-16 md:py-24 px-4 md:px-6 bg-[#0a0a0a] relative overflow-hidden flex flex-col items-center justify-center min-h-[700px] md:min-h-[850px]">
-            <div className="text-center mb-8 md:mb-12 space-y-2 md:space-y-4 px-4 w-full">
+        <section id="dino-runner" className="py-12 md:py-16 px-4 md:px-6 bg-[#0a0a0a] relative overflow-hidden flex flex-col items-center justify-center min-h-[600px] md:min-h-[750px]">
+            <div className="text-center mb-4 md:mb-8 space-y-2 md:space-y-4 px-4 w-full">
                 <span className="text-emerald-500 font-bold tracking-[0.3em] md:tracking-[0.5em] uppercase text-[9px] md:text-[10px] animate-pulse block">Retro Arcade</span>
                 <h2 className="text-[12vw] md:text-7xl font-black text-white tracking-widest uppercase italic leading-none">
                     Pixel <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Jump</span>
@@ -221,8 +221,8 @@ export default function DinoRunnerGame() {
                         >
                             {gameState === "gameover" ? (
                                 <>
-                                    <h3 className="text-2xl md:text-4xl font-black text-rose-500 tracking-tighter mb-2 italic">GAME OVER</h3>
-                                    <div className="flex gap-4 md:gap-6 mb-6 md:mb-8 mt-2">
+                                    <h3 className="text-2xl md:text-4xl font-black text-rose-500 tracking-tighter mb-1 italic">GAME OVER</h3>
+                                    <div className="flex gap-4 md:gap-6 mb-4 md:mb-6 mt-1">
                                         <div className="text-center">
                                             <p className="text-[8px] md:text-[9px] uppercase tracking-widest text-gray-400">Distance</p>
                                             <p className="text-xl md:text-2xl font-black text-white">{score}</p>
@@ -319,7 +319,7 @@ export default function DinoRunnerGame() {
                 )}
             </div>
 
-            <div className="mt-8 md:mt-12 flex flex-wrap justify-center gap-4 md:gap-8 px-6">
+            <div className="mt-4 md:mt-8 flex flex-wrap justify-center gap-4 md:gap-8 px-6">
                 <div className="px-4 md:px-6 py-2 md:py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
                     <Flame className="text-orange-500" size={14} />
                     <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/60">Fast Paced</span>
