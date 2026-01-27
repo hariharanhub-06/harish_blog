@@ -159,22 +159,40 @@ function AIChatInner() {
         if (intent === "CASUAL" || /(happy|bored|tired|stressed|motivated)/i.test(msg)) {
             if (!state.lastStage || state.lastStage === "WELCOME") {
                 newStage = "CASUAL_MOOD";
+            } else if (state.lastStage === "CASUAL_MOOD") {
+                newStage = "CASUAL_CHAT";
             }
         } else if (intent === "LEARNING") {
             if (!state.lastStage || state.lastStage === "WELCOME") {
                 newStage = "LEARNING_CATEGORY";
             } else if (state.lastStage === "LEARNING_CATEGORY") {
                 newStage = "LEARNING_SUBJECT";
+            } else if (state.lastStage === "LEARNING_SUBJECT") {
+                newStage = "LEARNING_LEVEL";
+            } else if (state.lastStage === "LEARNING_LEVEL") {
+                newStage = "LEARNING_ACTION";
             }
         } else if (intent === "BOOKING") {
             if (state.bookingStage === "NONE") {
                 updateState({ bookingStage: "MODE" });
+                newStage = "BOOKING_MODE";
+            } else if (state.bookingStage === "MODE") {
+                updateState({ bookingStage: "DETAILS" });
+                newStage = "BOOKING_DETAILS";
+            } else if (state.bookingStage === "DETAILS") {
+                updateState({ bookingStage: "DATETIME" });
+                newStage = "BOOKING_DATETIME";
+            } else if (state.bookingStage === "DATETIME") {
+                updateState({ bookingStage: "CONFIRMED" });
+                newStage = "BOOKING_CONFIRM";
             }
         } else if (intent === "PRICE") {
             if (!state.lastStage || state.lastStage === "WELCOME") {
                 newStage = "PRICE_CATEGORY";
             } else if (state.lastStage === "PRICE_CATEGORY") {
                 newStage = "PRICE_PLANS";
+            } else if (state.lastStage === "PRICE_PLANS") {
+                newStage = "PRICE_DETAIL";
             }
         } else if (intent === "CERT") {
             if (!state.lastStage || state.lastStage === "WELCOME") {
@@ -344,22 +362,46 @@ function generateResponse(message: string, state: UserState): Message {
                 content: `Perfect 😄 now I understand you better!\n\nMost people at your stage usually want:\n✔ Strong basics\n✔ Clear concepts\n✔ Confidence boost\n✔ Career advantage\n\nTell me 😊\nWhich area are you most interested in right now?`,
                 options: ["Maths", "Science", "English", "Soft skills", "Management", "Technical skills", "Career guidance"]
             };
+        } else if (stage === "LEARNING_SUBJECT") {
+            return {
+                role: "bot",
+                content: `Excellent choice 😄👍\n\nNow just one quick question 😊\nWhat's your current comfort level with this subject?`,
+                options: ["Complete beginner", "Basic knowledge", "Intermediate", "Advanced", "Expert level"]
+            };
+        } else if (stage === "LEARNING_LEVEL") {
+            return {
+                role: "bot",
+                content: `Perfect! 😄 I know exactly how to help you now.\n\nBased on your level, I recommend:\n✔ Personalized learning plan\n✔ Expert guidance\n✔ Practice materials\n✔ Progress tracking\n\nWhat would you like to do next?`,
+                options: ["Book free demo", "See course details", "Talk to expert", "Check pricing", "Main menu"]
+            };
         }
     }
 
     // BOOKING FLOW
     if (intent === "BOOKING" || lower.includes("book")) {
-        if (state.bookingStage === "NONE") {
+        if (state.bookingStage === "NONE" || stage === "BOOKING_MODE") {
             return {
                 role: "bot",
                 content: "Wonderful 😄👏 booking early is a very smart decision!\n\nBefore I proceed, just one quick question 😊\nWhat kind of session do you prefer?",
                 options: ["Online", "Offline", "Personal coaching", "Group class", "Just demo"]
             };
-        } else if (state.bookingStage === "MODE") {
+        } else if (state.bookingStage === "MODE" || stage === "BOOKING_DETAILS") {
             return {
                 role: "bot",
                 content: "Nice 😄 good choice!\n\nTo book correctly, I need a few details 🙏\nThis helps us give you the right trainer & timing.\n\n👤 Full name\n📞 Mobile number\n📍 City / Location\n\nDon't worry — your details are safe with us 😊",
                 options: ["I'll provide details", "Change mode", "Main menu"]
+            };
+        } else if (state.bookingStage === "DETAILS" || stage === "BOOKING_DATETIME") {
+            return {
+                role: "bot",
+                content: "Great! 😄 I've noted your details.\n\nNow let's finalize the timing 📅\n\nWhen would you prefer to have your session?",
+                options: ["This week", "Next week", "Flexible timing", "Weekends only", "After 6 PM"]
+            };
+        } else if (state.bookingStage === "DATETIME" || stage === "BOOKING_CONFIRM") {
+            return {
+                role: "bot",
+                content: "Perfect! ✨😄\n\nYour booking request is confirmed!\n\n✔ Mode: ${state.bookingData.mode || 'Selected'}\n✔ Preferred timing noted\n\nOur team will contact you within 24 hours to:\n📞 Confirm final schedule\n✉️ Send session details\n🎯 Share preparation tips\n\nYou made a great decision! 👏\n\nAnything else I can help with?",
+                options: ["Course details", "Pricing", "Preparation tips", "Main menu"]
             };
         }
     }
@@ -377,6 +419,12 @@ function generateResponse(message: string, state: UserState): Message {
                 role: "bot",
                 content: "Perfect 👍 now I'll explain clearly 😄\n\nWe mainly offer three smart options:\n\n1️⃣ Free trial – test quality\n2️⃣ Certified short program – best value\n3️⃣ Long program – best results\n\nMost students start with free trial\nand then move to certified programs 👍\n\nWould you like me to:",
                 options: ["Explain free option", "Explain certified option", "Suggest best plan", "Direct booking"]
+            };
+        } else if (stage === "PRICE_DETAIL") {
+            return {
+                role: "bot",
+                content: "Excellent! 😄 Let me break it down for you:\n\n💰 **Pricing ranges:**\n• Free Demo: ₹0 (1 session)\n• Short Course: ₹2,999 - ₹9,999\n• Long Program: ₹15,999 - ₹49,999\n\n✨ **What's included:**\n✔ Expert trainers\n✔ Study materials\n✔ Practice sessions\n✔ Certificate (paid courses)\n✔ Lifetime support\n\nMost students find it very affordable compared to quality 👍\n\nInterested in:",
+                options: ["Book free demo", "Full course details", "Payment plans", "Talk to expert", "Main menu"]
             };
         }
     }
@@ -406,6 +454,12 @@ function generateResponse(message: string, state: UserState): Message {
                 role: "bot",
                 content: "Haha 😄 nice to relax a bit!\n\nTell me 😉\nRight now your mood is more like:",
                 options: ["Happy 😄", "Bored 😐", "Tired 😴", "Stressed 😵", "Motivated 🔥"]
+            };
+        } else if (stage === "CASUAL_CHAT") {
+            return {
+                role: "bot",
+                content: "😄 I'm enjoying this chat too!\n\nBy the way…\nSince you're here anyway 😉\nWould you like to explore what we offer?\n\nOr just keep chatting — totally fine! 👍",
+                options: ["Tell me more", "Show courses", "Keep chatting", "Book demo", "Main menu"]
             };
         }
     }
