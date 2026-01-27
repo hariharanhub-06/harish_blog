@@ -53,9 +53,11 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
         const isAllAnswered = liveQuestion?.totalAnswers >= playerCount && playerCount > 0;
         const shouldReveal = (timeLeft === 0 || isAllAnswered) && status === "active";
 
-        if (shouldReveal && autoAdvanceTimer === null && hasAdvancedRef.current !== currentQuestionIndex) {
+        const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
+
+        if (shouldReveal && autoAdvanceTimer === null && hasAdvancedRef.current !== currentQuestionIndex && !isLastQuestion) {
             setAutoAdvanceTimer(10);
-        } else if (!shouldReveal) {
+        } else if (!shouldReveal || isLastQuestion) {
             setAutoAdvanceTimer(null);
         }
     }, [timeLeft, liveQuestion, playerCount, status, autoAdvanceTimer, currentQuestionIndex]);
@@ -236,24 +238,35 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
                                         </div>
 
                                         <div className="flex flex-col md:flex-row justify-center gap-4 pt-4 pb-2">
-                                            <button
-                                                onClick={() => handleAction("next")}
-                                                className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2"
-                                            >
-                                                Next Question <ArrowRight size={20} />
-                                            </button>
-                                            <div className="flex gap-4">
+                                            {currentQuestionIndex < totalQuestions - 1 ? (
                                                 <button
-                                                    onClick={() => handleAction("skip")}
-                                                    className="flex-1 px-8 py-4 bg-white border-2 border-gray-100 text-gray-600 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                                                    onClick={() => handleAction("next")}
+                                                    className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2"
                                                 >
-                                                    <RefreshCcw size={18} /> Skip
+                                                    Next Question <ArrowRight size={20} />
                                                 </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleAction("end")}
+                                                    className="px-8 py-4 bg-primary text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2 animate-pulse"
+                                                >
+                                                    Finish Quiz <Trophy size={20} />
+                                                </button>
+                                            )}
+                                            <div className="flex gap-4">
+                                                {currentQuestionIndex < totalQuestions - 1 && (
+                                                    <button
+                                                        onClick={() => handleAction("skip")}
+                                                        className="flex-1 px-8 py-4 bg-white border-2 border-gray-100 text-gray-600 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                                                    >
+                                                        <RefreshCcw size={18} /> Skip
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={() => handleAction("end")}
                                                     className="flex-1 px-8 py-4 bg-red-50 text-red-500 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-red-100 transition-all flex items-center justify-center gap-2"
                                                 >
-                                                    <StopCircle size={20} /> End
+                                                    <StopCircle size={20} /> Force End
                                                 </button>
                                             </div>
                                         </div>
