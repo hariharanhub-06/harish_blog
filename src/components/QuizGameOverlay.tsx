@@ -68,6 +68,8 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
     const [liveQuestion, setLiveQuestion] = useState<any>(null);
     const [serverShowResults, setServerShowResults] = useState(false);
     const [isPlayerCorrect, setIsPlayerCorrect] = useState(false);
+    const [lastPointsEarned, setLastPointsEarned] = useState(0);
+    const [currentRank, setCurrentRank] = useState<number | null>(null);
 
     // Anti-cheat: Tab visibility change (Only for self-paced, disable for live to avoid false positives on mobile)
     useEffect(() => {
@@ -173,6 +175,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
 
                     setServerShowResults(data.showResults || false);
                     setIsPlayerCorrect(data.isCorrect || false);
+                    setCurrentRank(data.currentRank || null);
 
                     // Handle Status Changes
                     if (data.status === "active" && data.currentQuestion) {
@@ -238,15 +241,27 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
 
     const handleOptionToggle = (optionId: string) => {
         if (isSubmitted) return;
-        setSelectedOptionIds(prev =>
-            prev.includes(optionId)
-                ? prev.filter(id => id !== optionId)
-                : [...prev, optionId]
-        );
+
+        if (isLive) {
+            // Auto-submit for live game to match Kahoot experience
+            const newSelection = [optionId];
+            setSelectedOptionIds(newSelection);
+            handleSubmit(newSelection);
+        } else {
+            setSelectedOptionIds(prev =>
+                prev.includes(optionId)
+                    ? prev.filter(id => id !== optionId)
+                    : [...prev, optionId]
+            );
+        }
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (overrideIds?: string[]) => {
         if (isSubmitted) return;
+
+        const finalIds = overrideIds || selectedOptionIds;
+        if (finalIds.length === 0) return;
+
         setIsSubmitted(true);
 
         if (isLive) {
@@ -258,7 +273,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                     body: JSON.stringify({
                         sessionId,
                         participantId,
-                        answerIds: selectedOptionIds,
+                        answerIds: finalIds,
                         timeLeft
                     })
                 });
@@ -266,6 +281,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                 if (data.success) {
                     setScore(data.newScore);
                     setStreak(data.streak || 0);
+                    setLastPointsEarned(data.pointsAwarded || 0);
                     if (data.isCorrect) setCorrectCount(prev => prev + 1);
                 }
             } catch (error) {
@@ -280,8 +296,8 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
 
         const correctOptionIds = currentQuestion.options.filter(o => o.isCorrect).map(o => o.id);
         const isCorrect = correctOptionIds.length > 0 &&
-            selectedOptionIds.length === correctOptionIds.length &&
-            selectedOptionIds.every(id => correctOptionIds.includes(id));
+            finalIds.length === correctOptionIds.length &&
+            finalIds.every(id => correctOptionIds.includes(id));
 
         if (isCorrect) {
             const currentQ = quiz?.questions[currentQuestionIndex];
@@ -330,7 +346,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] bg-black flex flex-col font-poppins text-white overflow-y-auto"
         >
-            <div className="absolute top-6 right-6 z-[110]">
+            <div className="absolute top-6 left-6 md:left-auto md:right-6 z-[110]">
                 <button
                     onClick={onClose}
                     className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl transition-all border border-white/10 group"
@@ -365,7 +381,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                             placeholder="ENTER GAME PIN"
                                             value={pin}
                                             onChange={(e) => setPin(e.target.value)}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-center font-black text-4xl tracking-[0.3em] focus:ring-2 focus:ring-blue-500 outline-none transition-all uppercase"
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-center font-black text-2xl md:text-4xl tracking-[0.1em] md:tracking-[0.3em] focus:ring-2 focus:ring-blue-500 outline-none transition-all uppercase"
                                         />
                                         <input
                                             type="text"
@@ -467,7 +483,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                     </div>
                                 </div>
 
-                                <div className="flex gap-4 items-center">
+                                <div className="flex gap-4 items-center pr-12 md:pr-0">
                                     {streak > 1 && (
                                         <div className="text-right">
                                             <span className="text-[10px] font-black text-primary uppercase tracking-widest block leading-none mb-1">Streak</span>
@@ -478,7 +494,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                     )}
                                     <div className="text-right">
                                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block leading-none mb-1">Live Score</span>
-                                        <span className="text-3xl font-black tracking-tighter leading-none">{score}</span>
+                                        <span className="text-2xl md:text-3xl font-black tracking-tighter leading-none">{score}</span>
                                     </div>
                                 </div>
                             </div>
@@ -539,14 +555,14 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                         })}
                                     </div>
 
-                                    {!isSubmitted && selectedOptionIds.length > 0 && (
+                                    {!isSubmitted && !isLive && selectedOptionIds.length > 0 && (
                                         <motion.div
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/90 to-transparent z-50 flex justify-center"
                                         >
                                             <button
-                                                onClick={handleSubmit}
+                                                onClick={() => handleSubmit()}
                                                 className="w-full max-w-md px-12 py-5 bg-white text-black rounded-3xl font-black uppercase tracking-[0.3em] text-xs hover:scale-105 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)]"
                                             >
                                                 Submit Answer
@@ -568,16 +584,31 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                                                         className="flex flex-col items-center"
                                                     >
                                                         {isPlayerCorrect ? (
-                                                            <h3 className="text-4xl md:text-6xl font-black text-emerald-500 mb-2 tracking-tighter uppercase animate-bounce">Correct! 🔥</h3>
+                                                            <>
+                                                                <h3 className="text-4xl md:text-6xl font-black text-emerald-500 mb-2 tracking-tighter uppercase animate-bounce">Correct! 🔥</h3>
+                                                                <div className="bg-emerald-500/20 px-6 py-2 rounded-full border border-emerald-500/30 mb-4">
+                                                                    <span className="text-xl font-black text-emerald-400">+{lastPointsEarned} Points</span>
+                                                                </div>
+                                                            </>
                                                         ) : (
-                                                            <h3 className="text-4xl md:text-6xl font-black text-red-500 mb-2 tracking-tighter uppercase">Incorrect</h3>
+                                                            <h3 className="text-4xl md:text-6xl font-black text-red-500 mb-6 tracking-tighter uppercase">Incorrect</h3>
                                                         )}
-                                                        <p className="font-bold text-gray-400">Next question starting soon...</p>
+
+                                                        {currentRank && (
+                                                            <div className="flex flex-col items-center">
+                                                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-1">Current Standing</span>
+                                                                <p className="text-2xl font-black text-white uppercase tracking-tighter">
+                                                                    {currentRank}{currentRank === 1 ? 'st' : currentRank === 2 ? 'nd' : currentRank === 3 ? 'rd' : 'th'} Place
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                        <p className="font-bold text-gray-400 mt-8">Next question starting soon...</p>
                                                     </motion.div>
                                                 ) : (
                                                     <>
-                                                        <Loader2 className="animate-spin text-white mb-2" />
-                                                        <p className="font-bold text-gray-400">Answer Submitted! Waiting for next question...</p>
+                                                        <Loader2 className="animate-spin text-white mb-4" size={32} />
+                                                        <p className="text-xl font-black text-white uppercase tracking-tighter mb-2">Answer Submitted!</p>
+                                                        <p className="font-bold text-gray-400">Waiting for others to finish...</p>
                                                     </>
                                                 )}
                                             </motion.div>

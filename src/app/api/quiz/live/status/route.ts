@@ -46,7 +46,7 @@ export async function GET(req: Request) {
         // Also get total participants count
         const allParticipants = await db.query.quizParticipants.findMany({
             where: eq(quizParticipants.sessionId, session.id),
-            columns: { id: true }
+            columns: { id: true, score: true }
         });
 
         // Get current question if active and index is valid
@@ -127,6 +127,10 @@ export async function GET(req: Request) {
             totalParticipants: allParticipants.length,
             showResults,
             isCorrect: isParticipantCorrect,
+            currentRank: participantId ? allParticipants
+                .map(p => ({ id: p.id, score: p.score }))
+                .sort((a, b) => (b.score || 0) - (a.score || 0))
+                .findIndex(p => p.id === participantId) + 1 : null,
             currentQuestion
         });
 

@@ -28,7 +28,7 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
     useEffect(() => {
         const interval = setInterval(fetchStatus, 2000);
         return () => clearInterval(interval);
-    }, []);
+    }, [sessionId, currentQuestionIndex]);
 
     // Local countdown timer for the host
     useEffect(() => {
@@ -41,28 +41,34 @@ export default function LiveQuizHost({ sessionId, initialPin, quizTitle, totalQu
         return () => clearInterval(timer);
     }, [status, timeLeft]);
 
-    // Auto-advance logic
+    // Auto-advance logic: Trigger reveal and start 10s countdown
     useEffect(() => {
-        let timer: any;
         const isAllAnswered = liveQuestion?.totalAnswers >= playerCount && playerCount > 0;
-        const showResults = (timeLeft === 0 || isAllAnswered) && status === "active";
+        const shouldReveal = (timeLeft === 0 || isAllAnswered) && status === "active";
 
-        if (showResults) {
-            if (autoAdvanceTimer === null) {
-                setAutoAdvanceTimer(10);
-            } else if (autoAdvanceTimer > 0) {
-                timer = setInterval(() => {
-                    setAutoAdvanceTimer(prev => (prev !== null ? prev - 1 : 0));
-                }, 1000);
-            } else if (autoAdvanceTimer === 0) {
+        if (shouldReveal && autoAdvanceTimer === null) {
+            setAutoAdvanceTimer(10);
+        } else if (!shouldReveal) {
+            setAutoAdvanceTimer(null);
+        }
+    }, [timeLeft, liveQuestion, playerCount, status, autoAdvanceTimer]);
+
+    // Independent countdown for auto-advance
+    useEffect(() => {
+        if (autoAdvanceTimer === null || autoAdvanceTimer <= 0) {
+            if (autoAdvanceTimer === 0) {
                 handleAction("next");
                 setAutoAdvanceTimer(null);
             }
-        } else {
-            setAutoAdvanceTimer(null);
+            return;
         }
+
+        const timer = setInterval(() => {
+            setAutoAdvanceTimer(prev => (prev !== null ? prev - 1 : 0));
+        }, 1000);
+
         return () => clearInterval(timer);
-    }, [timeLeft, liveQuestion, playerCount, status, autoAdvanceTimer]);
+    }, [autoAdvanceTimer]);
 
     const fetchStatus = async () => {
         try {
