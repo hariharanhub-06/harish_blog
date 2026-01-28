@@ -100,9 +100,9 @@ export default function FinanceModule() {
         setLoading(true);
         try {
             const [debtsRes, statsRes, transRes] = await Promise.all([
-                fetch("/api/admin/finance/debts"),
-                fetch(`/api/admin/finance/summary?range=${dateRange}`),
-                fetch(`/api/admin/finance/transactions?limit=100${selectedCategory !== 'All' ? `&category=${selectedCategory}` : ''}`)
+                fetch("/api/admin/finance/debts", { cache: "no-store" }),
+                fetch(`/api/admin/finance/summary?range=${dateRange}`, { cache: "no-store" }),
+                fetch(`/api/admin/finance/transactions?limit=100${selectedCategory !== 'All' ? `&category=${selectedCategory}` : ''}`, { cache: "no-store" })
             ]);
 
             if (debtsRes.ok) setDebts(await debtsRes.json());
@@ -152,7 +152,12 @@ export default function FinanceModule() {
                 const amount = parseFloat(match[2]);
 
                 if (item && !isNaN(amount)) {
-                    const matchedDebt = debts.find(d => d.name.toLowerCase() === item.toLowerCase());
+                    // Fuzzy match: check if debt name includes item OR item includes debt name
+                    const matchedDebt = debts.find(d =>
+                        d.name.toLowerCase() === item.toLowerCase() ||
+                        d.name.toLowerCase().includes(item.toLowerCase()) ||
+                        item.toLowerCase().includes(d.name.toLowerCase())
+                    );
                     entries.push({
                         type: currentType,
                         item,
