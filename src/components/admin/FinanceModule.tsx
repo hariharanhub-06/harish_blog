@@ -180,11 +180,12 @@ export default function FinanceModule() {
     }, [logInput, debts]);
 
     const handleSaveLog = async () => {
-        if (parsedEntries.length === 0 || parsedEntries.some(e => !e.isValid)) return;
+        const validEntries = parsedEntries.filter(e => e.isValid);
+        if (validEntries.length === 0) return;
 
         setSaving(true);
         try {
-            for (const entry of parsedEntries) {
+            for (const entry of validEntries) {
                 await fetch("/api/admin/finance/transactions", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -198,9 +199,17 @@ export default function FinanceModule() {
                     })
                 });
             }
-            setLogInput("");
+
+            // Keep only invalid entries in the text box
+            const invalidLines = parsedEntries.filter(e => !e.isValid).map(e => e.item);
+            setLogInput(invalidLines.join('\n'));
+
             fetchData();
-            alert("Entries saved successfully!");
+            if (invalidLines.length > 0) {
+                alert(`Saved ${validEntries.length} entries. Please check the remaining invalid lines.`);
+            } else {
+                setLogInput(""); // Clear if everything was valid
+            }
         } catch (error) {
             console.error("Failed to save log", error);
         } finally {
@@ -700,12 +709,12 @@ export default function FinanceModule() {
                                 </div>
 
                                 <button
-                                    disabled={parsedEntries.length === 0 || parsedEntries.some(e => !e.isValid) || saving}
+                                    disabled={parsedEntries.filter(e => e.isValid).length === 0 || saving}
                                     onClick={handleSaveLog}
-                                    className={`w-full mt-8 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3 ${parsedEntries.length > 0 && !parsedEntries.some(e => !e.isValid) ? 'bg-primary text-white shadow-xl shadow-primary/30 hover:scale-105 active:scale-95' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                                    className={`w-full mt-8 py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3 ${parsedEntries.filter(e => e.isValid).length > 0 ? 'bg-primary text-white shadow-xl shadow-primary/30 hover:scale-105 active:scale-95' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
                                 >
                                     {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                                    Confirm and Post Entries
+                                    {parsedEntries.some(e => !e.isValid) ? `Save ${parsedEntries.filter(e => e.isValid).length} Valid Entries` : 'Confirm and Post Entries'}
                                 </button>
                             </div>
                         </div>
