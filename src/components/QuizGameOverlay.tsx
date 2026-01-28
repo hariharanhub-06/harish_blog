@@ -59,6 +59,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
     const [userName, setUserName] = useState("");
     const [pin, setPin] = useState("");
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
+    const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
 
     // Live Quiz State
     const [sessionId, setSessionId] = useState("");
@@ -112,7 +113,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
                     userName,
                     score,
                     correctAnswers: correctCount,
-                    totalQuestions: quiz.questions.length,
+                    totalQuestions: shuffledQuestions.length,
                     timeTaken: 0
                 })
             });
@@ -245,9 +246,18 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
     const startQuiz = () => {
         if (!userName) return alert("Please enter your name");
 
+        // Shuffle questions using Fisher-Yates algorithm
+        const questionsToShuffle = quiz?.questions || [];
+        const shuffled = [...questionsToShuffle];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        setShuffledQuestions(shuffled);
+
         setGameState("playing");
         // Ensure we prioritize question limit only if valid (>0), else use global
-        const firstQTime = quiz?.questions[0]?.timeLimit;
+        const firstQTime = shuffled[0]?.timeLimit;
         const initialTime = (firstQTime && firstQTime > 0) ? firstQTime : (quiz?.timeLimit || 30);
 
         setTimeLeft(initialTime);
@@ -305,7 +315,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
         }
 
         // Self-paced Logic
-        const currentQuestion = quiz?.questions[currentQuestionIndex];
+        const currentQuestion = shuffledQuestions[currentQuestionIndex];
         if (!currentQuestion) return;
 
         const correctOptionIds = currentQuestion.options.filter(o => o.isCorrect).map(o => o.id);
@@ -314,7 +324,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
             finalIds.every(id => correctOptionIds.includes(id));
 
         if (isCorrect) {
-            const currentQ = quiz?.questions[currentQuestionIndex];
+            const currentQ = shuffledQuestions[currentQuestionIndex];
             const qTime = (currentQ?.timeLimit && currentQ.timeLimit > 0) ? currentQ.timeLimit : (quiz?.timeLimit || 30);
 
             const timeBonus = Math.floor((timeLeft / qTime) * 500);
@@ -326,13 +336,13 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
         }
 
         setTimeout(() => {
-            if (currentQuestionIndex < (quiz?.questions.length || 0) - 1) {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
                 const nextIndex = currentQuestionIndex + 1;
                 setCurrentQuestionIndex(prev => prev + 1);
                 setSelectedOptionIds([]);
                 setIsSubmitted(false);
 
-                const nextQ = quiz?.questions[nextIndex];
+                const nextQ = shuffledQuestions[nextIndex];
                 const nextTime = (nextQ?.timeLimit && nextQ.timeLimit > 0) ? nextQ.timeLimit : (quiz?.timeLimit || 30);
                 setTimeLeft(nextTime);
             } else {
@@ -343,7 +353,7 @@ export default function QuizGameOverlay({ quiz, isLive = false, onClose }: QuizG
     };
 
     // Helper to get current Question (Live or Self-Paced)
-    const activeQuestion = isLive ? liveQuestion : quiz?.questions[currentQuestionIndex];
+    const activeQuestion = isLive ? liveQuestion : shuffledQuestions[currentQuestionIndex];
 
     // Lock Body Scroll
     useEffect(() => {
