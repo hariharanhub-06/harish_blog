@@ -30,31 +30,30 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const data = await req.json();
-        const res = await db.transaction(async (tx) => {
-            const [transaction] = await tx.insert(financeTransactions).values({
-                amount: parseFloat(data.amount),
-                description: data.description,
-                category: data.category,
-                type: data.type,
-                debtId: data.debtId || null,
-                date: data.date ? new Date(data.date) : new Date(),
-            }).returning();
+        // neon-http driver does not support transactions, so executing sequentially
+        const [transaction] = await db.insert(financeTransactions).values({
+            amount: parseFloat(data.amount),
+            description: data.description,
+            category: data.category,
+            type: data.type,
+            debtId: data.debtId || null,
+            date: data.date ? new Date(data.date) : new Date(),
+        }).returning();
 
-            // If it's a debt payment, update the remaining amount in financeDebts
-            if (data.type === "debt_pay" && data.debtId) {
-                const [debt] = await tx.select().from(financeDebts).where(eq(financeDebts.id, data.debtId));
-                if (debt) {
-                    await tx.update(financeDebts)
-                        .set({
-                            remainingAmount: debt.remainingAmount - parseFloat(data.amount),
-                            updatedAt: new Date(),
-                        })
-                        .where(eq(financeDebts.id, data.debtId));
-                }
+        // If it's a debt payment, update the remaining amount in financeDebts
+        if (data.type === "debt_pay" && data.debtId) {
+            const [debt] = await db.select().from(financeDebts).where(eq(financeDebts.id, data.debtId));
+            if (debt) {
+                await db.update(financeDebts)
+                    .set({
+                        remainingAmount: debt.remainingAmount - parseFloat(data.amount),
+                        updatedAt: new Date(),
+                    })
+                    .where(eq(financeDebts.id, data.debtId));
             }
+        }
 
-            return transaction;
-        });
+        const res = transaction;
 
         return NextResponse.json(res);
     } catch (error: any) {
@@ -72,25 +71,24 @@ export async function DELETE(req: Request) {
         const id = searchParams.get("id");
         if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
-        await db.transaction(async (tx) => {
-            const [transaction] = await tx.select().from(financeTransactions).where(eq(financeTransactions.id, id));
-            if (!transaction) return;
+        // neon-http driver does not support transactions, so executing sequentially
+        const [transaction] = await db.select().from(financeTransactions).where(eq(financeTransactions.id, id));
+        if (!transaction) return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
 
-            // Rollback debt payment if deleting a debt_pay transaction
-            if (transaction.type === "debt_pay" && transaction.debtId) {
-                const [debt] = await tx.select().from(financeDebts).where(eq(financeDebts.id, transaction.debtId));
-                if (debt) {
-                    await tx.update(financeDebts)
-                        .set({
-                            remainingAmount: debt.remainingAmount + transaction.amount,
-                            updatedAt: new Date(),
-                        })
-                        .where(eq(financeDebts.id, transaction.debtId));
-                }
+        // Rollback debt payment if deleting a debt_pay transaction
+        if (transaction.type === "debt_pay" && transaction.debtId) {
+            const [debt] = await db.select().from(financeDebts).where(eq(financeDebts.id, transaction.debtId));
+            if (debt) {
+                await db.update(financeDebts)
+                    .set({
+                        remainingAmount: debt.remainingAmount + transaction.amount,
+                        updatedAt: new Date(),
+                    })
+                    .where(eq(financeDebts.id, transaction.debtId));
             }
+        }
 
-            await tx.delete(financeTransactions).where(eq(financeTransactions.id, id));
-        });
+        await db.delete(financeTransactions).where(eq(financeTransactions.id, id));
 
         return NextResponse.json({ success: true });
     } catch (error) {
