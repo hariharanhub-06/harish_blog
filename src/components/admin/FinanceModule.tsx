@@ -191,7 +191,7 @@ export default function FinanceModule() {
         setSaving(true);
         try {
             for (const entry of validEntries) {
-                await fetch("/api/admin/finance/transactions", {
+                const res = await fetch("/api/admin/finance/transactions", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -203,6 +203,11 @@ export default function FinanceModule() {
                         date: new Date().toISOString()
                     })
                 });
+
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.details || "Server Error");
+                }
             }
 
             // Keep only invalid entries in the text box
@@ -215,8 +220,9 @@ export default function FinanceModule() {
             } else {
                 setLogInput(""); // Clear if everything was valid
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to save log", error);
+            alert(`Error saving logs: ${error.message}`);
         } finally {
             setSaving(false);
         }

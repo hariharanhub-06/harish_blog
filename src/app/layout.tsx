@@ -15,20 +15,19 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://hariharanhub.com'),
-  title: "Hari Haran's Blog | Developer & Consultant",
-  description: "Official Blog & Portfolio of Hari Haran Jeyaramamoorthy. Insights on Web Development, Software Engineering, and Entrepreneurship.",
+  title: "Hari Haran | Business Consultant & Developer in Coimbatore",
+  description: "Expert Business Consultant and Web Developer based in Coimbatore. Specializing in software solutions, startup strategy, and digital transformation.",
   keywords: [
     "Hari Haran Jeyaramamoorthy",
     "Hari Haran Blog",
-    "Tech Blog",
-    "Web Developer",
-    "Business Consultant",
+    "Business Consultant Coimbatore",
+    "Web Developer Coimbatore",
+    "Software Engineer India",
+    "Startup Consultant",
     "HM Snacks",
     "HM Tech",
     "Haripicks",
-    "Snack Business",
-    "Tech Solutions",
-    "Software Engineer",
+    "Freelance Developer Coimbatore",
     "Next.js Developer"
   ],
   icons: {
@@ -70,12 +69,19 @@ export default function RootLayout({
               "@type": "Person",
               "name": "Hari Haran Jeyaramamoorthy",
               "url": "https://hariharanhub.com",
-              "jobTitle": "Founder & Developer",
+              "jobTitle": "Business Consultant & Software Developer",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Coimbatore",
+                "addressRegion": "Tamil Nadu",
+                "addressCountry": "IN"
+              },
               "worksFor": [],
-              "knowsAbout": ["Web Development", "E-commerce", "Business Strategy", "Software Engineering"],
+              "knowsAbout": ["Web Development", "Business Consulting", "E-commerce", "Startup Strategy", "Software Engineering"],
               "sameAs": [
                 "https://linkedin.com/in/hari-haran-j",
-                "https://github.com/startup-digi-3119"
+                "https://github.com/startup-digi-3119",
+                "https://instagram.com/_mr_vibrant"
               ]
             })
           }}

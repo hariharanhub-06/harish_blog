@@ -36,7 +36,7 @@ export async function POST(req: Request) {
                 description: data.description,
                 category: data.category,
                 type: data.type,
-                debtId: data.debtId,
+                debtId: data.debtId || null,
                 date: data.date ? new Date(data.date) : new Date(),
             }).returning();
 
@@ -57,9 +57,12 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json(res);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to create transaction", error);
-        return NextResponse.json({ error: "Failed to create transaction" }, { status: 500 });
+        return NextResponse.json({
+            error: "Failed to create transaction",
+            details: error.message || "Unknown error"
+        }, { status: 500 });
     }
 }
 
