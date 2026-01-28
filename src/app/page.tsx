@@ -3,8 +3,10 @@ import MainContent from "@/components/MainContent";
 import { MatrixBackground } from "@/components/MatrixBackground";
 import { db } from "@/db";
 
-// Force dynamic rendering to ensure we get the latest data
-export const dynamic = "force-dynamic";
+// Enable Incremental Static Regeneration (ISR)
+// Revalidate every 3600 seconds (1 hour) to save DB and Vercel usage
+export const revalidate = 3600;
+// export const dynamic = "force-dynamic"; // Removed to prevent per-request DB hits
 
 export default async function Home() {
   // Fetch all data with safe fallbacks
