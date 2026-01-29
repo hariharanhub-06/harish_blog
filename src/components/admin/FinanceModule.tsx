@@ -503,7 +503,7 @@ export default function FinanceModule() {
                                                     return (
                                                         <div key={i} className="space-y-2">
                                                             <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                                                <span>{cat.category}</span>
+                                                                <span>{cat.category || 'Uncategorized'}</span>
                                                                 <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
                                                             </div>
                                                             <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
