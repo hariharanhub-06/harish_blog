@@ -509,11 +509,11 @@ export default function FinanceModule() {
                                     <div className="space-y-4">
                                         {(() => {
                                             const cats = stats?.categories || [];
-                                            const expenses = cats.filter((c: any) => c.type === 'expense' || c.type === 'debt_pay');
+                                            const expensesOnly = cats.filter((c: any) => c.type === 'expense');
                                             const debtTotal = cats.filter((c: any) => c.type === 'debt_pay').reduce((acc: number, curr: any) => acc + curr.value, 0);
 
-                                            // Combine with a synthetic "Debt" summary category
-                                            const displayCats = [...expenses];
+                                            // Combine normal expenses with a single synthetic "Debt" summary category
+                                            const displayCats = [...expensesOnly];
                                             if (debtTotal > 0) {
                                                 displayCats.push({
                                                     category: "Debt",
