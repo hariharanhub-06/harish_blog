@@ -65,6 +65,39 @@ export async function POST(req: Request) {
     }
 }
 
+export async function PUT(req: Request) {
+    try {
+        const data = await req.json();
+        const { id, ...updates } = data;
+
+        if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
+
+        // Handle date conversion if provided
+        if (updates.date) updates.date = new Date(updates.date);
+
+        // Handle amount parsing if provided
+        if (updates.amount !== undefined) updates.amount = parseFloat(updates.amount);
+
+        const [transaction] = await db.update(financeTransactions)
+            .set({
+                ...updates,
+                updatedAt: new Date()
+            })
+            .where(eq(financeTransactions.id, id))
+            .returning();
+
+        if (!transaction) return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
+
+        return NextResponse.json(transaction);
+    } catch (error: any) {
+        console.error("Failed to update transaction", error);
+        return NextResponse.json({
+            error: "Failed to update transaction",
+            details: error.message || "Unknown error"
+        }, { status: 500 });
+    }
+}
+
 export async function DELETE(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
