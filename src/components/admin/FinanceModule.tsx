@@ -298,8 +298,10 @@ export default function FinanceModule() {
     const totalIncome = summaryData.find((s: any) => s.type === "income")?.total || 0;
     const totalExpense = summaryData.find((s: any) => s.type === "expense")?.total || 0;
     const debtPayments = summaryData.find((s: any) => s.type === "debt_pay")?.total || 0;
+    // Debt payments are also expenses
+    const totalExpenseWithDebt = totalExpense + debtPayments;
     const debtBalance = stats?.debtBalance || 0;
-    const savingsRate = totalIncome > 0 ? Math.round(((totalIncome - totalExpense - debtPayments) / totalIncome) * 100) : 0;
+    const savingsRate = totalIncome > 0 ? Math.round(((totalIncome - totalExpenseWithDebt) / totalIncome) * 100) : 0;
 
     return (
         <div className="space-y-8 pb-20">
@@ -328,7 +330,7 @@ export default function FinanceModule() {
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard title="Total Income" value={totalIncome} icon={TrendingUp} color="emerald" />
-                <StatCard title="Total Expenses" value={totalExpense} icon={TrendingDown} color="red" />
+                <StatCard title="Total Expenses" value={totalExpenseWithDebt} icon={TrendingDown} color="red" />
                 <StatCard title="Debt Balance" value={debtBalance} icon={CreditCard} color="orange" />
                 <StatCard title="Savings Rate" value={`${savingsRate}%`} icon={LayoutDashboard} color="blue" />
             </div>
@@ -352,7 +354,20 @@ export default function FinanceModule() {
                                 </div>
                                 <div className="h-[350px]">
                                     <ResponsiveContainer width="100%" height="100%">
-                                        <AreaChart data={stats?.trend || []}>
+                                        <AreaChart data={
+                                            // Group trend by month to combine expense and debt_pay
+                                            Array.from((stats?.trend || []).reduce((acc: any, curr: any) => {
+                                                if (!acc.has(curr.month)) acc.set(curr.month, { month: curr.month, income: 0, expense: 0, debt_pay: 0 });
+                                                const entry = acc.get(curr.month);
+                                                if (curr.type === 'income') entry.income += curr.total;
+                                                else if (curr.type === 'expense') entry.expense += curr.total;
+                                                else if (curr.type === 'debt_pay') entry.debt_pay += curr.total;
+                                                return acc;
+                                            }, new Map()).values()).map((m: any) => ({
+                                                ...m,
+                                                totalExpense: m.expense + m.debt_pay
+                                            }))
+                                        }>
                                             <defs>
                                                 <linearGradient id="colorInc" x1="0" y1="0" x2="0" y2="1">
                                                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
@@ -362,13 +377,19 @@ export default function FinanceModule() {
                                                     <stop offset="5%" stopColor="#ef4444" stopOpacity={0.1} />
                                                     <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                                                 </linearGradient>
+                                                <linearGradient id="colorDebt" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                                </linearGradient>
                                             </defs>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 'bold', fill: '#94a3b8' }} />
                                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 'bold', fill: '#94a3b8' }} />
                                             <Tooltip content={<CustomTooltip />} />
-                                            <Area type="monotone" dataKey="income" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorInc)" />
-                                            <Area type="monotone" dataKey="expense" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorExp)" />
+                                            <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }} />
+                                            <Area type="monotone" dataKey="income" name="Income" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorInc)" />
+                                            <Area type="monotone" dataKey="expense" name="Expenses" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorExp)" />
+                                            <Area type="monotone" dataKey="debt_pay" name="Debt Payments" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorDebt)" />
                                         </AreaChart>
                                     </ResponsiveContainer>
                                 </div>
@@ -506,8 +527,8 @@ export default function FinanceModule() {
                                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Overall Progress</p>
                                                 <p className="text-lg font-black text-emerald-600">
                                                     {debts.reduce((acc, d) => acc + d.initialAmount, 0) > 0
-                                                        ? Math.round((1 - (debts.reduce((acc, d) => acc + d.remainingAmount, 0) / debts.reduce((acc, d) => acc + d.initialAmount, 0))) * 100)
-                                                        : 0}%
+                                                        ? ((1 - (debts.reduce((acc, d) => acc + d.remainingAmount, 0) / debts.reduce((acc, d) => acc + d.initialAmount, 0))) * 100).toFixed(2)
+                                                        : '0.00'}%
                                                 </p>
                                             </div>
                                         </div>
@@ -521,7 +542,7 @@ export default function FinanceModule() {
                                                 <div key={debt.id} className="space-y-3">
                                                     <div className="flex justify-between items-end">
                                                         <span className="text-xs font-black uppercase tracking-widest text-gray-900 truncate pr-4">{debt.name}</span>
-                                                        <span className="text-xs font-black text-gray-900">{Math.round(progress)}%</span>
+                                                        <span className="text-xs font-black text-gray-900">{progress.toFixed(2)}%</span>
                                                     </div>
                                                     <div className="h-3 bg-white rounded-full overflow-hidden border border-gray-100">
                                                         <div
