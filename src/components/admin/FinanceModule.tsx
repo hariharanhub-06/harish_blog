@@ -168,8 +168,18 @@ export default function FinanceModule() {
             let found = false;
 
             while ((match = regex.exec(trimmed)) !== null) {
-                const item = match[1].trim();
+                let item = match[1].trim();
                 const amount = parseFloat(match[2]);
+
+                // Strip common header words if they appear at the start of the category
+                const headers = ["income:", "income", "expense:", "expense", "debt:", "debt pay:", "debts paid:", "debts:", "debt"];
+                for (const header of headers) {
+                    if (item.toLowerCase().startsWith(header)) {
+                        item = item.substring(header.length).trim();
+                        // If it's empty after stripping, skip it (it was just the header)
+                        if (!item) continue;
+                    }
+                }
 
                 if (item && !isNaN(amount)) {
                     let normalizedCategory = item;
@@ -188,6 +198,12 @@ export default function FinanceModule() {
                         const match = existingCategories.find((cat: string) => {
                             const c = cat.toLowerCase();
                             const i = item.toLowerCase();
+
+                            // Skip common generic words from fuzzy matching to avoid false positives
+                            if (["income", "expense", "revenue", "debt", "transfer"].includes(c)) {
+                                return c === i; // Only exact match for these generic terms
+                            }
+
                             if (c === i) return true;
                             // Only match if one is a significant substring of the other (e.g. "Food" matches "Food Delivery")
                             // And avoid matching very short strings to prevent broad matches
@@ -475,28 +491,32 @@ export default function FinanceModule() {
                                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
                                     <h3 className="font-black text-lg uppercase tracking-tight mb-8">Top Incomes</h3>
                                     <div className="space-y-4">
-                                        {(stats?.categories || [])
-                                            .filter((c: any) => c.type === 'income')
-                                            .sort((a: any, b: any) => b.value - a.value)
-                                            .slice(0, 5)
-                                            .map((cat: any, i: number) => {
-                                                const max = Math.max(...(stats?.categories || []).filter((c: any) => c.type === 'income').map((c: any) => c.value), 1);
-                                                return (
-                                                    <div key={i} className="space-y-2">
-                                                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                                                            <span>{cat.category}</span>
-                                                            <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                        {(() => {
+                                            const cats = stats?.categories || [];
+                                            const incomes = cats.filter((c: any) => c.type === 'income');
+
+                                            return incomes
+                                                .sort((a: any, b: any) => b.value - a.value)
+                                                .slice(0, 5)
+                                                .map((cat: any, i: number) => {
+                                                    const max = Math.max(...incomes.map((c: any) => c.value), 1);
+                                                    return (
+                                                        <div key={i} className="space-y-2">
+                                                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                                                <span>{cat.category}</span>
+                                                                <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
+                                                                <motion.div
+                                                                    initial={{ width: 0 }}
+                                                                    animate={{ width: `${(cat.value / max) * 100}%` }}
+                                                                    className="h-full bg-emerald-400 rounded-full"
+                                                                />
+                                                            </div>
                                                         </div>
-                                                        <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
-                                                            <motion.div
-                                                                initial={{ width: 0 }}
-                                                                animate={{ width: `${(cat.value / max) * 100}%` }}
-                                                                className="h-full bg-emerald-400 rounded-full"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                                                    );
+                                                });
+                                        })()}
                                         {(stats?.categories || []).filter((c: any) => c.type === 'income').length === 0 && (
                                             <div className="h-[200px] flex items-center justify-center text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-50/50 rounded-2xl">
                                                 No income data
@@ -740,29 +760,43 @@ export default function FinanceModule() {
                                 {(() => {
                                     // Determine context based on the last header typed
                                     const lines = logInput.toLowerCase().split('\n');
-                                    let currentContext = 'expense';
+                                    let currentContext: 'income' | 'expense' | 'debt_pay' = 'expense';
                                     for (let i = lines.length - 1; i >= 0; i--) {
-                                        if (lines[i].includes('debts paid:') || lines[i].includes('debt:')) {
+                                        const l = lines[i].trim();
+                                        if (l.includes('debts paid:') || l.includes('debt:')) {
                                             currentContext = 'debt_pay';
                                             break;
                                         }
-                                        if (lines[i].includes('expense:') || lines[i].includes('income:')) {
-                                            currentContext = 'other';
+                                        if (l.includes('income:') || l.startsWith('income')) {
+                                            currentContext = 'income';
+                                            break;
+                                        }
+                                        if (l.includes('expense:') || l.startsWith('expense')) {
+                                            currentContext = 'expense';
                                             break;
                                         }
                                     }
 
-                                    if (currentContext === 'debt_pay') {
+                                    const suggestions = currentContext === 'debt_pay'
+                                        ? debts.filter(d => d.remainingAmount > 0).map(d => d.name)
+                                        : (stats?.categories || [])
+                                            .filter((c: any) => c.type === currentContext)
+                                            .map((c: any) => c.category);
+
+                                    if (suggestions.length > 0) {
                                         return (
                                             <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 py-2">Quick Add:</span>
-                                                {debts.filter(d => d.remainingAmount > 0).map(debt => (
+                                                {suggestions.slice(0, 10).map((name: string) => (
                                                     <button
-                                                        key={debt.id}
-                                                        onClick={() => setLogInput(prev => `${prev}${prev.endsWith('\n') || prev === '' ? '' : '\n'}${debt.name} - `)}
-                                                        className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs font-bold transition-all border border-blue-100"
+                                                        key={name}
+                                                        onClick={() => setLogInput(prev => `${prev}${prev.endsWith('\n') || prev === '' ? '' : '\n'}${name} - `)}
+                                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${currentContext === 'income' ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-100' :
+                                                            currentContext === 'debt_pay' ? 'bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-100' :
+                                                                'bg-red-50 hover:bg-red-100 text-red-600 border-red-100'
+                                                            }`}
                                                     >
-                                                        {debt.name}
+                                                        {name}
                                                     </button>
                                                 ))}
                                             </div>
