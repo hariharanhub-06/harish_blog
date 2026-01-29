@@ -145,18 +145,21 @@ export default function FinanceModule() {
             const trimmed = line.trim();
             if (!trimmed) return;
 
-            // Check for section headers
-            if (trimmed.toLowerCase().includes("debts paid:") || trimmed.toLowerCase().includes("debt:")) {
+            // Check for section headers (but don't skip if there's a number on the same line)
+            const lowerTrimmed = trimmed.toLowerCase();
+            const hasNumber = /\d/.test(trimmed);
+
+            if (lowerTrimmed.includes("debts paid:") || (lowerTrimmed.includes("debt") && !hasNumber)) {
                 currentType = "debt_pay";
-                return;
+                if (!hasNumber) return;
             }
-            if (trimmed.toLowerCase().includes("expense:") || trimmed.toLowerCase().startsWith("expense")) {
+            if (lowerTrimmed.includes("expense:") || (lowerTrimmed.startsWith("expense") && !hasNumber)) {
                 currentType = "expense";
-                return;
+                if (!hasNumber) return;
             }
-            if (trimmed.toLowerCase().includes("income:") || trimmed.toLowerCase().startsWith("income")) {
+            if (lowerTrimmed.includes("income:") || (lowerTrimmed.startsWith("income") && !hasNumber)) {
                 currentType = "income";
-                return;
+                if (!hasNumber) return;
             }
 
             // Improved parsing: Handle multiple pairs on the same line
@@ -181,12 +184,17 @@ export default function FinanceModule() {
                         normalizedCategory = matchedDebt?.name || "Transfer";
                         matchedDebtId = matchedDebt?.id;
                     } else {
-                        // Fuzzy match against existing categories for income/expense
-                        const match = existingCategories.find((cat: string) =>
-                            cat.toLowerCase() === item.toLowerCase() ||
-                            cat.toLowerCase().includes(item.toLowerCase()) ||
-                            item.toLowerCase().includes(cat.toLowerCase())
-                        );
+                        // Specific fuzzy match against existing categories for income/expense
+                        const match = existingCategories.find((cat: string) => {
+                            const c = cat.toLowerCase();
+                            const i = item.toLowerCase();
+                            if (c === i) return true;
+                            // Only match if one is a significant substring of the other (e.g. "Food" matches "Food Delivery")
+                            // And avoid matching very short strings to prevent broad matches
+                            if (i.length >= 4 && c.includes(i)) return true;
+                            if (c.length >= 4 && i.includes(c)) return true;
+                            return false;
+                        });
                         if (match) normalizedCategory = match;
                     }
 
@@ -499,28 +507,44 @@ export default function FinanceModule() {
                                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
                                     <h3 className="font-black text-lg uppercase tracking-tight mb-8">Top Expenses</h3>
                                     <div className="space-y-4">
-                                        {(stats?.categories || [])
-                                            .filter((c: any) => c.type === 'expense' || c.type === 'debt_pay')
-                                            .sort((a: any, b: any) => b.value - a.value)
-                                            .slice(0, 5)
-                                            .map((cat: any, i: number) => {
-                                                const max = Math.max(...(stats?.categories || []).filter((c: any) => c.type === 'expense' || c.type === 'debt_pay').map((c: any) => c.value), 1);
-                                                return (
-                                                    <div key={i} className="space-y-2">
-                                                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                                                            <span>{cat.category}</span>
-                                                            <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                        {(() => {
+                                            const cats = stats?.categories || [];
+                                            const expenses = cats.filter((c: any) => c.type === 'expense' || c.type === 'debt_pay');
+                                            const debtTotal = cats.filter((c: any) => c.type === 'debt_pay').reduce((acc: number, curr: any) => acc + curr.value, 0);
+
+                                            // Combine with a synthetic "Debt" summary category
+                                            const displayCats = [...expenses];
+                                            if (debtTotal > 0) {
+                                                displayCats.push({
+                                                    category: "Debt",
+                                                    value: debtTotal,
+                                                    type: "summary",
+                                                    isSummary: true
+                                                });
+                                            }
+
+                                            return displayCats
+                                                .sort((a, b) => b.value - a.value)
+                                                .slice(0, 5)
+                                                .map((cat: any, i: number) => {
+                                                    const max = Math.max(...displayCats.map(c => c.value), 1);
+                                                    return (
+                                                        <div key={i} className="space-y-2">
+                                                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                                                <span className={cat.isSummary ? 'text-primary font-black' : ''}>{cat.category}</span>
+                                                                <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
+                                                                <motion.div
+                                                                    initial={{ width: 0 }}
+                                                                    animate={{ width: `${(cat.value / max) * 100}%` }}
+                                                                    className={`h-full rounded-full ${cat.isSummary ? 'bg-primary' : 'bg-red-400'}`}
+                                                                />
+                                                            </div>
                                                         </div>
-                                                        <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
-                                                            <motion.div
-                                                                initial={{ width: 0 }}
-                                                                animate={{ width: `${(cat.value / max) * 100}%` }}
-                                                                className="h-full bg-red-400 rounded-full"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                                                    );
+                                                });
+                                        })()}
                                     </div>
                                 </div>
                             </div>
