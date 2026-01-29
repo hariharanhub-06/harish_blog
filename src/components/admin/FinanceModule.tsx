@@ -357,7 +357,7 @@ export default function FinanceModule() {
     // Debt payments are also expenses
     const totalExpenseWithDebt = totalExpense + debtPayments;
     const debtBalance = stats?.debtBalance || 0;
-    const savingsRate = totalIncome > 0 ? Math.round(((totalIncome - totalExpenseWithDebt) / totalIncome) * 100) : 0;
+    const savingsRate = totalIncome > 0 ? (((totalIncome - totalExpenseWithDebt) / totalIncome) * 100).toFixed(1) : "0";
 
     return (
         <div className="space-y-8 pb-20">
