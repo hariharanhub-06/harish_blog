@@ -56,8 +56,9 @@ export default function AnalyticsTab({ analytics }: AnalyticsTabProps) {
                 <div className="mb-10">
                     <h4 className="text-lg font-black uppercase tracking-tight mb-6">Weekly Spending Pattern</h4>
                     <div className="grid grid-cols-4 gap-4">
-                        {Object.entries(analytics.cashFlowPatterns?.weeklyPattern || {}).map(([week, amount]: any, idx) => {
-                            const max = Math.max(...Object.values(analytics.cashFlowPatterns?.weeklyPattern || {}));
+                        {Object.entries((analytics.cashFlowPatterns?.weeklyPattern || {}) as Record<string, number>).map(([week, amount], idx) => {
+                            const values = Object.values(analytics.cashFlowPatterns?.weeklyPattern || {}) as number[];
+                            const max = values.length > 0 ? Math.max(...values) : 0;
                             const percentage = max > 0 ? (amount / max) * 100 : 0;
                             return (
                                 <div key={week} className="space-y-3">
