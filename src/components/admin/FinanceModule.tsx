@@ -86,6 +86,10 @@ export default function FinanceModule() {
     const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
     const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
     const [error, setError] = useState<string | null>(null);
+    // Category Editing States
+    const [editingTxId, setEditingTxId] = useState<string | null>(null);
+    const [editingCategory, setEditingCategory] = useState("");
+
     const [debtForm, setDebtForm] = useState({
         name: "",
         initialAmount: "",
@@ -501,9 +505,39 @@ export default function FinanceModule() {
                                                 .map((cat: any, i: number) => {
                                                     const max = Math.max(...incomes.map((c: any) => c.value), 1);
                                                     return (
-                                                        <div key={i} className="space-y-2">
-                                                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                                                <span>{cat.category || 'Uncategorized'}</span>
+                                                        <div key={i} className="space-y-2 group/income">
+                                                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span>{cat.category || 'Uncategorized'}</span>
+                                                                    {cat.category.toLowerCase() === 'revenue' && (
+                                                                        <button
+                                                                            onClick={async (e) => {
+                                                                                e.stopPropagation();
+                                                                                if (confirm("Rename ALL 'Revenue' entries to 'Loan Commission'?")) {
+                                                                                    setSaving(true);
+                                                                                    try {
+                                                                                        // Fetch all revenue transactions
+                                                                                        const r = await fetch(`/api/admin/finance/transactions?category=Revenue`);
+                                                                                        const txs = await r.json();
+                                                                                        for (const tx of txs) {
+                                                                                            await fetch("/api/admin/finance/transactions", {
+                                                                                                method: "PUT",
+                                                                                                headers: { "Content-Type": "application/json" },
+                                                                                                body: JSON.stringify({ id: tx.id, category: "Loan Commission" })
+                                                                                            });
+                                                                                        }
+                                                                                        fetchData();
+                                                                                    } finally {
+                                                                                        setSaving(false);
+                                                                                    }
+                                                                                }
+                                                                            }}
+                                                                            className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[8px] hover:bg-primary hover:text-white transition-all"
+                                                                        >
+                                                                            Fix to Loan Commission
+                                                                        </button>
+                                                                    )}
+                                                                </div>
                                                                 <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
                                                             </div>
                                                             <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
@@ -935,7 +969,43 @@ export default function FinanceModule() {
                                                         <span className="text-sm font-black text-gray-900 group-hover:text-primary transition-all">{tx.description}</span>
                                                     </td>
                                                     <td className="py-6">
-                                                        <span className="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-black text-gray-500 uppercase tracking-widest">{tx.category}</span>
+                                                        {editingTxId === tx.id ? (
+                                                            <input
+                                                                autoFocus
+                                                                type="text"
+                                                                value={editingCategory}
+                                                                onChange={(e) => setEditingCategory(e.target.value)}
+                                                                onBlur={async () => {
+                                                                    if (editingCategory.trim() && editingCategory !== tx.category) {
+                                                                        await fetch("/api/admin/finance/transactions", {
+                                                                            method: "PUT",
+                                                                            headers: { "Content-Type": "application/json" },
+                                                                            body: JSON.stringify({ id: tx.id, category: editingCategory.trim() })
+                                                                        });
+                                                                        fetchData();
+                                                                    }
+                                                                    setEditingTxId(null);
+                                                                }}
+                                                                onKeyDown={async (e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.currentTarget.blur();
+                                                                    } else if (e.key === 'Escape') {
+                                                                        setEditingTxId(null);
+                                                                    }
+                                                                }}
+                                                                className="px-3 py-1 bg-white border border-primary/20 rounded-lg text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-primary/20 w-32"
+                                                            />
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setEditingTxId(tx.id);
+                                                                    setEditingCategory(tx.category);
+                                                                }}
+                                                                className="px-3 py-1 bg-gray-100 group-hover:bg-primary/5 rounded-lg text-[10px] font-black text-gray-500 group-hover:text-primary uppercase tracking-widest transition-all hover:scale-105"
+                                                            >
+                                                                {tx.category}
+                                                            </button>
+                                                        )}
                                                     </td>
                                                     <td className="py-6">
                                                         <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${tx.type === 'income' ? 'bg-emerald-50 text-emerald-600' :
@@ -950,17 +1020,29 @@ export default function FinanceModule() {
                                                             <span className={`text-sm font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-gray-900'}`}>
                                                                 {tx.type === 'income' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
                                                             </span>
-                                                            <button
-                                                                onClick={async () => {
-                                                                    if (confirm("Delete this entry?")) {
-                                                                        await fetch(`/api/admin/finance/transactions?id=${tx.id}`, { method: 'DELETE' });
-                                                                        fetchData();
-                                                                    }
-                                                                }}
-                                                                className="opacity-0 group-hover:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-all"
-                                                            >
-                                                                <Trash2 size={14} />
-                                                            </button>
+                                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setEditingTxId(tx.id);
+                                                                        setEditingCategory(tx.category);
+                                                                    }}
+                                                                    className="p-2 text-gray-300 hover:text-primary transition-all"
+                                                                    title="Edit Category"
+                                                                >
+                                                                    <ArrowRight size={14} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        if (confirm("Delete this entry?")) {
+                                                                            await fetch(`/api/admin/finance/transactions?id=${tx.id}`, { method: 'DELETE' });
+                                                                            fetchData();
+                                                                        }
+                                                                    }}
+                                                                    className="p-2 text-gray-300 hover:text-red-500 transition-all"
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
