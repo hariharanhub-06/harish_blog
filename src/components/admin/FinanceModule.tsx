@@ -77,7 +77,9 @@ export default function FinanceModule() {
     const [analytics, setAnalytics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [dateRange, setDateRange] = useState("This Month");
+    const [dateRange, setDateRange] = useState("Last 6 Months");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
 
     // Debt Modal States
@@ -96,16 +98,24 @@ export default function FinanceModule() {
     // Fetch initial data
     useEffect(() => {
         fetchData();
-    }, [dateRange, selectedCategory]);
+    }, [dateRange, selectedCategory, startDate, endDate]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
+            let summaryUrl = `/api/admin/finance/summary?range=${dateRange}`;
+            let analyticsUrl = `/api/admin/finance/analytics?range=${dateRange}`;
+
+            if (dateRange === "Custom" && startDate && endDate) {
+                summaryUrl = `/api/admin/finance/summary?startDate=${startDate}&endDate=${endDate}`;
+                analyticsUrl = `/api/admin/finance/analytics?startDate=${startDate}&endDate=${endDate}`;
+            }
+
             const [debtsRes, statsRes, transRes, analyticsRes] = await Promise.all([
                 fetch("/api/admin/finance/debts", { cache: "no-store" }),
-                fetch(`/api/admin/finance/summary?range=${dateRange}`, { cache: "no-store" }),
+                fetch(summaryUrl, { cache: "no-store" }),
                 fetch(`/api/admin/finance/transactions?limit=100${selectedCategory !== 'All' ? `&category=${selectedCategory}` : ''}`, { cache: "no-store" }),
-                fetch("/api/admin/finance/analytics", { cache: "no-store" })
+                fetch(analyticsUrl, { cache: "no-store" })
             ]);
 
             if (debtsRes.ok) setDebts(await debtsRes.json());
@@ -125,6 +135,10 @@ export default function FinanceModule() {
 
         const entries: ParsedEntry[] = [];
         let currentType: "expense" | "income" | "debt_pay" = "expense";
+
+        // Get existing categories for fuzzy matching
+        const existingCategories = (stats?.categories || []).map((c: any) => c.category);
+        const debtNames = (debts || []).map((d: any) => d.name);
 
         const lines = logInput.split('\n');
         lines.forEach(line => {
@@ -146,7 +160,6 @@ export default function FinanceModule() {
             }
 
             // Improved parsing: Handle multiple pairs on the same line
-            // regex to find patterns like "Name - Amount" or "Name Amount"
             const regex = /([a-zA-Z\s]+)(?:-?\s*)(\d+)/g;
             let match;
             let found = false;
@@ -156,18 +169,33 @@ export default function FinanceModule() {
                 const amount = parseFloat(match[2]);
 
                 if (item && !isNaN(amount)) {
-                    // Fuzzy match: check if debt name includes item OR item includes debt name
-                    const matchedDebt = debts.find(d =>
-                        d.name.toLowerCase() === item.toLowerCase() ||
-                        d.name.toLowerCase().includes(item.toLowerCase()) ||
-                        item.toLowerCase().includes(d.name.toLowerCase())
-                    );
+                    let normalizedCategory = item;
+                    let matchedDebtId = undefined;
+
+                    if (currentType === "debt_pay") {
+                        const matchedDebt = debts.find(d =>
+                            d.name.toLowerCase() === item.toLowerCase() ||
+                            d.name.toLowerCase().includes(item.toLowerCase()) ||
+                            item.toLowerCase().includes(d.name.toLowerCase())
+                        );
+                        normalizedCategory = matchedDebt?.name || "Transfer";
+                        matchedDebtId = matchedDebt?.id;
+                    } else {
+                        // Fuzzy match against existing categories for income/expense
+                        const match = existingCategories.find((cat: string) =>
+                            cat.toLowerCase() === item.toLowerCase() ||
+                            cat.toLowerCase().includes(item.toLowerCase()) ||
+                            item.toLowerCase().includes(cat.toLowerCase())
+                        );
+                        if (match) normalizedCategory = match;
+                    }
+
                     entries.push({
                         type: currentType,
                         item,
                         amount,
-                        category: currentType === "debt_pay" ? (matchedDebt?.name || "Transfer") : (currentType === "income" ? "Revenue" : item),
-                        debtId: currentType === "debt_pay" ? matchedDebt?.id : undefined,
+                        category: normalizedCategory,
+                        debtId: matchedDebtId,
                         isValid: true
                     });
                     found = true;
@@ -186,7 +214,7 @@ export default function FinanceModule() {
         });
 
         return entries;
-    }, [logInput, debts]);
+    }, [logInput, debts, stats]);
 
     const handleSaveLog = async () => {
         const validEntries = parsedEntries.filter(e => e.isValid);
@@ -339,23 +367,59 @@ export default function FinanceModule() {
                 <StatCard title="Savings Rate" value={`${savingsRate}%`} icon={LayoutDashboard} color="blue" />
             </div>
 
+            {/* Shared Date Filter */}
+            <div className="flex flex-wrap items-center gap-4 bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-50 rounded-xl text-gray-400">
+                        <Calendar size={18} />
+                    </div>
+                    <select
+                        value={dateRange}
+                        onChange={(e) => setDateRange(e.target.value)}
+                        className="bg-gray-50 border-0 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                    >
+                        <option>Last 6 Months</option>
+                        <option>This Year</option>
+                        <option>This Month</option>
+                        <option value="Custom">📅 Custom Range</option>
+                    </select>
+                </div>
+
+                {dateRange === "Custom" && (
+                    <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center gap-3"
+                    >
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">From</span>
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="bg-gray-50 border-0 rounded-xl px-4 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20"
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">To</span>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="bg-gray-50 border-0 rounded-xl px-4 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20"
+                            />
+                        </div>
+                    </motion.div>
+                )}
+            </div>
+
             <main className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {activeTab === "dashboard" && (
                     <>
                         {/* Charts Area */}
                         <div className="lg:col-span-8 space-y-8">
                             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                                <div className="flex justify-between items-center mb-8">
-                                    <h3 className="font-black text-xl uppercase tracking-tight">Income vs Expense Trend</h3>
-                                    <select
-                                        value={dateRange}
-                                        onChange={(e) => setDateRange(e.target.value)}
-                                        className="bg-gray-50 border-0 rounded-xl px-4 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20"
-                                    >
-                                        <option>Last 6 Months</option>
-                                        <option>This Year</option>
-                                    </select>
-                                </div>
+                                <h3 className="font-black text-xl uppercase tracking-tight mb-8">Income vs Expense Trend</h3>
                                 <div className="h-[350px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={
@@ -401,47 +465,46 @@ export default function FinanceModule() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                                    <h3 className="font-black text-lg uppercase tracking-tight mb-8">Net Cash Flow</h3>
-                                    <div className="h-[250px]">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <BarChart data={
-                                                // Group trend by month to calculate net flow
-                                                Array.from((stats?.trend || []).reduce((acc: any, curr: any) => {
-                                                    if (!acc.has(curr.month)) acc.set(curr.month, { month: curr.month, income: 0, expense: 0 });
-                                                    const entry = acc.get(curr.month);
-                                                    if (curr.type === 'income') entry.income += curr.total;
-                                                    else entry.expense += curr.total;
-                                                    return acc;
-                                                }, new Map()).values()).map((m: any) => ({
-                                                    ...m,
-                                                    net: m.income - m.expense
-                                                }))
-                                            }>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
-                                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
-                                                <Tooltip content={<CustomTooltip />} />
-                                                <Bar dataKey="net" radius={[4, 4, 0, 0]}>
-                                                    {
-                                                        // Color based on value
-                                                        (stats?.trend || []).map((entry: any, index: number) => (
-                                                            <Cell key={`cell-${index}`} fill={entry.net >= 0 ? '#10b981' : '#ef4444'} />
-                                                        ))
-                                                    }
-                                                </Bar>
-                                            </BarChart>
-                                        </ResponsiveContainer>
+                                    <h3 className="font-black text-lg uppercase tracking-tight mb-8">Top Incomes</h3>
+                                    <div className="space-y-4">
+                                        {(stats?.categories || [])
+                                            .filter((c: any) => c.type === 'income')
+                                            .sort((a: any, b: any) => b.value - a.value)
+                                            .slice(0, 5)
+                                            .map((cat: any, i: number) => {
+                                                const max = Math.max(...(stats?.categories || []).filter((c: any) => c.type === 'income').map((c: any) => c.value), 1);
+                                                return (
+                                                    <div key={i} className="space-y-2">
+                                                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                                                            <span>{cat.category}</span>
+                                                            <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                                        </div>
+                                                        <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
+                                                            <motion.div
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${(cat.value / max) * 100}%` }}
+                                                                className="h-full bg-emerald-400 rounded-full"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        {(stats?.categories || []).filter((c: any) => c.type === 'income').length === 0 && (
+                                            <div className="h-[200px] flex items-center justify-center text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-50/50 rounded-2xl">
+                                                No income data
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
                                     <h3 className="font-black text-lg uppercase tracking-tight mb-8">Top Expenses</h3>
                                     <div className="space-y-4">
                                         {(stats?.categories || [])
-                                            .filter((c: any) => c.type === 'expense')
+                                            .filter((c: any) => c.type === 'expense' || c.type === 'debt_pay')
                                             .sort((a: any, b: any) => b.value - a.value)
                                             .slice(0, 5)
                                             .map((cat: any, i: number) => {
-                                                const max = Math.max(...(stats?.categories || []).filter((c: any) => c.type === 'expense').map((c: any) => c.value));
+                                                const max = Math.max(...(stats?.categories || []).filter((c: any) => c.type === 'expense' || c.type === 'debt_pay').map((c: any) => c.value), 1);
                                                 return (
                                                     <div key={i} className="space-y-2">
                                                         <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">

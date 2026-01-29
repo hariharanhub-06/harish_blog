@@ -88,8 +88,8 @@ export default function AnalyticsTab({ analytics }: AnalyticsTabProps) {
                 {/* Daily Cash Flow Calendar Heatmap */}
                 <div>
                     <h4 className="text-lg font-black uppercase tracking-tight mb-6">Daily Cash Flow</h4>
-                    <div className="grid grid-cols-7 gap-3">
-                        {(analytics.cashFlowPatterns?.dailyFlow || []).slice(0, 28).map((day: any) => {
+                    <div className="grid grid-cols-7 sm:grid-cols-10 md:grid-cols-15 lg:grid-cols-[repeat(auto-fill,minmax(40px,1fr))] gap-3">
+                        {(analytics.cashFlowPatterns?.dailyFlow || []).map((day: any) => {
                             const isPositive = day.net > 0;
                             const magnitude = Math.abs(day.net);
                             const maxMagnitude = Math.max(...analytics.cashFlowPatterns.dailyFlow.map((d: any) => Math.abs(d.net)));

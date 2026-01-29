@@ -19,10 +19,14 @@ interface Insight {
 
 export async function GET(req: Request) {
     try {
-        // Get current month's transactions
+        const { searchParams } = new URL(req.url);
+        const startDateParam = searchParams.get("startDate");
+        const endDateParam = searchParams.get("endDate");
+
+        // Default to current month if no range provided
         const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const startOfMonth = startDateParam ? new Date(startDateParam) : new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = endDateParam ? new Date(endDateParam) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
         const transactions = await db.select()
             .from(financeTransactions)
