@@ -54,8 +54,11 @@ export async function GET(req: Request) {
         }
 
         transactions.forEach(tx => {
+            if (!tx.date) return;
             const day = new Date(tx.date).getDate();
-            const entry = dailyFlowMap.get(day)!;
+            const entry = dailyFlowMap.get(day);
+
+            if (!entry) return;
 
             if (tx.type === 'income') {
                 entry.income += tx.amount;
