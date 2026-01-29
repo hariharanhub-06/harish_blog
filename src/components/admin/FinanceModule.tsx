@@ -36,6 +36,7 @@ import {
     Bar,
     Legend
 } from "recharts";
+import AnalyticsTab from "./finance/AnalyticsTab";
 
 interface Transaction {
     id: string;
@@ -68,11 +69,12 @@ interface ParsedEntry {
 }
 
 export default function FinanceModule() {
-    const [activeTab, setActiveTab] = useState<"dashboard" | "log" | "debts" | "history">("dashboard");
+    const [activeTab, setActiveTab] = useState<"dashboard" | "log" | "debts" | "history" | "analytics">("dashboard");
     const [logInput, setLogInput] = useState("");
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [debts, setDebts] = useState<Debt[]>([]);
     const [stats, setStats] = useState<any>(null);
+    const [analytics, setAnalytics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [dateRange, setDateRange] = useState("This Month");
@@ -99,15 +101,17 @@ export default function FinanceModule() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [debtsRes, statsRes, transRes] = await Promise.all([
+            const [debtsRes, statsRes, transRes, analyticsRes] = await Promise.all([
                 fetch("/api/admin/finance/debts", { cache: "no-store" }),
                 fetch(`/api/admin/finance/summary?range=${dateRange}`, { cache: "no-store" }),
-                fetch(`/api/admin/finance/transactions?limit=100${selectedCategory !== 'All' ? `&category=${selectedCategory}` : ''}`, { cache: "no-store" })
+                fetch(`/api/admin/finance/transactions?limit=100${selectedCategory !== 'All' ? `&category=${selectedCategory}` : ''}`, { cache: "no-store" }),
+                fetch("/api/admin/finance/analytics", { cache: "no-store" })
             ]);
 
             if (debtsRes.ok) setDebts(await debtsRes.json());
             if (statsRes.ok) setStats(await statsRes.json());
             if (transRes.ok) setTransactions(await transRes.json());
+            if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
         } catch (error) {
             console.error("Failed to fetch finance data", error);
         } finally {
@@ -314,12 +318,12 @@ export default function FinanceModule() {
                     </h2>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Smart tracking and wealth analysis</p>
                 </div>
-                <div className="flex bg-white p-1 rounded-2xl border border-gray-100 shadow-sm">
-                    {["dashboard", "log", "debts", "history"].map((tab) => (
+                <div className="flex bg-white p-1 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
+                    {["dashboard", "analytics", "log", "debts", "history"].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
-                            className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-400 hover:text-gray-600'}`}
+                            className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-400 hover:text-gray-600'}`}
                         >
                             {tab}
                         </button>
@@ -847,6 +851,8 @@ export default function FinanceModule() {
                         </div>
                     )
                 }
+
+                {activeTab === "analytics" && <AnalyticsTab analytics={analytics} />}
             </main >
 
             {/* Debt Management Modal */}
