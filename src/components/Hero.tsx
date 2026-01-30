@@ -86,32 +86,32 @@ export default function Hero({ profile, className }: HeroProps) {
                                 <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[480px] lg:h-[480px] rounded-full flex items-center justify-center">
 
                                     {/* Radial Sound Wave Visualization */}
-                                    <div className="absolute inset-[-60px] z-0 pointer-events-none flex items-center justify-center">
+                                    <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
                                         {isPlaying && Array.from({ length: 60 }).map((_, i) => (
-                                            <motion.div
+                                            <div
                                                 key={i}
-                                                className="absolute w-1.5 bg-gradient-to-t from-cyan-400 to-purple-500 rounded-full"
-                                                initial={{ height: 10, opacity: 0.5 }}
-                                                animate={{
-                                                    height: [10, 20 + ((i * 1337) % 50), 10], // Deterministic pseudo-random height based on index
-                                                    opacity: [0.5, 1, 0.5],
-                                                }}
-                                                transition={{
-                                                    duration: 0.5,
-                                                    repeat: Infinity,
-                                                    delay: i * 0.02,
-                                                    repeatType: "reverse",
-                                                }}
-                                                style={{
-                                                    rotate: `${i * 6}deg`,
-                                                    transformOrigin: "0 180px", // Push bars out from center
-                                                    bottom: "50%",
-                                                }}
-                                            />
+                                                className="absolute inset-0"
+                                                style={{ rotate: `${i * 6}deg` }}
+                                            >
+                                                <motion.div
+                                                    className="absolute -top-8 left-1/2 -translate-x-1/2 w-1.5 bg-gradient-to-t from-cyan-400 to-purple-500 rounded-full"
+                                                    initial={{ height: 10, opacity: 0.5 }}
+                                                    animate={{
+                                                        height: [10, 20 + ((i * 1337) % 50), 10], // Deterministic pseudo-random
+                                                        opacity: [0.5, 1, 0.5],
+                                                    }}
+                                                    transition={{
+                                                        duration: 0.5,
+                                                        repeat: Infinity,
+                                                        delay: i * 0.02,
+                                                        repeatType: "reverse",
+                                                    }}
+                                                />
+                                            </div>
                                         ))}
                                         {/* Static Glow Ring when not playing */}
                                         {!isPlaying && profile.audioUrl && (
-                                            <div className="absolute inset-16 rounded-full border border-white/10 animate-[spin_10s_linear_infinite]" />
+                                            <div className="absolute inset- [-10px] rounded-full border border-white/10 animate-[spin_10s_linear_infinite]" />
                                         )}
                                     </div>
 
