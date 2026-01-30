@@ -262,12 +262,14 @@ export default function AdminMeetingsModule() {
                                             key={i}
                                             onClick={() => toggleAvailability(date)}
                                             disabled={isPast}
-                                            className={`p-4 rounded-xl border-2 flex flex-col items-center gap-1 transition-all
-                                                ${isAv ? 'border-primary bg-primary/10 text-white shadow-lg shadow-primary/20' : 'border-white/5 bg-white/5 text-gray-400 hover:border-white/20'}
+                                            className={`p-2 py-4 rounded-xl border-2 flex flex-col items-center justify-center gap-0.5 transition-all
+                                                ${isAv ? 'border-primary bg-primary/10 text-white shadow-lg shadow-primary/20' : 'border-white/5 bg-white/5 text-gray-500 hover:border-white/20'}
                                                 ${isPast ? 'opacity-20 cursor-not-allowed grayscale' : ''}`}
                                         >
-                                            <span className="text-xl font-bold">{i + 1}</span>
-                                            <div className={`w-1.5 h-1.5 rounded-full ${isAv ? 'bg-primary animate-pulse' : 'bg-transparent'}`} />
+                                            <span className="text-lg font-black">{i + 1}</span>
+                                            <span className={`text-[7px] font-black uppercase tracking-widest ${isAv ? 'text-primary' : 'text-gray-600'}`}>
+                                                {isAv ? 'Available' : 'Unavailable'}
+                                            </span>
                                         </button>
                                     );
                                 })}
