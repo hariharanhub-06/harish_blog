@@ -348,9 +348,9 @@ export default function MeetingScheduler() {
                                             {bookedSessions.length > 0 && (
                                                 <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="p-4 bg-red-500/10 rounded-2xl border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.1)]">
                                                     <div className="flex items-center gap-2 text-red-500 mb-3 font-black uppercase text-[10px] tracking-[0.2em]">
-                                                        <AlertCircle size={16} className="animate-pulse" /> Deployment Interference Detected
+                                                        <AlertCircle size={16} className="animate-pulse" /> Time Slot Already Booked
                                                     </div>
-                                                    <p className="text-[9px] text-red-400/80 mb-3 font-bold uppercase tracking-wider">This time window is already occupied. Select an alternative interval.</p>
+                                                    <p className="text-[9px] text-red-400/80 mb-3 font-bold uppercase tracking-wider">Someone has already booked for the following times. Please select a different time:</p>
                                                     <div className="flex flex-wrap gap-2">
                                                         {bookedSessions.map((s, i) => (
                                                             <div key={i} className="px-3 py-1.5 bg-red-500/20 border border-red-500/20 rounded-xl text-[9px] font-black text-red-200">

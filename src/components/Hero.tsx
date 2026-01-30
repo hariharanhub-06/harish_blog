@@ -91,12 +91,12 @@ export default function Hero({ profile, className }: HeroProps) {
                                             <>
                                                 {/* Outer Pulse */}
                                                 <motion.div
-                                                    className="absolute rounded-full bg-gradient-to-br from-cyan-400/20 via-purple-500/20 to-blue-500/20 blur-2xl"
-                                                    initial={{ width: "100%", height: "100%", opacity: 0.3 }}
+                                                    className="absolute rounded-full bg-gradient-to-br from-cyan-400/40 via-purple-500/40 to-blue-500/40 blur-3xl"
+                                                    initial={{ width: "100%", height: "100%", opacity: 0.5 }}
                                                     animate={{
-                                                        width: ["100%", "115%", "100%"],
-                                                        height: ["100%", "115%", "100%"],
-                                                        opacity: [0.3, 0.6, 0.3],
+                                                        width: ["100%", "120%", "100%"],
+                                                        height: ["100%", "120%", "100%"],
+                                                        opacity: [0.5, 0.85, 0.5],
                                                     }}
                                                     transition={{
                                                         duration: 2,
@@ -106,12 +106,12 @@ export default function Hero({ profile, className }: HeroProps) {
                                                 />
                                                 {/* Inner Pulse */}
                                                 <motion.div
-                                                    className="absolute rounded-full bg-gradient-to-br from-cyan-400/30 via-purple-500/30 to-blue-500/30 blur-xl"
-                                                    initial={{ width: "90%", height: "90%", opacity: 0.4 }}
+                                                    className="absolute rounded-full bg-gradient-to-br from-cyan-400/50 via-purple-500/50 to-blue-500/50 blur-2xl"
+                                                    initial={{ width: "90%", height: "90%", opacity: 0.6 }}
                                                     animate={{
-                                                        width: ["90%", "105%", "90%"],
-                                                        height: ["90%", "105%", "90%"],
-                                                        opacity: [0.4, 0.7, 0.4],
+                                                        width: ["90%", "110%", "90%"],
+                                                        height: ["90%", "110%", "90%"],
+                                                        opacity: [0.6, 0.9, 0.6],
                                                     }}
                                                     transition={{
                                                         duration: 1.5,
@@ -124,7 +124,7 @@ export default function Hero({ profile, className }: HeroProps) {
                                         )}
                                         {/* Static Glow Ring when not playing */}
                                         {!isPlaying && profile.audioUrl && (
-                                            <div className="absolute inset-[-12px] md:inset-[-15px] rounded-full border-2 border-cyan-500/20 animate-[spin_15s_linear_infinite] shadow-[0_0_20px_rgba(6,182,212,0.2)]" />
+                                            <div className="absolute inset-[-12px] md:inset-[-15px] rounded-full border-2 border-cyan-500/30 animate-[spin_15s_linear_infinite] shadow-[0_0_25px_rgba(6,182,212,0.35)]" />
                                         )}
                                     </div>
 
