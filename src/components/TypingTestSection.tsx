@@ -236,7 +236,7 @@ export default function TypingTestSection() {
 
                             {/* Enhanced Typing Area */}
                             <div
-                                className="relative mb-10 min-h-[250px] p-8 rounded-[2rem] bg-black/40 border border-white/10 overflow-hidden cursor-text group"
+                                className="relative mb-10 h-[280px] md:h-[400px] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-black/40 border border-white/10 overflow-y-auto cursor-text group selection:bg-blue-500/30"
                                 onClick={() => inputRef.current?.focus()}
                             >
                                 {/* Start Overlay */}
