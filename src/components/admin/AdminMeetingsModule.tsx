@@ -23,7 +23,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import MeetingChecklistModal from "./MeetingChecklistModal";
 import MeetingScoringModal from "./MeetingScoringModal";
-import { CHECKLIST_ITEMS } from "@/constants/meetingData";
+import { CHECKLIST_ITEMS, getEfficiencyStatus } from "@/constants/meetingData";
 
 interface Meeting {
     id: string;
@@ -403,9 +403,20 @@ export default function AdminMeetingsModule() {
                                                     <div className="p-2 rounded-xl bg-gray-50 group-hover/star:bg-yellow-500/10 group-hover/star:text-yellow-600 transition-all">
                                                         <Star size={18} className="text-gray-400 group-hover/star:text-yellow-600" />
                                                     </div>
-                                                    <span className="text-[8px] font-black text-gray-400">
-                                                        {calculateTotalPoints(meeting.scoringData)} pts
-                                                    </span>
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="text-[8px] font-black text-gray-400">
+                                                            {calculateTotalPoints(meeting.scoringData)} pts
+                                                        </span>
+                                                        {calculateTotalPoints(meeting.scoringData) > 0 && (
+                                                            <span className={`text-[6px] font-black uppercase px-1 rounded-sm ${getEfficiencyStatus(calculateTotalPoints(meeting.scoringData)) === 'HYPERACTIVE' ? 'bg-purple-100 text-purple-700' :
+                                                                    getEfficiencyStatus(calculateTotalPoints(meeting.scoringData)) === 'SUPERACTIVE' ? 'bg-blue-100 text-blue-700' :
+                                                                        getEfficiencyStatus(calculateTotalPoints(meeting.scoringData)) === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' :
+                                                                            'bg-gray-100 text-gray-400'
+                                                                }`}>
+                                                                {getEfficiencyStatus(calculateTotalPoints(meeting.scoringData))}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </button>
                                             </div>
                                         </td>
