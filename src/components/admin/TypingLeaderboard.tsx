@@ -29,9 +29,15 @@ export default function TypingLeaderboard() {
         try {
             const res = await fetch(`/api/typing-test/leaderboard?duration=${duration}&difficulty=${difficulty}`);
             const data = await res.json();
-            setEntries(data || []);
+            if (Array.isArray(data)) {
+                setEntries(data);
+            } else {
+                console.error("API did not return an array:", data);
+                setEntries([]);
+            }
         } catch (error) {
             console.error("Failed to fetch leaderboard", error);
+            setEntries([]);
         } finally {
             setLoading(false);
         }

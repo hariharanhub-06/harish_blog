@@ -57,9 +57,20 @@ export default function TypingTestSection() {
         setUserInput("");
         setWpm(0);
         setAccuracy(100);
-        const pool = difficultyPools[difficulty];
-        const baseText = pool[Math.floor(Math.random() * pool.length)];
-        setText((baseText + " ").repeat(15).trim());
+
+        const pool = [...difficultyPools[difficulty]];
+        // Shuffle pool
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+
+        // Join pool items until we have enough length (approx 2000 chars)
+        let longText = "";
+        while (longText.length < 2000) {
+            longText += pool[Math.floor(Math.random() * pool.length)] + " ";
+        }
+        setText(longText.trim());
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
