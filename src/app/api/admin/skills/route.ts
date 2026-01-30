@@ -3,6 +3,8 @@ import { skills } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
     const allSkills = await db.select({
         id: skills.id,
