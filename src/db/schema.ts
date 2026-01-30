@@ -567,5 +567,6 @@ export const typingTestResults = pgTable("typing_test_results", {
   wpm: integer("wpm").notNull(),
   accuracy: integer("accuracy").notNull(),
   duration: integer("duration").notNull(), // 2, 5, 30
+  difficulty: text("difficulty").default("basic"),
   createdAt: timestamp("created_at").defaultNow(),
 });
