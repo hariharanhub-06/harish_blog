@@ -21,16 +21,39 @@ export default function TypingTestSection() {
     const difficultyPools = {
         basic: [
             "The sun rises in the east every single morning. Walking in the park is a very relaxing activity. A healthy diet and regular exercise are important for a long life. Books are a great way to learn new things and expand your mind.",
-            "Water is essential for all living things on Earth. Learning a new language can be a challenging but rewarding experience. The quick brown fox jumps over the lazy dog."
+            "Water is essential for all living things on Earth. Learning a new language can be a challenging but rewarding experience. The quick brown fox jumps over the lazy dog.",
+            "Music has the power to bring people together from all walks of life. Small acts of kindness can make a big difference in someone's day.",
+            "Exploring new places allows us to see the world from different perspectives. Persistence and hard work are the keys to achieving your goals.",
+            "Nature offers a peaceful escape from the hustle and bustle of city life. The ocean is home to millions of diverse and fascinating creatures.",
+            "Cooking a healthy meal for your family is a great way to show you care. Reading stories to children helps stimulate their imagination and growth.",
+            "A warm cup of tea on a rainy afternoon is a simple but pure joy. Every day is a new opportunity to learn something and improve yourself.",
+            "The stars in the night sky have inspired dreamers for thousands of years. Gardening is a wonderful hobby that connects you with the soil.",
+            "Taking a deep breath can help you find calm in a stressful situation. Friendship is a treasure that should be cherished and protected.",
+            "Laughter is the best medicine for a tired soul and a heavy heart. Setting small goals makes the journey to success feel much easier."
         ],
         intermediate: [
             "Programming is the art of telling another human what one wants the computer to do. Clean code always looks like it was written by someone who cares. Success is not final, failure is not fatal: it is the courage to continue that counts.",
-            "In the middle of difficulty lies opportunity. The best way to predict the future is to create it. Innovation distinguishes between a leader and a follower. Stay hungry, stay foolish."
+            "In the middle of difficulty lies opportunity. The best way to predict the future is to create it. Innovation distinguishes between a leader and a follower. Stay hungry, stay foolish.",
+            "Artificial intelligence is not a substitute for human intelligence but an extension of it. The complexity of modern software requires a disciplined approach to development.",
+            "Photography is more than just capturing images; it is about telling a story through a single frame. The lens allows us to see beauty in the mundane.",
+            "Effective communication is the cornerstone of a successful team and a healthy relationship. Listening is just as important as speaking our minds.",
+            "The laws of physics govern everything from the smallest atoms to the largest galaxies in the universe. Science is a continuous journey of discovery.",
+            "Philosophy encourages us to question the nature of existence and the values we hold dear. Thinking deeply is a rare and precious skill nowadays.",
+            "Economic theories attempt to explain how resources are allocated in a global marketplace. Understanding financial trends requires both data and intuition.",
+            "The history of civilization is a testament to human resilience and our desire for progress. Each era brings its own unique set of challenges.",
+            "Writing a novel requires a blend of creative inspiration and rigorous technical craftsmanship. Characters come to life through their choices and actions."
         ],
         expert: [
             "async function fetchUserData(id: string) { const response = await fetch(`/api/users/${id}`); const data = await response.json(); return data; }",
             "const calculateRisk = (assets: number, liabilities: number) => { const ratio = assets / liabilities; return ratio > 1.5 ? 'low' : 'high'; };",
-            "class PortfolioManager extends BaseService { constructor(db: Database) { super(db); } async sync() { await this.db.profiles.updateMany(); } }"
+            "class PortfolioManager extends BaseService { constructor(db: Database) { super(db); } async sync() { await this.db.profiles.updateMany(); } }",
+            "SELECT u.name, SUM(o.total) as total_spent FROM users u JOIN orders o ON u.id = o.user_id WHERE o.status = 'completed' GROUP BY u.id ORDER BY total_spent DESC LIMIT 10;",
+            "export const useDebounce = <T,>(value: T, delay: number): T => { const [debounced, set] = useState(value); useEffect(() => { const h = setTimeout(() => set(value), delay); return () => clearTimeout(h); }, [value, delay]); return debounced; };",
+            "def quick_sort(arr): if len(arr) <= 1: return arr; pivot = arr[len(arr) // 2]; left = [x for x in arr if x < pivot]; middle = [x for x in arr if x == pivot]; right = [x for x in arr if x > pivot]; return quick_sort(left) + middle + quick_sort(right)",
+            "interface User { id: string; settings: { theme: 'dark' | 'light'; notifications: boolean; }; roles: ('admin' | 'user')[]; }",
+            "background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;",
+            "const { data, error, isLoading } = useSWR('/api/analytics', fetcher); if (error) return <div>Failed to load</div>; if (isLoading) return <Spinner />;",
+            "git commit -m \"Refactor: improve memory management in worker threads\" && git push origin main && echo \"Deployment pipeline initiated successfully.\""
         ]
     };
 
@@ -59,16 +82,28 @@ export default function TypingTestSection() {
         setAccuracy(100);
 
         const pool = [...difficultyPools[difficulty]];
-        // Shuffle pool
+
+        // Fisher-Yates shuffle
         for (let i = pool.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [pool[i], pool[j]] = [pool[j], pool[i]];
         }
 
-        // Join pool items until we have enough length (approx 2000 chars)
+        // Join items uniquely until we have enough length (approx 4000 chars for a 30 min test)
         let longText = "";
-        while (longText.length < 2000) {
-            longText += pool[Math.floor(Math.random() * pool.length)] + " ";
+        let usedItems = 0;
+
+        while (longText.length < 4000) {
+            const index = usedItems % pool.length;
+            // If we've used everything, reshuffle to avoid the same sequence
+            if (usedItems > 0 && index === 0) {
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+            }
+            longText += pool[index] + " ";
+            usedItems++;
         }
         setText(longText.trim());
     };
