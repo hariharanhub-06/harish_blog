@@ -98,7 +98,7 @@ export default function Navbar() {
                                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                                            className="absolute top-full left-0 mt-2 w-48 bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-2 z-[60]"
+                                            className="absolute top-full left-0 mt-2 w-48 bg-[#0e0e0e] border border-white/10 rounded-2xl shadow-2xl p-2 z-[60]"
                                         >
                                             {link.items?.map((item) => (
                                                 <Link
@@ -141,7 +141,7 @@ export default function Navbar() {
                         initial={{ opacity: 0, y: -20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        className="absolute top-28 left-6 right-6 rounded-3xl shadow-2xl overflow-hidden md:hidden border transition-all z-50 bg-[#0e0e0e]/95 border-white/10"
+                        className="absolute top-28 left-6 right-6 rounded-3xl shadow-2xl overflow-hidden md:hidden border transition-all z-50 bg-[#0e0e0e] border-white/10"
                     >
                         <div className="flex flex-col p-6 space-y-2 max-h-[70vh] overflow-y-auto">
                             {navLinks.map((link) => (
