@@ -591,7 +591,9 @@ export const meetingSchedules = pgTable("meeting_schedules", {
   mobileNumber: text("mobile_number"),
   driveLink: text("drive_link"),
   scheduledDate: timestamp("scheduled_date").notNull(),
+  endDate: timestamp("end_date"), // For flexible time ranges
   status: text("status").default("requested"), // requested, confirmed, completed
+  isVisible: boolean("is_visible").default(true),
   checklistData: jsonb("checklist_data"), // { itemId: { checked: boolean, comment: string } }
   scoringData: jsonb("scoring_data"), // { rowId: { points: number, comment: string } }
   createdAt: timestamp("created_at").defaultNow(),

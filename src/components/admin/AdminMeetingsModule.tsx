@@ -16,7 +16,9 @@ import {
     Loader2,
     Plus,
     Link as LinkIcon,
-    Trash2
+    Trash2,
+    ChevronLeft,
+    ChevronRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MeetingChecklistModal from "./MeetingChecklistModal";
@@ -49,7 +51,8 @@ export default function AdminMeetingsModule() {
     const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
     const [modalType, setModalType] = useState<"checklist" | "scoring" | null>(null);
     const [showAvailability, setShowAvailability] = useState(false);
-    const [availability, setAvailability] = useState<any[]>([]);
+    const [availability, setAvailability] = useState<string[]>([]);
+    const [currentMonth, setCurrentMonth] = useState(new Date());
 
     useEffect(() => {
         fetchMeetings();
@@ -61,23 +64,23 @@ export default function AdminMeetingsModule() {
             const res = await fetch("/api/meetings/availability");
             if (res.ok) {
                 const data = await res.json();
-                setAvailability(data);
+                setAvailability(data.filter((d: any) => d.isAvailable).map((d: any) => new Date(d.specificDate).toDateString()));
             }
         } catch (error) {
             console.error("Failed to fetch availability:", error);
         }
     };
 
-    const toggleAvailability = async (day: number, current: boolean) => {
+    const toggleAvailability = async (date: Date) => {
+        const dateStr = date.toDateString();
+        const isCurrentlyAvailable = availability.includes(dateStr);
         try {
             const res = await fetch("/api/meetings/availability", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    dayOfWeek: day,
-                    isAvailable: !current,
-                    startTime: "10:00",
-                    endTime: "18:00"
+                    specificDate: date.toISOString(),
+                    isAvailable: !isCurrentlyAvailable
                 }),
             });
             if (res.ok) fetchAvailability();
@@ -85,6 +88,13 @@ export default function AdminMeetingsModule() {
             console.error("Failed to toggle availability:", error);
         }
     };
+
+    const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+    const prevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+    const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+
+    const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+    const daysInMonth = getDaysInMonth(currentMonth.getFullYear(), currentMonth.getMonth());
 
     const fetchMeetings = async () => {
         try {
@@ -218,29 +228,46 @@ export default function AdminMeetingsModule() {
                         className="overflow-hidden"
                     >
                         <div className="bg-gray-900 p-8 rounded-[2rem] text-white mb-6">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-primary">
-                                    <Clock size={20} />
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-primary">
+                                        <Clock size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold">Availability Calendar</h3>
+                                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">Enable specific dates for club visits</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="font-bold">Weekly Visit Availability</h3>
-                                    <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">Enable days for clubs to schedule visits</p>
+                                <div className="flex items-center gap-4 bg-white/5 p-1.5 rounded-xl border border-white/10">
+                                    <button onClick={prevMonth} className="p-2 hover:bg-white/10 rounded-lg transition-colors"><ChevronLeft size={16} /></button>
+                                    <span className="text-sm font-bold min-w-[120px] text-center uppercase tracking-widest">
+                                        {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                    </span>
+                                    <button onClick={nextMonth} className="p-2 hover:bg-white/10 rounded-lg transition-colors"><ChevronRight size={16} /></button>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-4">
-                                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, i) => {
-                                    const av = availability.find(a => a.dayOfWeek === i);
-                                    const isAv = av?.isAvailable ?? false;
+
+                            <div className="grid grid-cols-7 gap-2">
+                                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => (
+                                    <div key={d} className="text-center text-[10px] font-black uppercase text-gray-500 py-2">{d}</div>
+                                ))}
+                                {Array.from({ length: firstDayOfMonth }).map((_, i) => <div key={`empty-${i}`} />)}
+                                {Array.from({ length: daysInMonth }).map((_, i) => {
+                                    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
+                                    const isAv = availability.includes(date.toDateString());
+                                    const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
+
                                     return (
                                         <button
-                                            key={day}
-                                            onClick={() => toggleAvailability(i, isAv)}
-                                            className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${isAv ? 'border-primary bg-primary/10 text-white' : 'border-white/10 bg-white/5 text-gray-500'}`}
+                                            key={i}
+                                            onClick={() => toggleAvailability(date)}
+                                            disabled={isPast}
+                                            className={`p-4 rounded-xl border-2 flex flex-col items-center gap-1 transition-all
+                                                ${isAv ? 'border-primary bg-primary/10 text-white shadow-lg shadow-primary/20' : 'border-white/5 bg-white/5 text-gray-400 hover:border-white/20'}
+                                                ${isPast ? 'opacity-20 cursor-not-allowed grayscale' : ''}`}
                                         >
-                                            <span className="text-[10px] font-black uppercase tracking-widest">{day}</span>
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isAv ? 'bg-primary text-white' : 'bg-white/10'}`}>
-                                                {isAv ? <CheckCircle2 size={16} /> : <div className="w-2 h-2 rounded-full bg-white/20" />}
-                                            </div>
+                                            <span className="text-xl font-bold">{i + 1}</span>
+                                            <div className={`w-1.5 h-1.5 rounded-full ${isAv ? 'bg-primary animate-pulse' : 'bg-transparent'}`} />
                                         </button>
                                     );
                                 })}
