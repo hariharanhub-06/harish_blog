@@ -74,6 +74,15 @@ export default function AdminMeetingsModule() {
     const toggleAvailability = async (date: Date) => {
         const dateStr = date.toDateString();
         const isCurrentlyAvailable = availability.includes(dateStr);
+
+        // Optimistic Update: Change state immediately
+        const previousAvailability = [...availability];
+        const newAvailability = isCurrentlyAvailable
+            ? availability.filter(d => d !== dateStr)
+            : [...availability, dateStr];
+
+        setAvailability(newAvailability);
+
         try {
             const res = await fetch("/api/meetings/availability", {
                 method: "POST",
@@ -83,9 +92,16 @@ export default function AdminMeetingsModule() {
                     isAvailable: !isCurrentlyAvailable
                 }),
             });
-            if (res.ok) fetchAvailability();
+
+            if (!res.ok) {
+                // Revert on failure
+                setAvailability(previousAvailability);
+                const error = await res.json();
+                console.error("Failed to toggle availability:", error);
+            }
         } catch (error) {
             console.error("Failed to toggle availability:", error);
+            setAvailability(previousAvailability);
         }
     };
 
