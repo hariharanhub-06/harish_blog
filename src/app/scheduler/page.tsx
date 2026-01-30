@@ -138,7 +138,7 @@ export default function MeetingScheduler() {
 
     if (success) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#050608] p-6 text-white">
+            <div className="min-h-screen flex items-center justify-center bg-white p-6 text-gray-900">
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -161,23 +161,9 @@ export default function MeetingScheduler() {
     }
 
     return (
-        <div className="min-h-[100dvh] py-4 px-6 font-poppins relative overflow-x-hidden text-white flex flex-col justify-center items-center">
-            {/* Direct Atmospheric Video Background */}
-            <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="fixed inset-0 w-full h-full object-cover -z-30 opacity-90 scale-105 pointer-events-none"
-            >
-                <source src="https://assets.mixkit.co/videos/preview/mixkit-nebula-blue-and-purple-liquid-background-34538-large.mp4" type="video/mp4" />
-            </video>
-            <div className="fixed inset-0 bg-[#050608]/30 -z-20 backdrop-blur-[0.5px]" />
-
-            {/* Glowing Depth Layers */}
-            <div className="absolute inset-0 -z-10 pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-primary/10 to-transparent opacity-20" />
-            </div>
+        <div className="min-h-[100dvh] py-4 px-6 font-poppins relative overflow-x-hidden text-gray-900 flex flex-col justify-center items-center bg-white">
+            {/* Subtle Gradient Background */}
+            <div className="fixed inset-0 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 -z-10" />
 
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -190,32 +176,32 @@ export default function MeetingScheduler() {
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full text-[9px] font-black uppercase tracking-[0.4em] mb-4 backdrop-blur-md"
+                        className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full text-[9px] font-black uppercase tracking-[0.4em] mb-4"
                     >
                         <CalendarCheck size={12} className="text-primary animate-pulse" />
                         Elite Visit System
                     </motion.div>
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-2 leading-none">
-                        Schedule <span className="bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent italic">Your Impact</span>
+                    <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-gray-900 mb-2 leading-none">
+                        Schedule <span className="bg-gradient-to-r from-primary to-violet-600 bg-clip-text text-transparent italic">Your Impact</span>
                     </h1>
-                    <p className="text-gray-500 text-sm max-w-xl mx-auto font-medium opacity-70">
+                    <p className="text-gray-600 text-sm max-w-xl mx-auto font-medium">
                         High-performance interface for elite deployments.
                     </p>
                 </div>
 
-                {/* Main Integrated Container with Glow Border */}
-                <div className="relative p-[1.5px] rounded-[3rem] group overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)]">
+                {/* Main Integrated Container */}
+                <div className="relative p-[1.5px] rounded-[3rem] group overflow-hidden shadow-[0_8px_32px_-8px_rgba(0,0,0,0.1)]">
                     {/* Continuous Border Animation */}
                     <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_280deg,rgba(var(--primary-rgb),1)_360deg)] group-hover:scale-110 transition-transform duration-1000"
+                        className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_280deg,rgba(var(--primary-rgb),0.5)_360deg)] group-hover:scale-110 transition-transform duration-1000"
                     />
 
-                    <div className="relative bg-[#0a0b0e]/95 backdrop-blur-3xl rounded-[3rem] overflow-hidden flex flex-col md:flex-row min-h-[580px] border border-white/5">
+                    <div className="relative bg-white backdrop-blur-3xl rounded-[3rem] overflow-hidden flex flex-col md:flex-row min-h-[580px] border border-gray-200">
                         {/* Interactive Phase Sidebar */}
-                        <div className="w-full md:w-72 bg-black p-4 md:p-8 text-white flex flex-row md:flex-col justify-between md:justify-start gap-4 md:gap-0 relative border-b md:border-b-0 md:border-r border-white/5 overflow-x-auto md:overflow-visible scrollbar-hide">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0 opacity-10 hidden md:block" />
+                        <div className="w-full md:w-72 bg-gray-50 p-4 md:p-8 text-gray-900 flex flex-row md:flex-col justify-between md:justify-start gap-4 md:gap-0 relative border-b md:border-b-0 md:border-r border-gray-200 overflow-x-auto md:overflow-visible scrollbar-hide">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0 opacity-20 hidden md:block" />
 
                             <div className="flex flex-row md:flex-col gap-4 md:gap-0 w-full">
                                 <h3 className="text-base md:text-lg font-black mb-0 md:mb-10 tracking-tight flex items-center gap-2 whitespace-nowrap">
@@ -228,8 +214,8 @@ export default function MeetingScheduler() {
                                         { step: 2, title: "Timeframe", icon: Clock },
                                         { step: 3, title: "Club Core", icon: Users }
                                     ].map((s) => (
-                                        <div key={s.step} className={`flex flex-col md:flex-row items-center md:items-start gap-2 md:gap-4 transition-all duration-500 ${step >= s.step ? 'opacity-100' : 'opacity-20'}`}>
-                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 shrink-0 ${step === s.step ? 'bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)] scale-110' : step > s.step ? 'bg-emerald-500 text-white' : 'bg-white/5 border border-white/10'}`}>
+                                        <div key={s.step} className={`flex flex-col md:flex-row items-center md:items-start gap-2 md:gap-4 transition-all duration-500 ${step >= s.step ? 'opacity-100' : 'opacity-30'}`}>
+                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 shrink-0 ${step === s.step ? 'bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] scale-110' : step > s.step ? 'bg-emerald-500 text-white' : 'bg-gray-200 border border-gray-300 text-gray-400'}`}>
                                                 {step > s.step ? <CheckCircle2 size={18} /> : <s.icon size={18} />}
                                             </div>
                                             <div className="flex flex-col items-center md:items-start">
@@ -241,15 +227,15 @@ export default function MeetingScheduler() {
                                 </div>
                             </div>
 
-                            <div className="hidden md:block p-5 bg-white/5 rounded-[1.5rem] border border-white/10">
-                                <p className="text-[10px] text-gray-500 font-bold leading-relaxed italic">
+                            <div className="hidden md:block p-5 bg-blue-50/50 rounded-[1.5rem] border border-blue-100">
+                                <p className="text-[10px] text-gray-600 font-bold leading-relaxed italic">
                                     Finalize cloud docs before deployment.
                                 </p>
                             </div>
                         </div>
 
-                        {/* High-Contrast Right Content */}
-                        <div className="flex-1 p-8 md:p-10 bg-gradient-to-br from-white/[0.02] to-transparent">
+                        {/* Right Content Area */}
+                        <div className="flex-1 p-8 md:p-10">
                             <AnimatePresence mode="wait">
                                 {step === 1 && (
                                     <motion.div
@@ -261,15 +247,15 @@ export default function MeetingScheduler() {
                                     >
                                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
                                             <div className="flex-1">
-                                                <h2 className="text-3xl font-black tracking-tighter">Timeline <span className="text-primary italic">.</span></h2>
+                                                <h2 className="text-3xl font-black tracking-tighter text-gray-900">Timeline <span className="text-primary italic">.</span></h2>
                                                 <p className="text-gray-500 text-[9px] mt-1 font-black uppercase tracking-[0.4em]">Target your Preferred Date</p>
                                             </div>
-                                            <div className="flex items-center gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-2xl shadow-xl h-fit">
-                                                <button onClick={prevMonth} className="p-2 hover:bg-primary/20 text-white rounded-lg transition-all active:scale-90"><ChevronLeft size={16} /></button>
-                                                <span className="text-[10px] font-black min-w-[110px] text-center uppercase tracking-[0.2em] text-white">
+                                            <div className="flex items-center gap-3 bg-gray-100 p-1.5 rounded-xl border border-gray-200 shadow-sm h-fit">
+                                                <button onClick={prevMonth} className="p-2 hover:bg-primary/10 text-gray-700 rounded-lg transition-all active:scale-90"><ChevronLeft size={16} /></button>
+                                                <span className="text-[10px] font-black min-w-[110px] text-center uppercase tracking-[0.2em] text-gray-900">
                                                     {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
                                                 </span>
-                                                <button onClick={nextMonth} className="p-2 hover:bg-primary/20 text-white rounded-lg transition-all active:scale-90"><ChevronRight size={16} /></button>
+                                                <button onClick={nextMonth} className="p-2 hover:bg-primary/10 text-gray-700 rounded-lg transition-all active:scale-90"><ChevronRight size={16} /></button>
                                             </div>
                                         </div>
 
