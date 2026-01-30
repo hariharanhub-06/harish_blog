@@ -11,17 +11,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith("/admin");
     const isHomePage = pathname === "/";
+    const isScheduler = pathname === "/scheduler";
 
     return (
         <>
-            {!isAdmin && <AnalyticsTracker />}
-            {!isAdmin && <Navbar />}
+            {!isAdmin && !isScheduler && <AnalyticsTracker />}
+            {!isAdmin && !isScheduler && <Navbar />}
 
-            <main className={`min-h-screen ${(!isAdmin && !isHomePage) ? "pt-24 md:pt-28" : ""}`}>
+            <main className={`min-h-screen ${(!isAdmin && !isHomePage && !isScheduler) ? "pt-24 md:pt-28" : ""}`}>
                 {children}
             </main>
-            {!isAdmin && <Footer />}
-            {!isAdmin && <AIChat />}
+            {!isAdmin && !isScheduler && <Footer />}
+            {!isAdmin && !isScheduler && <AIChat />}
         </>
     );
 }

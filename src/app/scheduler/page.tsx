@@ -19,19 +19,25 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Availability {
-    dayOfWeek: number;
-    startTime: string;
-    endTime: string;
+    specificDate: string;
     isAvailable: boolean;
+}
+
+interface BookedSession {
+    scheduledDate: string;
+    endDate: string;
 }
 
 export default function MeetingScheduler() {
     const [step, setStep] = useState(1);
-    const [availability, setAvailability] = useState<Availability[]>([]);
+    const [availability, setAvailability] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-    const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+    const [startTime, setStartTime] = useState("10:00");
+    const [endTime, setEndTime] = useState("12:00");
+    const [bookedSessions, setBookedSessions] = useState<BookedSession[]>([]);
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+
     const [form, setForm] = useState({
         meetingType: "GRR Visit",
         clubName: "",
@@ -53,7 +59,7 @@ export default function MeetingScheduler() {
             const res = await fetch("/api/meetings/availability");
             if (res.ok) {
                 const data = await res.json();
-                setAvailability(data);
+                setAvailability(data.filter((d: any) => d.isAvailable).map((d: any) => new Date(d.specificDate).toDateString()));
             }
         } catch (error) {
             console.error("Failed to fetch availability:", error);
@@ -62,46 +68,35 @@ export default function MeetingScheduler() {
         }
     };
 
-    const fetchBookedSlots = async (date: Date) => {
+    const fetchBookedSessions = async (date: Date) => {
         try {
             const res = await fetch(`/api/meetings/schedule?date=${date.toISOString()}`);
             if (res.ok) {
                 const data = await res.json();
-                setBookedSlots(data);
+                setBookedSessions(data);
             }
         } catch (error) {
             console.error("Failed to fetch booked slots:", error);
         }
     };
 
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-    // Generate dates for the next 30 days
-    const availableDates = Array.from({ length: 30 }).map((_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() + i + 1); // Start from tomorrow
-        return d;
-    }).filter(d => {
-        const av = availability.find(a => a.dayOfWeek === d.getDay());
-        return av?.isAvailable;
-    });
-
-    const slots = [
-        "10:00 - 12:00",
-        "13:00 - 15:00",
-        "16:00 - 18:00"
-    ];
+    const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+    const prevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+    const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedDate || !selectedSlot) return;
+        if (!selectedDate || !startTime || !endTime) return;
 
         setIsSubmitting(true);
         try {
-            const startTime = selectedSlot.split(" - ")[0];
-            const finalDate = new Date(selectedDate);
-            const [hours, minutes] = startTime.split(":");
-            finalDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+            const start = new Date(selectedDate);
+            const [sH, sM] = startTime.split(":");
+            start.setHours(parseInt(sH), parseInt(sM), 0, 0);
+
+            const end = new Date(selectedDate);
+            const [eH, eM] = endTime.split(":");
+            end.setHours(parseInt(eH), parseInt(eM), 0, 0);
 
             const res = await fetch("/api/meetings/schedule", {
                 method: "POST",
@@ -109,17 +104,20 @@ export default function MeetingScheduler() {
                 body: JSON.stringify({
                     ...form,
                     numAttendees: parseInt(form.numAttendees) || 0,
-                    scheduledDate: finalDate.toISOString()
+                    scheduledDate: start.toISOString(),
+                    endDate: end.toISOString()
                 }),
             });
 
             if (res.ok) {
                 setSuccess(true);
-                // WhatsApp redirect
-                const text = `Hi, I've scheduled a ${form.meetingType} for ${form.clubName} on ${finalDate.toLocaleDateString()} at ${selectedSlot}.`;
+                const text = `Hi, I've scheduled a ${form.meetingType} for ${form.clubName} on ${start.toLocaleDateString()} from ${startTime} to ${endTime}.`;
                 setTimeout(() => {
                     window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(text)}`, "_blank");
                 }, 2000);
+            } else {
+                const errorData = await res.json();
+                alert(errorData.error || "Failed to schedule meeting");
             }
         } catch (error) {
             console.error("Failed to schedule:", error);
@@ -217,23 +215,53 @@ export default function MeetingScheduler() {
                                     key="step1"
                                     className="h-full flex flex-col"
                                 >
-                                    <h2 className="text-2xl font-black mb-8 flex items-center gap-2">Choose a Date <span className="text-primary">.</span></h2>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 overflow-y-auto max-h-[400px] pr-2 scrollbar-hide">
-                                        {availableDates.map((date) => (
-                                            <button
-                                                key={date.getTime()}
-                                                onClick={() => {
-                                                    setSelectedDate(date);
-                                                    setStep(2);
-                                                    fetchBookedSlots(date);
-                                                }}
-                                                className={`p-6 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 ${selectedDate?.toDateString() === date.toDateString() ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-primary/30 hover:bg-gray-50'}`}
-                                            >
-                                                <span className="text-[10px] font-black uppercase text-gray-400">{days[date.getDay()]}</span>
-                                                <span className="text-2xl font-black text-gray-900">{date.getDate()}</span>
-                                                <span className="text-[10px] font-black text-primary uppercase">{date.toLocaleString('default', { month: 'short' })}</span>
-                                            </button>
+                                    <div className="flex items-center justify-between mb-8">
+                                        <h2 className="text-2xl font-black flex items-center gap-2">Choose a Date <span className="text-primary">.</span></h2>
+                                        <div className="flex items-center gap-3 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+                                            <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><ChevronLeft size={16} /></button>
+                                            <span className="text-xs font-black min-w-[100px] text-center uppercase tracking-widest text-gray-500">
+                                                {currentMonth.toLocaleString('default', { month: 'short', year: 'numeric' })}
+                                            </span>
+                                            <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><ChevronRight size={16} /></button>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-7 gap-1 mb-4">
+                                        {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => (
+                                            <div key={d} className="text-center text-[8px] font-black uppercase text-gray-300 py-2">{d}</div>
                                         ))}
+                                        {Array.from({ length: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() }).map((_, i) => <div key={`empty-${i}`} />)}
+                                        {Array.from({ length: getDaysInMonth(currentMonth.getFullYear(), currentMonth.getMonth()) }).map((_, i) => {
+                                            const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
+                                            const dateStr = date.toDateString();
+                                            const isAvailable = availability.includes(dateStr);
+
+                                            const leadTimeDate = new Date();
+                                            leadTimeDate.setHours(0, 0, 0, 0);
+                                            leadTimeDate.setDate(leadTimeDate.getDate() + 5);
+                                            const isTooEarly = date < leadTimeDate;
+
+                                            return (
+                                                <button
+                                                    key={i}
+                                                    disabled={!isAvailable || isTooEarly}
+                                                    onClick={() => {
+                                                        setSelectedDate(date);
+                                                        setStep(2);
+                                                        fetchBookedSessions(date);
+                                                    }}
+                                                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center
+                                                        ${selectedDate?.toDateString() === dateStr ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20 scale-105 z-10' :
+                                                            isAvailable && !isTooEarly ? 'border-gray-50 bg-gray-50 text-gray-900 hover:border-primary/30 hover:bg-white' :
+                                                                'border-transparent bg-transparent text-gray-200 cursor-not-allowed opacity-50'}`}
+                                                >
+                                                    <span className="text-lg font-black">{i + 1}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="mt-auto p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                        <p className="text-[10px] text-gray-400 font-medium text-center italic">Dates are enabled based on official availability. Minimum 5-day lead time required.</p>
                                     </div>
                                 </motion.div>
                             )}
@@ -247,32 +275,59 @@ export default function MeetingScheduler() {
                                     <button onClick={() => setStep(1)} className="text-primary text-xs font-black uppercase mb-4 flex items-center gap-1">
                                         <ChevronLeft size={14} /> Back
                                     </button>
-                                    <h2 className="text-2xl font-black mb-8">Available Slots <span className="text-primary">/</span> {selectedDate?.toLocaleDateString()}</h2>
-                                    <div className="space-y-4">
-                                        {slots.map((slot) => {
-                                            const isBooked = bookedSlots.includes(slot);
-                                            return (
-                                                <button
-                                                    key={slot}
-                                                    disabled={isBooked}
-                                                    onClick={() => { setSelectedSlot(slot); setStep(3); }}
-                                                    className={`w-full p-6 rounded-3xl border-2 flex items-center justify-between transition-all 
-                                                        ${isBooked ? 'opacity-50 cursor-not-allowed border-gray-100 bg-gray-50' :
-                                                            selectedSlot === slot ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-primary/30 hover:bg-gray-50'}`}
-                                                >
-                                                    <div className="flex items-center gap-4">
-                                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isBooked ? 'bg-gray-200 text-gray-400' : selectedSlot === slot ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-gray-100 text-gray-400'}`}>
-                                                            <Clock size={20} />
+                                    <div className="flex items-center justify-between mb-8">
+                                        <h2 className="text-2xl font-black">Set Time <span className="text-primary">/</span> {selectedDate?.toLocaleDateString()}</h2>
+                                        <div className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-lg">Available: 09:00 - 19:00</div>
+                                    </div>
+
+                                    <div className="space-y-8">
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Start Time</label>
+                                                <input
+                                                    type="time"
+                                                    min="09:00"
+                                                    max="18:00"
+                                                    value={startTime}
+                                                    onChange={e => setStartTime(e.target.value)}
+                                                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-black focus:ring-2 ring-primary/20 outline-none transition-all focus:border-primary/30"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">End Time</label>
+                                                <input
+                                                    type="time"
+                                                    min="10:00"
+                                                    max="19:00"
+                                                    value={endTime}
+                                                    onChange={e => setEndTime(e.target.value)}
+                                                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-black focus:ring-2 ring-primary/20 outline-none transition-all focus:border-primary/30"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {bookedSessions.length > 0 && (
+                                            <div className="p-6 bg-red-50 rounded-3xl border border-red-100">
+                                                <div className="flex items-center gap-2 text-red-600 mb-3">
+                                                    <AlertCircle size={16} />
+                                                    <span className="text-xs font-black uppercase">Booked Intervals Today</span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {bookedSessions.map((s, i) => (
+                                                        <div key={i} className="px-3 py-1 bg-white border border-red-200 rounded-lg text-[10px] font-bold text-red-500">
+                                                            {new Date(s.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} - {new Date(s.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                                                         </div>
-                                                        <div className="flex flex-col items-start">
-                                                            <span className="text-lg font-bold text-gray-900">{slot}</span>
-                                                            {isBooked && <span className="text-[10px] font-black uppercase text-red-500">Already Booked</span>}
-                                                        </div>
-                                                    </div>
-                                                    {!isBooked && <ChevronRight className={selectedSlot === slot ? 'text-primary' : 'text-gray-300'} />}
-                                                </button>
-                                            );
-                                        })}
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <button
+                                            onClick={() => setStep(3)}
+                                            className="w-full py-5 bg-primary text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all"
+                                        >
+                                            Next Step
+                                        </button>
                                     </div>
                                 </motion.div>
                             )}
