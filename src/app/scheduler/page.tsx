@@ -31,6 +31,7 @@ export default function MeetingScheduler() {
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+    const [bookedSlots, setBookedSlots] = useState<string[]>([]);
     const [form, setForm] = useState({
         meetingType: "GRR Visit",
         clubName: "",
@@ -58,6 +59,18 @@ export default function MeetingScheduler() {
             console.error("Failed to fetch availability:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchBookedSlots = async (date: Date) => {
+        try {
+            const res = await fetch(`/api/meetings/schedule?date=${date.toISOString()}`);
+            if (res.ok) {
+                const data = await res.json();
+                setBookedSlots(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch booked slots:", error);
         }
     };
 
@@ -209,7 +222,11 @@ export default function MeetingScheduler() {
                                         {availableDates.map((date) => (
                                             <button
                                                 key={date.getTime()}
-                                                onClick={() => { setSelectedDate(date); setStep(2); }}
+                                                onClick={() => {
+                                                    setSelectedDate(date);
+                                                    setStep(2);
+                                                    fetchBookedSlots(date);
+                                                }}
                                                 className={`p-6 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 ${selectedDate?.toDateString() === date.toDateString() ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-primary/30 hover:bg-gray-50'}`}
                                             >
                                                 <span className="text-[10px] font-black uppercase text-gray-400">{days[date.getDay()]}</span>
@@ -232,21 +249,30 @@ export default function MeetingScheduler() {
                                     </button>
                                     <h2 className="text-2xl font-black mb-8">Available Slots <span className="text-primary">/</span> {selectedDate?.toLocaleDateString()}</h2>
                                     <div className="space-y-4">
-                                        {slots.map((slot) => (
-                                            <button
-                                                key={slot}
-                                                onClick={() => { setSelectedSlot(slot); setStep(3); }}
-                                                className={`w-full p-6 rounded-3xl border-2 flex items-center justify-between transition-all ${selectedSlot === slot ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-primary/30 hover:bg-gray-50'}`}
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${selectedSlot === slot ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-gray-100 text-gray-400'}`}>
-                                                        <Clock size={20} />
+                                        {slots.map((slot) => {
+                                            const isBooked = bookedSlots.includes(slot);
+                                            return (
+                                                <button
+                                                    key={slot}
+                                                    disabled={isBooked}
+                                                    onClick={() => { setSelectedSlot(slot); setStep(3); }}
+                                                    className={`w-full p-6 rounded-3xl border-2 flex items-center justify-between transition-all 
+                                                        ${isBooked ? 'opacity-50 cursor-not-allowed border-gray-100 bg-gray-50' :
+                                                            selectedSlot === slot ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-primary/30 hover:bg-gray-50'}`}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isBooked ? 'bg-gray-200 text-gray-400' : selectedSlot === slot ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-gray-100 text-gray-400'}`}>
+                                                            <Clock size={20} />
+                                                        </div>
+                                                        <div className="flex flex-col items-start">
+                                                            <span className="text-lg font-bold text-gray-900">{slot}</span>
+                                                            {isBooked && <span className="text-[10px] font-black uppercase text-red-500">Already Booked</span>}
+                                                        </div>
                                                     </div>
-                                                    <span className="text-lg font-bold text-gray-900">{slot}</span>
-                                                </div>
-                                                <ChevronRight className={selectedSlot === slot ? 'text-primary' : 'text-gray-300'} />
-                                            </button>
-                                        ))}
+                                                    {!isBooked && <ChevronRight className={selectedSlot === slot ? 'text-primary' : 'text-gray-300'} />}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </motion.div>
                             )}

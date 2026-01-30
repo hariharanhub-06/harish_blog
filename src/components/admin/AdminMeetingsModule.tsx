@@ -15,7 +15,8 @@ import {
     AlertCircle,
     Loader2,
     Plus,
-    Link as LinkIcon
+    Link as LinkIcon,
+    Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MeetingChecklistModal from "./MeetingChecklistModal";
@@ -109,6 +110,18 @@ export default function AdminMeetingsModule() {
             if (res.ok) fetchMeetings();
         } catch (error) {
             console.error("Failed to update status:", error);
+        }
+    };
+
+    const handleDeleteMeeting = async (id: string) => {
+        if (!window.confirm("Are you sure you want to delete this meeting?")) return;
+        try {
+            const res = await fetch(`/api/meetings/admin?id=${id}`, {
+                method: "DELETE",
+            });
+            if (res.ok) fetchMeetings();
+        } catch (error) {
+            console.error("Failed to delete meeting:", error);
         }
     };
 
@@ -370,6 +383,13 @@ export default function AdminMeetingsModule() {
                                                         <LinkIcon size={16} />
                                                     </a>
                                                 )}
+                                                <button
+                                                    onClick={() => handleDeleteMeeting(meeting.id)}
+                                                    className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                                                    title="Delete Meeting"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
                                                 <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-400">
                                                     <MoreVertical size={16} />
                                                 </button>

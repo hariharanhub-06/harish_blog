@@ -20,7 +20,8 @@ import {
     HeartHandshake,
     Gamepad2,
     Wallet,
-    Trophy
+    Trophy,
+    Calendar
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";

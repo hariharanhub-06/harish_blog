@@ -39,3 +39,21 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+
+export async function DELETE(req: Request) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const id = searchParams.get("id");
+
+        if (!id) {
+            return NextResponse.json({ error: "ID is required" }, { status: 400 });
+        }
+
+        await db.delete(meetingSchedules).where(eq(meetingSchedules.id, id));
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Failed to delete meeting:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
