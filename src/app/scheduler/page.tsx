@@ -14,7 +14,11 @@ import {
     ChevronLeft,
     Loader2,
     CalendarCheck,
-    AlertCircle
+    AlertCircle,
+    Star,
+    Sparkles,
+    MousePointer2,
+    Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -157,76 +161,164 @@ export default function MeetingScheduler() {
     }
 
     return (
-        <div className="min-h-screen bg-[#fafbfc] py-20 px-6 font-poppins">
-            <div className="max-w-4xl mx-auto">
+        <div className="min-h-screen bg-[#fafbfc] py-20 px-6 font-poppins relative overflow-hidden">
+            {/* Cinematic Floating Background Shapes */}
+            <div className="absolute inset-0 -z-10 pointer-events-none opacity-40">
+                {/* Large Blurred Blobs */}
+                {[...Array(5)].map((_, i) => (
+                    <motion.div
+                        key={`blob-${i}`}
+                        className="absolute w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px]"
+                        animate={{
+                            x: [Math.random() * 100 - 50, Math.random() * 100 - 50],
+                            y: [Math.random() * 100 - 50, Math.random() * 100 - 50],
+                            scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                            duration: 10 + i * 2,
+                            repeat: Infinity,
+                            repeatType: "reverse",
+                        }}
+                        style={{
+                            left: `${(i * 25) % 100}%`,
+                            top: `${(i * 30) % 100}%`,
+                        }}
+                    />
+                ))}
+
+                {/* Shifting Grid */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+
+                {/* Floating Geometric Icons */}
+                {[...Array(12)].map((_, i) => {
+                    const icons = [Star, Sparkles, CalendarIcon, Users, Zap, Clock];
+                    const Icon = icons[i % icons.length];
+                    return (
+                        <motion.div
+                            key={`icon-${i}`}
+                            className="absolute text-primary/10"
+                            animate={{
+                                y: [-20, 20, -20],
+                                rotate: [0, 90, 180, 270, 360],
+                                scale: [0.8, 1.2, 0.8],
+                                opacity: [0.2, 0.5, 0.2]
+                            }}
+                            transition={{
+                                duration: 8 + i,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                top: `${Math.random() * 100}%`,
+                            }}
+                        >
+                            <Icon size={20 + (i % 3) * 10} />
+                        </motion.div>
+                    );
+                })}
+            </div>
+
+            <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="max-w-4xl mx-auto relative z-10"
+            >
                 <div className="text-center mb-16">
                     <motion.div
-                        initial={{ y: -20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-xs font-black uppercase tracking-widest mb-6"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-xs font-black uppercase tracking-widest mb-6 border border-primary/20 backdrop-blur-sm shadow-xl shadow-primary/5"
                     >
-                        <CalendarCheck size={14} />
+                        <CalendarCheck size={14} className="animate-pulse" />
                         Official Visit Scheduler
                     </motion.div>
-                    <h1 className="text-5xl font-black tracking-tight text-gray-900 mb-4">Book Your <span className="text-primary">Official Visit</span></h1>
-                    <p className="text-gray-500 text-lg max-w-2xl mx-auto font-medium">Select a slot and provide your club details to schedule a GRR or DRR visit.</p>
+                    <h1 className="text-5xl md:text-6xl font-black tracking-tight text-gray-900 mb-4 drop-shadow-sm">
+                        Book Your <span className="text-primary relative inline-block">Official Visit
+                            <motion.span
+                                initial={{ width: 0 }}
+                                animate={{ width: "100%" }}
+                                transition={{ duration: 0.8, delay: 0.8 }}
+                                className="absolute bottom-1 left-0 h-2 bg-primary/10 -z-10 rounded-full"
+                            />
+                        </span>
+                    </h1>
+                    <p className="text-gray-500 text-lg max-w-2xl mx-auto font-medium leading-relaxed">
+                        Select a slot and provide your club details to schedule a GRR or DRR visit with precision.
+                    </p>
                 </div>
 
-                <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+                <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-white/40 overflow-hidden flex flex-col md:flex-row min-h-[650px] group transition-all duration-700 hover:shadow-[0_48px_80px_-20px_rgba(0,0,0,0.15)]">
                     {/* Left Sidebar - Steps */}
-                    <div className="w-full md:w-80 bg-gray-900 p-10 text-white flex flex-col justify-between">
+                    <div className="w-full md:w-80 bg-gray-950 p-10 text-white flex flex-col justify-between relative overflow-hidden">
+                        {/* Animated gradient accent for sidebar */}
+                        <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-primary/0 via-primary/50 to-primary/0 opactiy-20" />
+
                         <div>
-                            <h3 className="text-xl font-bold mb-10">Steps</h3>
-                            <div className="space-y-8">
+                            <h3 className="text-xl font-bold mb-10 tracking-tight flex items-center gap-2">
+                                <span className="w-8 h-1 bg-primary rounded-full" />
+                                Progress
+                            </h3>
+                            <div className="space-y-10">
                                 {[
                                     { step: 1, title: "Select Date", icon: CalendarIcon },
                                     { step: 2, title: "Pick a Slot", icon: Clock },
                                     { step: 3, title: "Club Details", icon: Users }
                                 ].map((s) => (
-                                    <div key={s.step} className={`flex items-center gap-4 transition-all ${step === s.step ? 'opacity-100 translate-x-2' : 'opacity-40'}`}>
-                                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black ${step === s.step ? 'bg-primary text-white shadow-lg shadow-primary/40' : 'bg-white/10'}`}>
-                                            <s.icon size={18} />
+                                    <div key={s.step} className={`flex items-center gap-5 transition-all duration-500 ${step >= s.step ? 'opacity-100 translate-x-1' : 'opacity-30'}`}>
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black transition-all duration-500 ${step === s.step ? 'bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)] scale-110' : step > s.step ? 'bg-emerald-500 text-white' : 'bg-white/5 border border-white/10'}`}>
+                                            {step > s.step ? <CheckCircle2 size={20} /> : <s.icon size={20} />}
                                         </div>
-                                        <span className="font-bold text-sm tracking-tight">{s.title}</span>
+                                        <div className="flex flex-col">
+                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${step === s.step ? 'text-primary' : 'text-gray-500'}`}>Step {s.step}</span>
+                                            <span className="font-bold text-base mt-0.5">{s.title}</span>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
-                            <div className="flex items-center gap-2 text-primary mb-2">
-                                <AlertCircle size={14} />
-                                <span className="text-[10px] font-black uppercase">Note</span>
+                        <div className="p-6 bg-white/5 rounded-[2rem] border border-white/10 backdrop-blur-sm group-hover:border-primary/20 transition-colors">
+                            <div className="flex items-center gap-2 text-primary mb-3">
+                                <AlertCircle size={16} className="animate-bounce" />
+                                <span className="text-[10px] font-black uppercase tracking-wider">Crucial Note</span>
                             </div>
-                            <p className="text-[10px] text-gray-400 font-medium leading-relaxed">Ensure all relevant documents are ready in your Drive link before the visit.</p>
+                            <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
+                                Please ensure all mandatory documents are uploaded to your Drive before confirming.
+                            </p>
                         </div>
                     </div>
 
                     {/* Right Side - Content */}
-                    <div className="flex-1 p-10 md:p-14">
+                    <div className="flex-1 p-10 md:p-14 bg-gradient-to-br from-white/50 to-white/90">
                         <AnimatePresence mode="wait">
                             {step === 1 && (
                                 <motion.div
-                                    initial={{ x: 20, opacity: 0 }}
+                                    initial={{ x: 30, opacity: 0 }}
                                     animate={{ x: 0, opacity: 1 }}
-                                    exit={{ x: -20, opacity: 0 }}
+                                    exit={{ x: -30, opacity: 0 }}
                                     key="step1"
                                     className="h-full flex flex-col"
                                 >
-                                    <div className="flex items-center justify-between mb-8">
-                                        <h2 className="text-2xl font-black flex items-center gap-2">Choose a Date <span className="text-primary">.</span></h2>
-                                        <div className="flex items-center gap-3 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
-                                            <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><ChevronLeft size={16} /></button>
-                                            <span className="text-xs font-black min-w-[100px] text-center uppercase tracking-widest text-gray-500">
-                                                {currentMonth.toLocaleString('default', { month: 'short', year: 'numeric' })}
+                                    <div className="flex items-center justify-between mb-10">
+                                        <div>
+                                            <h2 className="text-3xl font-black tracking-tight">Timeline Selection <span className="text-primary animate-pulse">.</span></h2>
+                                            <p className="text-gray-400 text-xs mt-1 font-bold uppercase tracking-widest">Pick your preferred visit date</p>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-gray-50/80 backdrop-blur-sm p-2 rounded-2xl border border-gray-100 shadow-sm">
+                                            <button onClick={prevMonth} className="p-2.5 hover:bg-white rounded-xl transition-all hover:shadow-md active:scale-95"><ChevronLeft size={18} /></button>
+                                            <span className="text-[10px] font-black min-w-[110px] text-center uppercase tracking-[0.15em] text-gray-700">
+                                                {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
                                             </span>
-                                            <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><ChevronRight size={16} /></button>
+                                            <button onClick={nextMonth} className="p-2.5 hover:bg-white rounded-xl transition-all hover:shadow-md active:scale-95"><ChevronRight size={18} /></button>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-7 gap-1 mb-4">
+                                    <div className="grid grid-cols-7 gap-3 mb-8">
                                         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => (
-                                            <div key={d} className="text-center text-[8px] font-black uppercase text-gray-300 py-2">{d}</div>
+                                            <div key={d} className="text-center text-[10px] font-black uppercase text-gray-300 py-2 tracking-widest">{d}</div>
                                         ))}
                                         {Array.from({ length: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() }).map((_, i) => <div key={`empty-${i}`} />)}
                                         {Array.from({ length: getDaysInMonth(currentMonth.getFullYear(), currentMonth.getMonth()) }).map((_, i) => {
@@ -248,76 +340,95 @@ export default function MeetingScheduler() {
                                                         setStep(2);
                                                         fetchBookedSessions(date);
                                                     }}
-                                                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center
-                                                        ${selectedDate?.toDateString() === dateStr ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20 scale-105 z-10' :
-                                                            isAvailable && !isTooEarly ? 'border-gray-50 bg-gray-50 text-gray-900 hover:border-primary/30 hover:bg-white' :
-                                                                'border-transparent bg-transparent text-gray-200 cursor-not-allowed opacity-50'}`}
+                                                    className={`aspect-square rounded-2xl border-2 transition-all duration-300 flex flex-col items-center justify-center group/btn relative overflow-hidden
+                                                        ${selectedDate?.toDateString() === dateStr ? 'border-primary bg-primary text-white shadow-[0_12px_24px_-8px_rgba(var(--primary-rgb),0.5)] scale-105 z-10' :
+                                                            isAvailable && !isTooEarly ? 'border-gray-50 bg-white shadow-sm text-gray-900 hover:border-primary/40 hover:scale-105 active:scale-95' :
+                                                                'border-transparent bg-transparent text-gray-200 cursor-not-allowed opacity-40'}`}
                                                 >
-                                                    <span className="text-lg font-black">{i + 1}</span>
+                                                    <span className="text-xl font-black relative z-10">{i + 1}</span>
+                                                    {isAvailable && !isTooEarly && selectedDate?.toDateString() !== dateStr && (
+                                                        <div className="absolute inset-0 bg-primary/5 translate-y-full group-hover/btn:translate-y-0 transition-transform" />
+                                                    )}
                                                 </button>
                                             );
                                         })}
                                     </div>
-                                    <div className="mt-auto p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                        <p className="text-[10px] text-gray-400 font-medium text-center italic">Dates are enabled based on official availability. Minimum 3-day lead time required.</p>
+                                    <div className="mt-auto p-5 bg-primary/5 rounded-[2rem] border border-dashed border-primary/20 backdrop-blur-sm">
+                                        <p className="text-[11px] text-primary/60 font-bold text-center italic leading-relaxed">
+                                            Dates are dynamically enabled based on officer availability. <br />
+                                            A standard 3-day buffer is maintained for quality logistics.
+                                        </p>
                                     </div>
                                 </motion.div>
                             )}
 
                             {step === 2 && (
                                 <motion.div
-                                    initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}
+                                    initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -30, opacity: 0 }}
                                     key="step2"
                                     className="h-full flex flex-col"
                                 >
-                                    <button onClick={() => setStep(1)} className="text-primary text-xs font-black uppercase mb-4 flex items-center gap-1">
-                                        <ChevronLeft size={14} /> Back
+                                    <button onClick={() => setStep(1)} className="group/back text-primary text-[10px] font-black uppercase mb-6 flex items-center gap-1.5 hover:gap-2 transition-all w-fit">
+                                        <ChevronLeft size={16} /> <span className="tracking-widest">Revisit Dates</span>
                                     </button>
-                                    <div className="flex items-center justify-between mb-8">
-                                        <h2 className="text-2xl font-black">Set Time <span className="text-primary">/</span> {selectedDate?.toLocaleDateString('en-GB')}</h2>
-                                        <div className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-lg">Available: 09:00 - 19:00</div>
+                                    <div className="flex items-center justify-between mb-12">
+                                        <div>
+                                            <h2 className="text-3xl font-black tracking-tight">Clock In <span className="text-primary">/</span> {selectedDate?.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</h2>
+                                            <p className="text-gray-400 text-xs mt-1 font-bold uppercase tracking-widest">Define your visit window</p>
+                                        </div>
+                                        <div className="px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-xl border border-primary/10 tracking-widest">Window: 09:00 - 19:00</div>
                                     </div>
 
-                                    <div className="space-y-8">
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Start Time</label>
-                                                <input
-                                                    type="time"
-                                                    min="09:00"
-                                                    max="18:00"
-                                                    value={startTime}
-                                                    onChange={e => setStartTime(e.target.value)}
-                                                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-black focus:ring-2 ring-primary/20 outline-none transition-all focus:border-primary/30"
-                                                />
+                                    <div className="space-y-10">
+                                        <div className="grid grid-cols-2 gap-8">
+                                            <div className="space-y-3">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pl-2">Start Time</label>
+                                                <div className="relative group/input">
+                                                    <Clock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/input:text-primary transition-colors" size={20} />
+                                                    <input
+                                                        type="time"
+                                                        min="09:00"
+                                                        max="18:00"
+                                                        value={startTime}
+                                                        onChange={e => setStartTime(e.target.value)}
+                                                        className="w-full pl-14 pr-6 py-5 bg-white border-2 border-gray-100 rounded-[1.5rem] text-2xl font-black focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40 shadow-sm"
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">End Time</label>
-                                                <input
-                                                    type="time"
-                                                    min="10:00"
-                                                    max="19:00"
-                                                    value={endTime}
-                                                    onChange={e => setEndTime(e.target.value)}
-                                                    className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-black focus:ring-2 ring-primary/20 outline-none transition-all focus:border-primary/30"
-                                                />
+                                            <div className="space-y-3">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pl-2">End Time</label>
+                                                <div className="relative group/input">
+                                                    <Clock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/input:text-primary transition-colors" size={20} />
+                                                    <input
+                                                        type="time"
+                                                        min="10:00"
+                                                        max="19:00"
+                                                        value={endTime}
+                                                        onChange={e => setEndTime(e.target.value)}
+                                                        className="w-full pl-14 pr-6 py-5 bg-white border-2 border-gray-100 rounded-[1.5rem] text-2xl font-black focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40 shadow-sm"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
                                         {bookedSessions.length > 0 && (
-                                            <div className="p-6 bg-red-50 rounded-3xl border border-red-100">
-                                                <div className="flex items-center gap-2 text-red-600 mb-3">
-                                                    <AlertCircle size={16} />
-                                                    <span className="text-xs font-black uppercase">Booked Intervals Today</span>
+                                            <motion.div
+                                                initial={{ y: 20, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                className="p-8 bg-red-50/50 backdrop-blur-sm rounded-[2rem] border border-red-100"
+                                            >
+                                                <div className="flex items-center gap-2.5 text-red-600 mb-5 text-sm font-black uppercase tracking-wider">
+                                                    <AlertCircle size={18} className="animate-pulse" />
+                                                    Conflict Alerts (Already Booked)
                                                 </div>
-                                                <div className="flex flex-wrap gap-2">
+                                                <div className="flex flex-wrap gap-3">
                                                     {bookedSessions.map((s, i) => (
-                                                        <div key={i} className="px-3 py-1 bg-white border border-red-200 rounded-lg text-[10px] font-bold text-red-500">
+                                                        <div key={i} className="px-4 py-2 bg-white border border-red-200 rounded-xl text-xs font-black text-red-500 shadow-sm">
                                                             {new Date(s.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} - {new Date(s.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                                                         </div>
                                                     ))}
                                                 </div>
-                                            </div>
+                                            </motion.div>
                                         )}
 
                                         {(() => {
@@ -333,12 +444,15 @@ export default function MeetingScheduler() {
                                                 <button
                                                     disabled={hasConflict || !startTime || !endTime || startTime >= endTime}
                                                     onClick={() => setStep(3)}
-                                                    className={`w-full py-5 rounded-[1.5rem] font-black text-lg transition-all
+                                                    className={`w-full py-6 rounded-[2rem] font-black text-xl tracking-tight transition-all relative overflow-hidden group/next
                                                         ${hasConflict || !startTime || !endTime || startTime >= endTime
                                                             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                            : 'bg-primary text-white shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99]'}`}
+                                                            : 'bg-primary text-white shadow-[0_20px_40px_-10px_rgba(var(--primary-rgb),0.3)] hover:scale-[1.02] active:scale-[0.98]'}`}
                                                 >
-                                                    {hasConflict ? "Time Already Booked" : startTime >= endTime ? "Invalid Time Range" : "Next Step"}
+                                                    <span className="relative z-10">{hasConflict ? "Time Interval Occupied" : startTime >= endTime ? "Invalid Time Span" : "Continue to Logistics"}</span>
+                                                    {!hasConflict && startTime < endTime && (
+                                                        <div className="absolute inset-0 bg-white/20 translate-x-full group-hover/next:translate-x-0 transition-transform duration-500" />
+                                                    )}
                                                 </button>
                                             );
                                         })()}
@@ -348,20 +462,20 @@ export default function MeetingScheduler() {
 
                             {step === 3 && (
                                 <motion.div
-                                    initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}
+                                    initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -30, opacity: 0 }}
                                     key="step3"
                                     className="h-full"
                                 >
-                                    <button onClick={() => setStep(2)} className="text-primary text-xs font-black uppercase mb-4 flex items-center gap-1">
-                                        <ChevronLeft size={14} /> Back
+                                    <button onClick={() => setStep(2)} className="group/back text-primary text-[10px] font-black uppercase mb-6 flex items-center gap-1.5 hover:gap-2 transition-all w-fit">
+                                        <ChevronLeft size={16} /> <span className="tracking-widest">Revisit Time</span>
                                     </button>
-                                    <h2 className="text-2xl font-black mb-8">Club Details <span className="text-primary">.</span></h2>
-                                    <form onSubmit={handleSubmit} className="space-y-6">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-1.5">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Visit Type</label>
+                                    <h2 className="text-3xl font-black tracking-tight mb-10">Logistics & Details <span className="text-primary">.</span></h2>
+                                    <form onSubmit={handleSubmit} className="space-y-8">
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pl-2">Engagement Type</label>
                                                 <select
-                                                    className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20"
+                                                    className="w-full p-4 bg-white border-2 border-gray-100 rounded-2xl text-sm font-bold focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40 appearance-none shadow-sm"
                                                     value={form.meetingType}
                                                     onChange={e => setForm({ ...form, meetingType: e.target.value })}
                                                 >
@@ -369,33 +483,33 @@ export default function MeetingScheduler() {
                                                     <option>DRR Visit</option>
                                                 </select>
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Club Name</label>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pl-2">Rotaract Club Name</label>
                                                 <input
                                                     required
-                                                    className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20"
-                                                    placeholder="e.g. RC Metro"
+                                                    className="w-full p-4 bg-white border-2 border-gray-100 rounded-2xl text-sm font-bold focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40 shadow-sm"
+                                                    placeholder="e.g. RC Metro South"
                                                     value={form.clubName}
                                                     onChange={e => setForm({ ...form, clubName: e.target.value })}
                                                 />
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-1.5">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">President Name</label>
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pl-2">President Name</label>
                                                 <input
-                                                    className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20"
-                                                    placeholder="Full Name"
+                                                    className="w-full p-4 bg-white border-2 border-gray-100 rounded-2xl text-sm font-bold focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40 shadow-sm"
+                                                    placeholder="Official Full Name"
                                                     value={form.presidentName}
                                                     onChange={e => setForm({ ...form, presidentName: e.target.value })}
                                                 />
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">WhatsApp Number</label>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pl-2">Coordination Number</label>
                                                 <input
                                                     required
-                                                    className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20"
+                                                    className="w-full p-4 bg-white border-2 border-gray-100 rounded-2xl text-sm font-bold focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40 shadow-sm"
                                                     placeholder="91XXXXXXXXXX"
                                                     value={form.mobileNumber}
                                                     onChange={e => setForm({ ...form, mobileNumber: e.target.value })}
@@ -403,43 +517,50 @@ export default function MeetingScheduler() {
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-1.5">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Venue</label>
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pl-2">Primary Venue</label>
                                                 <input
                                                     required
-                                                    className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20"
-                                                    placeholder="Meeting Venue"
+                                                    className="w-full p-4 bg-white border-2 border-gray-100 rounded-2xl text-sm font-bold focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40 shadow-sm"
+                                                    placeholder="Main Location"
                                                     value={form.venue}
                                                     onChange={e => setForm({ ...form, venue: e.target.value })}
                                                 />
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Venue Details</label>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pl-2">Specific Map/Details</label>
                                                 <input
-                                                    className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20"
-                                                    placeholder="Building/Floor/Room"
+                                                    className="w-full p-4 bg-white border-2 border-gray-100 rounded-2xl text-sm font-bold focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40 shadow-sm"
+                                                    placeholder="Floor, Hall Name, Landmark"
                                                     value={form.venueDetails}
                                                     onChange={e => setForm({ ...form, venueDetails: e.target.value })}
                                                 />
                                             </div>
                                         </div>
 
-                                        <div className="space-y-1.5">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Drive Link (Docs)</label>
-                                            <input
-                                                className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20"
-                                                placeholder="https://drive.google.com/..."
-                                                value={form.driveLink}
-                                                onChange={e => setForm({ ...form, driveLink: e.target.value })}
-                                            />
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pl-2">Centralized Document Link (Drive)</label>
+                                            <div className="relative group/drive">
+                                                <LinkIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/drive:text-primary transition-colors" size={18} />
+                                                <input
+                                                    className="w-full pl-14 pr-6 py-4 bg-white border-2 border-gray-100 rounded-2xl text-sm font-bold focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40 shadow-sm"
+                                                    placeholder="https://drive.google.com/share-id..."
+                                                    value={form.driveLink}
+                                                    onChange={e => setForm({ ...form, driveLink: e.target.value })}
+                                                />
+                                            </div>
                                         </div>
 
                                         <button
                                             disabled={isSubmitting}
-                                            className="w-full py-5 bg-primary text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50"
+                                            className="w-full py-6 bg-gray-900 text-white rounded-[2rem] font-black text-xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.2)] hover:bg-black hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3 group/submit"
                                         >
-                                            {isSubmitting ? "Processing..." : "Confirm Schedule"}
+                                            {isSubmitting ? (
+                                                <><Loader2 className="animate-spin" size={20} /> Deploying Request...</>
+                                            ) : (
+                                                <><CheckCircle2 className="group-hover/submit:scale-125 transition-transform" size={20} /> Finalize Booking</>
+                                            )}
                                         </button>
                                     </form>
                                 </motion.div>
@@ -447,7 +568,7 @@ export default function MeetingScheduler() {
                         </AnimatePresence>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }
