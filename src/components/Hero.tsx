@@ -94,14 +94,14 @@ export default function Hero({ profile, className }: HeroProps) {
                                                 style={{ rotate: `${i * 6}deg` }}
                                             >
                                                 <motion.div
-                                                    className="absolute -top-8 left-1/2 -translate-x-1/2 w-1.5 bg-gradient-to-t from-cyan-400 to-purple-500 rounded-full"
-                                                    initial={{ height: 10, opacity: 0.5 }}
+                                                    className="absolute -top-12 left-1/2 -translate-x-1/2 w-2 bg-gradient-to-t from-cyan-400 via-purple-500 to-cyan-400 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.5)]"
+                                                    initial={{ height: 12, opacity: 0.6 }}
                                                     animate={{
-                                                        height: [10, 20 + ((i * 1337) % 50), 10], // Deterministic pseudo-random
-                                                        opacity: [0.5, 1, 0.5],
+                                                        height: [12, 35 + ((i * 1337) % 65), 12],
+                                                        opacity: [0.6, 1, 0.6],
                                                     }}
                                                     transition={{
-                                                        duration: 0.5,
+                                                        duration: 0.6,
                                                         repeat: Infinity,
                                                         delay: i * 0.02,
                                                         repeatType: "reverse",
@@ -111,7 +111,7 @@ export default function Hero({ profile, className }: HeroProps) {
                                         ))}
                                         {/* Static Glow Ring when not playing */}
                                         {!isPlaying && profile.audioUrl && (
-                                            <div className="absolute inset- [-10px] rounded-full border border-white/10 animate-[spin_10s_linear_infinite]" />
+                                            <div className="absolute inset-[-15px] rounded-full border-2 border-cyan-500/20 animate-[spin_12s_linear_infinite] shadow-[0_0_20px_rgba(6,182,212,0.15)]" />
                                         )}
                                     </div>
 

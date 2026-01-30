@@ -161,18 +161,18 @@ export default function MeetingScheduler() {
     }
 
     return (
-        <div className="h-screen py-4 px-6 font-poppins relative overflow-hidden text-white flex flex-col justify-center items-center bg-[#050608]">
+        <div className="min-h-[100dvh] py-4 px-6 font-poppins relative overflow-x-hidden text-white flex flex-col justify-center items-center">
             {/* Direct Atmospheric Video Background */}
             <video
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="absolute inset-0 w-full h-full object-cover -z-20 opacity-90 scale-105"
+                className="fixed inset-0 w-full h-full object-cover -z-30 opacity-90 scale-105 pointer-events-none"
             >
                 <source src="https://assets.mixkit.co/videos/preview/mixkit-nebula-blue-and-purple-liquid-background-34538-large.mp4" type="video/mp4" />
             </video>
-            <div className="absolute inset-0 bg-black/40 -z-10 backdrop-blur-[1px]" />
+            <div className="fixed inset-0 bg-[#050608]/30 -z-20 backdrop-blur-[0.5px]" />
 
             {/* Glowing Depth Layers */}
             <div className="absolute inset-0 -z-10 pointer-events-none">
@@ -213,35 +213,35 @@ export default function MeetingScheduler() {
                     />
 
                     <div className="relative bg-[#0a0b0e]/95 backdrop-blur-3xl rounded-[3rem] overflow-hidden flex flex-col md:flex-row min-h-[580px] border border-white/5">
-                        {/* Interactive Left Sidebar */}
-                        <div className="w-full md:w-72 bg-black p-8 text-white flex flex-col justify-between relative border-r border-white/5">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0 opacity-10" />
+                        {/* Interactive Phase Sidebar */}
+                        <div className="w-full md:w-72 bg-black p-4 md:p-8 text-white flex flex-row md:flex-col justify-between md:justify-start gap-4 md:gap-0 relative border-b md:border-b-0 md:border-r border-white/5 overflow-x-auto md:overflow-visible scrollbar-hide">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0 opacity-10 hidden md:block" />
 
-                            <div>
-                                <h3 className="text-lg font-black mb-10 tracking-tight flex items-center gap-2">
-                                    <span className="w-8 h-1 bg-primary rounded-full" />
+                            <div className="flex flex-row md:flex-col gap-4 md:gap-0 w-full">
+                                <h3 className="text-base md:text-lg font-black mb-0 md:mb-10 tracking-tight flex items-center gap-2 whitespace-nowrap">
+                                    <span className="w-6 md:w-8 h-1 bg-primary rounded-full" />
                                     Phase
                                 </h3>
-                                <div className="space-y-8">
+                                <div className="flex flex-row md:flex-col md:space-y-8 gap-4 md:gap-0">
                                     {[
                                         { step: 1, title: "Calendar", icon: CalendarIcon },
                                         { step: 2, title: "Timeframe", icon: Clock },
                                         { step: 3, title: "Club Core", icon: Users }
                                     ].map((s) => (
-                                        <div key={s.step} className={`flex items-center gap-4 transition-all duration-500 ${step >= s.step ? 'opacity-100' : 'opacity-20'}`}>
-                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 ${step === s.step ? 'bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)] scale-110' : step > s.step ? 'bg-emerald-500 text-white' : 'bg-white/5 border border-white/10'}`}>
+                                        <div key={s.step} className={`flex flex-col md:flex-row items-center md:items-start gap-2 md:gap-4 transition-all duration-500 ${step >= s.step ? 'opacity-100' : 'opacity-20'}`}>
+                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 shrink-0 ${step === s.step ? 'bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)] scale-110' : step > s.step ? 'bg-emerald-500 text-white' : 'bg-white/5 border border-white/10'}`}>
                                                 {step > s.step ? <CheckCircle2 size={18} /> : <s.icon size={18} />}
                                             </div>
-                                            <div className="flex flex-col">
+                                            <div className="flex flex-col items-center md:items-start">
                                                 <span className={`text-[8px] font-black uppercase tracking-[0.3em] ${step === s.step ? 'text-primary' : 'text-gray-600'}`}>0{s.step}</span>
-                                                <span className="text-sm font-bold tracking-tight">{s.title}</span>
+                                                <span className="text-xs md:text-sm font-bold tracking-tight whitespace-nowrap">{s.title}</span>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            <div className="p-5 bg-white/5 rounded-[1.5rem] border border-white/10">
+                            <div className="hidden md:block p-5 bg-white/5 rounded-[1.5rem] border border-white/10">
                                 <p className="text-[10px] text-gray-500 font-bold leading-relaxed italic">
                                     Finalize cloud docs before deployment.
                                 </p>
