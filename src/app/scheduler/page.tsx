@@ -161,37 +161,32 @@ export default function MeetingScheduler() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050608] py-20 px-6 font-poppins relative overflow-hidden text-white">
-            {/* Cinematic Background Elements */}
+        <div className="min-h-screen bg-[#000] py-20 px-6 font-poppins relative overflow-hidden text-white">
+            {/* Cinematic Video Background */}
+            <div className="absolute inset-0 -z-20 pointer-events-none overflow-hidden">
+                <div className="absolute inset-0 bg-black/60 z-10" /> {/* Cinematic Overlay */}
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute min-w-full min-h-full object-cover opacity-50 grayscale-[20%] brightness-[40%] scale-110"
+                >
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-purple-and-blue-colors-flowing-33824-large.mp4" type="video/mp4" />
+                </video>
+            </div>
+
+            {/* Glowing Depth Layers */}
             <div className="absolute inset-0 -z-10 pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(var(--primary-rgb),0.2),transparent)]" />
-
-                {/* Large Vibrant Glowing Orbs */}
-                {[...Array(6)].map((_, i) => (
-                    <motion.div
-                        key={`orb-${i}`}
-                        className="absolute w-[600px] h-[600px] rounded-full blur-[160px]"
-                        animate={{
-                            x: [Math.random() * 200 - 100, Math.random() * 200 - 100],
-                            y: [Math.random() * 200 - 100, Math.random() * 200 - 100],
-                            opacity: [0.1, 0.4, 0.1],
-                            scale: [1, 1.3, 1]
-                        }}
-                        transition={{
-                            duration: 20 + i * 5,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                        }}
-                        style={{
-                            left: `${(i * 30) % 100}%`,
-                            top: `${(i * 40) % 100}%`,
-                            background: i % 2 === 0 ? 'rgba(var(--primary-rgb), 0.3)' : 'rgba(139, 92, 246, 0.25)',
-                        }}
-                    />
-                ))}
-
-                {/* Shifting Grid Layer */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:60px_60px] opacity-30" />
+                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-primary/20 to-transparent opacity-30" />
+                <motion.div
+                    animate={{
+                        opacity: [0.3, 0.5, 0.3],
+                        scale: [1, 1.1, 1]
+                    }}
+                    transition={{ duration: 10, repeat: Infinity }}
+                    className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-primary/20 blur-[150px] rounded-full"
+                />
             </div>
 
             <motion.div
@@ -279,17 +274,17 @@ export default function MeetingScheduler() {
                                         key="step1"
                                         className="h-full flex flex-col"
                                     >
-                                        <div className="flex items-center justify-between mb-16">
-                                            <div>
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-16">
+                                            <div className="flex-1">
                                                 <h2 className="text-4xl font-black tracking-tighter">Timeline <span className="text-primary italic">.</span></h2>
                                                 <p className="text-gray-500 text-[10px] mt-2 font-black uppercase tracking-[0.4em]">Target your Preferred Date</p>
                                             </div>
-                                            <div className="flex items-center gap-4 bg-white/5 p-2 rounded-2xl border border-white/10 backdrop-blur-2xl">
-                                                <button onClick={prevMonth} className="p-3 hover:bg-white/10 rounded-xl transition-all"><ChevronLeft size={20} /></button>
-                                                <span className="text-xs font-black min-w-[130px] text-center uppercase tracking-widest">
+                                            <div className="flex items-center gap-4 bg-white/5 p-2 rounded-2xl border border-white/10 backdrop-blur-2xl shadow-xl">
+                                                <button onClick={prevMonth} className="p-3 hover:bg-primary/20 text-white rounded-xl transition-all active:scale-90"><ChevronLeft size={20} /></button>
+                                                <span className="text-xs font-black min-w-[130px] text-center uppercase tracking-[0.2em] text-white">
                                                     {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
                                                 </span>
-                                                <button onClick={nextMonth} className="p-3 hover:bg-white/10 rounded-xl transition-all"><ChevronRight size={20} /></button>
+                                                <button onClick={nextMonth} className="p-3 hover:bg-primary/20 text-white rounded-xl transition-all active:scale-90"><ChevronRight size={20} /></button>
                                             </div>
                                         </div>
 
