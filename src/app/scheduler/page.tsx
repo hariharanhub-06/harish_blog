@@ -72,7 +72,7 @@ export default function MeetingScheduler() {
 
     const fetchBookedSessions = async (date: Date) => {
         try {
-            const res = await fetch(`/api/meetings/schedule?date=${date.toISOString()}`);
+            const res = await fetch(`/api/meetings/schedule?date=${date.toLocaleDateString('en-CA')}`);
             if (res.ok) {
                 const data = await res.json();
                 setBookedSessions(data);
@@ -236,7 +236,7 @@ export default function MeetingScheduler() {
 
                                             const leadTimeDate = new Date();
                                             leadTimeDate.setHours(0, 0, 0, 0);
-                                            leadTimeDate.setDate(leadTimeDate.getDate() + 5);
+                                            leadTimeDate.setDate(leadTimeDate.getDate() + 3);
                                             const isTooEarly = date < leadTimeDate;
 
                                             return (
@@ -259,7 +259,7 @@ export default function MeetingScheduler() {
                                         })}
                                     </div>
                                     <div className="mt-auto p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                        <p className="text-[10px] text-gray-400 font-medium text-center italic">Dates are enabled based on official availability. Minimum 5-day lead time required.</p>
+                                        <p className="text-[10px] text-gray-400 font-medium text-center italic">Dates are enabled based on official availability. Minimum 3-day lead time required.</p>
                                     </div>
                                 </motion.div>
                             )}
@@ -320,12 +320,28 @@ export default function MeetingScheduler() {
                                             </div>
                                         )}
 
-                                        <button
-                                            onClick={() => setStep(3)}
-                                            className="w-full py-5 bg-primary text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all"
-                                        >
-                                            Next Step
-                                        </button>
+                                        {(() => {
+                                            const start = startTime;
+                                            const end = endTime;
+                                            const hasConflict = bookedSessions.some(s => {
+                                                const sStart = new Date(s.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                                                const sEnd = new Date(s.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                                                return (start < sEnd && end > sStart);
+                                            });
+
+                                            return (
+                                                <button
+                                                    disabled={hasConflict || !startTime || !endTime || startTime >= endTime}
+                                                    onClick={() => setStep(3)}
+                                                    className={`w-full py-5 rounded-[1.5rem] font-black text-lg transition-all
+                                                        ${hasConflict || !startTime || !endTime || startTime >= endTime
+                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                            : 'bg-primary text-white shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99]'}`}
+                                                >
+                                                    {hasConflict ? "Time Already Booked" : startTime >= endTime ? "Invalid Time Range" : "Next Step"}
+                                                </button>
+                                            );
+                                        })()}
                                     </div>
                                 </motion.div>
                             )}
