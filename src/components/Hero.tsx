@@ -85,17 +85,37 @@ export default function Hero({ profile, className }: HeroProps) {
                             <Tilt options={{ max: 10, speed: 400, glare: false }}>
                                 <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[480px] lg:h-[480px] rounded-full flex items-center justify-center">
 
-                                    {/* Sound Wave Visualization - Behind Avatar */}
-                                    {isPlaying && (
-                                        <>
-                                            <div className="absolute inset-0 rounded-full border-4 border-orange-500/30 animate-ping" />
-                                            <div className="absolute inset-[-20px] rounded-full border-2 border-orange-500/20 animate-ping delay-75" />
-                                            <div className="absolute inset-[-40px] rounded-full border border-orange-500/10 animate-ping delay-150" />
-                                            <div className="absolute inset-0 bg-orange-500/5 rounded-full animate-pulse" />
-                                        </>
-                                    )}
+                                    {/* Radial Sound Wave Visualization */}
+                                    <div className="absolute inset-[-60px] z-0 pointer-events-none flex items-center justify-center">
+                                        {isPlaying && Array.from({ length: 60 }).map((_, i) => (
+                                            <motion.div
+                                                key={i}
+                                                className="absolute w-1.5 bg-gradient-to-t from-cyan-400 to-purple-500 rounded-full"
+                                                initial={{ height: 10, opacity: 0.5 }}
+                                                animate={{
+                                                    height: [10, 20 + ((i * 1337) % 50), 10], // Deterministic pseudo-random height based on index
+                                                    opacity: [0.5, 1, 0.5],
+                                                }}
+                                                transition={{
+                                                    duration: 0.5,
+                                                    repeat: Infinity,
+                                                    delay: i * 0.02,
+                                                    repeatType: "reverse",
+                                                }}
+                                                style={{
+                                                    rotate: `${i * 6}deg`,
+                                                    transformOrigin: "0 180px", // Push bars out from center
+                                                    bottom: "50%",
+                                                }}
+                                            />
+                                        ))}
+                                        {/* Static Glow Ring when not playing */}
+                                        {!isPlaying && profile.audioUrl && (
+                                            <div className="absolute inset-16 rounded-full border border-white/10 animate-[spin_10s_linear_infinite]" />
+                                        )}
+                                    </div>
 
-                                    <div className="relative w-full h-full rounded-full overflow-hidden shadow-2xl z-10">
+                                    <div className="relative w-full h-full rounded-full overflow-hidden shadow-2xl z-10 border-4 border-[#0e0e0e]">
                                         {profile.avatarUrl ? (
                                             <Image
                                                 src={profile.avatarUrl}
@@ -113,12 +133,43 @@ export default function Hero({ profile, className }: HeroProps) {
 
                                     {/* Creative Play Button on Edge */}
                                     {profile.audioUrl && (
-                                        <button
-                                            onClick={toggleAudio}
-                                            className="absolute bottom-4 right-4 z-20 w-12 h-12 md:w-16 md:h-16 bg-orange-600 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 active:scale-95 transition-all border-4 border-[#0e0e0e]"
-                                        >
-                                            {isPlaying ? <Pause fill="white" /> : <Play fill="white" className="ml-1" />}
-                                        </button>
+                                        <div className="absolute bottom-[10%] right-[5%] z-20">
+                                            <button
+                                                onClick={toggleAudio}
+                                                className={`
+                                                    relative w-16 h-16 rounded-full flex items-center justify-center
+                                                    transition-all duration-300 shadow-[0_0_30px_rgba(0,0,0,0.5)]
+                                                    ${isPlaying ? 'bg-red-600 scale-95' : 'bg-white hover:scale-110 animate-bounce-subtle'}
+                                                `}
+                                            >
+                                                {/* Button Pulse Effect */}
+                                                {!isPlaying && (
+                                                    <span className="absolute inset-0 rounded-full bg-white opacity-20 animate-ping" />
+                                                )}
+
+                                                {isPlaying ? (
+                                                    <div className="flex gap-1">
+                                                        <motion.div
+                                                            animate={{ height: [8, 16, 8] }}
+                                                            transition={{ repeat: Infinity, duration: 0.5 }}
+                                                            className="w-1.5 bg-white rounded-full"
+                                                        />
+                                                        <motion.div
+                                                            animate={{ height: [12, 24, 12] }}
+                                                            transition={{ repeat: Infinity, duration: 0.5, delay: 0.1 }}
+                                                            className="w-1.5 bg-white rounded-full"
+                                                        />
+                                                        <motion.div
+                                                            animate={{ height: [8, 16, 8] }}
+                                                            transition={{ repeat: Infinity, duration: 0.5, delay: 0.2 }}
+                                                            className="w-1.5 bg-white rounded-full"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <Play fill="black" className="ml-1 text-black" size={24} />
+                                                )}
+                                            </button>
+                                        </div>
                                     )}
 
                                     {/* Audio Element */}
