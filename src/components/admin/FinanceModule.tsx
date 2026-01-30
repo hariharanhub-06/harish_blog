@@ -77,7 +77,7 @@ export default function FinanceModule() {
     const [analytics, setAnalytics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [dateRange, setDateRange] = useState("Last 6 Months");
+    const [dateRange, setDateRange] = useState("Last 30 Days");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
@@ -406,6 +406,7 @@ export default function FinanceModule() {
                         onChange={(e) => setDateRange(e.target.value)}
                         className="bg-gray-50 border-0 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-primary/20 cursor-pointer"
                     >
+                        <option>Last 30 Days</option>
                         <option>Last 6 Months</option>
                         <option>This Year</option>
                         <option>This Month</option>
@@ -451,10 +452,10 @@ export default function FinanceModule() {
                                 <div className="h-[350px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={
-                                            // Group trend by month to combine expense and debt_pay
+                                            // Group trend by period (month or day) to combine expense and debt_pay
                                             Array.from((stats?.trend || []).reduce((acc: any, curr: any) => {
-                                                if (!acc.has(curr.month)) acc.set(curr.month, { month: curr.month, income: 0, expense: 0, debt_pay: 0 });
-                                                const entry = acc.get(curr.month);
+                                                if (!acc.has(curr.period)) acc.set(curr.period, { period: curr.period, income: 0, expense: 0, debt_pay: 0 });
+                                                const entry = acc.get(curr.period);
                                                 if (curr.type === 'income') entry.income += curr.total;
                                                 else if (curr.type === 'expense') entry.expense += curr.total;
                                                 else if (curr.type === 'debt_pay') entry.debt_pay += curr.total;
@@ -479,7 +480,7 @@ export default function FinanceModule() {
                                                 </linearGradient>
                                             </defs>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 'bold', fill: '#94a3b8' }} />
+                                            <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 'bold', fill: '#94a3b8' }} />
                                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 'bold', fill: '#94a3b8' }} />
                                             <Tooltip content={<CustomTooltip />} />
                                             <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }} />
