@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users } from "lucide-react";
+import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users, Music } from "lucide-react";
 import Image from "next/image";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import TimelineModule from "./TimelineModule";
@@ -54,7 +54,7 @@ export default function ProfileModule() {
         });
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero' | 'about') => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero' | 'about' | 'audio') => {
         if (!e.target.files?.[0]) return;
         setUploading(true);
 
@@ -74,8 +74,10 @@ export default function ProfileModule() {
                 setProfile({ ...profile, avatarUrl: imagekitUrl });
             } else if (type === 'hero') {
                 setProfile({ ...profile, heroImageUrl: imagekitUrl });
-            } else {
+            } else if (type === 'about') {
                 setProfile({ ...profile, aboutImageUrl: imagekitUrl });
+            } else if (type === 'audio') {
+                setProfile({ ...profile, audioUrl: imagekitUrl });
             }
         } catch (error) {
             console.error("Image upload failed", error);
@@ -186,6 +188,35 @@ export default function ProfileModule() {
                                 </label>
                             </div>
                             <p className="text-secondary text-sm font-bold uppercase tracking-widest text-center">About Section Picture</p>
+                        </div>
+
+                        {/* Audio Upload Section */}
+                        <div className="flex flex-col items-center space-y-6 md:col-span-2 lg:col-span-3">
+                            <div className="w-full max-w-md bg-gray-50 rounded-2xl p-6 border border-gray-100 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-pink-100 text-pink-600 rounded-xl">
+                                        <Music size={24} />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-black text-gray-900 uppercase tracking-wide">Profile Audio</span>
+                                        {profile.audioUrl ? (
+                                            <span className="text-xs text-green-600 font-bold flex items-center gap-1">
+                                                Audio Uploaded
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs text-gray-400 font-medium">No audio uploaded</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <label className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors shadow-sm text-xs font-black uppercase tracking-widest text-gray-600">
+                                    {uploading ? <Loader2 size={16} className="animate-spin" /> : "Upload MP3"}
+                                    <input type="file" className="hidden" accept="audio/*" onChange={(e) => handleImageUpload(e, 'audio')} />
+                                </label>
+                            </div>
+                            {profile.audioUrl && (
+                                <audio controls src={profile.audioUrl} className="w-full max-w-md bg-transparent" />
+                            )}
                         </div>
                     </div>
 

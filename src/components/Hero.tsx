@@ -14,11 +14,27 @@ interface HeroProps {
         headline: any;
         avatarUrl: any;
         heroImageUrl: any;
+        audioUrl: any;
     };
     className?: string;
 }
 
+import { useState, useRef } from "react";
+import { Play, Pause } from "lucide-react";
+
 export default function Hero({ profile, className }: HeroProps) {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    const toggleAudio = () => {
+        if (!audioRef.current) return;
+        if (isPlaying) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
+    };
     const socialLinks = [
         { icon: MessageCircle, href: "https://wa.me/919042387152", color: "hover:bg-green-500" },
         { icon: Instagram, href: "https://instagram.com/_mr_vibrant", color: "hover:bg-pink-500" },
@@ -67,19 +83,52 @@ export default function Hero({ profile, className }: HeroProps) {
                             <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent rounded-full blur-3xl -z-10" />
 
                             <Tilt options={{ max: 10, speed: 400, glare: false }}>
-                                <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[480px] lg:h-[480px] rounded-full overflow-hidden shadow-2xl">
-                                    {profile.avatarUrl ? (
-                                        <Image
-                                            src={profile.avatarUrl}
-                                            alt={profile.name}
-                                            fill
-                                            className="object-cover"
-                                            priority
+                                <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[480px] lg:h-[480px] rounded-full flex items-center justify-center">
+
+                                    {/* Sound Wave Visualization - Behind Avatar */}
+                                    {isPlaying && (
+                                        <>
+                                            <div className="absolute inset-0 rounded-full border-4 border-orange-500/30 animate-ping" />
+                                            <div className="absolute inset-[-20px] rounded-full border-2 border-orange-500/20 animate-ping delay-75" />
+                                            <div className="absolute inset-[-40px] rounded-full border border-orange-500/10 animate-ping delay-150" />
+                                            <div className="absolute inset-0 bg-orange-500/5 rounded-full animate-pulse" />
+                                        </>
+                                    )}
+
+                                    <div className="relative w-full h-full rounded-full overflow-hidden shadow-2xl z-10">
+                                        {profile.avatarUrl ? (
+                                            <Image
+                                                src={profile.avatarUrl}
+                                                alt={profile.name}
+                                                fill
+                                                className="object-cover"
+                                                priority
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+                                                <span className="text-white text-6xl font-black">{(profile.name || "").charAt(0)}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Creative Play Button on Edge */}
+                                    {profile.audioUrl && (
+                                        <button
+                                            onClick={toggleAudio}
+                                            className="absolute bottom-4 right-4 z-20 w-12 h-12 md:w-16 md:h-16 bg-orange-600 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 active:scale-95 transition-all border-4 border-[#0e0e0e]"
+                                        >
+                                            {isPlaying ? <Pause fill="white" /> : <Play fill="white" className="ml-1" />}
+                                        </button>
+                                    )}
+
+                                    {/* Audio Element */}
+                                    {profile.audioUrl && (
+                                        <audio
+                                            ref={audioRef}
+                                            src={profile.audioUrl}
+                                            onEnded={() => setIsPlaying(false)}
+                                            className="hidden"
                                         />
-                                    ) : (
-                                        <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                                            <span className="text-white text-6xl font-black">{(profile.name || "").charAt(0)}</span>
-                                        </div>
                                     )}
                                 </div>
                             </Tilt>

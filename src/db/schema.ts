@@ -12,6 +12,7 @@ export const profiles = pgTable("profiles", {
   avatarUrl: text("avatar_url"),
   heroImageUrl: text("hero_image_url"),
   aboutImageUrl: text("about_image_url"),
+  audioUrl: text("audio_url"),
   socialLinks: jsonb("social_links").$default(() => ({
     linkedin: "",
     github: "",
@@ -559,3 +560,12 @@ export const financeTransactionRelations = relations(financeTransactions, ({ one
     references: [financeDebts.id],
   }),
 }));
+
+export const typingTestResults = pgTable("typing_test_results", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userName: text("user_name").notNull(),
+  wpm: integer("wpm").notNull(),
+  accuracy: integer("accuracy").notNull(),
+  duration: integer("duration").notNull(), // 2, 5, 30
+  createdAt: timestamp("created_at").defaultNow(),
+});

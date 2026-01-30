@@ -132,7 +132,8 @@ export default async function Home() {
             name: profile.name,
             headline: profile.headline,
             avatarUrl: profile.avatarUrl,
-            heroImageUrl: profile.heroImageUrl
+            heroImageUrl: profile.heroImageUrl,
+            audioUrl: profile.audioUrl
           } as any}
           className=""
         />
