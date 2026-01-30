@@ -536,6 +536,6 @@ export default function AdminMeetingsModule() {
                     />
                 )}
             </AnimatePresence>
-        </div>
+        </motion.div>
     );
 }
