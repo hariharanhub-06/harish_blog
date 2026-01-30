@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase } from "lucide-react";
+import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase, ChevronDown, Monitor, Keyboard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
@@ -12,7 +12,17 @@ const navLinks = [
     { name: "Portfolio", href: "#portfolio", icon: Briefcase },
     { name: "Academy", href: "#academy", icon: GraduationCap },
     { name: "Videos", href: "#videos", icon: FileText },
-    { name: "Quiz", href: "#quiz", icon: Gamepad2 },
+    {
+        name: "Activities",
+        href: "#",
+        icon: Gamepad2,
+        isDropdown: true,
+        items: [
+            { name: "Quiz", href: "#quiz", icon: Gamepad2, color: "text-blue-500" },
+            { name: "Dino Runner", href: "#dino-runner", icon: Monitor, color: "text-emerald-500" },
+            { name: "Type Test", href: "#typing-test", icon: Keyboard, color: "text-orange-500", creative: true }
+        ]
+    },
     { name: "Contact", href: "#contact", icon: Mail },
 ];
 
@@ -23,6 +33,7 @@ export default function Navbar() {
 
     const [scrolled, setScrolled] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -49,21 +60,60 @@ export default function Navbar() {
                 </Link>
 
                 {/* Desktop Menu */}
-                <div className="hidden md:flex space-x-2 items-center">
+                <div className="hidden md:flex space-x-1 items-center">
                     {navLinks.map((link) => (
-                        <button
+                        <div
                             key={link.name}
-                            onClick={() => {
-                                if (link.name === "Contact") {
-                                    window.dispatchEvent(new CustomEvent("open-ai-chat"));
-                                } else {
-                                    window.location.href = link.href;
-                                }
-                            }}
-                            className={`px-4 py-2 font-black text-[10px] uppercase tracking-[0.2em] transition-all rounded-xl hover:bg-white/5 ${isDarkTheme ? "text-white/60 hover:text-orange-500" : "text-gray-600 hover:text-primary"}`}
+                            className="relative group/nav-item"
+                            onMouseEnter={() => link.isDropdown && setActiveDropdown(link.name)}
+                            onMouseLeave={() => setActiveDropdown(null)}
                         >
-                            {link.name}
-                        </button>
+                            <button
+                                onClick={() => {
+                                    if (link.name === "Contact") {
+                                        window.dispatchEvent(new CustomEvent("open-ai-chat"));
+                                    } else if (!link.isDropdown) {
+                                        window.location.href = link.href;
+                                    }
+                                }}
+                                className={`px-4 py-2 font-black text-[10px] uppercase tracking-[0.2em] transition-all rounded-xl hover:bg-white/5 flex items-center gap-1.5 ${isDarkTheme ? "text-white/60 hover:text-orange-500" : "text-gray-600 hover:text-primary"} ${activeDropdown === link.name ? "text-orange-500 bg-white/5" : ""}`}
+                            >
+                                {link.name}
+                                {link.isDropdown && <ChevronDown size={12} className={`transition-transform duration-300 ${activeDropdown === link.name ? "rotate-180" : ""}`} />}
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {link.isDropdown && (
+                                <AnimatePresence>
+                                    {activeDropdown === link.name && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                                            className="absolute top-full left-0 mt-2 w-48 bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-2 z-[60]"
+                                        >
+                                            {link.items?.map((item) => (
+                                                <Link
+                                                    key={item.name}
+                                                    href={item.href}
+                                                    className={`flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-white/5 group/drop-item ${item.creative ? "relative overflow-hidden" : ""}`}
+                                                >
+                                                    <div className={`p-2 rounded-lg bg-white/5 group-hover/drop-item:scale-110 transition-transform ${item.color}`}>
+                                                        <item.icon size={14} />
+                                                    </div>
+                                                    <span className={`text-[10px] font-black uppercase tracking-widest text-white/70 group-hover/drop-item:text-white`}>
+                                                        {item.name}
+                                                    </span>
+                                                    {item.creative && (
+                                                        <span className="absolute -right-1 -top-1 w-6 h-6 bg-orange-600/20 rounded-full blur-lg animate-pulse" />
+                                                    )}
+                                                </Link>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            )}
+                        </div>
                     ))}
                 </div>
 
@@ -85,23 +135,53 @@ export default function Navbar() {
                         exit={{ opacity: 0, y: -20, scale: 0.95 }}
                         className="absolute top-28 left-6 right-6 rounded-3xl shadow-2xl overflow-hidden md:hidden border transition-all z-50 bg-[#0e0e0e]/95 border-white/10"
                     >
-                        <div className="flex flex-col p-6 space-y-2">
+                        <div className="flex flex-col p-6 space-y-2 max-h-[70vh] overflow-y-auto">
                             {navLinks.map((link) => (
-                                <button
-                                    key={link.name}
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        if (link.name === "Contact") {
-                                            window.dispatchEvent(new CustomEvent("open-ai-chat"));
-                                        } else {
-                                            window.location.href = link.href;
-                                        }
-                                    }}
-                                    className="flex items-center space-x-4 p-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all text-white/60 hover:text-orange-500 hover:bg-white/5 w-full text-left"
-                                >
-                                    <link.icon size={18} className="text-orange-600/60" />
-                                    <span>{link.name}</span>
-                                </button>
+                                <div key={link.name} className="flex flex-col">
+                                    <button
+                                        onClick={() => {
+                                            if (link.isDropdown) {
+                                                setActiveDropdown(activeDropdown === link.name ? null : link.name);
+                                            } else {
+                                                setIsOpen(false);
+                                                if (link.name === "Contact") {
+                                                    window.dispatchEvent(new CustomEvent("open-ai-chat"));
+                                                } else {
+                                                    window.location.href = link.href;
+                                                }
+                                            }
+                                        }}
+                                        className="flex items-center justify-between p-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all text-white/60 hover:text-orange-500 hover:bg-white/5 w-full text-left"
+                                    >
+                                        <div className="flex items-center space-x-4">
+                                            <link.icon size={18} className="text-orange-600/60" />
+                                            <span>{link.name}</span>
+                                        </div>
+                                        {link.isDropdown && <ChevronDown size={14} className={`transition-transform duration-300 ${activeDropdown === link.name ? "rotate-180" : ""}`} />}
+                                    </button>
+
+                                    {/* Mobile Dropdown Items */}
+                                    {link.isDropdown && activeDropdown === link.name && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: "auto", opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="grid grid-cols-1 gap-1 pl-12 pr-4 pb-4"
+                                        >
+                                            {link.items?.map((item) => (
+                                                <Link
+                                                    key={item.name}
+                                                    href={item.href}
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all text-white/40 hover:text-white"
+                                                >
+                                                    <item.icon size={14} className={item.color} />
+                                                    <span className="text-[9px] font-black uppercase tracking-widest">{item.name}</span>
+                                                </Link>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </div>
                             ))}
                             <div className="flex flex-col gap-3 mt-4 pt-6 border-t border-white/5">
                                 <button
