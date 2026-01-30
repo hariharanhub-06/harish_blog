@@ -8,9 +8,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 const navLinks = [
-    { name: "About", href: "#about", icon: User },
-    { name: "Portfolio", href: "#portfolio", icon: Briefcase },
-    { name: "Academy", href: "#academy", icon: GraduationCap },
+    {
+        name: "About",
+        href: "#",
+        icon: User,
+        isDropdown: true,
+        items: [
+            { name: "Biography", href: "#about", icon: User, color: "text-orange-500" },
+            { name: "Portfolio", href: "#portfolio", icon: Briefcase, color: "text-blue-500" },
+            { name: "Academy", href: "#academy", icon: GraduationCap, color: "text-purple-500" },
+        ]
+    },
     { name: "Videos", href: "#videos", icon: FileText },
     {
         name: "Activities",
