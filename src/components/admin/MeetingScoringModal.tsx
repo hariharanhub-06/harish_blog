@@ -120,10 +120,10 @@ export default function MeetingScoringModal({ meeting, onClose, onSave }: Scorin
                                                 <button
                                                     key={i}
                                                     onClick={() => toggleUnit(item.id, i, item.unitValue || 0)}
-                                                    className={`w-5 h-5 rounded border transition-all flex items-center justify-center
+                                                    className={`w-5 h-5 rounded border-2 transition-all flex items-center justify-center
                                                         ${data[item.id]?.checkedUnits?.includes(i)
                                                             ? 'bg-yellow-500 border-yellow-500 text-white'
-                                                            : 'bg-white border-gray-200 hover:border-yellow-200'}`}
+                                                            : 'bg-gray-50 border-gray-300 hover:border-yellow-400 hover:bg-white'}`}
                                                 >
                                                     {data[item.id]?.checkedUnits?.includes(i) && <Check size={10} strokeWidth={4} />}
                                                 </button>
