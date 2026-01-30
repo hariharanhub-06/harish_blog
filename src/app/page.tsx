@@ -4,9 +4,9 @@ import { MatrixBackground } from "@/components/MatrixBackground";
 import { db } from "@/db";
 
 // Enable Incremental Static Regeneration (ISR)
-// Revalidate every 3600 seconds (1 hour) to save DB and Vercel usage
-export const revalidate = 3600;
-// export const dynamic = "force-dynamic"; // Removed to prevent per-request DB hits
+// Revalidate every 0 seconds to ensure fresh data during debugging
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   // Fetch all data with safe fallbacks
