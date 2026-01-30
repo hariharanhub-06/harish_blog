@@ -18,7 +18,14 @@ export default function MeetingChecklistModal({ meeting, onClose, onSave }: Chec
     const toggleItem = (id: string) => {
         setData((prev: any) => ({
             ...prev,
-            [id]: { ...prev[id], checked: !prev[id]?.checked }
+            [id]: { ...prev[id], checked: !prev[id]?.checked, na: false }
+        }));
+    };
+
+    const toggleNA = (id: string) => {
+        setData((prev: any) => ({
+            ...prev,
+            [id]: { ...prev[id], na: !prev[id]?.na, checked: false }
         }));
     };
 
@@ -29,9 +36,10 @@ export default function MeetingChecklistModal({ meeting, onClose, onSave }: Chec
         }));
     };
 
-    const totalItems = CHECKLIST_ITEMS.length;
-    const checkedCount = CHECKLIST_ITEMS.filter(item => data[item.id]?.checked).length;
-    const percentage = Math.round((checkedCount / totalItems) * 100);
+    const applicableItems = CHECKLIST_ITEMS.filter(item => !data[item.id]?.na);
+    const totalItems = applicableItems.length;
+    const checkedCount = applicableItems.filter(item => data[item.id]?.checked).length;
+    const percentage = totalItems > 0 ? Math.round((checkedCount / totalItems) * 100) : 0;
 
     const categories = Array.from(new Set(CHECKLIST_ITEMS.map(i => i.category)));
 
@@ -86,13 +94,21 @@ export default function MeetingChecklistModal({ meeting, onClose, onSave }: Chec
                                         className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${data[item.id]?.checked ? 'bg-primary/5 border-primary/20' : 'bg-white border-gray-100 hover:border-gray-200'}`}
                                     >
                                         <div className="flex items-center gap-4 flex-1">
-                                            <button
-                                                onClick={() => toggleItem(item.id)}
-                                                className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${data[item.id]?.checked ? 'bg-primary border-primary text-white' : 'border-gray-200 bg-gray-50'}`}
-                                            >
-                                                {data[item.id]?.checked && <Check size={14} strokeWidth={4} />}
-                                            </button>
-                                            <span className={`text-sm font-bold ${data[item.id]?.checked ? 'text-gray-900' : 'text-gray-500'}`}>{item.label}</span>
+                                            <div className="flex flex-col gap-2">
+                                                <button
+                                                    onClick={() => toggleItem(item.id)}
+                                                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${data[item.id]?.checked ? 'bg-primary border-primary text-white' : 'border-gray-200 bg-gray-50'}`}
+                                                >
+                                                    {data[item.id]?.checked && <Check size={14} strokeWidth={4} />}
+                                                </button>
+                                                <button
+                                                    onClick={() => toggleNA(item.id)}
+                                                    className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border transition-all ${data[item.id]?.na ? 'bg-gray-900 border-gray-900 text-white' : 'border-gray-200 text-gray-400 hover:border-gray-300'}`}
+                                                >
+                                                    N/A
+                                                </button>
+                                            </div>
+                                            <span className={`text-sm font-bold transition-opacity ${data[item.id]?.na ? 'opacity-40 line-through' : 'opacity-100'} ${data[item.id]?.checked ? 'text-gray-900' : 'text-gray-500'}`}>{item.label}</span>
                                         </div>
 
                                         <div className="flex items-center gap-2">

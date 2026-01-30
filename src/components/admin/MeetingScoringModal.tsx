@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Star, Plus, MessageSquare, Info, Calculator, Trophy } from "lucide-react";
+import { X, Star, Plus, MessageSquare, Info, Calculator, Trophy, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SCORING_CRITERIA, getEfficiencyStatus } from "@/constants/meetingData";
 
@@ -14,6 +14,24 @@ interface ScoringModalProps {
 export default function MeetingScoringModal({ meeting, onClose, onSave }: ScoringModalProps) {
     const [data, setData] = useState(meeting.scoringData || {});
     const [activeComment, setActiveComment] = useState<string | null>(null);
+
+    const toggleUnit = (id: string, unitIndex: number, unitValue: number) => {
+        setData((prev: any) => {
+            const currentUnits = prev[id]?.checkedUnits || [];
+            const newUnits = currentUnits.includes(unitIndex)
+                ? currentUnits.filter((u: number) => u !== unitIndex)
+                : [...currentUnits, unitIndex];
+
+            return {
+                ...prev,
+                [id]: {
+                    ...prev[id],
+                    checkedUnits: newUnits,
+                    points: newUnits.length * unitValue
+                }
+            };
+        });
+    };
 
     const updatePoints = (id: string, val: string, max: number) => {
         let points = parseInt(val) || 0;
@@ -66,9 +84,9 @@ export default function MeetingScoringModal({ meeting, onClose, onSave }: Scorin
                         <div className="flex gap-4">
                             <div className="flex flex-col items-center">
                                 <span className={`text-xs font-black px-3 py-1 rounded-full ${status === 'HYPERACTIVE' ? 'bg-purple-100 text-purple-700' :
-                                        status === 'SUPERACTIVE' ? 'bg-blue-100 text-blue-700' :
-                                            status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' :
-                                                'bg-gray-100 text-gray-500'
+                                    status === 'SUPERACTIVE' ? 'bg-blue-100 text-blue-700' :
+                                        status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' :
+                                            'bg-gray-100 text-gray-500'
                                     }`}>
                                     {status}
                                 </span>
@@ -95,18 +113,36 @@ export default function MeetingScoringModal({ meeting, onClose, onSave }: Scorin
                                 </div>
 
                                 <div className="flex items-center gap-4">
-                                    {/* Score Input */}
-                                    <div className="flex items-center gap-2">
-                                        <input
-                                            type="number"
-                                            className="w-16 h-10 bg-gray-50 border-none rounded-xl text-center text-sm font-black focus:ring-2 ring-yellow-500/20"
-                                            value={data[item.id]?.points || 0}
-                                            onChange={(e) => updatePoints(item.id, e.target.value, item.maxPoints)}
-                                            min={0}
-                                            max={item.maxPoints}
-                                        />
-                                        <span className="text-[10px] font-black text-gray-400 uppercase w-10">/ {item.maxPoints}</span>
-                                    </div>
+                                    {/* Score Input or Checkboxes */}
+                                    {item.type === "checkbox" ? (
+                                        <div className="flex flex-wrap gap-1 max-w-[200px] justify-end">
+                                            {Array.from({ length: item.units || 0 }).map((_, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => toggleUnit(item.id, i, item.unitValue || 0)}
+                                                    className={`w-5 h-5 rounded border transition-all flex items-center justify-center
+                                                        ${data[item.id]?.checkedUnits?.includes(i)
+                                                            ? 'bg-yellow-500 border-yellow-500 text-white'
+                                                            : 'bg-white border-gray-200 hover:border-yellow-200'}`}
+                                                >
+                                                    {data[item.id]?.checkedUnits?.includes(i) && <Check size={10} strokeWidth={4} />}
+                                                </button>
+                                            ))}
+                                            <span className="text-[10px] font-black text-gray-400 uppercase ml-2">/ {item.maxPoints}</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                className="w-16 h-10 bg-gray-50 border-none rounded-xl text-center text-sm font-black focus:ring-2 ring-yellow-500/20"
+                                                value={data[item.id]?.points || 0}
+                                                onChange={(e) => updatePoints(item.id, e.target.value, item.maxPoints)}
+                                                min={0}
+                                                max={item.maxPoints}
+                                            />
+                                            <span className="text-[10px] font-black text-gray-400 uppercase w-10">/ {item.maxPoints}</span>
+                                        </div>
+                                    )}
 
                                     {/* Comment Toggle */}
                                     <button
