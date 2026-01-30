@@ -32,11 +32,11 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: [
-      { url: "/hh-gold-logo.png" },
-      { url: "/hh-gold-logo.png", sizes: "32x32" },
+      { url: "/hari-favicon.png" },
+      { url: "/hari-favicon.png", sizes: "32x32" },
     ],
-    shortcut: "/hh-gold-logo.png",
-    apple: "/hh-gold-logo.png",
+    shortcut: "/hari-favicon.png",
+    apple: "/hari-favicon.png",
   },
   openGraph: {
     title: "Hari Haran's Blog | Developer & Consultant",
