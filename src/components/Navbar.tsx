@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase, ChevronDown, Monitor, Keyboard } from "lucide-react";
+import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase, ChevronDown, Monitor, Keyboard, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
@@ -31,6 +31,7 @@ const navLinks = [
             { name: "Type Test", href: "#typing-test", icon: Keyboard, color: "text-orange-500", creative: true }
         ]
     },
+    { name: "Book", href: "/scheduler", icon: Calendar },
     { name: "Contact", href: "#contact", icon: Mail },
 ];
 

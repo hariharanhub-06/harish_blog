@@ -570,3 +570,30 @@ export const typingTestResults = pgTable("typing_test_results", {
   difficulty: text("difficulty").default("basic"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const meetingAvailability = pgTable("meeting_availability", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  dayOfWeek: integer("day_of_week"), // 0-6
+  startTime: text("start_time"), // "HH:mm"
+  endTime: text("end_time"), // "HH:mm"
+  isAvailable: boolean("is_available").default(true),
+  specificDate: timestamp("specific_date"), // For one-off availability
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const meetingSchedules = pgTable("meeting_schedules", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  meetingType: text("meeting_type").notNull(), // "GRR Visit", "DRR Visit"
+  clubName: text("club_name").notNull(),
+  numAttendees: integer("num_attendees"),
+  notes: text("notes"),
+  presidentName: text("president_name"),
+  mobileNumber: text("mobile_number"),
+  driveLink: text("drive_link"),
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  status: text("status").default("requested"), // requested, confirmed, completed
+  checklistData: jsonb("checklist_data"), // { itemId: { checked: boolean, comment: string } }
+  scoringData: jsonb("scoring_data"), // { rowId: { points: number, comment: string } }
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
