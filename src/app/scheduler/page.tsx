@@ -161,18 +161,18 @@ export default function MeetingScheduler() {
     }
 
     return (
-        <div className="h-screen bg-[#000] py-4 px-6 font-poppins relative overflow-hidden text-white flex flex-col justify-center items-center">
-            {/* Cinematic Video Background */}
-            <div className="absolute inset-0 -z-20 pointer-events-none overflow-hidden">
-                <div className="absolute inset-0 bg-black/70 z-10" />
+        <div className="h-screen py-4 px-6 font-poppins relative overflow-hidden text-white flex flex-col justify-center items-center">
+            {/* Cinematic Video Background Container */}
+            <div className="absolute inset-0 -z-20 pointer-events-none overflow-hidden bg-[#050608]">
+                <div className="absolute inset-0 bg-black/50 z-10" />
                 <video
                     autoPlay
                     loop
                     muted
                     playsInline
-                    className="absolute min-w-full min-h-full object-cover opacity-40 grayscale-[20%] brightness-[30%] scale-105"
+                    className="absolute min-w-full min-h-full object-cover opacity-70 brightness-[60%]"
                 >
-                    <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-purple-and-blue-colors-flowing-33824-large.mp4" type="video/mp4" />
+                    <source src="https://player.vimeo.com/external/494916328.hd.mp4?s=d010e9c8bc8250ed796979667794121406e9bad8&profile_id=175" type="video/mp4" />
                 </video>
             </div>
 
