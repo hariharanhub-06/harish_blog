@@ -85,33 +85,46 @@ export default function Hero({ profile, className }: HeroProps) {
                             <Tilt options={{ max: 10, speed: 400, glare: false }}>
                                 <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[480px] lg:h-[480px] rounded-full flex items-center justify-center">
 
-                                    {/* Radial Sound Wave Visualization */}
+                                    {/* Pulsing Glow Effect */}
                                     <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
-                                        {isPlaying && Array.from({ length: 60 }).map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="absolute inset-0"
-                                                style={{ rotate: `${i * 6}deg` }}
-                                            >
+                                        {isPlaying && (
+                                            <>
+                                                {/* Outer Pulse */}
                                                 <motion.div
-                                                    className="absolute -top-[35px] md:-top-[65px] left-1/2 -translate-x-1/2 w-3 md:w-3.5 bg-gradient-to-t from-cyan-400 via-purple-500 to-transparent rounded-full shadow-[0_0_30px_rgba(34,211,238,1)]"
-                                                    initial={{ height: 35, opacity: 0.8 }}
+                                                    className="absolute rounded-full bg-gradient-to-br from-cyan-400/20 via-purple-500/20 to-blue-500/20 blur-2xl"
+                                                    initial={{ width: "100%", height: "100%", opacity: 0.3 }}
                                                     animate={{
-                                                        height: [35, 70 + ((i * 1337) % 100), 35],
-                                                        opacity: [0.8, 1, 0.8],
+                                                        width: ["100%", "115%", "100%"],
+                                                        height: ["100%", "115%", "100%"],
+                                                        opacity: [0.3, 0.6, 0.3],
                                                     }}
                                                     transition={{
-                                                        duration: 0.6,
+                                                        duration: 2,
                                                         repeat: Infinity,
-                                                        delay: i * 0.02,
-                                                        repeatType: "reverse",
+                                                        ease: "easeInOut",
                                                     }}
                                                 />
-                                            </div>
-                                        ))}
+                                                {/* Inner Pulse */}
+                                                <motion.div
+                                                    className="absolute rounded-full bg-gradient-to-br from-cyan-400/30 via-purple-500/30 to-blue-500/30 blur-xl"
+                                                    initial={{ width: "90%", height: "90%", opacity: 0.4 }}
+                                                    animate={{
+                                                        width: ["90%", "105%", "90%"],
+                                                        height: ["90%", "105%", "90%"],
+                                                        opacity: [0.4, 0.7, 0.4],
+                                                    }}
+                                                    transition={{
+                                                        duration: 1.5,
+                                                        repeat: Infinity,
+                                                        ease: "easeInOut",
+                                                        delay: 0.3,
+                                                    }}
+                                                />
+                                            </>
+                                        )}
                                         {/* Static Glow Ring when not playing */}
                                         {!isPlaying && profile.audioUrl && (
-                                            <div className="absolute inset-[-18px] md:inset-[-25px] rounded-full border-[3px] md:border-[4px] border-cyan-500/40 animate-[spin_12s_linear_infinite] shadow-[0_0_35px_rgba(6,182,212,0.4)]" />
+                                            <div className="absolute inset-[-12px] md:inset-[-15px] rounded-full border-2 border-cyan-500/20 animate-[spin_15s_linear_infinite] shadow-[0_0_20px_rgba(6,182,212,0.2)]" />
                                         )}
                                     </div>
 
