@@ -211,7 +211,7 @@ export default function MeetingScoringModal({ meeting, onClose, onSave }: Scorin
                 <div className="p-8 border-t border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <div className="flex items-center gap-2 text-gray-400">
                         <Trophy size={16} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Total Obtainable: 164 Points</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest">Total Obtainable: 176 Points</span>
                     </div>
                     <button
                         onClick={() => onSave(data)}

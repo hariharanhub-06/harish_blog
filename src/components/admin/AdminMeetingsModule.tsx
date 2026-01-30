@@ -334,13 +334,14 @@ export default function AdminMeetingsModule() {
                                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Meeting Info</th>
                                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
                                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Monitoring</th>
+                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Venue</th>
                                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {filteredMeetings.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500 font-medium">
+                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500 font-medium">
                                         No meetings found
                                     </td>
                                 </tr>
@@ -357,11 +358,11 @@ export default function AdminMeetingsModule() {
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
                                                     <Calendar size={12} className="text-primary" />
-                                                    {new Date(meeting.scheduledDate).toLocaleDateString('en-GB')}
+                                                    {new Date(meeting.scheduledDate).toLocaleDateString("en-GB")}
                                                 </div>
                                                 <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-400 uppercase">
                                                     <Clock size={10} />
-                                                    {new Date(meeting.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    {new Date(meeting.scheduledDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                                 </div>
                                                 <span className="text-[10px] font-black uppercase text-accent bg-accent/5 px-2 py-0.5 rounded-full w-fit">
                                                     {meeting.meetingType}
@@ -371,9 +372,9 @@ export default function AdminMeetingsModule() {
                                         <td className="px-6 py-4">
                                             <select
                                                 className={`text-[10px] font-black uppercase tracking-wider py-1 px-3 rounded-full border-none focus:ring-2 ring-primary/20 appearance-none text-center cursor-pointer transition-all
-                                                    ${meeting.status === 'requested' ? 'bg-amber-100 text-amber-700' :
-                                                        meeting.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
-                                                            'bg-blue-100 text-blue-700'}`}
+                                                    ${meeting.status === "requested" ? "bg-amber-100 text-amber-700" :
+                                                        meeting.status === "confirmed" ? "bg-emerald-100 text-emerald-700" :
+                                                            "bg-blue-100 text-blue-700"}`}
                                                 value={meeting.status}
                                                 onChange={(e) => updateMeetingStatus(meeting.id, e.target.value)}
                                             >
@@ -409,11 +410,19 @@ export default function AdminMeetingsModule() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
+                                            <div className="flex flex-col min-w-[120px]">
+                                                <span className="text-xs font-bold text-gray-900">{meeting.venue || "No Venue"}</span>
+                                                <span className="text-[10px] text-gray-500 font-medium truncate max-w-[150px]" title={meeting.venueDetails}>
+                                                    {meeting.venueDetails || "No Details"}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 {meeting.mobileNumber && (
                                                     <a
                                                         href={`https://wa.me/${meeting.mobileNumber}?text=${encodeURIComponent(
-                                                            `Hi, we are confirming your ${meeting.meetingType} visit for ${meeting.clubName} on ${new Date(meeting.scheduledDate).toLocaleDateString('en-GB')} at ${new Date(meeting.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Venue: ${meeting.venue || 'TBA'} - ${meeting.venueDetails || ''}`
+                                                            `Hi, we are confirming your ${meeting.meetingType} visit for ${meeting.clubName} on ${new Date(meeting.scheduledDate).toLocaleDateString("en-GB")} at ${new Date(meeting.scheduledDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}. Venue: ${meeting.venue || "TBA"} - ${meeting.venueDetails || ""}`
                                                         )}`}
                                                         target="_blank"
                                                         className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
@@ -438,9 +447,6 @@ export default function AdminMeetingsModule() {
                                                     title="Delete Meeting"
                                                 >
                                                     <Trash2 size={16} />
-                                                </button>
-                                                <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-400">
-                                                    <MoreVertical size={16} />
                                                 </button>
                                             </div>
                                         </td>
