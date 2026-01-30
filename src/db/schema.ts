@@ -590,6 +590,8 @@ export const meetingSchedules = pgTable("meeting_schedules", {
   presidentName: text("president_name"),
   mobileNumber: text("mobile_number"),
   driveLink: text("drive_link"),
+  venue: text("venue"),
+  venueDetails: text("venue_details"),
   scheduledDate: timestamp("scheduled_date").notNull(),
   endDate: timestamp("end_date"), // For flexible time ranges
   status: text("status").default("requested"), // requested, confirmed, completed
