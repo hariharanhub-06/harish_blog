@@ -111,10 +111,6 @@ export default function MeetingScheduler() {
 
             if (res.ok) {
                 setSuccess(true);
-                const text = `Hi, I've scheduled a ${form.meetingType} for ${form.clubName} on ${start.toLocaleDateString()} from ${startTime} to ${endTime}.`;
-                setTimeout(() => {
-                    window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(text)}`, "_blank");
-                }, 2000);
             } else {
                 const errorData = await res.json();
                 alert(errorData.error || "Failed to schedule meeting");
@@ -146,7 +142,7 @@ export default function MeetingScheduler() {
                         <CheckCircle2 size={48} />
                     </div>
                     <h2 className="text-3xl font-black mb-4">Request Sent!</h2>
-                    <p className="text-gray-500 font-medium mb-8">Your meeting request for <span className="text-primary font-bold">{form.clubName}</span> has been submitted. Redirecting to WhatsApp for confirmation...</p>
+                    <p className="text-gray-500 font-medium mb-8">Your meeting request for <span className="text-primary font-bold">{form.clubName}</span> has been submitted successfully. Our team will review and confirm your visit shortly.</p>
                     <button
                         onClick={() => window.location.href = "/"}
                         className="text-primary font-bold hover:underline"
@@ -276,7 +272,7 @@ export default function MeetingScheduler() {
                                         <ChevronLeft size={14} /> Back
                                     </button>
                                     <div className="flex items-center justify-between mb-8">
-                                        <h2 className="text-2xl font-black">Set Time <span className="text-primary">/</span> {selectedDate?.toLocaleDateString()}</h2>
+                                        <h2 className="text-2xl font-black">Set Time <span className="text-primary">/</span> {selectedDate?.toLocaleDateString('en-GB')}</h2>
                                         <div className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-lg">Available: 09:00 - 19:00</div>
                                     </div>
 
