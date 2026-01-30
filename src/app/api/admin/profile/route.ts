@@ -26,6 +26,7 @@ export async function POST(req: Request) {
             socialLinks: data.socialLinks,
             stats: data.stats,
             trainingStats: data.trainingStats,
+            audioUrl: data.audioUrl,
             updatedAt: new Date(),
         }).where(eq(profiles.id, existing.id));
     } else {
