@@ -215,7 +215,34 @@ export default function AdminMeetingsModule() {
     }
 
     return (
-        <div className="space-y-6">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-6 relative"
+        >
+            {/* Background Particles */}
+            <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+                {[...Array(6)].map((_, i) => (
+                    <motion.div
+                        key={i}
+                        className="absolute w-64 h-64 rounded-full bg-primary/5 blur-3xl"
+                        animate={{
+                            x: [Math.random() * 100, Math.random() * -100, Math.random() * 100],
+                            y: [Math.random() * 100, Math.random() * -100, Math.random() * 100],
+                        }}
+                        transition={{
+                            duration: 10 + i * 2,
+                            repeat: Infinity,
+                            ease: "linear"
+                        }}
+                        style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                        }}
+                    />
+                ))}
+            </div>
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold">Meetings & Efficiency</h2>
@@ -340,14 +367,38 @@ export default function AdminMeetingsModule() {
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {filteredMeetings.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500 font-medium">
-                                        No meetings found
+                                <motion.tr
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <td colSpan={6} className="px-6 py-24 text-center">
+                                        <div className="flex flex-col items-center justify-center gap-4">
+                                            <div className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center text-gray-200">
+                                                <Calendar size={40} />
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-900 font-bold">No meetings found</p>
+                                                <p className="text-sm text-gray-400 font-medium">Try adjusting your search or filters</p>
+                                            </div>
+                                            <button
+                                                onClick={() => { setSearchTerm(""); setStatusFilter("all"); }}
+                                                className="mt-2 text-xs font-black uppercase text-primary hover:underline"
+                                            >
+                                                Clear all filters
+                                            </button>
+                                        </div>
                                     </td>
-                                </tr>
+                                </motion.tr>
                             ) : (
-                                filteredMeetings.map((meeting) => (
-                                    <tr key={meeting.id} className="hover:bg-gray-50/50 transition-colors group">
+                                filteredMeetings.map((meeting, index) => (
+                                    <motion.tr
+                                        key={meeting.id}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                                        className="hover:bg-gray-50/50 transition-colors group"
+                                    >
                                         <td className="px-6 py-4 text-gray-900">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-gray-900">{meeting.clubName}</span>
@@ -409,9 +460,9 @@ export default function AdminMeetingsModule() {
                                                         </span>
                                                         {calculateTotalPoints(meeting.scoringData) > 0 && (
                                                             <span className={`text-[6px] font-black uppercase px-1 rounded-sm ${getEfficiencyStatus(calculateTotalPoints(meeting.scoringData)) === 'HYPERACTIVE' ? 'bg-purple-100 text-purple-700' :
-                                                                    getEfficiencyStatus(calculateTotalPoints(meeting.scoringData)) === 'SUPERACTIVE' ? 'bg-blue-100 text-blue-700' :
-                                                                        getEfficiencyStatus(calculateTotalPoints(meeting.scoringData)) === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' :
-                                                                            'bg-gray-100 text-gray-400'
+                                                                getEfficiencyStatus(calculateTotalPoints(meeting.scoringData)) === 'SUPERACTIVE' ? 'bg-blue-100 text-blue-700' :
+                                                                    getEfficiencyStatus(calculateTotalPoints(meeting.scoringData)) === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' :
+                                                                        'bg-gray-100 text-gray-400'
                                                                 }`}>
                                                                 {getEfficiencyStatus(calculateTotalPoints(meeting.scoringData))}
                                                             </span>
@@ -461,7 +512,7 @@ export default function AdminMeetingsModule() {
                                                 </button>
                                             </div>
                                         </td>
-                                    </tr>
+                                    </motion.tr>
                                 ))
                             )}
                         </tbody>
