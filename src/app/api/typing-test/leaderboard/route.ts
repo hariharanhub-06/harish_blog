@@ -2,21 +2,23 @@
 import { db } from "@/db";
 import { typingTestResults } from "@/db/schema";
 import { NextResponse } from "next/server";
-import { desc } from "drizzle-orm";
+import { desc, and, eq } from "drizzle-orm";
 
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const duration = searchParams.get("duration");
+        const difficulty = searchParams.get("difficulty");
 
-        let query = db.select().from(typingTestResults);
-
-        // Sorting by WPM (desc) then Accuracy (desc)
-        // Drizzle ORM query builder approach
         const results = await db.query.typingTestResults.findMany({
-            where: duration ? (t, { eq }) => eq(t.duration, parseInt(duration)) : undefined,
+            where: (t, { and, eq }) => {
+                const conditions = [];
+                if (duration) conditions.push(eq(t.duration, parseInt(duration)));
+                if (difficulty) conditions.push(eq(t.difficulty, difficulty));
+                return conditions.length > 0 ? and(...conditions) : undefined;
+            },
             orderBy: [desc(typingTestResults.wpm), desc(typingTestResults.accuracy)],
-            limit: 50 // Limit to top 50
+            limit: 50
         });
 
         return NextResponse.json(results);
