@@ -68,7 +68,7 @@ export const skills = pgTable("skills", {
   category: text("category"),
   proficiency: integer("proficiency").default(0),
   icon: text("icon"),
-  displayOrder: integer("order").default(0),
+  displayOrder: integer("display_order").default(0),
 });
 
 export const experience = pgTable("experience", {
