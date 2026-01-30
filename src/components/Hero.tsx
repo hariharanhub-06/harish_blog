@@ -94,11 +94,11 @@ export default function Hero({ profile, className }: HeroProps) {
                                                 style={{ rotate: `${i * 6}deg` }}
                                             >
                                                 <motion.div
-                                                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2.5 md:w-3 bg-gradient-to-b from-cyan-400 via-purple-500 to-transparent rounded-full shadow-[0_0_20px_rgba(34,211,238,0.8)]"
-                                                    initial={{ height: 20, opacity: 0.7 }}
+                                                    className="absolute -top-[35px] md:-top-[65px] left-1/2 -translate-x-1/2 w-3 md:w-3.5 bg-gradient-to-t from-cyan-400 via-purple-500 to-transparent rounded-full shadow-[0_0_30px_rgba(34,211,238,1)]"
+                                                    initial={{ height: 35, opacity: 0.8 }}
                                                     animate={{
-                                                        height: [20, 50 + ((i * 1337) % 80), 20],
-                                                        opacity: [0.7, 1, 0.7],
+                                                        height: [35, 70 + ((i * 1337) % 100), 35],
+                                                        opacity: [0.8, 1, 0.8],
                                                     }}
                                                     transition={{
                                                         duration: 0.6,
@@ -111,7 +111,7 @@ export default function Hero({ profile, className }: HeroProps) {
                                         ))}
                                         {/* Static Glow Ring when not playing */}
                                         {!isPlaying && profile.audioUrl && (
-                                            <div className="absolute inset-[-15px] md:inset-[-20px] rounded-full border-2 md:border-[3px] border-cyan-500/30 animate-[spin_12s_linear_infinite] shadow-[0_0_30px_rgba(6,182,212,0.25)]" />
+                                            <div className="absolute inset-[-18px] md:inset-[-25px] rounded-full border-[3px] md:border-[4px] border-cyan-500/40 animate-[spin_12s_linear_infinite] shadow-[0_0_35px_rgba(6,182,212,0.4)]" />
                                         )}
                                     </div>
 
