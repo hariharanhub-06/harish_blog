@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import FeedbackSection from "./FeedbackSection";
 import DinoRunnerGame from "@/components/DinoRunnerGame";
 import QuizGameOverlay from "@/components/QuizGameOverlay";
+import TypingTestSection from "@/components/TypingTestSection";
 
 interface Stat {
     icon: string;
@@ -653,9 +654,11 @@ export default function MainContent({
                                 })()}
                             />
                         </section>
-                    )}
                 </section>
             )}
+
+            {/* Typing Test Section */}
+            <TypingTestSection />
 
             <FeedbackSection />
 
@@ -663,29 +666,35 @@ export default function MainContent({
             <DinoRunnerGame />
 
 
-            {activeQuiz && (
-                <QuizGameOverlay
-                    quiz={activeQuiz}
-                    onClose={() => setActiveQuiz(null)}
-                />
-            )}
+            {
+                activeQuiz && (
+                    <QuizGameOverlay
+                        quiz={activeQuiz}
+                        onClose={() => setActiveQuiz(null)}
+                    />
+                )
+            }
 
-            {isLiveJoin && (
-                <QuizGameOverlay
-                    quiz={null}
-                    isLive={true}
-                    onClose={() => setIsLiveJoin(false)}
-                />
-            )}
+            {
+                isLiveJoin && (
+                    <QuizGameOverlay
+                        quiz={null}
+                        isLive={true}
+                        onClose={() => setIsLiveJoin(false)}
+                    />
+                )
+            }
 
-            {selectedItem && (
-                <DetailModal
-                    isOpen={!!selectedItem}
-                    onClose={() => setSelectedItem(null)}
-                    type={selectedItem.type}
-                    data={selectedItem.data as any}
-                />
-            )}
-        </div>
+            {
+                selectedItem && (
+                    <DetailModal
+                        isOpen={!!selectedItem}
+                        onClose={() => setSelectedItem(null)}
+                        type={selectedItem.type}
+                        data={selectedItem.data as any}
+                    />
+                )
+            }
+        </div >
     );
 }
