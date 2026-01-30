@@ -33,8 +33,9 @@ import QuizModule from "@/components/admin/QuizModule";
 import FeedbackModule from "@/components/admin/FeedbackModule";
 import FinanceModule from "@/components/admin/FinanceModule";
 import TypingLeaderboard from "@/components/admin/TypingLeaderboard";
+import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
 
-type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard";
+type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -46,7 +47,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "youtube-manager", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard"];
+        const validTabs = ["overview", "profile", "messages", "youtube-manager", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -99,6 +100,7 @@ export default function AdminDashboard() {
         { id: "quiz-manager", title: "Quiz Manager", icon: Gamepad2, color: "bg-cyan-500" },
         { id: "finance-hub", title: "Finance Hub", icon: Wallet, color: "bg-amber-500" },
         { id: "leaderboard", title: "Leaderboard", icon: Trophy, color: "bg-yellow-500" },
+        { id: "meetings", title: "Meetings List", icon: Calendar, color: "bg-blue-600" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
     ];
 
@@ -113,6 +115,7 @@ export default function AdminDashboard() {
             case "quiz-manager": return <QuizModule />;
             case "finance-hub": return <FinanceModule />;
             case "leaderboard": return <TypingLeaderboard />;
+            case "meetings": return <AdminMeetingsModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <OverviewModule />
