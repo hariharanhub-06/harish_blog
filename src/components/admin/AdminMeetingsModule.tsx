@@ -34,6 +34,8 @@ interface Meeting {
     presidentName: string;
     mobileNumber: string;
     driveLink: string;
+    venue: string;
+    venueDetails: string;
     scheduledDate: string;
     status: "requested" | "confirmed" | "completed";
     checklistData: any;
@@ -355,7 +357,7 @@ export default function AdminMeetingsModule() {
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
                                                     <Calendar size={12} className="text-primary" />
-                                                    {new Date(meeting.scheduledDate).toLocaleDateString()}
+                                                    {new Date(meeting.scheduledDate).toLocaleDateString('en-GB')}
                                                 </div>
                                                 <div className="flex items-center gap-1.5 text-[10px] font-black text-gray-400 uppercase">
                                                     <Clock size={10} />
@@ -410,7 +412,9 @@ export default function AdminMeetingsModule() {
                                             <div className="flex items-center gap-2">
                                                 {meeting.mobileNumber && (
                                                     <a
-                                                        href={`https://wa.me/${meeting.mobileNumber}?text=Confirming your ${meeting.meetingType} schedule.`}
+                                                        href={`https://wa.me/${meeting.mobileNumber}?text=${encodeURIComponent(
+                                                            `Hi, we are confirming your ${meeting.meetingType} visit for ${meeting.clubName} on ${new Date(meeting.scheduledDate).toLocaleDateString('en-GB')} at ${new Date(meeting.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Venue: ${meeting.venue || 'TBA'} - ${meeting.venueDetails || ''}`
+                                                        )}`}
                                                         target="_blank"
                                                         className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
                                                         title="WhatsApp Confirm"

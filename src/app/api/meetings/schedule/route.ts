@@ -41,6 +41,8 @@ export async function POST(req: Request) {
             presidentName,
             mobileNumber,
             driveLink,
+            venue,
+            venueDetails,
             scheduledDate, // Start time (ISO string)
             endDate        // End time (ISO string)
         } = body;
@@ -58,12 +60,7 @@ export async function POST(req: Request) {
                 eq(t.status, "confirmed"),
                 eq(t.isVisible, true),
                 or(
-                    // New meeting starts during an existing meeting: start >= t.start AND start < t.end
-                    and(gte(t.scheduledDate, start), lt(t.scheduledDate, end)), // This is wrong logic, I need to compare column with value
-                    // Correct logic:
-                    // (t.scheduledDate <= start AND t.endDate > start) OR
-                    // (t.scheduledDate < end AND t.endDate >= end) OR
-                    // (t.scheduledDate >= start AND t.endDate <= end)
+                    // Correct overlap logic for custom ranges
                     and(lte(t.scheduledDate, start), gt(t.endDate, start)),
                     and(lt(t.scheduledDate, end), gte(t.endDate, end)),
                     and(gte(t.scheduledDate, start), lte(t.endDate, end))
@@ -72,7 +69,7 @@ export async function POST(req: Request) {
         });
 
         if (overlapping) {
-            return NextResponse.json({ error: "This time range overlaps with an existing confirmed booking" }, { status: 409 });
+            return NextResponse.json({ error: "This time slot is already booked. Please choose another time." }, { status: 409 });
         }
 
         const result = await db.insert(meetingSchedules).values({
@@ -83,6 +80,8 @@ export async function POST(req: Request) {
             presidentName,
             mobileNumber,
             driveLink,
+            venue,
+            venueDetails,
             scheduledDate: start,
             endDate: end,
             status: "requested",

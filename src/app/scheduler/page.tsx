@@ -45,7 +45,9 @@ export default function MeetingScheduler() {
         notes: "",
         presidentName: "",
         mobileNumber: "",
-        driveLink: ""
+        driveLink: "",
+        venue: "",
+        venueDetails: ""
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -381,6 +383,28 @@ export default function MeetingScheduler() {
                                                     placeholder="91XXXXXXXXXX"
                                                     value={form.mobileNumber}
                                                     onChange={e => setForm({ ...form, mobileNumber: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Venue</label>
+                                                <input
+                                                    required
+                                                    className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20"
+                                                    placeholder="Meeting Venue"
+                                                    value={form.venue}
+                                                    onChange={e => setForm({ ...form, venue: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Venue Details</label>
+                                                <input
+                                                    className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 ring-primary/20"
+                                                    placeholder="Building/Floor/Room"
+                                                    value={form.venueDetails}
+                                                    onChange={e => setForm({ ...form, venueDetails: e.target.value })}
                                                 />
                                             </div>
                                         </div>
