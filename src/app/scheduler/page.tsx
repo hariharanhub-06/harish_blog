@@ -161,20 +161,18 @@ export default function MeetingScheduler() {
     }
 
     return (
-        <div className="h-screen py-4 px-6 font-poppins relative overflow-hidden text-white flex flex-col justify-center items-center">
-            {/* Cinematic Video Background Container */}
-            <div className="absolute inset-0 -z-20 pointer-events-none overflow-hidden bg-[#050608]">
-                <div className="absolute inset-0 bg-black/50 z-10" />
-                <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute min-w-full min-h-full object-cover opacity-70 brightness-[60%]"
-                >
-                    <source src="https://player.vimeo.com/external/494916328.hd.mp4?s=d010e9c8bc8250ed796979667794121406e9bad8&profile_id=175" type="video/mp4" />
-                </video>
-            </div>
+        <div className="h-screen py-4 px-6 font-poppins relative overflow-hidden text-white flex flex-col justify-center items-center bg-[#050608]">
+            {/* Direct Atmospheric Video Background */}
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover -z-20 opacity-90 scale-105"
+            >
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-nebula-blue-and-purple-liquid-background-34538-large.mp4" type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-black/40 -z-10 backdrop-blur-[1px]" />
 
             {/* Glowing Depth Layers */}
             <div className="absolute inset-0 -z-10 pointer-events-none">
@@ -261,12 +259,12 @@ export default function MeetingScheduler() {
                                         key="step1"
                                         className="h-full flex flex-col"
                                     >
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
                                             <div className="flex-1">
                                                 <h2 className="text-3xl font-black tracking-tighter">Timeline <span className="text-primary italic">.</span></h2>
                                                 <p className="text-gray-500 text-[9px] mt-1 font-black uppercase tracking-[0.4em]">Target your Preferred Date</p>
                                             </div>
-                                            <div className="flex items-center gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-2xl shadow-xl">
+                                            <div className="flex items-center gap-3 bg-white/5 p-1.5 rounded-xl border border-white/10 backdrop-blur-2xl shadow-xl h-fit">
                                                 <button onClick={prevMonth} className="p-2 hover:bg-primary/20 text-white rounded-lg transition-all active:scale-90"><ChevronLeft size={16} /></button>
                                                 <span className="text-[10px] font-black min-w-[110px] text-center uppercase tracking-[0.2em] text-white">
                                                     {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
@@ -362,13 +360,14 @@ export default function MeetingScheduler() {
                                             </div>
 
                                             {bookedSessions.length > 0 && (
-                                                <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="p-4 bg-red-500/5 rounded-2xl border border-red-500/20">
-                                                    <div className="flex items-center gap-2 text-red-500 mb-3 font-black uppercase text-[10px] tracking-[0.2em] animate-pulse">
-                                                        <AlertCircle size={16} /> Sector Conflicts Detected
+                                                <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="p-4 bg-red-500/10 rounded-2xl border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.1)]">
+                                                    <div className="flex items-center gap-2 text-red-500 mb-3 font-black uppercase text-[10px] tracking-[0.2em]">
+                                                        <AlertCircle size={16} className="animate-pulse" /> Deployment Interference Detected
                                                     </div>
+                                                    <p className="text-[9px] text-red-400/80 mb-3 font-bold uppercase tracking-wider">This time window is already occupied. Select an alternative interval.</p>
                                                     <div className="flex flex-wrap gap-2">
                                                         {bookedSessions.map((s, i) => (
-                                                            <div key={i} className="px-3 py-1.5 bg-red-500/10 border border-red-500/10 rounded-xl text-[9px] font-black text-red-400">
+                                                            <div key={i} className="px-3 py-1.5 bg-red-500/20 border border-red-500/20 rounded-xl text-[9px] font-black text-red-200">
                                                                 {new Date(s.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} - {new Date(s.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                                                             </div>
                                                         ))}
