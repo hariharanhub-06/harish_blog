@@ -654,6 +654,7 @@ export default function MainContent({
                                 })()}
                             />
                         </section>
+                    )}
                 </section>
             )}
 
