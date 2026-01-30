@@ -83,7 +83,7 @@ export default function Hero({ profile, className }: HeroProps) {
                             <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent rounded-full blur-3xl -z-10" />
 
                             <Tilt options={{ max: 10, speed: 400, glare: false }}>
-                                <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[480px] lg:h-[480px] rounded-full flex items-center justify-center">
+                                <div className="relative w-56 h-56 md:w-72 md:h-72 lg:w-[380px] lg:h-[380px] rounded-full flex items-center justify-center">
 
                                     {/* Pulsing Glow Effect */}
                                     <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
