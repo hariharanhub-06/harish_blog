@@ -45,6 +45,14 @@ export const metadata: Metadata = {
     siteName: 'Hari Haran Jeyaramamoorthy',
     locale: 'en_US',
     type: 'website',
+    images: [
+      {
+        url: '/hari-favicon.png',
+        width: 800,
+        height: 800,
+        alt: 'Hari Haran Jeyaramamoorthy',
+      },
+    ],
   },
   robots: {
     index: true,
