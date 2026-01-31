@@ -66,7 +66,7 @@ export default function AdminMeetingsModule() {
             const res = await fetch("/api/meetings/availability");
             if (res.ok) {
                 const data = await res.json();
-                setAvailability(data.filter((d: any) => d.isAvailable).map((d: any) => new Date(d.specificDate).toDateString()));
+                setAvailability(data.filter((d: any) => d.isAvailable).map((d: any) => d.specificDate.split('T')[0]));
             }
         } catch (error) {
             console.error("Failed to fetch availability:", error);
@@ -74,7 +74,7 @@ export default function AdminMeetingsModule() {
     };
 
     const toggleAvailability = async (date: Date) => {
-        const dateStr = date.toDateString();
+        const dateStr = date.toISOString().split('T')[0];
         const isCurrentlyAvailable = availability.includes(dateStr);
 
         // Optimistic Update: Change state immediately
@@ -299,12 +299,7 @@ export default function AdminMeetingsModule() {
                                 {Array.from({ length: firstDayOfMonth }).map((_, i) => <div key={`empty-${i}`} />)}
                                 {Array.from({ length: daysInMonth }).map((_, i) => {
                                     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
-                                    const isAv = availability.some(availDate => {
-                                        const d = new Date(availDate);
-                                        return d.getDate() === date.getDate() &&
-                                            d.getMonth() === date.getMonth() &&
-                                            d.getFullYear() === date.getFullYear();
-                                    });
+                                    const isAv = availability.includes(date.toISOString().split('T')[0]);
                                     const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
 
                                     return (
