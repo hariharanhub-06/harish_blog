@@ -348,43 +348,53 @@ export default function MainContent({
                 {profile.featuredVideoUrl && (
                     <section className="container mx-auto px-6 py-12 bg-black/20 rounded-[3rem] border border-white/5 my-8 overflow-hidden relative">
                         <div className="flex flex-col items-center mb-10">
-                            <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-16">STUDIO</h2>
+                            <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-16">JOURNEY</h2>
                             <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter text-center relative z-10">
-                                Featured <span className="text-orange-600">Video</span>
+                                My <span className="text-orange-600">Journey</span>
                             </h2>
                             <div className="w-24 h-2 bg-orange-600 mt-4 rounded-full" />
+                            <p className="text-gray-400 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] mt-4 opacity-50">From Born to Now: The History of Hariharan</p>
                         </div>
 
                         <div className="max-w-5xl mx-auto">
                             <CardWrapper index={0}>
                                 <div className="group relative bg-[#1a1a1a] rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/40 transition-all duration-500">
-                                    <div className="aspect-video w-full relative">
-                                        {profile.featuredVideoUrl?.length === 11 ? (
-                                            <iframe
-                                                width="100%"
-                                                height="100%"
-                                                src={`https://www.youtube.com/embed/${profile.featuredVideoUrl}?autoplay=0&rel=0`}
-                                                title="Featured Video"
-                                                frameBorder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                                className="absolute inset-0"
-                                            ></iframe>
+                                    <div className="aspect-video w-full relative bg-zinc-900 flex items-center justify-center">
+                                        {profile.featuredVideoUrl ? (
+                                            <>
+                                                {profile.featuredVideoUrl.length === 11 ? (
+                                                    <iframe
+                                                        width="100%"
+                                                        height="100%"
+                                                        src={`https://www.youtube.com/embed/${profile.featuredVideoUrl}?autoplay=0&rel=0&modestbranding=1`}
+                                                        title="The Journey of Hariharan"
+                                                        frameBorder="0"
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                        allowFullScreen
+                                                        className="absolute inset-0 w-full h-full"
+                                                    ></iframe>
+                                                ) : (
+                                                    <video
+                                                        src={profile.featuredVideoUrl}
+                                                        controls
+                                                        className="absolute inset-0 w-full h-full object-contain"
+                                                        poster={profile.aboutImageUrl || undefined}
+                                                    />
+                                                )}
+                                            </>
                                         ) : (
-                                            <video
-                                                src={profile.featuredVideoUrl}
-                                                controls
-                                                className="w-full h-full object-cover"
-                                                poster={profile.aboutImageUrl || undefined}
-                                            />
+                                            <div className="flex flex-col items-center space-y-4">
+                                                <Play size={48} className="text-white/20" />
+                                                <p className="text-white/20 font-black tracking-widest text-xs uppercase">Journey coming soon...</p>
+                                            </div>
                                         )}
                                     </div>
-                                    <div className="p-8 bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 right-0 pointer-events-none">
+                                    <div className="p-8 bg-gradient-to-t from-black/90 via-black/40 to-transparent absolute bottom-0 left-0 right-0 pointer-events-none group-hover:opacity-100 transition-opacity">
                                         <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
-                                            Watch My Feature
+                                            My Life Story
                                         </h3>
-                                        <p className="text-gray-400 text-sm font-bold mt-2 opacity-60">
-                                            Innovation and Excellence in Action
+                                        <p className="text-orange-500 text-xs font-black uppercase tracking-widest mt-2">
+                                            A Narrative of Innovation & Passion
                                         </p>
                                     </div>
                                 </div>
