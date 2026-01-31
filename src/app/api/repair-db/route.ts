@@ -5,11 +5,21 @@ import { NextResponse } from "next/server";
 export async function GET() {
     try {
         console.log("Starting repair migration...");
-        await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS featured_video_url TEXT`);
-        await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS about_image_url TEXT`);
+        const queries = [
+            `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS featured_video_url TEXT`,
+            `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS about_image_url TEXT`,
+            `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS headline TEXT`,
+            `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio TEXT`,
+            `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS audio_url TEXT`
+        ];
+
+        for (const q of queries) {
+            await db.execute(sql.raw(q));
+        }
+
         return NextResponse.json({
             success: true,
-            message: "Database repair completed. Missing columns added."
+            message: "Database repair completed. Missing columns verified."
         });
     } catch (error: any) {
         console.error("Repair failed:", error);
