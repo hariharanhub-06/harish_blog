@@ -13,6 +13,7 @@ export const profiles = pgTable("profiles", {
   heroImageUrl: text("hero_image_url"),
   aboutImageUrl: text("about_image_url"),
   audioUrl: text("audio_url"),
+  featuredVideoUrl: text("featured_video_url"),
   socialLinks: jsonb("social_links").$default(() => ({
     linkedin: "",
     github: "",

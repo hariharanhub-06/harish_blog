@@ -27,6 +27,7 @@ export async function POST(req: Request) {
             stats: data.stats,
             trainingStats: data.trainingStats,
             audioUrl: data.audioUrl,
+            featuredVideoUrl: data.featuredVideoUrl,
             updatedAt: new Date(),
         }).where(eq(profiles.id, existing.id));
     } else {

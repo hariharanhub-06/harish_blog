@@ -54,7 +54,7 @@ export default function ProfileModule() {
         });
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero' | 'about' | 'audio') => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero' | 'about' | 'audio' | 'video') => {
         if (!e.target.files?.[0]) return;
         setUploading(true);
 
@@ -78,6 +78,8 @@ export default function ProfileModule() {
                 setProfile({ ...profile, aboutImageUrl: imagekitUrl });
             } else if (type === 'audio') {
                 setProfile({ ...profile, audioUrl: imagekitUrl });
+            } else if (type === 'video') {
+                setProfile({ ...profile, featuredVideoUrl: imagekitUrl });
             }
         } catch (error) {
             console.error("Image upload failed", error);
@@ -217,6 +219,71 @@ export default function ProfileModule() {
                             {profile.audioUrl && (
                                 <audio controls src={profile.audioUrl} className="w-full max-w-md bg-transparent" />
                             )}
+                        </div>
+
+                        {/* Video Section */}
+                        <div className="flex flex-col items-center space-y-6 md:col-span-2 lg:col-span-3 pt-6 border-t border-gray-50">
+                            <div className="w-full max-w-xl space-y-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-red-100 text-red-600 rounded-xl">
+                                        <Presentation size={24} />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-black text-gray-900 uppercase tracking-wide">Featured Blog Video</span>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Only one video will be displayed on the blog</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">YouTube Video ID</label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. dQw4w9WgXcQ"
+                                            value={profile.featuredVideoUrl?.length === 11 ? profile.featuredVideoUrl : ""}
+                                            onChange={(e) => setProfile({ ...profile, featuredVideoUrl: e.target.value })}
+                                            className="w-full bg-white border border-gray-100 rounded-xl p-4 text-sm font-bold focus:ring-2 focus:ring-primary transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Or Upload File</label>
+                                        <label className="flex items-center justify-center gap-2 w-full h-[54px] bg-white border border-gray-100 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors shadow-sm text-xs font-black uppercase tracking-widest text-gray-600">
+                                            {uploading ? <Loader2 size={16} className="animate-spin" /> : "Select Video File"}
+                                            <input type="file" className="hidden" accept="video/*" onChange={(e) => handleImageUpload(e, 'video')} />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {profile.featuredVideoUrl && (
+                                    <div className="mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Preview</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setProfile({ ...profile, featuredVideoUrl: null })}
+                                                className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                        {profile.featuredVideoUrl.length === 11 ? (
+                                            <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
+                                                <iframe
+                                                    width="100%"
+                                                    height="100%"
+                                                    src={`https://www.youtube.com/embed/${profile.featuredVideoUrl}`}
+                                                    title="YouTube video player"
+                                                    frameBorder="0"
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowFullScreen
+                                                ></iframe>
+                                            </div>
+                                        ) : (
+                                            <video controls src={profile.featuredVideoUrl} className="w-full rounded-xl shadow-lg" />
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 

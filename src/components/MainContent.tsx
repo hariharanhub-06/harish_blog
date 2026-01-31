@@ -76,6 +76,8 @@ interface Profile {
     about: string | null;
     location: string | null;
     aboutImageUrl?: string | null;
+    audioUrl?: string | null;
+    featuredVideoUrl?: string | null;
     trainingStats?: Stat[];
     stats?: Stat[];
 }
@@ -108,7 +110,6 @@ interface MainContentProps {
     profile: Profile;
     stats: Stat[];
     projects: Project[];
-    videos: Video[];
     experiences: Experience[];
     educations: Education[];
     volunteerings: Volunteering[];
@@ -122,7 +123,6 @@ export default function MainContent({
     profile: initialProfile,
     stats: initialStats,
     projects: initialProjects,
-    videos: initialVideos,
     experiences: initialExperiences,
     educations: initialEducations,
     volunteerings: initialVolunteerings,
@@ -133,7 +133,6 @@ export default function MainContent({
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
     const [projects, setProjects] = useState(initialProjects || []);
-    const [videos, setVideos] = useState(initialVideos || []);
     const [experiences, setExperiences] = useState(initialExperiences || []);
     const [educations, setEducations] = useState(initialEducations || []);
     const [volunteerings, setVolunteerings] = useState(initialVolunteerings || []);
@@ -156,7 +155,6 @@ export default function MainContent({
                     const data = await res.json();
                     if (data.profile) setProfile(data.profile);
                     if (data.projects) setProjects(data.projects);
-                    if (data.videos) setVideos(data.videos);
                     if (data.experiences) setExperiences(data.experiences);
                     if (data.educations) setEducations(data.educations);
                     if (data.volunteerings) setVolunteerings(data.volunteerings);
@@ -344,61 +342,51 @@ export default function MainContent({
                     experience={profile.stats?.find((s: Stat) => s.label === "Years Experience")?.value?.toString() || "3+"}
                 />
 
-                {/* YouTube Videos Section */}
-                {videos.length > 0 && (
+                {/* Featured Video Section */}
+                {profile.featuredVideoUrl && (
                     <section className="container mx-auto px-6 py-12 bg-black/20 rounded-[3rem] border border-white/5 my-8 overflow-hidden relative">
                         <div className="flex flex-col items-center mb-10">
                             <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-16">STUDIO</h2>
                             <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter text-center relative z-10">
-                                Watch My <span className="text-orange-600">Videos</span>
+                                Featured <span className="text-orange-600">Video</span>
                             </h2>
                             <div className="w-24 h-2 bg-orange-600 mt-4 rounded-full" />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                            {videos.map((video, i) => (
-                                <CardWrapper key={video.id} index={i}>
-                                    <div className="group relative bg-[#1a1a1a] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/40 transition-all duration-500 flex flex-col h-full">
-                                        <div className="relative aspect-video overflow-hidden">
-                                            <Image
-                                                src={`https://img.youtube.com/vi/${video.youtubeVideoId}/maxresdefault.jpg`}
-                                                alt={video.title}
-                                                fill
-                                                className="object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                        <div className="max-w-5xl mx-auto">
+                            <CardWrapper index={0}>
+                                <div className="group relative bg-[#1a1a1a] rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/40 transition-all duration-500">
+                                    <div className="aspect-video w-full relative">
+                                        {profile.featuredVideoUrl.length === 11 ? (
+                                            <iframe
+                                                width="100%"
+                                                height="100%"
+                                                src={`https://www.youtube.com/embed/${profile.featuredVideoUrl}?autoplay=0&rel=0`}
+                                                title="Featured Video"
+                                                frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                className="absolute inset-0"
+                                            ></iframe>
+                                        ) : (
+                                            <video
+                                                src={profile.featuredVideoUrl}
+                                                controls
+                                                className="w-full h-full object-cover"
+                                                poster={profile.aboutImageUrl || undefined}
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100">
-                                                <div className="bg-orange-600 p-6 rounded-full shadow-[0_0_40px_rgba(234,88,12,0.5)]">
-                                                    <Play size={36} fill="white" className="text-white ml-1" />
-                                                </div>
-                                            </div>
-                                            <div className="absolute top-4 left-4">
-                                                <div className="bg-orange-600/90 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 shadow-lg">
-                                                    <span className="text-[10px] font-black text-white uppercase tracking-widest leading-none">{video.category || "Main"}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="p-8 flex flex-col flex-grow">
-                                            <h3 className="text-2xl font-black text-white line-clamp-2 leading-tight group-hover:text-orange-500 transition-colors mb-4">
-                                                {video.title}
-                                            </h3>
-                                            <p className="text-gray-400 text-sm font-bold line-clamp-2 mb-8 leading-relaxed italic opacity-60">
-                                                {video.description || "Check out this video on my channel where I explore digital excellence and innovation."}
-                                            </p>
-                                            <div className="mt-auto pt-6 border-t border-white/5">
-                                                <a
-                                                    href={`https://youtube.com/watch?v=${video.youtubeVideoId}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center gap-3 text-orange-600 font-black text-xs uppercase tracking-[0.2em] group-hover:gap-5 transition-all"
-                                                >
-                                                    Watch Now <ArrowRight size={16} />
-                                                </a>
-                                            </div>
-                                        </div>
+                                        )}
                                     </div>
-                                </CardWrapper>
-                            ))}
+                                    <div className="p-8 bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 right-0 pointer-events-none">
+                                        <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
+                                            Watch My Feature
+                                        </h3>
+                                        <p className="text-gray-400 text-sm font-bold mt-2 opacity-60">
+                                            Innovation and Excellence in Action
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardWrapper>
                         </div>
                     </section>
                 )}

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { profiles, projects, experience, education, volunteering, youtubeVideos } from "@/db/schema";
+import { profiles, projects, experience, education, volunteering } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -10,10 +10,6 @@ export async function GET() {
         const profileData = await db.query.profiles.findFirst();
         const allProjects = await db.query.projects.findMany({
             orderBy: [desc(projects.displayOrder), desc(projects.createdAt)],
-        });
-        const videos = await db.query.youtubeVideos.findMany({
-            where: eq(youtubeVideos.isActive, true),
-            orderBy: [desc(youtubeVideos.displayOrder), desc(youtubeVideos.createdAt)],
         });
         const experiences = await db.query.experience.findMany({
             orderBy: [desc(experience.displayOrder)],
@@ -54,7 +50,6 @@ export async function GET() {
         return NextResponse.json({
             profile: profileData,
             projects: allProjects,
-            videos,
             experiences,
             educations,
             volunteerings,
