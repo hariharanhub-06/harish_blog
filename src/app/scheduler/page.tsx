@@ -181,9 +181,9 @@ export default function MeetingScheduler() {
                         <CalendarCheck size={10} className="text-primary animate-pulse" />
                         Elite Visit System
                     </motion.div>
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-2 leading-none flex flex-wrap justify-center gap-x-3">
+                    <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-2 leading-none flex flex-wrap justify-center gap-x-2">
                         <span>Schedule</span>
-                        <span className="bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent italic pr-2">Your Impact</span>
+                        <span className="bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent italic px-4 py-1 -mx-2 inline-block">Your Impact</span>
                     </h1>
                     <p className="text-gray-400 text-sm max-w-xl mx-auto font-medium">
                         High-performance interface for elite deployments.
@@ -315,7 +315,7 @@ export default function MeetingScheduler() {
                                                 <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-gray-900 flex flex-wrap items-center gap-2">
                                                     <span>T-Interval</span>
                                                     <span className="text-primary">/</span>
-                                                    <span className="italic pr-1">{selectedDate?.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                                                    <span className="italic px-3 py-1 -mx-1 inline-block">{selectedDate?.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
                                                 </h2>
                                                 <p className="text-gray-500 text-[8px] md:text-[9px] mt-1 font-black uppercase tracking-[0.4em]">Initialize Visit Window</p>
                                             </div>
@@ -358,7 +358,7 @@ export default function MeetingScheduler() {
                                                     <p className="text-[9px] text-red-400/80 mb-3 font-bold uppercase tracking-wider">Someone has already booked for the following times. Please select a different time:</p>
                                                     <div className="flex flex-wrap gap-2">
                                                         {bookedSessions.map((s, i) => (
-                                                            <div key={i} className="px-3 py-1.5 bg-red-50 border border-red-100 rounded-xl text-[10px] font-black text-red-600">
+                                                            <div key={i} className="px-3 py-1.5 bg-red-600 border border-red-700 rounded-xl text-[10px] font-black text-white shadow-sm">
                                                                 {new Date(s.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} - {new Date(s.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                                                             </div>
                                                         ))}
