@@ -23,19 +23,19 @@ export async function POST(req: Request) {
         }
 
         const date = new Date(specificDate);
-        date.setHours(0, 0, 0, 0);
+        const dateKey = date.toISOString().split('T')[0]; // "YYYY-MM-DD"
 
         const existing = await db.query.meetingAvailability.findFirst({
-            where: (t, { eq }) => eq(t.specificDate, date)
+            where: (t, { eq, sql }) => sql`DATE(${t.specificDate}) = ${dateKey}`
         });
 
         if (existing) {
             await db.update(meetingAvailability)
-                .set({ isAvailable })
+                .set({ isAvailable, specificDate: new Date(dateKey) })
                 .where(eq(meetingAvailability.id, existing.id));
         } else {
             await db.insert(meetingAvailability).values({
-                specificDate: date,
+                specificDate: new Date(dateKey),
                 isAvailable
             });
         }
