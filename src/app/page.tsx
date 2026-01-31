@@ -137,7 +137,6 @@ export default async function Home() {
         profile={profile as any}
         stats={profile.stats as any}
         projects={dbProjects as any}
-        videos={[]}
         experiences={experiences as any}
         educations={educations as any}
         volunteerings={volunteerings as any}
