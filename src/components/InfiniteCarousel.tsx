@@ -45,6 +45,31 @@ export function InfiniteCarousel({
         setIsPaused(false);
     };
 
+    const handleScroll = () => {
+        if (!containerRef.current || isDragging) return;
+        const { scrollLeft, scrollWidth } = containerRef.current;
+        const halfWidth = scrollWidth / 2;
+
+        if (scrollLeft <= 0) {
+            containerRef.current.scrollLeft = halfWidth;
+        } else if (scrollLeft >= halfWidth) {
+            containerRef.current.scrollLeft = 0;
+        }
+    };
+
+    // Drift Engine
+    useEffect(() => {
+        let animationFrameId: number;
+        const drift = () => {
+            if (containerRef.current && !isPaused && !isDragging) {
+                containerRef.current.scrollLeft += 0.8; // Smooth slow drift
+            }
+            animationFrameId = requestAnimationFrame(drift);
+        };
+        animationFrameId = requestAnimationFrame(drift);
+        return () => cancelAnimationFrame(animationFrameId);
+    }, [isPaused, isDragging]);
+
     // Base items repeated enough to fill width
     const displayItems = items.length > 0
         ? (items.length < 6 ? [...items, ...items, ...items] : items)
@@ -56,20 +81,21 @@ export function InfiniteCarousel({
         <div className={`relative ${className} group overflow-hidden`}>
             <div
                 ref={containerRef}
-                className={`overflow-x-hidden whitespace-nowrap flex ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} scrollbar-hide`}
+                onScroll={handleScroll}
+                className={`overflow-x-auto whitespace-nowrap flex ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} scrollbar-hide`}
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={handleMouseLeave}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
+                style={{
+                    scrollBehavior: (isDragging || !isPaused) ? 'auto' : 'smooth',
+                    WebkitOverflowScrolling: 'touch'
+                }}
             >
                 <div
                     className="flex gap-12 items-center px-6 shrink-0"
-                    style={{
-                        animation: `marquee ${displayItems.length * 5}s linear infinite`,
-                        animationPlayState: (isPaused || isDragging) ? 'paused' : 'running',
-                        width: 'max-content'
-                    }}
+                    style={{ width: 'max-content' }}
                 >
                     {/* Render items twice for a perfect infinite loop */}
                     {[1, 2].map((setIdx) => (
@@ -85,13 +111,10 @@ export function InfiniteCarousel({
             </div>
 
             <style jsx>{`
-                @keyframes marquee {
-                    from { transform: translateX(0); }
-                    to { transform: translateX(-50%); }
-                }
                 .scrollbar-hide {
                     -ms-overflow-style: none;
                     scrollbar-width: none;
+                    touch-action: pan-y;
                 }
                 .scrollbar-hide::-webkit-scrollbar {
                     display: none;
