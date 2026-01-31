@@ -16,10 +16,23 @@ export default function ProfileModule() {
     }, []);
 
     const fetchProfile = async () => {
-        const res = await fetch("/api/admin/profile");
-        if (res.ok) {
-            const data = await res.json();
-            setProfile(data);
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
+            const res = await fetch("/api/admin/profile", { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                const data = await res.json();
+                setProfile(data || {});
+            } else {
+                console.error("Failed to fetch profile:", res.statusText);
+                setProfile({}); // Set empty object to avoid stuck loading
+            }
+        } catch (error) {
+            console.error("Error fetching profile:", error);
+            setProfile({}); // Set empty object to avoid stuck loading
         }
     };
 
@@ -266,7 +279,7 @@ export default function ProfileModule() {
                                                 Remove
                                             </button>
                                         </div>
-                                        {profile.featuredVideoUrl.length === 11 ? (
+                                        {profile.featuredVideoUrl?.length === 11 ? (
                                             <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
                                                 <iframe
                                                     width="100%"
