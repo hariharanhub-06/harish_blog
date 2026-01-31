@@ -519,6 +519,45 @@ export default function FinanceModule() {
                                 </div>
                             </div>
 
+                            {/* Daily Cash Flow Grid (Reference to image) */}
+                            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                                <h3 className="font-black text-xl uppercase tracking-tight mb-8">Daily Cash Flow</h3>
+                                <div className="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-12 lg:grid-cols-16 gap-3">
+                                    {(analytics?.cashFlowPatterns?.dailyFlow || Array.from({ length: 31 }, (_, i) => ({ day: i + 1, net: 0 }))).map((day: any) => {
+                                        const isPositive = day.net > 0;
+                                        const isNegative = day.net < 0;
+                                        const magnitude = Math.abs(day.net);
+
+                                        return (
+                                            <div
+                                                key={day.day}
+                                                className={`aspect-square rounded-2xl border flex flex-col items-center justify-center p-1 transition-all hover:scale-105 cursor-pointer ${isPositive ? 'bg-emerald-50 border-emerald-100 shadow-sm shadow-emerald-50' :
+                                                    isNegative ? 'bg-red-50 border-red-100 shadow-sm shadow-red-50' :
+                                                        'bg-gray-50/50 border-gray-100'
+                                                    }`}
+                                            >
+                                                <span className={`text-sm font-black ${isPositive ? 'text-emerald-700' : isNegative ? 'text-red-700' : 'text-gray-900'}`}>{day.day}</span>
+                                                {magnitude > 0 && (
+                                                    <span className={`text-[8px] font-black uppercase opacity-70 ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
+                                                        ₹{Math.round(magnitude / 1000)}k
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                <div className="flex items-center justify-center gap-8 mt-8">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-lg bg-emerald-300" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Positive Flow</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-lg bg-red-300" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Negative Flow</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
                                     <h3 className="font-black text-lg uppercase tracking-tight mb-8">Top Incomes</h3>
