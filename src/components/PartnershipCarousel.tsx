@@ -81,6 +81,21 @@ export default function PartnershipCarousel() {
         setIsPaused(false);
     };
 
+    // Drift Engine
+    useEffect(() => {
+        let animationFrameId: number;
+
+        const drift = () => {
+            if (containerRef.current && !isPaused && !isDragging) {
+                containerRef.current.scrollLeft += 1; // Adjust speed as needed
+            }
+            animationFrameId = requestAnimationFrame(drift);
+        };
+
+        animationFrameId = requestAnimationFrame(drift);
+        return () => cancelAnimationFrame(animationFrameId);
+    }, [isPaused, isDragging]);
+
     if (partnerships.length === 0) return null;
 
     // For a seamless infinite scroll, we need enough items to fill the width.
@@ -107,25 +122,9 @@ export default function PartnershipCarousel() {
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
-                onTouchStart={(e) => {
-                    if (!containerRef.current) return;
-                    setIsDragging(true);
-                    setStartX(e.touches[0].pageX - containerRef.current.offsetLeft);
-                    setScrollLeft(containerRef.current.scrollLeft);
-                    setIsPaused(true);
-                }}
-                onTouchMove={(e) => {
-                    if (!isDragging || !containerRef.current) return;
-                    const x = e.touches[0].pageX - containerRef.current.offsetLeft;
-                    const walk = (x - startX);
-                    containerRef.current.scrollLeft = scrollLeft - walk;
-                }}
-                onTouchEnd={() => {
-                    setIsDragging(false);
-                    setIsPaused(false);
-                }}
                 style={{
-                    scrollBehavior: isDragging ? 'auto' : 'smooth'
+                    scrollBehavior: (isDragging || !isPaused) ? 'auto' : 'smooth',
+                    WebkitOverflowScrolling: 'touch' // Ensure momentum scroll on iOS
                 }}
             >
                 {/* Render three tracks for infinite manual dragging */}
@@ -133,10 +132,6 @@ export default function PartnershipCarousel() {
                     <div
                         key={`set-${setIdx}`}
                         className="flex whitespace-nowrap"
-                        style={{
-                            animation: `scroll 50s linear infinite`,
-                            animationPlayState: isPaused ? 'paused' : 'running'
-                        }}
                     >
                         {basePartners.map((partner, idx) => (
                             <div
@@ -165,13 +160,10 @@ export default function PartnershipCarousel() {
             </div>
 
             <style jsx>{`
-                @keyframes scroll {
-                    0% { transform: translateX(0); }
-                    100% { transform: translateX(-100%); }
-                }
                 .scrollbar-hide {
                     -ms-overflow-style: none;
                     scrollbar-width: none;
+                    touch-action: pan-y; /* Allow vertical scroll, handle horizontal scroll natively */
                 }
                 .scrollbar-hide::-webkit-scrollbar {
                     display: none;
