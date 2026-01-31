@@ -81,6 +81,11 @@ export default function FinanceModule() {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
+    const [visibleLines, setVisibleLines] = useState({
+        income: true,
+        expense: true,
+        debt_pay: true
+    });
 
     // Debt Modal States
     const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
@@ -448,7 +453,29 @@ export default function FinanceModule() {
                         {/* Charts Area */}
                         <div className="lg:col-span-8 space-y-8">
                             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                                <h3 className="font-black text-xl uppercase tracking-tight mb-8">Income vs Expense Trend</h3>
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                                    <h3 className="font-black text-xl uppercase tracking-tight">Income vs Expense Trend</h3>
+                                    <div className="flex items-center gap-4 flex-wrap">
+                                        {[
+                                            { id: 'income', label: 'Income', color: '#10b981' },
+                                            { id: 'expense', label: 'Expenses', color: '#ef4444' },
+                                            { id: 'debt_pay', label: 'Debt Payments', color: '#3b82f6' }
+                                        ].map((line) => (
+                                            <label key={line.id} className="flex items-center gap-2 cursor-pointer group">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={(visibleLines as any)[line.id]}
+                                                    onChange={() => setVisibleLines(prev => ({ ...prev, [line.id]: !(prev as any)[line.id] }))}
+                                                    className="w-4 h-4 rounded border-gray-100 text-primary focus:ring-primary/20 accent-primary"
+                                                />
+                                                <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${(visibleLines as any)[line.id] ? 'text-gray-900' : 'text-gray-300'}`}>
+                                                    {line.label}
+                                                </span>
+                                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: line.color, opacity: (visibleLines as any)[line.id] ? 1 : 0.2 }} />
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
                                 <div className="h-[350px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={
@@ -484,9 +511,9 @@ export default function FinanceModule() {
                                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 'bold', fill: '#94a3b8' }} />
                                             <Tooltip content={<CustomTooltip />} />
                                             <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }} />
-                                            <Area type="monotone" dataKey="income" name="Income" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorInc)" />
-                                            <Area type="monotone" dataKey="expense" name="Expenses" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorExp)" />
-                                            <Area type="monotone" dataKey="debt_pay" name="Debt Payments" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorDebt)" />
+                                            {visibleLines.income && <Area type="monotone" dataKey="income" name="Income" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorInc)" />}
+                                            {visibleLines.expense && <Area type="monotone" dataKey="expense" name="Expenses" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorExp)" />}
+                                            {visibleLines.debt_pay && <Area type="monotone" dataKey="debt_pay" name="Debt Payments" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorDebt)" />}
                                         </AreaChart>
                                     </ResponsiveContainer>
                                 </div>
