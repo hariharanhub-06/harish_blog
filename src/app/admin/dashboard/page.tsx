@@ -36,7 +36,7 @@ import FinanceModule from "@/components/admin/FinanceModule";
 import TypingLeaderboard from "@/components/admin/TypingLeaderboard";
 import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
 
-type Tab = "overview" | "profile" | "messages" | "youtube-manager" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "youtube-manager", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -95,7 +95,6 @@ export default function AdminDashboard() {
         { id: "overview", title: "Command Center", icon: Home, color: "bg-blue-500" },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500" },
         { id: "training-academy", title: "Training Academy", icon: GraduationCap, color: "bg-orange-500" },
-        { id: "youtube-manager", title: "YouTube Manager", icon: Youtube, color: "bg-red-600" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500" },
         { id: "feedbacks", title: "Testimonials", icon: HeartHandshake, color: "bg-pink-500" },
         { id: "quiz-manager", title: "Quiz Manager", icon: Gamepad2, color: "bg-cyan-500" },
@@ -108,7 +107,6 @@ export default function AdminDashboard() {
     const renderContent = () => {
         switch (activeTab) {
             case "profile": return <ProfileModule />;
-            case "youtube-manager": return <YouTubeModule />;
             case "messages": return <MessagesModule />;
             case "training-academy": return <TrainingAcademyModule />;
             case "timeline": return <TimelineModule />;
