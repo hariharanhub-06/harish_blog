@@ -31,7 +31,6 @@ const navLinks = [
             { name: "Type Test", href: "#typing-test", icon: Keyboard, color: "text-orange-500", creative: true }
         ]
     },
-    { name: "Book", href: "/scheduler", icon: Calendar },
     { name: "Contact", href: "#contact", icon: Mail },
 ];
 
