@@ -300,9 +300,15 @@ export default function ProfileModule() {
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">YouTube Video ID</label>
                                         <input
                                             type="text"
-                                            placeholder="e.g. dQw4w9WgXcQ"
-                                            value={profile.featuredVideoUrl?.length === 11 ? profile.featuredVideoUrl : ""}
-                                            onChange={(e) => setProfile({ ...profile, featuredVideoUrl: e.target.value })}
+                                            placeholder="Paste YouTube ID or Link"
+                                            value={profile.featuredVideoUrl || ""}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                                                const match = val.match(regExp);
+                                                const id = (match && match[2].length === 11) ? match[2] : val;
+                                                setProfile({ ...profile, featuredVideoUrl: id });
+                                            }}
                                             className="w-full bg-white border border-gray-100 rounded-xl p-4 text-sm font-bold focus:ring-2 focus:ring-primary transition-all"
                                         />
                                     </div>
