@@ -347,12 +347,12 @@ export default function MainContent({
                 {/* My Journey Section */}
                 <section id="journey" className="container mx-auto px-6 py-12 bg-black/20 rounded-[3rem] border border-white/5 my-8 overflow-hidden relative">
                     <div className="flex flex-col items-center mb-10">
-                        <h2 className="text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-16">JOURNEY</h2>
-                        <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter text-center relative z-10">
+                        <h2 className="text-[15vw] md:text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-12 md:-mt-16">JOURNEY</h2>
+                        <h2 className="text-3xl md:text-6xl font-black text-white uppercase tracking-tighter text-center relative z-10">
                             My <span className="text-orange-600">Journey</span>
                         </h2>
-                        <div className="w-24 h-2 bg-orange-600 mt-4 rounded-full" />
-                        <p className="text-gray-400 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] mt-4 opacity-50">From Born to Now: The History of Hariharan</p>
+                        <div className="w-16 md:w-24 h-1.5 md:h-2 bg-orange-600 mt-2 md:mt-4 rounded-full" />
+                        <p className="text-gray-400 text-[8px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em] mt-3 md:mt-4 opacity-50 px-4 text-center">From Born to Now: The History of Hariharan</p>
                     </div>
 
                     <div className="max-w-5xl mx-auto">
@@ -398,7 +398,8 @@ export default function MainContent({
                                         </div>
                                     )}
                                 </div>
-                                <div className="p-8 bg-gradient-to-t from-black/90 via-black/40 to-transparent absolute bottom-0 left-0 right-0 pointer-events-none group-hover:opacity-100 transition-opacity">
+                                {/* Desktop Overlay */}
+                                <div className="hidden md:block p-8 bg-gradient-to-t from-black/90 via-black/40 to-transparent absolute bottom-0 left-0 right-0 pointer-events-none group-hover:opacity-100 transition-opacity">
                                     <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
                                         My Life Story
                                     </h3>
@@ -406,6 +407,15 @@ export default function MainContent({
                                         A Narrative of Innovation & Passion
                                     </p>
                                 </div>
+                            </div>
+                            {/* Mobile Caption */}
+                            <div className="md:hidden p-6 bg-[#1a1a1a] border-t border-white/5 text-center">
+                                <h3 className="text-xl font-black text-white uppercase tracking-tighter">
+                                    My Life Story
+                                </h3>
+                                <p className="text-orange-500 text-[10px] font-black uppercase tracking-widest mt-1">
+                                    A Narrative of Innovation & Passion
+                                </p>
                             </div>
                         </CardWrapper>
                     </div>
