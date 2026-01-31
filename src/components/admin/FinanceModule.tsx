@@ -813,7 +813,7 @@ export default function FinanceModule() {
                                     }
 
                                     const suggestions = currentContext === 'debt_pay'
-                                        ? debts.filter(d => d.remainingAmount > 0).map(d => d.name)
+                                        ? debts.map(d => d.name)
                                         : (stats?.categories || [])
                                             .filter((c: any) => c.type === currentContext)
                                             .map((c: any) => c.category);
@@ -822,7 +822,7 @@ export default function FinanceModule() {
                                         return (
                                             <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 py-2">Quick Add:</span>
-                                                {suggestions.slice(0, 10).map((name: string) => (
+                                                {suggestions.map((name: string) => (
                                                     <button
                                                         key={name}
                                                         onClick={() => setLogInput(prev => `${prev}${prev.endsWith('\n') || prev === '' ? '' : '\n'}${name} - `)}
