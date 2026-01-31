@@ -39,12 +39,13 @@ export default function ProfileModule() {
                     trainingStats: []
                 });
             } else {
-                console.error("Failed to fetch profile:", res.statusText);
-                setProfile({}); // Set empty object to avoid stuck loading
+                const errorData = await res.json().catch(() => ({}));
+                console.error("Failed to fetch profile:", errorData.error || res.statusText);
+                setProfile({ error: errorData.error || "Failed to load profile from database." });
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error fetching profile:", error);
-            setProfile({}); // Set empty object to avoid stuck loading
+            setProfile({ error: "Network error or request timed out." });
         }
     };
 
@@ -139,6 +140,23 @@ export default function ProfileModule() {
             setSaving(false);
         }
     };
+
+    if (profile?.error) {
+        return (
+            <div className="flex flex-col items-center justify-center p-20 space-y-6 bg-red-50 rounded-[3rem] border-2 border-dashed border-red-200">
+                <div className="text-center space-y-2">
+                    <h3 className="text-xl font-black text-red-600 uppercase tracking-tighter">Database Sync Required</h3>
+                    <p className="text-sm font-medium text-red-500 max-w-sm">{profile.error}</p>
+                </div>
+                <button
+                    onClick={() => window.open('/api/repair-db', '_blank')}
+                    className="bg-red-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-200"
+                >
+                    Run Database Repair Tool
+                </button>
+            </div>
+        );
+    }
 
     if (!profile) {
         return (
