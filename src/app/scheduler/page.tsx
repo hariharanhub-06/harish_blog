@@ -284,8 +284,8 @@ export default function MeetingScheduler() {
                                                         }}
                                                         className={`aspect-square rounded-xl border transition-all duration-300 flex flex-col items-center justify-center relative overflow-hidden group/btn font-black
                                                             ${selectedDate?.toDateString() === dateStr ? 'border-primary bg-primary text-white shadow-[0_10px_20px_rgba(var(--primary-rgb),0.3)] scale-105 z-10' :
-                                                                isAvailable && !isTooEarly ? 'border-white/10 bg-white/5 hover:border-primary/40 hover:bg-primary/5 hover:scale-105 active:scale-95' :
-                                                                    'border-transparent bg-transparent text-gray-800 cursor-not-allowed opacity-10'}`}
+                                                                isAvailable && !isTooEarly ? 'border-gray-100 bg-gray-50/50 text-gray-900 hover:border-primary/40 hover:bg-primary/5 hover:scale-105 active:scale-95' :
+                                                                    'border-transparent bg-transparent text-gray-300 cursor-not-allowed opacity-20'}`}
                                                     >
                                                         <span className="text-lg relative z-10">{i + 1}</span>
                                                     </button>
@@ -311,10 +311,10 @@ export default function MeetingScheduler() {
                                         </button>
                                         <div className="flex items-center justify-between mb-8">
                                             <div>
-                                                <h2 className="text-3xl font-black tracking-tighter">T-Interval <span className="text-primary">/</span> {selectedDate?.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</h2>
+                                                <h2 className="text-3xl font-black tracking-tighter text-gray-900">T-Interval <span className="text-primary">/</span> {selectedDate?.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</h2>
                                                 <p className="text-gray-500 text-[9px] mt-1 font-black uppercase tracking-[0.4em]">Initialize Visit Window</p>
                                             </div>
-                                            <div className="px-4 py-1.5 bg-primary/10 text-primary text-[9px] font-black uppercase rounded-lg border border-primary/20 tracking-widest shadow-[0_0_20px_rgba(var(--primary-rgb),0.1)]">09:00 - 19:00 Hub</div>
+                                            <div className="px-4 py-1.5 bg-primary/10 text-primary text-[9px] font-black uppercase rounded-lg border border-primary/20 tracking-widest">09:00 - 19:00 Hub</div>
                                         </div>
 
                                         <div className="space-y-6">
@@ -322,24 +322,24 @@ export default function MeetingScheduler() {
                                                 <div className="space-y-2">
                                                     <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Start Op</label>
                                                     <div className="relative group/input">
-                                                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within/input:text-primary transition-colors" size={18} />
+                                                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/input:text-primary transition-colors" size={18} />
                                                         <input
                                                             type="time"
                                                             value={startTime}
                                                             onChange={e => setStartTime(e.target.value)}
-                                                            className="w-full pl-12 pr-6 py-4 bg-white/[0.03] border-2 border-white/10 rounded-2xl text-xl font-black focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40"
+                                                            className="w-full pl-12 pr-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-black text-gray-900 focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40"
                                                         />
                                                     </div>
                                                 </div>
                                                 <div className="space-y-2">
                                                     <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">End Op</label>
                                                     <div className="relative group/input">
-                                                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within/input:text-primary transition-colors" size={18} />
+                                                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within/input:text-primary transition-colors" size={18} />
                                                         <input
                                                             type="time"
                                                             value={endTime}
                                                             onChange={e => setEndTime(e.target.value)}
-                                                            className="w-full pl-12 pr-6 py-4 bg-white/[0.03] border-2 border-white/10 rounded-2xl text-xl font-black focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40"
+                                                            className="w-full pl-12 pr-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-black text-gray-900 focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40"
                                                         />
                                                     </div>
                                                 </div>
@@ -397,25 +397,25 @@ export default function MeetingScheduler() {
                                         <button onClick={() => setStep(2)} className="group/back text-primary text-[9px] font-black uppercase mb-4 flex items-center gap-2 hover:gap-3 transition-all">
                                             <ChevronLeft size={16} /> Re-configure Intervals
                                         </button>
-                                        <h2 className="text-3xl font-black tracking-tighter mb-8">Core Logistics <span className="text-primary italic">.</span></h2>
+                                        <h2 className="text-3xl font-black tracking-tighter mb-8 text-gray-900">Core Logistics <span className="text-primary italic">.</span></h2>
                                         <form onSubmit={handleSubmit} className="space-y-4">
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-2">
                                                     <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Mission Type</label>
                                                     <select
-                                                        className="w-full p-3.5 bg-white/[0.03] border-2 border-white/10 rounded-xl text-xs font-bold focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 appearance-none outline-none"
+                                                        className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 appearance-none outline-none"
                                                         value={form.meetingType}
                                                         onChange={e => setForm({ ...form, meetingType: e.target.value })}
                                                     >
-                                                        <option className="bg-gray-900">GRR Visit</option>
-                                                        <option className="bg-gray-900">DRR Visit</option>
+                                                        <option className="bg-white">GRR Visit</option>
+                                                        <option className="bg-white">DRR Visit</option>
                                                     </select>
                                                 </div>
                                                 <div className="space-y-2">
                                                     <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Deployment Club</label>
                                                     <input
                                                         required
-                                                        className="w-full p-3.5 bg-white/[0.03] border-2 border-white/10 rounded-xl text-xs font-bold focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none"
+                                                        className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
                                                         placeholder="e.g. RC Metro"
                                                         value={form.clubName}
                                                         onChange={e => setForm({ ...form, clubName: e.target.value })}
@@ -427,7 +427,7 @@ export default function MeetingScheduler() {
                                                 <div className="space-y-2">
                                                     <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Leadership Name</label>
                                                     <input
-                                                        className="w-full p-3.5 bg-white/[0.03] border-2 border-white/10 rounded-xl text-xs font-bold focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none"
+                                                        className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
                                                         placeholder="Full Name"
                                                         value={form.presidentName}
                                                         onChange={e => setForm({ ...form, presidentName: e.target.value })}
@@ -437,7 +437,7 @@ export default function MeetingScheduler() {
                                                     <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Secure Contact</label>
                                                     <input
                                                         required
-                                                        className="w-full p-3.5 bg-white/[0.03] border-2 border-white/10 rounded-xl text-xs font-bold focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none"
+                                                        className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
                                                         placeholder="91XXXXXXXXXX"
                                                         value={form.mobileNumber}
                                                         onChange={e => setForm({ ...form, mobileNumber: e.target.value })}
@@ -450,7 +450,7 @@ export default function MeetingScheduler() {
                                                     <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Primary HQ (Venue)</label>
                                                     <input
                                                         required
-                                                        className="w-full p-3.5 bg-white/[0.03] border-2 border-white/10 rounded-xl text-xs font-bold focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none"
+                                                        className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
                                                         placeholder="Main Venue"
                                                         value={form.venue}
                                                         onChange={e => setForm({ ...form, venue: e.target.value })}
@@ -459,7 +459,7 @@ export default function MeetingScheduler() {
                                                 <div className="space-y-2">
                                                     <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Tactical Details</label>
                                                     <input
-                                                        className="w-full p-3.5 bg-white/[0.03] border-2 border-white/10 rounded-xl text-xs font-bold focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none"
+                                                        className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
                                                         placeholder="Location Intel"
                                                         value={form.venueDetails}
                                                         onChange={e => setForm({ ...form, venueDetails: e.target.value })}
@@ -472,7 +472,7 @@ export default function MeetingScheduler() {
                                                 <div className="relative group/drive">
                                                     <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within/drive:text-primary transition-colors" size={16} />
                                                     <input
-                                                        className="w-full pl-12 pr-6 py-3.5 bg-white/[0.03] border-2 border-white/10 rounded-2xl text-xs font-bold focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none"
+                                                        className="w-full pl-12 pr-6 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
                                                         placeholder="https://drive.google.com/..."
                                                         value={form.driveLink}
                                                         onChange={e => setForm({ ...form, driveLink: e.target.value })}
@@ -482,12 +482,12 @@ export default function MeetingScheduler() {
 
                                             <button
                                                 disabled={isSubmitting}
-                                                className="w-full py-5 bg-white text-black rounded-2xl font-black text-lg shadow-[0_20px_40px_-10px_rgba(255,255,255,0.1)] hover:scale-[1.03] active:scale-[0.97] transition-all disabled:opacity-50 flex items-center justify-center gap-3 group/submit"
+                                                className="w-full py-5 bg-primary text-white rounded-2xl font-black text-lg shadow-[0_20px_40px_-10px_rgba(var(--primary-rgb),0.3)] hover:scale-[1.03] active:scale-[0.97] transition-all disabled:opacity-50 flex items-center justify-center gap-3 group/submit"
                                             >
                                                 {isSubmitting ? (
                                                     <><Loader2 className="animate-spin" size={20} /> Deploying Intel...</>
                                                 ) : (
-                                                    <><Zap className="text-primary group-hover/submit:scale-125 transition-transform duration-500" size={20} /> Confirm Deployment</>
+                                                    <><Zap className="white group-hover/submit:scale-125 transition-transform duration-500" size={20} /> Confirm Deployment</>
                                                 )}
                                             </button>
                                         </form>
