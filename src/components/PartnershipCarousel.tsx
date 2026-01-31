@@ -64,25 +64,9 @@ export default function PartnershipCarousel() {
     const handleMouseMove = (e: React.MouseEvent) => {
         if (!isDragging || !containerRef.current) return;
         e.preventDefault();
-        const { scrollWidth } = containerRef.current;
-        const oneThird = scrollWidth / 3;
         const x = e.pageX - containerRef.current.offsetLeft;
-        const walk = (x - startX) * 2;
-        const newScrollLeft = scrollLeft - walk;
-
-        if (newScrollLeft <= 0) {
-            const wrappedScroll = oneThird + newScrollLeft;
-            containerRef.current.scrollLeft = wrappedScroll;
-            setScrollLeft(wrappedScroll);
-            setStartX(e.pageX - containerRef.current.offsetLeft);
-        } else if (newScrollLeft >= oneThird * 2) {
-            const wrappedScroll = newScrollLeft - oneThird;
-            containerRef.current.scrollLeft = wrappedScroll;
-            setScrollLeft(wrappedScroll);
-            setStartX(e.pageX - containerRef.current.offsetLeft);
-        } else {
-            containerRef.current.scrollLeft = newScrollLeft;
-        }
+        const walk = (x - startX);
+        containerRef.current.scrollLeft = scrollLeft - walk;
     };
 
     const handleMouseUp = () => {
@@ -123,6 +107,23 @@ export default function PartnershipCarousel() {
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
+                onTouchStart={(e) => {
+                    if (!containerRef.current) return;
+                    setIsDragging(true);
+                    setStartX(e.touches[0].pageX - containerRef.current.offsetLeft);
+                    setScrollLeft(containerRef.current.scrollLeft);
+                    setIsPaused(true);
+                }}
+                onTouchMove={(e) => {
+                    if (!isDragging || !containerRef.current) return;
+                    const x = e.touches[0].pageX - containerRef.current.offsetLeft;
+                    const walk = (x - startX);
+                    containerRef.current.scrollLeft = scrollLeft - walk;
+                }}
+                onTouchEnd={() => {
+                    setIsDragging(false);
+                    setIsPaused(false);
+                }}
                 style={{
                     scrollBehavior: isDragging ? 'auto' : 'smooth'
                 }}
