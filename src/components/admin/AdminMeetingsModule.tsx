@@ -299,7 +299,12 @@ export default function AdminMeetingsModule() {
                                 {Array.from({ length: firstDayOfMonth }).map((_, i) => <div key={`empty-${i}`} />)}
                                 {Array.from({ length: daysInMonth }).map((_, i) => {
                                     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
-                                    const isAv = availability.includes(date.toDateString());
+                                    const isAv = availability.some(availDate => {
+                                        const d = new Date(availDate);
+                                        return d.getDate() === date.getDate() &&
+                                            d.getMonth() === date.getMonth() &&
+                                            d.getFullYear() === date.getFullYear();
+                                    });
                                     const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
 
                                     return (

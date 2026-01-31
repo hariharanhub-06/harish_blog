@@ -268,11 +268,20 @@ export default function MeetingScheduler() {
                                             {Array.from({ length: getDaysInMonth(currentMonth.getFullYear(), currentMonth.getMonth()) }).map((_, i) => {
                                                 const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
                                                 const dateStr = date.toDateString();
-                                                const isAvailable = availability.includes(dateStr);
+                                                const isAvailable = availability.some(availDate => {
+                                                    const d = new Date(availDate);
+                                                    return d.getDate() === date.getDate() &&
+                                                        d.getMonth() === date.getMonth() &&
+                                                        d.getFullYear() === date.getFullYear();
+                                                });
+
                                                 const leadTimeDate = new Date();
                                                 leadTimeDate.setHours(0, 0, 0, 0);
-                                                leadTimeDate.setDate(leadTimeDate.getDate() + 3);
-                                                const isTooEarly = date < leadTimeDate;
+                                                const leadTimeLimit = new Date(leadTimeDate);
+                                                leadTimeLimit.setDate(leadTimeLimit.getDate() + 3);
+
+                                                const isTooEarly = date < leadTimeLimit;
+                                                const isSelected = selectedDate?.toDateString() === dateStr;
 
                                                 return (
                                                     <button
@@ -283,12 +292,22 @@ export default function MeetingScheduler() {
                                                             setStep(2);
                                                             fetchBookedSessions(date);
                                                         }}
-                                                        className={`aspect-square rounded-xl border transition-all duration-300 flex flex-col items-center justify-center relative overflow-hidden group/btn font-black
-                                                            ${selectedDate?.toDateString() === dateStr ? 'border-primary bg-primary text-white shadow-[0_10px_20px_rgba(var(--primary-rgb),0.3)] scale-105 z-10' :
+                                                        className={`aspect-square rounded-xl border-2 transition-all duration-300 flex flex-col items-center justify-center relative overflow-hidden group/btn font-black
+                                                            ${isSelected ? 'border-primary bg-primary text-white shadow-[0_10px_20px_rgba(var(--primary-rgb),0.3)] scale-105 z-10' :
                                                                 isAvailable && !isTooEarly ? 'border-gray-100 bg-gray-50/50 text-gray-900 hover:border-primary/40 hover:bg-primary/5 hover:scale-105 active:scale-95' :
-                                                                    'border-transparent bg-transparent text-gray-300 cursor-not-allowed opacity-20'}`}
+                                                                    isTooEarly && isAvailable ? 'border-gray-50 bg-gray-50/30 text-gray-300 cursor-not-allowed' :
+                                                                        'border-gray-50/50 bg-transparent text-gray-200 cursor-not-allowed'}`}
                                                     >
-                                                        <span className="text-lg relative z-10">{i + 1}</span>
+                                                        <span className={`text-lg relative z-10 ${isSelected ? 'text-white' : isAvailable && !isTooEarly ? 'text-gray-900' : 'text-gray-300/50'}`}>
+                                                            {i + 1}
+                                                        </span>
+
+                                                        {isAvailable && isTooEarly && !isSelected && (
+                                                            <span className="absolute bottom-1 text-[6px] uppercase tracking-tighter text-gray-400 font-bold opacity-0 group-hover/btn:opacity-100 transition-opacity">Buffer Lock</span>
+                                                        )}
+                                                        {!isAvailable && !isSelected && (
+                                                            <span className="absolute bottom-1 text-[6px] uppercase tracking-tighter text-gray-300 font-bold opacity-0 group-hover/btn:opacity-100 transition-opacity">Unavailable</span>
+                                                        )}
                                                     </button>
                                                 );
                                             })}
