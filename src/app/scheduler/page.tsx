@@ -161,7 +161,7 @@ export default function MeetingScheduler() {
     }
 
     return (
-        <div className="min-h-[100dvh] py-4 px-6 font-poppins relative overflow-x-hidden text-white flex flex-col justify-center items-center bg-[#0a0b0e]">
+        <div className="min-h-[100dvh] py-2 md:py-4 px-3 md:px-6 font-poppins relative overflow-x-hidden text-white flex flex-col justify-center items-center bg-[#0a0b0e]">
             {/* Dark Gradient Background */}
             <div className="fixed inset-0 bg-gradient-to-br from-[#0a0b0e] via-[#0e0f14] to-[#0a0b0e] -z-10" />
 
@@ -176,9 +176,9 @@ export default function MeetingScheduler() {
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full text-[9px] font-black uppercase tracking-[0.4em] mb-4 backdrop-blur-md"
+                        className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-[8px] font-black uppercase tracking-[0.4em] mb-2 backdrop-blur-md"
                     >
-                        <CalendarCheck size={12} className="text-primary animate-pulse" />
+                        <CalendarCheck size={10} className="text-primary animate-pulse" />
                         Elite Visit System
                     </motion.div>
                     <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-2 leading-none flex flex-wrap justify-center gap-x-3">
@@ -199,9 +199,9 @@ export default function MeetingScheduler() {
                         className="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_280deg,rgba(var(--primary-rgb),1)_360deg)] group-hover:scale-110 transition-transform duration-1000"
                     />
 
-                    <div className="relative bg-white backdrop-blur-3xl rounded-[3rem] overflow-hidden flex flex-col md:flex-row min-h-[580px] border border-white/5">
+                    <div className="relative bg-white backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden flex flex-col md:flex-row min-h-[500px] border border-white/5">
                         {/* Interactive Phase Sidebar */}
-                        <div className="w-full md:w-72 bg-gray-50 p-4 md:p-8 text-gray-900 flex flex-row md:flex-col justify-between md:justify-start gap-4 md:gap-0 relative border-b md:border-b-0 md:border-r border-gray-200 overflow-x-auto md:overflow-visible scrollbar-hide">
+                        <div className="w-full md:w-64 bg-gray-50/50 p-2 md:p-8 text-gray-900 flex flex-row md:flex-col justify-between md:justify-start gap-4 md:gap-0 relative border-b md:border-b-0 md:border-r border-gray-100 overflow-x-auto md:overflow-visible scrollbar-hide">
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0 opacity-20 hidden md:block" />
 
                             <div className="flex flex-row md:flex-col gap-4 md:gap-0 w-full">
