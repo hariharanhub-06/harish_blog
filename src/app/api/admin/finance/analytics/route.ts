@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { financeTransactions } from "@/db/schema";
-import { gte, sql } from "drizzle-orm";
+import { and, gte, lte, sql } from "drizzle-orm";
 
 interface DailyFlow {
     day: number;
@@ -20,22 +20,50 @@ interface Insight {
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
-        const startDateParam = searchParams.get("startDate");
-        const endDateParam = searchParams.get("endDate");
+        let startDateParam = searchParams.get("startDate");
+        let endDateParam = searchParams.get("endDate");
+        const range = searchParams.get("range");
 
-        // Default to current month if no range provided
+        // Calculate dates from range if not explicitly provided
+        if (!startDateParam && !endDateParam && range) {
+            const now = new Date();
+            if (range === "Last 30 Days") {
+                const start = new Date();
+                start.setDate(now.getDate() - 30);
+                startDateParam = start.toISOString();
+                endDateParam = now.toISOString();
+            } else if (range === "Last 6 Months") {
+                const start = new Date();
+                start.setMonth(now.getMonth() - 6);
+                startDateParam = start.toISOString();
+                endDateParam = now.toISOString();
+            } else if (range === "This Month") {
+                const start = new Date(now.getFullYear(), now.getMonth(), 1);
+                startDateParam = start.toISOString();
+                endDateParam = now.toISOString();
+            } else if (range === "This Year") {
+                const start = new Date(now.getFullYear(), 0, 1);
+                startDateParam = start.toISOString();
+                endDateParam = now.toISOString();
+            }
+        }
+
+        // Default to current month if still no range provided
         const now = new Date();
-        const startOfMonth = startDateParam ? new Date(startDateParam) : new Date(now.getFullYear(), now.getMonth(), 1);
-        const endOfMonth = endDateParam ? new Date(endDateParam) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const startDate = startDateParam ? new Date(startDateParam) : new Date(now.getFullYear(), now.getMonth(), 1);
+        const endDate = endDateParam ? new Date(endDateParam) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
         const transactions = await db.select()
             .from(financeTransactions)
-            .where(gte(financeTransactions.date, startOfMonth));
+            .where(and(
+                gte(financeTransactions.date, startDate),
+                lte(financeTransactions.date, endDate)
+            ));
 
         if (transactions.length === 0) {
             return NextResponse.json({
                 cashFlowPatterns: {
-                    dailyFlow: [],
+                    dailyFlow: Array.from({ length: 31 }, (_, i) => ({ day: i + 1, income: 0, expense: 0, net: 0 })),
                     weeklyPattern: { week1: 0, week2: 0, week3: 0, week4: 0 },
                     insights: []
                 },
@@ -51,25 +79,35 @@ export async function GET(req: Request) {
 
         // === CASH FLOW PATTERNS ===
 
-        // 1. Group by day of month
+        // Use Asia/Kolkata for grouping to match user perspective
         const dailyFlowMap = new Map<number, DailyFlow>();
-        for (let day = 1; day <= endOfMonth.getDate(); day++) {
+        const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+        const displayMonth = nowIST.getMonth();
+        const displayYear = nowIST.getFullYear();
+        const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
+
+        for (let day = 1; day <= daysInMonth; day++) {
             dailyFlowMap.set(day, { day, income: 0, expense: 0, net: 0 });
         }
 
         transactions.forEach(tx => {
             if (!tx.date) return;
-            const day = new Date(tx.date).getDate();
-            const entry = dailyFlowMap.get(day);
 
-            if (!entry) return;
+            const txDate = new Date(tx.date);
+            const istDate = new Date(txDate.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
-            if (tx.type === 'income') {
-                entry.income += tx.amount;
-            } else {
-                entry.expense += tx.amount;
+            if (istDate.getMonth() === displayMonth && istDate.getFullYear() === displayYear) {
+                const day = istDate.getDate();
+                const entry = dailyFlowMap.get(day);
+                if (entry) {
+                    if (tx.type === 'income') {
+                        entry.income += tx.amount;
+                    } else {
+                        entry.expense += tx.amount;
+                    }
+                    entry.net = entry.income - entry.expense;
+                }
             }
-            entry.net = entry.income - entry.expense;
         });
 
         const dailyFlow = Array.from(dailyFlowMap.values());
@@ -98,7 +136,7 @@ export async function GET(req: Request) {
             .filter(t => t.type === 'expense' || t.type === 'debt_pay')
             .reduce((sum, t) => sum + t.amount, 0);
 
-        const dailyBurnRate = totalExpense / endOfMonth.getDate();
+        const dailyBurnRate = totalExpense / endDate.getDate();
 
         // 4. Detect spending spikes (>2x daily average)
         const spikes = dailyFlow.filter(d => d.expense > dailyBurnRate * 2);
@@ -168,10 +206,10 @@ export async function GET(req: Request) {
 
         // 1. Money lifespan (simulate day-by-day depletion)
         let balance = totalIncome;
-        let depletionDay = endOfMonth.getDate();
+        let depletionDay = endDate.getDate();
         const depletionCurve = [];
 
-        for (let day = 1; day <= endOfMonth.getDate(); day++) {
+        for (let day = 1; day <= endDate.getDate(); day++) {
             const dayData = dailyFlowMap.get(day)!;
             balance += dayData.income - dayData.expense;
 
@@ -181,7 +219,7 @@ export async function GET(req: Request) {
                 percentage: totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0
             });
 
-            if (balance <= 0 && depletionDay === endOfMonth.getDate()) {
+            if (balance <= 0 && depletionDay === endDate.getDate()) {
                 depletionDay = day;
             }
         }
