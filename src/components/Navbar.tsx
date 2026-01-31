@@ -19,7 +19,6 @@ const navLinks = [
             { name: "Academy", href: "#academy", icon: GraduationCap, color: "text-purple-500" },
         ]
     },
-    { name: "Videos", href: "#videos", icon: FileText },
     {
         name: "Activities",
         href: "#",

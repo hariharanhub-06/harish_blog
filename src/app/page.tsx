@@ -11,7 +11,6 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   // Fetch all data with safe fallbacks
   let dbProfile: any = null;
-  let videos: any[] = [];
   let dbProjects: any[] = [];
   let experiences: any[] = [];
   let educations: any[] = [];
@@ -24,10 +23,6 @@ export default async function Home() {
     // Parallel fetch with failure isolation (Promise.allSettled)
     const results = await Promise.allSettled([
       db.query.profiles.findFirst(),
-      db.query.youtubeVideos.findMany({
-        where: (videos, { eq }) => eq(videos.isActive, true),
-        orderBy: (videos, { desc }) => [desc(videos.displayOrder), desc(videos.createdAt)]
-      }),
       db.query.projects.findMany({
         orderBy: (projects, { desc }) => [desc(projects.featured), desc(projects.displayOrder), desc(projects.createdAt)]
       }),
@@ -58,13 +53,12 @@ export default async function Home() {
     };
 
     dbProfile = val(results[0], 'profile');
-    videos = val(results[1], 'videos') || [];
-    dbProjects = val(results[2], 'projects') || [];
-    experiences = val(results[3], 'experiences') || [];
-    educations = val(results[4], 'educations') || [];
-    volunteerings = val(results[5], 'volunteerings') || [];
-    dbSkills = val(results[6], 'skills') || [];
-    partnerships = val(results[7], 'partnerships') || [];
+    dbProjects = val(results[1], 'projects') || [];
+    experiences = val(results[2], 'experiences') || [];
+    educations = val(results[3], 'educations') || [];
+    volunteerings = val(results[4], 'volunteerings') || [];
+    dbSkills = val(results[5], 'skills') || [];
+    partnerships = val(results[6], 'partnerships') || [];
 
     // Fetch Quizzes separately as it has relations that might fail if not pushed
     try {
@@ -143,7 +137,7 @@ export default async function Home() {
         profile={profile as any}
         stats={profile.stats as any}
         projects={dbProjects as any}
-        videos={videos as any}
+        videos={[]}
         experiences={experiences as any}
         educations={educations as any}
         volunteerings={volunteerings as any}
