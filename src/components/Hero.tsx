@@ -122,9 +122,9 @@ export default function Hero({ profile, className }: HeroProps) {
                                                 />
                                             </>
                                         )}
-                                        {/* Static Glow Ring when not playing */}
+                                        {/* Static White Ring */}
                                         {!isPlaying && profile.audioUrl && (
-                                            <div className="absolute inset-[-12px] md:inset-[-15px] rounded-full border-2 border-cyan-500/30 animate-[spin_15s_linear_infinite] shadow-[0_0_25px_rgba(6,182,212,0.35)]" />
+                                            <div className="absolute inset-[-10px] md:inset-[-12px] rounded-full border border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.1)]" />
                                         )}
                                     </div>
 
