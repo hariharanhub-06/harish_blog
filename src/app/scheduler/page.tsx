@@ -181,8 +181,9 @@ export default function MeetingScheduler() {
                         <CalendarCheck size={12} className="text-primary animate-pulse" />
                         Elite Visit System
                     </motion.div>
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-2 leading-none">
-                        Schedule <span className="bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent italic">Your Impact</span>
+                    <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-2 leading-none flex flex-wrap justify-center gap-x-3">
+                        <span>Schedule</span>
+                        <span className="bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent italic pr-2">Your Impact</span>
                     </h1>
                     <p className="text-gray-400 text-sm max-w-xl mx-auto font-medium">
                         High-performance interface for elite deployments.
@@ -309,12 +310,16 @@ export default function MeetingScheduler() {
                                         <button onClick={() => setStep(1)} className="group/back text-primary text-[9px] font-black uppercase mb-4 flex items-center gap-2 hover:gap-3 transition-all">
                                             <ChevronLeft size={16} /> Re-configure Dates
                                         </button>
-                                        <div className="flex items-center justify-between mb-8">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                                             <div>
-                                                <h2 className="text-3xl font-black tracking-tighter text-gray-900">T-Interval <span className="text-primary">/</span> {selectedDate?.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</h2>
-                                                <p className="text-gray-500 text-[9px] mt-1 font-black uppercase tracking-[0.4em]">Initialize Visit Window</p>
+                                                <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-gray-900 flex flex-wrap items-center gap-2">
+                                                    <span>T-Interval</span>
+                                                    <span className="text-primary">/</span>
+                                                    <span className="italic pr-1">{selectedDate?.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                                                </h2>
+                                                <p className="text-gray-500 text-[8px] md:text-[9px] mt-1 font-black uppercase tracking-[0.4em]">Initialize Visit Window</p>
                                             </div>
-                                            <div className="px-4 py-1.5 bg-primary/10 text-primary text-[9px] font-black uppercase rounded-lg border border-primary/20 tracking-widest">09:00 - 19:00 Hub</div>
+                                            <div className="inline-flex self-start sm:self-center px-4 py-1.5 bg-primary/10 text-primary text-[9px] font-black uppercase rounded-lg border border-primary/20 tracking-widest whitespace-nowrap">09:00 - 19:00 Hub</div>
                                         </div>
 
                                         <div className="space-y-6">
@@ -353,7 +358,7 @@ export default function MeetingScheduler() {
                                                     <p className="text-[9px] text-red-400/80 mb-3 font-bold uppercase tracking-wider">Someone has already booked for the following times. Please select a different time:</p>
                                                     <div className="flex flex-wrap gap-2">
                                                         {bookedSessions.map((s, i) => (
-                                                            <div key={i} className="px-3 py-1.5 bg-red-500/20 border border-red-500/20 rounded-xl text-[9px] font-black text-red-200">
+                                                            <div key={i} className="px-3 py-1.5 bg-red-50 border border-red-100 rounded-xl text-[10px] font-black text-red-600">
                                                                 {new Date(s.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} - {new Date(s.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                                                             </div>
                                                         ))}
@@ -397,7 +402,7 @@ export default function MeetingScheduler() {
                                         <button onClick={() => setStep(2)} className="group/back text-primary text-[9px] font-black uppercase mb-4 flex items-center gap-2 hover:gap-3 transition-all">
                                             <ChevronLeft size={16} /> Re-configure Intervals
                                         </button>
-                                        <h2 className="text-3xl font-black tracking-tighter mb-8 text-gray-900">Core Logistics <span className="text-primary italic">.</span></h2>
+                                        <h2 className="text-2xl md:text-3xl font-black tracking-tighter mb-8 text-gray-900">Core Logistics <span className="text-primary italic pr-2">.</span></h2>
                                         <form onSubmit={handleSubmit} className="space-y-4">
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-2">
