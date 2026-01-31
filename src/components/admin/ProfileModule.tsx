@@ -333,21 +333,29 @@ export default function ProfileModule() {
                                                 Remove
                                             </button>
                                         </div>
-                                        {profile.featuredVideoUrl?.length === 11 ? (
-                                            <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
-                                                <iframe
-                                                    width="100%"
-                                                    height="100%"
-                                                    src={`https://www.youtube.com/embed/${profile.featuredVideoUrl}`}
-                                                    title="YouTube video player"
-                                                    frameBorder="0"
-                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                    allowFullScreen
-                                                ></iframe>
-                                            </div>
-                                        ) : (
-                                            <video controls src={profile.featuredVideoUrl} className="w-full rounded-xl shadow-lg" />
-                                        )}
+                                        {(() => {
+                                            const val = profile.featuredVideoUrl;
+                                            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                                            const match = val.match(regExp);
+                                            const id = (match && match[2].length === 11) ? match[2] : val;
+
+                                            if (id.length === 11) {
+                                                return (
+                                                    <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
+                                                        <iframe
+                                                            width="100%"
+                                                            height="100%"
+                                                            src={`https://www.youtube.com/embed/${id}`}
+                                                            title="YouTube video player"
+                                                            frameBorder="0"
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                            allowFullScreen
+                                                        ></iframe>
+                                                    </div>
+                                                );
+                                            }
+                                            return <video controls src={val} className="w-full rounded-xl shadow-lg" />;
+                                        })()}
                                     </div>
                                 )}
                             </div>
