@@ -54,6 +54,8 @@ export default function AdminMeetingsModule() {
     const [modalType, setModalType] = useState<"checklist" | "scoring" | null>(null);
     const [showAvailability, setShowAvailability] = useState(false);
     const [availability, setAvailability] = useState<string[]>([]);
+    const [stagedAvailability, setStagedAvailability] = useState<string[]>([]);
+    const [isSavingAvailability, setIsSavingAvailability] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
     useEffect(() => {
@@ -66,45 +68,54 @@ export default function AdminMeetingsModule() {
             const res = await fetch("/api/meetings/availability");
             if (res.ok) {
                 const data = await res.json();
-                setAvailability(data.filter((d: any) => d.isAvailable).map((d: any) => d.specificDate.split('T')[0]));
+                const fetchedAv = data.filter((d: any) => d.isAvailable).map((d: any) => d.specificDate.split('T')[0]);
+                setAvailability(fetchedAv);
+                setStagedAvailability(fetchedAv);
             }
         } catch (error) {
             console.error("Failed to fetch availability:", error);
         }
     };
 
-    const toggleAvailability = async (date: Date) => {
-        const dateStr = date.toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
-        const isCurrentlyAvailable = availability.includes(dateStr);
+    const toggleAvailability = (date: Date) => {
+        const dateStr = date.toLocaleDateString('en-CA');
+        const isCurrentlyAvailable = stagedAvailability.includes(dateStr);
 
-        // Optimistic Update: Change state immediately
-        const previousAvailability = [...availability];
-        const newAvailability = isCurrentlyAvailable
-            ? availability.filter(d => d !== dateStr)
-            : [...availability, dateStr];
+        if (isCurrentlyAvailable) {
+            setStagedAvailability(stagedAvailability.filter(d => d !== dateStr));
+        } else {
+            setStagedAvailability([...stagedAvailability, dateStr]);
+        }
+    };
 
-        setAvailability(newAvailability);
-
+    const handleSaveAvailability = async () => {
+        setIsSavingAvailability(true);
         try {
             const res = await fetch("/api/meetings/availability", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    specificDate: dateStr,
-                    isAvailable: !isCurrentlyAvailable
+                    availableDates: stagedAvailability
                 }),
             });
 
-            if (!res.ok) {
-                // Revert on failure
-                setAvailability(previousAvailability);
+            if (res.ok) {
+                setAvailability(stagedAvailability);
+                alert("Availability saved successfully!");
+            } else {
                 const error = await res.json();
-                console.error("Failed to toggle availability:", error);
+                alert(`Failed to save: ${error.error}`);
             }
         } catch (error) {
-            console.error("Failed to toggle availability:", error);
-            setAvailability(previousAvailability);
+            console.error("Failed to save availability:", error);
+            alert("A network error occurred while saving.");
+        } finally {
+            setIsSavingAvailability(false);
         }
+    };
+
+    const discardChanges = () => {
+        setStagedAvailability(availability);
     };
 
     const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
@@ -280,15 +291,42 @@ export default function AdminMeetingsModule() {
                                     </div>
                                     <div>
                                         <h3 className="font-bold">Availability Calendar</h3>
-                                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">Enable specific dates for club visits</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">Enable specific dates for club visits</p>
+                                            {JSON.stringify(availability.sort()) !== JSON.stringify(stagedAvailability.sort()) && (
+                                                <span className="flex items-center gap-1 text-[8px] font-black text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full animate-pulse">
+                                                    <AlertCircle size={8} /> Unsaved Changes
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 bg-white/5 p-1.5 rounded-xl border border-white/10">
-                                    <button onClick={prevMonth} className="p-2 hover:bg-white/10 rounded-lg transition-colors"><ChevronLeft size={16} /></button>
-                                    <span className="text-sm font-bold min-w-[120px] text-center uppercase tracking-widest">
-                                        {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                                    </span>
-                                    <button onClick={nextMonth} className="p-2 hover:bg-white/10 rounded-lg transition-colors"><ChevronRight size={16} /></button>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-4 bg-white/5 p-1.5 rounded-xl border border-white/10 mr-4">
+                                        <button onClick={prevMonth} className="p-2 hover:bg-white/10 rounded-lg transition-colors"><ChevronLeft size={16} /></button>
+                                        <span className="text-sm font-bold min-w-[120px] text-center uppercase tracking-widest">
+                                            {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                        </span>
+                                        <button onClick={nextMonth} className="p-2 hover:bg-white/10 rounded-lg transition-colors"><ChevronRight size={16} /></button>
+                                    </div>
+
+                                    {JSON.stringify(availability.sort()) !== JSON.stringify(stagedAvailability.sort()) && (
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={discardChanges}
+                                                className="px-4 py-2 rounded-xl text-xs font-black uppercase text-gray-400 hover:text-white transition-colors"
+                                            >
+                                                Discard
+                                            </button>
+                                            <button
+                                                onClick={handleSaveAvailability}
+                                                disabled={isSavingAvailability}
+                                                className="px-6 py-2 bg-primary text-white rounded-xl text-xs font-black uppercase shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                                            >
+                                                {isSavingAvailability ? 'Saving...' : 'Save Changes'}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -300,7 +338,9 @@ export default function AdminMeetingsModule() {
                                 {Array.from({ length: daysInMonth }).map((_, i) => {
                                     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
                                     const dateStr = date.toLocaleDateString('en-CA');
-                                    const isAv = availability.includes(dateStr);
+                                    const isAv = stagedAvailability.includes(dateStr);
+                                    const isSaved = availability.includes(dateStr);
+                                    const isModified = isAv !== isSaved;
                                     const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
 
                                     return (
@@ -308,10 +348,14 @@ export default function AdminMeetingsModule() {
                                             key={i}
                                             onClick={() => toggleAvailability(date)}
                                             disabled={isPast}
-                                            className={`p-2 py-4 rounded-xl border-2 flex flex-col items-center justify-center gap-0.5 transition-all
+                                            className={`p-2 py-4 rounded-xl border-2 flex flex-col items-center justify-center gap-0.5 transition-all relative
                                                 ${isAv ? 'border-primary bg-primary/10 text-white shadow-lg shadow-primary/20' : 'border-white/5 bg-white/5 text-gray-500 hover:border-white/20'}
-                                                ${isPast ? 'opacity-20 cursor-not-allowed grayscale' : ''}`}
+                                                ${isPast ? 'opacity-20 cursor-not-allowed grayscale' : ''}
+                                                ${isModified ? 'ring-2 ring-amber-500/50 ring-offset-2 ring-offset-gray-900 shadow-[0_0_15px_rgba(245,158,11,0.3)]' : ''}`}
                                         >
+                                            {isModified && (
+                                                <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" title="Unsaved Change" />
+                                            )}
                                             <span className="text-lg font-black">{i + 1}</span>
                                             <span className={`text-[7px] font-black uppercase tracking-widest ${isAv ? 'text-primary' : 'text-gray-600'}`}>
                                                 {isAv ? 'Available' : 'Unavailable'}
