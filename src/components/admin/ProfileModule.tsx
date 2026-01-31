@@ -25,7 +25,19 @@ export default function ProfileModule() {
 
             if (res.ok) {
                 const data = await res.json();
-                setProfile(data || {});
+                setProfile(data?.id ? data : {
+                    name: "",
+                    location: "",
+                    headline: "",
+                    about: "",
+                    avatarUrl: null,
+                    heroImageUrl: null,
+                    aboutImageUrl: null,
+                    audioUrl: null,
+                    featuredVideoUrl: null,
+                    stats: [],
+                    trainingStats: []
+                });
             } else {
                 console.error("Failed to fetch profile:", res.statusText);
                 setProfile({}); // Set empty object to avoid stuck loading
@@ -73,9 +85,12 @@ export default function ProfileModule() {
 
         try {
             const file = e.target.files[0];
-            // Check file size (limit to 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                alert("File is too large. Please select an image under 10MB.");
+            // Check file size (limit to 10MB for images, 100MB for video/audio)
+            const isMedia = type === 'audio' || type === 'video';
+            const limit = isMedia ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+
+            if (file.size > limit) {
+                alert(`File is too large. Please select a ${isMedia ? 'file under 100MB' : 'image under 10MB'}.`);
                 setUploading(false);
                 return;
             }
@@ -113,9 +128,13 @@ export default function ProfileModule() {
             });
             if (res.ok) {
                 alert("Profile updated successfully!");
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                alert("Failed to save profile: " + (errorData.error || "Database error. Did you run the migration?"));
             }
         } catch (error) {
             console.error("Save failed", error);
+            alert("Network error: Failed to reach the server.");
         } finally {
             setSaving(false);
         }
