@@ -100,6 +100,7 @@ export default async function Home() {
       { label: "Clubs Led", value: "5+", icon: "Award" },
       { label: "Colleges Partnered", value: "42", icon: "User" },
     ],
+    aboutImageUrl: null,
     trainingStats: [
       { label: "Expert Sessions", value: "150+", icon: "Presentation" },
       { label: "Partnered Colleges", value: "42+", icon: "GraduationCap" },
@@ -107,10 +108,14 @@ export default async function Home() {
     ]
   };
 
-  // Merge DB data with default (DB takes precedence if fields exist)
+  // Merge DB data with default (DB takes precedence if fields exist and are not null)
   const profile = {
     ...defaultProfile,
     ...(dbProfile || {}),
+    // Ensure images don't get wiped if null in DB or DB missing
+    avatarUrl: dbProfile?.avatarUrl || defaultProfile.avatarUrl,
+    heroImageUrl: dbProfile?.heroImageUrl || defaultProfile.heroImageUrl,
+    aboutImageUrl: dbProfile?.aboutImageUrl || (dbProfile as any)?.aboutImageUrl || null,
     // Ensure stats is an array even if DB returns something else (though schema says jsonb array)
     stats: Array.isArray(dbProfile?.stats) ? dbProfile.stats : defaultProfile.stats,
     trainingStats: Array.isArray(dbProfile?.trainingStats) ? dbProfile.trainingStats : defaultProfile.trainingStats,

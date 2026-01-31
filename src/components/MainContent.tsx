@@ -73,6 +73,8 @@ interface Video {
 
 interface Profile {
     name: string | null;
+    avatarUrl?: string | null;
+    heroImageUrl?: string | null;
     about: string | null;
     location: string | null;
     aboutImageUrl?: string | null;
@@ -357,7 +359,7 @@ export default function MainContent({
                             <CardWrapper index={0}>
                                 <div className="group relative bg-[#1a1a1a] rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/40 transition-all duration-500">
                                     <div className="aspect-video w-full relative">
-                                        {profile.featuredVideoUrl.length === 11 ? (
+                                        {profile.featuredVideoUrl?.length === 11 ? (
                                             <iframe
                                                 width="100%"
                                                 height="100%"
