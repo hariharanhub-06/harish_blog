@@ -25,18 +25,29 @@ export default function ProfileModule() {
 
             if (res.ok) {
                 const data = await res.json();
+                // If it's a new/empty profile, use the professional defaults from the main page
                 setProfile(data?.id ? data : {
-                    name: "",
-                    location: "",
-                    headline: "",
-                    about: "",
-                    avatarUrl: null,
+                    name: "Hari Haran Jeyaramamoorthy",
+                    headline: "Web/App Developer | Business Consultant | Job Placement Expert",
+                    about: "Passionate developer and business strategist focused on building innovative solutions.",
+                    location: "Tamil Nadu, India",
+                    avatarUrl: "/hari_photo.png",
                     heroImageUrl: null,
                     aboutImageUrl: null,
                     audioUrl: null,
                     featuredVideoUrl: null,
-                    stats: [],
-                    trainingStats: []
+                    socialLinks: { linkedin: "", github: "", twitter: "", instagram: "" },
+                    stats: [
+                        { label: "Years Experience", value: "3+", icon: "Briefcase" },
+                        { label: "Projects Completed", value: "10+", icon: "Code" },
+                        { label: "Clubs Led", value: "5+", icon: "Award" },
+                        { label: "Colleges Partnered", value: "42", icon: "User" },
+                    ],
+                    trainingStats: [
+                        { label: "Expert Sessions", value: "150+", icon: "Presentation" },
+                        { label: "Partnered Colleges", value: "42+", icon: "GraduationCap" },
+                        { label: "Minds Empowered", value: "5000+", icon: "Users" },
+                    ]
                 });
             } else {
                 const errorData = await res.json().catch(() => ({}));
