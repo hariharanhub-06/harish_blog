@@ -35,13 +35,13 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
     };
 
     const onDragEnd = (event: any, info: any) => {
-        const threshold = 50;
+        const threshold = 120; // Increased to prevent accidental swipes on tap
         const velocity = info.velocity.x;
         const offset = info.offset.x;
 
-        if (offset < -threshold || velocity < -300) {
+        if (offset < -threshold || velocity < -800) {
             handleNext();
-        } else if (offset > threshold || velocity > 300) {
+        } else if (offset > threshold || velocity > 800) {
             handlePrev();
         }
     };
