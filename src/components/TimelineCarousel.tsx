@@ -76,8 +76,7 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
             <div className="relative overflow-hidden px-0 md:px-12">
                 <motion.div
                     drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    style={{ x: dragX }}
+                    dragElastic={0.1}
                     onDragEnd={onDragEnd}
                     animate={{
                         x: `-${currentIndex * 100}%`
