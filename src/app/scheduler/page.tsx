@@ -65,7 +65,7 @@ export default function MeetingScheduler() {
             const res = await fetch("/api/meetings/availability");
             if (res.ok) {
                 const data = await res.json();
-                setAvailability(data.filter((d: any) => d.isAvailable).map((d: any) => new Date(d.specificDate).toDateString()));
+                setAvailability(data.filter((d: any) => d.isAvailable).map((d: any) => d.specificDate.split('T')[0]));
             }
         } catch (error) {
             console.error("Failed to fetch availability:", error);
@@ -267,13 +267,8 @@ export default function MeetingScheduler() {
                                             {Array.from({ length: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() }).map((_, i) => <div key={`empty-${i}`} />)}
                                             {Array.from({ length: getDaysInMonth(currentMonth.getFullYear(), currentMonth.getMonth()) }).map((_, i) => {
                                                 const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
-                                                const dateStr = date.toDateString();
-                                                const isAvailable = availability.some(availDate => {
-                                                    const d = new Date(availDate);
-                                                    return d.getDate() === date.getDate() &&
-                                                        d.getMonth() === date.getMonth() &&
-                                                        d.getFullYear() === date.getFullYear();
-                                                });
+                                                const dateStr = date.toISOString().split('T')[0];
+                                                const isAvailable = availability.includes(dateStr);
 
                                                 const leadTimeDate = new Date();
                                                 leadTimeDate.setHours(0, 0, 0, 0);
