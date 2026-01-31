@@ -22,20 +22,20 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Date is required" }, { status: 400 });
         }
 
-        const date = new Date(specificDate);
-        const dateKey = date.toISOString().split('T')[0]; // "YYYY-MM-DD"
+        const dateKey = specificDate; // Should be YYYY-MM-DD from frontend
+        const normalizedDate = new Date(dateKey); // Creates UTC midnight date
 
         const existing = await db.query.meetingAvailability.findFirst({
-            where: (t, { eq, sql }) => sql`DATE(${t.specificDate}) = ${dateKey}`
+            where: (t, { eq }) => eq(t.specificDate, normalizedDate)
         });
 
         if (existing) {
             await db.update(meetingAvailability)
-                .set({ isAvailable, specificDate: new Date(dateKey) })
+                .set({ isAvailable })
                 .where(eq(meetingAvailability.id, existing.id));
         } else {
             await db.insert(meetingAvailability).values({
-                specificDate: new Date(dateKey),
+                specificDate: normalizedDate,
                 isAvailable
             });
         }

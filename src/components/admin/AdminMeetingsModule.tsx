@@ -74,7 +74,7 @@ export default function AdminMeetingsModule() {
     };
 
     const toggleAvailability = async (date: Date) => {
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = date.toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
         const isCurrentlyAvailable = availability.includes(dateStr);
 
         // Optimistic Update: Change state immediately
@@ -90,7 +90,7 @@ export default function AdminMeetingsModule() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    specificDate: date.toISOString(),
+                    specificDate: dateStr,
                     isAvailable: !isCurrentlyAvailable
                 }),
             });
@@ -299,7 +299,8 @@ export default function AdminMeetingsModule() {
                                 {Array.from({ length: firstDayOfMonth }).map((_, i) => <div key={`empty-${i}`} />)}
                                 {Array.from({ length: daysInMonth }).map((_, i) => {
                                     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
-                                    const isAv = availability.includes(date.toISOString().split('T')[0]);
+                                    const dateStr = date.toLocaleDateString('en-CA');
+                                    const isAv = availability.includes(dateStr);
                                     const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
 
                                     return (

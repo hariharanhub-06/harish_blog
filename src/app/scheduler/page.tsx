@@ -267,7 +267,7 @@ export default function MeetingScheduler() {
                                             {Array.from({ length: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() }).map((_, i) => <div key={`empty-${i}`} />)}
                                             {Array.from({ length: getDaysInMonth(currentMonth.getFullYear(), currentMonth.getMonth()) }).map((_, i) => {
                                                 const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
-                                                const dateStr = date.toISOString().split('T')[0];
+                                                const dateStr = date.toLocaleDateString('en-CA');
                                                 const isAvailable = availability.includes(dateStr);
 
                                                 const leadTimeDate = new Date();
