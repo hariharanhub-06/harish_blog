@@ -27,31 +27,36 @@ export async function GET(req: Request) {
         // Calculate dates from range if not explicitly provided
         if (!startDateParam && !endDateParam && range) {
             const now = new Date();
+            const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
             if (range === "Last 30 Days") {
-                const start = new Date();
-                start.setDate(now.getDate() - 30);
+                const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30, 0, 0, 0, 0);
                 startDateParam = start.toISOString();
-                endDateParam = now.toISOString();
+                endDateParam = endOfToday.toISOString();
             } else if (range === "Last 6 Months") {
-                const start = new Date();
-                start.setMonth(now.getMonth() - 6);
+                const start = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate(), 0, 0, 0, 0);
                 startDateParam = start.toISOString();
-                endDateParam = now.toISOString();
+                endDateParam = endOfToday.toISOString();
             } else if (range === "This Month") {
-                const start = new Date(now.getFullYear(), now.getMonth(), 1);
+                const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
                 startDateParam = start.toISOString();
-                endDateParam = now.toISOString();
+                endDateParam = endOfToday.toISOString();
             } else if (range === "This Year") {
-                const start = new Date(now.getFullYear(), 0, 1);
+                const start = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
                 startDateParam = start.toISOString();
-                endDateParam = now.toISOString();
+                endDateParam = endOfToday.toISOString();
             }
         }
 
         // Default to current month if still no range provided
         const now = new Date();
         const startDate = startDateParam ? new Date(startDateParam) : new Date(now.getFullYear(), now.getMonth(), 1);
-        const endDate = endDateParam ? new Date(endDateParam) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const endDate = endDateParam ? new Date(endDateParam) : new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+        // Ensure endDate is end of day if it was just a date string
+        if (endDateParam && !endDateParam.includes('T')) {
+            endDate.setHours(23, 59, 59, 999);
+        }
 
         const transactions = await db.select()
             .from(financeTransactions)
@@ -90,15 +95,24 @@ export async function GET(req: Request) {
             dailyFlowMap.set(day, { day, income: 0, expense: 0, net: 0 });
         }
 
+        const istFormatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric'
+        });
+
         transactions.forEach(tx => {
             if (!tx.date) return;
 
             const txDate = new Date(tx.date);
-            const istDate = new Date(txDate.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+            const parts = istFormatter.formatToParts(txDate);
+            const istDay = parseInt(parts.find(p => p.type === 'day')!.value);
+            const istMonth = parseInt(parts.find(p => p.type === 'month')!.value) - 1;
+            const istYear = parseInt(parts.find(p => p.type === 'year')!.value);
 
-            if (istDate.getMonth() === displayMonth && istDate.getFullYear() === displayYear) {
-                const day = istDate.getDate();
-                const entry = dailyFlowMap.get(day);
+            if (istMonth === displayMonth && istYear === displayYear) {
+                const entry = dailyFlowMap.get(istDay);
                 if (entry) {
                     if (tx.type === 'income') {
                         entry.income += tx.amount;
