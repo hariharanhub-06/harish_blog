@@ -813,25 +813,34 @@ export default function FinanceModule() {
                                     }
 
                                     const suggestions = currentContext === 'debt_pay'
-                                        ? debts.map(d => d.name)
+                                        ? debts.map(d => ({
+                                            name: d.name,
+                                            progress: d.initialAmount > 0 ? ((d.initialAmount - d.remainingAmount) / d.initialAmount) * 100 : 0
+                                        }))
                                         : (stats?.categories || [])
                                             .filter((c: any) => c.type === currentContext)
-                                            .map((c: any) => c.category);
+                                            .map((c: any) => ({ name: c.category, progress: 0 }));
 
                                     if (suggestions.length > 0) {
                                         return (
                                             <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 py-2">Quick Add:</span>
-                                                {suggestions.map((name: string) => (
+                                                {suggestions.map((s: any) => (
                                                     <button
-                                                        key={name}
-                                                        onClick={() => setLogInput(prev => `${prev}${prev.endsWith('\n') || prev === '' ? '' : '\n'}${name} - `)}
+                                                        key={s.name}
+                                                        onClick={() => setLogInput(prev => `${prev}${prev.endsWith('\n') || prev === '' ? '' : '\n'}${s.name} - `)}
                                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${currentContext === 'income' ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-100' :
-                                                            currentContext === 'debt_pay' ? 'bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-100' :
+                                                            currentContext === 'debt_pay' ? (
+                                                                s.progress >= 100 ? 'bg-emerald-500 text-white border-emerald-600 shadow-lg shadow-emerald-200/50' :
+                                                                    s.progress >= 75 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+                                                                        s.progress >= 50 ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                                                                            s.progress >= 25 ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                                                                                'bg-red-50 text-red-600 border-red-100'
+                                                            ) :
                                                                 'bg-red-50 hover:bg-red-100 text-red-600 border-red-100'
                                                             }`}
                                                     >
-                                                        {name}
+                                                        {s.name}
                                                     </button>
                                                 ))}
                                             </div>
