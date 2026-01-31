@@ -539,7 +539,7 @@ export default function FinanceModule() {
                                                 <span className={`text-sm font-black ${isPositive ? 'text-emerald-700' : isNegative ? 'text-red-700' : 'text-gray-900'}`}>{day.day}</span>
                                                 {magnitude > 0 && (
                                                     <span className={`text-[8px] font-black uppercase opacity-70 ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
-                                                        ₹{Math.round(magnitude / 1000)}k
+                                                        ₹{magnitude >= 1000 ? `${Math.round(magnitude / 1000)}k` : Math.round(magnitude)}
                                                     </span>
                                                 )}
                                             </div>
