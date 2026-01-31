@@ -332,7 +332,7 @@ export default function MeetingScheduler() {
                                                             type="time"
                                                             value={startTime}
                                                             onChange={e => setStartTime(e.target.value)}
-                                                            className="w-full pl-12 pr-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-black text-gray-900 focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40"
+                                                            className="w-full pl-10 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-lg md:text-xl font-black text-gray-900 focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40"
                                                         />
                                                     </div>
                                                 </div>
@@ -344,7 +344,7 @@ export default function MeetingScheduler() {
                                                             type="time"
                                                             value={endTime}
                                                             onChange={e => setEndTime(e.target.value)}
-                                                            className="w-full pl-12 pr-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-black text-gray-900 focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40"
+                                                            className="w-full pl-10 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-lg md:text-xl font-black text-gray-900 focus:ring-4 ring-primary/10 outline-none transition-all focus:border-primary/40"
                                                         />
                                                     </div>
                                                 </div>
@@ -417,7 +417,7 @@ export default function MeetingScheduler() {
                                                     </select>
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Deployment Club</label>
+                                                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Club Name</label>
                                                     <input
                                                         required
                                                         className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
@@ -430,7 +430,7 @@ export default function MeetingScheduler() {
 
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-2">
-                                                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Leadership Name</label>
+                                                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">President Name</label>
                                                     <input
                                                         className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
                                                         placeholder="Full Name"
@@ -439,7 +439,7 @@ export default function MeetingScheduler() {
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Secure Contact</label>
+                                                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">President Contact</label>
                                                     <input
                                                         required
                                                         className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
@@ -451,50 +451,51 @@ export default function MeetingScheduler() {
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Primary HQ (Venue)</label>
-                                                    <input
-                                                        required
-                                                        className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
-                                                        placeholder="Main Venue"
-                                                        value={form.venue}
-                                                        onChange={e => setForm({ ...form, venue: e.target.value })}
-                                                    />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Venue</label>
+                                                        <input
+                                                            required
+                                                            className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
+                                                            placeholder="Main Venue"
+                                                            value={form.venue}
+                                                            onChange={e => setForm({ ...form, venue: e.target.value })}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Venue Google Map Link/Venue Details</label>
+                                                        <input
+                                                            className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
+                                                            placeholder="Location Intel"
+                                                            value={form.venueDetails}
+                                                            onChange={e => setForm({ ...form, venueDetails: e.target.value })}
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Tactical Details</label>
-                                                    <input
-                                                        className="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
-                                                        placeholder="Location Intel"
-                                                        value={form.venueDetails}
-                                                        onChange={e => setForm({ ...form, venueDetails: e.target.value })}
-                                                    />
-                                                </div>
-                                            </div>
 
-                                            <div className="space-y-2">
-                                                <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Document Intel (Drive)</label>
-                                                <div className="relative group/drive">
-                                                    <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within/drive:text-primary transition-colors" size={16} />
-                                                    <input
-                                                        className="w-full pl-12 pr-6 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
-                                                        placeholder="https://drive.google.com/..."
-                                                        value={form.driveLink}
-                                                        onChange={e => setForm({ ...form, driveLink: e.target.value })}
-                                                    />
+                                                <div className="space-y-2">
+                                                    <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 ml-3">Drive Link</label>
+                                                    <div className="relative group/drive">
+                                                        <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within/drive:text-primary transition-colors" size={16} />
+                                                        <input
+                                                            className="w-full pl-12 pr-6 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xs font-bold text-gray-900 focus:ring-4 ring-primary/10 transition-all focus:border-primary/40 outline-none placeholder:text-gray-400"
+                                                            placeholder="https://drive.google.com/..."
+                                                            value={form.driveLink}
+                                                            onChange={e => setForm({ ...form, driveLink: e.target.value })}
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <button
-                                                disabled={isSubmitting}
-                                                className="w-full py-5 bg-primary text-white rounded-2xl font-black text-lg shadow-[0_20px_40px_-10px_rgba(var(--primary-rgb),0.3)] hover:scale-[1.03] active:scale-[0.97] transition-all disabled:opacity-50 flex items-center justify-center gap-3 group/submit"
-                                            >
-                                                {isSubmitting ? (
-                                                    <><Loader2 className="animate-spin" size={20} /> Deploying Intel...</>
-                                                ) : (
-                                                    <><Zap className="white group-hover/submit:scale-125 transition-transform duration-500" size={20} /> Confirm Deployment</>
-                                                )}
-                                            </button>
+                                                <button
+                                                    disabled={isSubmitting}
+                                                    className="w-full py-5 bg-primary text-white rounded-2xl font-black text-lg shadow-[0_20px_40px_-10px_rgba(var(--primary-rgb),0.3)] hover:scale-[1.03] active:scale-[0.97] transition-all disabled:opacity-50 flex items-center justify-center gap-3 group/submit"
+                                                >
+                                                    {isSubmitting ? (
+                                                        <><Loader2 className="animate-spin" size={20} /> Deploying Intel...</>
+                                                    ) : (
+                                                        <><Zap className="white group-hover/submit:scale-125 transition-transform duration-500" size={20} /> Confirm Deployment</>
+                                                    )}
+                                                </button>
                                         </form>
                                     </motion.div>
                                 )}
