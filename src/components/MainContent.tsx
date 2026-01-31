@@ -361,25 +361,35 @@ export default function MainContent({
                                 <div className="aspect-video w-full relative bg-zinc-900 flex items-center justify-center">
                                     {profile.featuredVideoUrl ? (
                                         <>
-                                            {profile.featuredVideoUrl.length === 11 ? (
-                                                <iframe
-                                                    width="100%"
-                                                    height="100%"
-                                                    src={`https://www.youtube.com/embed/${profile.featuredVideoUrl}?autoplay=0&rel=0&modestbranding=1`}
-                                                    title="The Journey of Hariharan"
-                                                    frameBorder="0"
-                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                    allowFullScreen
-                                                    className="absolute inset-0 w-full h-full"
-                                                ></iframe>
-                                            ) : (
-                                                <video
-                                                    src={profile.featuredVideoUrl}
-                                                    controls
-                                                    className="absolute inset-0 w-full h-full object-contain"
-                                                    poster={profile.aboutImageUrl || undefined}
-                                                />
-                                            )}
+                                            {(() => {
+                                                const val = profile.featuredVideoUrl;
+                                                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                                                const match = val.match(regExp);
+                                                const id = (match && match[2].length === 11) ? match[2] : val;
+
+                                                if (id.length === 11) {
+                                                    return (
+                                                        <iframe
+                                                            width="100%"
+                                                            height="100%"
+                                                            src={`https://www.youtube.com/embed/${id}?autoplay=0&rel=0&modestbranding=1`}
+                                                            title="The Journey of Hariharan"
+                                                            frameBorder="0"
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                            allowFullScreen
+                                                            className="absolute inset-0 w-full h-full"
+                                                        ></iframe>
+                                                    );
+                                                }
+                                                return (
+                                                    <video
+                                                        src={val}
+                                                        controls
+                                                        className="absolute inset-0 w-full h-full object-contain"
+                                                        poster={profile.aboutImageUrl || undefined}
+                                                    />
+                                                );
+                                            })()}
                                         </>
                                     ) : (
                                         <div className="flex flex-col items-center space-y-4">
