@@ -114,7 +114,9 @@ export default function AnalyticsTab({ analytics }: AnalyticsTabProps) {
                                 >
                                     <span className="text-xs font-black text-gray-900">{day.day}</span>
                                     {magnitude > 0 && (
-                                        <span className="text-[8px] font-bold text-gray-600">₹{Math.round(magnitude / 1000)}k</span>
+                                        <span className="text-[8px] font-bold text-gray-600">
+                                            ₹{magnitude >= 1000 ? `${Math.round(magnitude / 1000)}k` : Math.round(magnitude)}
+                                        </span>
                                     )}
                                 </div>
                             );

@@ -13,30 +13,38 @@ export async function GET(req: Request) {
         // Calculate dates from range if not explicitly provided
         if (!startDate && !endDate && range) {
             const now = new Date();
+            // Standardize now to end of day for range calculations
+            const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
             if (range === "Last 30 Days") {
-                const start = new Date();
-                start.setDate(now.getDate() - 30);
+                const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30, 0, 0, 0, 0);
                 startDate = start.toISOString();
-                endDate = now.toISOString();
+                endDate = endOfToday.toISOString();
             } else if (range === "Last 6 Months") {
-                const start = new Date();
-                start.setMonth(now.getMonth() - 6);
+                const start = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate(), 0, 0, 0, 0);
                 startDate = start.toISOString();
-                endDate = now.toISOString();
+                endDate = endOfToday.toISOString();
             } else if (range === "This Month") {
-                const start = new Date(now.getFullYear(), now.getMonth(), 1);
+                const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
                 startDate = start.toISOString();
-                endDate = now.toISOString();
+                endDate = endOfToday.toISOString();
             } else if (range === "This Year") {
-                const start = new Date(now.getFullYear(), 0, 1);
+                const start = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
                 startDate = start.toISOString();
-                endDate = now.toISOString();
+                endDate = endOfToday.toISOString();
             }
         }
 
         let conditions = [];
         if (startDate) conditions.push(gte(financeTransactions.date, new Date(startDate)));
-        if (endDate) conditions.push(lte(financeTransactions.date, new Date(endDate)));
+        if (endDate) {
+            const end = new Date(endDate);
+            // If it's just a date string, set to end of day
+            if (!endDate.includes('T')) {
+                end.setHours(23, 59, 59, 999);
+            }
+            conditions.push(lte(financeTransactions.date, end));
+        }
 
         const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
