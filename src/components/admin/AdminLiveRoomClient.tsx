@@ -33,25 +33,34 @@ export default function AdminLiveRoomClient({ session }: Props) {
 
     const [jitsiApi, setJitsiApi] = useState<any>(null);
     const [modSettings, setModSettings] = useState({
-        disableAudio: session.moderatorSettings?.disableAudio || false,
-        disableVideo: session.moderatorSettings?.disableVideo || false,
-        disableScreenSharing: session.moderatorSettings?.disableScreenSharing || false,
-        disableReactions: session.moderatorSettings?.disableReactions || false,
-        disableChat: session.moderatorSettings?.disableChat || false,
+        disableAudio: false,
+        disableVideo: false,
+        disableScreenSharing: false,
+        disableReactions: false,
+        disableChat: false,
     });
     const [updating, setUpdating] = useState(false);
+
+    // Initial fetch of policies
+    useEffect(() => {
+        const loadSettings = async () => {
+            const res = await fetch(`/api/sessions/${session.id}/settings`);
+            if (res.ok) {
+                const data = await res.json();
+                setModSettings(data);
+            }
+        };
+        loadSettings();
+    }, [session.id]);
 
     // Push settings to DB whenever they change
     const updateSettings = async (newSettings: any) => {
         setUpdating(true);
         try {
-            await fetch('/api/sessions/admin', {
-                method: 'PATCH',
+            await fetch(`/api/sessions/${session.id}/settings`, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: session.id,
-                    moderatorSettings: newSettings
-                })
+                body: JSON.stringify(newSettings)
             });
             setModSettings(newSettings);
         } catch (e) {
