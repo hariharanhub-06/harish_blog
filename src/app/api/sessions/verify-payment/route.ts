@@ -39,7 +39,12 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: "Invalid Signature" }, { status: 400 });
             }
 
-            // 2. Signature Valid! Create Registration
+            // 2. Fetch Session to get Price
+            const session = await db.query.liveSessions.findFirst({
+                where: eq(liveSessions.id, sessionId)
+            });
+
+            // 3. Signature Valid! Create Registration
             await db.insert(sessionRegistrations).values({
                 sessionId,
                 userName: userData.name,
@@ -49,7 +54,7 @@ export async function POST(req: Request) {
                 razorpayPaymentId: razorpay_payment_id,
                 razorpaySignature: razorpay_signature,
                 status: "confirmed",
-                amountPaid: 0
+                amountPaid: session?.price || 0
             });
         }
 
