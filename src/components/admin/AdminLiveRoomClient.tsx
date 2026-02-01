@@ -34,7 +34,12 @@ export default function AdminLiveRoomClient({ session }: Props) {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ userId: "admin", name: "Admin (Host)" })
                 });
-                const { token, apiKey } = await res.json();
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+
+                const { token, apiKey } = data;
+                if (!apiKey) throw new Error("Stream API Key is missing. Please check your environment variables.");
+                if (!token) throw new Error("Failed to generate communication token.");
 
                 const vClient = new StreamVideoClient({
                     apiKey,
