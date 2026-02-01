@@ -23,7 +23,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ registered: false, error: "This email is not registered for this session." });
         }
 
-        return NextResponse.json({ registered: true });
+        return NextResponse.json({
+            registered: true,
+            token: registration.joinToken
+        });
     } catch (error) {
         console.error("Check registration failed:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

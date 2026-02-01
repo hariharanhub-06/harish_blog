@@ -37,7 +37,7 @@ export default function FeedbackModule() {
     const [fetching, setFetching] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
-    const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
+    const [expandedId, setExpandedId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<"All" | "Fresh" | "Approved">("All");
 
     const [formData, setFormData] = useState({
@@ -221,78 +221,104 @@ export default function FeedbackModule() {
 
             {/* List View */}
             <div className="space-y-3">
-                {processedFeedbacks.map((f) => (
-                    <div
-                        key={f.id}
-                        className={`group bg-white p-4 md:p-6 rounded-[2rem] border transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-xl hover:border-primary/20 ${f.status === "Fresh" ? "border-orange-100 bg-orange-50/30" : "border-gray-100"}`}
-                    >
-                        <div className="flex items-center gap-4 flex-1">
-                            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-all">
-                                {f.role === "Student" ? <GraduationCap size={20} /> : f.role === "Professional" ? <Briefcase size={20} /> : <Lightbulb size={20} />}
-                            </div>
-                            <div className="min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <h4 className="text-sm font-black text-gray-900 uppercase tracking-tight">{f.name}</h4>
-                                    <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border ${f.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-orange-100 text-orange-600 border-orange-200"}`}>
-                                        {f.status}
-                                    </span>
+                {processedFeedbacks.map((f) => {
+                    const isExpanded = expandedId === f.id;
+                    return (
+                        <div
+                            key={f.id}
+                            className={`group bg-white p-4 md:p-6 rounded-[2rem] border transition-all duration-300 flex flex-col justify-between gap-4 ${isExpanded ? "ring-2 ring-primary/20 border-primary/20 shadow-xl" : "border-gray-100 hover:border-gray-200"} ${f.status === "Fresh" && !isExpanded ? "border-orange-100 bg-orange-50/30" : ""}`}
+                        >
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex items-center gap-4 flex-1">
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isExpanded ? "bg-primary text-white" : "bg-gray-50 text-primary"}`}>
+                                        {f.role === "Student" ? <GraduationCap size={20} /> : f.role === "Professional" ? <Briefcase size={20} /> : <Lightbulb size={20} />}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h4 className="text-sm font-black text-gray-900 uppercase tracking-tight">{f.name}</h4>
+                                            <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border ${f.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-orange-100 text-orange-600 border-orange-200"}`}>
+                                                {f.status}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-3 text-[10px] font-bold text-secondary uppercase tracking-widest opacity-60">
+                                            <span className="flex items-center gap-1"><Building size={10} /> {f.organization}</span>
+                                            <span>•</span>
+                                            <span className="flex items-center gap-1"><Quote size={10} /> {f.role}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-3 text-[10px] font-bold text-secondary uppercase tracking-widest opacity-60">
-                                    <span className="flex items-center gap-1"><Building size={10} /> {f.organization}</span>
-                                    <span>•</span>
-                                    <span className="flex items-center gap-1"><Quote size={10} /> {f.role}</span>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div className="flex-1 max-w-xl">
-                            <p className="text-xs text-secondary/60 font-medium line-clamp-2 md:line-clamp-1 italic">
-                                &ldquo;{f.content}&rdquo;
-                            </p>
-                        </div>
-
-                        <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 md:border-l md:border-gray-50 md:pl-6">
-                            <div className="flex flex-col items-center">
-                                <div className="flex text-amber-500 mb-1">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} size={10} fill={i < f.rating ? "currentColor" : "none"} />
-                                    ))}
-                                </div>
-                                <span className="text-[9px] font-black text-gray-300 uppercase tracking-tighter">
-                                    {new Date(f.createdAt).toLocaleDateString()}
-                                </span>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                {f.status === "Fresh" && (
-                                    <button
-                                        onClick={() => handleApprove(f.id)}
-                                        disabled={updatingId === f.id}
-                                        className="p-3 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
-                                        title="Approve"
-                                    >
-                                        {updatingId === f.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-                                    </button>
+                                {!isExpanded && (
+                                    <div className="flex-1 max-w-xl">
+                                        <p className="text-xs text-secondary/60 font-medium line-clamp-2 md:line-clamp-1 italic">
+                                            &ldquo;{f.content}&rdquo;
+                                        </p>
+                                    </div>
                                 )}
-                                <button
-                                    onClick={() => setSelectedFeedback(f)}
-                                    className="p-3 bg-gray-50 text-secondary/60 hover:bg-primary hover:text-white rounded-xl transition-all active:scale-95"
-                                    title="View Full Content"
-                                >
-                                    <Eye size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(f.id)}
-                                    disabled={updatingId === f.id}
-                                    className="p-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all active:scale-95 disabled:opacity-50"
-                                    title="Delete"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
+
+                                <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 md:border-l md:border-gray-50 md:pl-6">
+                                    <div className="flex flex-col items-center">
+                                        <div className="flex text-amber-500 mb-1">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} size={10} fill={i < f.rating ? "currentColor" : "none"} />
+                                            ))}
+                                        </div>
+                                        <span className="text-[9px] font-black text-gray-300 uppercase tracking-tighter">
+                                            {new Date(f.createdAt).toLocaleDateString()}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        {f.status === "Fresh" && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleApprove(f.id); }}
+                                                disabled={updatingId === f.id}
+                                                className="p-3 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
+                                                title="Approve"
+                                            >
+                                                {updatingId === f.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => setExpandedId(isExpanded ? null : f.id)}
+                                            className={`p-3 rounded-xl transition-all active:scale-95 ${isExpanded ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-gray-50 text-secondary/60 hover:bg-primary/10 hover:text-primary"}`}
+                                            title={isExpanded ? "Collapse" : "Expand to Read"}
+                                        >
+                                            <Eye size={16} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(f.id); }}
+                                            disabled={updatingId === f.id}
+                                            className="p-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all active:scale-95 disabled:opacity-50"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+
+                            {isExpanded && (
+                                <div className="mt-4 pt-6 border-t border-gray-50 animate-in slide-in-from-top-2 duration-300">
+                                    <div className="relative">
+                                        <Quote className="absolute -top-4 -left-2 text-primary/5" size={60} />
+                                        <p className="text-sm text-secondary font-medium leading-relaxed italic relative z-10 px-4 md:px-8">
+                                            &ldquo;{f.content}&rdquo;
+                                        </p>
+                                    </div>
+                                    <div className="mt-6 flex justify-end">
+                                        <button
+                                            onClick={() => setExpandedId(null)}
+                                            className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline"
+                                        >
+                                            Click to collapse
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {processedFeedbacks.length === 0 && !fetching && (
@@ -397,53 +423,7 @@ export default function FeedbackModule() {
                     </div>
                 </div>
             )}
-            {/* View Testimony Modal */}
-            {selectedFeedback && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[110] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl p-0 relative overflow-hidden">
-                        {/* Header Box */}
-                        <div className="bg-gray-50/50 border-b border-gray-100 p-8 flex justify-between items-start">
-                            <div className="flex items-center gap-4">
-                                <div className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
-                                    {selectedFeedback.role === "Student" ? <GraduationCap size={24} /> : selectedFeedback.role === "Professional" ? <Briefcase size={24} /> : <Lightbulb size={24} />}
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">{selectedFeedback.name}</h3>
-                                    <p className="text-secondary text-[10px] font-black uppercase tracking-widest mt-1 opacity-60">
-                                        {selectedFeedback.organization} • {selectedFeedback.role}
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => setSelectedFeedback(null)}
-                                className="p-3 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-2xl transition-all"
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
 
-                        <div className="p-10">
-                            <div className="relative">
-                                <Quote className="absolute -top-6 -left-6 text-primary/5" size={80} />
-                                <p className="text-lg text-secondary font-medium leading-relaxed italic relative z-10 text-center px-6">
-                                    &ldquo;{selectedFeedback.content}&rdquo;
-                                </p>
-                            </div>
-
-                            <div className="mt-12 pt-8 border-t border-gray-100 flex justify-between items-center">
-                                <div className="flex gap-1 text-amber-500">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} size={16} fill={i < selectedFeedback.rating ? "currentColor" : "none"} />
-                                    ))}
-                                </div>
-                                <span className="text-xs font-black text-gray-300 uppercase tracking-[0.2em]">
-                                    Received on {new Date(selectedFeedback.createdAt).toLocaleDateString("en-US", { month: 'long', day: 'numeric', year: 'numeric' })}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
