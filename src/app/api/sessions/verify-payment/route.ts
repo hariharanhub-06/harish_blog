@@ -58,15 +58,18 @@ export async function POST(req: Request) {
             where: eq(liveSessions.id, sessionId)
         });
 
-        if (session) {
+        if (session && userData?.email) {
             const origin = req.headers.get("origin") || "https://hariharan.me";
             const liveLink = `${origin}/live/${session.id}?email=${encodeURIComponent(userData.email)}`;
+            const sessionTitle = session.title || "Live Webinar Session";
+            const userName = userData.name || "Attendee";
 
-            console.log(`Sending confirmation email to ${userData.email} for session: ${session.title}`);
-            const emailResult = await sendEmail({
+            console.log(`Sending confirmation email to ${userData.email} for session: ${sessionTitle}`);
+
+            const emailContent = {
                 to: userData.email,
-                subject: `Registration Confirmed: ${session.title}`,
-                text: `Hello ${userData.name},\n\nYour registration for ${session.title} is confirmed.\n\nJoin Link: ${liveLink}\nDate: ${new Date(session.startTime).toLocaleString()}\n\nSee you there!`,
+                subject: `Registration Confirmed: ${sessionTitle}`,
+                text: `Hello ${userName},\n\nYour registration for ${sessionTitle} is confirmed.\n\nJoin Link: ${liveLink}\nDate: ${new Date(session.startTime).toLocaleString()}\n\nSee you there!`,
                 html: `
                     <!DOCTYPE html>
                     <html>
@@ -127,7 +130,9 @@ export async function POST(req: Request) {
                     </body>
                     </html>
                 `
-            });
+            };
+
+            const emailResult = await sendEmail(emailContent);
 
             if (!emailResult.success) {
                 console.error("Email delivery failed:", emailResult.error);

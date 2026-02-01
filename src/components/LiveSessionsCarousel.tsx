@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Video, Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import SessionRegistrationModal from "./SessionRegistrationModal";
+import JoinSessionModal from "./JoinSessionModal";
 
 interface Session {
     id: string;
@@ -23,6 +24,7 @@ interface LiveSessionsCarouselProps {
 
 export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselProps) {
     const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+    const [joiningSession, setJoiningSession] = useState<Session | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     if (sessions.length === 0) return null;
@@ -112,8 +114,7 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                const email = prompt("Enter your registered email to join:");
-                                                if (email) window.location.href = `/live/${session.id}?email=${encodeURIComponent(email)}`;
+                                                setJoiningSession(session);
                                             }}
                                             className="flex-1 py-1 bg-white/10 hover:bg-white/20 text-white text-[8px] font-black uppercase tracking-widest rounded-md border border-white/5 transition-all active:scale-95"
                                         >
@@ -154,6 +155,14 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
                     onClose={() => setSelectedSession(null)}
                 />
             )}
+
+            {/* Join Modal */}
+            <JoinSessionModal
+                sessionId={joiningSession?.id || ""}
+                sessionTitle={joiningSession?.title || ""}
+                isOpen={!!joiningSession}
+                onClose={() => setJoiningSession(null)}
+            />
 
             <style jsx>{`
                 .no-scrollbar::-webkit-scrollbar { display: none; }
