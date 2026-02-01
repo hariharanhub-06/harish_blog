@@ -29,11 +29,13 @@ export default function AdminLiveRoomClient({ session }: Props) {
     useEffect(() => {
         const initStream = async () => {
             try {
+                console.log("Initializing Admin Dashboard...");
                 const res = await fetch("/api/sessions/live-token", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ userId: "admin", name: "Admin (Host)" })
                 });
+                console.log("Admin token response status:", res.status);
                 const data = await res.json();
                 if (data.error) throw new Error(data.error);
 
@@ -75,7 +77,7 @@ export default function AdminLiveRoomClient({ session }: Props) {
             if (videoClient) videoClient.disconnectUser();
             if (chatClient) chatClient.disconnectUser();
         };
-    }, [videoClient, chatClient, call]);
+    }, []); // Only run once on mount
 
     const copyKey = () => {
         navigator.clipboard.writeText(session.id);
