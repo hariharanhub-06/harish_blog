@@ -34,7 +34,7 @@ export async function POST(req: Request) {
         const options = {
             amount: Math.round(amount), // Ensure it's an integer
             currency,
-            receipt: `receipt_${sessionId}_${Date.now()}`,
+            receipt: `rcpt_${sessionId.substring(0, 8)}_${Date.now().toString().slice(-10)}`,
         };
 
         console.log("Initiating Razorpay Order with options:", options);
