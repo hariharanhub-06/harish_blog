@@ -11,6 +11,7 @@ interface Props {
         id: string;
         name: string;
         email: string;
+        activeSessionId: string;
     };
 }
 
@@ -27,6 +28,7 @@ export default function LiveRoomClient({ session, user }: Props) {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
+                // 1. Fetch Mod Settings
                 const res = await fetch(`/api/sessions/${session.id}/settings`);
                 const data = await res.json();
                 if (data && typeof data.disableAudio !== 'undefined') {
@@ -37,9 +39,34 @@ export default function LiveRoomClient({ session, user }: Props) {
             }
         };
 
-        const interval = setInterval(fetchSettings, 5000);
+        const checkHeartbeat = async () => {
+            if (!user.activeSessionId) return;
+            try {
+                const res = await fetch('/api/sessions/heartbeat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        registrationId: user.id,
+                        activeSessionId: user.activeSessionId
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.valid === false) {
+                        setError("You have opened the session in another tab/device. This connection has been closed.");
+                        if (jitsiApi) jitsiApi.dispose();
+                    }
+                }
+            } catch (e) { console.error(e); }
+        };
+
+        const interval = setInterval(() => {
+            fetchSettings();
+            checkHeartbeat();
+        }, 5000);
         return () => clearInterval(interval);
-    }, [session.id]);
+    }, [session.id, user.id, user.activeSessionId, jitsiApi]);
 
     useEffect(() => {
         if (!jitsiApi || !modSettings) return;
