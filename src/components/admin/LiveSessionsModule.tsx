@@ -16,7 +16,10 @@ import {
     Check,
     X,
     Eye,
-    ExternalLink
+    ExternalLink,
+    Mail as MailIcon,
+    MessageSquare,
+    Send
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import SessionCreateEditModal from "./SessionCreateEditModal";
@@ -59,6 +62,8 @@ export default function LiveSessionsModule() {
     const [viewingRegistrations, setViewingRegistrations] = useState<Session | null>(null);
     const [registrations, setRegistrations] = useState<Registration[]>([]);
     const [loadingRegistrations, setLoadingRegistrations] = useState(false);
+    const [resending, setResending] = useState(false);
+    const [searchRegistrations, setSearchRegistrations] = useState("");
 
     useEffect(() => {
         fetchSessions();
@@ -90,10 +95,6 @@ export default function LiveSessionsModule() {
         }
     };
 
-    const filteredSessions = sessions.filter(s =>
-        s.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
     const fetchRegistrations = async (sessionId: string) => {
         setLoadingRegistrations(true);
         try {
@@ -113,6 +114,80 @@ export default function LiveSessionsModule() {
         setViewingRegistrations(session);
         fetchRegistrations(session.id);
     };
+
+    const handleResendEmails = async () => {
+        if (!viewingRegistrations) return;
+        if (!window.confirm("Resend confirmation emails to ALL confirmed registrants?")) return;
+
+        setResending(true);
+        try {
+            const res = await fetch("/api/sessions/admin/resend-emails", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sessionId: viewingRegistrations.id })
+            });
+            const data = await res.json();
+            if (res.ok) alert(data.message);
+            else alert(data.error || "Failed to resend emails");
+        } catch (error) {
+            alert("An error occurred");
+        } finally {
+            setResending(false);
+        }
+    };
+
+    const handleResendSingleEmail = async (reg: Registration) => {
+        if (!viewingRegistrations) return;
+        setResending(true);
+        try {
+            const res = await fetch("/api/sessions/admin/resend-emails", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    sessionId: viewingRegistrations.id,
+                    registrationId: reg.id
+                })
+            });
+            if (res.ok) alert(`Email sent to ${reg.userName}`);
+            else alert("Failed to send email");
+        } catch (error) {
+            alert("An error occurred");
+        } finally {
+            setResending(false);
+        }
+    };
+
+    const handleDeleteRegistration = async (regId: string) => {
+        if (!window.confirm("Delete this registration?")) return;
+        try {
+            const res = await fetch(`/api/sessions/admin/registrations?id=${regId}`, {
+                method: "DELETE"
+            });
+            if (res.ok && viewingRegistrations) {
+                fetchRegistrations(viewingRegistrations.id);
+                fetchSessions(); // Update counts
+            }
+        } catch (error) {
+            alert("Failed to delete");
+        }
+    };
+
+    const handleWhatsApp = (reg: Registration) => {
+        if (!reg.userMobile) return;
+        const cleanMobile = reg.userMobile.replace(/\D/g, '');
+        const message = `Hello ${reg.userName}, this is regarding your registration for ${viewingRegistrations?.title}. Here is your meeting link: ${viewingRegistrations?.meetingLink}`;
+        window.open(`https://wa.me/${cleanMobile}?text=${encodeURIComponent(message)}`, '_blank');
+    };
+
+    const filteredSessions = sessions.filter(s =>
+        s.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const filteredRegistrations = registrations.filter(reg =>
+        reg.userName.toLowerCase().includes(searchRegistrations.toLowerCase()) ||
+        reg.userEmail.toLowerCase().includes(searchRegistrations.toLowerCase()) ||
+        (reg.userMobile || "").includes(searchRegistrations)
+    );
 
     if (loading) {
         return (
@@ -300,9 +375,32 @@ export default function LiveSessionsModule() {
                                     <h2 className="text-xl font-black text-gray-900 tracking-tight">Registrations</h2>
                                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{viewingRegistrations.title}</p>
                                 </div>
-                                <button onClick={() => setViewingRegistrations(null)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
-                                    <X size={20} />
-                                </button>
+                                <div className="flex items-center gap-4">
+                                    <button
+                                        onClick={handleResendEmails}
+                                        disabled={resending || registrations.length === 0}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-black uppercase tracking-wider hover:bg-primary hover:text-white transition-all disabled:opacity-50 disabled:pointer-events-none"
+                                    >
+                                        {resending ? <Loader2 size={14} className="animate-spin" /> : <Globe size={14} />}
+                                        Resend All Confirmations
+                                    </button>
+                                    <button onClick={() => setViewingRegistrations(null)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="p-6 border-b border-gray-100 bg-gray-50/30 flex flex-col md:flex-row gap-4">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                                    <input
+                                        type="search"
+                                        placeholder="Search by name, email, or mobile..."
+                                        className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:ring-2 ring-primary/20 transition-all font-medium"
+                                        value={searchRegistrations}
+                                        onChange={(e) => setSearchRegistrations(e.target.value)}
+                                    />
+                                </div>
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-6">
@@ -320,25 +418,22 @@ export default function LiveSessionsModule() {
                                         <thead>
                                             <tr className="text-[10px] font-black uppercase tracking-wider text-gray-400 border-b border-gray-100">
                                                 <th className="py-3 pl-2 text-left text-[10px] font-black uppercase tracking-wider text-gray-500">User Info</th>
-                                                <th className="py-3 text-left text-[10px] font-black uppercase tracking-wider text-gray-500">Payment ID</th>
-                                                <th className="py-3 text-left text-[10px] font-black uppercase tracking-wider text-gray-500">Order ID</th>
-                                                <th className="pb-3">Status</th>
-                                                <th className="pb-3 pr-2 text-right">Registered At</th>
+                                                <th className="py-3 text-left text-[10px] font-black uppercase tracking-wider text-gray-500">Payment</th>
+                                                <th className="py-3 text-left text-[10px] font-black uppercase tracking-wider text-gray-500">Status</th>
+                                                <th className="py-3 text-right text-[10px] font-black uppercase tracking-wider text-gray-500">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="text-sm">
-                                            {registrations.map((reg) => (
+                                            {filteredRegistrations.map((reg) => (
                                                 <tr key={reg.id} className="border-b border-gray-50 group hover:bg-gray-50/50 transition-colors">
                                                     <td className="py-4 pl-2">
                                                         <div className="font-bold text-gray-900">{reg.userName}</div>
                                                         <div className="text-xs text-gray-500">{reg.userEmail}</div>
-                                                        {reg.userMobile && <div className="text-xs text-gray-400">{reg.userMobile}</div>}
+                                                        {reg.userMobile && <div className="text-xs text-gray-400 font-medium">{reg.userMobile}</div>}
                                                     </td>
-                                                    <td className="py-4 font-mono text-xs text-gray-600">
-                                                        {reg.razorpayPaymentId || "-"}
-                                                    </td>
-                                                    <td className="py-4 font-mono text-xs text-gray-600">
-                                                        {reg.razorpayOrderId || "-"}
+                                                    <td className="py-4">
+                                                        <div className="text-[10px] font-bold text-gray-400 uppercase">Order: <span className="text-gray-600 font-mono">{reg.razorpayOrderId || "-"}</span></div>
+                                                        <div className="text-[10px] font-bold text-gray-400 uppercase">Pay: <span className="text-gray-600 font-mono">{reg.razorpayPaymentId || "-"}</span></div>
                                                     </td>
                                                     <td className="py-4">
                                                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide
@@ -350,11 +445,40 @@ export default function LiveSessionsModule() {
                                                             {reg.status}
                                                         </span>
                                                     </td>
-                                                    <td className="py-4 pr-2 text-xs text-gray-400">
-                                                        {new Date(reg.registeredAt).toLocaleDateString()}
+                                                    <td className="py-4 pr-2">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <button
+                                                                onClick={() => handleResendSingleEmail(reg)}
+                                                                title="Resend Email"
+                                                                className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                                                            >
+                                                                <MailIcon size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleWhatsApp(reg)}
+                                                                title="Open WhatsApp"
+                                                                className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                                                            >
+                                                                <MessageSquare size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeleteRegistration(reg.id)}
+                                                                title="Delete Registration"
+                                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))}
+                                            {filteredRegistrations.length === 0 && registrations.length > 0 && (
+                                                <tr>
+                                                    <td colSpan={4} className="py-12 text-center text-gray-400 italic">
+                                                        No results match your search.
+                                                    </td>
+                                                </tr>
+                                            )}
                                         </tbody>
                                     </table>
                                 )}
