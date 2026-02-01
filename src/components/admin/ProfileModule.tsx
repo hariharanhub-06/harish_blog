@@ -28,7 +28,7 @@ export default function ProfileModule() {
                 // If it's a new/empty profile, use the professional defaults from the main page
                 setProfile(data?.id ? data : {
                     name: "Hari Haran Jeyaramamoorthy",
-                    headline: "Web/App Developer | Business Consultant | Job Placement Expert",
+                    headline: "Web/App Developer | Business Consultant | Job Placement Expert | Operations & Partnerships Manager | Snack Business Owner | Project Management",
                     about: "Passionate developer and business strategist focused on building innovative solutions.",
                     location: "Tamil Nadu, India",
                     avatarUrl: "/hari_photo.png",
@@ -36,7 +36,7 @@ export default function ProfileModule() {
                     aboutImageUrl: null,
                     audioUrl: null,
                     featuredVideoUrl: null,
-                    socialLinks: { linkedin: "", github: "", twitter: "", instagram: "" },
+                    socialLinks: { linkedin: "https://linkedin.com/in/hari-haran-j", github: "https://github.com/hari-haran-j", twitter: "", instagram: "" },
                     stats: [
                         { label: "Years Experience", value: "3+", icon: "Briefcase" },
                         { label: "Projects Completed", value: "10+", icon: "Code" },
