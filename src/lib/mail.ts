@@ -9,15 +9,23 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, text, html }: EmailOptions) {
     // These environment variables should be configured in your .env file
-    console.log(`Setting up SMTP transporter for ${process.env.SMTP_HOST} with user ${process.env.SMTP_USER}`);
+    const smtpPort = Number(process.env.SMTP_PORT) || 587;
+    const isSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true";
+
+    console.log(`Setting up SMTP transporter for ${process.env.SMTP_HOST} on port ${smtpPort} (Secure: ${isSecure})`);
+
     const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT) || 587,
-        secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+        port: smtpPort,
+        secure: isSecure,
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
         },
+        // Standard timeout settings for better reliability
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
     });
 
     try {

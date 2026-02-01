@@ -37,9 +37,11 @@ export async function POST(req: Request) {
         // 3. Loop and send (sequentially for reliability, though parallel is faster)
         let successCount = 0;
         let failCount = 0;
+        let lastError = "";
 
         for (const reg of registrations) {
             const emailResult = await sendEmail({
+                // ... same options
                 to: reg.userEmail,
                 subject: `Registration Confirmed: ${session.title}`,
                 text: `Hello ${reg.userName},\n\nYour registration for ${session.title} is confirmed.\n\nMeeting Link: ${session.meetingLink}\nDate: ${new Date(session.startTime).toLocaleString()}\n\nSee you there!`,
@@ -105,13 +107,19 @@ export async function POST(req: Request) {
                 `
             });
 
-            if (emailResult.success) successCount++;
-            else failCount++;
+            if (emailResult.success) {
+                successCount++;
+            } else {
+                failCount++;
+                lastError = (emailResult.error as Error)?.message || "Unknown SMTP Error";
+            }
         }
 
         return NextResponse.json({
-            success: true,
-            message: `Batch send complete. Success: ${successCount}, Failed: ${failCount}`,
+            success: failCount === 0,
+            message: failCount > 0
+                ? `Batch Send: ${successCount} sent, ${failCount} FAILED. Error: ${lastError}`
+                : `Successfully sent emails to ${successCount} registrants.`,
             counts: { success: successCount, failed: failCount }
         });
 
