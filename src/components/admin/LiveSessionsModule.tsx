@@ -73,9 +73,14 @@ export default function LiveSessionsModule() {
     const fetchSessions = async () => {
         try {
             const res = await fetch("/api/sessions/admin");
+            console.log("[LiveSessionsModule] Fetch status:", res.status);
             if (res.ok) {
                 const data = await res.json();
+                console.log("[LiveSessionsModule] Fetched data:", data);
                 setSessions(data);
+            } else {
+                const text = await res.text();
+                console.error("[LiveSessionsModule] Fetch failed:", text);
             }
         } catch (error) {
             console.error("Failed to fetch sessions:", error);
@@ -214,13 +219,21 @@ export default function LiveSessionsModule() {
                     </h2>
                     <p className="text-sm text-gray-500 font-medium">Host paid webinars and masterclasses</p>
                 </div>
-                <button
-                    onClick={() => { setEditingSession(null); setIsCreateModalOpen(true); }}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-bold text-xs shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
-                >
-                    <Plus size={14} />
-                    Create Session
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={fetchSessions}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold text-xs hover:bg-gray-200 transition-all"
+                    >
+                        Refresh
+                    </button>
+                    <button
+                        onClick={() => { setEditingSession(null); setIsCreateModalOpen(true); }}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-bold text-xs shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                    >
+                        <Plus size={14} />
+                        Create Session
+                    </button>
+                </div>
             </div>
 
             {/* Search */}

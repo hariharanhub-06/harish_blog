@@ -13,6 +13,7 @@ export async function GET() {
                 registrations: true
             }
         });
+        console.log(`[API/SESSIONS/ADMIN] Fetched ${sessions.length} sessions`);
         return NextResponse.json(sessions);
     } catch (error) {
         console.error("Failed to fetch sessions:", error);
