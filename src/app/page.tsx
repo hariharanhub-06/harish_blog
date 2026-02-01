@@ -5,10 +5,11 @@ import { db } from "@/db";
 
 // Enable Incremental Static Regeneration (ISR)
 // Revalidate every 0 seconds to ensure fresh data during debugging
-export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  console.log("Server: Rendering Home Page at " + new Date().toISOString());
+
   // Fetch all data with safe fallbacks
   let dbProfile: any = null;
   let dbProjects: any[] = [];
