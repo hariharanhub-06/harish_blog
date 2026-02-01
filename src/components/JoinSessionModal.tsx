@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, ArrowRight, Video, Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 interface JoinSessionModalProps {
     sessionId: string;
@@ -14,12 +15,46 @@ interface JoinSessionModalProps {
 export default function JoinSessionModal({ sessionId, sessionTitle, isOpen, onClose }: JoinSessionModalProps) {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const searchParams = useSearchParams();
 
-    const handleJoin = (e: React.FormEvent) => {
+    // Auto-fill and show error if redirected back
+    useEffect(() => {
+        if (isOpen) {
+            const err = searchParams.get("joinError");
+            const urlEmail = searchParams.get("email");
+            if (err === "unauthorized") {
+                setError("Access Denied. This email is not registered for this session.");
+                if (urlEmail) setEmail(urlEmail);
+            }
+        }
+    }, [isOpen, searchParams]);
+
+    const handleJoin = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email) return;
+
         setLoading(true);
-        window.location.href = `/live/${sessionId}?email=${encodeURIComponent(email)}`;
+        setError(null);
+
+        try {
+            const res = await fetch("/api/sessions/check-registration", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sessionId, email })
+            });
+            const data = await res.json();
+
+            if (data.registered) {
+                window.location.href = `/live/${sessionId}?email=${encodeURIComponent(email)}`;
+            } else {
+                setError(data.error || "Access Denied. Please ensure you use the registered email.");
+                setLoading(false);
+            }
+        } catch (err) {
+            setError("Something went wrong. Please try again.");
+            setLoading(false);
+        }
     };
 
     return (
@@ -59,11 +94,6 @@ export default function JoinSessionModal({ sessionId, sessionTitle, isOpen, onCl
 
                             <form onSubmit={handleJoin} className="space-y-4 text-left">
                                 <div className="space-y-3">
-                                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl">
-                                        <p className="text-[9px] text-amber-700 font-black uppercase tracking-widest leading-relaxed text-center">
-                                            Important: You can only join using the email address used during registration.
-                                        </p>
-                                    </div>
                                     <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1"> Registered Email Address</label>
                                     <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
@@ -71,11 +101,23 @@ export default function JoinSessionModal({ sessionId, sessionTitle, isOpen, onCl
                                             required
                                             type="email"
                                             placeholder="Enter your email"
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent rounded-2xl font-bold text-gray-900 outline-none focus:border-red-500/20 focus:bg-white transition-all text-sm"
+                                            className={`w-full pl-12 pr-4 py-4 bg-gray-50 border-2 rounded-2xl font-bold text-gray-900 outline-none transition-all text-sm ${error ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-red-500/20 focus:bg-white'}`}
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            onChange={(e) => {
+                                                setEmail(e.target.value);
+                                                if (error) setError(null);
+                                            }}
                                         />
                                     </div>
+                                    {error && (
+                                        <motion.p
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="text-[10px] text-red-600 font-black uppercase tracking-widest ml-1"
+                                        >
+                                            {error}
+                                        </motion.p>
+                                    )}
                                 </div>
 
                                 <button

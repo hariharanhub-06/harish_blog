@@ -138,24 +138,33 @@ export default function LiveRoomClient({ session, user }: Props) {
                         disableModeratorIndicator: true,
                         startWithVideoMuted: true,
                         enableEmailInStats: false,
+                        disableDeepLinking: true,
+                        prejoinPageEnabled: false,
+                        hideModeratorIndicator: true,
                         toolbarButtons: [
                             'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
                             'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
                             'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                            'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
-                            'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone',
+                            'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
+                            'tileview', 'videobackgroundblur', 'download', 'help',
                             'e2ee'
                         ],
+                        remoteVideoMenu: {
+                            disableKick: true,
+                        },
                     }}
                     interfaceConfigOverwrite={{
                         DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                        SHOW_JITSI_WATERMARK: false,
+                        HIDE_INVITE_ON_PAGE_START: true,
+                        MOBILE_APP_PROMO: false,
                     }}
                     userInfo={{
                         displayName: user.name,
                         email: user.email
                     }}
                     onApiReady={(externalApi) => {
-                        // We can add custom event listeners here if needed
+                        // Custom handlers
                     }}
                     getIFrameRef={(iframeRef) => {
                         iframeRef.style.height = '100%';

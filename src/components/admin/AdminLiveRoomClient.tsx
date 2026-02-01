@@ -148,6 +148,8 @@ export default function AdminLiveRoomClient({ session }: Props) {
                         enableWelcomePage: false,
                         enableClosePage: false,
                         disableModeratorIndicator: false,
+                        disableDeepLinking: true,
+                        prejoinPageEnabled: false,
                         toolbarButtons: [
                             'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
                             'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
@@ -163,7 +165,6 @@ export default function AdminLiveRoomClient({ session }: Props) {
                     }}
                     onApiReady={(externalApi) => {
                         // Admin-only event or API calls
-                        // E.g. externalApi.executeCommand('password', 'your-session-password');
                     }}
                     getIFrameRef={(iframeRef) => {
                         iframeRef.style.height = '100%';
