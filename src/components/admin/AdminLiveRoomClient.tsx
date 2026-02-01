@@ -7,10 +7,12 @@ import {
     StreamCall,
     ParticipantView,
     useCallStateHooks,
+    useCall,
     CallingState,
 } from "@stream-io/video-react-sdk";
 import { Chat, Channel, Window, MessageList, MessageInput } from "stream-chat-react";
 import { StreamChat } from "stream-chat";
+import { motion } from "framer-motion";
 import { Loader2, Video, Users, MessageSquare, Shield, Copy, Settings, Layout, Mic, ExternalLink, Hand, Trash2 } from "lucide-react";
 
 interface Props {
@@ -68,10 +70,53 @@ export default function AdminLiveRoomClient({ session }: Props) {
 
     if (!videoClient || !chatClient || !call) {
         return (
-            <div className="h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center space-y-4">
-                    <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Initializing Host Dashboard...</p>
+            <div className="min-h-screen relative flex items-center justify-center bg-gray-50 overflow-hidden">
+                {/* Subtle Background Pattern */}
+                <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+
+                <div className="relative z-10 text-center space-y-8 max-w-md px-6">
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="w-24 h-24 bg-white rounded-[32px] border border-gray-100 flex items-center justify-center mx-auto shadow-2xl shadow-black/5"
+                    >
+                        <Loader2 className="w-10 h-10 animate-spin text-gray-900" />
+                    </motion.div>
+
+                    <div className="space-y-3">
+                        <motion.h2
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="text-gray-900 text-xl font-black uppercase tracking-tight"
+                        >
+                            Host Dashboard
+                        </motion.h2>
+                        <motion.p
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.3 }}
+                            className="text-gray-400 font-bold text-[10px] uppercase tracking-[0.3em]"
+                        >
+                            {session.title}
+                        </motion.p>
+                    </div>
+
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="pt-8 flex flex-col items-center gap-3"
+                    >
+                        <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100/50">
+                            <Shield size={12} />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Secure Admin Access</span>
+                        </div>
+                        <p className="text-gray-400 font-medium text-[9px] uppercase tracking-[0.2em] animate-pulse">
+                            Initializing interactive broadcast environment...
+                        </p>
+                    </motion.div>
                 </div>
             </div>
         );
@@ -164,7 +209,7 @@ export default function AdminLiveRoomClient({ session }: Props) {
                     {/* Chat Sidebar */}
                     <aside className="w-[380px] bg-white border-l border-gray-100 flex flex-col relative z-30">
                         <Chat client={chatClient} theme="str-chat__theme-light">
-                            <Channel channel={chatClient.channel('messaging', session.id, { name: session.title })}>
+                            <Channel channel={chatClient.channel('messaging', session.id)}>
                                 <Window>
                                     <div className="p-6 border-b border-gray-50 bg-gray-50/50">
                                         <div className="flex items-center justify-between mb-4">
@@ -228,7 +273,7 @@ function AdminStagePreview() {
 }
 
 function ParticipantManager() {
-    const { useParticipants, useCall } = useCallStateHooks();
+    const { useParticipants } = useCallStateHooks();
     const participants = useParticipants();
     const call = useCall();
 
@@ -245,7 +290,7 @@ function ParticipantManager() {
         }
     };
 
-    if (participants.filter(p => p.id !== 'admin').length === 0) {
+    if (participants.filter(p => p.userId !== 'admin').length === 0) {
         return (
             <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-4 py-20">
                 <Users size={32} strokeWidth={1} className="opacity-20" />
@@ -256,7 +301,7 @@ function ParticipantManager() {
 
     return (
         <div className="space-y-2">
-            {participants.filter(p => p.id !== 'admin').map(p => (
+            {participants.filter(p => p.userId !== 'admin').map(p => (
                 <div key={p.sessionId} className="p-4 bg-gray-50 rounded-2xl flex items-center justify-between group hover:bg-gray-100 transition-colors">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
@@ -265,7 +310,7 @@ function ParticipantManager() {
                         <div>
                             <div className="font-bold text-gray-900 text-sm">{p.name || "Anonymous User"}</div>
                             <div className="flex items-center gap-3">
-                                {p.isMuted ? <Mic size={10} className="text-gray-400" /> : <Mic size={10} className="text-emerald-500" />}
+                                {p.audioMuted ? <Mic size={10} className="text-gray-400" /> : <Mic size={10} className="text-emerald-500" />}
                                 <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Lobby</span>
                             </div>
                         </div>
