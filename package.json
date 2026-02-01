@@ -29,6 +29,7 @@
         "lucide-react": "0.468.0",
         "next": "15.1.11",
         "nodemailer": "^6.9.16",
+        "razorpay": "^2.9.6",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-easy-crop": "^5.5.6",
