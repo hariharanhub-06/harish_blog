@@ -5,17 +5,17 @@ import { redirect } from "next/navigation";
 import LiveRoomClient from "@/components/live/LiveRoomClient";
 
 interface Props {
-    params: {
+    params: Promise<{
         sessionId: string;
-    };
-    searchParams: {
+    }>;
+    searchParams: Promise<{
         email?: string;
-    };
+    }>;
 }
 
 export default async function LiveSessionPage({ params, searchParams }: Props) {
-    const { sessionId } = params;
-    const { email } = searchParams;
+    const { sessionId } = await params;
+    const { email } = await searchParams;
 
     // 1. Fetch Session
     const session = await db.query.liveSessions.findFirst({
