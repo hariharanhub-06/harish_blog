@@ -30,7 +30,7 @@ const navLinks = [
             { name: "Type Test", href: "/#typing-test", icon: Keyboard, color: "text-orange-500", creative: true }
         ]
     },
-    { name: "Live Session", href: "/sessions", icon: Video },
+    { name: "Live Session", href: "/#sessions", icon: Video },
     { name: "Contact", href: "#contact", icon: Mail },
 ];
 
