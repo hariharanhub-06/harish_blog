@@ -46,7 +46,7 @@ export default function JoinSessionModal({ sessionId, sessionTitle, isOpen, onCl
             const data = await res.json();
 
             if (data.registered) {
-                window.location.href = `/live/${sessionId}?email=${encodeURIComponent(email)}`;
+                window.location.href = `/live/${sessionId}?token=${data.token}`;
             } else {
                 setError(data.error || "Access Denied. Please ensure you use the registered email.");
                 setLoading(false);
