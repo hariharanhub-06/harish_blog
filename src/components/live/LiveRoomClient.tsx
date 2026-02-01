@@ -29,8 +29,8 @@ export default function LiveRoomClient({ session, user }: Props) {
             try {
                 const res = await fetch(`/api/sessions/${session.id}/settings`);
                 const data = await res.json();
-                if (data.moderatorSettings) {
-                    setModSettings(data.moderatorSettings);
+                if (data && typeof data.disableAudio !== 'undefined') {
+                    setModSettings(data);
                 }
             } catch (e) {
                 console.error("Polling error:", e);
@@ -53,8 +53,18 @@ export default function LiveRoomClient({ session, user }: Props) {
         ];
 
         let filteredButtons = [...baseButtons];
-        if (modSettings.disableAudio) filteredButtons = filteredButtons.filter(b => b !== 'microphone');
-        if (modSettings.disableVideo) filteredButtons = filteredButtons.filter(b => b !== 'camera');
+        if (modSettings.disableAudio) {
+            filteredButtons = filteredButtons.filter(b => b !== 'microphone');
+            jitsiApi.isAudioMuted().then((muted: boolean) => {
+                if (!muted) jitsiApi.executeCommand('toggleAudio');
+            });
+        }
+        if (modSettings.disableVideo) {
+            filteredButtons = filteredButtons.filter(b => b !== 'camera');
+            jitsiApi.isVideoMuted().then((muted: boolean) => {
+                if (!muted) jitsiApi.executeCommand('toggleVideo');
+            });
+        }
         if (modSettings.disableScreenSharing) filteredButtons = filteredButtons.filter(b => b !== 'desktop');
         if (modSettings.disableChat) filteredButtons = filteredButtons.filter(b => b !== 'chat');
 

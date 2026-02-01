@@ -232,9 +232,9 @@ export default function AdminLiveRoomClient({ session }: Props) {
                 </div>
 
                 {/* Right Panel: Host Moderation Sidebar */}
-                <div className="w-80 bg-white border-l border-gray-100 flex flex-col shrink-0 overflow-y-auto hidden xl:flex">
-                    <div className="p-6 border-b border-gray-50 bg-gray-50/50">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Moderation Policy</h3>
+                <div className="w-72 bg-white border-l border-gray-100 flex flex-col shrink-0 overflow-y-auto hidden xl:flex">
+                    <div className="p-4 border-b border-gray-50 bg-gray-50/50">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Moderation Policy</h3>
                         <div className="space-y-4">
                             {[
                                 { id: 'disableAudio', label: 'Lock Microphones', icon: Mic },
@@ -261,27 +261,27 @@ export default function AdminLiveRoomClient({ session }: Props) {
                         </div>
                     </div>
 
-                    <div className="p-6 flex-1">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Quick Actions</h3>
-                        <div className="space-y-3">
+                    <div className="p-4 flex-1">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Quick Actions</h3>
+                        <div className="space-y-2">
                             <button
                                 onClick={() => handleMuteAll('audio')}
-                                className="w-full flex items-center justify-between p-4 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all active:scale-95 group"
+                                className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
                             >
                                 <div className="flex items-center gap-3">
                                     <Mic size={16} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-left leading-tight font-sans">Mute All<br />Audio</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Audio</span>
                                 </div>
                                 <X size={14} className="opacity-40 group-hover:opacity-100" />
                             </button>
 
                             <button
                                 onClick={() => handleMuteAll('video')}
-                                className="w-full flex items-center justify-between p-4 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all active:scale-95 group"
+                                className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
                             >
                                 <div className="flex items-center gap-3">
                                     <Video size={16} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-left leading-tight font-sans">Mute All<br />Video</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Video</span>
                                 </div>
                                 <X size={14} className="opacity-40 group-hover:opacity-100" />
                             </button>
