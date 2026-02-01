@@ -2,7 +2,7 @@ export default function imageKitLoader({ src, width, quality }: { src: string; w
     if (src.startsWith("/")) return src; // Local images
     if (!src.includes("ik.imagekit.io")) return src; // Not ImageKit images
 
-    const params = [`w-${width}`];
+    const params = [`w-${width}`, 'f-auto'];
     if (quality) {
         params.push(`q-${quality}`);
     }

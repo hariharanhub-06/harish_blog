@@ -13,7 +13,10 @@ export async function POST(req: Request) {
 
         const registration = await db.query.sessionRegistrations.findFirst({
             where: eq(sessionRegistrations.id, registrationId),
-            columns: { activeSessionId: true }
+            columns: {
+                activeSessionId: true,
+                lastActiveAt: true
+            }
         });
 
         if (!registration) {
@@ -24,10 +27,16 @@ export async function POST(req: Request) {
         const isValid = registration.activeSessionId === activeSessionId;
 
         if (isValid) {
-            // Update lastActiveAt to keep the session alive
-            await db.update(sessionRegistrations)
-                .set({ lastActiveAt: new Date() })
-                .where(eq(sessionRegistrations.id, registrationId));
+            // OPTIMIZATION: Only write to DB if last update was > 2 mins ago
+            // This drastically reduces Neon DB Data Transfer and Compute usage
+            const lastUpdate = registration.lastActiveAt ? new Date(registration.lastActiveAt).getTime() : 0;
+            const now = Date.now();
+
+            if (now - lastUpdate > 120000) { // 2 minutes
+                await db.update(sessionRegistrations)
+                    .set({ lastActiveAt: new Date() })
+                    .where(eq(sessionRegistrations.id, registrationId));
+            }
         }
 
         return NextResponse.json({ valid: isValid });

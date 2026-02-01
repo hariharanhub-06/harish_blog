@@ -64,7 +64,7 @@ export default function LiveRoomClient({ session, user }: Props) {
         const interval = setInterval(() => {
             fetchSettings();
             checkHeartbeat();
-        }, 5000);
+        }, 15000); // 15s interval to save bandwidth (4GB limit)
         return () => clearInterval(interval);
     }, [session.id, user.id, user.activeSessionId, jitsiApi]);
 
