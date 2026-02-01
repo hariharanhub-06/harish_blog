@@ -58,7 +58,12 @@ export default function JoinSessionModal({ sessionId, sessionTitle, isOpen, onCl
                             </p>
 
                             <form onSubmit={handleJoin} className="space-y-4 text-left">
-                                <div className="space-y-2">
+                                <div className="space-y-3">
+                                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl">
+                                        <p className="text-[9px] text-amber-700 font-black uppercase tracking-widest leading-relaxed text-center">
+                                            Important: You can only join using the email address used during registration.
+                                        </p>
+                                    </div>
                                     <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1"> Registered Email Address</label>
                                     <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
@@ -89,8 +94,8 @@ export default function JoinSessionModal({ sessionId, sessionTitle, isOpen, onCl
                                 </button>
                             </form>
 
-                            <p className="mt-8 text-[10px] text-red-500 font-black uppercase tracking-widest border-t border-red-100 pt-6">
-                                Note: Only the email address used during registration can access this live session.
+                            <p className="mt-8 text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                                Check your confirmation email for the join link.
                             </p>
                         </div>
                     </motion.div>
