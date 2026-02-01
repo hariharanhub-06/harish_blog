@@ -10,13 +10,13 @@ interface Props {
         sessionId: string;
     }>;
     searchParams: Promise<{
-        email?: string;
+        token?: string;
     }>;
 }
 
 export default async function LiveSessionPage({ params, searchParams }: Props) {
     const { sessionId } = await params;
-    const { email } = await searchParams;
+    const { token } = await searchParams;
 
     // 1. Fetch Session
     const session = await db.query.liveSessions.findFirst({
@@ -48,20 +48,30 @@ export default async function LiveSessionPage({ params, searchParams }: Props) {
         );
     }
 
-    // 2. Access Protection
-    const registration = email ? await db.query.sessionRegistrations.findFirst({
+    // 2. Access Protection via Token
+    const registration = token ? await db.query.sessionRegistrations.findFirst({
         where: and(
             eq(sessionRegistrations.sessionId, sessionId),
-            eq(sessionRegistrations.userEmail, email),
+            eq(sessionRegistrations.joinToken, token),
             eq(sessionRegistrations.status, "confirmed")
         )
     }) : null;
 
     if (!registration) {
-        // Instead of showing a denial page here, we redirect back to home
-        // The modal on the home page will handle the "wrong email" feedback
-        redirect(`/?joinError=unauthorized&sessionId=${sessionId}&email=${email || ""}`);
+        redirect(`/?joinError=unauthorized&sessionId=${sessionId}`);
     }
+
+    // 3. Concurrent Session Protection
+    // Create a new session ID for this window/device
+    const currentActiveId = crypto.randomUUID();
+
+    // Update the registration with the new active session ID
+    await db.update(sessionRegistrations)
+        .set({
+            activeSessionId: currentActiveId,
+            lastActiveAt: new Date()
+        })
+        .where(eq(sessionRegistrations.id, registration.id));
 
 
     return (
@@ -71,7 +81,8 @@ export default async function LiveSessionPage({ params, searchParams }: Props) {
                 user={{
                     id: registration.id,
                     name: registration.userName,
-                    email: registration.userEmail
+                    email: registration.userEmail,
+                    activeSessionId: currentActiveId
                 }}
             />
         </div>

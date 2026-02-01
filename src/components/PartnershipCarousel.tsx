@@ -53,32 +53,28 @@ export default function PartnershipCarousel() {
         }
     }, [partnerships.length]);
 
-    const handleMouseDown = (e: React.MouseEvent) => {
-        if (!containerRef.current) return;
-        setIsDragging(true);
-        setStartX(e.pageX - containerRef.current.offsetLeft);
-        setScrollLeft(containerRef.current.scrollLeft);
-        setIsPaused(true);
-    };
+    const handleTap = (e: React.MouseEvent) => {
+        if (!containerRef.current || partnerships.length === 0) return;
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (!isDragging || !containerRef.current) return;
-        e.preventDefault();
-        const x = e.pageX - containerRef.current.offsetLeft;
-        const walk = (x - startX);
-        containerRef.current.scrollLeft = scrollLeft - walk;
-    };
+        const { clientWidth, scrollLeft } = containerRef.current;
+        const clickX = e.clientX - containerRef.current.getBoundingClientRect().left;
 
-    const handleMouseUp = () => {
-        setIsDragging(false);
-        setIsPaused(false);
-    };
+        // Find the width of a single item including gap
+        const itemWidth = window.innerWidth >= 768 ? 324 : 264; // 300+mx-3*2 or 240+mx-3*2
 
-    const handleMouseLeave = () => {
-        if (isDragging) {
-            setIsDragging(false);
+        if (clickX < clientWidth / 2) {
+            // Tap Left
+            containerRef.current.scrollTo({
+                left: scrollLeft - itemWidth,
+                behavior: "smooth"
+            });
+        } else {
+            // Tap Right
+            containerRef.current.scrollTo({
+                left: scrollLeft + itemWidth,
+                behavior: "smooth"
+            });
         }
-        setIsPaused(false);
     };
 
     // Drift Engine
@@ -115,15 +111,13 @@ export default function PartnershipCarousel() {
 
             <div
                 ref={containerRef}
-                className={`relative group flex overflow-x-auto scrollbar-hide ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+                className="relative group flex overflow-x-auto scrollbar-hide cursor-pointer"
                 onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={handleMouseLeave}
+                onMouseLeave={() => setIsPaused(false)}
                 onScroll={handleScroll}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
+                onClick={handleTap}
                 style={{
-                    scrollBehavior: (isDragging || !isPaused) ? 'auto' : 'smooth',
+                    scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch' // Ensure momentum scroll on iOS
                 }}
             >

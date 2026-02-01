@@ -17,32 +17,29 @@ export function InfiniteCarousel({
     const [scrollLeft, setScrollLeft] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const handleMouseDown = (e: React.MouseEvent) => {
-        if (!containerRef.current) return;
-        setIsDragging(true);
-        setStartX(e.pageX - containerRef.current.offsetLeft);
-        setScrollLeft(containerRef.current.scrollLeft);
-        setIsPaused(true);
-    };
+    const handleTap = (e: React.MouseEvent) => {
+        if (!containerRef.current || items.length === 0) return;
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (!isDragging || !containerRef.current) return;
-        e.preventDefault();
-        const x = e.pageX - containerRef.current.offsetLeft;
-        const walk = (x - startX) * 2;
-        containerRef.current.scrollLeft = scrollLeft - walk;
-    };
+        const { clientWidth, scrollLeft } = containerRef.current;
+        const clickX = e.clientX - containerRef.current.getBoundingClientRect().left;
 
-    const handleMouseUp = () => {
-        setIsDragging(false);
-        setIsPaused(false);
-    };
+        // Find the width of a single item including gap
+        const firstItem = containerRef.current.querySelector('.shrink-0') as HTMLElement;
+        const itemWidth = firstItem ? firstItem.offsetWidth + 48 : clientWidth; // 48 is the gap-12 (12*4px)
 
-    const handleMouseLeave = () => {
-        if (isDragging) {
-            setIsDragging(false);
+        if (clickX < clientWidth / 2) {
+            // Tap Left
+            containerRef.current.scrollTo({
+                left: scrollLeft - itemWidth,
+                behavior: "smooth"
+            });
+        } else {
+            // Tap Right
+            containerRef.current.scrollTo({
+                left: scrollLeft + itemWidth,
+                behavior: "smooth"
+            });
         }
-        setIsPaused(false);
     };
 
     const handleScroll = () => {
@@ -82,14 +79,12 @@ export function InfiniteCarousel({
             <div
                 ref={containerRef}
                 onScroll={handleScroll}
-                className={`overflow-x-auto whitespace-nowrap flex ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} scrollbar-hide`}
+                className="overflow-x-auto whitespace-nowrap flex cursor-pointer scrollbar-hide"
                 onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={handleMouseLeave}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
+                onMouseLeave={() => setIsPaused(false)}
+                onClick={handleTap}
                 style={{
-                    scrollBehavior: (isDragging || !isPaused) ? 'auto' : 'smooth',
+                    scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch'
                 }}
             >

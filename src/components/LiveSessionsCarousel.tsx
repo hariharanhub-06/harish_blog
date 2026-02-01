@@ -44,9 +44,22 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
 
     const scroll = (direction: "left" | "right") => {
         if (scrollContainerRef.current) {
-            const { scrollLeft, clientWidth } = scrollContainerRef.current;
-            const scrollTo = direction === "left" ? scrollLeft - clientWidth / 3 : scrollLeft + clientWidth / 3;
+            const { scrollLeft } = scrollContainerRef.current;
+            const itemWidth = window.innerWidth >= 768 ? 200 : 170; // 190+10 or 160+10
+            const scrollTo = direction === "left" ? scrollLeft - itemWidth : scrollLeft + itemWidth;
             scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
+        }
+    };
+
+    const handleTap = (e: React.MouseEvent) => {
+        if (!scrollContainerRef.current) return;
+        const { clientWidth } = scrollContainerRef.current;
+        const clickX = e.clientX - scrollContainerRef.current.getBoundingClientRect().left;
+
+        if (clickX < clientWidth / 2) {
+            scroll("left");
+        } else {
+            scroll("right");
         }
     };
 
@@ -84,7 +97,8 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
                 {/* Horizontal Layout - Hyper Dense */}
                 <div
                     ref={scrollContainerRef}
-                    className="flex gap-2.5 overflow-x-auto pb-3 snap-x snap-mandatory no-scrollbar scroll-smooth"
+                    onClick={handleTap}
+                    className="flex gap-2.5 overflow-x-auto pb-3 snap-x snap-mandatory no-scrollbar scroll-smooth cursor-pointer"
                 >
                     {sessions.map((session) => (
                         <motion.div
