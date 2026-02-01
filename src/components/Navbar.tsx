@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase, ChevronDown, Monitor, Keyboard, Calendar } from "lucide-react";
+import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase, ChevronDown, Monitor, Keyboard, Calendar, Video } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
@@ -25,7 +25,7 @@ const navLinks = [
         icon: Gamepad2,
         isDropdown: true,
         items: [
-            { name: "Live Sessions", href: "/sessions", icon: Video, color: "text-red-500" },
+            { name: "Live Session", href: "/sessions", icon: Video, color: "text-red-500" },
             { name: "Quiz", href: "/#quiz", icon: Gamepad2, color: "text-blue-500" },
             { name: "Dino Runner", href: "/#dino-runner", icon: Monitor, color: "text-emerald-500" },
             { name: "Type Test", href: "/#typing-test", icon: Keyboard, color: "text-orange-500", creative: true }
