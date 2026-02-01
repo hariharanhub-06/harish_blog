@@ -14,10 +14,7 @@ interface Partnership {
 
 export default function PartnershipCarousel() {
     const [partnerships, setPartnerships] = useState<Partnership[]>([]);
-    const [isDragging, setIsDragging] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [scrollLeft, setScrollLeft] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -32,18 +29,20 @@ export default function PartnershipCarousel() {
     }, []);
 
     // Function to handle seamless loop reset
+    // Function to handle seamless loop reset
     const handleScroll = useCallback(() => {
-        if (!containerRef.current || isDragging) return;
+        if (!containerRef.current) return;
 
         const { scrollLeft, scrollWidth } = containerRef.current;
         const oneThird = scrollWidth / 3;
 
+        // Reset buffer
         if (scrollLeft <= 0) {
             containerRef.current.scrollLeft = oneThird;
         } else if (scrollLeft >= oneThird * 2) {
             containerRef.current.scrollLeft = oneThird;
         }
-    }, [isDragging]);
+    }, []);
 
     // Initial positioning to the middle set
     useEffect(() => {
@@ -59,7 +58,7 @@ export default function PartnershipCarousel() {
         let animationFrameId: number;
 
         const drift = () => {
-            if (containerRef.current && !isPaused && !isDragging) {
+            if (containerRef.current && !isPaused) {
                 containerRef.current.scrollLeft += 1; // Adjust speed as needed
             }
             animationFrameId = requestAnimationFrame(drift);
@@ -67,7 +66,7 @@ export default function PartnershipCarousel() {
 
         animationFrameId = requestAnimationFrame(drift);
         return () => cancelAnimationFrame(animationFrameId);
-    }, [isPaused, isDragging]);
+    }, [isPaused]);
 
     if (partnerships.length === 0) return null;
 
@@ -88,14 +87,13 @@ export default function PartnershipCarousel() {
 
             <div
                 ref={containerRef}
-                className="relative group flex overflow-x-auto scrollbar-hide cursor-pointer"
+                className="relative group flex overflow-x-auto scrollbar-hide"
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={() => setIsPaused(false)}
                 onTouchStart={() => setIsPaused(true)}
                 onTouchEnd={() => setIsPaused(false)}
                 onScroll={handleScroll}
                 style={{
-                    scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch' // Ensure momentum scroll on iOS
                 }}
             >
