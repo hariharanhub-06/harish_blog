@@ -15,6 +15,58 @@ interface Props {
 }
 
 export default function LiveRoomClient({ session, user }: Props) {
+    const [jitsiApi, setJitsiApi] = useState<any>(null);
+    const [modSettings, setModSettings] = useState<any>(session.moderatorSettings || {
+        disableAudio: false,
+        disableVideo: false,
+        disableScreenSharing: false,
+        disableReactions: false,
+        disableChat: false,
+    });
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch(`/api/sessions/${session.id}/settings`);
+                const data = await res.json();
+                if (data.moderatorSettings) {
+                    setModSettings(data.moderatorSettings);
+                }
+            } catch (e) {
+                console.error("Polling error:", e);
+            }
+        };
+
+        const interval = setInterval(fetchSettings, 5000);
+        return () => clearInterval(interval);
+    }, [session.id]);
+
+    useEffect(() => {
+        if (!jitsiApi || !modSettings) return;
+
+        const baseButtons = [
+            'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+            'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
+            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+            'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
+            'tileview', 'videobackgroundblur', 'download', 'help', 'e2ee'
+        ];
+
+        let filteredButtons = [...baseButtons];
+        if (modSettings.disableAudio) filteredButtons = filteredButtons.filter(b => b !== 'microphone');
+        if (modSettings.disableVideo) filteredButtons = filteredButtons.filter(b => b !== 'camera');
+        if (modSettings.disableScreenSharing) filteredButtons = filteredButtons.filter(b => b !== 'desktop');
+        if (modSettings.disableChat) filteredButtons = filteredButtons.filter(b => b !== 'chat');
+
+        jitsiApi.executeCommand('overwriteConfig', {
+            toolbarButtons: filteredButtons,
+            disableReactions: modSettings.disableReactions,
+            remoteVideoMenu: {
+                disableKick: true,
+            },
+        });
+    }, [jitsiApi, modSettings]);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -164,7 +216,7 @@ export default function LiveRoomClient({ session, user }: Props) {
                         email: user.email
                     }}
                     onApiReady={(externalApi) => {
-                        // Custom handlers
+                        setJitsiApi(externalApi);
                     }}
                     getIFrameRef={(iframeRef) => {
                         iframeRef.style.height = '100%';

@@ -614,6 +614,13 @@ export const liveSessions = pgTable("live_sessions", {
   posterUrl: text("poster_url"), // e.g., ImageKit URL
   status: text("status").default("scheduled"), // scheduled, active, completed
   isPublished: boolean("is_published").default(false),
+  moderatorSettings: jsonb("moderator_settings").$default(() => ({
+    disableAudio: false,
+    disableVideo: false,
+    disableScreenSharing: false,
+    disableReactions: false,
+    disableChat: false,
+  })),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
