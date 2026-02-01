@@ -45,6 +45,7 @@ export default function LiveRoomClient({ session, user }: Props) {
     const [chatClient, setChatClient] = useState<StreamChat | null>(null);
     const [call, setCall] = useState<any>(null);
     const [showChat, setShowChat] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const initStream = async () => {
@@ -85,8 +86,9 @@ export default function LiveRoomClient({ session, user }: Props) {
                 await callInstance.join({ create: true });
                 setCall(callInstance);
 
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Stream init error:", error);
+                setError(error.message || "Failed to initialize live room. Please try again later.");
             }
         };
 
@@ -97,6 +99,26 @@ export default function LiveRoomClient({ session, user }: Props) {
             if (chatClient) chatClient.disconnectUser();
         };
     }, [user.id]);
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-[#050505] text-center p-6 space-y-6">
+                <div className="w-20 h-20 bg-red-500/10 rounded-[32px] flex items-center justify-center border border-red-500/20">
+                    <X className="text-red-500" size={32} />
+                </div>
+                <h2 className="text-white text-xl font-black uppercase tracking-tight">Access Error</h2>
+                <p className="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] max-w-sm leading-relaxed">
+                    {error}
+                </p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="px-8 py-3 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-gray-200 transition-all active:scale-95"
+                >
+                    Try Again
+                </button>
+            </div>
+        );
+    }
 
     if (!videoClient || !chatClient || !call) {
         return (
