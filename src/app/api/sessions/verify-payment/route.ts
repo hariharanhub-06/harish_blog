@@ -59,11 +59,14 @@ export async function POST(req: Request) {
         });
 
         if (session) {
+            const origin = req.headers.get("origin") || "https://hariharan.me";
+            const liveLink = `${origin}/live/${session.id}?email=${encodeURIComponent(userData.email)}`;
+
             console.log(`Sending confirmation email to ${userData.email} for session: ${session.title}`);
             const emailResult = await sendEmail({
                 to: userData.email,
                 subject: `Registration Confirmed: ${session.title}`,
-                text: `Hello ${userData.name},\n\nYour registration for ${session.title} is confirmed.\n\nMeeting Link: ${session.meetingLink}\nDate: ${new Date(session.startTime).toLocaleString()}\n\nSee you there!`,
+                text: `Hello ${userData.name},\n\nYour registration for ${session.title} is confirmed.\n\nJoin Link: ${liveLink}\nDate: ${new Date(session.startTime).toLocaleString()}\n\nSee you there!`,
                 html: `
                     <!DOCTYPE html>
                     <html>
@@ -114,7 +117,7 @@ export async function POST(req: Request) {
 
                                 <p style="margin-bottom: 32px;">Please use the button below to join the session at the scheduled time. We recommend joining 5 minutes early to test your audio/video.</p>
                                 
-                                <a href="${session.meetingLink}" class="cta-button">Join Live Session</a>
+                                <a href="${liveLink}" class="cta-button">Join Live Session</a>
                             </div>
                             <div class="footer">
                                 <p>&copy; ${new Date().getFullYear()} Hari Haran Jeyaramamoorthy. All rights reserved.</p>
