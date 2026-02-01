@@ -13,32 +13,45 @@ export async function POST(req: Request) {
             razorpay_payment_id,
             razorpay_signature,
             sessionId,
-            userData // { name, email, mobile }
+            userData, // { name, email, mobile }
+            isFree
         } = body;
 
-        // 1. Verify Signature
-        const bodyData = razorpay_order_id + "|" + razorpay_payment_id;
-        const expectedSignature = crypto
-            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-            .update(bodyData.toString())
-            .digest("hex");
+        if (isFree) {
+            // Bypass Razorpay for free sessions
+            await db.insert(sessionRegistrations).values({
+                sessionId,
+                userName: userData.name,
+                userEmail: userData.email,
+                userMobile: userData.mobile,
+                status: "confirmed",
+                amountPaid: 0
+            });
+        } else {
+            // 1. Verify Signature
+            const bodyData = razorpay_order_id + "|" + razorpay_payment_id;
+            const expectedSignature = crypto
+                .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+                .update(bodyData.toString())
+                .digest("hex");
 
-        if (expectedSignature !== razorpay_signature) {
-            return NextResponse.json({ error: "Invalid Signature" }, { status: 400 });
+            if (expectedSignature !== razorpay_signature) {
+                return NextResponse.json({ error: "Invalid Signature" }, { status: 400 });
+            }
+
+            // 2. Signature Valid! Create Registration
+            await db.insert(sessionRegistrations).values({
+                sessionId,
+                userName: userData.name,
+                userEmail: userData.email,
+                userMobile: userData.mobile,
+                razorpayOrderId: razorpay_order_id,
+                razorpayPaymentId: razorpay_payment_id,
+                razorpaySignature: razorpay_signature,
+                status: "confirmed",
+                amountPaid: 0
+            });
         }
-
-        // 2. Signature Valid! Create Registration
-        await db.insert(sessionRegistrations).values({
-            sessionId,
-            userName: userData.name,
-            userEmail: userData.email,
-            userMobile: userData.mobile,
-            razorpayOrderId: razorpay_order_id,
-            razorpayPaymentId: razorpay_payment_id,
-            razorpaySignature: razorpay_signature,
-            status: "confirmed", // Auto-confirmed!
-            amountPaid: 0 // We can fetch amount if needed, but signature proves payment
-        });
 
         // 3. Send Confirmation Email (Automated!)
         const session = await db.query.liveSessions.findFirst({

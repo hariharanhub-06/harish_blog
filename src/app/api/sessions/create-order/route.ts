@@ -21,18 +21,24 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Session not found" }, { status: 404 });
         }
 
-        const amount = session.price * 100; // Razorpay expects amount in paise
+        const amount = (session.price || 0) * 100;
+
+        if (amount === 0) {
+            return NextResponse.json({
+                error: "Zero amount session should not initiate payment flow.",
+                isFree: true
+            }, { status: 400 });
+        }
+
         const currency = "INR";
         const options = {
-            amount: amount.toString(),
+            amount: Math.round(amount), // Ensure it's an integer
             currency,
             receipt: `receipt_${sessionId}_${Date.now()}`,
         };
 
+        console.log("Initiating Razorpay Order with options:", options);
         const order = await razorpay.orders.create(options);
-
-        // We don't create the registration record yet. 
-        // We only create it after successful payment verification.
 
         return NextResponse.json({
             id: order.id,
@@ -40,8 +46,9 @@ export async function POST(req: Request) {
             amount: order.amount,
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Razorpay Order Creation Failed:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        const errorMessage = error?.error?.description || error?.message || "Internal Server Error";
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }
