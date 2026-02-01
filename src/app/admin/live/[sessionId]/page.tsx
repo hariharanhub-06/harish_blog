@@ -5,13 +5,13 @@ import { redirect } from "next/navigation";
 import AdminLiveRoomClient from "@/components/admin/AdminLiveRoomClient";
 
 interface Props {
-    params: {
+    params: Promise<{
         sessionId: string;
-    };
+    }>;
 }
 
 export default async function AdminLivePage({ params }: Props) {
-    const { sessionId } = params;
+    const { sessionId } = await params;
 
     // Fetch Session
     const session = await db.query.liveSessions.findFirst({
