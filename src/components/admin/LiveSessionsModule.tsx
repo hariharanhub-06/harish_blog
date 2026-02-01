@@ -173,9 +173,11 @@ export default function LiveSessionsModule() {
     };
 
     const handleWhatsApp = (reg: Registration) => {
-        if (!reg.userMobile) return;
+        if (!reg.userMobile || !viewingRegistrations) return;
         const cleanMobile = reg.userMobile.replace(/\D/g, '');
-        const message = `Hello ${reg.userName}, this is regarding your registration for ${viewingRegistrations?.title}. Here is your meeting link: ${viewingRegistrations?.meetingLink}`;
+        const origin = window.location.origin;
+        const liveLink = `${origin}/live/${viewingRegistrations.id}?email=${encodeURIComponent(reg.userEmail)}`;
+        const message = `Hello ${reg.userName}, this is regarding your registration for ${viewingRegistrations.title}. Here is your meeting link: ${liveLink}`;
         window.open(`https://wa.me/${cleanMobile}?text=${encodeURIComponent(message)}`, '_blank');
     };
 
@@ -242,7 +244,7 @@ export default function LiveSessionsModule() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all relative overflow-hidden"
+                        className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all relative overflow-hidden flex flex-col"
                     >
                         {/* Status Badge */}
                         <div className={`absolute top-4 right-4 z-10 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full
@@ -251,7 +253,7 @@ export default function LiveSessionsModule() {
                         </div>
 
                         {/* Content */}
-                        <div className="mb-6">
+                        <div className="flex-1">
                             {session.posterUrl && (
                                 <div className="w-full h-32 rounded-2xl overflow-hidden mb-4 relative">
                                     <img src={session.posterUrl} alt={session.title} className="w-full h-full object-cover" />
@@ -292,25 +294,28 @@ export default function LiveSessionsModule() {
                                     </div>
                                 </div>
                             </div>
-
-                            {session.meetingLink && (
-                                <a
-                                    href={session.meetingLink}
-                                    target="_blank"
-                                    className="flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline mb-2"
-                                >
-                                    <LinkIcon size={12} />
-                                    {session.meetingLink}
-                                </a>
-                            )}
                         </div>
 
-                        <div className="flex items-center gap-2 mt-auto pt-4 border-t border-gray-50">
+                        <div className="flex items-center gap-2 pt-4 border-t border-gray-50">
+                            <button
+                                onClick={() => window.open(`/admin/live/${session.id}`, '_blank')}
+                                title="Go Live Room"
+                                className="px-3 py-2 bg-red-600 text-white rounded-xl font-bold text-xs hover:bg-red-700 transition-colors flex items-center gap-2"
+                            >
+                                <Video size={14} /> <span className="hidden xl:inline">Go Live</span>
+                            </button>
                             <button
                                 onClick={() => { setEditingSession(session); setIsCreateModalOpen(true); }}
                                 className="flex-1 py-2 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-black transition-colors"
                             >
-                                Edit Details
+                                Edit
+                            </button>
+                            <button
+                                onClick={() => handleOpenRegistrations(session)}
+                                className="p-2 bg-primary/10 text-primary rounded-xl hover:bg-primary hover:text-white transition-colors"
+                                title="View Registrations"
+                            >
+                                <Users size={16} />
                             </button>
                             <button
                                 onClick={() => handleDeleteSession(session.id)}
@@ -319,23 +324,17 @@ export default function LiveSessionsModule() {
                                 <Trash2 size={16} />
                             </button>
                         </div>
-                        <button
-                            onClick={() => handleOpenRegistrations(session)}
-                            className="w-full mt-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-colors"
-                        >
-                            <Users size={14} /> View Registrations
-                        </button>
                     </motion.div>
                 ))}
-
-                {filteredSessions.length === 0 && (
-                    <div className="col-span-full flex flex-col items-center justify-center p-12 text-center text-gray-400">
-                        <Video size={48} className="mb-4 opacity-20" />
-                        <p className="font-bold">No sessions found</p>
-                        <p className="text-sm">Create your first paid live session!</p>
-                    </div>
-                )}
             </div>
+
+            {filteredSessions.length === 0 && (
+                <div className="flex flex-col items-center justify-center p-12 text-center text-gray-400">
+                    <Video size={48} className="mb-4 opacity-20" />
+                    <p className="font-bold">No sessions found</p>
+                    <p className="text-sm">Create your first paid live session!</p>
+                </div>
+            )}
 
             {/* Create/Edit Modal */}
             <AnimatePresence>
@@ -382,7 +381,7 @@ export default function LiveSessionsModule() {
                                         className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-black uppercase tracking-wider hover:bg-primary hover:text-white transition-all disabled:opacity-50 disabled:pointer-events-none"
                                     >
                                         {resending ? <Loader2 size={14} className="animate-spin" /> : <Globe size={14} />}
-                                        Resend All Confirmations
+                                        Resend All
                                     </button>
                                     <button onClick={() => setViewingRegistrations(null)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
                                         <X size={20} />
@@ -417,10 +416,10 @@ export default function LiveSessionsModule() {
                                     <table className="w-full text-left border-collapse">
                                         <thead>
                                             <tr className="text-[10px] font-black uppercase tracking-wider text-gray-400 border-b border-gray-100">
-                                                <th className="py-3 pl-2 text-left text-[10px] font-black uppercase tracking-wider text-gray-500">User Info</th>
-                                                <th className="py-3 text-left text-[10px] font-black uppercase tracking-wider text-gray-500">Payment</th>
-                                                <th className="py-3 text-left text-[10px] font-black uppercase tracking-wider text-gray-500">Status</th>
-                                                <th className="py-3 text-right text-[10px] font-black uppercase tracking-wider text-gray-500">Actions</th>
+                                                <th className="py-3 pl-2">User Info</th>
+                                                <th className="py-3">Payment</th>
+                                                <th className="py-3">Status</th>
+                                                <th className="py-3 text-right">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="text-sm">
@@ -439,31 +438,27 @@ export default function LiveSessionsModule() {
                                                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide
                                                             ${reg.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
                                                                 reg.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                                    'bg-amber-100 text-amber-700'
-                                                            }
+                                                                    'bg-amber-100 text-amber-700'}
                                                         `}>
                                                             {reg.status}
                                                         </span>
                                                     </td>
-                                                    <td className="py-4 pr-2">
+                                                    <td className="py-4 pr-2 text-right">
                                                         <div className="flex items-center justify-end gap-2">
                                                             <button
                                                                 onClick={() => handleResendSingleEmail(reg)}
-                                                                title="Resend Email"
                                                                 className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
                                                             >
                                                                 <MailIcon size={16} />
                                                             </button>
                                                             <button
                                                                 onClick={() => handleWhatsApp(reg)}
-                                                                title="Open WhatsApp"
                                                                 className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
                                                             >
                                                                 <MessageSquare size={16} />
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDeleteRegistration(reg.id)}
-                                                                title="Delete Registration"
                                                                 className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                                                             >
                                                                 <Trash2 size={16} />
@@ -472,13 +467,6 @@ export default function LiveSessionsModule() {
                                                     </td>
                                                 </tr>
                                             ))}
-                                            {filteredRegistrations.length === 0 && registrations.length > 0 && (
-                                                <tr>
-                                                    <td colSpan={4} className="py-12 text-center text-gray-400 italic">
-                                                        No results match your search.
-                                                    </td>
-                                                </tr>
-                                            )}
                                         </tbody>
                                     </table>
                                 )}
