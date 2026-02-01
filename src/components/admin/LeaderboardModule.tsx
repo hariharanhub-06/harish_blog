@@ -33,8 +33,8 @@ export default function LeaderboardModule() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     // Typing States
-    const [duration, setDuration] = useState<2 | 5 | 30>(2);
-    const [difficulty, setDifficulty] = useState<'basic' | 'intermediate' | 'expert'>('basic');
+    const [duration, setDuration] = useState<2 | 5 | 30 | "all">("all");
+    const [difficulty, setDifficulty] = useState<'basic' | 'intermediate' | 'expert' | "all">('all');
     const [typingEntries, setTypingEntries] = useState<TypingEntry[]>([]);
 
     // Quiz States
@@ -59,7 +59,11 @@ export default function LeaderboardModule() {
     const fetchTypingLeaderboard = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/typing-test/leaderboard?duration=${duration}&difficulty=${difficulty}`);
+            const params = new URLSearchParams();
+            if (duration !== "all") params.set("duration", duration.toString());
+            if (difficulty !== "all") params.set("difficulty", difficulty);
+
+            const res = await fetch(`/api/typing-test/leaderboard?${params.toString()}`);
             const data = await res.json();
             setTypingEntries(Array.isArray(data) ? data : []);
         } catch (error) {
@@ -76,7 +80,7 @@ export default function LeaderboardModule() {
             if (Array.isArray(data)) {
                 setQuizzes(data);
                 if (data.length > 0 && !selectedQuizId) {
-                    setSelectedQuizId(data[0].id);
+                    setSelectedQuizId("all");
                 }
             }
         } catch (error) {
@@ -155,6 +159,12 @@ export default function LeaderboardModule() {
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Duration</label>
                             <div className="flex bg-gray-50 p-1 rounded-xl border border-gray-100">
+                                <button
+                                    onClick={() => setDuration("all")}
+                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${duration === "all" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                                >
+                                    All
+                                </button>
                                 {[2, 5, 30].map((mins) => (
                                     <button
                                         key={mins}
@@ -170,6 +180,12 @@ export default function LeaderboardModule() {
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Difficulty</label>
                             <div className="flex bg-gray-50 p-1 rounded-xl border border-gray-100">
+                                <button
+                                    onClick={() => setDifficulty("all")}
+                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${difficulty === "all" ? "bg-white text-purple-600 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                                >
+                                    All
+                                </button>
                                 {['basic', 'intermediate', 'expert'].map((lvl) => (
                                     <button
                                         key={lvl}
@@ -191,6 +207,7 @@ export default function LeaderboardModule() {
                                 onChange={(e) => setSelectedQuizId(e.target.value)}
                                 className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-bold text-gray-900 focus:outline-none focus:border-primary/30 appearance-none cursor-pointer"
                             >
+                                <option value="all">Overall (All Quizzes)</option>
                                 {quizzes.map((q) => (
                                     <option key={q.id} value={q.id}>{q.title}</option>
                                 ))}

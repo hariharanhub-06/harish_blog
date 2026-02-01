@@ -9,15 +9,11 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const quizId = searchParams.get("quizId");
 
-        if (!quizId) {
-            return NextResponse.json({ error: "Quiz ID is required" }, { status: 400 });
-        }
-
         const leaderboard = await db.select()
             .from(quizSubmissions)
-            .where(eq(quizSubmissions.quizId, quizId))
+            .where(quizId && quizId !== "all" ? eq(quizSubmissions.quizId, quizId) : undefined)
             .orderBy(desc(quizSubmissions.score), asc(quizSubmissions.attempts))
-            .limit(10);
+            .limit(50);
 
         return NextResponse.json(leaderboard);
     } catch (error) {
