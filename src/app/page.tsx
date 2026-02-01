@@ -129,6 +129,28 @@ export default async function Home() {
     socialLinks: dbProfile?.socialLinks || defaultProfile.socialLinks
   };
 
+  // 0. Fallback for Projects
+  if (dbProjects.length === 0) {
+    dbProjects = [
+      {
+        id: "proj-1",
+        title: "HM Snacks E-Commerce",
+        description: "A premium digital storefront for snack distribution and partnership management.",
+        category: "Web App",
+        technologies: ["Next.js", "Tailwind", "Drizzle"],
+        featured: true
+      },
+      {
+        id: "proj-2",
+        title: "Student Mentorship Portal",
+        description: "Interactive platform for job placement and session management.",
+        category: "Web App",
+        technologies: ["React", "Lucide", "Jitsi"],
+        featured: true
+      }
+    ];
+  }
+
   // 1. Fallback for Experiences
   if (experiences.length === 0) {
     experiences = [
