@@ -125,10 +125,10 @@ export default function FeedbackModule() {
 
     const processedFeedbacks = feedbacks
         .filter(f => activeTab === "All" ? true : f.status === activeTab)
-        .filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        .filter(f => (f.name || "").toLowerCase().includes(searchQuery.toLowerCase()))
         .sort((a, b) => {
-            const dateA = new Date(a.createdAt).getTime();
-            const dateB = new Date(b.createdAt).getTime();
+            const dateA = new Date(a.createdAt || 0).getTime();
+            const dateB = new Date(b.createdAt || 0).getTime();
             return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
         });
 
@@ -286,7 +286,7 @@ export default function FeedbackModule() {
                 ))}
             </div>
 
-            {filteredFeedbacks.length === 0 && !fetching && (
+            {processedFeedbacks.length === 0 && !fetching && (
                 <div className="text-center py-32 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-100 flex flex-col items-center">
                     <MessageSquare size={48} className="text-secondary/20 mb-4" />
                     <p className="text-secondary text-sm font-black uppercase tracking-widest">No feedbacks found in this category</p>
