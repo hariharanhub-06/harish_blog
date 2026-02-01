@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
     try {
         const body = await req.json();
-        const { id, status, isPublished, title, description, price, startTime, duration, meetingLink, posterUrl, moderatorSettings } = body;
+        const { id, status, isPublished, title, description, price, startTime, duration, meetingLink, posterUrl } = body;
 
         if (!id) {
             return NextResponse.json({ error: "ID is required" }, { status: 400 });
@@ -68,7 +68,6 @@ export async function PATCH(req: Request) {
         if (duration) updateData.duration = Number(duration);
         if (meetingLink) updateData.meetingLink = meetingLink;
         if (posterUrl) updateData.posterUrl = posterUrl;
-        if (moderatorSettings) updateData.moderatorSettings = moderatorSettings;
 
         await db.update(liveSessions)
             .set(updateData)
