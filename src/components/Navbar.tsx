@@ -191,17 +191,7 @@ export default function Navbar() {
                                     )}
                                 </div>
                             ))}
-                            <div className="flex flex-col gap-3 mt-4 pt-6 border-t border-white/5">
-                                <button
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        window.dispatchEvent(new CustomEvent("open-ai-chat"));
-                                    }}
-                                    className="w-full text-center py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-lg transition-all bg-orange-600 text-white shadow-orange-600/20"
-                                >
-                                    Hire Me
-                                </button>
-                            </div>
+                            {/* Removed Hire Me button per user request */}
                         </div>
                     </motion.div>
                 )}

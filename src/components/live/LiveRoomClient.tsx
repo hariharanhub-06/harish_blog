@@ -131,7 +131,7 @@ export default function LiveRoomClient({ session, user }: Props) {
 
             <div className="flex-1 w-full bg-[#050505] relative overflow-hidden">
                 <JitsiMeeting
-                    domain="meet.jit.si"
+                    domain="meet.ffmuc.net"
                     roomName={roomName}
                     configOverwrite={{
                         startWithAudioMuted: true,
