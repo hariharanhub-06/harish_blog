@@ -42,7 +42,7 @@ export default function Hero({ profile, className }: HeroProps) {
     ];
 
     return (
-        <section className={cn("relative min-h-[70vh] lg:min-h-[65vh] flex items-center justify-center overflow-hidden bg-[#0e0e0e] pt-12 md:pt-16", className)}>
+        <section className={cn("relative min-h-[90vh] lg:min-h-[85vh] flex items-center justify-center overflow-hidden bg-[#0e0e0e] pt-20 md:pt-28", className)}>
             {/* Hero Background Image */}
             {profile.heroImageUrl && (
                 <div className="absolute inset-0 z-0">
@@ -63,14 +63,14 @@ export default function Hero({ profile, className }: HeroProps) {
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 2, ease: "easeOut" }}
-                    className="text-[12vw] md:text-[8vw] font-black text-outline uppercase leading-none whitespace-nowrap"
+                    className="text-[20vw] md:text-[12vw] font-black text-outline uppercase leading-none whitespace-nowrap"
                 >
                     {(profile.name || "").split(" ").slice(0, 1).join(" ")}
                 </motion.h2>
             </div>
 
-            <div className="container mx-auto px-4 relative z-10 w-full max-w-[1200px]">
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-4">
+            <div className="container mx-auto px-4 relative z-10 w-full max-w-[1400px]">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
                     {/* Character/Portrait Side */}
                     <div className="w-full lg:w-1/2 flex justify-center">
                         <motion.div
@@ -80,10 +80,10 @@ export default function Hero({ profile, className }: HeroProps) {
                             className="relative"
                         >
                             {/* Decorative circular element */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent rounded-full blur-2xl -z-10" />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent rounded-full blur-3xl -z-10" />
 
                             <Tilt options={{ max: 10, speed: 400, glare: false }}>
-                                <div className="relative w-36 h-36 md:w-48 md:h-48 lg:w-[260px] lg:h-[260px] rounded-full flex items-center justify-center">
+                                <div className="relative w-48 h-48 md:w-60 md:h-60 lg:w-[340px] lg:h-[340px] rounded-full flex items-center justify-center">
 
                                     {/* Pulsing Glow Effect */}
                                     <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
@@ -91,7 +91,7 @@ export default function Hero({ profile, className }: HeroProps) {
                                             <>
                                                 {/* Outer Pulse */}
                                                 <motion.div
-                                                    className="absolute rounded-full bg-gradient-to-br from-cyan-400/40 via-purple-500/40 to-blue-500/40 blur-2xl"
+                                                    className="absolute rounded-full bg-gradient-to-br from-cyan-400/40 via-purple-500/40 to-blue-500/40 blur-3xl"
                                                     initial={{ width: "100%", height: "100%", opacity: 0.5 }}
                                                     animate={{
                                                         width: ["100%", "120%", "100%"],
@@ -106,7 +106,7 @@ export default function Hero({ profile, className }: HeroProps) {
                                                 />
                                                 {/* Inner Pulse */}
                                                 <motion.div
-                                                    className="absolute rounded-full bg-gradient-to-br from-cyan-400/50 via-purple-500/50 to-blue-500/50 blur-xl"
+                                                    className="absolute rounded-full bg-gradient-to-br from-cyan-400/50 via-purple-500/50 to-blue-500/50 blur-2xl"
                                                     initial={{ width: "90%", height: "90%", opacity: 0.6 }}
                                                     animate={{
                                                         width: ["90%", "110%", "90%"],
@@ -124,11 +124,11 @@ export default function Hero({ profile, className }: HeroProps) {
                                         )}
                                         {/* Static White Ring */}
                                         {!isPlaying && profile.audioUrl && (
-                                            <div className="absolute inset-[-8px] md:inset-[-10px] rounded-full border border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
+                                            <div className="absolute inset-[-10px] md:inset-[-12px] rounded-full border border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.1)]" />
                                         )}
                                     </div>
 
-                                    <div className="relative w-full h-full rounded-full overflow-hidden shadow-xl z-10 border-4 border-[#0e0e0e]">
+                                    <div className="relative w-full h-full rounded-full overflow-hidden shadow-2xl z-10 border-4 border-[#0e0e0e]">
                                         {profile.avatarUrl ? (
                                             <Image
                                                 src={profile.avatarUrl}
@@ -139,19 +139,19 @@ export default function Hero({ profile, className }: HeroProps) {
                                             />
                                         ) : (
                                             <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                                                <span className="text-white text-4xl font-black">{(profile.name || "").charAt(0)}</span>
+                                                <span className="text-white text-6xl font-black">{(profile.name || "").charAt(0)}</span>
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Creative Play Button on Edge */}
                                     {profile.audioUrl && (
-                                        <div className="absolute bottom-[5%] right-[2%] z-20">
+                                        <div className="absolute bottom-[10%] right-[5%] z-20">
                                             <button
                                                 onClick={toggleAudio}
                                                 className={`
-                                                    relative w-12 h-12 rounded-full flex items-center justify-center
-                                                    transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.5)]
+                                                    relative w-16 h-16 rounded-full flex items-center justify-center
+                                                    transition-all duration-300 shadow-[0_0_30px_rgba(0,0,0,0.5)]
                                                     ${isPlaying ? 'bg-red-600 scale-95' : 'bg-white hover:scale-110 animate-bounce-subtle'}
                                                 `}
                                             >
@@ -163,23 +163,23 @@ export default function Hero({ profile, className }: HeroProps) {
                                                 {isPlaying ? (
                                                     <div className="flex gap-1">
                                                         <motion.div
-                                                            animate={{ height: [6, 12, 6] }}
+                                                            animate={{ height: [8, 16, 8] }}
                                                             transition={{ repeat: Infinity, duration: 0.5 }}
-                                                            className="w-1 bg-white rounded-full"
+                                                            className="w-1.5 bg-white rounded-full"
                                                         />
                                                         <motion.div
-                                                            animate={{ height: [10, 18, 10] }}
+                                                            animate={{ height: [12, 24, 12] }}
                                                             transition={{ repeat: Infinity, duration: 0.5, delay: 0.1 }}
-                                                            className="w-1 bg-white rounded-full"
+                                                            className="w-1.5 bg-white rounded-full"
                                                         />
                                                         <motion.div
-                                                            animate={{ height: [6, 12, 6] }}
+                                                            animate={{ height: [8, 16, 8] }}
                                                             transition={{ repeat: Infinity, duration: 0.5, delay: 0.2 }}
-                                                            className="w-1 bg-white rounded-full"
+                                                            className="w-1.5 bg-white rounded-full"
                                                         />
                                                     </div>
                                                 ) : (
-                                                    <Play fill="black" className="ml-1 text-black" size={18} />
+                                                    <Play fill="black" className="ml-1 text-black" size={24} />
                                                 )}
                                             </button>
                                         </div>
@@ -200,19 +200,19 @@ export default function Hero({ profile, className }: HeroProps) {
                     </div>
 
                     {/* Content Side */}
-                    <div className="w-full lg:w-1/2 space-y-6 text-center lg:text-left">
+                    <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
                             className="w-full pr-4"
                         >
-                            <span className="text-orange-500 font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-[10px]">Hello, my name is</span>
-                            <h1 className="flex flex-col mt-1 font-black tracking-tighter text-white w-full">
-                                <span className="text-[clamp(1.5rem,8vw,4rem)] leading-[1] whitespace-nowrap block">Hari Haran</span>
-                                <span className="text-[clamp(1rem,6vw,3rem)] leading-[1] text-orange-600 whitespace-nowrap block mt-1 md:mt-1.5">Jeyaramamoorthy</span>
+                            <span className="text-orange-500 font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-xs">Hello, my name is</span>
+                            <h1 className="flex flex-col mt-2 font-black tracking-tighter text-white w-full">
+                                <span className="text-[clamp(2rem,10vw,5rem)] leading-[1] whitespace-nowrap block">Hari Haran</span>
+                                <span className="text-[clamp(1.2rem,7.5vw,3.8rem)] leading-[1] text-orange-600 whitespace-nowrap block mt-1 md:mt-1.5">Jeyaramamoorthy</span>
                             </h1>
-                            <p className="max-w-xl mx-auto mt-3 md:mt-4 text-[7px] md:text-xs font-bold leading-relaxed tracking-[0.1em] md:tracking-[0.2em] text-gray-400 uppercase lg:mx-0 opacity-80">
+                            <p className="max-w-2xl mx-auto mt-4 md:mt-6 text-[8px] md:text-sm font-bold leading-relaxed tracking-[0.1em] md:tracking-[0.2em] text-gray-400 uppercase lg:mx-0 opacity-80">
                                 {profile.headline?.replace(/ PRO$/i, "") || "Web/App Developer | Business Consultant | Job Placement Expert | Operations & Partnerships Manager | Snack Business Owner | Project Management"}
                             </p>
                         </motion.div>
