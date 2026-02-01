@@ -23,6 +23,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import MeetingChecklistModal from "./MeetingChecklistModal";
 import MeetingScoringModal from "./MeetingScoringModal";
+import MeetingCreateEditModal from "./MeetingCreateEditModal";
 import { CHECKLIST_ITEMS, getEfficiencyStatus } from "@/constants/meetingData";
 
 interface Meeting {
@@ -51,7 +52,7 @@ export default function AdminMeetingsModule() {
 
     // Modal & Availability State
     const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
-    const [modalType, setModalType] = useState<"checklist" | "scoring" | null>(null);
+    const [modalType, setModalType] = useState<"checklist" | "scoring" | "edit" | null>(null);
     const [showAvailability, setShowAvailability] = useState(false);
     const [availability, setAvailability] = useState<string[]>([]);
     const [stagedAvailability, setStagedAvailability] = useState<string[]>([]);
@@ -267,7 +268,10 @@ export default function AdminMeetingsModule() {
                         <Calendar size={14} />
                         {showAvailability ? 'Close Availability' : 'Set Availability'}
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-bold text-xs shadow-lg shadow-primary/20">
+                    <button
+                        onClick={() => { setActiveMeeting(null); setModalType("edit"); }}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-bold text-xs shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                    >
                         <Plus size={14} />
                         New Entry
                     </button>
@@ -526,6 +530,15 @@ export default function AdminMeetingsModule() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
+                                                {/* Edit Button */}
+                                                <button
+                                                    onClick={() => { setActiveMeeting(meeting); setModalType("edit"); }}
+                                                    className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                                                    title="Edit Meeting"
+                                                >
+                                                    <MoreVertical size={16} />
+                                                </button>
+
                                                 {meeting.mobileNumber && (
                                                     <a
                                                         href={`https://wa.me/${meeting.mobileNumber}?text=${encodeURIComponent(
@@ -578,6 +591,13 @@ export default function AdminMeetingsModule() {
                         meeting={activeMeeting}
                         onClose={() => { setModalType(null); setActiveMeeting(null); }}
                         onSave={(data) => handleSaveScoring(activeMeeting.id, data)}
+                    />
+                )}
+                {modalType === "edit" && (
+                    <MeetingCreateEditModal
+                        meeting={activeMeeting}
+                        onClose={() => { setModalType(null); setActiveMeeting(null); }}
+                        onSave={() => { fetchMeetings(); setModalType(null); }}
                     />
                 )}
             </AnimatePresence>
