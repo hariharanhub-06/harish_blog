@@ -91,17 +91,24 @@ export default function LiveRoomClient({ session, user }: Props) {
 
             } catch (error: any) {
                 console.error("Stream init error:", error);
-                setError(error.message || "Failed to initialize live room. Please try again later.");
+                setError(error.message || "Connection timed out. Please check your internet or try again.");
             }
         };
+
+        const timeout = setTimeout(() => {
+            if (!videoClient || !chatClient || !call) {
+                if (!error) setError("The connection is taking longer than expected. Please check your credentials or refresh.");
+            }
+        }, 15000); // 15s timeout
 
         initStream();
 
         return () => {
+            clearTimeout(timeout);
             if (videoClient) videoClient.disconnectUser();
             if (chatClient) chatClient.disconnectUser();
         };
-    }, [user.id]);
+    }, [user.id, videoClient, chatClient, call]);
 
     if (error) {
         return (
