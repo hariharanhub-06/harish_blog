@@ -50,12 +50,14 @@ export default function LiveRoomClient({ session, user }: Props) {
     useEffect(() => {
         const initStream = async () => {
             try {
+                console.log("Initializing Stream for user:", user.id);
                 // 1. Get Token from our API
                 const res = await fetch("/api/sessions/live-token", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ userId: user.id, name: user.name })
                 });
+                console.log("Token response status:", res.status);
                 const data = await res.json();
                 if (data.error) throw new Error(data.error);
 
@@ -108,7 +110,7 @@ export default function LiveRoomClient({ session, user }: Props) {
             if (videoClient) videoClient.disconnectUser();
             if (chatClient) chatClient.disconnectUser();
         };
-    }, [user.id, videoClient, chatClient, call]);
+    }, []);
 
     if (error) {
         return (
