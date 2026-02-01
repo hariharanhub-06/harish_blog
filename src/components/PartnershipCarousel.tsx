@@ -53,29 +53,6 @@ export default function PartnershipCarousel() {
         }
     }, [partnerships.length]);
 
-    const handleTap = (e: React.MouseEvent) => {
-        if (!containerRef.current || partnerships.length === 0) return;
-
-        const { clientWidth, scrollLeft } = containerRef.current;
-        const clickX = e.clientX - containerRef.current.getBoundingClientRect().left;
-
-        // Find the width of a single item including gap
-        const itemWidth = window.innerWidth >= 768 ? 324 : 264; // 300+mx-3*2 or 240+mx-3*2
-
-        if (clickX < clientWidth / 2) {
-            // Tap Left
-            containerRef.current.scrollTo({
-                left: scrollLeft - itemWidth,
-                behavior: "smooth"
-            });
-        } else {
-            // Tap Right
-            containerRef.current.scrollTo({
-                left: scrollLeft + itemWidth,
-                behavior: "smooth"
-            });
-        }
-    };
 
     // Drift Engine
     useEffect(() => {
@@ -114,8 +91,9 @@ export default function PartnershipCarousel() {
                 className="relative group flex overflow-x-auto scrollbar-hide cursor-pointer"
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={() => setIsPaused(false)}
+                onTouchStart={() => setIsPaused(true)}
+                onTouchEnd={() => setIsPaused(false)}
                 onScroll={handleScroll}
-                onClick={handleTap}
                 style={{
                     scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch' // Ensure momentum scroll on iOS
@@ -139,6 +117,7 @@ export default function PartnershipCarousel() {
                                             src={partner.logo}
                                             alt={partner.name}
                                             fill
+                                            sizes="(max-width: 768px) 240px, 300px"
                                             className="object-contain group-hover/card:scale-110 transition-transform duration-700"
                                         />
                                     </div>

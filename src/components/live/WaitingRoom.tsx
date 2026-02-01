@@ -27,8 +27,8 @@ export default function WaitingRoom({ sessionId }: WaitingRoomProps) {
             }
         };
 
-        // Poll every 5 seconds
-        const interval = setInterval(checkStatus, 5000);
+        // Poll every 10 seconds to save bandwidth
+        const interval = setInterval(checkStatus, 10000);
         return () => clearInterval(interval);
     }, [sessionId, router]);
 

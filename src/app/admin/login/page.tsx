@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, AlertCircle } from "lucide-react";
@@ -18,6 +18,7 @@ export default function AdminLogin() {
         setLoading(true);
         setError("");
         try {
+            await setPersistence(auth, browserSessionPersistence);
             await signInWithEmailAndPassword(auth, email, password);
             router.push("/admin/dashboard");
         } catch (err: any) {

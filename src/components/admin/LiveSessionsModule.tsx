@@ -22,6 +22,7 @@ import {
     Send
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getOptimizedImageUrl } from "@/lib/utils";
 import SessionCreateEditModal from "./SessionCreateEditModal";
 
 interface Registration {
@@ -270,7 +271,7 @@ export default function LiveSessionsModule() {
                         <div className="flex-1">
                             {session.posterUrl && (
                                 <div className="w-full h-32 rounded-2xl overflow-hidden mb-4 relative">
-                                    <img src={session.posterUrl} alt={session.title} className="w-full h-full object-cover" />
+                                    <img src={getOptimizedImageUrl(session.posterUrl, 400)} alt={session.title} className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                                 </div>
                             )}
