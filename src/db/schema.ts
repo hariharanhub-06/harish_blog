@@ -639,6 +639,16 @@ export const sessionRegistrations = pgTable("session_registrations", {
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 
+export const liveSessionModeratorPolicies = pgTable("live_session_moderator_policies", {
+  sessionId: text("session_id").primaryKey(), // Using sessionId as PK for 1:1 isolation
+  disableAudio: boolean("disable_audio").default(false),
+  disableVideo: boolean("disable_video").default(false),
+  disableScreenSharing: boolean("disable_screen_sharing").default(false),
+  disableChat: boolean("disable_chat").default(false),
+  disableReactions: boolean("disable_reactions").default(false),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const sessionRelations = relations(liveSessions, ({ many }) => ({
   registrations: many(sessionRegistrations),
 }));
