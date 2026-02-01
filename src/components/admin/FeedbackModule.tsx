@@ -17,7 +17,8 @@ import {
     Lightbulb,
     Search,
     RefreshCcw,
-    Quote
+    Quote,
+    Eye
 } from "lucide-react";
 
 interface Feedback {
@@ -36,6 +37,7 @@ export default function FeedbackModule() {
     const [fetching, setFetching] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
     const [activeTab, setActiveTab] = useState<"All" | "Fresh" | "Approved">("All");
 
     const [formData, setFormData] = useState({
@@ -244,7 +246,7 @@ export default function FeedbackModule() {
                         </div>
 
                         <div className="flex-1 max-w-xl">
-                            <p className="text-xs text-gray-600 font-medium line-clamp-2 md:line-clamp-1 italic group-hover:line-clamp-none transition-all">
+                            <p className="text-xs text-secondary/60 font-medium line-clamp-2 md:line-clamp-1 italic">
                                 &ldquo;{f.content}&rdquo;
                             </p>
                         </div>
@@ -272,6 +274,13 @@ export default function FeedbackModule() {
                                         {updatingId === f.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                                     </button>
                                 )}
+                                <button
+                                    onClick={() => setSelectedFeedback(f)}
+                                    className="p-3 bg-gray-50 text-secondary/60 hover:bg-primary hover:text-white rounded-xl transition-all active:scale-95"
+                                    title="View Full Content"
+                                >
+                                    <Eye size={16} />
+                                </button>
                                 <button
                                     onClick={() => handleDelete(f.id)}
                                     disabled={updatingId === f.id}
@@ -385,6 +394,53 @@ export default function FeedbackModule() {
                                 {fetching ? <Loader2 className="animate-spin" size={20} /> : "Publish Testimony"}
                             </button>
                         </form>
+                    </div>
+                </div>
+            )}
+            {/* View Testimony Modal */}
+            {selectedFeedback && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl p-0 relative overflow-hidden">
+                        {/* Header Box */}
+                        <div className="bg-gray-50/50 border-b border-gray-100 p-8 flex justify-between items-start">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+                                    {selectedFeedback.role === "Student" ? <GraduationCap size={24} /> : selectedFeedback.role === "Professional" ? <Briefcase size={24} /> : <Lightbulb size={24} />}
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">{selectedFeedback.name}</h3>
+                                    <p className="text-secondary text-[10px] font-black uppercase tracking-widest mt-1 opacity-60">
+                                        {selectedFeedback.organization} • {selectedFeedback.role}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setSelectedFeedback(null)}
+                                className="p-3 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-2xl transition-all"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="p-10">
+                            <div className="relative">
+                                <Quote className="absolute -top-6 -left-6 text-primary/5" size={80} />
+                                <p className="text-lg text-secondary font-medium leading-relaxed italic relative z-10 text-center px-6">
+                                    &ldquo;{selectedFeedback.content}&rdquo;
+                                </p>
+                            </div>
+
+                            <div className="mt-12 pt-8 border-t border-gray-100 flex justify-between items-center">
+                                <div className="flex gap-1 text-amber-500">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} size={16} fill={i < selectedFeedback.rating ? "currentColor" : "none"} />
+                                    ))}
+                                </div>
+                                <span className="text-xs font-black text-gray-300 uppercase tracking-[0.2em]">
+                                    Received on {new Date(selectedFeedback.createdAt).toLocaleDateString("en-US", { month: 'long', day: 'numeric', year: 'numeric' })}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
