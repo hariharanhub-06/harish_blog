@@ -35,7 +35,7 @@ export async function GET(req: Request) {
             }
         }
 
-        let conditions = [];
+        const conditions = [];
         if (startDate) conditions.push(gte(financeTransactions.date, new Date(startDate)));
         if (endDate) {
             const end = new Date(endDate);

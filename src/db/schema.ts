@@ -602,3 +602,43 @@ export const meetingSchedules = pgTable("meeting_schedules", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const liveSessions = pgTable("live_sessions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text("title").notNull(),
+  description: text("description"),
+  price: real("price").notNull().default(0),
+  startTime: timestamp("start_time").notNull(),
+  duration: integer("duration").default(60), // in minutes
+  meetingLink: text("meeting_link"), // e.g., Google Meet
+  posterUrl: text("poster_url"), // e.g., ImageKit URL
+  status: text("status").default("scheduled"), // scheduled, active, completed
+  isPublished: boolean("is_published").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const sessionRegistrations = pgTable("session_registrations", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  sessionId: text("session_id").notNull(),
+  userName: text("user_name").notNull(),
+  userEmail: text("user_email").notNull(),
+  userMobile: text("user_mobile").notNull(),
+  razorpayOrderId: text("razorpay_order_id"),
+  razorpayPaymentId: text("razorpay_payment_id"),
+  razorpaySignature: text("razorpay_signature"),
+  amountPaid: real("amount_paid").default(0),
+  status: text("status").default("pending"), // pending, confirmed, failed
+  registeredAt: timestamp("registered_at").defaultNow(),
+});
+
+export const sessionRelations = relations(liveSessions, ({ many }) => ({
+  registrations: many(sessionRegistrations),
+}));
+
+export const registrationRelations = relations(sessionRegistrations, ({ one }) => ({
+  session: one(liveSessions, {
+    fields: [sessionRegistrations.sessionId],
+    references: [liveSessions.id],
+  }),
+}));

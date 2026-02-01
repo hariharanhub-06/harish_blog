@@ -21,7 +21,8 @@ import {
     Gamepad2,
     Wallet,
     Trophy,
-    Calendar
+    Calendar,
+    Video
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -35,8 +36,9 @@ import FeedbackModule from "@/components/admin/FeedbackModule";
 import FinanceModule from "@/components/admin/FinanceModule";
 import TypingLeaderboard from "@/components/admin/TypingLeaderboard";
 import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
+import LiveSessionsModule from "@/components/admin/LiveSessionsModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -48,7 +50,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings", "sessions"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -101,6 +103,7 @@ export default function AdminDashboard() {
         { id: "finance-hub", title: "Finance Hub", icon: Wallet, color: "bg-amber-500" },
         { id: "leaderboard", title: "Leaderboard", icon: Trophy, color: "bg-yellow-500" },
         { id: "meetings", title: "Meetings List", icon: Calendar, color: "bg-blue-600" },
+        { id: "sessions", title: "Live Sessions", icon: Video, color: "bg-red-500" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
     ];
 
@@ -115,6 +118,7 @@ export default function AdminDashboard() {
             case "finance-hub": return <FinanceModule />;
             case "leaderboard": return <TypingLeaderboard />;
             case "meetings": return <AdminMeetingsModule />;
+            case "sessions": return <LiveSessionsModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <OverviewModule />
