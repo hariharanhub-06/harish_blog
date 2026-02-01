@@ -33,6 +33,7 @@ interface Registration {
     razorpayPaymentId?: string;
     razorpayOrderId?: string;
     registeredAt: string;
+    amountPaid: number;
 }
 
 interface Session {
@@ -433,6 +434,7 @@ export default function LiveSessionsModule() {
                                                     <td className="py-4">
                                                         <div className="text-[10px] font-bold text-gray-400 uppercase">Order: <span className="text-gray-600 font-mono">{reg.razorpayOrderId || "-"}</span></div>
                                                         <div className="text-[10px] font-bold text-gray-400 uppercase">Pay: <span className="text-gray-600 font-mono">{reg.razorpayPaymentId || "-"}</span></div>
+                                                        <div className="text-[10px] font-bold text-primary uppercase mt-1">Paid: <span className="font-black">₹{reg.amountPaid || 0}</span></div>
                                                     </td>
                                                     <td className="py-4">
                                                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide
