@@ -25,3 +25,28 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+
+export async function GET(req: Request) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const sessionId = searchParams.get('sessionId');
+
+        if (!sessionId) {
+            return NextResponse.json({ error: "Session ID required" }, { status: 400 });
+        }
+
+        const session = await db.query.liveSessions.findFirst({
+            where: eq(liveSessions.id, sessionId),
+            columns: { status: true }
+        });
+
+        if (!session) {
+            return NextResponse.json({ error: "Session not found" }, { status: 404 });
+        }
+
+        return NextResponse.json({ status: session.status });
+
+    } catch (error) {
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
