@@ -311,13 +311,46 @@ export default function LiveSessionsModule() {
                         </div>
 
                         <div className="flex items-center gap-2 pt-4 border-t border-gray-50">
-                            <button
-                                onClick={() => window.open(`/admin/live/${session.id}`, '_blank')}
-                                title="Go Live Room"
-                                className="px-3 py-2 bg-red-600 text-white rounded-xl font-bold text-xs hover:bg-red-700 transition-colors flex items-center gap-2"
-                            >
-                                <Video size={14} /> <span className="hidden xl:inline">Go Live</span>
-                            </button>
+                            {session.status === 'active' ? (
+                                <button
+                                    onClick={async () => {
+                                        if (!confirm('End this session? Participants will not be able to join.')) return;
+                                        try {
+                                            const res = await fetch('/api/sessions/status', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ sessionId: session.id, status: 'completed' })
+                                            });
+                                            if (res.ok) fetchSessions();
+                                        } catch (e) { console.error(e); }
+                                    }}
+                                    className="px-3 py-2 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-black transition-colors flex items-center gap-2"
+                                >
+                                    <Video size={14} className="text-red-500" /> <span className="hidden xl:inline">End Session</span>
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            // 1. Activate session
+                                            const res = await fetch('/api/sessions/status', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ sessionId: session.id, status: 'active' })
+                                            });
+
+                                            // 2. Open room
+                                            if (res.ok) {
+                                                fetchSessions();
+                                                window.open(`/admin/live/${session.id}`, '_blank');
+                                            }
+                                        } catch (e) { console.error(e); }
+                                    }}
+                                    className="px-3 py-2 bg-red-600 text-white rounded-xl font-bold text-xs hover:bg-red-700 transition-colors flex items-center gap-2 animate-pulse"
+                                >
+                                    <Video size={14} /> <span className="hidden xl:inline">Go Live</span>
+                                </button>
+                            )}
                             <button
                                 onClick={() => { setEditingSession(session); setIsCreateModalOpen(true); }}
                                 className="flex-1 py-2 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-black transition-colors"
