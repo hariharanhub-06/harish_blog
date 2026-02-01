@@ -18,7 +18,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             {!isAdmin && !isScheduler && <AnalyticsTracker />}
             {!isAdmin && !isScheduler && <Navbar />}
 
-            <main className={`min-h-screen ${(!isAdmin && !isHomePage && !isScheduler) ? "pt-24 md:pt-28" : ""}`}>
+            <main className={`min-h-[100dvh] ${(!isAdmin && !isHomePage && !isScheduler) ? "pt-24 md:pt-28" : ""}`}>
                 {children}
             </main>
             {!isAdmin && !isScheduler && <Footer />}
