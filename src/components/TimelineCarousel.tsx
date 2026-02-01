@@ -34,15 +34,14 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
         setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
     };
 
-    const onDragEnd = (event: any, info: any) => {
-        const threshold = 120; // Increased to prevent accidental swipes on tap
-        const velocity = info.velocity.x;
-        const offset = info.offset.x;
+    const handleTap = (e: React.MouseEvent) => {
+        const { clientWidth } = e.currentTarget;
+        const clickX = e.clientX - e.currentTarget.getBoundingClientRect().left;
 
-        if (offset < -threshold || velocity < -800) {
-            handleNext();
-        } else if (offset > threshold || velocity > 800) {
+        if (clickX < clientWidth / 2) {
             handlePrev();
+        } else {
+            handleNext();
         }
     };
 
@@ -75,14 +74,12 @@ export default function TimelineCarousel({ items, type, onItemClick, colorClass,
             {/* Carousel Container */}
             <div className="relative overflow-hidden px-0 md:px-12">
                 <motion.div
-                    drag="x"
-                    dragElastic={0.1}
-                    onDragEnd={onDragEnd}
+                    onClick={handleTap}
                     animate={{
                         x: `-${currentIndex * 100}%`
                     }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className="flex cursor-grab active:cursor-grabbing"
+                    className="flex cursor-pointer"
                 >
                     {items.map((item, i) => (
                         <div key={i} className="w-full flex-shrink-0 flex justify-center px-4 select-none">

@@ -629,6 +629,9 @@ export const sessionRegistrations = pgTable("session_registrations", {
   razorpaySignature: text("razorpay_signature"),
   amountPaid: real("amount_paid").default(0),
   status: text("status").default("pending"), // pending, confirmed, failed
+  joinToken: text("join_token").unique().$defaultFn(() => crypto.randomUUID()),
+  activeSessionId: text("active_session_id"),
+  lastActiveAt: timestamp("last_active_at"),
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 
