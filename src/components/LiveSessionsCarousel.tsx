@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { IndianRupee, Video, Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Video, Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import SessionRegistrationModal from "./SessionRegistrationModal";
 
@@ -30,22 +30,22 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
     const scroll = (direction: "left" | "right") => {
         if (scrollContainerRef.current) {
             const { scrollLeft, clientWidth } = scrollContainerRef.current;
-            const scrollTo = direction === "left" ? scrollLeft - clientWidth / 2 : scrollLeft + clientWidth / 2;
+            const scrollTo = direction === "left" ? scrollLeft - clientWidth / 3 : scrollLeft + clientWidth / 3;
             scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
         }
     };
 
     return (
-        <section id="sessions" className="py-12 md:py-16 bg-[#0e0e0e] border-y border-white/5">
+        <section id="sessions" className="py-6 md:py-10 bg-[#0e0e0e] border-y border-white/5 overflow-hidden">
             <div className="container mx-auto px-6">
-                {/* Header Section - Compact */}
-                <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                    <div className="text-center md:text-left">
-                        <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                            <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
-                            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-red-500">Live & Interactive</span>
+                {/* Header Section - Extremely Compact */}
+                <div className="flex justify-between items-center mb-6 gap-4">
+                    <div className="flex flex-col">
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
+                            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-red-500">Live</span>
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter">
+                        <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter">
                             Upcoming <span className="text-red-600">Sessions</span>
                         </h2>
                     </div>
@@ -53,77 +53,68 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => scroll("left")}
-                            className="p-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90"
+                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90"
                         >
-                            <ChevronLeft size={18} />
+                            <ChevronLeft size={16} />
                         </button>
                         <button
                             onClick={() => scroll("right")}
-                            className="p-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90"
+                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90"
                         >
-                            <ChevronRight size={18} />
+                            <ChevronRight size={16} />
                         </button>
                     </div>
                 </div>
 
-                {/* Horizontal Layout - Aiming for 5 in a row feel */}
+                {/* Horizontal Layout - Hyper Dense */}
                 <div
                     ref={scrollContainerRef}
-                    className="flex gap-4 overflow-x-auto pb-6 snap-x snap-mandatory no-scrollbar scroll-smooth"
+                    className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory no-scrollbar scroll-smooth"
                 >
                     {sessions.map((session) => (
                         <motion.div
                             key={session.id}
-                            whileHover={{ y: -5 }}
+                            whileHover={{ y: -3 }}
                             onClick={() => setSelectedSession(session)}
-                            className="flex-shrink-0 w-[240px] md:w-[260px] snap-center group cursor-pointer"
+                            className="flex-shrink-0 w-[180px] md:w-[210px] snap-center group cursor-pointer"
                         >
-                            <div className="relative h-[320px] rounded-3xl overflow-hidden border border-white/10 group-hover:border-red-600/50 transition-all duration-300 shadow-xl bg-zinc-900/50">
+                            <div className="relative h-[240px] md:h-[260px] rounded-2xl overflow-hidden border border-white/10 group-hover:border-red-600/50 transition-all duration-300 bg-zinc-900/40">
                                 {/* Poster Image */}
                                 {session.posterUrl ? (
                                     <img
                                         src={session.posterUrl}
                                         alt={session.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60 group-hover:opacity-100"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-50 group-hover:opacity-100"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-white/5">
-                                        <Video size={48} />
+                                        <Video size={40} />
                                     </div>
                                 )}
 
-                                {/* Gradient Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                                {/* Sharp Bottom Gradient */}
+                                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/60 to-transparent" />
 
-                                {/* Price / Labels */}
-                                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
-                                    <div className="px-3 py-1 bg-red-600/90 backdrop-blur-sm rounded-lg text-[9px] font-black uppercase tracking-widest text-white shadow-lg">
+                                {/* Compact Label */}
+                                <div className="absolute top-3 right-3">
+                                    <div className="px-2 py-0.5 bg-red-600/90 backdrop-blur-sm rounded-md text-[8px] font-black uppercase tracking-widest text-white shadow-lg">
                                         {session.price === 0 ? "Free" : `₹${session.price}`}
                                     </div>
                                 </div>
 
-                                {/* Content Overlay */}
-                                <div className="absolute inset-x-0 bottom-0 p-5 space-y-3">
-                                    <div className="space-y-1">
-                                        <h3 className="text-lg font-black text-white uppercase tracking-tighter leading-tight line-clamp-2 group-hover:text-red-500 transition-colors">
-                                            {session.title}
-                                        </h3>
-                                        <div className="flex flex-wrap items-center gap-3 text-[9px] font-black uppercase tracking-widest text-white/40">
-                                            <span className="flex items-center gap-1">
-                                                <Calendar size={10} className="text-red-500" />
-                                                {format(new Date(session.startTime), 'MMM d')}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <Clock size={10} className="text-red-500" />
-                                                {format(new Date(session.startTime), 'h:mm a')}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Action Text */}
-                                    <div className="pt-2 border-t border-white/10 text-center">
-                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            Click to Register
+                                {/* Content Overlay - Very Compact */}
+                                <div className="absolute inset-x-0 bottom-0 p-4 space-y-2">
+                                    <h3 className="text-sm font-black text-white uppercase tracking-tighter leading-tight line-clamp-2 group-hover:text-red-500 transition-colors">
+                                        {session.title}
+                                    </h3>
+                                    <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest border-t border-white/5 pt-2">
+                                        <span className="flex items-center gap-1 text-white/40">
+                                            <Calendar size={8} className="text-red-500" />
+                                            {format(new Date(session.startTime), 'MMM d')}
+                                        </span>
+                                        <span className="flex items-center gap-1 text-white/40">
+                                            <Clock size={8} className="text-red-500" />
+                                            {format(new Date(session.startTime), 'h:mm a')}
                                         </span>
                                     </div>
                                 </div>

@@ -107,9 +107,10 @@ export default function SessionRegistrationModal({ session, onClose }: SessionRe
             const rzp1 = new window.Razorpay(options);
             rzp1.open();
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Payment failed:", error);
-            alert("Payment init failed. Please try again.");
+            const errorMessage = error instanceof Error ? error.message : "Payment init failed. Please try again.";
+            alert(`Payment Error: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
