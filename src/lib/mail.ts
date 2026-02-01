@@ -9,6 +9,7 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, text, html }: EmailOptions) {
     // These environment variables should be configured in your .env file
+    console.log(`Setting up SMTP transporter for ${process.env.SMTP_HOST} with user ${process.env.SMTP_USER}`);
     const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT) || 587,
