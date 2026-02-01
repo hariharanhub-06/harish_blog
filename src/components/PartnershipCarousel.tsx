@@ -134,7 +134,6 @@ export default function PartnershipCarousel() {
                 .scrollbar-hide {
                     -ms-overflow-style: none;
                     scrollbar-width: none;
-                    touch-action: pan-y; /* Allow vertical scroll, handle horizontal scroll natively */
                 }
                 .scrollbar-hide::-webkit-scrollbar {
                     display: none;

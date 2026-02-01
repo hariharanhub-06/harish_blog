@@ -81,7 +81,6 @@ export function InfiniteCarousel({
                 .scrollbar-hide {
                     -ms-overflow-style: none;
                     scrollbar-width: none;
-                    touch-action: pan-y;
                 }
                 .scrollbar-hide::-webkit-scrollbar {
                     display: none;
