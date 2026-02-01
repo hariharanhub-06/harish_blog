@@ -170,7 +170,7 @@ export default function LiveSessionsModule() {
                         className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all relative overflow-hidden"
                     >
                         {/* Status Badge */}
-                        <div className={`absolute top-4 right-4 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full
+                        <div className={`absolute top-4 right-4 z-10 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full
                             ${session.isPublished ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}`}>
                             {session.isPublished ? "Published" : "Draft"}
                         </div>
