@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Trophy, Calendar, Clock, Search, Download } from "lucide-react";
+import { X, Trophy, Calendar, Clock, Search, Download, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Submission {
@@ -25,6 +25,7 @@ interface QuizResultsModalProps {
 export default function QuizResultsModal({ quizId, quizTitle, onClose }: QuizResultsModalProps) {
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [loading, setLoading] = useState(true);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [search, setSearch] = useState("");
 
     useEffect(() => {
@@ -42,6 +43,19 @@ export default function QuizResultsModal({ quizId, quizTitle, onClose }: QuizRes
             console.error("Failed to fetch results", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this submission?")) return;
+        setDeletingId(id);
+        try {
+            const res = await fetch(`/api/admin/quiz-results?id=${id}`, { method: "DELETE" });
+            if (res.ok) fetchResults();
+        } catch (error) {
+            console.error("Delete failed", error);
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -120,7 +134,8 @@ export default function QuizResultsModal({ quizId, quizTitle, onClose }: QuizRes
                                     <th className="pb-4">Participant</th>
                                     <th className="pb-4">Score</th>
                                     <th className="pb-4">Correctness</th>
-                                    <th className="pb-4 text-right pr-4">Date & Time</th>
+                                    <th className="pb-4">Date & Time</th>
+                                    <th className="pb-4 text-right pr-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -150,14 +165,23 @@ export default function QuizResultsModal({ quizId, quizTitle, onClose }: QuizRes
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="py-4 text-right pr-4">
-                                            <div className="flex flex-col items-end">
+                                        <td className="py-4">
+                                            <div className="flex flex-col">
                                                 <span className="font-bold text-gray-700">{formatDate(sub.completedAt)}</span>
                                                 <span className="text-xs text-gray-400 font-medium flex items-center gap-1">
                                                     <Clock size={10} />
                                                     {new Date(sub.completedAt).toLocaleTimeString()}
                                                 </span>
                                             </div>
+                                        </td>
+                                        <td className="py-4 text-right pr-4">
+                                            <button
+                                                onClick={() => handleDelete(sub.id)}
+                                                disabled={deletingId === sub.id}
+                                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                                            >
+                                                {deletingId === sub.id ? <div className="animate-spin w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full" /> : <Trash2 size={16} />}
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
