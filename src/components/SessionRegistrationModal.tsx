@@ -55,16 +55,40 @@ export default function SessionRegistrationModal({ session, onClose }: SessionRe
                 alert("Payment gateway is still loading. Please try again in a few seconds.");
                 return;
             }
-            // 1. Create Order
-            const orderRes = await fetch("/api/sessions/create-order", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sessionId: session.id })
-            });
+            // 1. Create Order (Only if not free)
+            let orderData = { id: "", amount: 0, currency: "INR" };
 
-            const orderData = await orderRes.json();
+            if (session.price > 0) {
+                const orderRes = await fetch("/api/sessions/create-order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ sessionId: session.id })
+                });
 
-            if (!orderRes.ok) throw new Error(orderData.error);
+                const data = await orderRes.json();
+                if (!orderRes.ok) throw new Error(data.error || "Order creation failed");
+                orderData = data;
+            } else {
+                // For free sessions, directly verify/register
+                const verifyRes = await fetch("/api/sessions/verify-payment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        sessionId: session.id,
+                        userData: form,
+                        isFree: true
+                    })
+                });
+
+                if (verifyRes.ok) {
+                    setStep(2);
+                    setLoading(false);
+                    return;
+                } else {
+                    const errorData = await verifyRes.json();
+                    throw new Error(errorData.error || "Free registration failed");
+                }
+            }
 
             // 2. Initialize Razorpay
             const options = {
@@ -186,7 +210,7 @@ export default function SessionRegistrationModal({ session, onClose }: SessionRe
                                 className="w-full py-4 bg-black text-white rounded-xl font-bold hover:bg-gray-900 transition-all shadow-xl shadow-gray-200 flex items-center justify-center gap-2"
                             >
                                 {loading && <Loader2 className="animate-spin" size={18} />}
-                                {loading ? "Processing..." : `Pay ₹${session.price} Securely`}
+                                {loading ? "Processing..." : (session.price === 0 ? "Register Now (Free)" : `Pay ₹${session.price} Securely`)}
                             </button>
 
                             <div className="text-center">
