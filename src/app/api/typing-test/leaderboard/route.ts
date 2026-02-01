@@ -13,8 +13,8 @@ export async function GET(req: Request) {
         const results = await db.query.typingTestResults.findMany({
             where: (t, { and, eq }) => {
                 const conditions = [];
-                if (duration) conditions.push(eq(t.duration, parseInt(duration)));
-                if (difficulty) conditions.push(eq(t.difficulty, difficulty));
+                if (duration && duration !== "all") conditions.push(eq(t.duration, parseInt(duration)));
+                if (difficulty && difficulty !== "all") conditions.push(eq(t.difficulty, difficulty));
                 return conditions.length > 0 ? and(...conditions) : undefined;
             },
             orderBy: [desc(typingTestResults.wpm), desc(typingTestResults.accuracy)],
