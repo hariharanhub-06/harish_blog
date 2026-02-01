@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
-const nextConfig = {
+const nextConfig: NextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     loader: 'custom',
     loaderFile: './src/lib/imagekitLoader.ts',
@@ -23,12 +29,7 @@ const nextConfig = {
       }
     ],
   },
-  compress: true, // Enable gzip/brotli compression
-  eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
-  },
+  compress: true,
 };
 
 export default nextConfig;

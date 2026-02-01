@@ -10,7 +10,7 @@ export async function GET(req: Request) {
         const endDate = searchParams.get("endDate");
         const category = searchParams.get("category");
 
-        let conditions = [];
+        const conditions = [];
         if (startDate) conditions.push(gte(financeTransactions.date, new Date(startDate)));
         if (endDate) conditions.push(lte(financeTransactions.date, new Date(endDate)));
         if (category && category !== "All") conditions.push(eq(financeTransactions.category, category));
