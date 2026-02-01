@@ -58,16 +58,24 @@ export default function AdminLiveRoomClient({ session }: Props) {
 
             } catch (error: any) {
                 console.error("Admin init failed:", error);
-                setError(error.message || "Failed to initialize host dashboard. Please try again later.");
+                setError(error.message || "Connection timed out. Please check your internet or try again.");
             }
         };
 
+        const timeout = setTimeout(() => {
+            if (!videoClient || !chatClient || !call) {
+                if (!error) setError("The host dashboard connection is taking longer than expected. Please check your credentials or refresh.");
+            }
+        }, 15000); // 15s timeout
+
         initStream();
+
         return () => {
+            clearTimeout(timeout);
             if (videoClient) videoClient.disconnectUser();
             if (chatClient) chatClient.disconnectUser();
         };
-    }, []);
+    }, [videoClient, chatClient, call]);
 
     const copyKey = () => {
         navigator.clipboard.writeText(session.id);
