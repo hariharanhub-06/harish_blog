@@ -197,18 +197,45 @@ export default function SessionCreateEditModal({ session, onClose, onSave }: Ses
 
                     {/* Meeting Link & Poster */}
                     <div className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold uppercase text-blue-600 flex items-center gap-2">
-                                <LinkIcon size={14} /> Meeting Link (MeetHour / Zoom / Google Meet)
-                            </label>
-                            <input
-                                type="url"
-                                className="w-full p-3 bg-blue-50/50 border border-blue-100 rounded-xl font-medium outline-none focus:ring-2 ring-blue-500/20 text-blue-800"
-                                placeholder="https://meet.google.com/..."
-                                value={formData.meetingLink}
-                                onChange={e => setFormData({ ...formData, meetingLink: e.target.value })}
-                            />
+                        <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-start gap-4">
+                            <div className="p-2 bg-emerald-500 rounded-lg text-white">
+                                <Globe size={18} />
+                            </div>
+                            <div>
+                                <h4 className="text-xs font-black uppercase text-emerald-800 tracking-wider">System Generated Link</h4>
+                                <p className="text-[10px] text-emerald-600 font-bold leading-relaxed mt-1">
+                                    No more manual links! The system will automatically generate a secure webinar room on your website.
+                                    Attendees will receive a direct "Join" link in their confirmation email.
+                                </p>
+                            </div>
                         </div>
+
+                        {isEdit && (
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase text-gray-500">Attendee Preview Link</label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        readOnly
+                                        type="text"
+                                        className="flex-1 p-2 bg-gray-50 rounded-lg text-[10px] font-mono text-gray-400 outline-none"
+                                        value={`${typeof window !== 'undefined' ? window.location.origin : ''}/live/${session.id}`}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const link = `${window.location.origin}/live/${session.id}`;
+                                            navigator.clipboard.writeText(link);
+                                            alert("Link copied!");
+                                        }}
+                                        className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                                        title="Copy Link"
+                                    >
+                                        <LinkIcon size={14} className="text-gray-600" />
+                                    </button>
+                                </div>
+                                <p className="text-[10px] text-gray-400 font-medium italic">Use this link for marketing. Attendees will be asked for their email on arrival.</p>
+                            </div>
+                        )}
 
                         <div className="space-y-2">
                             <label className="text-xs font-black uppercase text-gray-500 flex items-center gap-2">

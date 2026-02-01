@@ -107,6 +107,29 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
                                     <h3 className="text-[11px] font-black text-white uppercase tracking-tighter leading-tight line-clamp-2 group-hover:text-red-500 transition-colors">
                                         {session.title}
                                     </h3>
+
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const email = prompt("Enter your registered email to join:");
+                                                if (email) window.location.href = `/live/${session.id}?email=${encodeURIComponent(email)}`;
+                                            }}
+                                            className="flex-1 py-1 bg-white/10 hover:bg-white/20 text-white text-[8px] font-black uppercase tracking-widest rounded-md border border-white/5 transition-all active:scale-95"
+                                        >
+                                            Join Room
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedSession(session);
+                                            }}
+                                            className="flex-1 py-1 bg-red-600 hover:bg-red-700 text-white text-[8px] font-black uppercase tracking-widest rounded-md transition-all active:scale-95 shadow-lg shadow-red-600/20"
+                                        >
+                                            Register
+                                        </button>
+                                    </div>
+
                                     <div className="flex items-center justify-between text-[7px] font-black uppercase tracking-widest border-t border-white/5 pt-1.5">
                                         <span className="flex items-center gap-1 text-white/40">
                                             <Calendar size={6} className="text-red-500" />

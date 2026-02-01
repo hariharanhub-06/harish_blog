@@ -1,40 +1,30 @@
-
 import { db } from "@/db";
-import { quizSessions, quizzes, quizQuestions } from "@/db/schema";
+import { liveSessions } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
-import LiveQuizHost from "@/components/admin/LiveQuizHost";
+import { redirect } from "next/navigation";
+import AdminLiveRoomClient from "@/components/admin/AdminLiveRoomClient";
 
-interface PageProps {
-    params: Promise<{
+interface Props {
+    params: {
         sessionId: string;
-    }>;
+    };
 }
 
-export default async function HostLivePage({ params }: PageProps) {
-    const { sessionId } = await params;
+export default async function AdminLivePage({ params }: Props) {
+    const { sessionId } = params;
 
-    const session = await db.query.quizSessions.findFirst({
-        where: eq(quizSessions.id, sessionId)
+    // Fetch Session
+    const session = await db.query.liveSessions.findFirst({
+        where: eq(liveSessions.id, sessionId)
     });
 
-    if (!session) return notFound();
-
-    const quiz = await db.query.quizzes.findFirst({
-        where: eq(quizzes.id, session.quizId),
-        with: {
-            questions: true
-        }
-    });
-
-    if (!quiz) return notFound();
+    if (!session) {
+        redirect("/admin?error=not_found");
+    }
 
     return (
-        <LiveQuizHost
-            sessionId={session.id}
-            initialPin={session.pin}
-            quizTitle={quiz.title}
-            totalQuestions={quiz.questions.length}
-        />
+        <div className="min-h-screen bg-gray-50 overflow-hidden">
+            <AdminLiveRoomClient session={session} />
+        </div>
     );
 }
