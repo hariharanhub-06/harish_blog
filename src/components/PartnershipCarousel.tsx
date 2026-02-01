@@ -15,6 +15,9 @@ interface Partnership {
 export default function PartnershipCarousel() {
     const [partnerships, setPartnerships] = useState<Partnership[]>([]);
     const [isPaused, setIsPaused] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeftState, setScrollLeftState] = useState(0); // Renamed to avoid confusion with ref property
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -28,7 +31,6 @@ export default function PartnershipCarousel() {
             .catch((err) => console.error("Failed to load partnerships:", err));
     }, []);
 
-    // Function to handle seamless loop reset
     // Function to handle seamless loop reset
     const handleScroll = useCallback(() => {
         if (!containerRef.current) return;
@@ -52,13 +54,39 @@ export default function PartnershipCarousel() {
         }
     }, [partnerships.length]);
 
+    // Drag Handlers
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (!containerRef.current) return;
+        setIsDragging(true);
+        setStartX(e.pageX - containerRef.current.offsetLeft);
+        setScrollLeftState(containerRef.current.scrollLeft);
+        setIsPaused(true);
+    };
+
+    const handleMouseLeave = () => {
+        setIsDragging(false);
+        setIsPaused(false);
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+        setIsPaused(false);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging || !containerRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - containerRef.current.offsetLeft;
+        const walk = (x - startX) * 1.5; // Scroll-fast
+        containerRef.current.scrollLeft = scrollLeftState - walk;
+    };
 
     // Drift Engine
     useEffect(() => {
         let animationFrameId: number;
 
         const drift = () => {
-            if (containerRef.current && !isPaused) {
+            if (containerRef.current && !isPaused && !isDragging) {
                 containerRef.current.scrollLeft += 1; // Adjust speed as needed
             }
             animationFrameId = requestAnimationFrame(drift);
@@ -66,7 +94,7 @@ export default function PartnershipCarousel() {
 
         animationFrameId = requestAnimationFrame(drift);
         return () => cancelAnimationFrame(animationFrameId);
-    }, [isPaused]);
+    }, [isPaused, isDragging]);
 
     if (partnerships.length === 0) return null;
 
@@ -87,9 +115,12 @@ export default function PartnershipCarousel() {
 
             <div
                 ref={containerRef}
-                className="relative group flex overflow-x-auto scrollbar-hide"
+                className={`relative group flex overflow-x-auto scrollbar-hide ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
                 onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={() => setIsPaused(false)}
+                onMouseLeave={handleMouseLeave} // Handle Drag Leave too
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
                 onTouchStart={() => setIsPaused(true)}
                 onTouchEnd={() => setIsPaused(false)}
                 onScroll={handleScroll}

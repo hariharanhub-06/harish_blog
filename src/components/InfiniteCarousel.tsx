@@ -12,6 +12,9 @@ export function InfiniteCarousel({
     className?: string;
 }) {
     const [isPaused, setIsPaused] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeftState, setScrollLeftState] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const handleScroll = () => {
@@ -26,18 +29,45 @@ export function InfiniteCarousel({
         }
     };
 
+    // Drag Handlers
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (!containerRef.current) return;
+        setIsDragging(true);
+        setStartX(e.pageX - containerRef.current.offsetLeft);
+        setScrollLeftState(containerRef.current.scrollLeft);
+        setIsPaused(true);
+    };
+
+    const handleMouseLeave = () => {
+        setIsDragging(false);
+        setIsPaused(false);
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+        setIsPaused(false);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging || !containerRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - containerRef.current.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        containerRef.current.scrollLeft = scrollLeftState - walk;
+    };
+
     // Drift Engine
     useEffect(() => {
         let animationFrameId: number;
         const drift = () => {
-            if (containerRef.current && !isPaused) {
+            if (containerRef.current && !isPaused && !isDragging) {
                 containerRef.current.scrollLeft += 0.8; // Smooth slow drift
             }
             animationFrameId = requestAnimationFrame(drift);
         };
         animationFrameId = requestAnimationFrame(drift);
         return () => cancelAnimationFrame(animationFrameId);
-    }, [isPaused]);
+    }, [isPaused, isDragging]);
 
     // Base items repeated enough to fill width
     const displayItems = items.length > 0
@@ -51,9 +81,12 @@ export function InfiniteCarousel({
             <div
                 ref={containerRef}
                 onScroll={handleScroll}
-                className="overflow-x-auto whitespace-nowrap flex scrollbar-hide"
+                className={`overflow-x-auto whitespace-nowrap flex scrollbar-hide ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
                 onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={() => setIsPaused(false)}
+                onMouseLeave={handleMouseLeave}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
                 onTouchStart={() => setIsPaused(true)}
                 onTouchEnd={() => setIsPaused(false)}
                 style={{
