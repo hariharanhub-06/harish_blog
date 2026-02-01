@@ -20,6 +20,7 @@ import FeedbackSection from "./FeedbackSection";
 import DinoRunnerGame from "@/components/DinoRunnerGame";
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
+import LiveSessionsCarousel from "./LiveSessionsCarousel";
 
 interface Stat {
     icon: string;
@@ -102,6 +103,17 @@ interface Quiz {
     questions: any[];
 }
 
+interface LiveSession {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    startTime: string;
+    duration: number;
+    posterUrl: string;
+    status: string;
+}
+
 interface Skill {
     id: string;
     name: string;
@@ -118,6 +130,7 @@ interface MainContentProps {
     partnerships?: Partnership[];
     skills?: Skill[];
     quizzes?: Quiz[];
+    liveSessions?: LiveSession[];
 }
 
 
@@ -130,7 +143,8 @@ export default function MainContent({
     volunteerings: initialVolunteerings,
     partnerships: initialPartnerships = [],
     skills: initialSkills = [],
-    quizzes: initialQuizzes = []
+    quizzes: initialQuizzes = [],
+    liveSessions: initialLiveSessions = []
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -141,6 +155,7 @@ export default function MainContent({
     const [partnerships, setPartnerships] = useState(initialPartnerships || []);
     const [skills, setSkills] = useState(initialSkills || []);
     const [quizzes, setQuizzes] = useState(initialQuizzes || []);
+    const [liveSessions, setLiveSessions] = useState(initialLiveSessions || []);
 
     const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
     const [isLiveJoin, setIsLiveJoin] = useState(false);
@@ -163,6 +178,7 @@ export default function MainContent({
                     if (data.partnerships) setPartnerships(data.partnerships);
                     if (data.skills) setSkills(data.skills);
                     if (data.quizzes) setQuizzes(data.quizzes);
+                    if (data.liveSessions) setLiveSessions(data.liveSessions);
 
                     if (data.profile && data.profile.stats) {
                         setStats(data.profile.stats);
@@ -224,6 +240,11 @@ export default function MainContent({
                     )}
                 </div>
             </section>
+
+            {/* Live Sessions Carousel */}
+            {liveSessions.length > 0 && (
+                <LiveSessionsCarousel sessions={liveSessions} />
+            )}
 
             {/* Training Programs Section (Replaces Skill Carousel) */}
             <TrainingPrograms

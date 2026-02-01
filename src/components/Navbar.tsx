@@ -25,12 +25,12 @@ const navLinks = [
         icon: Gamepad2,
         isDropdown: true,
         items: [
-            { name: "Live Session", href: "/sessions", icon: Video, color: "text-red-500" },
             { name: "Quiz", href: "/#quiz", icon: Gamepad2, color: "text-blue-500" },
             { name: "Dino Runner", href: "/#dino-runner", icon: Monitor, color: "text-emerald-500" },
             { name: "Type Test", href: "/#typing-test", icon: Keyboard, color: "text-orange-500", creative: true }
         ]
     },
+    { name: "Live Session", href: "/sessions", icon: Video },
     { name: "Contact", href: "#contact", icon: Mail },
 ];
 

@@ -19,6 +19,7 @@ export default async function Home() {
   let dbSkills: any[] = [];
   let partnerships: any[] = [];
   let quizzes: any[] = [];
+  let liveSessions: any[] = [];
 
   try {
     // Parallel fetch with failure isolation (Promise.allSettled)
@@ -42,6 +43,10 @@ export default async function Home() {
       db.query.partnerships.findMany({
         where: (p, { eq }) => eq(p.isActive, true),
         orderBy: (p, { desc }) => [desc(p.displayOrder)]
+      }),
+      db.query.liveSessions.findMany({
+        where: (s, { eq }) => eq(s.isPublished, true),
+        orderBy: (s, { desc }) => [desc(s.startTime)]
       })
     ]);
 
@@ -60,6 +65,7 @@ export default async function Home() {
     volunteerings = val(results[4], 'volunteerings') || [];
     dbSkills = val(results[5], 'skills') || [];
     partnerships = val(results[6], 'partnerships') || [];
+    liveSessions = val(results[7], 'liveSessions') || [];
 
     // Fetch Quizzes separately as it has relations that might fail if not pushed
     try {
@@ -149,6 +155,7 @@ export default async function Home() {
         skills={dbSkills as any}
         partnerships={partnerships as any}
         quizzes={quizzes as any}
+        liveSessions={liveSessions as any}
       />
     </div>
   );
