@@ -31,6 +31,13 @@ export default function AdminLiveRoomClient({ session }: Props) {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const [jitsiApi, setJitsiApi] = useState<any>(null);
+
+    const handleMuteAll = (mediaType: 'audio' | 'video') => {
+        if (!jitsiApi) return;
+        jitsiApi.executeCommand('muteEveryone', mediaType);
+    };
+
     if (error) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center p-6 space-y-6">
@@ -124,9 +131,10 @@ export default function AdminLiveRoomClient({ session }: Props) {
                         <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Room Name (Secure)</span>
                         <span className="text-[10px] font-bold text-gray-900 font-mono truncate max-w-[150px]">{roomName}</span>
                     </div>
-                    <button className="p-2 text-gray-400 hover:text-gray-900 transition-colors">
-                        <Settings size={20} />
-                    </button>
+                    <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-xl border border-amber-200/50">
+                        <Settings size={12} />
+                        <span className="text-[9px] font-black uppercase tracking-widest">Tip: Use the Shield icon below for chat controls</span>
+                    </div>
                     <div className="h-6 w-[1px] bg-gray-200 mx-2" />
                     <button
                         onClick={() => window.location.href = '/admin'}
@@ -163,8 +171,8 @@ export default function AdminLiveRoomClient({ session }: Props) {
                         displayName: "Admin (Host)",
                         email: "admin@harishblog.com"
                     }}
-                    onApiReady={(externalApi) => {
-                        // Admin-only event or API calls
+                    onApiReady={(api) => {
+                        setJitsiApi(api);
                     }}
                     getIFrameRef={(iframeRef) => {
                         iframeRef.style.height = '100%';
@@ -172,6 +180,37 @@ export default function AdminLiveRoomClient({ session }: Props) {
                         iframeRef.style.border = 'none';
                     }}
                 />
+            </div>
+
+            {/* Admin Moderator Toolbar */}
+            <div className="bg-white border-t border-gray-100 p-4 flex items-center justify-center gap-4 z-20 shrink-0">
+                <div className="flex items-center gap-2 mr-6 hidden md:flex">
+                    <Users size={16} className="text-gray-400" />
+                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Host Controls:</span>
+                </div>
+
+                <button
+                    onClick={() => handleMuteAll('audio')}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-gray-900/5 hover:bg-red-50 text-gray-900 hover:text-red-600 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-transparent hover:border-red-200"
+                >
+                    <Mic size={14} /> Mute All Microphones
+                </button>
+
+                <button
+                    onClick={() => handleMuteAll('video')}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-gray-900/5 hover:bg-red-50 text-gray-900 hover:text-red-600 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-transparent hover:border-red-200"
+                >
+                    <Video size={14} /> Mute All Cameras
+                </button>
+
+                <div className="h-4 w-[1px] bg-gray-200 mx-2" />
+
+                <button
+                    onClick={() => jitsiApi?.executeCommand('toggleChat')}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-black/10"
+                >
+                    <MessageSquare size={14} /> Toggle Chat Panel
+                </button>
             </div>
 
             <style jsx global>{`
