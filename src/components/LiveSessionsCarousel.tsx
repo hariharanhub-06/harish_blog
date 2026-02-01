@@ -39,13 +39,13 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
         <section id="sessions" className="py-6 md:py-10 bg-[#0e0e0e] border-y border-white/5 overflow-hidden">
             <div className="container mx-auto px-6">
                 {/* Header Section - Extremely Compact */}
-                <div className="flex justify-between items-center mb-6 gap-4">
+                <div className="flex justify-between items-center mb-4 gap-4">
                     <div className="flex flex-col">
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
-                            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-red-500">Live</span>
+                        <div className="flex items-center gap-2 mb-0.5">
+                            <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
+                            <span className="text-[7px] font-black uppercase tracking-[0.3em] text-red-500">Live</span>
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter">
+                        <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter">
                             Upcoming <span className="text-red-600">Sessions</span>
                         </h2>
                     </div>
@@ -53,15 +53,15 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => scroll("left")}
-                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90"
+                            className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90"
                         >
-                            <ChevronLeft size={16} />
+                            <ChevronLeft size={14} />
                         </button>
                         <button
                             onClick={() => scroll("right")}
-                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90"
+                            className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all active:scale-90"
                         >
-                            <ChevronRight size={16} />
+                            <ChevronRight size={14} />
                         </button>
                     </div>
                 </div>
@@ -69,16 +69,16 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
                 {/* Horizontal Layout - Hyper Dense */}
                 <div
                     ref={scrollContainerRef}
-                    className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory no-scrollbar scroll-smooth"
+                    className="flex gap-2.5 overflow-x-auto pb-3 snap-x snap-mandatory no-scrollbar scroll-smooth"
                 >
                     {sessions.map((session) => (
                         <motion.div
                             key={session.id}
-                            whileHover={{ y: -3 }}
+                            whileHover={{ y: -2 }}
                             onClick={() => setSelectedSession(session)}
-                            className="flex-shrink-0 w-[180px] md:w-[210px] snap-center group cursor-pointer"
+                            className="flex-shrink-0 w-[160px] md:w-[190px] snap-center group cursor-pointer"
                         >
-                            <div className="relative h-[240px] md:h-[260px] rounded-2xl overflow-hidden border border-white/10 group-hover:border-red-600/50 transition-all duration-300 bg-zinc-900/40">
+                            <div className="relative h-[210px] md:h-[230px] rounded-2xl overflow-hidden border border-white/10 group-hover:border-red-600/50 transition-all duration-300 bg-zinc-900/40">
                                 {/* Poster Image */}
                                 {session.posterUrl ? (
                                     <img
@@ -88,7 +88,7 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-white/5">
-                                        <Video size={40} />
+                                        <Video size={32} />
                                     </div>
                                 )}
 
@@ -96,24 +96,24 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
                                 <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/60 to-transparent" />
 
                                 {/* Compact Label */}
-                                <div className="absolute top-3 right-3">
-                                    <div className="px-2 py-0.5 bg-red-600/90 backdrop-blur-sm rounded-md text-[8px] font-black uppercase tracking-widest text-white shadow-lg">
+                                <div className="absolute top-2 right-2">
+                                    <div className="px-1.5 py-0.5 bg-red-600/90 backdrop-blur-sm rounded-md text-[7px] font-black uppercase tracking-widest text-white shadow-lg">
                                         {session.price === 0 ? "Free" : `₹${session.price}`}
                                     </div>
                                 </div>
 
                                 {/* Content Overlay - Very Compact */}
-                                <div className="absolute inset-x-0 bottom-0 p-4 space-y-2">
-                                    <h3 className="text-sm font-black text-white uppercase tracking-tighter leading-tight line-clamp-2 group-hover:text-red-500 transition-colors">
+                                <div className="absolute inset-x-0 bottom-0 p-3 space-y-1.5">
+                                    <h3 className="text-[11px] font-black text-white uppercase tracking-tighter leading-tight line-clamp-2 group-hover:text-red-500 transition-colors">
                                         {session.title}
                                     </h3>
-                                    <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest border-t border-white/5 pt-2">
+                                    <div className="flex items-center justify-between text-[7px] font-black uppercase tracking-widest border-t border-white/5 pt-1.5">
                                         <span className="flex items-center gap-1 text-white/40">
-                                            <Calendar size={8} className="text-red-500" />
+                                            <Calendar size={6} className="text-red-500" />
                                             {format(new Date(session.startTime), 'MMM d')}
                                         </span>
                                         <span className="flex items-center gap-1 text-white/40">
-                                            <Clock size={8} className="text-red-500" />
+                                            <Clock size={6} className="text-red-500" />
                                             {format(new Date(session.startTime), 'h:mm a')}
                                         </span>
                                     </div>
