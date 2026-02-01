@@ -29,6 +29,9 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions) {
     });
 
     try {
+        console.log(`Sending email to: ${to} | Subject: ${subject}`);
+        console.log(`Content Length - Text: ${text?.length || 0}, HTML: ${html?.length || 0}`);
+
         const info = await transporter.sendMail({
             from: `"Hari Haran J" <${process.env.SMTP_USER}>`,
             to,

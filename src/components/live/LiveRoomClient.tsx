@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import {
     StreamVideoClient,
     StreamVideo,
@@ -99,9 +100,50 @@ export default function LiveRoomClient({ session, user }: Props) {
 
     if (!videoClient || !chatClient || !call) {
         return (
-            <div className="h-screen flex flex-col items-center justify-center bg-gray-900 gap-4">
-                <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                <p className="text-gray-400 font-medium animate-pulse uppercase tracking-[0.2em] text-[10px]">Entering Live Room...</p>
+            <div className="min-h-screen relative flex items-center justify-center bg-[#050505] overflow-hidden">
+                {/* Background Glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-red-600/20 rounded-full blur-[120px] animate-pulse" />
+
+                <div className="relative z-10 text-center space-y-8 max-w-md px-6">
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="w-24 h-24 bg-white/5 backdrop-blur-3xl rounded-[32px] border border-white/10 flex items-center justify-center mx-auto shadow-2xl"
+                    >
+                        <Loader2 className="w-10 h-10 animate-spin text-red-500" />
+                    </motion.div>
+
+                    <div className="space-y-3">
+                        <motion.h2
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="text-white text-xl font-black uppercase tracking-tight"
+                        >
+                            Entering Room
+                        </motion.h2>
+                        <motion.p
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.3 }}
+                            className="text-gray-400 font-bold text-[10px] uppercase tracking-[0.3em]"
+                        >
+                            {session.title}
+                        </motion.p>
+                    </div>
+
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="pt-8"
+                    >
+                        <p className="text-gray-600 font-medium text-[9px] uppercase tracking-widest animate-pulse">
+                            Initializing encrypted secure connection...
+                        </p>
+                    </motion.div>
+                </div>
             </div>
         );
     }
@@ -148,7 +190,7 @@ export default function LiveRoomClient({ session, user }: Props) {
                     {showChat && (
                         <aside className="w-full md:w-[350px] border-l border-white/5 bg-[#0a0a0a] flex flex-col shadow-2xl relative z-20">
                             <Chat client={chatClient} theme="str-chat__theme-dark">
-                                <Channel channel={chatClient.channel('messaging', session.id, { name: session.title })}>
+                                <Channel channel={chatClient.channel('messaging', session.id)}>
                                     <Window>
                                         <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/40">
                                             <h2 className="font-black text-[10px] uppercase tracking-[0.3em] text-gray-400">Interactive Chat</h2>

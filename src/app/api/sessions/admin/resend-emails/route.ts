@@ -43,11 +43,13 @@ export async function POST(req: Request) {
 
         for (const reg of registrations) {
             const liveLink = `${origin}/live/${session.id}?email=${encodeURIComponent(reg.userEmail)}`;
+            const sessionTitle = session.title || "Live Webinar Session";
+            const userName = reg.userName || "Attendee";
 
-            const emailResult = await sendEmail({
+            const emailContent = {
                 to: reg.userEmail,
-                subject: `Registration Confirmed: ${session.title}`,
-                text: `Hello ${reg.userName},\n\nYour registration for ${session.title} is confirmed.\n\nJoin Link: ${liveLink}\nDate: ${new Date(session.startTime).toLocaleString()}\n\nSee you there!`,
+                subject: `Registration Confirmed: ${sessionTitle}`,
+                text: `Hello ${userName},\n\nYour registration for ${sessionTitle} is confirmed.\n\nJoin Link: ${liveLink}\nDate: ${new Date(session.startTime).toLocaleString()}\n\nSee you there!`,
                 html: `
                     <!DOCTYPE html>
                     <html>
@@ -108,7 +110,9 @@ export async function POST(req: Request) {
                     </body>
                     </html>
                 `
-            });
+            };
+
+            const emailResult = await sendEmail(emailContent);
 
             if (emailResult.success) {
                 successCount++;
