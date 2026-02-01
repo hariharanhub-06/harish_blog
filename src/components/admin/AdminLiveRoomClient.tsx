@@ -13,7 +13,7 @@ import {
 import { Chat, Channel, Window, MessageList, MessageInput } from "stream-chat-react";
 import { StreamChat } from "stream-chat";
 import { motion } from "framer-motion";
-import { Loader2, Video, Users, MessageSquare, Shield, Copy, Settings, Layout, Mic, ExternalLink, Hand, Trash2 } from "lucide-react";
+import { Loader2, Video, Users, MessageSquare, Shield, Copy, Settings, Layout, Mic, ExternalLink, Hand, Trash2, X } from "lucide-react";
 
 interface Props {
     session: any;
@@ -24,6 +24,7 @@ export default function AdminLiveRoomClient({ session }: Props) {
     const [chatClient, setChatClient] = useState<StreamChat | null>(null);
     const [call, setCall] = useState<any>(null);
     const [copied, setCopied] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const initStream = async () => {
@@ -50,8 +51,9 @@ export default function AdminLiveRoomClient({ session }: Props) {
                 await callInstance.join({ create: true });
                 setCall(callInstance);
 
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Admin init failed:", error);
+                setError(error.message || "Failed to initialize host dashboard. Please try again later.");
             }
         };
 
@@ -67,6 +69,26 @@ export default function AdminLiveRoomClient({ session }: Props) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center p-6 space-y-6">
+                <div className="w-20 h-20 bg-red-500/10 rounded-[32px] flex items-center justify-center border border-red-500/20">
+                    <X className="text-red-500" size={32} />
+                </div>
+                <h2 className="text-gray-900 text-xl font-black uppercase tracking-tight">Host Dashboard Error</h2>
+                <p className="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] max-w-sm leading-relaxed">
+                    {error}
+                </p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="px-8 py-3 bg-gray-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-black transition-all active:scale-95 shadow-xl shadow-black/10"
+                >
+                    Retry Initialization
+                </button>
+            </div>
+        );
+    }
 
     if (!videoClient || !chatClient || !call) {
         return (
@@ -280,7 +302,7 @@ function ParticipantManager() {
     const handleGrantStage = async (p: any) => {
         // In Stream, to allow someone to speak we update their permissions
         try {
-            await call?.updateParticipantPermissions(p.sessionId, {
+            await (call as any)?.updateParticipantPermissions(p.sessionId, {
                 can_publish_audio: true,
                 can_publish_video: true
             });
@@ -301,7 +323,7 @@ function ParticipantManager() {
 
     return (
         <div className="space-y-2">
-            {participants.filter(p => p.userId !== 'admin').map(p => (
+            {(participants as any[]).filter(p => p.userId !== 'admin').map((p: any) => (
                 <div key={p.sessionId} className="p-4 bg-gray-50 rounded-2xl flex items-center justify-between group hover:bg-gray-100 transition-colors">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
@@ -310,7 +332,7 @@ function ParticipantManager() {
                         <div>
                             <div className="font-bold text-gray-900 text-sm">{p.name || "Anonymous User"}</div>
                             <div className="flex items-center gap-3">
-                                {p.audioMuted ? <Mic size={10} className="text-gray-400" /> : <Mic size={10} className="text-emerald-500" />}
+                                {p.isMuted ? <Mic size={10} className="text-gray-400" /> : <Mic size={10} className="text-emerald-500" />}
                                 <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Lobby</span>
                             </div>
                         </div>

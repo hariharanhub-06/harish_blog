@@ -23,7 +23,7 @@ export default async function LiveSessionPage({ params, searchParams }: Props) {
     });
 
     if (!session) {
-        redirect("/sessions?error=not_found");
+        redirect("/?error=session_not_found");
     }
 
     // 2. Check Registration (simplified for now, ideally needs auth or a secure link)
@@ -61,7 +61,7 @@ export default async function LiveSessionPage({ params, searchParams }: Props) {
     });
 
     if (!registration) {
-        redirect(`/sessions?error=not_registered&sessionId=${sessionId}`);
+        redirect(`/?error=not_registered&sessionId=${sessionId}`);
     }
 
     return (
