@@ -200,7 +200,7 @@ export default function MainContent({
     return (
         <div className="flex flex-col gap-4 pb-4 overflow-x-hidden">
             {/* Stats Section */}
-            <section className="container mx-auto px-6 py-8">
+            <section className="container mx-auto px-6 py-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {loading ? (
                         [...Array(4)].map((_, i) => (
@@ -259,9 +259,9 @@ export default function MainContent({
                     <div className="absolute top-0 left-0 h-full w-8 md:w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-8 md:w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                    <div className="flex flex-col items-center mb-6 text-center">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500/80">Professional Journey</span>
-                        <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Experience</h4>
+                    <div className="flex flex-col items-center mb-4 text-center">
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-500/80">Professional Journey</span>
+                        <h4 className="text-xl font-black text-white uppercase tracking-tighter">Experience</h4>
                     </div>
 
                     <InfiniteCarousel
@@ -293,9 +293,9 @@ export default function MainContent({
                     <div className="absolute top-0 left-0 h-full w-8 md:w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-8 md:w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                    <div className="flex flex-col items-center mb-6 text-center">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-500/80">Academic Background</span>
-                        <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Education</h4>
+                    <div className="flex flex-col items-center mb-4 text-center">
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-amber-500/80">Academic Background</span>
+                        <h4 className="text-xl font-black text-white uppercase tracking-tighter">Education</h4>
                     </div>
 
                     <InfiniteCarousel
@@ -327,9 +327,9 @@ export default function MainContent({
                     <div className="absolute top-0 left-0 h-full w-8 md:w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-8 md:w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                    <div className="flex flex-col items-center mb-6 text-center">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-teal-500/80">Community Impact</span>
-                        <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Volunteering</h4>
+                    <div className="flex flex-col items-center mb-4 text-center">
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-teal-500/80">Community Impact</span>
+                        <h4 className="text-xl font-black text-white uppercase tracking-tighter">Volunteering</h4>
                     </div>
 
                     <InfiniteCarousel
@@ -366,10 +366,10 @@ export default function MainContent({
                 />
 
                 {/* My Journey Section */}
-                <section id="journey" className="container mx-auto px-6 py-12 bg-black/20 rounded-[3rem] border border-white/5 my-8 overflow-hidden relative">
-                    <div className="flex flex-col items-center mb-10">
-                        <h2 className="text-[15vw] md:text-[12vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-12 md:-mt-16">JOURNEY</h2>
-                        <h2 className="text-3xl md:text-6xl font-black text-white uppercase tracking-tighter text-center relative z-10">
+                <section id="journey" className="container mx-auto px-6 py-8 bg-black/20 rounded-[2.5rem] border border-white/5 my-4 overflow-hidden relative">
+                    <div className="flex flex-col items-center mb-6">
+                        <h2 className="text-[10vw] md:text-[8vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-10 md:-mt-12">JOURNEY</h2>
+                        <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter text-center relative z-10">
                             My <span className="text-orange-600">Journey</span>
                         </h2>
                         <div className="w-16 md:w-24 h-1.5 md:h-2 bg-orange-600 mt-2 md:mt-4 rounded-full" />
@@ -444,10 +444,10 @@ export default function MainContent({
             </section>
 
             {/* Projects/Portfolio Section */}
-            <section id="portfolio" className="container mx-auto px-6 scroll-mt-20 py-12">
-                <div className="flex flex-col items-center mb-8">
-                    <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">Featured <span className="text-orange-600">Projects</span></h2>
-                    <div className="w-16 h-1.5 bg-orange-600 mt-2 rounded-full"></div>
+            <section id="portfolio" className="container mx-auto px-6 scroll-mt-20 py-8">
+                <div className="flex flex-col items-center mb-6">
+                    <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter">Featured <span className="text-orange-600">Projects</span></h2>
+                    <div className="w-12 h-1 bg-orange-600 mt-2 rounded-full"></div>
                     <p className="mt-4 text-gray-400 text-base max-w-xl text-center font-bold">
                         Building digital products that combine stunning design with robust business logic.
                     </p>
@@ -520,14 +520,14 @@ export default function MainContent({
             {/* Feedback Section */}
             {/* Quiz Section */}
             {quizzes.length > 0 && (
-                <section id="quiz" className="py-12 md:py-20 bg-gradient-to-b from-transparent to-primary/5 relative overflow-hidden">
+                <section id="quiz" className="py-8 md:py-12 bg-gradient-to-b from-transparent to-primary/5 relative overflow-hidden">
                     <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
                     <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
-                    <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center mb-12 gap-6 relative z-10">
+                    <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center mb-8 gap-6 relative z-10">
                         <div className="text-center md:text-left">
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Challenge Area</span>
-                            <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Interactive <span className="text-primary italic">Quizzes</span></h2>
+                            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Challenge Area</span>
+                            <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter">Interactive <span className="text-primary italic">Quizzes</span></h2>
                         </div>
 
                         <div className="flex flex-col md:flex-row items-center gap-4">
