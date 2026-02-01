@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { JitsiMeeting } from '@jitsi/react-sdk';
-import { Loader2, Video, Users, MessageSquare, Shield, X, Copy, Settings, Layout, Mic, ExternalLink, Hand, Trash2 } from "lucide-react";
+import { Loader2, Video, Users, MessageSquare, Shield, X, Copy, Settings, Layout, Mic, ExternalLink, Hand, Trash2, Menu } from "lucide-react";
 
 interface Props {
     session: any;
@@ -40,6 +40,7 @@ export default function AdminLiveRoomClient({ session }: Props) {
         disableChat: false,
     });
     const [updating, setUpdating] = useState(false);
+    const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
     // Initial fetch of policies
     useEffect(() => {
@@ -172,6 +173,12 @@ export default function AdminLiveRoomClient({ session }: Props) {
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+                        className="xl:hidden p-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    >
+                        <Menu size={20} />
+                    </button>
                     <div className="hidden md:flex flex-col items-end mr-4">
                         <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Room Name (Secure)</span>
                         <span className="text-[10px] font-bold text-gray-900 font-mono truncate max-w-[150px]">{roomName}</span>
@@ -223,6 +230,9 @@ export default function AdminLiveRoomClient({ session }: Props) {
                         onApiReady={(api) => {
                             setJitsiApi(api);
                         }}
+                        onReadyToClose={() => {
+                            window.location.href = '/admin';
+                        }}
                         getIFrameRef={(iframeRef) => {
                             iframeRef.style.height = '100%';
                             iframeRef.style.width = '100%';
@@ -231,7 +241,7 @@ export default function AdminLiveRoomClient({ session }: Props) {
                     />
                 </div>
 
-                {/* Right Panel: Host Moderation Sidebar */}
+                {/* Right Panel: Host Moderation Sidebar (Desktop) */}
                 <div className="w-72 bg-white border-l border-gray-100 flex flex-col shrink-0 overflow-y-auto hidden xl:flex">
                     <div className="p-4 border-b border-gray-50 bg-gray-50/50">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Moderation Policy</h3>
@@ -306,6 +316,72 @@ export default function AdminLiveRoomClient({ session }: Props) {
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile/Tablet Sidebar Overlay */}
+                {showMobileSidebar && (
+                    <div className="absolute inset-0 z-50 bg-black/50 xl:hidden flex justify-end">
+                        <motion.div
+                            initial={{ x: "100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "100%" }}
+                            className="w-80 bg-white h-full shadow-2xl flex flex-col overflow-y-auto"
+                        >
+                            <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                                <h3 className="text-xs font-black uppercase tracking-wider">Moderator Controls</h3>
+                                <button onClick={() => setShowMobileSidebar(false)} className="p-2 hover:bg-gray-200 rounded-lg"><X size={18} /></button>
+                            </div>
+
+                            {/* Reusing the controls content (simplified duplication for responsiveness) */}
+                            <div className="p-4 space-y-4 flex-1">
+                                <div className="space-y-4">
+                                    {[
+                                        { id: 'disableAudio', label: 'Lock Microphones', icon: Mic },
+                                        { id: 'disableVideo', label: 'Lock Cameras', icon: Video },
+                                        { id: 'disableScreenSharing', label: 'Lock Screen Sharing', icon: Layout },
+                                        { id: 'disableChat', label: 'Lock Public Chat', icon: MessageSquare },
+                                        { id: 'disableReactions', label: 'Lock Reactions', icon: Hand },
+                                    ].map((item: any) => (
+                                        <label key={item.id} className="flex items-center justify-between group cursor-pointer">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-2 rounded-lg transition-colors ${(modSettings as any)[item.id] ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'}`}>
+                                                    <item.icon size={14} />
+                                                </div>
+                                                <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">{item.label}</span>
+                                            </div>
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 rounded-md border-gray-300 text-black focus:ring-black cursor-pointer"
+                                                checked={(modSettings as any)[item.id]}
+                                                onChange={(e) => updateSettings({ ...modSettings, [item.id]: e.target.checked })}
+                                            />
+                                        </label>
+                                    ))}
+                                </div>
+                                <div className="h-px bg-gray-100 my-4" />
+                                <div className="space-y-2">
+                                    <button
+                                        onClick={() => handleMuteAll('audio')}
+                                        className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Mic size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Audio</span>
+                                        </div>
+                                    </button>
+                                    <button
+                                        onClick={() => handleMuteAll('video')}
+                                        className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Video size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Video</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
             </div>
 
             {/* Mobile Footer Moderation (Simplified) */}
