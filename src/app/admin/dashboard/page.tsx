@@ -34,7 +34,7 @@ import YouTubeModule from "@/components/admin/YouTubeModule";
 import QuizModule from "@/components/admin/QuizModule";
 import FeedbackModule from "@/components/admin/FeedbackModule";
 import FinanceModule from "@/components/admin/FinanceModule";
-import TypingLeaderboard from "@/components/admin/TypingLeaderboard";
+import LeaderboardModule from "@/components/admin/LeaderboardModule";
 import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
 import LiveSessionsModule from "@/components/admin/LiveSessionsModule";
 
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
             case "feedbacks": return <FeedbackModule />;
             case "quiz-manager": return <QuizModule />;
             case "finance-hub": return <FinanceModule />;
-            case "leaderboard": return <TypingLeaderboard />;
+            case "leaderboard": return <LeaderboardModule />;
             case "meetings": return <AdminMeetingsModule />;
             case "sessions": return <LiveSessionsModule />;
             default: return (
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-[#fcfcfd] flex relative overflow-hidden font-poppins text-gray-900">
+        <div className="flex h-[100dvh] bg-[#fcfcfc] overflow-hidden selection:bg-primary/10 font-poppins text-gray-900">
             {/* Soft Background Decorative Blobs */}
             <div className="fixed top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="fixed bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />

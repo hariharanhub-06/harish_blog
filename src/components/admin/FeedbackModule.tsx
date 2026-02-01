@@ -47,6 +47,9 @@ export default function FeedbackModule() {
         isAdmin: true // Admin creating feedback is auto-approved
     });
 
+    const [searchQuery, setSearchQuery] = useState("");
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
     useEffect(() => {
         fetchFeedbacks();
     }, []);
@@ -120,9 +123,14 @@ export default function FeedbackModule() {
         }
     };
 
-    const filteredFeedbacks = feedbacks.filter(f =>
-        activeTab === "All" ? true : f.status === activeTab
-    );
+    const processedFeedbacks = feedbacks
+        .filter(f => activeTab === "All" ? true : f.status === activeTab)
+        .filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        .sort((a, b) => {
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+        });
 
     const averageRating = feedbacks.length > 0
         ? (feedbacks.reduce((acc, f) => acc + f.rating, 0) / feedbacks.length).toFixed(1)
@@ -166,84 +174,112 @@ export default function FeedbackModule() {
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex items-center gap-2 bg-gray-50/50 p-1.5 rounded-2xl border border-gray-100 max-w-fit">
-                {["All", "Fresh", "Approved"].map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab as any)}
-                        className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab
-                            ? "bg-white text-primary shadow-sm border border-gray-100"
-                            : "text-secondary hover:text-primary"
-                            }`}
-                    >
-                        {tab === "Fresh" ? "Pending" : tab}
-                        {tab === "Fresh" && feedbacks.filter(f => f.status === "Fresh").length > 0 && (
-                            <span className="ml-2 bg-orange-500 text-white px-1.5 py-0.5 rounded-full text-[8px] animate-pulse">
-                                {feedbacks.filter(f => f.status === "Fresh").length}
-                            </span>
-                        )}
-                    </button>
-                ))}
-            </div>
-
-            {/* List */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                {filteredFeedbacks.map((f) => (
-                    <div key={f.id} className="relative h-[120px] w-full">
-                        <div
-                            className={`absolute inset-x-0 top-0 group bg-white p-4 rounded-[2rem] border transition-all duration-300 flex flex-col overflow-hidden z-10 hover:z-50 hover:shadow-2xl hover:border-primary/30 h-[120px] hover:h-auto min-h-[120px] ${f.status === "Fresh" ? "border-orange-100 bg-orange-50/30 shadow-sm shadow-orange-100/20" : "border-gray-100 shadow-sm"
+            {/* Filters & Search */}
+            <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 bg-gray-50/50 p-1 rounded-2xl border border-gray-100 shrink-0">
+                    {["All", "Fresh", "Approved"].map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab as any)}
+                            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab
+                                ? "bg-white text-primary shadow-sm border border-gray-100"
+                                : "text-secondary hover:text-primary"
                                 }`}
                         >
-                            <div className="flex items-center justify-between mb-2 shrink-0">
-                                <div className="flex text-amber-500">
+                            {tab === "Fresh" ? "Pending" : tab}
+                            {tab === "Fresh" && feedbacks.filter(f => f.status === "Fresh").length > 0 && (
+                                <span className="ml-2 bg-orange-500 text-white px-1.5 py-0.5 rounded-full text-[8px] animate-pulse">
+                                    {feedbacks.filter(f => f.status === "Fresh").length}
+                                </span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex flex-1 items-center gap-4 w-full">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                        <input
+                            type="text"
+                            placeholder="Search by name..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl pl-12 pr-4 py-3 text-xs font-bold focus:outline-none focus:border-primary/30 transition-all"
+                        />
+                    </div>
+
+                    <button
+                        onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+                        className="flex items-center gap-2 px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-secondary hover:text-primary transition-all shrink-0"
+                    >
+                        {sortOrder === "desc" ? "Newest First" : "Oldest First"}
+                    </button>
+                </div>
+            </div>
+
+            {/* List View */}
+            <div className="space-y-3">
+                {processedFeedbacks.map((f) => (
+                    <div
+                        key={f.id}
+                        className={`group bg-white p-4 md:p-6 rounded-[2rem] border transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-xl hover:border-primary/20 ${f.status === "Fresh" ? "border-orange-100 bg-orange-50/30" : "border-gray-100"}`}
+                    >
+                        <div className="flex items-center gap-4 flex-1">
+                            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-all">
+                                {f.role === "Student" ? <GraduationCap size={20} /> : f.role === "Professional" ? <Briefcase size={20} /> : <Lightbulb size={20} />}
+                            </div>
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="text-sm font-black text-gray-900 uppercase tracking-tight">{f.name}</h4>
+                                    <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border ${f.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-orange-100 text-orange-600 border-orange-200"}`}>
+                                        {f.status}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-3 text-[10px] font-bold text-secondary uppercase tracking-widest opacity-60">
+                                    <span className="flex items-center gap-1"><Building size={10} /> {f.organization}</span>
+                                    <span>•</span>
+                                    <span className="flex items-center gap-1"><Quote size={10} /> {f.role}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 max-w-xl">
+                            <p className="text-xs text-gray-600 font-medium line-clamp-2 md:line-clamp-1 italic group-hover:line-clamp-none transition-all">
+                                &ldquo;{f.content}&rdquo;
+                            </p>
+                        </div>
+
+                        <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 md:border-l md:border-gray-50 md:pl-6">
+                            <div className="flex flex-col items-center">
+                                <div className="flex text-amber-500 mb-1">
                                     {[...Array(5)].map((_, i) => (
-                                        <Star key={i} size={8} fill={i < f.rating ? "currentColor" : "none"} />
+                                        <Star key={i} size={10} fill={i < f.rating ? "currentColor" : "none"} />
                                     ))}
                                 </div>
-                                <span className={`px-2 py-0.5 rounded-full text-[6px] font-black uppercase tracking-widest border shrink-0 ${f.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-orange-100 text-orange-600 border-orange-200"
-                                    }`}>
-                                    {f.status === "Fresh" ? "PND" : "APR"}
+                                <span className="text-[9px] font-black text-gray-300 uppercase tracking-tighter">
+                                    {new Date(f.createdAt).toLocaleDateString()}
                                 </span>
                             </div>
 
-                            <div className="min-w-0 mb-1">
-                                <h4 className="text-[10px] font-black text-gray-900 uppercase tracking-tight truncate group-hover:whitespace-normal group-hover:line-clamp-2">{f.name}</h4>
-                            </div>
-
-                            {/* Hidden by default, shown on hover */}
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2 space-y-3">
-                                <p className="text-gray-600 text-[10px] font-medium leading-relaxed italic border-t border-gray-50 pt-3">
-                                    &ldquo;{f.content}&rdquo;
-                                </p>
-
-                                <div className="flex items-center gap-2 pb-2">
-                                    <div className="w-6 h-6 rounded-lg bg-gray-50 flex items-center justify-center text-secondary/40 shrink-0">
-                                        {f.role === "Student" ? <GraduationCap size={12} /> : f.role === "Professional" ? <Briefcase size={12} /> : <Lightbulb size={12} />}
-                                    </div>
-                                    <p className="text-[8px] font-bold text-secondary uppercase tracking-widest truncate">
-                                        {f.organization}
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center gap-1.5 w-full pt-1">
-                                    {f.status === "Fresh" && (
-                                        <button
-                                            onClick={() => handleApprove(f.id)}
-                                            disabled={updatingId === f.id}
-                                            className="flex-1 py-2 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center justify-center"
-                                        >
-                                            {updatingId === f.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={14} />}
-                                        </button>
-                                    )}
+                            <div className="flex items-center gap-2">
+                                {f.status === "Fresh" && (
                                     <button
-                                        onClick={() => handleDelete(f.id)}
+                                        onClick={() => handleApprove(f.id)}
                                         disabled={updatingId === f.id}
-                                        className="flex-1 py-2 bg-red-50 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center justify-center"
+                                        className="p-3 bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
+                                        title="Approve"
                                     >
-                                        <Trash2 size={14} />
+                                        {updatingId === f.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                                     </button>
-                                </div>
+                                )}
+                                <button
+                                    onClick={() => handleDelete(f.id)}
+                                    disabled={updatingId === f.id}
+                                    className="p-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all active:scale-95 disabled:opacity-50"
+                                    title="Delete"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -163,7 +163,7 @@ export default function LiveRoomClient({ session, user }: Props) {
     }
 
     return (
-        <div className="h-screen bg-black flex flex-col">
+        <div className="h-[100dvh] bg-black flex flex-col supports-[height:100svh]:h-[100svh]">
             <header className="p-4 bg-black/40 backdrop-blur-md border-b border-white/5 flex items-center justify-between z-10 shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-red-600/10 rounded-lg">
