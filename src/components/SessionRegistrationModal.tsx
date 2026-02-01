@@ -51,6 +51,10 @@ export default function SessionRegistrationModal({ session, onClose }: SessionRe
         setLoading(true);
 
         try {
+            if (!window.Razorpay) {
+                alert("Payment gateway is still loading. Please try again in a few seconds.");
+                return;
+            }
             // 1. Create Order
             const orderRes = await fetch("/api/sessions/create-order", {
                 method: "POST",
