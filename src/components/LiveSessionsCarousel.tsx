@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Video, Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
+import { useSearchParams } from "next/navigation";
 import SessionRegistrationModal from "./SessionRegistrationModal";
 import JoinSessionModal from "./JoinSessionModal";
 
@@ -26,6 +27,18 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
     const [selectedSession, setSelectedSession] = useState<Session | null>(null);
     const [joiningSession, setJoiningSession] = useState<Session | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const error = searchParams.get("joinError");
+        const sid = searchParams.get("sessionId");
+        if (error && sid) {
+            const session = sessions.find(s => s.id === sid);
+            if (session) {
+                setJoiningSession(session);
+            }
+        }
+    }, [searchParams, sessions]);
 
     if (sessions.length === 0) return null;
 
