@@ -12,38 +12,10 @@ export function InfiniteCarousel({
     className?: string;
 }) {
     const [isPaused, setIsPaused] = useState(false);
-    const [isDragging, setIsDragging] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [scrollLeft, setScrollLeft] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const handleTap = (e: React.MouseEvent) => {
-        if (!containerRef.current || items.length === 0) return;
-
-        const { clientWidth, scrollLeft } = containerRef.current;
-        const clickX = e.clientX - containerRef.current.getBoundingClientRect().left;
-
-        // Find the width of a single item including gap
-        const firstItem = containerRef.current.querySelector('.shrink-0') as HTMLElement;
-        const itemWidth = firstItem ? firstItem.offsetWidth + 48 : clientWidth; // 48 is the gap-12 (12*4px)
-
-        if (clickX < clientWidth / 2) {
-            // Tap Left
-            containerRef.current.scrollTo({
-                left: scrollLeft - itemWidth,
-                behavior: "smooth"
-            });
-        } else {
-            // Tap Right
-            containerRef.current.scrollTo({
-                left: scrollLeft + itemWidth,
-                behavior: "smooth"
-            });
-        }
-    };
-
     const handleScroll = () => {
-        if (!containerRef.current || isDragging) return;
+        if (!containerRef.current) return;
         const { scrollLeft, scrollWidth } = containerRef.current;
         const halfWidth = scrollWidth / 2;
 
@@ -58,14 +30,14 @@ export function InfiniteCarousel({
     useEffect(() => {
         let animationFrameId: number;
         const drift = () => {
-            if (containerRef.current && !isPaused && !isDragging) {
+            if (containerRef.current && !isPaused) {
                 containerRef.current.scrollLeft += 0.8; // Smooth slow drift
             }
             animationFrameId = requestAnimationFrame(drift);
         };
         animationFrameId = requestAnimationFrame(drift);
         return () => cancelAnimationFrame(animationFrameId);
-    }, [isPaused, isDragging]);
+    }, [isPaused]);
 
     // Base items repeated enough to fill width
     const displayItems = items.length > 0
@@ -79,12 +51,12 @@ export function InfiniteCarousel({
             <div
                 ref={containerRef}
                 onScroll={handleScroll}
-                className="overflow-x-auto whitespace-nowrap flex cursor-pointer scrollbar-hide"
+                className="overflow-x-auto whitespace-nowrap flex scrollbar-hide"
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={() => setIsPaused(false)}
-                onClick={handleTap}
+                onTouchStart={() => setIsPaused(true)}
+                onTouchEnd={() => setIsPaused(false)}
                 style={{
-                    scrollBehavior: 'smooth',
                     WebkitOverflowScrolling: 'touch'
                 }}
             >
