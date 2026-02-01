@@ -22,7 +22,7 @@ export default function AboutHero({ name, about, location, imageUrl, experience 
     ];
 
     return (
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center py-12 md:py-16">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-8 md:py-10">
             {/* Image Side (Left) */}
             <motion.div
                 initial={{ opacity: 0, x: -50 }}
@@ -33,10 +33,10 @@ export default function AboutHero({ name, about, location, imageUrl, experience 
             >
                 <div className="relative group">
                     {/* Decorative Background Elements */}
-                    <div className="absolute -inset-4 bg-orange-600/20 rounded-[3rem] blur-2xl group-hover:bg-orange-600/30 transition-all duration-700 -z-10" />
+                    <div className="absolute -inset-4 bg-orange-600/20 rounded-[2.5rem] blur-2xl group-hover:bg-orange-600/30 transition-all duration-700 -z-10" />
 
                     <Tilt options={{ max: 10, speed: 400, "max-glare": 0.2 }}>
-                        <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden border-4 border-white/5 shadow-2x shadow-black/50 bg-[#1a1a1a]">
+                        <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden border-4 border-white/5 shadow-2x shadow-black/50 bg-[#1a1a1a]">
                             {imageUrl ? (
                                 <Image
                                     src={imageUrl}
@@ -46,7 +46,7 @@ export default function AboutHero({ name, about, location, imageUrl, experience 
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-zinc-900">
-                                    <span className="text-[15vw] font-black text-white/5">{name.charAt(0)}</span>
+                                    <span className="text-[12vw] font-black text-white/5">{name.charAt(0)}</span>
                                 </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-transparent to-transparent opacity-60" />
@@ -54,9 +54,9 @@ export default function AboutHero({ name, about, location, imageUrl, experience 
                     </Tilt>
 
                     {/* Quick Stats Floating Card */}
-                    <div className="absolute -bottom-10 right-0 md:-right-10 bg-white/5 backdrop-blur-xl p-6 md:p-8 rounded-[2rem] border border-white/10 shadow-2xl animate-in fade-in slide-in-from-right-10 duration-1000 delay-500">
-                        <div className="text-orange-600 font-black text-4xl mb-1">{experience}</div>
-                        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Years <br />Experience</div>
+                    <div className="absolute -bottom-8 right-0 md:-right-8 bg-white/5 backdrop-blur-xl p-5 md:p-6 rounded-[1.5rem] border border-white/10 shadow-2xl animate-in fade-in slide-in-from-right-10 duration-1000 delay-500">
+                        <div className="text-orange-600 font-black text-3xl mb-1">{experience}</div>
+                        <div className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60">Years <br />Experience</div>
                     </div>
                 </div>
             </motion.div>
@@ -67,11 +67,11 @@ export default function AboutHero({ name, about, location, imageUrl, experience 
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1, ease: "easeOut" }}
-                className="space-y-8 order-1 lg:order-2"
+                className="space-y-6 order-1 lg:order-2"
             >
-                <div className="space-y-4">
-                    <span className="text-orange-600 font-black uppercase tracking-[0.3em] text-xs">My Background</span>
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1] tracking-tighter">
+                <div className="space-y-3">
+                    <span className="text-orange-600 font-black uppercase tracking-[0.3em] text-[10px]">My Background</span>
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-[1] tracking-tighter">
                         Innovating <br /> The <span className="text-outline-vibrant">Digital</span> <br /> Frontier.
                     </h2>
                 </div>

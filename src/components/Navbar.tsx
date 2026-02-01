@@ -55,7 +55,7 @@ export default function Navbar() {
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 py-4 md:py-6`}
         >
-            <div className={`container mx-auto max-w-5xl h-14 rounded-2xl flex justify-between items-center transition-all duration-500 border ${scrolled
+            <div className={`container mx-auto max-w-4xl h-12 rounded-2xl flex justify-between items-center transition-all duration-500 border ${scrolled
                 ? (isDarkTheme ? "bg-black/80 backdrop-blur-md border-white/10 px-6 shadow-2xl" : "bg-white/95 backdrop-blur-md border-gray-100 px-6 shadow-xl")
                 : (isDarkTheme ? "bg-white/5 backdrop-blur-sm border-white/10 px-5" : "bg-white/80 backdrop-blur-sm border-gray-100 px-5 shadow-sm")
                 }`}>
