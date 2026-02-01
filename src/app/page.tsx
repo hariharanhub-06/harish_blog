@@ -96,8 +96,8 @@ export default async function Home() {
     about: "Passionate developer and business strategist focused on building innovative solutions.",
     location: "Tamil Nadu, India",
     socialLinks: {
-      linkedin: "",
-      github: "",
+      linkedin: "https://linkedin.com/in/hari-haran-j",
+      github: "https://github.com/hari-haran-j",
       twitter: "",
       instagram: ""
     },
@@ -128,6 +128,50 @@ export default async function Home() {
     trainingStats: Array.isArray(dbProfile?.trainingStats) ? dbProfile.trainingStats : defaultProfile.trainingStats,
     socialLinks: dbProfile?.socialLinks || defaultProfile.socialLinks
   };
+
+  // 1. Fallback for Experiences
+  if (experiences.length === 0) {
+    experiences = [
+      {
+        id: "default-1",
+        role: "Web/App Developer",
+        company: "Freelance",
+        duration: "2021 - Present",
+        description: "Building custom web applications and mobile apps."
+      },
+      {
+        id: "default-2",
+        role: "Operations Manager",
+        company: "HM Snacks",
+        duration: "2022 - Present",
+        description: "Managing supply chain and business partnerships."
+      }
+    ];
+  }
+
+  // 2. Fallback for Education
+  if (educations.length === 0) {
+    educations = [
+      {
+        id: "edu-1",
+        degree: "Professional Certification in Web Development",
+        institution: "Industry Lead Programs",
+        period: "2021"
+      }
+    ];
+  }
+
+  // 3. Fallback for Partnerships (Academy Carousel)
+  if (partnerships.length === 0) {
+    partnerships = [
+      {
+        id: "part-1",
+        name: "Regional Tech Hubs",
+        partnerType: "Academy",
+        isActive: true
+      }
+    ];
+  }
 
   return (
     <div className="flex flex-col gap-0 bg-[#0e0e0e] relative">
