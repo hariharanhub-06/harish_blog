@@ -32,10 +32,46 @@ export default function AdminLiveRoomClient({ session }: Props) {
     };
 
     const [jitsiApi, setJitsiApi] = useState<any>(null);
+    const [modSettings, setModSettings] = useState({
+        disableAudio: session.moderatorSettings?.disableAudio || false,
+        disableVideo: session.moderatorSettings?.disableVideo || false,
+        disableScreenSharing: session.moderatorSettings?.disableScreenSharing || false,
+        disableReactions: session.moderatorSettings?.disableReactions || false,
+        disableChat: session.moderatorSettings?.disableChat || false,
+    });
+    const [updating, setUpdating] = useState(false);
 
-    const handleMuteAll = (mediaType: 'audio' | 'video') => {
+    // Push settings to DB whenever they change
+    const updateSettings = async (newSettings: any) => {
+        setUpdating(true);
+        try {
+            await fetch('/api/sessions/admin', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: session.id,
+                    moderatorSettings: newSettings
+                })
+            });
+            setModSettings(newSettings);
+        } catch (e) {
+            console.error("Failed to update settings:", e);
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleMuteAll = async (mediaType: 'audio' | 'video') => {
         if (!jitsiApi) return;
+
+        // 1. Try built-in command
         jitsiApi.executeCommand('muteEveryone', mediaType);
+
+        // 2. Loop through participants for hard-mute reliability
+        const participants = jitsiApi.getParticipantsInfo();
+        participants.forEach((p: any) => {
+            jitsiApi.executeCommand('muteRemoteParticipant', p.participantId, mediaType);
+        });
     };
 
     if (error) {
@@ -132,8 +168,10 @@ export default function AdminLiveRoomClient({ session }: Props) {
                         <span className="text-[10px] font-bold text-gray-900 font-mono truncate max-w-[150px]">{roomName}</span>
                     </div>
                     <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-xl border border-amber-200/50">
-                        <Settings size={12} />
-                        <span className="text-[9px] font-black uppercase tracking-widest">Tip: Use the Shield icon below for chat controls</span>
+                        {updating ? <Loader2 size={12} className="animate-spin" /> : <Settings size={12} />}
+                        <span className="text-[9px] font-black uppercase tracking-widest">
+                            {updating ? "Saving Policy..." : "Room Policy Active"}
+                        </span>
                     </div>
                     <div className="h-6 w-[1px] bg-gray-200 mx-2" />
                     <button
@@ -146,70 +184,143 @@ export default function AdminLiveRoomClient({ session }: Props) {
             </header>
 
             {/* Main Workspace */}
-            <div className="flex-1 w-full relative">
-                <JitsiMeeting
-                    domain="meet.ffmuc.net"
-                    roomName={roomName}
-                    configOverwrite={{
-                        startWithAudioMuted: false,
-                        startWithVideoMuted: false,
-                        enableWelcomePage: false,
-                        enableClosePage: false,
-                        disableModeratorIndicator: false,
-                        disableDeepLinking: true,
-                        prejoinPageEnabled: false,
-                        toolbarButtons: [
-                            'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-                            'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
-                            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                            'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
-                            'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone',
-                            'e2ee', 'security'
-                        ],
-                    }}
-                    userInfo={{
-                        displayName: "Admin (Host)",
-                        email: "admin@harishblog.com"
-                    }}
-                    onApiReady={(api) => {
-                        setJitsiApi(api);
-                    }}
-                    getIFrameRef={(iframeRef) => {
-                        iframeRef.style.height = '100%';
-                        iframeRef.style.width = '100%';
-                        iframeRef.style.border = 'none';
-                    }}
-                />
-            </div>
-
-            {/* Admin Moderator Toolbar */}
-            <div className="bg-white border-t border-gray-100 p-4 flex items-center justify-center gap-4 z-20 shrink-0">
-                <div className="flex items-center gap-2 mr-6 hidden md:flex">
-                    <Users size={16} className="text-gray-400" />
-                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Host Controls:</span>
+            <div className="flex-1 w-full flex relative overflow-hidden">
+                {/* Left Panel: Jitsi */}
+                <div className="flex-1 relative">
+                    <JitsiMeeting
+                        domain="meet.ffmuc.net"
+                        roomName={roomName}
+                        configOverwrite={{
+                            startWithAudioMuted: false,
+                            startWithVideoMuted: false,
+                            enableWelcomePage: false,
+                            enableClosePage: false,
+                            disableModeratorIndicator: false,
+                            disableDeepLinking: true,
+                            prejoinPageEnabled: false,
+                            toolbarButtons: [
+                                'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                                'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
+                                'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                                'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
+                                'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone',
+                                'e2ee', 'security'
+                            ],
+                        }}
+                        userInfo={{
+                            displayName: "Admin (Host)",
+                            email: "admin@harishblog.com"
+                        }}
+                        onApiReady={(api) => {
+                            setJitsiApi(api);
+                        }}
+                        getIFrameRef={(iframeRef) => {
+                            iframeRef.style.height = '100%';
+                            iframeRef.style.width = '100%';
+                            iframeRef.style.border = 'none';
+                        }}
+                    />
                 </div>
 
+                {/* Right Panel: Host Moderation Sidebar */}
+                <div className="w-80 bg-white border-l border-gray-100 flex flex-col shrink-0 overflow-y-auto hidden xl:flex">
+                    <div className="p-6 border-b border-gray-50 bg-gray-50/50">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Moderation Policy</h3>
+                        <div className="space-y-4">
+                            {[
+                                { id: 'disableAudio', label: 'Lock Microphones', icon: Mic },
+                                { id: 'disableVideo', label: 'Lock Cameras', icon: Video },
+                                { id: 'disableScreenSharing', label: 'Lock Screen Sharing', icon: Layout },
+                                { id: 'disableChat', label: 'Lock Public Chat', icon: MessageSquare },
+                                { id: 'disableReactions', label: 'Lock Reactions', icon: Hand },
+                            ].map((item: any) => (
+                                <label key={item.id} className="flex items-center justify-between group cursor-pointer">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg transition-colors ${(modSettings as any)[item.id] ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'}`}>
+                                            <item.icon size={14} />
+                                        </div>
+                                        <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">{item.label}</span>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        className="w-4 h-4 rounded-md border-gray-300 text-black focus:ring-black cursor-pointer"
+                                        checked={(modSettings as any)[item.id]}
+                                        onChange={(e) => updateSettings({ ...modSettings, [item.id]: e.target.checked })}
+                                    />
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="p-6 flex-1">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Quick Actions</h3>
+                        <div className="space-y-3">
+                            <button
+                                onClick={() => handleMuteAll('audio')}
+                                className="w-full flex items-center justify-between p-4 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all active:scale-95 group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Mic size={16} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-left leading-tight font-sans">Mute All<br />Audio</span>
+                                </div>
+                                <X size={14} className="opacity-40 group-hover:opacity-100" />
+                            </button>
+
+                            <button
+                                onClick={() => handleMuteAll('video')}
+                                className="w-full flex items-center justify-between p-4 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all active:scale-95 group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Video size={16} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-left leading-tight font-sans">Mute All<br />Video</span>
+                                </div>
+                                <X size={14} className="opacity-40 group-hover:opacity-100" />
+                            </button>
+
+                            <button
+                                onClick={() => jitsiApi?.executeCommand('toggleLobby', true)}
+                                className="w-full flex items-center gap-3 p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl hover:bg-emerald-100 transition-all active:scale-95"
+                            >
+                                <Shield size={16} />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-left leading-tight font-mono">Enable Lobby</span>
+                            </button>
+                        </div>
+
+                        <div className="mt-8 p-4 bg-amber-50 rounded-2xl border border-amber-100 space-y-2">
+                            <div className="flex items-center gap-2 text-amber-700">
+                                <Shield size={14} />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Hard Lock Tip</span>
+                            </div>
+                            <p className="text-[9px] text-amber-600 font-medium leading-relaxed">
+                                To prevent students from unmuting themselves at all, click the **Security (Shield)** icon inside Jitsi and check **"Everyone starts muted"**.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Footer Moderation (Simplified) */}
+            <div className="bg-white border-t border-gray-100 p-3 flex xl:hidden items-center justify-center gap-3 shrink-0">
                 <button
                     onClick={() => handleMuteAll('audio')}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-gray-900/5 hover:bg-red-50 text-gray-900 hover:text-red-600 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-transparent hover:border-red-200"
+                    className="flex-1 p-3 bg-gray-100 rounded-xl flex flex-col items-center"
                 >
-                    <Mic size={14} /> Mute All Microphones
+                    <Mic size={14} />
+                    <span className="text-[8px] font-black uppercase mt-1">Mute All</span>
                 </button>
-
                 <button
                     onClick={() => handleMuteAll('video')}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-gray-900/5 hover:bg-red-50 text-gray-900 hover:text-red-600 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-transparent hover:border-red-200"
+                    className="flex-1 p-3 bg-gray-100 rounded-xl flex flex-col items-center"
                 >
-                    <Video size={14} /> Mute All Cameras
+                    <Video size={14} />
+                    <span className="text-[8px] font-black uppercase mt-1">Video All</span>
                 </button>
-
-                <div className="h-4 w-[1px] bg-gray-200 mx-2" />
-
                 <button
                     onClick={() => jitsiApi?.executeCommand('toggleChat')}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-black/10"
+                    className="flex-1 p-3 bg-gray-900 text-white rounded-xl flex flex-col items-center"
                 >
-                    <MessageSquare size={14} /> Toggle Chat Panel
+                    <MessageSquare size={14} />
+                    <span className="text-[8px] font-black uppercase mt-1">Chat Pane</span>
                 </button>
             </div>
 
