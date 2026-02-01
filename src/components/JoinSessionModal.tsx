@@ -89,9 +89,8 @@ export default function JoinSessionModal({ sessionId, sessionTitle, isOpen, onCl
                                 </button>
                             </form>
 
-                            <p className="mt-8 text-[10px] text-gray-400 font-medium">
-                                Only registered emails can access the live session. <br />
-                                Check your confirmation email for details.
+                            <p className="mt-8 text-[10px] text-red-500 font-black uppercase tracking-widest border-t border-red-100 pt-6">
+                                Note: Only the email address used during registration can access this live session.
                             </p>
                         </div>
                     </motion.div>
