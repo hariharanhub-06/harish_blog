@@ -203,6 +203,21 @@ export default function LiveRoomClient({ session, user }: Props) {
                         disableDeepLinking: true,
                         prejoinPageEnabled: false,
                         hideModeratorIndicator: true,
+                        // Low Bandwidth Optimizations
+                        resolution: 480,
+                        constraints: {
+                            video: {
+                                height: {
+                                    ideal: 480,
+                                    max: 720,
+                                    min: 240
+                                }
+                            }
+                        },
+                        enableLayerSuspension: true, // Drops video if bandwidth is too low
+                        p2p: {
+                            enabled: true, // Use P2P for 1-on-1 to save server bandwidth
+                        },
                         toolbarButtons: [
                             'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
                             'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
@@ -227,6 +242,9 @@ export default function LiveRoomClient({ session, user }: Props) {
                     }}
                     onApiReady={(externalApi) => {
                         setJitsiApi(externalApi);
+                    }}
+                    onReadyToClose={() => {
+                        window.location.href = '/';
                     }}
                     getIFrameRef={(iframeRef) => {
                         iframeRef.style.height = '100%';
