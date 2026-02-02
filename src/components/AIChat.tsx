@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { X, MessageSquare, Send, CheckCircle2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 
 interface FormData {
     name: string;
@@ -22,6 +22,9 @@ export default function ContactForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, setError] = useState("");
+
+    const { scrollYProgress } = useScroll();
+    const pathLength = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
     // Listen for global open event
     useEffect(() => {
@@ -91,14 +94,14 @@ export default function ContactForm() {
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-[60]">
+        <div className="fixed bottom-6 right-6 z-[60] flex items-center justify-center">
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="mb-4 w-[340px] md:w-[420px] bg-[#0e0e0e] border border-white/10 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl"
+                        className="mb-4 w-[340px] md:w-[420px] bg-[#0e0e0e] border border-white/10 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl absolute bottom-[80px] right-0"
                     >
                         {/* Header */}
                         <div className="p-5 bg-gradient-to-r from-orange-600/20 to-transparent border-b border-white/5 flex justify-between items-center">
@@ -216,14 +219,38 @@ export default function ContactForm() {
             </AnimatePresence>
 
             {!isOpen && (
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsOpen(true)}
-                    className="w-14 h-14 md:w-16 md:h-16 bg-white text-black rounded-full shadow-2xl flex items-center justify-center border-4 border-orange-600"
-                >
-                    <MessageSquare size={24} />
-                </motion.button>
+                <div className="relative flex items-center justify-center w-[80px] h-[80px]">
+                    {/* Scroll Progress Circle */}
+                    <svg className="absolute w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
+                        <circle
+                            cx="50"
+                            cy="50"
+                            r="45"
+                            fill="none"
+                            stroke="rgba(255, 255, 255, 0.1)"
+                            strokeWidth="4"
+                        />
+                        <motion.circle
+                            cx="50"
+                            cy="50"
+                            r="45"
+                            fill="none"
+                            stroke="#ea580c" // Orange-600
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            style={{ pathLength }}
+                        />
+                    </svg>
+
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setIsOpen(true)}
+                        className="w-14 h-14 md:w-16 md:h-16 bg-white text-black rounded-full shadow-2xl flex items-center justify-center border-4 border-orange-600 relative z-10"
+                    >
+                        <MessageSquare size={24} />
+                    </motion.button>
+                </div>
             )}
         </div>
     );
