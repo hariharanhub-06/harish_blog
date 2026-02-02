@@ -120,10 +120,10 @@ export default function ContactForm() {
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="mb-4 w-[340px] md:w-[420px] bg-[#0e0e0e] border border-white/10 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl absolute bottom-[80px] right-0"
+                        className="mb-4 w-[340px] md:w-[420px] bg-[#0e0e0e] border border-white/10 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl absolute bottom-[80px] right-0 flex flex-col max-h-[calc(100vh-120px)]"
                     >
                         {/* Header */}
-                        <div className="p-5 bg-gradient-to-r from-orange-600/20 to-transparent border-b border-white/5 flex justify-between items-center">
+                        <div className="p-5 bg-gradient-to-r from-orange-600/20 to-transparent border-b border-white/5 flex justify-between items-center shrink-0">
                             <div>
                                 <h3 className="text-sm font-black text-white tracking-widest uppercase">Contact Me</h3>
                                 <p className="text-[9px] text-emerald-500 uppercase tracking-wider">● Available</p>
@@ -137,7 +137,7 @@ export default function ContactForm() {
                         </div>
 
                         {/* Form Content */}
-                        <div className="p-6 bg-black/20">
+                        <div className="p-6 bg-black/20 overflow-y-auto custom-scrollbar">
                             {isSubmitted ? (
                                 <motion.div
                                     initial={{ scale: 0.8, opacity: 0 }}
