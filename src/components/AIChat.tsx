@@ -112,6 +112,10 @@ export default function ContactForm() {
         };
     }, [isOpen]);
 
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <div ref={containerRef} className="fixed bottom-6 right-6 z-[60] flex items-center justify-center">
             <AnimatePresence>
@@ -239,7 +243,12 @@ export default function ContactForm() {
 
             <div className="relative flex items-center justify-center w-[80px] h-[80px]">
                 {/* Scroll Progress Circle */}
-                <svg className="absolute w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
+                <svg
+                    className="absolute w-full h-full -rotate-90 cursor-pointer hover:opacity-80 transition-opacity"
+                    viewBox="0 0 100 100"
+                    onClick={scrollToTop}
+                >
+                    <title>Scroll to Top</title>
                     <circle
                         cx="50"
                         cy="50"
