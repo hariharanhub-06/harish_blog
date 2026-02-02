@@ -93,8 +93,27 @@ export default function ContactForm() {
         }
     };
 
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Handle click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]);
+
     return (
-        <div className="fixed bottom-6 right-6 z-[60] flex items-center justify-center">
+        <div ref={containerRef} className="fixed bottom-6 right-6 z-[60] flex items-center justify-center">
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -218,40 +237,38 @@ export default function ContactForm() {
                 )}
             </AnimatePresence>
 
-            {!isOpen && (
-                <div className="relative flex items-center justify-center w-[80px] h-[80px]">
-                    {/* Scroll Progress Circle */}
-                    <svg className="absolute w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
-                        <circle
-                            cx="50"
-                            cy="50"
-                            r="45"
-                            fill="none"
-                            stroke="rgba(255, 255, 255, 0.1)"
-                            strokeWidth="4"
-                        />
-                        <motion.circle
-                            cx="50"
-                            cy="50"
-                            r="45"
-                            fill="none"
-                            stroke="#ea580c" // Orange-600
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            style={{ pathLength }}
-                        />
-                    </svg>
+            <div className="relative flex items-center justify-center w-[80px] h-[80px]">
+                {/* Scroll Progress Circle */}
+                <svg className="absolute w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
+                    <circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        fill="none"
+                        stroke="rgba(255, 255, 255, 0.1)"
+                        strokeWidth="4"
+                    />
+                    <motion.circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        fill="none"
+                        stroke="#ea580c" // Orange-600
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        style={{ pathLength }}
+                    />
+                </svg>
 
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setIsOpen(true)}
-                        className="w-14 h-14 md:w-16 md:h-16 bg-white text-black rounded-full shadow-2xl flex items-center justify-center border-4 border-orange-600 relative z-10"
-                    >
-                        <MessageSquare size={24} />
-                    </motion.button>
-                </div>
-            )}
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="w-14 h-14 md:w-16 md:h-16 bg-white text-black rounded-full shadow-2xl flex items-center justify-center border-4 border-orange-600 relative z-10"
+                >
+                    {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
+                </motion.button>
+            </div>
         </div>
     );
 }
