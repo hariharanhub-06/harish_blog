@@ -466,54 +466,56 @@ export default function MainContent({
                         ))}
                     </div>
                 ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {projects.map((project, i) => (
-                            <CardWrapper key={project.id} index={i}>
-                                <Tilt options={{ max: 10, speed: 400, glare: false }} className="h-full">
-                                    <div
-                                        className="group flex flex-col h-full bg-[#1a1a1a] rounded-3xl overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/30 transition-all duration-500 cursor-pointer"
-                                        onClick={() => setSelectedItem({ data: project, type: "project" })}
-                                    >
-                                        <div className="relative h-64 overflow-hidden">
-                                            {project.thumbnail ? (
-                                                <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100" />
-                                            ) : (
-                                                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
-                                                    <span className="text-white font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
-                                                </div>
-                                            )}
-                                            <div className="absolute top-4 right-4 flex gap-2">
-                                                {project.featured && (
-                                                    <span className="bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">Featured</span>
+                    <InfiniteCarousel
+                        items={projects.map((project, i) => (
+                            <div key={project.id} className="w-[85vw] md:w-[450px] h-full">
+                                <CardWrapper index={i}>
+                                    <Tilt options={{ max: 10, speed: 400, glare: false }} className="h-full">
+                                        <div
+                                            className="group flex flex-col h-full bg-[#1a1a1a] rounded-3xl overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/30 transition-all duration-500 cursor-pointer"
+                                            onClick={() => setSelectedItem({ data: project, type: "project" })}
+                                        >
+                                            <div className="relative h-64 overflow-hidden shrink-0">
+                                                {project.thumbnail ? (
+                                                    <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100" />
+                                                ) : (
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
+                                                        <span className="text-white font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
+                                                    </div>
                                                 )}
-                                            </div>
-                                        </div>
-
-                                        <div className="p-6 flex flex-col flex-grow text-left">
-                                            <div className="flex flex-wrap gap-2 mb-4">
-                                                {project.technologies?.slice(0, 3).map((tech: string) => (
-                                                    <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/10 px-3 py-1.5 rounded-md">{tech}</span>
-                                                ))}
+                                                <div className="absolute top-4 right-4 flex gap-2">
+                                                    {project.featured && (
+                                                        <span className="bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">Featured</span>
+                                                    )}
+                                                </div>
                                             </div>
 
-                                            <h3 className="text-2xl font-black text-white mb-2 group-hover:text-orange-500 transition-colors leading-tight">{project.title}</h3>
-                                            <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2 font-bold">{project.description}</p>
+                                            <div className="p-6 flex flex-col flex-grow text-left">
+                                                <div className="flex flex-wrap gap-2 mb-4">
+                                                    {project.technologies?.slice(0, 3).map((tech: string) => (
+                                                        <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/10 px-3 py-1.5 rounded-md">{tech}</span>
+                                                    ))}
+                                                </div>
 
-                                            <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
-                                                <span className="text-orange-600 font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
-                                                    View Case Study <ArrowRight size={16} />
-                                                </span>
-                                                <div className="flex gap-4">
-                                                    <ExternalLink size={18} className="text-gray-600 hover:text-white transition-colors" />
-                                                    <Github size={18} className="text-gray-600 hover:text-white transition-colors" />
+                                                <h3 className="text-2xl font-black text-white mb-2 group-hover:text-orange-500 transition-colors leading-tight">{project.title}</h3>
+                                                <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2 font-bold">{project.description}</p>
+
+                                                <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
+                                                    <span className="text-orange-600 font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
+                                                        View Case Study <ArrowRight size={16} />
+                                                    </span>
+                                                    <div className="flex gap-4">
+                                                        <ExternalLink size={18} className="text-gray-600 hover:text-white transition-colors" />
+                                                        <Github size={18} className="text-gray-600 hover:text-white transition-colors" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </Tilt>
-                            </CardWrapper>
+                                    </Tilt>
+                                </CardWrapper>
+                            </div>
                         ))}
-                    </div>
+                    />
                 )}
             </section>
 
