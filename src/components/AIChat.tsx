@@ -113,14 +113,14 @@ export default function ContactForm() {
         if (seen) {
             // Force show for debugging based on user request "I cant see the character"
             setShowCharacter(true);
-            setTimeout(() => setShowBubble(true), 1000);
+            setTimeout(() => setShowBubble(true), 300);
         } else {
-            // Show character after 3 seconds
+            // Show character after 0.5 seconds
             const characterTimer = setTimeout(() => {
                 setShowCharacter(true);
-                // Show bubble 1 second after character
-                setTimeout(() => setShowBubble(true), 1000);
-            }, 3000);
+                // Show bubble 0.3 seconds after character
+                setTimeout(() => setShowBubble(true), 300);
+            }, 500);
 
             return () => clearTimeout(characterTimer);
         }
@@ -420,8 +420,8 @@ export default function ContactForm() {
                         }}
                         exit={{ x: 400, opacity: 0 }}
                         transition={{
-                            x: { type: "spring", damping: 25, stiffness: 120, delay: 0.5 },
-                            opacity: { duration: 0.5, delay: 0.5 }
+                            x: { type: "spring", damping: 25, stiffness: 120 },
+                            opacity: { duration: 0.5 }
                         }}
                         className="relative cursor-pointer pointer-events-auto"
                         onClick={handleCharacterClick}
