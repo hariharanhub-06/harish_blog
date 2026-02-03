@@ -53,10 +53,12 @@ export default function ContactForm() {
                 return;
             }
 
-            // Match canvas size to video aspect ratio
-            if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
+            // Match canvas size to video aspect ratio, but cap at a low resolution for performance
+            const MAX_WIDTH = 180;
+            if (canvas.width !== MAX_WIDTH) {
+                const scale = MAX_WIDTH / video.videoWidth;
+                canvas.width = MAX_WIDTH;
+                canvas.height = video.videoHeight * scale;
             }
 
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -85,12 +87,11 @@ export default function ContactForm() {
                 }
 
                 // Update bubble Y offset based on character's actual head position in frame
-                // We want the bubble to follow the head perfectly
                 if (foundTop) {
                     const percentFromTop = topPixelY / canvas.height;
-                    // Subtract a baseline (e.g., 0.2 is where the head usually sits)
-                    // and multiply by the canvas height to get actual pixel movement
-                    const offset = (percentFromTop - 0.2) * 150;
+                    // Improved mapping: since canvas is smaller, 120 offset needs to be consistent
+                    // (percentFromTop - 0.2) maps to -30px to +120px depending on jump height
+                    const offset = (percentFromTop - 0.2) * 120;
                     bubbleY.set(offset);
                 }
 
