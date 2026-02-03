@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, MessageSquare, Send, CheckCircle2 } from "lucide-react";
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
+import { X, MessageSquare, Send, CheckCircle2, ArrowUp } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
 
 interface FormData {
     name: string;
@@ -13,6 +13,9 @@ interface FormData {
 
 export default function ContactForm() {
     const [isOpen, setIsOpen] = useState(false);
+    const [showCharacter, setShowCharacter] = useState(false);
+    const [showBubble, setShowBubble] = useState(false);
+    const [hasSeenCharacter, setHasSeenCharacter] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         name: "",
         email: "",
@@ -23,15 +26,133 @@ export default function ContactForm() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, setError] = useState("");
 
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
     const { scrollYProgress } = useScroll();
     const pathLength = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
+    // Track head position for bubble synchronization
+    const bubbleY = useMotionValue(0);
+
+    // Chroma Key Processing Loop
+    useEffect(() => {
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        if (!video || !canvas) return;
+
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) return;
+
+        let animationFrameId: number;
+
+        const processFrame = () => {
+            // Check if video is actually ready to be drawn
+            if (video.paused || video.ended || video.readyState < 2) {
+                animationFrameId = requestAnimationFrame(processFrame);
+                return;
+            }
+
+            // Match canvas size to video aspect ratio
+            if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            try {
+                const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const length = frame.data.length;
+                let topPixelY = canvas.height;
+                let foundTop = false;
+
+                for (let i = 0; i < length; i += 4) {
+                    const r = frame.data[i + 0];
+                    const g = frame.data[i + 1];
+                    const b = frame.data[i + 2];
+
+                    // Chroma key detection (Green)
+                    // Dominant green threshold - refined to be less aggressive
+                    if (g > 70 && g > r * 1.3 && g > b * 1.3) {
+                        frame.data[i + 3] = 0; // Transparent
+                    } else if (!foundTop && frame.data[i + 3] > 120) {
+                        // Found a solid non-transparent pixel
+                        const pixelIndex = i / 4;
+                        topPixelY = Math.floor(pixelIndex / canvas.width);
+                        foundTop = true;
+                    }
+                }
+
+                // Update bubble Y offset based on character's actual head position in frame
+                // We want the bubble to follow the head perfectly
+                if (foundTop) {
+                    const percentFromTop = topPixelY / canvas.height;
+                    // Subtract a baseline (e.g., 0.2 is where the head usually sits)
+                    // and multiply by the canvas height to get actual pixel movement
+                    const offset = (percentFromTop - 0.2) * 150;
+                    bubbleY.set(offset);
+                }
+
+                ctx.putImageData(frame, 0, 0);
+            } catch (e) {
+                // Handle potential security errors or frame access issues
+            }
+
+            animationFrameId = requestAnimationFrame(processFrame);
+        };
+
+        processFrame();
+        return () => cancelAnimationFrame(animationFrameId);
+    }, [showCharacter]);
+
+    // Check if user has seen character before
+    useEffect(() => {
+        const seen = localStorage.getItem('seenChatCharacter');
+        if (seen) {
+            // Force show for debugging based on user request "I cant see the character"
+            setShowCharacter(true);
+            setTimeout(() => setShowBubble(true), 1000);
+        } else {
+            // Show character after 3 seconds
+            const characterTimer = setTimeout(() => {
+                setShowCharacter(true);
+                // Show bubble 1 second after character
+                setTimeout(() => setShowBubble(true), 1000);
+                // Hide bubble after 5 seconds
+                setTimeout(() => setShowBubble(false), 6000);
+            }, 3000);
+
+            return () => clearTimeout(characterTimer);
+        }
+    }, []);
+
+    // Explicitly play video when character is shown
+    useEffect(() => {
+        if (showCharacter && videoRef.current) {
+            const video = videoRef.current;
+            video.load(); // Force reload for new source
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => {
+                    console.warn("Video auto-play failed, waiting for interaction", err);
+                });
+            }
+        }
+    }, [showCharacter]);
+
     // Listen for global open event
     useEffect(() => {
-        const handleOpen = () => setIsOpen(true);
+        const handleOpen = () => {
+            setIsOpen(true);
+            if (!hasSeenCharacter) {
+                localStorage.setItem('seenChatCharacter', 'true');
+                setHasSeenCharacter(true);
+            }
+        };
         window.addEventListener("open-ai-chat", handleOpen);
         return () => window.removeEventListener("open-ai-chat", handleOpen);
-    }, []);
+    }, [hasSeenCharacter]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData(prev => ({
@@ -114,6 +235,15 @@ export default function ContactForm() {
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCharacterClick = () => {
+        setIsOpen(!isOpen);
+        if (!hasSeenCharacter) {
+            localStorage.setItem('seenChatCharacter', 'true');
+            setHasSeenCharacter(true);
+        }
+        setShowBubble(false); // Hide bubble once clicked
     };
 
     return (
@@ -241,8 +371,8 @@ export default function ContactForm() {
                 )}
             </AnimatePresence>
 
-            <div className="relative flex items-center justify-center w-[80px] h-[80px]">
-                {/* Scroll Progress Circle */}
+            {/* Scroll Progress Circle (Left Side) - Always visible or as before */}
+            <div className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-[60] flex items-center justify-center w-[36px] h-[36px] md:w-[40px] md:h-[40px]">
                 <svg
                     className="absolute w-full h-full -rotate-90 cursor-pointer hover:opacity-80 transition-opacity"
                     viewBox="0 0 100 100"
@@ -252,7 +382,7 @@ export default function ContactForm() {
                     <circle
                         cx="50"
                         cy="50"
-                        r="45"
+                        r="48"
                         fill="none"
                         stroke="rgba(255, 255, 255, 0.1)"
                         strokeWidth="4"
@@ -260,7 +390,7 @@ export default function ContactForm() {
                     <motion.circle
                         cx="50"
                         cy="50"
-                        r="45"
+                        r="48"
                         fill="none"
                         stroke="#ea580c" // Orange-600
                         strokeWidth="4"
@@ -268,16 +398,83 @@ export default function ContactForm() {
                         style={{ pathLength }}
                     />
                 </svg>
-
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="w-14 h-14 md:w-16 md:h-16 bg-white text-black rounded-full shadow-2xl flex items-center justify-center border-4 border-orange-600 relative z-10"
-                >
-                    {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
-                </motion.button>
+                {/* ArrowUp inside circle */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.6 }}
+                        className="text-white"
+                    >
+                        <ArrowUp size={14} className="md:w-4 md:h-4" />
+                    </motion.div>
+                </div>
             </div>
+
+            {/* Animated Video Character */}
+            {showCharacter && (
+                <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[60] flex items-end justify-end pointer-events-none">
+                    <motion.div
+                        initial={{ x: 400, opacity: 0 }}
+                        animate={{
+                            x: 0,
+                            opacity: 1
+                        }}
+                        exit={{ x: 400, opacity: 0 }}
+                        transition={{
+                            x: { type: "spring", damping: 25, stiffness: 120, delay: 0.5 },
+                            opacity: { duration: 0.5, delay: 0.5 }
+                        }}
+                        className="relative cursor-pointer pointer-events-auto"
+                        onClick={handleCharacterClick}
+                    >
+                        {/* Speech Bubble */}
+                        <AnimatePresence>
+                            {showBubble && (
+                                <motion.div
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0, opacity: 0 }}
+                                    className="absolute bottom-[115px] md:bottom-[135px] right-0 mb-4 bg-white text-black px-1.5 py-1 rounded-lg shadow-2xl min-w-[100px] max-w-[140px] z-20"
+                                    style={{
+                                        transformOrigin: "bottom right",
+                                        y: bubbleY
+                                    }}
+                                >
+                                    <p className="text-[9px] font-bold text-orange-600 leading-tight">Meet my boss! 👋</p>
+                                    <p className="text-[8px] text-black/70 mt-0 leading-tight">Fill the form</p>
+                                    <div className="absolute bottom-0 right-6 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-white translate-y-full" />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Hidden Video for processing */}
+                        <video
+                            ref={videoRef}
+                            src="/mascot-dance.mp4"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            crossOrigin="anonymous"
+                            className="hidden"
+                            onCanPlayThrough={() => {
+                                videoRef.current?.play().catch(() => { });
+                            }}
+                        />
+
+                        {/* Visible Canvas with Chroma Key */}
+                        <canvas
+                            ref={canvasRef}
+                            className="w-[80px] h-[120px] md:w-[100px] md:h-[150px] drop-shadow-2xl"
+                            style={{
+                                // Color shift filter to pull colors towards the theme
+                                // Rotate hue to orange territory, boost saturation/contrast
+                                filter: 'saturate(1.8) brightness(1.1) contrast(1.2) hue-rotate(15deg) sepia(0.2)'
+                            }}
+                        />
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 }
