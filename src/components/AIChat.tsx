@@ -451,7 +451,9 @@ export default function ContactForm() {
                         {showCharacter && (
                             <video
                                 ref={videoRef}
-                                src="/mascot-dance.mp4"
+                                src={process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT
+                                    ? `${process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT}/mascot/mascot-dance.mp4?tr=f-auto,q-60`
+                                    : "/mascot-dance.mp4"}
                                 autoPlay
                                 loop
                                 muted
