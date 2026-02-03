@@ -18,12 +18,14 @@ import {
     Link as LinkIcon,
     Trash2,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    FileText
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MeetingChecklistModal from "./MeetingChecklistModal";
 import MeetingScoringModal from "./MeetingScoringModal";
 import MeetingCreateEditModal from "./MeetingCreateEditModal";
+import SchedulerDocumentsModule from "./SchedulerDocumentsModule";
 import { CHECKLIST_ITEMS, getEfficiencyStatus } from "@/constants/meetingData";
 
 interface Meeting {
@@ -54,6 +56,7 @@ export default function AdminMeetingsModule() {
     const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
     const [modalType, setModalType] = useState<"checklist" | "scoring" | "edit" | null>(null);
     const [showAvailability, setShowAvailability] = useState(false);
+    const [showTemplates, setShowTemplates] = useState(false);
     const [availability, setAvailability] = useState<string[]>([]);
     const [stagedAvailability, setStagedAvailability] = useState<string[]>([]);
     const [isSavingAvailability, setIsSavingAvailability] = useState(false);
@@ -262,7 +265,20 @@ export default function AdminMeetingsModule() {
                 </div>
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => setShowAvailability(!showAvailability)}
+                        onClick={() => {
+                            setShowTemplates(!showTemplates);
+                            setShowAvailability(false);
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${showTemplates ? 'bg-gray-900 text-white shadow-lg' : 'bg-white border border-gray-100 text-emerald-600 hover:bg-emerald-50'}`}
+                    >
+                        <FileText size={14} />
+                        {showTemplates ? 'Hide Templates' : 'Meeting Templates'}
+                    </button>
+                    <button
+                        onClick={() => {
+                            setShowAvailability(!showAvailability);
+                            setShowTemplates(false);
+                        }}
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${showAvailability ? 'bg-gray-900 text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-600 hover:bg-gray-50'}`}
                     >
                         <Calendar size={14} />
@@ -368,6 +384,22 @@ export default function AdminMeetingsModule() {
                                     );
                                 })}
                             </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Template Management */}
+            <AnimatePresence>
+                {showTemplates && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="bg-gray-50/50 p-8 rounded-[2rem] border border-gray-100 mb-6 font-primary text-gray-900">
+                            <SchedulerDocumentsModule />
                         </div>
                     </motion.div>
                 )}

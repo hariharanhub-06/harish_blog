@@ -603,6 +603,16 @@ export const meetingSchedules = pgTable("meeting_schedules", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const schedulerDocuments = pgTable("scheduler_documents", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  fileUrl: text("file_url").notNull(),
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const liveSessions = pgTable("live_sessions", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   title: text("title").notNull(),

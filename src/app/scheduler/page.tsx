@@ -18,7 +18,8 @@ import {
     Star,
     Sparkles,
     MousePointer2,
-    Zap
+    Zap,
+    Download
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -32,9 +33,16 @@ interface BookedSession {
     endDate: string;
 }
 
+interface SchedulerDocument {
+    id: string;
+    name: string;
+    fileUrl: string;
+}
+
 export default function MeetingScheduler() {
     const [step, setStep] = useState(1);
     const [availability, setAvailability] = useState<string[]>([]);
+    const [documents, setDocuments] = useState<SchedulerDocument[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [startTime, setStartTime] = useState("10:00");
@@ -58,6 +66,7 @@ export default function MeetingScheduler() {
 
     useEffect(() => {
         fetchAvailability();
+        fetchDocuments();
     }, []);
 
     const fetchAvailability = async () => {
@@ -71,6 +80,18 @@ export default function MeetingScheduler() {
             console.error("Failed to fetch availability:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchDocuments = async () => {
+        try {
+            const res = await fetch("/api/scheduler/documents");
+            if (res.ok) {
+                const data = await res.json();
+                setDocuments(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch documents:", error);
         }
     };
 
@@ -516,6 +537,53 @@ export default function MeetingScheduler() {
                         </div>
                     </div>
                 </div>
+
+                {/* Templates & Documents Section */}
+                {documents.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="w-full mt-12"
+                    >
+                        <div className="flex items-center justify-between mb-6 px-4">
+                            <div>
+                                <h2 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                                    <FileText className="text-primary" size={24} />
+                                    Meeting Templates
+                                </h2>
+                                <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mt-1">Download required assets for visit</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {documents.map((doc) => (
+                                <motion.a
+                                    key={doc.id}
+                                    href={doc.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="bg-white/5 border border-white/10 backdrop-blur-xl p-6 rounded-[2rem] flex items-center justify-between group hover:border-primary/50 transition-all"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <FileText size={24} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-white group-hover:text-primary transition-colors">{doc.name}</h3>
+                                            <p className="text-[10px] text-gray-500 font-black uppercase tracking-tighter">Ready for Download</p>
+                                        </div>
+                                    </div>
+                                    <div className="w-10 h-10 bg-white/5 text-white/50 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all shadow-lg shadow-black/20">
+                                        <Download size={18} />
+                                    </div>
+                                </motion.a>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
             </motion.div>
         </div>
     );
