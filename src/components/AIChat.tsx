@@ -109,21 +109,14 @@ export default function ContactForm() {
 
     // Check if user has seen character before
     useEffect(() => {
-        const seen = localStorage.getItem('seenChatCharacter');
-        if (seen) {
-            // Force show for debugging based on user request "I cant see the character"
+        // Show character after a short delay (0.5s) on every visit
+        const characterTimer = setTimeout(() => {
             setShowCharacter(true);
+            // Show bubble 0.3 seconds after character
             setTimeout(() => setShowBubble(true), 300);
-        } else {
-            // Show character after 0.5 seconds
-            const characterTimer = setTimeout(() => {
-                setShowCharacter(true);
-                // Show bubble 0.3 seconds after character
-                setTimeout(() => setShowBubble(true), 300);
-            }, 500);
+        }, 500);
 
-            return () => clearTimeout(characterTimer);
-        }
+        return () => clearTimeout(characterTimer);
     }, []);
 
     // Explicitly play video when character is shown
@@ -454,20 +447,23 @@ export default function ContactForm() {
                             )}
                         </AnimatePresence>
 
-                        {/* Hidden Video for processing */}
-                        <video
-                            ref={videoRef}
-                            src="/mascot-dance.mp4"
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            crossOrigin="anonymous"
-                            className="hidden"
-                            onCanPlayThrough={() => {
-                                videoRef.current?.play().catch(() => { });
-                            }}
-                        />
+                        {/* Hidden Video for processing - Lazy loaded */}
+                        {showCharacter && (
+                            <video
+                                ref={videoRef}
+                                src="/mascot-dance.mp4"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                crossOrigin="anonymous"
+                                className="hidden"
+                                preload="metadata" // Only load metadata initially
+                                onCanPlayThrough={() => {
+                                    videoRef.current?.play().catch(() => { });
+                                }}
+                            />
+                        )}
 
                         {/* Visible Canvas with Chroma Key */}
                         <canvas
