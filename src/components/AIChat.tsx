@@ -441,14 +441,14 @@ export default function ContactForm() {
                                     initial={{ scale: 0, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     exit={{ scale: 0, opacity: 0 }}
-                                    className="absolute bottom-[95px] md:bottom-[135px] right-0 mb-4 bg-white text-black px-1.5 py-1 rounded-lg shadow-2xl min-w-[100px] max-w-[140px] z-20"
+                                    className="absolute bottom-[95px] md:bottom-[135px] right-0 mb-4 bg-white text-black px-1.5 py-1 rounded-lg shadow-2xl min-w-[80px] max-w-[110px] md:min-w-[100px] md:max-w-[140px] z-20"
                                     style={{
                                         transformOrigin: "bottom right",
                                         y: bubbleY
                                     }}
                                 >
-                                    <p className="text-[9px] font-bold text-orange-600 leading-tight">Meet my boss! 👋</p>
-                                    <p className="text-[8px] text-black/70 mt-0 leading-tight">Fill the form</p>
+                                    <p className="text-[8px] md:text-[9px] font-bold text-orange-600 leading-tight">Meet my boss! 👋</p>
+                                    <p className="text-[7px] md:text-[8px] text-black/70 mt-0 leading-tight">Fill the form</p>
                                     <div className="absolute bottom-0 right-6 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-white translate-y-full" />
                                 </motion.div>
                             )}
