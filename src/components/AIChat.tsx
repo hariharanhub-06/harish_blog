@@ -140,6 +140,14 @@ export default function ContactForm() {
         }
     }, [showCharacter]);
 
+    // Re-show bubble when form is closed
+    useEffect(() => {
+        if (!isOpen && showCharacter) {
+            const timer = setTimeout(() => setShowBubble(true), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen, showCharacter]);
+
     // Listen for global open event
     useEffect(() => {
         const handleOpen = () => {
@@ -433,7 +441,7 @@ export default function ContactForm() {
                                     initial={{ scale: 0, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     exit={{ scale: 0, opacity: 0 }}
-                                    className="absolute bottom-[115px] md:bottom-[135px] right-0 mb-4 bg-white text-black px-1.5 py-1 rounded-lg shadow-2xl min-w-[100px] max-w-[140px] z-20"
+                                    className="absolute bottom-[95px] md:bottom-[135px] right-0 mb-4 bg-white text-black px-1.5 py-1 rounded-lg shadow-2xl min-w-[100px] max-w-[140px] z-20"
                                     style={{
                                         transformOrigin: "bottom right",
                                         y: bubbleY
@@ -464,7 +472,7 @@ export default function ContactForm() {
                         {/* Visible Canvas with Chroma Key */}
                         <canvas
                             ref={canvasRef}
-                            className="w-[80px] h-[120px] md:w-[100px] md:h-[150px] drop-shadow-2xl"
+                            className="w-[60px] h-[90px] md:w-[100px] md:h-[150px] drop-shadow-2xl"
                             style={{
                                 // Color shift filter to pull colors towards the theme
                                 // Rotate hue to orange territory, boost saturation/contrast
