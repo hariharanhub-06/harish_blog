@@ -120,8 +120,6 @@ export default function ContactForm() {
                 setShowCharacter(true);
                 // Show bubble 1 second after character
                 setTimeout(() => setShowBubble(true), 1000);
-                // Hide bubble after 5 seconds
-                setTimeout(() => setShowBubble(false), 6000);
             }, 3000);
 
             return () => clearTimeout(characterTimer);
