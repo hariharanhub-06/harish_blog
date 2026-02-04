@@ -1,3 +1,5 @@
+"use client";
+
 import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield } from "lucide-react";
 import LiveMinutesSidebar from "./LiveMinutesSidebar";
 
