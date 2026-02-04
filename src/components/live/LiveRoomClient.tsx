@@ -15,9 +15,10 @@ interface Props {
         email: string;
         activeSessionId: string;
     };
+    isAdmin: boolean;
 }
 
-export default function LiveRoomClient({ session, user }: Props) {
+export default function LiveRoomClient({ session, user, isAdmin }: Props) {
     const [jitsiApi, setJitsiApi] = useState<any>(null);
     const [modSettings, setModSettings] = useState<any>(session.moderatorSettings || {
         disableAudio: false,
@@ -166,7 +167,7 @@ export default function LiveRoomClient({ session, user }: Props) {
     useDistributedTranscription({
         sessionId: session.id,
         userName: user.name,
-        isActive: !modSettings.disableAudio // Only listen if audio is allowed logic (or just always if you want minutes regardless of Jitsi mute)
+        isActive: modSettings ? !modSettings.disableAudio : true // Default to true if settings loading
     });
 
     return (
@@ -194,50 +195,61 @@ export default function LiveRoomClient({ session, user }: Props) {
                 </div>
             </header>
 
-            <div className="flex-1 w-full bg-[#050505] relative overflow-hidden">
-                <JitsiMeeting
-                    domain="meet.ffmuc.net"
-                    roomName={roomName}
-                    configOverwrite={{
-                        startWithAudioMuted: true,
-                        disableModeratorIndicator: true,
-                        startWithVideoMuted: true,
-                        enableEmailInStats: false,
-                        disableDeepLinking: true,
-                        prejoinPageEnabled: false,
-                        hideModeratorIndicator: true,
-                        resolution: 480,
-                        constraints: {
-                            video: {
-                                height: { ideal: 480, max: 720, min: 240 }
-                            }
-                        },
-                        enableLayerSuspension: true,
-                        p2p: { enabled: true },
-                        toolbarButtons: [
-                            'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-                            'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
-                            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                            'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
-                            'tileview', 'videobackgroundblur', 'download', 'help', 'e2ee'
-                        ],
-                        remoteVideoMenu: { disableKick: true },
-                    }}
-                    interfaceConfigOverwrite={{
-                        DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-                        SHOW_JITSI_WATERMARK: false,
-                        HIDE_INVITE_ON_PAGE_START: true,
-                        MOBILE_APP_PROMO: false,
-                    }}
-                    userInfo={{ displayName: user.name, email: user.email }}
-                    onApiReady={(externalApi) => setJitsiApi(externalApi)}
-                    onReadyToClose={() => window.location.href = '/'}
-                    getIFrameRef={(iframeRef) => {
-                        iframeRef.style.height = '100%';
-                        iframeRef.style.width = '100%';
-                        iframeRef.style.border = 'none';
-                    }}
-                />
+            <div className="flex-1 w-full bg-[#050505] relative overflow-hidden flex">
+                {/* Main Meeting Area */}
+                <div className="flex-1 relative">
+                    <JitsiMeeting
+                        domain="meet.ffmuc.net"
+                        roomName={roomName}
+                        configOverwrite={{
+                            startWithAudioMuted: true,
+                            disableModeratorIndicator: true,
+                            startWithVideoMuted: true,
+                            enableEmailInStats: false,
+                            disableDeepLinking: true,
+                            prejoinPageEnabled: false,
+                            hideModeratorIndicator: true,
+                            resolution: 480,
+                            constraints: {
+                                video: {
+                                    height: { ideal: 480, max: 720, min: 240 }
+                                }
+                            },
+                            enableLayerSuspension: true,
+                            p2p: { enabled: true },
+                            toolbarButtons: [
+                                'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                                'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
+                                'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                                'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
+                                'tileview', 'videobackgroundblur', 'download', 'help', 'e2ee'
+                            ],
+                            remoteVideoMenu: { disableKick: true },
+                        }}
+                        interfaceConfigOverwrite={{
+                            DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                            SHOW_JITSI_WATERMARK: false,
+                            HIDE_INVITE_ON_PAGE_START: true,
+                            MOBILE_APP_PROMO: false,
+                        }}
+                        userInfo={{ displayName: user.name, email: user.email }}
+                        onApiReady={(externalApi) => setJitsiApi(externalApi)}
+                        onReadyToClose={() => window.location.href = '/'}
+                        getIFrameRef={(iframeRef) => {
+                            iframeRef.style.height = '100%';
+                            iframeRef.style.width = '100%';
+                            iframeRef.style.border = 'none';
+                        }}
+                    />
+                </div>
+
+                {/* Minutes Sidebar (Only for Admin) */}
+                {isAdmin && (
+                    <LiveMinutesSidebar
+                        sessionId={session.id}
+                        isAdmin={isAdmin}
+                    />
+                )}
             </div>
 
             <style jsx global>{`

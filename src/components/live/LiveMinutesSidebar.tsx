@@ -33,6 +33,8 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
 
     useEffect(() => {
         fetchMinutes();
+        const interval = setInterval(fetchMinutes, 5000); // Poll every 5 seconds
+
         // Initialize Speech Recognition once
         if (typeof window !== "undefined" && ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
             const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
@@ -83,6 +85,7 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
         }
 
         return () => {
+            clearInterval(interval);
             if (recognitionRef.current) {
                 recognitionRef.current.stop();
             }

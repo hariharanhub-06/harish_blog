@@ -95,6 +95,7 @@ export default async function LiveSessionPage({ params, searchParams }: Props) {
                     email: registration.userEmail,
                     activeSessionId: currentActiveId
                 }}
+                isAdmin={isAdmin}
             />
         </div>
     );

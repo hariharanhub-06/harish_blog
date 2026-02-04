@@ -18,7 +18,14 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
         const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
         if (!SpeechRecognition) return;
 
-        const recognition = new SpeechRecognition();
+        let recognition: any;
+        try {
+            recognition = new SpeechRecognition();
+        } catch (e) {
+            console.error("Speech Recognition initialization failed:", e);
+            return;
+        }
+
         recognition.continuous = true;
         recognition.interimResults = false; // independent transcription needs complete sentences usually
         recognition.lang = 'en-US';
