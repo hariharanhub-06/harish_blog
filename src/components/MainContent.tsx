@@ -17,7 +17,9 @@ import { TrainingPrograms } from "./TrainingPrograms";
 import { Tilt } from "./Tilt";
 import { useEffect, useState } from "react";
 import FeedbackSection from "./FeedbackSection";
-import DinoRunnerGame from "@/components/DinoRunnerGame";
+import dynamic from "next/dynamic";
+
+const DinoRunnerGame = dynamic(() => import("@/components/DinoRunnerGame"), { ssr: false });
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";

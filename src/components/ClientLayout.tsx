@@ -5,7 +5,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import { BackgroundBlobs } from "@/components/BackgroundBlobs";
-import AIChat from "@/components/AIChat";
+import dynamic from "next/dynamic";
+
+const AIChat = dynamic(() => import("@/components/AIChat"), { ssr: false });
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();

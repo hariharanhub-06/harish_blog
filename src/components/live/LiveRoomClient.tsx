@@ -130,7 +130,8 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
     useDistributedTranscription({
         sessionId: session.id,
         userName: user.name,
-        isActive: modSettings ? !modSettings.disableAudio : true // Default to true if settings loading
+        // Only active if audio is NOT disabled by moderator
+        isActive: modSettings ? !modSettings.disableAudio : true
     });
 
     if (error) {
@@ -175,12 +176,7 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
         );
     }
 
-    // Distributed Transcription for Participants
-    useDistributedTranscription({
-        sessionId: session.id,
-        userName: user.name,
-        isActive: modSettings ? !modSettings.disableAudio : true // Default to true if settings loading
-    });
+
 
     return (
         <div className="h-[100dvh] bg-black flex flex-col supports-[height:100svh]:h-[100svh]">
