@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, MessageSquare, Send, CheckCircle2, ArrowUp } from "lucide-react";
+import { X, MessageSquare, Send, CheckCircle2, ArrowUp, Clock, EyeOff, RefreshCcw, GripVertical } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
 
 interface FormData {
@@ -25,6 +25,13 @@ export default function ContactForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, setError] = useState("");
+
+    // Mascot Drag & Privacy States
+    const [isHidden, setIsHidden] = useState(false);
+    const [contextMenuOpen, setContextMenuOpen] = useState(false);
+    const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const isDraggingRef = useRef(false);
+    const [isLongPressing, setIsLongPressing] = useState(false);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -140,6 +147,67 @@ export default function ContactForm() {
             return () => clearTimeout(timer);
         }
     }, [isOpen, showCharacter]);
+
+    // Check for Hidden Status on Mount
+    useEffect(() => {
+        const checkHiddenStatus = () => {
+            const hideUntil = localStorage.getItem("mascot_hide_until");
+            if (hideUntil) {
+                const triggerTime = parseInt(hideUntil);
+                if (Date.now() < triggerTime) {
+                    setIsHidden(true);
+                    // Set timer to auto-show
+                    const remaining = triggerTime - Date.now();
+                    setTimeout(() => {
+                        setIsHidden(false);
+                        localStorage.removeItem("mascot_hide_until");
+                    }, remaining);
+                } else {
+                    localStorage.removeItem("mascot_hide_until");
+                }
+            }
+        };
+        checkHiddenStatus();
+    }, []);
+
+    const handleHide = (duration: '2m' | '5m' | 'refresh') => {
+        setIsHidden(true);
+        setContextMenuOpen(false);
+
+        if (duration === 'refresh') {
+            // Just session state, will return on refresh (or rather, isHidden is false by default on reload)
+            // If "Until Refresh" means "Gone for now", isHidden=true is enough.
+            // If they modify code or hot-reload, it might reset. 
+        } else {
+            const ms = duration === '2m' ? 2 * 60 * 1000 : 5 * 60 * 1000;
+            const unlockTime = Date.now() + ms;
+            localStorage.setItem("mascot_hide_until", unlockTime.toString());
+
+            // Auto revert
+            setTimeout(() => {
+                setIsHidden(false);
+                localStorage.removeItem("mascot_hide_until");
+            }, ms);
+        }
+    };
+
+    // Long Press Logic
+    const startLongPress = () => {
+        if (isDraggingRef.current) return;
+        setIsLongPressing(true);
+        longPressTimerRef.current = setTimeout(() => {
+            setContextMenuOpen(true);
+            setIsLongPressing(false);
+        }, 5000); // 5 Seconds as requested
+    };
+
+    const cancelLongPress = () => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+        setIsLongPressing(false);
+    };
 
     // Listen for global open event
     useEffect(() => {
@@ -411,30 +479,79 @@ export default function ContactForm() {
             </div>
 
             {/* Animated Video Character */}
-            {showCharacter && (
-                <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[60] flex items-end justify-end pointer-events-none">
+            {showCharacter && !isHidden && (
+                <div className="fixed bottom-0 left-0 w-full h-full pointer-events-none z-[60]">
                     <motion.div
-                        initial={{ x: 400, opacity: 0 }}
+                        drag
+                        dragMomentum={false}
+                        whileDrag={{ scale: 1.1, cursor: "grabbing" }}
+                        initial={{ x: 0, y: 0, opacity: 0 }}
                         animate={{
-                            x: 0,
-                            opacity: 1
+                            opacity: 1,
+                            scale: isLongPressing ? 1.05 : 1 // Subtle pulse on long press
                         }}
-                        exit={{ x: 400, opacity: 0 }}
-                        transition={{
-                            x: { type: "spring", damping: 25, stiffness: 120 },
-                            opacity: { duration: 0.5 }
+                        exit={{ opacity: 0 }}
+                        onDragStart={() => { isDraggingRef.current = true; cancelLongPress(); }}
+                        onDragEnd={() => { setTimeout(() => isDraggingRef.current = false, 100); }} // Delay to prevent click triggering
+                        onPointerDown={startLongPress}
+                        onPointerUp={cancelLongPress}
+                        onPointerLeave={cancelLongPress}
+                        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 flex items-end justify-end pointer-events-auto cursor-grab touch-none"
+                        onClick={(e) => {
+                            if (!isDraggingRef.current && !contextMenuOpen) {
+                                handleCharacterClick();
+                            }
                         }}
-                        className="relative cursor-pointer pointer-events-auto"
-                        onClick={handleCharacterClick}
+                        style={{ x: 0, y: 0 }} // Default position for Framer Motion to manage
                     >
-                        {/* Speech Bubble */}
+                        {/* Long Press Progress Indicator (Optional visual cue) */}
+                        {isLongPressing && (
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                                <span className="text-[9px] font-bold text-white bg-black/50 px-2 py-0.5 rounded-full backdrop-blur-sm whitespace-nowrap animate-pulse">
+                                    Hold to Hide...
+                                </span>
+                            </div>
+                        )}
+                        {/* Context Menu for Hiding */}
                         <AnimatePresence>
-                            {showBubble && (
+                            {contextMenuOpen && (
+                                <motion.div
+                                    initial={{ scale: 0.8, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0.8, opacity: 0 }}
+                                    className="absolute bottom-full mb-2 right-0 bg-[#111] border border-white/20 rounded-xl overflow-hidden shadow-2xl min-w-[160px] z-50 flex flex-col"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <div className="px-3 py-2 bg-white/5 border-b border-white/10">
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mascot Options</p>
+                                    </div>
+                                    <button onClick={() => handleHide('2m')} className="px-4 py-3 flex items-center gap-3 hover:bg-white/10 text-left transition-colors">
+                                        <Clock size={14} className="text-orange-500" />
+                                        <span className="text-xs text-white font-medium">Hide for 2 mins</span>
+                                    </button>
+                                    <button onClick={() => handleHide('5m')} className="px-4 py-3 flex items-center gap-3 hover:bg-white/10 text-left transition-colors">
+                                        <Clock size={14} className="text-orange-500" />
+                                        <span className="text-xs text-white font-medium">Hide for 5 mins</span>
+                                    </button>
+                                    <button onClick={() => handleHide('refresh')} className="px-4 py-3 flex items-center gap-3 hover:bg-white/10 text-left transition-colors">
+                                        <RefreshCcw size={14} className="text-red-500" />
+                                        <span className="text-xs text-white font-medium">Hide until Refresh</span>
+                                    </button>
+                                    <div onClick={() => setContextMenuOpen(false)} className="px-4 py-2 border-t border-white/10 bg-white/5 text-center cursor-pointer hover:bg-white/10">
+                                        <span className="text-[10px] uppercase font-bold text-gray-500">Cancel</span>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Speech Bubble (Hidden if Menu is Open or Hiding) */}
+                        <AnimatePresence>
+                            {showBubble && !contextMenuOpen && !isDraggingRef.current && (
                                 <motion.div
                                     initial={{ scale: 0, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     exit={{ scale: 0, opacity: 0 }}
-                                    className="absolute bottom-[95px] md:bottom-[135px] right-0 mb-4 bg-white text-black px-1.5 py-1 rounded-lg shadow-2xl min-w-[80px] max-w-[110px] md:min-w-[100px] md:max-w-[140px] z-20"
+                                    className="absolute bottom-[95px] md:bottom-[135px] right-0 mb-4 bg-white text-black px-1.5 py-1 rounded-lg shadow-2xl min-w-[80px] max-w-[110px] md:min-w-[100px] md:max-w-[140px] z-20 pointer-events-none select-none"
                                     style={{
                                         transformOrigin: "bottom right",
                                         y: bubbleY
