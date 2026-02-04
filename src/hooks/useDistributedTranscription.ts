@@ -37,13 +37,17 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
 
         recognition.onend = () => {
             setIsListening(false);
-            // Auto-restart if it stopped but we still want it running
+            // Auto-restart with delay to prevent browser notification spam
             if (isRunningRef.current && isActive) {
-                try {
-                    recognition.start();
-                } catch (e) {
-                    // Ignore restart errors
-                }
+                setTimeout(() => {
+                    if (isRunningRef.current && isActive) {
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            // Ignore restart errors
+                        }
+                    }
+                }, 1000);
             }
         };
 
