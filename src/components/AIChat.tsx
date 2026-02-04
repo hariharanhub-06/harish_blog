@@ -546,7 +546,7 @@ export default function ContactForm() {
 
                         {/* Speech Bubble (Hidden if Menu is Open or Hiding) */}
                         <AnimatePresence>
-                            {showBubble && !contextMenuOpen && !isDraggingRef.current && (
+                            {showBubble && !contextMenuOpen && (
                                 <motion.div
                                     initial={{ scale: 0, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}

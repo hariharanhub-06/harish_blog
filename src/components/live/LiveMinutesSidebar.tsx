@@ -33,7 +33,7 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
 
     useEffect(() => {
         fetchMinutes();
-        const interval = setInterval(fetchMinutes, 5000); // Poll every 5 seconds
+        const interval = setInterval(fetchMinutes, 1000); // Poll every 1 second for "real-time" feel
 
         // Initialize Speech Recognition once
         if (typeof window !== "undefined" && ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
@@ -57,7 +57,7 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
                     if (event.results[i].isFinal) {
                         const finalTranscript = event.results[i][0].transcript.trim();
                         console.log("Speech Recognition: Final Transcript", finalTranscript);
-                        if (finalTranscript) {
+                        if (finalTranscript && finalTranscript.length > 5) {
                             saveMinute(finalTranscript, "transcript", "Host");
                         }
                     } else {
@@ -68,6 +68,10 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
             };
 
             recognition.onerror = (event: any) => {
+                if (event.error === 'network') {
+                    // Common non-fatal error, suppress spam
+                    return;
+                }
                 console.error("Speech recognition error:", event.error);
                 if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
                     setIsListening(false);
@@ -105,6 +109,8 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
             if (res.ok) {
                 const data = await res.json();
                 setMinutes(data);
+            } else {
+                console.error("Fetch minutes failed:", res.status, res.statusText, await res.text());
             }
         } catch (error) {
             console.error("Error fetching minutes:", error);
@@ -121,6 +127,8 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
             if (res.ok) {
                 const newMinute = await res.json();
                 setMinutes((prev) => [newMinute, ...prev]);
+            } else {
+                console.error("Save minute failed:", res.status, res.statusText, await res.text());
             }
         } catch (error) {
             console.error("Error saving minute:", error);
