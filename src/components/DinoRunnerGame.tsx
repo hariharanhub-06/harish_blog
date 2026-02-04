@@ -25,170 +25,210 @@ export default function DinoRunnerGame() {
     const [gameState, setGameState] = useState<"idle" | "playing" | "gameover">("idle");
     const [score, setScore] = useState(0);
     const [highScore, setHighScore] = useState(0);
-    const [dinoY, setDinoY] = useState(0);
-    const [isJumping, setIsJumping] = useState(false);
     const [obstacles, setObstacles] = useState<Obstacle[]>([]);
+    const [isJumping, setIsJumping] = useState(false);
 
+    // Refs for Game Loop (No Re-renders)
+    const dinoRef = useRef<HTMLDivElement>(null);
+    const obstacleRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const scoreElemRef = useRef<HTMLParagraphElement>(null);
     const requestRef = useRef<number | null>(null);
-    const lastSpawnRef = useRef<number>(0);
 
-    // Refs for high-frequency updates to avoid re-renders and closure staleness
-    const dinoYRef = useRef(0);
-    const velocityRef = useRef(0);
-    const obstaclesRef = useRef<Obstacle[]>([]);
-    const scoreRef = useRef(0);
-    const gameStateRef = useRef<"idle" | "playing" | "gameover">("idle");
+    // Game Logic Refs
+    const stateRef = useRef({
+        dinoY: 0,
+        velocity: 0,
+        score: 0,
+        gameSpeed: 8,
+        lastSpawn: 0,
+        isJumping: false,
+        obstacles: [] as Obstacle[], // Logic source of truth
+        status: "idle" as "idle" | "playing" | "gameover"
+    });
 
     const gravity = -0.8;
     const jumpPower = 15;
     const groundY = 0;
-    const gameSpeed = 8;
 
-    // Sync state ref
-    useEffect(() => {
-        gameStateRef.current = gameState;
-    }, [gameState]);
-
-    // High Score Persistence
+    // Load High Score
     useEffect(() => {
         const stored = localStorage.getItem("dino-ultra-score");
         if (stored) setHighScore(parseInt(stored));
     }, []);
 
-    const spawnObstacle = (time: number) => {
-        const minGap = 1500;
-        const randomGap = Math.random() * 1000;
+    // Sync React State changes to Ref
+    useEffect(() => {
+        stateRef.current.status = gameState;
+    }, [gameState]);
 
-        if (time - lastSpawnRef.current > minGap + randomGap) {
+    const spawnObstacle = (time: number) => {
+        const minGap = 1200;
+        const randomGap = Math.random() * 800;
+        const { lastSpawn } = stateRef.current;
+
+        if (time - lastSpawn > minGap + randomGap) {
             const newObstacle: Obstacle = {
                 id: Math.random(),
-                x: 800,
+                x: 800, // Start just off-screen
                 type: "cactus",
                 width: 30 + Math.random() * 20,
                 height: 40 + Math.random() * 40
             };
-            obstaclesRef.current = [...obstaclesRef.current.slice(-10), newObstacle];
-            lastSpawnRef.current = time;
+
+            // Update Logic Ref
+            stateRef.current.obstacles.push(newObstacle);
+            stateRef.current.lastSpawn = time;
+
+            // Trigger React Render for DOM mount only
+            setObstacles(prev => [...prev, newObstacle]);
         }
     };
 
-    const jump = useCallback(() => {
-        if (gameStateRef.current !== "playing" || dinoYRef.current > 0) return;
-        setIsJumping(true);
-        velocityRef.current = jumpPower;
-    }, []);
-
     const update = (time: number) => {
-        if (gameStateRef.current !== "playing") return;
+        if (stateRef.current.status !== "playing") return;
 
-        // Jump Physics
-        velocityRef.current += gravity;
-        dinoYRef.current += velocityRef.current;
+        const state = stateRef.current;
 
-        if (dinoYRef.current <= groundY) {
-            dinoYRef.current = groundY;
-            velocityRef.current = 0;
-            setIsJumping(false);
+        // 1. Physics (Dino)
+        state.velocity += gravity;
+        state.dinoY += state.velocity;
+
+        if (state.dinoY <= groundY) {
+            state.dinoY = groundY;
+            state.velocity = 0;
+            if (state.isJumping) {
+                state.isJumping = false;
+                setIsJumping(false);
+            }
         }
 
-        // Score
-        scoreRef.current += 1;
+        // 2. Physics (Obstacles)
+        // Move logical positions
+        state.obstacles.forEach(o => {
+            o.x -= state.gameSpeed;
+        });
 
-        // Obstacles & Collision
-        const nextObstacles = obstaclesRef.current
-            .map(o => ({ ...o, x: o.x - gameSpeed }))
-            .filter(o => o.x > -100);
+        // 3. Cleanup Off-screen
+        if (state.obstacles.length > 0 && state.obstacles[0].x < -100) {
+            const removed = state.obstacles.shift();
+            // Trigger React Render to remove from DOM
+            setObstacles(prev => prev.filter(o => o.id !== removed?.id));
+            obstacleRefs.current.delete(removed!.id);
+        }
 
-        // Collision logic
-        const dinoWidth = 30; // Narrower hitbox for fairness
-        const dinoHeight = 50;
-        const dinoLeft = 50 + 5;
-        const dinoRight = dinoLeft + dinoWidth;
-        const dinoBottom = dinoYRef.current;
-        const dinoTop = dinoBottom + dinoHeight;
+        // 4. Collision Detection
+        const dinoRect = {
+            left: 50 + 10,
+            right: 50 + 30, // Narrower hitbox
+            bottom: state.dinoY,
+            top: state.dinoY + 50
+        };
 
-        for (const o of nextObstacles) {
-            const obsLeft = o.x + 5;
-            const obsRight = o.x + o.width - 5;
-            const obsTop = o.height - 5;
+        for (const o of state.obstacles) {
+            const obsRect = {
+                left: o.x + 5,
+                right: o.x + o.width - 5,
+                top: o.height,
+                bottom: 0
+            };
 
             if (
-                dinoRight > obsLeft &&
-                dinoLeft < obsRight &&
-                dinoBottom < obsTop
+                dinoRect.right > obsRect.left &&
+                dinoRect.left < obsRect.right &&
+                dinoRect.bottom < obsRect.top
             ) {
-                setGameState("gameover");
-                gameStateRef.current = "gameover";
+                gameOver();
                 return;
             }
         }
 
-        obstaclesRef.current = nextObstacles;
-        spawnObstacle(time);
-
-        // Efficient batch update to React state
-        if (scoreRef.current % 5 === 0) {
-            setScore(scoreRef.current);
+        // 5. Render Updates (Direct DOM - No React Render)
+        // Dino
+        if (dinoRef.current) {
+            dinoRef.current.style.transform = `translateY(${-state.dinoY}px)`;
+            // Simple squash/stretch effect based on velocity can be added here
         }
-        setDinoY(dinoYRef.current);
-        setObstacles([...obstaclesRef.current]);
 
+        // Obstacles
+        state.obstacles.forEach(o => {
+            const el = obstacleRefs.current.get(o.id);
+            if (el) {
+                el.style.transform = `translate3d(${o.x}px, 0, 0)`;
+            }
+        });
+
+        // Score
+        state.score += 1;
+        if (scoreElemRef.current && state.score % 5 === 0) {
+            scoreElemRef.current.textContent = state.score.toString();
+        }
+
+        // Loop
+        spawnObstacle(time);
         requestRef.current = requestAnimationFrame(update);
     };
 
+    const jump = useCallback(() => {
+        if (stateRef.current.status !== "playing") return;
+        if (stateRef.current.dinoY <= groundY + 1) { // Tolerance
+            stateRef.current.velocity = jumpPower;
+            stateRef.current.isJumping = true;
+            setIsJumping(true);
+        }
+    }, []);
+
     const startGame = () => {
-        // Reset all refs
-        dinoYRef.current = 0;
-        velocityRef.current = 0;
-        obstaclesRef.current = [];
-        scoreRef.current = 0;
-        lastSpawnRef.current = performance.now();
+        // Reset State Ref
+        stateRef.current = {
+            dinoY: 0,
+            velocity: 0,
+            score: 0,
+            gameSpeed: 8,
+            lastSpawn: performance.now(),
+            isJumping: false,
+            obstacles: [],
+            status: "playing"
+        };
 
-        // Update states
-        setDinoY(0);
-        setObstacles([]);
+        // Reset Logic
+        obstacleRefs.current.clear();
+        setObstacles([]); // Clear DOM
         setScore(0);
-        setIsJumping(false);
         setGameState("playing");
-        gameStateRef.current = "playing";
 
-        // Kick off loop
         if (requestRef.current) cancelAnimationFrame(requestRef.current);
         requestRef.current = requestAnimationFrame(update);
     };
 
+    const gameOver = () => {
+        setGameState("gameover");
+        stateRef.current.status = "gameover";
+        setScore(stateRef.current.score); // Sync final score
+
+        if (requestRef.current) cancelAnimationFrame(requestRef.current);
+
+        if (stateRef.current.score > highScore) {
+            setHighScore(stateRef.current.score);
+            localStorage.setItem("dino-ultra-score", stateRef.current.score.toString());
+        }
+    };
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Don't intercept if user is typing in an input or textarea
-            if (
-                e.target instanceof HTMLInputElement ||
-                e.target instanceof HTMLTextAreaElement
-            ) {
-                return;
-            }
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
             if (e.code === "Space" || e.code === "ArrowUp") {
                 e.preventDefault();
-                if (gameStateRef.current === "idle" || gameStateRef.current === "gameover") {
-                    startGame();
-                } else {
+                if (stateRef.current.status === "playing") {
                     jump();
+                } else {
+                    startGame();
                 }
             }
         };
         window.addEventListener("keydown", handleKeyDown);
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-            if (requestRef.current) cancelAnimationFrame(requestRef.current);
-        };
+        return () => window.removeEventListener("keydown", handleKeyDown);
     }, [jump]);
-
-    useEffect(() => {
-        if (gameState === "gameover" && score > highScore) {
-            setHighScore(score);
-            localStorage.setItem("dino-ultra-score", score.toString());
-        }
-    }, [gameState, score, highScore]);
 
     return (
         <section id="dino-runner" className="py-12 md:py-16 px-4 md:px-6 bg-[#0a0a0a] relative overflow-hidden flex flex-col items-center justify-center min-h-[600px] md:min-h-[750px]">
@@ -256,46 +296,47 @@ export default function DinoRunnerGame() {
                 {/* Game Track */}
                 <div className="absolute bottom-10 left-0 w-full h-[2px] bg-white/20"></div>
 
-                {/* Dino */}
-                <motion.div
+                {/* Dino - Hardware Accelerated */}
+                <div
+                    ref={dinoRef}
                     style={{
+                        position: 'absolute',
                         left: 50,
-                        bottom: 40 + dinoY,
+                        bottom: 40,
                         width: 40,
-                        height: 60
+                        height: 60,
+                        willChange: 'transform'
                     }}
-                    className="absolute z-40"
+                    className="z-40"
                 >
                     <div className="w-full h-full bg-emerald-400 rounded-lg shadow-[0_0_20px_rgba(52,211,153,0.4)] flex flex-col items-center justify-end relative">
                         <div className="absolute top-2 right-2 w-2 h-2 bg-black rounded-full" />
                         <div className="absolute top-6 right-0 w-4 h-1 bg-black/20" />
                         <div className="flex gap-2 mb-[-5px]">
-                            <motion.div
-                                animate={gameState === "playing" && !isJumping ? { y: [0, -4, 0] } : {}}
-                                transition={{ repeat: Infinity, duration: 0.1 }}
-                                className="w-3 h-4 bg-emerald-600 rounded-sm"
-                            />
-                            <motion.div
-                                animate={gameState === "playing" && !isJumping ? { y: [-4, 0, -4] } : {}}
-                                transition={{ repeat: Infinity, duration: 0.1 }}
-                                className="w-3 h-4 bg-emerald-600 rounded-sm"
-                            />
+                            <div className="w-3 h-4 bg-emerald-600 rounded-sm" />
+                            <div className="w-3 h-4 bg-emerald-600 rounded-sm" />
                         </div>
-                        {isJumping && <div className="absolute inset-[-10px] border border-emerald-400/30 rounded-full animate-pulse" />}
                     </div>
-                </motion.div>
+                </div>
 
-                {/* Obstacles (Cacti) */}
+                {/* Obstacles (Cacti) - DOM Nodes managed by React, Positions managed by Ref/Loop */}
                 {obstacles.map(o => (
                     <div
                         key={o.id}
+                        ref={(el) => {
+                            if (el) obstacleRefs.current.set(o.id, el);
+                            else obstacleRefs.current.delete(o.id);
+                        }}
                         style={{
-                            left: o.x,
+                            position: 'absolute',
+                            left: 0, // Reset default left, use transform
                             bottom: 42,
                             width: o.width,
                             height: o.height,
+                            willChange: 'transform',
+                            transform: `translate3d(${o.x}px, 0, 0)` // Initial position
                         }}
-                        className="absolute flex items-end gap-1"
+                        className="flex items-end gap-1"
                     >
                         <div className="w-full h-full bg-cyan-500 rounded-t-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] relative overflow-hidden">
                             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[2px] h-[70%] bg-black/10" />
@@ -304,8 +345,8 @@ export default function DinoRunnerGame() {
                     </div>
                 ))}
 
-                {/* Score */}
-                {gameState === "playing" && (
+                {/* Score - Direct DOM Update */}
+                {gameState !== "idle" && (
                     <div className="absolute top-6 right-8 flex gap-6">
                         <div className="text-right">
                             <p className="text-[9px] font-black uppercase text-white/30 tracking-widest">Hi-Score</p>
@@ -313,7 +354,7 @@ export default function DinoRunnerGame() {
                         </div>
                         <div className="text-right">
                             <p className="text-[9px] font-black uppercase text-white/30 tracking-widest">Score</p>
-                            <p className="text-xl font-black text-emerald-400 tabular-nums">{score}</p>
+                            <p ref={scoreElemRef} className="text-xl font-black text-emerald-400 tabular-nums">0</p>
                         </div>
                     </div>
                 )}

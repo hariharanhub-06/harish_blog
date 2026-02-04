@@ -1,9 +1,4 @@
-"use client";
-
-import { useEffect, useState, useMemo } from "react";
-import { motion } from "framer-motion";
-import { JitsiMeeting } from '@jitsi/react-sdk';
-import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield, ScrollText } from "lucide-react";
+import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield } from "lucide-react";
 import LiveMinutesSidebar from "./LiveMinutesSidebar";
 
 interface Props {
@@ -25,7 +20,6 @@ export default function LiveRoomClient({ session, user }: Props) {
         disableReactions: false,
         disableChat: false,
     });
-    const [showSidebar, setShowSidebar] = useState(true);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -179,13 +173,6 @@ export default function LiveRoomClient({ session, user }: Props) {
                 </div>
                 <div className="flex items-center gap-4">
                     <button
-                        onClick={() => setShowSidebar(!showSidebar)}
-                        className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${showSidebar ? 'bg-orange-500/20 border-orange-500/50 text-orange-500' : 'bg-white/5 border-white/10 text-gray-400'}`}
-                    >
-                        <ScrollText size={12} />
-                        <span className="text-[8px] font-black uppercase tracking-widest">{showSidebar ? 'Hide Minutes' : 'Show Minutes'}</span>
-                    </button>
-                    <button
                         onClick={() => window.location.href = '/'}
                         className="p-2.5 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-500/20 group"
                     >
@@ -194,60 +181,51 @@ export default function LiveRoomClient({ session, user }: Props) {
                 </div>
             </header>
 
-            <main className="flex-1 flex overflow-hidden">
-                {/* Jitsi Layer */}
-                <div className="flex-1 relative bg-[#050505]">
-                    <JitsiMeeting
-                        domain="meet.ffmuc.net"
-                        roomName={roomName}
-                        configOverwrite={{
-                            startWithAudioMuted: true,
-                            disableModeratorIndicator: true,
-                            startWithVideoMuted: true,
-                            enableEmailInStats: false,
-                            disableDeepLinking: true,
-                            prejoinPageEnabled: false,
-                            hideModeratorIndicator: true,
-                            resolution: 480,
-                            constraints: {
-                                video: {
-                                    height: { ideal: 480, max: 720, min: 240 }
-                                }
-                            },
-                            enableLayerSuspension: true,
-                            p2p: { enabled: true },
-                            toolbarButtons: [
-                                'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-                                'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
-                                'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                                'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
-                                'tileview', 'videobackgroundblur', 'download', 'help', 'e2ee'
-                            ],
-                            remoteVideoMenu: { disableKick: true },
-                        }}
-                        interfaceConfigOverwrite={{
-                            DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-                            SHOW_JITSI_WATERMARK: false,
-                            HIDE_INVITE_ON_PAGE_START: true,
-                            MOBILE_APP_PROMO: false,
-                        }}
-                        userInfo={{ displayName: user.name, email: user.email }}
-                        onApiReady={(externalApi) => setJitsiApi(externalApi)}
-                        onReadyToClose={() => window.location.href = '/'}
-                        getIFrameRef={(iframeRef) => {
-                            iframeRef.style.height = '100%';
-                            iframeRef.style.width = '100%';
-                            iframeRef.style.border = 'none';
-                        }}
-                    />
-                </div>
-
-                {/* Minutes Sidebar */}
-                <LiveMinutesSidebar
-                    sessionId={session.id}
-                    isAdmin={false}
+            <div className="flex-1 w-full bg-[#050505] relative overflow-hidden">
+                <JitsiMeeting
+                    domain="meet.ffmuc.net"
+                    roomName={roomName}
+                    configOverwrite={{
+                        startWithAudioMuted: true,
+                        disableModeratorIndicator: true,
+                        startWithVideoMuted: true,
+                        enableEmailInStats: false,
+                        disableDeepLinking: true,
+                        prejoinPageEnabled: false,
+                        hideModeratorIndicator: true,
+                        resolution: 480,
+                        constraints: {
+                            video: {
+                                height: { ideal: 480, max: 720, min: 240 }
+                            }
+                        },
+                        enableLayerSuspension: true,
+                        p2p: { enabled: true },
+                        toolbarButtons: [
+                            'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                            'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
+                            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                            'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
+                            'tileview', 'videobackgroundblur', 'download', 'help', 'e2ee'
+                        ],
+                        remoteVideoMenu: { disableKick: true },
+                    }}
+                    interfaceConfigOverwrite={{
+                        DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                        SHOW_JITSI_WATERMARK: false,
+                        HIDE_INVITE_ON_PAGE_START: true,
+                        MOBILE_APP_PROMO: false,
+                    }}
+                    userInfo={{ displayName: user.name, email: user.email }}
+                    onApiReady={(externalApi) => setJitsiApi(externalApi)}
+                    onReadyToClose={() => window.location.href = '/'}
+                    getIFrameRef={(iframeRef) => {
+                        iframeRef.style.height = '100%';
+                        iframeRef.style.width = '100%';
+                        iframeRef.style.border = 'none';
+                    }}
                 />
-            </main>
+            </div>
 
             <style jsx global>{`
                 .watermark { display: none !important; }

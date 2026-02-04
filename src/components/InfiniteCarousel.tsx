@@ -61,7 +61,7 @@ export function InfiniteCarousel({
         let animationFrameId: number;
         const drift = () => {
             if (containerRef.current && !isPaused && !isDragging) {
-                containerRef.current.scrollLeft += 0.8; // Smooth slow drift
+                containerRef.current.scrollLeft += 1.0; // Increased speed (20%+)
             }
             animationFrameId = requestAnimationFrame(drift);
         };

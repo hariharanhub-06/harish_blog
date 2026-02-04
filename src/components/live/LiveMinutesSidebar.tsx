@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ScrollText, Clock, Trash2, Save, Mic, MicOff, ChevronRight, ChevronLeft, MoreVertical } from "lucide-react";
+import { ScrollText, Clock, Trash2, Save, Mic, MicOff, ChevronRight, ChevronLeft, Download } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Minute {
     id: string;
@@ -23,11 +25,66 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
     const [transcript, setTranscript] = useState("");
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    // Stable refs for speech recognition
     const recognitionRef = useRef<any>(null);
+    const isListeningRef = useRef(false);
 
     useEffect(() => {
         fetchMinutes();
-    }, [sessionId]);
+        // Initialize Speech Recognition once
+        if (typeof window !== "undefined" && ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+            const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = "en-US";
+
+            recognition.onresult = (event: any) => {
+                let interimTranscript = "";
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        const speakerText = event.results[i][0].transcript;
+                        if (speakerText.trim()) {
+                            saveMinute(speakerText.trim(), "transcript");
+                        }
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                setTranscript(interimTranscript);
+            };
+
+            recognition.onerror = (event: any) => {
+                console.error("Speech recognition error:", event.error);
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                    setIsListening(false);
+                    isListeningRef.current = false;
+                }
+            };
+
+            recognition.onend = () => {
+                // Auto-restart if we are still supposed to be listening
+                if (isListeningRef.current) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error("Failed to restart recognition:", e);
+                    }
+                } else {
+                    setIsListening(false);
+                }
+            };
+
+            recognitionRef.current = recognition;
+        }
+
+        return () => {
+            if (recognitionRef.current) {
+                recognitionRef.current.stop();
+            }
+        };
+    }, []);
 
     const fetchMinutes = async () => {
         try {
@@ -57,50 +114,61 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
         }
     };
 
-    useEffect(() => {
-        if (typeof window !== "undefined" && ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
-            const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-            recognitionRef.current = new SpeechRecognition();
-            recognitionRef.current.continuous = true;
-            recognitionRef.current.interimResults = true;
-            recognitionRef.current.lang = "en-US";
-
-            recognitionRef.current.onresult = (event: any) => {
-                let interimTranscript = "";
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        const speakerText = event.results[i][0].transcript;
-                        if (speakerText.trim()) {
-                            saveMinute(speakerText.trim(), "transcript");
-                        }
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
-                }
-                setTranscript(interimTranscript);
-            };
-
-            recognitionRef.current.onerror = (event: any) => {
-                console.error("Speech recognition error:", event.error);
-                setIsListening(false);
-            };
-
-            recognitionRef.current.onend = () => {
-                if (isListening) {
-                    recognitionRef.current.start();
-                }
-            };
-        }
-    }, [isListening]);
-
     const toggleListening = () => {
+        if (!recognitionRef.current) {
+            alert("Speech recognition is not supported in this browser.");
+            return;
+        }
+
         if (isListening) {
-            recognitionRef.current?.stop();
+            isListeningRef.current = false;
+            recognitionRef.current.stop();
             setIsListening(false);
         } else {
-            recognitionRef.current?.start();
-            setIsListening(true);
+            isListeningRef.current = true;
+            try {
+                recognitionRef.current.start();
+                setIsListening(true);
+            } catch (e) {
+                console.error("Error starting speech recognition:", e);
+            }
         }
+    };
+
+    const exportPDF = () => {
+        const doc = new jsPDF();
+
+        // Header
+        doc.setFontSize(20);
+        doc.text("Meeting Minutes", 14, 22);
+
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Session ID: ${sessionId}`, 14, 30);
+        doc.text(`Date: ${format(new Date(), "PPpp")}`, 14, 36);
+
+        // Content
+        const tableData = minutes.map(m => [
+            format(new Date(m.createdAt), "hh:mm a"),
+            m.type.toUpperCase(),
+            m.content
+        ]);
+
+        autoTable(doc, {
+            head: [['Time', 'Type', 'Content']],
+            body: tableData,
+            startY: 45,
+            theme: 'grid',
+            styles: { fontSize: 10, cellPadding: 3 },
+            headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255] },
+            columnStyles: {
+                0: { cellWidth: 25 }, // Time
+                1: { cellWidth: 25 }, // Type
+                2: { cellWidth: 'auto' } // Content
+            }
+        });
+
+        doc.save(`Meeting_Minutes_${format(new Date(), "yyyy-MM-dd")}.pdf`);
     };
 
     return (
@@ -128,12 +196,12 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
                 <>
                     {/* Controls (Admin Only) */}
                     {isAdmin && (
-                        <div className="p-4 border-b border-white/5 bg-white/[0.02]">
+                        <div className="p-4 border-b border-white/5 bg-white/[0.02] space-y-3">
                             <button
                                 onClick={toggleListening}
                                 className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 transition-all ${isListening
-                                        ? "bg-red-500/10 text-red-500 border border-red-500/20"
-                                        : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
+                                    ? "bg-red-500/10 text-red-500 border border-red-500/20"
+                                    : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
                                     }`}
                             >
                                 {isListening ? <Mic size={14} className="animate-pulse" /> : <MicOff size={14} />}
@@ -141,8 +209,17 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
                                     {isListening ? "Listening..." : "Auto-Minutes Off"}
                                 </span>
                             </button>
+
+                            <button
+                                onClick={exportPDF}
+                                className="w-full py-2 rounded-xl flex items-center justify-center gap-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                            >
+                                <Download size={14} />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Export All PDF</span>
+                            </button>
+
                             {transcript && (
-                                <div className="mt-2 text-[10px] text-gray-500 italic px-2 py-1 bg-black/40 rounded border border-white/5">
+                                <div className="text-[10px] text-gray-500 italic px-2 py-1 bg-black/40 rounded border border-white/5">
                                     "{transcript}..."
                                 </div>
                             )}
@@ -160,8 +237,8 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     className={`group relative p-3 rounded-xl border ${minute.type === 'pinned'
-                                            ? "bg-orange-500/5 border-orange-500/20"
-                                            : "bg-white/[0.02] border-white/5"
+                                        ? "bg-orange-500/5 border-orange-500/20"
+                                        : "bg-white/[0.02] border-white/5"
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-1.5">

@@ -87,7 +87,7 @@ export default function PartnershipCarousel() {
 
         const drift = () => {
             if (containerRef.current && !isPaused && !isDragging) {
-                containerRef.current.scrollLeft += 1; // Adjust speed as needed
+                containerRef.current.scrollLeft += 1.2; // Increased speed (20%)
             }
             animationFrameId = requestAnimationFrame(drift);
         };

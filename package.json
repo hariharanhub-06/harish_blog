@@ -30,6 +30,8 @@
         "framer-motion": "^11.0.0",
         "groq-sdk": "^0.37.0",
         "imagekit": "^5.2.0",
+        "jspdf": "^4.1.0",
+        "jspdf-autotable": "^5.0.7",
         "lodash": "^4.17.23",
         "lucide-react": "^0.468.0",
         "next": "15.1.11",
