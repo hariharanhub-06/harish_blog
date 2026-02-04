@@ -3,7 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { JitsiMeeting } from '@jitsi/react-sdk';
-import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield } from "lucide-react";
+import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield, ScrollText } from "lucide-react";
+import LiveMinutesSidebar from "./LiveMinutesSidebar";
 
 interface Props {
     session: any;
@@ -24,6 +25,7 @@ export default function LiveRoomClient({ session, user }: Props) {
         disableReactions: false,
         disableChat: false,
     });
+    const [showSidebar, setShowSidebar] = useState(true);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -108,14 +110,12 @@ export default function LiveRoomClient({ session, user }: Props) {
     const [error, setError] = useState<string | null>(null);
 
     // Generate a secure, unique room name that outsiders cannot guess
-    // Format: HarishBlog_Webinar_[SessionID]_[SecretHashValue]
     const roomName = useMemo(() => {
         const hash = btoa(session.id).substring(0, 12).replace(/[^a-zA-Z]/g, 'x');
         return `HarishBlog_Webinar_${session.id.substring(0, 8)}_${hash}`;
     }, [session.id]);
 
     useEffect(() => {
-        // Just a small delay to show our premium entering screen
         const timer = setTimeout(() => setLoading(false), 2000);
         return () => clearTimeout(timer);
     }, []);
@@ -144,7 +144,6 @@ export default function LiveRoomClient({ session, user }: Props) {
         return (
             <div className="min-h-screen relative flex items-center justify-center bg-[#050505] overflow-hidden">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-red-600/20 rounded-full blur-[120px] animate-pulse" />
-
                 <div className="relative z-10 text-center space-y-8 max-w-md px-6">
                     <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
@@ -154,36 +153,10 @@ export default function LiveRoomClient({ session, user }: Props) {
                     >
                         <Loader2 className="w-10 h-10 animate-spin text-red-500" />
                     </motion.div>
-
                     <div className="space-y-3">
-                        <motion.h2
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                            className="text-white text-xl font-black uppercase tracking-tight"
-                        >
-                            Entering Room
-                        </motion.h2>
-                        <motion.p
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className="text-gray-400 font-bold text-[10px] uppercase tracking-[0.3em]"
-                        >
-                            {session.title}
-                        </motion.p>
+                        <motion.h2 className="text-white text-xl font-black uppercase tracking-tight">Entering Room</motion.h2>
+                        <motion.p className="text-gray-400 font-bold text-[10px] uppercase tracking-[0.3em]">{session.title}</motion.p>
                     </div>
-
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className="pt-8"
-                    >
-                        <p className="text-gray-600 font-medium text-[9px] uppercase tracking-widest animate-pulse">
-                            Establishing encrypted peer-to-peer connection...
-                        </p>
-                    </motion.div>
                 </div>
             </div>
         );
@@ -200,15 +173,18 @@ export default function LiveRoomClient({ session, user }: Props) {
                         <h1 className="text-sm font-black text-white uppercase tracking-tight truncate max-w-[200px] md:max-w-md">{session.title}</h1>
                         <div className="flex items-center gap-2">
                             <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-[7px] font-black uppercase tracking-[0.3em] text-gray-500">Free Interactive Room</span>
+                            <span className="text-[7px] font-black uppercase tracking-[0.3em] text-gray-500">Live Studio Room</span>
                         </div>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
-                        <Shield size={10} className="text-emerald-500" />
-                        <span className="text-[8px] font-black uppercase text-gray-400 tracking-widest">Confidential Room</span>
-                    </div>
+                    <button
+                        onClick={() => setShowSidebar(!showSidebar)}
+                        className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${showSidebar ? 'bg-orange-500/20 border-orange-500/50 text-orange-500' : 'bg-white/5 border-white/10 text-gray-400'}`}
+                    >
+                        <ScrollText size={12} />
+                        <span className="text-[8px] font-black uppercase tracking-widest">{showSidebar ? 'Hide Minutes' : 'Show Minutes'}</span>
+                    </button>
                     <button
                         onClick={() => window.location.href = '/'}
                         className="p-2.5 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-500/20 group"
@@ -218,68 +194,60 @@ export default function LiveRoomClient({ session, user }: Props) {
                 </div>
             </header>
 
-            <div className="flex-1 w-full bg-[#050505] relative overflow-hidden">
-                <JitsiMeeting
-                    domain="meet.ffmuc.net"
-                    roomName={roomName}
-                    configOverwrite={{
-                        startWithAudioMuted: true,
-                        disableModeratorIndicator: true,
-                        startWithVideoMuted: true,
-                        enableEmailInStats: false,
-                        disableDeepLinking: true,
-                        prejoinPageEnabled: false,
-                        hideModeratorIndicator: true,
-                        // Low Bandwidth Optimizations
-                        resolution: 480,
-                        constraints: {
-                            video: {
-                                height: {
-                                    ideal: 480,
-                                    max: 720,
-                                    min: 240
+            <main className="flex-1 flex overflow-hidden">
+                {/* Jitsi Layer */}
+                <div className="flex-1 relative bg-[#050505]">
+                    <JitsiMeeting
+                        domain="meet.ffmuc.net"
+                        roomName={roomName}
+                        configOverwrite={{
+                            startWithAudioMuted: true,
+                            disableModeratorIndicator: true,
+                            startWithVideoMuted: true,
+                            enableEmailInStats: false,
+                            disableDeepLinking: true,
+                            prejoinPageEnabled: false,
+                            hideModeratorIndicator: true,
+                            resolution: 480,
+                            constraints: {
+                                video: {
+                                    height: { ideal: 480, max: 720, min: 240 }
                                 }
-                            }
-                        },
-                        enableLayerSuspension: true, // Drops video if bandwidth is too low
-                        p2p: {
-                            enabled: true, // Use P2P for 1-on-1 to save server bandwidth
-                        },
-                        toolbarButtons: [
-                            'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-                            'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
-                            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                            'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
-                            'tileview', 'videobackgroundblur', 'download', 'help',
-                            'e2ee'
-                        ],
-                        remoteVideoMenu: {
-                            disableKick: true,
-                        },
-                    }}
-                    interfaceConfigOverwrite={{
-                        DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-                        SHOW_JITSI_WATERMARK: false,
-                        HIDE_INVITE_ON_PAGE_START: true,
-                        MOBILE_APP_PROMO: false,
-                    }}
-                    userInfo={{
-                        displayName: user.name,
-                        email: user.email
-                    }}
-                    onApiReady={(externalApi) => {
-                        setJitsiApi(externalApi);
-                    }}
-                    onReadyToClose={() => {
-                        window.location.href = '/';
-                    }}
-                    getIFrameRef={(iframeRef) => {
-                        iframeRef.style.height = '100%';
-                        iframeRef.style.width = '100%';
-                        iframeRef.style.border = 'none';
-                    }}
+                            },
+                            enableLayerSuspension: true,
+                            p2p: { enabled: true },
+                            toolbarButtons: [
+                                'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                                'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
+                                'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                                'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
+                                'tileview', 'videobackgroundblur', 'download', 'help', 'e2ee'
+                            ],
+                            remoteVideoMenu: { disableKick: true },
+                        }}
+                        interfaceConfigOverwrite={{
+                            DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                            SHOW_JITSI_WATERMARK: false,
+                            HIDE_INVITE_ON_PAGE_START: true,
+                            MOBILE_APP_PROMO: false,
+                        }}
+                        userInfo={{ displayName: user.name, email: user.email }}
+                        onApiReady={(externalApi) => setJitsiApi(externalApi)}
+                        onReadyToClose={() => window.location.href = '/'}
+                        getIFrameRef={(iframeRef) => {
+                            iframeRef.style.height = '100%';
+                            iframeRef.style.width = '100%';
+                            iframeRef.style.border = 'none';
+                        }}
+                    />
+                </div>
+
+                {/* Minutes Sidebar */}
+                <LiveMinutesSidebar
+                    sessionId={session.id}
+                    isAdmin={false}
                 />
-            </div>
+            </main>
 
             <style jsx global>{`
                 .watermark { display: none !important; }

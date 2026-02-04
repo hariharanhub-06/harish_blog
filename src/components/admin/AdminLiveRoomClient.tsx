@@ -3,7 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { JitsiMeeting } from '@jitsi/react-sdk';
-import { Loader2, Video, Users, MessageSquare, Shield, X, Copy, Settings, Layout, Mic, ExternalLink, Hand, Trash2, Menu } from "lucide-react";
+import { Loader2, Video, Users, MessageSquare, Shield, X, Copy, Settings, Layout, Mic, ExternalLink, Hand, Trash2, Menu, ScrollText } from "lucide-react";
+import LiveMinutesSidebar from "../live/LiveMinutesSidebar";
 
 interface Props {
     session: any;
@@ -13,6 +14,7 @@ export default function AdminLiveRoomClient({ session }: Props) {
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'mod' | 'minutes'>('mod');
 
     // Generate the same secure, unique room name used by participants
     const roomName = useMemo(() => {
@@ -241,79 +243,92 @@ export default function AdminLiveRoomClient({ session }: Props) {
                     />
                 </div>
 
-                {/* Right Panel: Host Moderation Sidebar (Desktop) */}
-                <div className="w-72 bg-white border-l border-gray-100 flex flex-col shrink-0 overflow-y-auto hidden xl:flex">
-                    <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Moderation Policy</h3>
-                        <div className="space-y-4">
-                            {[
-                                { id: 'disableAudio', label: 'Lock Microphones', icon: Mic },
-                                { id: 'disableVideo', label: 'Lock Cameras', icon: Video },
-                                { id: 'disableScreenSharing', label: 'Lock Screen Sharing', icon: Layout },
-                                { id: 'disableChat', label: 'Lock Public Chat', icon: MessageSquare },
-                                { id: 'disableReactions', label: 'Lock Reactions', icon: Hand },
-                            ].map((item: any) => (
-                                <label key={item.id} className="flex items-center justify-between group cursor-pointer">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg transition-colors ${(modSettings as any)[item.id] ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'}`}>
-                                            <item.icon size={14} />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">{item.label}</span>
-                                    </div>
-                                    <input
-                                        type="checkbox"
-                                        className="w-4 h-4 rounded-md border-gray-300 text-black focus:ring-black cursor-pointer"
-                                        checked={(modSettings as any)[item.id]}
-                                        onChange={(e) => updateSettings({ ...modSettings, [item.id]: e.target.checked })}
-                                    />
-                                </label>
-                            ))}
-                        </div>
+                {/* Right Panel: Host Sidebar (Desktop) */}
+                <div className="w-80 bg-white border-l border-gray-100 flex flex-col shrink-0 overflow-hidden hidden xl:flex">
+                    <div className="flex border-b border-gray-100">
+                        <button
+                            onClick={() => setActiveTab('mod')}
+                            className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'mod' ? 'bg-black text-white' : 'bg-gray-50 text-gray-400 hover:text-gray-900'}`}
+                        >
+                            Moderation
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('minutes')}
+                            className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'minutes' ? 'bg-black text-white' : 'bg-gray-50 text-gray-400 hover:text-gray-900'}`}
+                        >
+                            Live Minutes
+                        </button>
                     </div>
 
-                    <div className="p-4 flex-1">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Quick Actions</h3>
-                        <div className="space-y-2">
-                            <button
-                                onClick={() => handleMuteAll('audio')}
-                                className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <Mic size={16} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Audio</span>
+                    <div className="flex-1 overflow-y-auto">
+                        {activeTab === 'mod' ? (
+                            <div className="flex flex-col h-full">
+                                <div className="p-4 border-b border-gray-50 bg-gray-50/50">
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Moderation Policy</h3>
+                                    <div className="space-y-4">
+                                        {[
+                                            { id: 'disableAudio', label: 'Lock Microphones', icon: Mic },
+                                            { id: 'disableVideo', label: 'Lock Cameras', icon: Video },
+                                            { id: 'disableScreenSharing', label: 'Lock Screen Sharing', icon: Layout },
+                                            { id: 'disableChat', label: 'Lock Public Chat', icon: MessageSquare },
+                                            { id: 'disableReactions', label: 'Lock Reactions', icon: Hand },
+                                        ].map((item: any) => (
+                                            <label key={item.id} className="flex items-center justify-between group cursor-pointer">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`p-2 rounded-lg transition-colors ${(modSettings as any)[item.id] ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'}`}>
+                                                        <item.icon size={14} />
+                                                    </div>
+                                                    <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">{item.label}</span>
+                                                </div>
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 rounded-md border-gray-300 text-black focus:ring-black cursor-pointer"
+                                                    checked={(modSettings as any)[item.id]}
+                                                    onChange={(e) => updateSettings({ ...modSettings, [item.id]: e.target.checked })}
+                                                />
+                                            </label>
+                                        ))}
+                                    </div>
                                 </div>
-                                <X size={14} className="opacity-40 group-hover:opacity-100" />
-                            </button>
 
-                            <button
-                                onClick={() => handleMuteAll('video')}
-                                className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <Video size={16} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Video</span>
+                                <div className="p-4 flex-1">
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Quick Actions</h3>
+                                    <div className="space-y-2">
+                                        <button
+                                            onClick={() => handleMuteAll('audio')}
+                                            className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <Mic size={16} />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Audio</span>
+                                            </div>
+                                            <X size={14} className="opacity-40 group-hover:opacity-100" />
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleMuteAll('video')}
+                                            className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <Video size={16} />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Video</span>
+                                            </div>
+                                            <X size={14} className="opacity-40 group-hover:opacity-100" />
+                                        </button>
+
+                                        <button
+                                            onClick={() => jitsiApi?.executeCommand('toggleLobby', true)}
+                                            className="w-full flex items-center gap-3 p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl hover:bg-emerald-100 transition-all active:scale-95"
+                                        >
+                                            <Shield size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-left leading-tight font-mono">Enable Lobby</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <X size={14} className="opacity-40 group-hover:opacity-100" />
-                            </button>
-
-                            <button
-                                onClick={() => jitsiApi?.executeCommand('toggleLobby', true)}
-                                className="w-full flex items-center gap-3 p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl hover:bg-emerald-100 transition-all active:scale-95"
-                            >
-                                <Shield size={16} />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-left leading-tight font-mono">Enable Lobby</span>
-                            </button>
-                        </div>
-
-                        <div className="mt-8 p-4 bg-amber-50 rounded-2xl border border-amber-100 space-y-2">
-                            <div className="flex items-center gap-2 text-amber-700">
-                                <Shield size={14} />
-                                <span className="text-[10px] font-black uppercase tracking-widest">Hard Lock Tip</span>
                             </div>
-                            <p className="text-[9px] text-amber-600 font-medium leading-relaxed">
-                                To prevent students from unmuting themselves at all, click the **Security (Shield)** icon inside Jitsi and check **"Everyone starts muted"**.
-                            </p>
-                        </div>
+                        ) : (
+                            <LiveMinutesSidebar sessionId={session.id} isAdmin={true} />
+                        )}
                     </div>
                 </div>
 

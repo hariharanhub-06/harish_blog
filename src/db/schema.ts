@@ -655,8 +655,24 @@ export const liveSessionModeratorPolicies = pgTable("live_session_moderator_poli
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const liveSessionMinutes = pgTable("live_session_minutes", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  sessionId: text("session_id").notNull(),
+  content: text("content").notNull(),
+  type: text("type").default("transcript"), // transcript, pinned, manual
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const sessionRelations = relations(liveSessions, ({ many }) => ({
   registrations: many(sessionRegistrations),
+  minutes: many(liveSessionMinutes),
+}));
+
+export const liveSessionMinutesRelations = relations(liveSessionMinutes, ({ one }) => ({
+  session: one(liveSessions, {
+    fields: [liveSessionMinutes.sessionId],
+    references: [liveSessions.id],
+  }),
 }));
 
 export const registrationRelations = relations(sessionRegistrations, ({ one }) => ({
