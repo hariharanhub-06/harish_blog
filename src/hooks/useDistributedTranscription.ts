@@ -55,8 +55,8 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
             const result = event.results[event.resultIndex];
             if (result.isFinal) {
                 const transcript = result[0].transcript.trim();
-                // Filter out short noise (less than 5 chars)
-                if (transcript && transcript.length > 5) {
+                // Filter out short noise (less than 2 chars)
+                if (transcript && transcript.length > 1) {
                     // Send to server
                     try {
                         await fetch(`/api/sessions/${sessionId}/minutes`, {
