@@ -2,6 +2,9 @@
 
 import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield } from "lucide-react";
 import LiveMinutesSidebar from "./LiveMinutesSidebar";
+import { useState, useEffect, useMemo } from "react";
+import { JitsiMeeting } from "@jitsi/react-sdk";
+import { motion } from "framer-motion";
 
 interface Props {
     session: any;
