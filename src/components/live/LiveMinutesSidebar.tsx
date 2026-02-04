@@ -191,11 +191,11 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
         doc.save(`Meeting_Minutes_${format(new Date(), "yyyy-MM-dd")}.pdf`);
     };
 
-    // Auto-scroll to bottom on new minutes
+    // Auto-scroll to bottom on new minutes - DISABLED to allow manual scrolling
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [minutes]);
+    // useEffect(() => {
+    //     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // }, [minutes]);
 
     return (
         <div className="w-[300px] md:w-[350px] bg-[#09090b] border-l border-white/10 flex flex-col h-full shadow-2xl z-20">
@@ -224,14 +224,19 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
 
                 <div className="flex gap-1">
                     <button
+                        onClick={exportPDF}
+                        disabled={minutes.length === 0}
+                        className="p-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Export PDF"
+                    >
+                        <Download size={16} />
+                    </button>
+                    <button
                         onClick={toggleListening}
                         className={`p-2 rounded-lg transition-all ${isListening ? "text-red-500 bg-red-500/10 hover:bg-red-500/20" : "text-white/60 hover:text-white hover:bg-white/10"}`}
                         title={isListening ? "Stop Recording" : "Start Recording"}
                     >
                         {isListening ? <Pause size={16} /> : <Play size={16} />}
-                    </button>
-                    <button className="p-2 text-white/40 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                        <Settings2 size={16} />
                     </button>
                 </div>
             </div>
