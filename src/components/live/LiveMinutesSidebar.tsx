@@ -42,27 +42,40 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
             recognition.continuous = true;
             recognition.interimResults = true;
             recognition.lang = "en-US";
+            recognition.maxAlternatives = 1;
 
             recognition.onstart = () => {
-                console.log("Speech Recognition: Started");
+                console.log("✅ Speech Recognition: Started");
             };
-            recognition.onaudiostart = () => console.log("Speech Recognition: Audio Started");
-            recognition.onsoundstart = () => console.log("Speech Recognition: Sound Started");
-            recognition.onspeechstart = () => console.log("Speech Recognition: Speech Started");
+            recognition.onaudiostart = () => {
+                console.log("🎤 Speech Recognition: Audio Started (Mic is capturing)");
+            };
+            recognition.onsoundstart = () => {
+                console.log("🔊 Speech Recognition: Sound Detected!");
+            };
+            recognition.onspeechstart = () => {
+                console.log("🗣️ Speech Recognition: Speech Detected! Processing...");
+            };
+            recognition.onspeechend = () => {
+                console.log("⏹️ Speech Recognition: Speech Ended");
+            };
 
             recognition.onresult = (event: any) => {
-                console.log("Speech Recognition: Result", event.results);
+                console.log("📝 Speech Recognition: Result received", event.results);
                 let interimTranscript = "";
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
                         const finalTranscript = event.results[i][0].transcript.trim();
-                        console.log("Speech Recognition: Final Transcript", finalTranscript);
+                        console.log("✅ Speech Recognition: FINAL Transcript:", finalTranscript);
                         // Filter out empty or single-character noise
                         if (finalTranscript && finalTranscript.length > 1) {
                             saveMinute(finalTranscript, "transcript", "Host");
+                        } else {
+                            console.log("⚠️ Transcript too short, filtered out:", finalTranscript);
                         }
                     } else {
                         interimTranscript += event.results[i][0].transcript;
+                        console.log("💭 Interim:", interimTranscript);
                     }
                 }
                 setTranscript(interimTranscript);
@@ -70,19 +83,24 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
 
             recognition.onerror = (event: any) => {
                 if (event.error === 'network') {
-                    // Common non-fatal error, suppress spam
+                    console.warn("⚠️ Network error (non-fatal)");
                     return;
                 }
-                console.error("Speech recognition error:", event.error);
+                console.error("❌ Speech Recognition Error:", event.error, event);
                 if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                    alert("Microphone permission denied! Please allow microphone access.");
                     setIsListening(false);
                     isListeningRef.current = false;
+                } else if (event.error === 'no-speech') {
+                    console.log("⏸️ No speech detected, waiting...");
                 }
             };
 
             recognition.onend = () => {
+                console.log("⏹️ Speech Recognition: Ended");
                 // Auto-restart if we are still supposed to be listening
                 if (isListeningRef.current) {
+                    console.log("🔄 Auto-restarting recognition...");
                     try {
                         recognition.start();
                     } catch (e) {
@@ -94,6 +112,8 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
             };
 
             recognitionRef.current = recognition;
+        } else {
+            console.error("❌ Speech Recognition not supported in this browser");
         }
 
         return () => {
@@ -200,44 +220,46 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
     return (
         <div className="w-[300px] md:w-[350px] bg-[#09090b] border-l border-white/10 flex flex-col h-full shadow-2xl z-20">
             {/* Header with Pulse Indicator */}
-            <div className="p-4 border-b border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between sticky top-0 z-10">
-                <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl transition-all duration-500 ${isListening ? "bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.4)]" : "bg-white/5"}`}>
-                        {isListening ? (
-                            <div className="flex gap-0.5 items-end h-4 w-4 justify-center">
-                                <motion.div animate={{ height: [4, 12, 4] }} transition={{ repeat: Infinity, duration: 0.5 }} className="w-1 bg-red-500 rounded-full" />
-                                <motion.div animate={{ height: [4, 16, 4] }} transition={{ repeat: Infinity, duration: 0.4, delay: 0.1 }} className="w-1 bg-red-500 rounded-full" />
-                                <motion.div animate={{ height: [4, 10, 4] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1 bg-red-500 rounded-full" />
+            <div className="p-3 border-b border-white/10 bg-black/40 backdrop-blur-md flex flex-col gap-2 sticky top-0 z-10">
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <div className={`p-1.5 rounded-xl transition-all duration-500 shrink-0 ${isListening ? "bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.4)]" : "bg-white/5"}`}>
+                            {isListening ? (
+                                <div className="flex gap-0.5 items-end h-4 w-4 justify-center">
+                                    <motion.div animate={{ height: [4, 12, 4] }} transition={{ repeat: Infinity, duration: 0.5 }} className="w-1 bg-red-500 rounded-full" />
+                                    <motion.div animate={{ height: [4, 16, 4] }} transition={{ repeat: Infinity, duration: 0.4, delay: 0.1 }} className="w-1 bg-red-500 rounded-full" />
+                                    <motion.div animate={{ height: [4, 10, 4] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1 bg-red-500 rounded-full" />
+                                </div>
+                            ) : (
+                                <MicOff size={16} className="text-gray-500" />
+                            )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <h2 className="text-xs font-black text-white uppercase tracking-wider truncate">Live Minutes</h2>
+                            <div className="flex items-center gap-1.5">
+                                <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isListening ? "bg-emerald-500 animate-pulse" : "bg-gray-600"}`} />
+                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest truncate">{isListening ? "Recording Audio" : "Paused"}</span>
                             </div>
-                        ) : (
-                            <MicOff size={16} className="text-gray-500" />
-                        )}
-                    </div>
-                    <div>
-                        <h2 className="text-sm font-black text-white uppercase tracking-wider">Live Minutes</h2>
-                        <div className="flex items-center gap-1.5">
-                            <div className={`w-1.5 h-1.5 rounded-full ${isListening ? "bg-emerald-500 animate-pulse" : "bg-gray-600"}`} />
-                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{isListening ? "Recording Audio" : "Paused"}</span>
                         </div>
                     </div>
-                </div>
 
-                <div className="flex gap-1">
-                    <button
-                        onClick={exportPDF}
-                        disabled={minutes.length === 0}
-                        className="p-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Export PDF"
-                    >
-                        <Download size={16} />
-                    </button>
-                    <button
-                        onClick={toggleListening}
-                        className={`p-2 rounded-lg transition-all ${isListening ? "text-red-500 bg-red-500/10 hover:bg-red-500/20" : "text-white/60 hover:text-white hover:bg-white/10"}`}
-                        title={isListening ? "Stop Recording" : "Start Recording"}
-                    >
-                        {isListening ? <Pause size={16} /> : <Play size={16} />}
-                    </button>
+                    <div className="flex gap-1.5 shrink-0 ml-2">
+                        <button
+                            onClick={exportPDF}
+                            disabled={minutes.length === 0}
+                            className="p-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Export PDF"
+                        >
+                            <Download size={14} />
+                        </button>
+                        <button
+                            onClick={toggleListening}
+                            className={`p-2 rounded-lg transition-all ${isListening ? "text-red-500 bg-red-500/10 hover:bg-red-500/20" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+                            title={isListening ? "Stop Recording" : "Start Recording"}
+                        >
+                            {isListening ? <Pause size={14} /> : <Play size={14} />}
+                        </button>
+                    </div>
                 </div>
             </div>
 
