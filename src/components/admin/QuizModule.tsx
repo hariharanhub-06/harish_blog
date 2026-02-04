@@ -101,7 +101,7 @@ export default function QuizModule() {
             });
             const data = await res.json();
             if (data.success) {
-                router.push(`/admin/live/${data.sessionId}`);
+                router.push(`/admin/quiz/${data.sessionId}`);
             } else {
                 alert("Failed to create live session");
             }
