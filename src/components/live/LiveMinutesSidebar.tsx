@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { FileText, Download, Mic, MicOff, Pin, Users } from "lucide-react";
+import { FileText, Download, Mic, MicOff, Pin, Users, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import jsPDF from "jspdf";
@@ -41,6 +41,21 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
             }
         } catch (error) {
             console.error("Error fetching minutes:", error);
+        }
+    };
+
+    const clearAllMinutes = async () => {
+        if (!confirm("Clear all transcripts? This cannot be undone.")) return;
+
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/minutes`, {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                setMinutes([]);
+            }
+        } catch (error) {
+            console.error("Error clearing minutes:", error);
         }
     };
 
@@ -128,14 +143,24 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
                     </div>
                 </div>
 
-                <button
-                    onClick={exportPDF}
-                    disabled={minutes.length === 0}
-                    className="p-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0 ml-2"
-                    title="Export PDF"
-                >
-                    <Download size={14} />
-                </button>
+                <div className="flex gap-1.5 shrink-0 ml-2">
+                    <button
+                        onClick={clearAllMinutes}
+                        disabled={minutes.length === 0}
+                        className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Clear All Transcripts"
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                    <button
+                        onClick={exportPDF}
+                        disabled={minutes.length === 0}
+                        className="p-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Export PDF"
+                    >
+                        <Download size={14} />
+                    </button>
+                </div>
             </div>
 
             {/* Minutes List (Chat Style) */}

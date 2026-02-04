@@ -46,3 +46,20 @@ export async function POST(
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+
+export async function DELETE(
+    req: Request,
+    { params }: { params: Promise<{ sessionId: string }> }
+) {
+    try {
+        const { sessionId } = await params;
+
+        await db.delete(liveSessionMinutes)
+            .where(eq(liveSessionMinutes.sessionId, sessionId));
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Failed to clear session minutes:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
