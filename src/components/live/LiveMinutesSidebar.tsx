@@ -121,176 +121,174 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
     };
 
     const toggleListening = () => {
-        if (!recognitionRef.current) {
-            alert("Speech recognition is not supported in this browser.");
-            return;
-        }
-
         if (isListening) {
-            isListeningRef.current = false;
-            recognitionRef.current.stop();
+            if (recognitionRef.current) recognitionRef.current.stop();
             setIsListening(false);
+            isListeningRef.current = false;
         } else {
-            isListeningRef.current = true;
-            try {
-                recognitionRef.current.start();
-                setIsListening(true);
-            } catch (e) {
-                console.error("Error starting speech recognition:", e);
+            if (recognitionRef.current) {
+                try {
+                    recognitionRef.current.start();
+                    setIsListening(true);
+                    isListeningRef.current = true;
+                } catch (e) {
+                    console.error("Failed to start recognition:", e);
+                }
             }
         }
     };
+};
 
-    const exportPDF = () => {
-        const doc = new jsPDF();
+const exportPDF = () => {
+    const doc = new jsPDF();
 
-        // Header
-        doc.setFontSize(20);
-        doc.text("Meeting Minutes", 14, 22);
+    // Header
+    doc.setFontSize(20);
+    doc.text("Meeting Minutes", 14, 22);
 
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Session ID: ${sessionId}`, 14, 30);
-        doc.text(`Date: ${format(new Date(), "PPpp")}`, 14, 36);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Session ID: ${sessionId}`, 14, 30);
+    doc.text(`Date: ${format(new Date(), "PPpp")}`, 14, 36);
 
-        // Content
-        const tableData = minutes.map(m => [
-            format(new Date(m.createdAt), "hh:mm a"),
-            m.type.toUpperCase(),
-            m.speakerName ? `${m.speakerName}: ${m.content}` : m.content
-        ]);
+    // Content
+    const tableData = minutes.map(m => [
+        format(new Date(m.createdAt), "hh:mm a"),
+        m.type.toUpperCase(),
+        m.speakerName ? `${m.speakerName}: ${m.content}` : m.content
+    ]);
 
-        autoTable(doc, {
-            head: [['Time', 'Type', 'Content']],
-            body: tableData,
-            startY: 45,
-            theme: 'grid',
-            styles: { fontSize: 10, cellPadding: 3 },
-            headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255] },
-            columnStyles: {
-                0: { cellWidth: 25 }, // Time
-                1: { cellWidth: 25 }, // Type
-                2: { cellWidth: 'auto' } // Content
-            }
-        });
+    autoTable(doc, {
+        head: [['Time', 'Type', 'Content']],
+        body: tableData,
+        startY: 45,
+        theme: 'grid',
+        styles: { fontSize: 10, cellPadding: 3 },
+        headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255] },
+        columnStyles: {
+            0: { cellWidth: 25 }, // Time
+            1: { cellWidth: 25 }, // Type
+            2: { cellWidth: 'auto' } // Content
+        }
+    });
 
-        doc.save(`Meeting_Minutes_${format(new Date(), "yyyy-MM-dd")}.pdf`);
-    };
+    doc.save(`Meeting_Minutes_${format(new Date(), "yyyy-MM-dd")}.pdf`);
+};
 
-    return (
-        <div className={`h-full flex flex-col transition-all duration-300 ${isSidebarOpen ? "w-80" : "w-12"} bg-[#0a0a0a] border-l border-white/5`}>
-            {/* Header / Toggle */}
-            <div className="p-4 border-b border-white/5 flex items-center justify-between overflow-hidden">
-                {isSidebarOpen ? (
-                    <>
-                        <div className="flex items-center gap-2">
-                            <ScrollText size={16} className="text-orange-500" />
-                            <span className="text-xs font-black uppercase tracking-widest text-white">Live Minutes</span>
-                        </div>
-                        <button onClick={() => setIsSidebarOpen(false)} className="p-1 hover:bg-white/5 rounded-lg text-gray-500">
-                            <ChevronRight size={16} />
-                        </button>
-                    </>
-                ) : (
-                    <button onClick={() => setIsSidebarOpen(true)} className="w-full flex justify-center py-2 text-gray-500 hover:text-white">
-                        <ChevronLeft size={16} />
-                    </button>
-                )}
-            </div>
-
-            {isSidebarOpen && (
+return (
+    <div className={`h-full flex flex-col transition-all duration-300 ${isSidebarOpen ? "w-80" : "w-12"} bg-[#0a0a0a] border-l border-white/5`}>
+        {/* Header / Toggle */}
+        <div className="p-4 border-b border-white/5 flex items-center justify-between overflow-hidden">
+            {isSidebarOpen ? (
                 <>
-                    {/* Controls (Admin Only) */}
-                    {isAdmin && (
-                        <div className="p-4 border-b border-white/5 bg-white/[0.02] space-y-3">
-                            <button
-                                onClick={toggleListening}
-                                className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 transition-all ${isListening
-                                    ? "bg-red-500/10 text-red-500 border border-red-500/20"
-                                    : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
-                                    }`}
-                            >
-                                {isListening ? <Mic size={14} className="animate-pulse" /> : <MicOff size={14} />}
-                                <span className="text-[10px] font-black uppercase tracking-widest">
-                                    {isListening ? "Listening..." : "Auto-Minutes Off"}
-                                </span>
-                            </button>
+                    <div className="flex items-center gap-2">
+                        <ScrollText size={16} className="text-orange-500" />
+                        <span className="text-xs font-black uppercase tracking-widest text-white">Live Minutes</span>
+                    </div>
+                    <button onClick={() => setIsSidebarOpen(false)} className="p-1 hover:bg-white/5 rounded-lg text-gray-500">
+                        <ChevronRight size={16} />
+                    </button>
+                </>
+            ) : (
+                <button onClick={() => setIsSidebarOpen(true)} className="w-full flex justify-center py-2 text-gray-500 hover:text-white">
+                    <ChevronLeft size={16} />
+                </button>
+            )}
+        </div>
 
-                            <button
-                                onClick={exportPDF}
-                                className="w-full py-2 rounded-xl flex items-center justify-center gap-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
-                            >
-                                <Download size={14} />
-                                <span className="text-[10px] font-black uppercase tracking-widest">Export All PDF</span>
-                            </button>
+        {isSidebarOpen && (
+            <>
+                {/* Controls (Admin Only) */}
+                {isAdmin && (
+                    <div className="p-4 border-b border-white/5 bg-white/[0.02] space-y-3">
+                        <button
+                            onClick={toggleListening}
+                            className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 transition-all ${isListening
+                                ? "bg-red-500/10 text-red-500 border border-red-500/20"
+                                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
+                                }`}
+                        >
+                            {isListening ? <Mic size={14} className="animate-pulse" /> : <MicOff size={14} />}
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                {isListening ? "Listening..." : "Auto-Minutes Off"}
+                            </span>
+                        </button>
 
-                            {transcript && (
-                                <div className="text-[10px] text-gray-500 italic px-2 py-1 bg-black/40 rounded border border-white/5">
-                                    "{transcript}..."
-                                </div>
-                            )}
-                        </div>
-                    )}
+                        <button
+                            onClick={exportPDF}
+                            className="w-full py-2 rounded-xl flex items-center justify-center gap-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                        >
+                            <Download size={14} />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Export All PDF</span>
+                        </button>
 
-                    {/* Timeline */}
-                    <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-                        <AnimatePresence mode="popLayout">
-                            {minutes.map((minute) => (
-                                <motion.div
-                                    key={minute.id}
-                                    layout
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    className={`group relative p-3 rounded-xl border ${minute.type === 'pinned'
-                                        ? "bg-orange-500/5 border-orange-500/20"
-                                        : "bg-white/[0.02] border-white/5"
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-between mb-1.5">
-                                        <div className="flex items-center gap-2">
-                                            <Clock size={10} className="text-gray-600" />
-                                            <span className="text-[9px] font-black text-gray-500 uppercase tracking-tighter">
-                                                {format(new Date(minute.createdAt), "hh:mm a")}
-                                            </span>
-                                        </div>
-                                        {isAdmin && (
-                                            <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-600 hover:text-red-500">
-                                                <Trash2 size={10} />
-                                            </button>
-                                        )}
-                                    </div>
-                                    <p className="text-[11px] text-gray-300 leading-relaxed font-medium">
-                                        {minute.speakerName && (
-                                            <span className="text-orange-500 font-bold mr-1">{minute.speakerName}:</span>
-                                        )}
-                                        {minute.content}
-                                    </p>
-
-                                    {minute.type === 'transcript' && isAdmin && (
-                                        <button
-                                            onClick={() => saveMinute(minute.content, 'pinned')}
-                                            className="mt-2 text-[9px] font-black uppercase tracking-widest text-orange-500/60 hover:text-orange-500 transition-colors flex items-center gap-1"
-                                        >
-                                            <Save size={10} /> Pin to Minutes
-                                        </button>
-                                    )}
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-
-                        {minutes.length === 0 && !transcript && (
-                            <div className="h-full flex flex-col items-center justify-center opacity-50 py-20 text-center">
-                                <ScrollText size={32} />
-                                <p className="text-[10px] font-black uppercase mt-4 tracking-widest text-gray-400">No minutes yet</p>
-                                <p className="text-[9px] text-gray-600 mt-2 max-w-[150px]">Minutes will appear here as you speak or type.</p>
+                        {transcript && (
+                            <div className="text-[10px] text-gray-500 italic px-2 py-1 bg-black/40 rounded border border-white/5">
+                                "{transcript}..."
                             </div>
                         )}
                     </div>
-                </>
-            )}
+                )}
 
-            <style jsx>{`
+                {/* Timeline */}
+                <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                    <AnimatePresence mode="popLayout">
+                        {minutes.map((minute) => (
+                            <motion.div
+                                key={minute.id}
+                                layout
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className={`group relative p-3 rounded-xl border ${minute.type === 'pinned'
+                                    ? "bg-orange-500/5 border-orange-500/20"
+                                    : "bg-white/[0.02] border-white/5"
+                                    }`}
+                            >
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <div className="flex items-center gap-2">
+                                        <Clock size={10} className="text-gray-600" />
+                                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-tighter">
+                                            {format(new Date(minute.createdAt), "hh:mm a")}
+                                        </span>
+                                    </div>
+                                    {isAdmin && (
+                                        <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-600 hover:text-red-500">
+                                            <Trash2 size={10} />
+                                        </button>
+                                    )}
+                                </div>
+                                <p className="text-[11px] text-gray-300 leading-relaxed font-medium">
+                                    {minute.speakerName && (
+                                        <span className="text-orange-500 font-bold mr-1">{minute.speakerName}:</span>
+                                    )}
+                                    {minute.content}
+                                </p>
+
+                                {minute.type === 'transcript' && isAdmin && (
+                                    <button
+                                        onClick={() => saveMinute(minute.content, 'pinned')}
+                                        className="mt-2 text-[9px] font-black uppercase tracking-widest text-orange-500/60 hover:text-orange-500 transition-colors flex items-center gap-1"
+                                    >
+                                        <Save size={10} /> Pin to Minutes
+                                    </button>
+                                )}
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+
+                    {minutes.length === 0 && !transcript && (
+                        <div className="h-full flex flex-col items-center justify-center opacity-50 py-20 text-center">
+                            <ScrollText size={32} />
+                            <p className="text-[10px] font-black uppercase mt-4 tracking-widest text-gray-400">No minutes yet</p>
+                            <p className="text-[9px] text-gray-600 mt-2 max-w-[150px]">Minutes will appear here as you speak or type.</p>
+                        </div>
+                    )}
+                </div>
+            </>
+        )}
+
+        <style jsx>{`
                 .custom-scrollbar::-webkit-scrollbar {
                     width: 4px;
                 }
@@ -305,6 +303,6 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
                     background: rgba(255, 255, 255, 0.1);
                 }
             `}</style>
-        </div>
-    );
+    </div>
+);
 }

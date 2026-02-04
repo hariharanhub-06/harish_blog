@@ -1,11 +1,17 @@
 "use client";
 
 import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield } from "lucide-react";
-import LiveMinutesSidebar from "./LiveMinutesSidebar";
+import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { JitsiMeeting } from "@jitsi/react-sdk";
 import { motion } from "framer-motion";
 import { useDistributedTranscription } from "@/hooks/useDistributedTranscription";
+
+const LiveMinutesSidebar = dynamic(() => import("./LiveMinutesSidebar"), {
+    ssr: false,
+    loading: () => <div className="w-80 border-l border-white/5 bg-[#050505] animate-pulse" />
+});
 
 interface Props {
     session: any;
