@@ -5,6 +5,7 @@ import LiveMinutesSidebar from "./LiveMinutesSidebar";
 import { useState, useEffect, useMemo } from "react";
 import { JitsiMeeting } from "@jitsi/react-sdk";
 import { motion } from "framer-motion";
+import { useDistributedTranscription } from "@/hooks/useDistributedTranscription";
 
 interface Props {
     session: any;
@@ -160,6 +161,13 @@ export default function LiveRoomClient({ session, user }: Props) {
             </div>
         );
     }
+
+    // Distributed Transcription for Participants
+    useDistributedTranscription({
+        sessionId: session.id,
+        userName: user.name,
+        isActive: !modSettings.disableAudio // Only listen if audio is allowed logic (or just always if you want minutes regardless of Jitsi mute)
+    });
 
     return (
         <div className="h-[100dvh] bg-black flex flex-col supports-[height:100svh]:h-[100svh]">

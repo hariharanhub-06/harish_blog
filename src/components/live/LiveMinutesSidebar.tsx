@@ -10,6 +10,7 @@ import autoTable from "jspdf-autotable";
 interface Minute {
     id: string;
     content: string;
+    speakerName?: string | null;
     type: "transcript" | "pinned" | "manual";
     createdAt: string;
 }
@@ -46,7 +47,9 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
                     if (event.results[i].isFinal) {
                         const speakerText = event.results[i][0].transcript;
                         if (speakerText.trim()) {
-                            saveMinute(speakerText.trim(), "transcript");
+                            if (speakerText.trim()) {
+                                saveMinute(speakerText.trim(), "transcript", "Host");
+                            }
                         }
                     } else {
                         interimTranscript += event.results[i][0].transcript;
@@ -98,12 +101,12 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
         }
     };
 
-    const saveMinute = async (content: string, type: "transcript" | "pinned" | "manual" = "transcript") => {
+    const saveMinute = async (content: string, type: "transcript" | "pinned" | "manual" = "transcript", speakerName?: string) => {
         try {
             const res = await fetch(`/api/sessions/${sessionId}/minutes`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content, type }),
+                body: JSON.stringify({ content, type, speakerName }),
             });
             if (res.ok) {
                 const newMinute = await res.json();
@@ -151,7 +154,7 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
         const tableData = minutes.map(m => [
             format(new Date(m.createdAt), "hh:mm a"),
             m.type.toUpperCase(),
-            m.content
+            m.speakerName ? `${m.speakerName}: ${m.content}` : m.content
         ]);
 
         autoTable(doc, {
@@ -255,6 +258,9 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
                                         )}
                                     </div>
                                     <p className="text-[11px] text-gray-300 leading-relaxed font-medium">
+                                        {minute.speakerName && (
+                                            <span className="text-orange-500 font-bold mr-1">{minute.speakerName}:</span>
+                                        )}
                                         {minute.content}
                                     </p>
 
@@ -271,9 +277,10 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
                         </AnimatePresence>
 
                         {minutes.length === 0 && !transcript && (
-                            <div className="h-full flex flex-col items-center justify-center opacity-20 py-20 text-center">
+                            <div className="h-full flex flex-col items-center justify-center opacity-50 py-20 text-center">
                                 <ScrollText size={32} />
-                                <p className="text-[10px] font-black uppercase mt-4 tracking-widest">No minutes yet</p>
+                                <p className="text-[10px] font-black uppercase mt-4 tracking-widest text-gray-400">No minutes yet</p>
+                                <p className="text-[9px] text-gray-600 mt-2 max-w-[150px]">Minutes will appear here as you speak or type.</p>
                             </div>
                         )}
                     </div>

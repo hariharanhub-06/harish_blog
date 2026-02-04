@@ -27,7 +27,7 @@ export async function POST(
 ) {
     try {
         const { sessionId } = await params;
-        const { content, type } = await req.json();
+        const { content, type, speakerName } = await req.json();
 
         if (!content) {
             return NextResponse.json({ error: "Content is required" }, { status: 400 });
@@ -37,6 +37,7 @@ export async function POST(
             sessionId,
             content,
             type: type || "transcript",
+            speakerName: speakerName || "Host", // Default if not provided
         }).returning();
 
         return NextResponse.json(newMinute[0]);

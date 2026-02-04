@@ -659,6 +659,7 @@ export const liveSessionMinutes = pgTable("live_session_minutes", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   sessionId: text("session_id").notNull(),
   content: text("content").notNull(),
+  speakerName: text("speaker_name"), // Added for distributed transcription
   type: text("type").default("transcript"), // transcript, pinned, manual
   createdAt: timestamp("created_at").defaultNow(),
 });

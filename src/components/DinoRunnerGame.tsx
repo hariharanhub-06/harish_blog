@@ -43,7 +43,8 @@ export default function DinoRunnerGame() {
         lastSpawn: 0,
         isJumping: false,
         obstacles: [] as Obstacle[], // Logic source of truth
-        status: "idle" as "idle" | "playing" | "gameover"
+        status: "idle" as "idle" | "playing" | "gameover",
+        lastFrameTime: 0
     });
 
     const gravity = -0.8;
@@ -89,9 +90,18 @@ export default function DinoRunnerGame() {
 
         const state = stateRef.current;
 
-        // 1. Physics (Dino)
-        state.velocity += gravity;
-        state.dinoY += state.velocity;
+        // Calculate Delta Time (dt)
+        // Normalize to target 60 FPS (approx 16.67ms per frame)
+        // If 144Hz: time diff is ~7ms -> dt ≈ 0.42 (Game runs slower per frame, keeping same real-time speed)
+        // If 60Hz: time diff is ~16ms -> dt ≈ 1.0
+        const now = time;
+        const lastTime = state.lastFrameTime || now;
+        const dt = Math.min((now - lastTime) / 16.67, 2.0); // Cap at 2.0 to prevent huge jumps on lag spike
+        state.lastFrameTime = now;
+
+        // 1. Physics (Dino) - Scaled by dt
+        state.velocity += gravity * dt;
+        state.dinoY += state.velocity * dt;
 
         if (state.dinoY <= groundY) {
             state.dinoY = groundY;
@@ -102,10 +112,9 @@ export default function DinoRunnerGame() {
             }
         }
 
-        // 2. Physics (Obstacles)
-        // Move logical positions
+        // 2. Physics (Obstacles) - Scaled by dt
         state.obstacles.forEach(o => {
-            o.x -= state.gameSpeed;
+            o.x -= state.gameSpeed * dt;
         });
 
         // 3. Cleanup Off-screen
@@ -146,7 +155,6 @@ export default function DinoRunnerGame() {
         // Dino
         if (dinoRef.current) {
             dinoRef.current.style.transform = `translateY(${-state.dinoY}px)`;
-            // Simple squash/stretch effect based on velocity can be added here
         }
 
         // Obstacles
@@ -158,9 +166,9 @@ export default function DinoRunnerGame() {
         });
 
         // Score
-        state.score += 1;
-        if (scoreElemRef.current && state.score % 5 === 0) {
-            scoreElemRef.current.textContent = state.score.toString();
+        state.score += 1 * dt; // Score based on time/distance
+        if (scoreElemRef.current && Math.floor(state.score) % 5 === 0) {
+            scoreElemRef.current.textContent = Math.floor(state.score).toString();
         }
 
         // Loop
@@ -187,7 +195,8 @@ export default function DinoRunnerGame() {
             lastSpawn: performance.now(),
             isJumping: false,
             obstacles: [],
-            status: "playing"
+            status: "playing",
+            lastFrameTime: performance.now()
         };
 
         // Reset Logic
