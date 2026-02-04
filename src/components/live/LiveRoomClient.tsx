@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield } from "lucide-react";
-import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { JitsiMeeting } from "@jitsi/react-sdk";
