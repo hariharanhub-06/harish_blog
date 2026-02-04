@@ -126,6 +126,13 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
         return () => clearTimeout(timer);
     }, []);
 
+    // Distributed Transcription for Participants
+    useDistributedTranscription({
+        sessionId: session.id,
+        userName: user.name,
+        isActive: modSettings ? !modSettings.disableAudio : true // Default to true if settings loading
+    });
+
     if (error) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-[#050505] text-center p-6 space-y-6">

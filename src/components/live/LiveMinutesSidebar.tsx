@@ -47,11 +47,9 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
                 let interimTranscript = "";
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        const speakerText = event.results[i][0].transcript;
-                        if (speakerText.trim()) {
-                            if (speakerText.trim()) {
-                                saveMinute(speakerText.trim(), "transcript", "Host");
-                            }
+                        const finalTranscript = event.results[i][0].transcript.trim();
+                        if (finalTranscript) {
+                            saveMinute(finalTranscript, "transcript", "Host");
                         }
                     } else {
                         interimTranscript += event.results[i][0].transcript;
