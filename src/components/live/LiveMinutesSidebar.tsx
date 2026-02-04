@@ -43,11 +43,20 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
             recognition.interimResults = true;
             recognition.lang = "en-US";
 
+            recognition.onstart = () => {
+                console.log("Speech Recognition: Started");
+            };
+            recognition.onaudiostart = () => console.log("Speech Recognition: Audio Started");
+            recognition.onsoundstart = () => console.log("Speech Recognition: Sound Started");
+            recognition.onspeechstart = () => console.log("Speech Recognition: Speech Started");
+
             recognition.onresult = (event: any) => {
+                console.log("Speech Recognition: Result", event.results);
                 let interimTranscript = "";
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
                         const finalTranscript = event.results[i][0].transcript.trim();
+                        console.log("Speech Recognition: Final Transcript", finalTranscript);
                         if (finalTranscript) {
                             saveMinute(finalTranscript, "transcript", "Host");
                         }

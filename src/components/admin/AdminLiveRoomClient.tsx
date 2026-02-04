@@ -261,74 +261,74 @@ export default function AdminLiveRoomClient({ session }: Props) {
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
-                        {activeTab === 'mod' ? (
-                            <div className="flex flex-col h-full">
-                                <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Moderation Policy</h3>
-                                    <div className="space-y-4">
-                                        {[
-                                            { id: 'disableAudio', label: 'Lock Microphones', icon: Mic },
-                                            { id: 'disableVideo', label: 'Lock Cameras', icon: Video },
-                                            { id: 'disableScreenSharing', label: 'Lock Screen Sharing', icon: Layout },
-                                            { id: 'disableChat', label: 'Lock Public Chat', icon: MessageSquare },
-                                            { id: 'disableReactions', label: 'Lock Reactions', icon: Hand },
-                                        ].map((item: any) => (
-                                            <label key={item.id} className="flex items-center justify-between group cursor-pointer">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`p-2 rounded-lg transition-colors ${(modSettings as any)[item.id] ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'}`}>
-                                                        <item.icon size={14} />
-                                                    </div>
-                                                    <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">{item.label}</span>
+                        <div className={`flex flex-col h-full ${activeTab === 'mod' ? '' : 'hidden'}`}>
+                            <div className="p-4 border-b border-gray-50 bg-gray-50/50">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Moderation Policy</h3>
+                                <div className="space-y-4">
+                                    {[
+                                        { id: 'disableAudio', label: 'Lock Microphones', icon: Mic },
+                                        { id: 'disableVideo', label: 'Lock Cameras', icon: Video },
+                                        { id: 'disableScreenSharing', label: 'Lock Screen Sharing', icon: Layout },
+                                        { id: 'disableChat', label: 'Lock Public Chat', icon: MessageSquare },
+                                        { id: 'disableReactions', label: 'Lock Reactions', icon: Hand },
+                                    ].map((item: any) => (
+                                        <label key={item.id} className="flex items-center justify-between group cursor-pointer">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-2 rounded-lg transition-colors ${(modSettings as any)[item.id] ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'}`}>
+                                                    <item.icon size={14} />
                                                 </div>
-                                                <input
-                                                    type="checkbox"
-                                                    className="w-4 h-4 rounded-md border-gray-300 text-black focus:ring-black cursor-pointer"
-                                                    checked={(modSettings as any)[item.id]}
-                                                    onChange={(e) => updateSettings({ ...modSettings, [item.id]: e.target.checked })}
-                                                />
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="p-4 flex-1">
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Quick Actions</h3>
-                                    <div className="space-y-2">
-                                        <button
-                                            onClick={() => handleMuteAll('audio')}
-                                            className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Mic size={16} />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Audio</span>
+                                                <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">{item.label}</span>
                                             </div>
-                                            <X size={14} className="opacity-40 group-hover:opacity-100" />
-                                        </button>
-
-                                        <button
-                                            onClick={() => handleMuteAll('video')}
-                                            className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Video size={16} />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Video</span>
-                                            </div>
-                                            <X size={14} className="opacity-40 group-hover:opacity-100" />
-                                        </button>
-
-                                        <button
-                                            onClick={() => jitsiApi?.executeCommand('toggleLobby', true)}
-                                            className="w-full flex items-center gap-3 p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl hover:bg-emerald-100 transition-all active:scale-95"
-                                        >
-                                            <Shield size={16} />
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-left leading-tight font-mono">Enable Lobby</span>
-                                        </button>
-                                    </div>
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 rounded-md border-gray-300 text-black focus:ring-black cursor-pointer"
+                                                checked={(modSettings as any)[item.id]}
+                                                onChange={(e) => updateSettings({ ...modSettings, [item.id]: e.target.checked })}
+                                            />
+                                        </label>
+                                    ))}
                                 </div>
                             </div>
-                        ) : (
+
+                            <div className="p-4 flex-1">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Quick Actions</h3>
+                                <div className="space-y-2">
+                                    <button
+                                        onClick={() => handleMuteAll('audio')}
+                                        className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Mic size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Audio</span>
+                                        </div>
+                                        <X size={14} className="opacity-40 group-hover:opacity-100" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleMuteAll('video')}
+                                        className="w-full flex items-center justify-between p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all active:scale-95 group"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Video size={16} />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-left leading-none font-sans">Mute All<br />Video</span>
+                                        </div>
+                                        <X size={14} className="opacity-40 group-hover:opacity-100" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => jitsiApi?.executeCommand('toggleLobby', true)}
+                                        className="w-full flex items-center gap-3 p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl hover:bg-emerald-100 transition-all active:scale-95"
+                                    >
+                                        <Shield size={16} />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-left leading-tight font-mono">Enable Lobby</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={`h-full ${activeTab === 'minutes' ? 'block' : 'hidden'}`}>
                             <LiveMinutesSidebar sessionId={session.id} isAdmin={true} />
-                        )}
+                        </div>
                     </div>
                 </div>
 
