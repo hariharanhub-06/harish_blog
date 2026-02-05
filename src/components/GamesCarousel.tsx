@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Gamepad2, Play, Brain, Trophy } from "lucide-react";
+import { Gamepad2, Play, Brain, Trophy, LayoutGrid, Type } from "lucide-react";
 import Image from "next/image";
 import { InfiniteCarousel } from "./InfiniteCarousel";
 
@@ -21,6 +21,7 @@ const GAMES: Game[] = [
         description: "Retro pixel adventure",
         icon: Gamepad2,
         color: "from-emerald-400 to-cyan-500",
+        image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070&auto=format&fit=crop"
     },
     {
         id: "tictactoe",
@@ -28,6 +29,7 @@ const GAMES: Game[] = [
         description: "Classic strategy duel",
         icon: Trophy,
         color: "from-orange-400 to-rose-500",
+        image: "https://images.unsplash.com/photo-1611996575749-79a3a250f948?q=80&w=2070&auto=format&fit=crop"
     },
     {
         id: "memory",
@@ -35,6 +37,23 @@ const GAMES: Game[] = [
         description: "Train your brain",
         icon: Brain,
         color: "from-blue-400 to-indigo-500",
+        image: "https://images.unsplash.com/photo-1606167668584-78701c57f13d?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        id: "puzzle",
+        title: "Picture Puzzle",
+        description: "Unscramble the picture",
+        icon: LayoutGrid,
+        color: "from-purple-400 to-pink-500",
+        image: "https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?q=80&w=2066&auto=format&fit=crop"
+    },
+    {
+        id: "scramble",
+        title: "Word Scramble",
+        description: "Master of letters",
+        icon: Type,
+        color: "from-amber-400 to-orange-500",
+        image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1973&auto=format&fit=crop"
     }
 ];
 
@@ -63,8 +82,20 @@ export default function GamesCarousel({ onPlayGame }: GamesCarouselProps) {
                             className="shrink-0 w-[280px] md:w-[350px] snap-center"
                         >
                             <div className="group relative bg-[#1a1a1a] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl hover:border-white/20 transition-all duration-500 flex flex-col h-full">
-                                <div className={`h-40 bg-gradient-to-br ${game.color} opacity-20 group-hover:opacity-40 transition-opacity flex items-center justify-center`}>
-                                    <game.icon size={64} className="text-white drop-shadow-2xl" />
+                                <div className="h-40 relative overflow-hidden">
+                                    {game.image ? (
+                                        <>
+                                            <Image src={game.image} alt={game.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-60" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent" />
+                                        </>
+                                    ) : (
+                                        <div className={`w-full h-full bg-gradient-to-br ${game.color} opacity-20 group-hover:opacity-40 transition-opacity flex items-center justify-center`}>
+                                            <game.icon size={64} className="text-white drop-shadow-2xl" />
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <game.icon size={48} className="text-white drop-shadow-2xl opacity-100 group-hover:scale-110 transition-transform duration-500" />
+                                    </div>
                                 </div>
 
                                 <div className="p-6 flex flex-col flex-grow">

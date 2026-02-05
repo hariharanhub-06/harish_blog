@@ -8,6 +8,8 @@ import dynamic from "next/dynamic";
 const DinoRunnerGame = dynamic(() => import("./DinoRunnerGame"), { ssr: false });
 const TicTacToe = dynamic(() => import("./TicTacToe"), { ssr: false });
 const MemoryCard = dynamic(() => import("./MemoryCard"), { ssr: false });
+const PicturePuzzle = dynamic(() => import("./PicturePuzzle"), { ssr: false });
+const WordScramble = dynamic(() => import("./WordScramble"), { ssr: false });
 
 interface GameOverlayProps {
     gameId: string | null;
@@ -49,6 +51,10 @@ export default function GameOverlay({ gameId, onClose }: GameOverlayProps) {
                 return <TicTacToe />;
             case "memory":
                 return <MemoryCard />;
+            case "puzzle":
+                return <PicturePuzzle />;
+            case "scramble":
+                return <WordScramble />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center p-12 text-center">
@@ -81,7 +87,11 @@ export default function GameOverlay({ gameId, onClose }: GameOverlayProps) {
                                 <Gamepad2 size={20} className="text-emerald-500" />
                             </div>
                             <h3 className="text-sm font-black text-white uppercase tracking-widest">
-                                {gameId === 'dino' ? 'Dino Runner' : gameId === 'tictactoe' ? 'Tic Tac Toe' : 'Memory Card'}
+                                {gameId === 'dino' ? 'Dino Runner' :
+                                    gameId === 'tictactoe' ? 'Tic Tac Toe' :
+                                        gameId === 'memory' ? 'Memory Card' :
+                                            gameId === 'puzzle' ? 'Picture Puzzle' :
+                                                'Word Scramble'}
                             </h3>
                         </div>
 

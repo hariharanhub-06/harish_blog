@@ -32,8 +32,7 @@ export default function GameAssetsModule() {
 
     const games = [
         { id: "memory", name: "Memory Card", minAssets: 8 },
-        { id: "tictactoe", name: "Tic Tac Toe", minAssets: 0 },
-        { id: "dino", name: "Dino Runner", minAssets: 0 }
+        { id: "puzzle", name: "Picture Puzzle", minAssets: 3 }
     ];
 
     useEffect(() => {
