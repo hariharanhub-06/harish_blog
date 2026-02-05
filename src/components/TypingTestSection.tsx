@@ -17,6 +17,8 @@ export default function TypingTestSection() {
     const [submitting, setSubmitting] = useState(false);
 
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const activeCharRef = useRef<HTMLSpanElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     const difficultyPools = {
         basic: [
@@ -116,6 +118,16 @@ export default function TypingTestSection() {
         setUserInput(value);
         calculateStats(value);
     };
+
+    // Auto-scroll effect
+    useEffect(() => {
+        if (isActive && activeCharRef.current) {
+            activeCharRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            });
+        }
+    }, [userInput.length, isActive]);
 
     const calculateStats = (input: string) => {
         const words = input.trim().split(/\s+/).length;
@@ -236,7 +248,8 @@ export default function TypingTestSection() {
 
                             {/* Enhanced Typing Area */}
                             <div
-                                className="relative mb-10 h-[280px] md:h-[400px] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-black/40 border border-white/10 overflow-y-auto cursor-text group selection:bg-blue-500/30"
+                                ref={scrollContainerRef}
+                                className="relative mb-10 h-[280px] md:h-[400px] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-black/40 border border-white/10 overflow-y-auto cursor-text group selection:bg-blue-500/30 scroll-smooth"
                                 onClick={() => inputRef.current?.focus()}
                             >
                                 {/* Start Overlay */}
@@ -266,6 +279,7 @@ export default function TypingTestSection() {
                                         return (
                                             <span
                                                 key={index}
+                                                ref={index === userInput.length ? activeCharRef : null}
                                                 className={`transition-colors duration-200 ${colorClass} ${index === userInput.length && isActive ? "border-l-2 border-blue-500 animate-pulse" : ""}`}
                                             >
                                                 {char}

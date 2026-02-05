@@ -4,6 +4,7 @@ interface Props {
     sessionId: string;
     userName: string;
     isActive: boolean; // Only listen if session is active/user is ready
+    lang?: string;     // Transcription language (e.g., 'en-IN', 'ta-IN')
 }
 
 // Detect browser type
@@ -18,7 +19,7 @@ function getBrowserInfo() {
     return { isBrave, isChrome, isEdge, isSafari, isFirefox };
 }
 
-export function useDistributedTranscription({ sessionId, userName, isActive }: Props) {
+export function useDistributedTranscription({ sessionId, userName, isActive, lang = 'en-IN' }: Props) {
     const [isListening, setIsListening] = useState(false);
     const [interimTranscript, setInterimTranscript] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -64,7 +65,7 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
 
         recognition.continuous = true;
         recognition.interimResults = true; // Show live transcription while speaking
-        recognition.lang = 'en-US';
+        recognition.lang = lang;
 
         recognition.onstart = () => {
             console.log(`🎤 [Distributed Transcription] Started listening for ${userName}`);
@@ -183,7 +184,7 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
                 recognitionRef.current.stop();
             }
         };
-    }, [sessionId, userName, isActive]);
+    }, [sessionId, userName, isActive, lang]);
 
     return { isListening, interimTranscript, error };
 }
