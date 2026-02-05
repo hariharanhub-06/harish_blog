@@ -6,16 +6,31 @@ import { RefreshCcw, Trophy, Brain, Send, HelpCircle, CheckCircle2, Loader2, Hea
 
 // Intermediate Level Words
 const WORDS = [
-    { word: "KUBERNETES", hint: "Container orchestration system" },
-    { word: "MICROSERVICES", hint: "Architectural style for modular apps" },
-    { word: "TYPESCRIPT", hint: "JavaScript with strong typing" },
-    { word: "POSTGRESQL", hint: "Advanced open source relational database" },
-    { word: "DOCKERIZED", hint: "The process of containerizing an app" },
-    { word: "WEBSOCKET", hint: "Persistent full-duplex communication" },
-    { word: "FULLSTACK", hint: "Development involving both client and server" },
-    { word: "AUTHENTICATION", hint: "Process of verifying user identity" },
-    { word: "MIDDLEWARE", hint: "Software that acts as a bridge between OS/Apps" },
-    { word: "ALGORITHM", hint: "Step-by-step procedure for calculations" }
+    { word: "REACT", hint: "Popular UI library for building interfaces" },
+    { word: "NEXTJS", hint: "The React framework for the web" },
+    { word: "GITHUB", hint: "Platform for hosting and sharing code" },
+    { word: "PYTHON", hint: "Versatile language known for simplicity" },
+    { word: "DATABASE", hint: "Structured collection of data storage" },
+    { word: "FRONTEND", hint: "The part of an app users interact with" },
+    { word: "BACKEND", hint: "The server-side part of an application" },
+    { word: "JAVASCRIPT", hint: "The programming language of the web" },
+    { word: "HTML", hint: "The standard markup language for web pages" },
+    { word: "CSS", hint: "The language used for styling web pages" },
+    { word: "NODEJS", hint: "JavaScript runtime built on Chrome's V8" },
+    { word: "APP", hint: "Short for application software" },
+    { word: "CLOUD", hint: "Remote servers used for storage/computing" },
+    { word: "LOGIN", hint: "Process of gaining access to a system" },
+    { word: "ADMIN", hint: "Dashboard for managing application data" },
+    { word: "SERVER", hint: "Hardware or software providing services" },
+    { word: "BROWSER", hint: "Software for navigating the internet" },
+    { word: "MOBILE", hint: "Handheld platform for applications" },
+    { word: "DESIGN", hint: "The visual and functional plan of an app" },
+    { word: "CODING", hint: "The process of writing computer programs" },
+    { word: "API", hint: "Interface for software communication" },
+    { word: "DEBUG", hint: "The process of finding and fixing errors" },
+    { word: "DEPLOY", hint: "Making an application available for use" },
+    { word: "VERSION", hint: "Specific stage of software development" },
+    { word: "PROJECT", hint: "A planned piece of work or task" }
 ];
 
 export default function WordScramble() {
