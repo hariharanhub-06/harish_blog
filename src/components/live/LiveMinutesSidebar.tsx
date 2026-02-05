@@ -18,9 +18,11 @@ interface Minute {
 interface Props {
     sessionId: string;
     isAdmin: boolean;
+    liveInterimText?: string;  // Live transcription while speaking
+    liveSpeakerName?: string;   // Who is speaking the interim text
 }
 
-export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
+export default function LiveMinutesSidebar({ sessionId, isAdmin, liveInterimText, liveSpeakerName }: Props) {
     const [minutes, setMinutes] = useState<Minute[]>([]);
 
     useEffect(() => {
@@ -165,6 +167,31 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin }: Props) {
 
             {/* Minutes List (Chat Style) */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-gradient-to-b from-[#09090b] to-black">
+                {/* Live Interim Transcript (While Speaking) */}
+                {liveInterimText && liveInterimText.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="group flex flex-col items-start"
+                    >
+                        <div className="flex items-center gap-2 mb-1 px-1">
+                            <span className={`text-[9px] font-black uppercase tracking-wider ${getSpeakerColor(liveSpeakerName)} flex items-center gap-1`}>
+                                <Mic size={10} className="animate-pulse" />
+                                {liveSpeakerName || 'Speaking...'}
+                            </span>
+                            <span className="text-[9px] text-gray-600 font-medium animate-pulse">
+                                Live
+                            </span>
+                        </div>
+
+                        <div className={`relative p-3 rounded-2xl w-full text-sm font-medium leading-relaxed shadow-sm transition-all
+                                        ${getSpeakerBg(liveSpeakerName)} border border-emerald-500/40 text-gray-400 italic opacity-70 rounded-tl-sm`}>
+                            <div className="relative z-10"><span className="animate-pulse">💬 </span>{liveInterimText}</div>
+                        </div>
+                    </motion.div>
+                )}
+
                 {minutes.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-40">
                         <Mic size={32} className="mb-3 text-white/20" />

@@ -66,7 +66,7 @@ export default function AdminLiveRoomClient({ session }: Props) {
         modSettings
     });
 
-    useDistributedTranscription({
+    const { interimTranscript } = useDistributedTranscription({
         sessionId: session.id,
         userName: 'Admin (Host)',
         isActive: transcriptionActive
@@ -343,7 +343,12 @@ export default function AdminLiveRoomClient({ session }: Props) {
                         </div>
 
                         <div className={`h-full ${activeTab === 'minutes' ? 'block' : 'hidden'}`}>
-                            <LiveMinutesSidebar sessionId={session.id} isAdmin={true} />
+                            <LiveMinutesSidebar
+                                sessionId={session.id}
+                                isAdmin={true}
+                                liveInterimText={interimTranscript}
+                                liveSpeakerName="Admin (Host)"
+                            />
                         </div>
                     </div>
                 </div>

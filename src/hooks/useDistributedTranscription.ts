@@ -20,6 +20,7 @@ function getBrowserInfo() {
 
 export function useDistributedTranscription({ sessionId, userName, isActive }: Props) {
     const [isListening, setIsListening] = useState(false);
+    const [interimTranscript, setInterimTranscript] = useState('');
     const recognitionRef = useRef<any>(null);
     const isRunningRef = useRef(false);
     const errorCountRef = useRef(0);
@@ -95,12 +96,15 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
             // Show interim results live (while speaking)
             if (!result.isFinal) {
                 console.log(`💬 [Distributed Transcription] Interim from ${userName}: "${transcript}"`);
-                // You could show this in UI with a different style (grayed out, italic, etc.)
+                // Update state for live UI display
+                setInterimTranscript(transcript);
             }
 
             // Send only final results to server
             if (result.isFinal) {
                 console.log(`📝 [Distributed Transcription] Final from ${userName}: "${transcript}"`);
+                // Clear interim text since we got the final version
+                setInterimTranscript('');
 
                 // Filter out short noise (less than 2 chars)
                 if (transcript && transcript.length > 1) {
@@ -178,5 +182,5 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
         };
     }, [sessionId, userName, isActive]);
 
-    return { isListening };
+    return { isListening, interimTranscript };
 }
