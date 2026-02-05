@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { JitsiMeeting } from '@jitsi/react-sdk';
 import { Loader2, Video, Users, MessageSquare, Shield, X, Copy, Settings, Layout, Mic, ExternalLink, Hand, Trash2, Menu, ScrollText } from "lucide-react";
 import LiveMinutesSidebar from "../live/LiveMinutesSidebar";
+import useDistributedTranscription from "@/hooks/useDistributedTranscription";
 
 interface Props {
     session: any;
@@ -55,6 +56,21 @@ export default function AdminLiveRoomClient({ session }: Props) {
         };
         loadSettings();
     }, [session.id]);
+
+    // Distributed Transcription for Admin Host
+    const transcriptionActive = modSettings ? !modSettings.disableAudio : true;
+    console.log(`🔍 [AdminLiveRoomClient] About to call useDistributedTranscription with:`, {
+        sessionId: session.id,
+        userName: 'Admin (Host)',
+        isActive: transcriptionActive,
+        modSettings
+    });
+
+    useDistributedTranscription({
+        sessionId: session.id,
+        userName: 'Admin (Host)',
+        isActive: transcriptionActive
+    });
 
     // Push settings to DB whenever they change
     const updateSettings = async (newSettings: any) => {

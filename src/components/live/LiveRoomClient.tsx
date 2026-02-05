@@ -127,11 +127,19 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
     }, []);
 
     // Distributed Transcription for Participants
+    const transcriptionActive = modSettings ? !modSettings.disableAudio : true;
+    console.log(`🔍 [LiveRoomClient] About to call useDistributedTranscription with:`, {
+        sessionId: session.id,
+        userName: user.name,
+        isActive: transcriptionActive,
+        modSettings
+    });
+
     useDistributedTranscription({
         sessionId: session.id,
         userName: user.name,
         // Only active if audio is NOT disabled by moderator
-        isActive: modSettings ? !modSettings.disableAudio : true
+        isActive: transcriptionActive
     });
 
     if (error) {
