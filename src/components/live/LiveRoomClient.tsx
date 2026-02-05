@@ -12,6 +12,8 @@ const LiveMinutesSidebar = dynamic(() => import("./LiveMinutesSidebar"), {
     loading: () => <div className="w-80 border-l border-white/5 bg-[#050505] animate-pulse" />
 });
 
+const LiveSubtitles = dynamic(() => import("./LiveSubtitles"), { ssr: false });
+
 interface Props {
     session: any;
     user: {
@@ -234,7 +236,7 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
                 </div>
             </header>
 
-            <div className="flex-1 w-full bg-[#050505] relative overflow-hidden flex flex-col md:flex-row">
+            <div className="flex-1 w-full bg-[#050505] relative overflow-hidden flex">
                 {/* Main Meeting Area */}
                 <div className="flex-1 relative">
 
@@ -289,8 +291,15 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
                         />
                     </div>
 
-                    {/* Minutes Sidebar (Visible to Everyone) */}
-                    <div className="h-[30vh] md:h-full w-full md:w-80 border-t md:border-t-0 md:border-l border-white/10 shrink-0 order-2 md:order-none">
+                    {/* Subtitles Overlay (Mobile/Desktop) */}
+                    <LiveSubtitles
+                        sessionId={session.id}
+                        liveInterimText={interimTranscript}
+                        liveSpeakerName={user.name}
+                    />
+
+                    {/* Minutes Sidebar (Visible to Everyone - Hidden on Mobile) */}
+                    <div className="h-full hidden md:block w-80 border-l border-white/10 shrink-0">
                         <LiveMinutesSidebar
                             sessionId={session.id}
                             isAdmin={isAdmin}
