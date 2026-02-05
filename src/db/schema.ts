@@ -652,6 +652,7 @@ export const liveSessionModeratorPolicies = pgTable("live_session_moderator_poli
   disableScreenSharing: boolean("disable_screen_sharing").default(false),
   disableChat: boolean("disable_chat").default(false),
   disableReactions: boolean("disable_reactions").default(false),
+  transcriptionLanguage: text("transcription_language").default("en-IN"),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 

@@ -35,7 +35,6 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
         disableChat: false,
     });
     const [isLocalAudioMuted, setIsLocalAudioMuted] = useState(true); // Start muted by default
-    const [selectedLang, setSelectedLang] = useState<'en-IN' | 'ta-IN'>('en-IN');
 
     // Track local audio mute state from Jitsi
     useEffect(() => {
@@ -165,7 +164,7 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
         userName: user.name,
         // Only active if audio is NOT disabled by moderator AND not locally muted
         isActive: transcriptionActive,
-        lang: selectedLang
+        lang: (modSettings as any)?.transcriptionLanguage || 'en-IN'
     });
 
     if (error) {
@@ -233,21 +232,7 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    {/* Language Toggle */}
-                    <div className="flex items-center bg-white/5 rounded-xl p-1 border border-white/10">
-                        <button
-                            onClick={() => setSelectedLang('en-IN')}
-                            className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${selectedLang === 'en-IN' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
-                        >
-                            English/Mixed
-                        </button>
-                        <button
-                            onClick={() => setSelectedLang('ta-IN')}
-                            className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${selectedLang === 'ta-IN' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
-                        >
-                            Tamil
-                        </button>
-                    </div>
+
 
                     <button
                         onClick={() => window.location.href = '/#sessions'}

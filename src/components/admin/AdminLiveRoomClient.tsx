@@ -229,13 +229,21 @@ export default function AdminLiveRoomClient({ session }: Props) {
                     {/* Language Toggle */}
                     <div className="hidden sm:flex items-center bg-gray-100 rounded-xl p-1 border border-gray-200">
                         <button
-                            onClick={() => setSelectedLang('en-IN')}
+                            onClick={() => {
+                                const newLang = 'en-IN';
+                                setSelectedLang(newLang);
+                                updateSettings({ ...modSettings, transcriptionLanguage: newLang });
+                            }}
                             className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${selectedLang === 'en-IN' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
                         >
                             English/Mixed
                         </button>
                         <button
-                            onClick={() => setSelectedLang('ta-IN')}
+                            onClick={() => {
+                                const newLang = 'ta-IN';
+                                setSelectedLang(newLang);
+                                updateSettings({ ...modSettings, transcriptionLanguage: newLang });
+                            }}
                             className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${selectedLang === 'ta-IN' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
                         >
                             Tamil
