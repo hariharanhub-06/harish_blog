@@ -234,7 +234,7 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
                 </div>
             </header>
 
-            <div className="flex-1 w-full bg-[#050505] relative overflow-hidden flex">
+            <div className="flex-1 w-full bg-[#050505] relative overflow-hidden flex flex-col md:flex-row">
                 {/* Main Meeting Area */}
                 <div className="flex-1 relative">
 
@@ -290,7 +290,7 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
                     </div>
 
                     {/* Minutes Sidebar (Visible to Everyone) */}
-                    <div className="h-full hidden md:block">
+                    <div className="h-[30vh] md:h-full w-full md:w-80 border-t md:border-t-0 md:border-l border-white/10 shrink-0 order-2 md:order-none">
                         <LiveMinutesSidebar
                             sessionId={session.id}
                             isAdmin={isAdmin}

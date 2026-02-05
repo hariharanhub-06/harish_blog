@@ -146,14 +146,16 @@ export default function LiveMinutesSidebar({ sessionId, isAdmin, liveInterimText
                 </div>
 
                 <div className="flex gap-1.5 shrink-0 ml-2">
-                    <button
-                        onClick={clearAllMinutes}
-                        disabled={minutes.length === 0}
-                        className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Clear All Transcripts"
-                    >
-                        <Trash2 size={14} />
-                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={clearAllMinutes}
+                            disabled={minutes.length === 0}
+                            className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Clear All Transcripts"
+                        >
+                            <Trash2 size={14} />
+                        </button>
+                    )}
                     <button
                         onClick={exportPDF}
                         disabled={minutes.length === 0}
