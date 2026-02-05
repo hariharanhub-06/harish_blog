@@ -233,7 +233,7 @@ export default function AdminLiveRoomClient({ session }: Props) {
                             }}
                             className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${selectedLang === 'en-IN' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
                         >
-                            English/Mixed
+                            English
                         </button>
                         <button
                             onClick={() => {
@@ -243,7 +243,7 @@ export default function AdminLiveRoomClient({ session }: Props) {
                             }}
                             className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${selectedLang === 'ta-IN' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
                         >
-                            Tamil
+                            Tamil / Mixed
                         </button>
                     </div>
                     <div className="hidden md:flex flex-col items-end mr-4">
