@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { JitsiMeeting } from '@jitsi/react-sdk';
 import { Loader2, Video, Users, MessageSquare, Shield, X, Copy, Settings, Layout, Mic, ExternalLink, Hand, Trash2, Menu, ScrollText } from "lucide-react";
 import LiveMinutesSidebar from "../live/LiveMinutesSidebar";
-import useDistributedTranscription from "@/hooks/useDistributedTranscription";
+import { useDistributedTranscription } from "@/hooks/useDistributedTranscription";
 
 interface Props {
     session: any;
