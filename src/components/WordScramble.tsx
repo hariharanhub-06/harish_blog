@@ -103,18 +103,13 @@ export default function WordScramble() {
     };
 
     const handleHint = () => {
-        setShowHint(true);
         const original = WORDS[currentWordIndex].word;
-        // Reveal a random unrevealed letter
         const unrevealed = original.split("").map((_, i) => i).filter(i => !hintRevealedLetters.includes(i));
         if (unrevealed.length > 0) {
+            setShowHint(true);
             const randomIdx = unrevealed[Math.floor(Math.random() * unrevealed.length)];
-            setHintRevealedLetters(prev => [...prev, randomIdx]);
-
-            // Auto-fill the letter in the input if possible or just show it
-            const inputArr = userInput.split("");
-            inputArr[randomIdx] = original[randomIdx];
-            setUserInput(inputArr.join(""));
+            setHintRevealedLetters(prev => [...prev, randomIdx].sort((a, b) => a - b));
+            setScore(s => Math.max(0, s - 10));
         }
     };
 
@@ -219,9 +214,28 @@ export default function WordScramble() {
                 </div>
 
                 <div className="bg-white/5 rounded-[3rem] p-10 border border-white/10 relative overflow-hidden backdrop-blur-xl shadow-2xl">
-                    <h3 className="text-5xl md:text-6xl font-black text-white uppercase tracking-[0.3em] mb-10 break-all select-none">
-                        {scrambledWord}
-                    </h3>
+                    <div className="mb-10">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-4">Scrambled</p>
+                        <h3 className="text-4xl md:text-5xl font-black text-white/40 uppercase tracking-[0.3em] line-through decoration-primary/30 select-none">
+                            {scrambledWord}
+                        </h3>
+                    </div>
+
+                    <div className="mb-12">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-6">Target Word</p>
+                        <div className="flex flex-wrap justify-center gap-3">
+                            {WORDS[currentWordIndex].word.split("").map((char, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ y: 20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    className={`w-10 h-14 md:w-12 md:h-16 border-b-4 flex items-center justify-center text-3xl font-black transition-all duration-500 ${hintRevealedLetters.includes(index) ? "border-primary text-primary" : "border-white/10 text-white/10"}`}
+                                >
+                                    {hintRevealedLetters.includes(index) ? char : "_"}
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <input
