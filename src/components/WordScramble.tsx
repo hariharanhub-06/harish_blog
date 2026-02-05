@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCcw, Trophy, Brain, Send, HelpCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { RefreshCcw, Trophy, Brain, Send, HelpCircle, CheckCircle2, Loader2, Heart } from "lucide-react";
 
 // Intermediate Level Words
 const WORDS = [
@@ -30,6 +30,8 @@ export default function WordScramble() {
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [startTime, setStartTime] = useState<number>(Date.now());
+    const [lives, setLives] = useState(5);
+    const [gameOver, setGameOver] = useState(false);
 
     const scramble = (word: string) => {
         return word.split("").sort(() => Math.random() - 0.5).join("");
@@ -47,6 +49,7 @@ export default function WordScramble() {
         setShowHint(false);
         setHintRevealedLetters([]);
         setStartTime(Date.now());
+        setGameOver(false);
     }, [currentWordIndex]);
 
     useEffect(() => {
@@ -55,7 +58,7 @@ export default function WordScramble() {
 
     const handleSubmit = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if (status !== "playing") return;
+        if (status !== "playing" || gameOver) return;
 
         const original = WORDS[currentWordIndex].word;
         if (userInput.toUpperCase() === original) {
@@ -70,7 +73,17 @@ export default function WordScramble() {
             }, 1500);
         } else {
             setStatus("wrong");
-            setTimeout(() => setStatus("playing"), 1000);
+            setLives(prev => {
+                const newLives = prev - 1;
+                if (newLives <= 0) {
+                    setGameOver(true);
+                    setTimeout(() => setStatus("finished"), 1500);
+                }
+                return newLives;
+            });
+            setTimeout(() => {
+                if (!gameOver) setStatus("playing");
+            }, 1000);
         }
     };
 
@@ -114,6 +127,8 @@ export default function WordScramble() {
     const resetGame = () => {
         setCurrentWordIndex(0);
         setScore(0);
+        setLives(5);
+        setGameOver(false);
         setSubmitted(false);
         setUserName("");
         initGame();
@@ -123,8 +138,14 @@ export default function WordScramble() {
         return (
             <div className="flex flex-col items-center justify-center p-8 text-center h-full">
                 <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6 w-full max-w-sm">
-                    <Trophy size={80} className="text-yellow-400 mx-auto animate-bounce" />
-                    <h2 className="text-4xl font-black text-white uppercase italic">Tech Master!</h2>
+                    {gameOver ? (
+                        <Brain size={80} className="text-rose-500 mx-auto animate-pulse" />
+                    ) : (
+                        <Trophy size={80} className="text-yellow-400 mx-auto animate-bounce" />
+                    )}
+                    <h2 className="text-4xl font-black text-white uppercase italic">
+                        {gameOver ? "Out of Lives!" : "Tech Master!"}
+                    </h2>
                     <p className="text-xl text-white/60 font-bold">Final Score: <span className="text-primary text-3xl">{score}</span></p>
 
                     {!submitted ? (
@@ -163,6 +184,18 @@ export default function WordScramble() {
                     <div className="text-left">
                         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Challenge</p>
                         <p className="text-2xl font-black text-white">{currentWordIndex + 1}<span className="text-white/20">/{WORDS.length}</span></p>
+                    </div>
+                    <div className="text-center flex flex-col items-center">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-2">Lives</p>
+                        <div className="flex gap-1.5">
+                            {[...Array(5)].map((_, i) => (
+                                <Heart
+                                    key={i}
+                                    size={16}
+                                    className={`${i < lives ? "text-rose-500 fill-rose-500" : "text-white/10 fill-white/5"} transition-all duration-500`}
+                                />
+                            ))}
+                        </div>
                     </div>
                     <div className="text-right">
                         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Points</p>
