@@ -49,7 +49,7 @@ export async function POST(req: Request) {
             const emailContent = {
                 to: reg.userEmail,
                 subject: `Registration Confirmed: ${sessionTitle}`,
-                text: `Hello ${userName},\n\nYour registration for ${sessionTitle} is confirmed.\n\nJoin Link: ${liveLink}\nDate: ${new Date(session.startTime).toLocaleString()}\n\nSee you there!`,
+                text: `Hello ${userName},\n\nYour registration for ${sessionTitle} is confirmed.\n\nJoin Link: ${liveLink}\nDate: ${new Date(session.startTime).toLocaleString()}\n\nNote: For features like Live Minutes (transcription), please join using a Laptop or Desktop computer with Google Chrome or Microsoft Edge. Features like live transcription are not supported on mobile devices.\n\nSee you there!`,
                 html: `
                     <!DOCTYPE html>
                     <html>
@@ -99,6 +99,10 @@ export async function POST(req: Request) {
                                 </div>
 
                                 <p style="margin-bottom: 32px;">Please use the button below to join the session at the scheduled time. We recommend joining 5 minutes early to test your audio/video.</p>
+                                
+                                <p style="margin-bottom: 32px; font-size: 14px; color: #ea580c; font-weight: 700; border: 2px solid #ea580c; padding: 16px; border-radius: 12px; background: #fff7ed;">
+                                    ⚠️ IMPORTANT: For the best experience and to use the Live Minutes (transcription) feature, please join using a <strong>Laptop or Desktop computer</strong> with Google Chrome or Microsoft Edge. Features like live transcription are not supported on mobile devices.
+                                </p>
                                 
                                 <a href="${liveLink}" class="cta-button">Join Live Session</a>
                             </div>

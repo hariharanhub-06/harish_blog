@@ -11,6 +11,7 @@ const LiveMinutesSidebar = dynamic(() => import("./LiveMinutesSidebar"), {
     ssr: false,
     loading: () => <div className="w-80 border-l border-white/5 bg-[#050505] animate-pulse" />
 });
+import AudioWaveform from "./AudioWaveform";
 
 interface Props {
     session: any;
@@ -221,6 +222,11 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
                         <div className="flex items-center gap-2">
                             <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
                             <span className="text-[7px] font-black uppercase tracking-[0.3em] text-gray-500">Live Studio Room</span>
+                            {!isLocalAudioMuted && (
+                                <div className="flex items-center ml-2 border-l border-white/10 pl-2">
+                                    <AudioWaveform isActive={!isLocalAudioMuted} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
