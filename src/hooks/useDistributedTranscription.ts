@@ -6,10 +6,24 @@ interface Props {
     isActive: boolean; // Only listen if session is active/user is ready
 }
 
+// Detect browser type
+function getBrowserInfo() {
+    const ua = navigator.userAgent;
+    const isBrave = (navigator as any).brave !== undefined;
+    const isChrome = /Chrome/.test(ua) && !isBrave;
+    const isEdge = /Edg/.test(ua);
+    const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
+    const isFirefox = /Firefox/.test(ua);
+
+    return { isBrave, isChrome, isEdge, isSafari, isFirefox };
+}
+
 export function useDistributedTranscription({ sessionId, userName, isActive }: Props) {
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef<any>(null);
     const isRunningRef = useRef(false);
+    const errorCountRef = useRef(0);
+    const hasShownBrowserWarning = useRef(false);
 
     useEffect(() => {
         console.log(`🎙️ [Distributed Transcription] Hook called for ${userName}, isActive: ${isActive}`);
@@ -19,11 +33,19 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
             return;
         }
 
+
         // Check browser support
         const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
         if (!SpeechRecognition) {
+            const browserInfo = getBrowserInfo();
             console.error('❌ [Distributed Transcription] Speech Recognition API not supported in this browser');
-            alert('Speech Recognition not supported in your browser. Please use Chrome, Edge, or Safari.');
+
+            if (browserInfo.isFirefox) {
+                console.error('❌ [Distributed Transcription] Firefox does not support the Web Speech Recognition API');
+                alert('🦊 Firefox Not Supported\n\nFirefox does not support the Web Speech Recognition API.\n\nTo enable live transcription, please use:\n✅ Chrome\n✅ Microsoft Edge\n✅ Safari\n\nYou can still participate in the webinar, but transcription won\'t work in Firefox.');
+            } else {
+                alert('Speech Recognition not supported in your browser. Please use Chrome, Edge, or Safari.');
+            }
             return;
         }
 
@@ -102,9 +124,31 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
         };
 
         recognition.onerror = (event: any) => {
+            errorCountRef.current++;
+            const browserInfo = getBrowserInfo();
+
             console.error(`❌ [Distributed Transcription] Error for ${userName}:`, event.error, event);
+
+            // Handle different error types with browser-specific messages
             if (event.error === 'not-allowed') {
-                alert(`Microphone permission denied! Please allow microphone access to enable transcription.`);
+                alert(`🎙️ Microphone Access Denied!\n\nPlease allow microphone access to enable live transcription.\n\n1. Click the microphone icon in your browser's address bar\n2. Select "Allow"\n3. Refresh the page`);
+            } else if (event.error === 'network') {
+                // Network errors are common in Brave due to privacy settings
+                if (browserInfo.isBrave && !hasShownBrowserWarning.current) {
+                    hasShownBrowserWarning.current = true;
+                    console.warn(`⚠️ [Distributed Transcription] Brave detected - network error is expected due to privacy settings`);
+
+                    if (errorCountRef.current >= 3) {
+                        alert(`⚠️ Speech Recognition Blocked\n\nBrave browser blocks Google's speech recognition service for privacy.\n\nTo enable transcription:\n\n✅ OPTION 1: Use Chrome or Edge\n✅ OPTION 2: Disable Brave Shields for this site:\n   • Click the Brave lion icon in the address bar\n   • Turn off "Shields"\n   • Refresh the page\n\nTranscription will continue retrying automatically.`);
+                    }
+                } else if (errorCountRef.current === 1) {
+                    // Show generic network error only on first occurrence
+                    console.warn(`⚠️ [Distributed Transcription] Network error - speech recognition may not be available`);
+                }
+            } else if (event.error === 'no-speech') {
+                console.log(`🔇 [Distributed Transcription] No speech detected, will retry...`);
+            } else if (event.error === 'aborted') {
+                console.log(`⏹️ [Distributed Transcription] Recognition aborted, will retry...`);
             }
         };
 
