@@ -9,9 +9,10 @@ interface Props {
     liveInterimText?: string;
     liveSpeakerName?: string;
     error?: string | null;
+    debugInfo?: { isActive: boolean };
 }
 
-export default function LiveSubtitles({ sessionId, liveInterimText, liveSpeakerName, error }: Props) {
+export default function LiveSubtitles({ sessionId, liveInterimText, liveSpeakerName, error, debugInfo }: Props) {
     const [latestMinute, setLatestMinute] = useState<{ content: string; speakerName: string; createdAt: string } | null>(null);
     const [isVisible, setIsVisible] = useState(true);
 
@@ -98,6 +99,12 @@ export default function LiveSubtitles({ sessionId, liveInterimText, liveSpeakerN
                     </button>
 
                     <div className="flex flex-col items-center gap-1">
+                        {/* Debug Info */}
+                        {debugInfo && (
+                            <div className="text-[8px] font-mono text-gray-500 mb-1">
+                                [Debug] Active: {debugInfo.isActive ? 'YES' : 'NO'}
+                            </div>
+                        )}
                         <span className={`text-[10px] font-black uppercase tracking-widest ${isInterim ? 'text-yellow-400 animate-pulse' : 'text-emerald-400'}`}>
                             {speakerToShow || 'Unknown'} {isInterim && '(Speaking...)'}
                         </span>

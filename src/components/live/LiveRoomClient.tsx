@@ -297,6 +297,7 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
                         liveInterimText={interimTranscript}
                         liveSpeakerName={user.name}
                         error={transcriptionError}
+                        debugInfo={{ isActive: transcriptionActive }}
                     />
 
                     {/* Minutes Sidebar (Visible to Everyone - Hidden on Mobile) */}
