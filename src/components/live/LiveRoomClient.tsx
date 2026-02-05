@@ -160,7 +160,7 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
 
 
 
-    const { interimTranscript } = useDistributedTranscription({
+    const { interimTranscript, error: transcriptionError } = useDistributedTranscription({
         sessionId: session.id,
         userName: user.name,
         // Only active if audio is NOT disabled by moderator AND not locally muted
@@ -296,6 +296,7 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
                         sessionId={session.id}
                         liveInterimText={interimTranscript}
                         liveSpeakerName={user.name}
+                        error={transcriptionError}
                     />
 
                     {/* Minutes Sidebar (Visible to Everyone - Hidden on Mobile) */}

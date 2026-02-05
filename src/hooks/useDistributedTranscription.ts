@@ -21,6 +21,7 @@ function getBrowserInfo() {
 export function useDistributedTranscription({ sessionId, userName, isActive }: Props) {
     const [isListening, setIsListening] = useState(false);
     const [interimTranscript, setInterimTranscript] = useState('');
+    const [error, setError] = useState<string | null>(null);
     const recognitionRef = useRef<any>(null);
     const isRunningRef = useRef(false);
     const errorCountRef = useRef(0);
@@ -68,6 +69,7 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
         recognition.onstart = () => {
             console.log(`🎤 [Distributed Transcription] Started listening for ${userName}`);
             setIsListening(true);
+            setError(null);
             isRunningRef.current = true;
         };
 
@@ -140,6 +142,7 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
             const browserInfo = getBrowserInfo();
 
             console.error(`❌ [Distributed Transcription] Error for ${userName}:`, event.error, event);
+            setError(event.error);
 
             // Handle different error types with browser-specific messages
             if (event.error === 'not-allowed') {
@@ -182,5 +185,5 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
         };
     }, [sessionId, userName, isActive]);
 
-    return { isListening, interimTranscript };
+    return { isListening, interimTranscript, error };
 }
