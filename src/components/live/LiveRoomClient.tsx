@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, Video, MessageSquare, X, Mic, Hand, Users, Shield } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import { JitsiMeeting } from "@jitsi/react-sdk";
 import { motion } from "framer-motion";
@@ -24,6 +24,7 @@ interface Props {
 }
 
 export default function LiveRoomClient({ session, user, isAdmin }: Props) {
+    const jitsiContainerRef = useRef<HTMLDivElement>(null); // Fix: Define ref
     const [jitsiApi, setJitsiApi] = useState<any>(null);
     const [modSettings, setModSettings] = useState<any>(session.moderatorSettings || {
         disableAudio: false,
@@ -32,9 +33,32 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
         disableReactions: false,
         disableChat: false,
     });
+    const [isLocalAudioMuted, setIsLocalAudioMuted] = useState(true); // Start muted by default
+
+    // Track local audio mute state from Jitsi
+    useEffect(() => {
+        if (!jitsiApi) return;
+
+        const handleAudioMuteStatusChanged = ({ muted }: { muted: boolean }) => {
+            setIsLocalAudioMuted(muted);
+        };
+
+        // Listen for mute events
+        jitsiApi.addListener('audioMuteStatusChanged', handleAudioMuteStatusChanged);
+
+        // Check initial state
+        jitsiApi.isAudioMuted().then((muted: boolean) => {
+            setIsLocalAudioMuted(muted);
+        });
+
+        return () => {
+            jitsiApi.removeListener('audioMuteStatusChanged', handleAudioMuteStatusChanged);
+        };
+    }, [jitsiApi]);
 
     useEffect(() => {
         const fetchSettings = async () => {
+            // ... existing fetch settings ...
             try {
                 // 1. Fetch Mod Settings
                 const res = await fetch(`/api/sessions/${session.id}/settings`);
@@ -127,18 +151,17 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
     }, []);
 
     // Distributed Transcription for Participants
-    const transcriptionActive = modSettings ? !modSettings.disableAudio : true;
-    console.log(`🔍 [LiveRoomClient] About to call useDistributedTranscription with:`, {
-        sessionId: session.id,
-        userName: user.name,
-        isActive: transcriptionActive,
-        modSettings
-    });
+    // Only active if: 
+    // 1. Audio is NOT globally disabled by moderator settings
+    // 2. AND Local participant microphone is NOT muted
+    const transcriptionActive = (modSettings ? !modSettings.disableAudio : true) && !isLocalAudioMuted;
 
-    useDistributedTranscription({
+
+
+    const { interimTranscript } = useDistributedTranscription({
         sessionId: session.id,
         userName: user.name,
-        // Only active if audio is NOT disabled by moderator
+        // Only active if audio is NOT disabled by moderator AND not locally muted
         isActive: transcriptionActive
     });
 
@@ -214,64 +237,76 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
             <div className="flex-1 w-full bg-[#050505] relative overflow-hidden flex">
                 {/* Main Meeting Area */}
                 <div className="flex-1 relative">
-                    <JitsiMeeting
-                        domain="meet.ffmuc.net"
-                        roomName={roomName}
-                        configOverwrite={{
-                            startWithAudioMuted: true,
-                            disableModeratorIndicator: true,
-                            startWithVideoMuted: true,
-                            enableEmailInStats: false,
-                            disableDeepLinking: true,
-                            prejoinPageEnabled: false,
-                            hideModeratorIndicator: true,
-                            resolution: 480,
-                            constraints: {
-                                video: {
-                                    height: { ideal: 480, max: 720, min: 240 }
-                                }
-                            },
-                            enableLayerSuspension: true,
-                            p2p: { enabled: true },
-                            toolbarButtons: [
-                                'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-                                'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
-                                'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                                'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
-                                'tileview', 'videobackgroundblur', 'download', 'help', 'e2ee'
-                            ],
-                            remoteVideoMenu: { disableKick: true },
-                        }}
-                        interfaceConfigOverwrite={{
-                            DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-                            SHOW_JITSI_WATERMARK: false,
-                            HIDE_INVITE_ON_PAGE_START: true,
-                            MOBILE_APP_PROMO: false,
-                        }}
-                        userInfo={{ displayName: user.name, email: user.email }}
-                        onApiReady={(externalApi) => setJitsiApi(externalApi)}
-                        onReadyToClose={() => window.location.href = '/'}
-                        getIFrameRef={(iframeRef) => {
-                            iframeRef.style.height = '100%';
-                            iframeRef.style.width = '100%';
-                            iframeRef.style.border = 'none';
-                        }}
-                    />
+
+
+                    {/* Jitsi Container */}
+                    <div
+                        className="w-full h-full"
+                        ref={jitsiContainerRef}
+                    >
+                        <JitsiMeeting
+                            domain="meet.ffmuc.net"
+                            roomName={roomName}
+                            configOverwrite={{
+                                startWithAudioMuted: true,
+                                disableModeratorIndicator: true,
+                                startWithVideoMuted: true,
+                                enableEmailInStats: false,
+                                disableDeepLinking: true,
+                                prejoinPageEnabled: false,
+                                hideModeratorIndicator: true,
+                                resolution: 480,
+                                constraints: {
+                                    video: {
+                                        height: { ideal: 480, max: 720, min: 240 }
+                                    }
+                                },
+                                enableLayerSuspension: true,
+                                p2p: { enabled: true },
+                                toolbarButtons: [
+                                    'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                                    'fodeviceselection', 'hangup', 'profile', 'info', 'chat', 'recording',
+                                    'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                                    'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
+                                    'tileview', 'videobackgroundblur', 'download', 'help', 'e2ee'
+                                ],
+                                remoteVideoMenu: { disableKick: true },
+                            }}
+                            interfaceConfigOverwrite={{
+                                DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                                SHOW_JITSI_WATERMARK: false,
+                                HIDE_INVITE_ON_PAGE_START: true,
+                                MOBILE_APP_PROMO: false,
+                            }}
+                            userInfo={{ displayName: user.name, email: user.email }}
+                            onApiReady={(externalApi) => setJitsiApi(externalApi)}
+                            onReadyToClose={() => window.location.href = '/'}
+                            getIFrameRef={(iframeRef) => {
+                                iframeRef.style.height = '100%';
+                                iframeRef.style.width = '100%';
+                                iframeRef.style.border = 'none';
+                            }}
+                        />
+                    </div>
+
+                    {/* Minutes Sidebar (Only for Admin) */}
+                    {isAdmin && (
+                        <div className="h-full">
+                            <LiveMinutesSidebar
+                                sessionId={session.id}
+                                isAdmin={isAdmin}
+                                liveInterimText={interimTranscript}
+                                liveSpeakerName={user.name}
+                            />
+                        </div>
+                    )}
                 </div>
 
-                {/* Minutes Sidebar (Only for Admin) */}
-                {isAdmin && (
-                    <LiveMinutesSidebar
-                        sessionId={session.id}
-                        isAdmin={isAdmin}
-                    />
-                )}
-            </div>
-
-            <style jsx global>{`
+                <style jsx global>{`
                 .watermark { display: none !important; }
                 .jitsi-meeting { height: 100% !important; background: black !important; }
             `}</style>
+            </div>
         </div>
     );
 }

@@ -44,6 +44,29 @@ export default function AdminLiveRoomClient({ session }: Props) {
     });
     const [updating, setUpdating] = useState(false);
     const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+    const [isLocalAudioMuted, setIsLocalAudioMuted] = useState(true); // Start muted by default
+
+    // Track local audio mute state from Jitsi
+    useEffect(() => {
+        if (!jitsiApi) return;
+
+        const handleAudioMuteStatusChanged = ({ muted }: { muted: boolean }) => {
+            console.log(`🎤 [AdminLiveRoomClient] Local audio muted: ${muted}`);
+            setIsLocalAudioMuted(muted);
+        };
+
+        // Listen for mute events
+        jitsiApi.addListener('audioMuteStatusChanged', handleAudioMuteStatusChanged);
+
+        // Check initial state
+        jitsiApi.isAudioMuted().then((muted: boolean) => {
+            setIsLocalAudioMuted(muted);
+        });
+
+        return () => {
+            jitsiApi.removeListener('audioMuteStatusChanged', handleAudioMuteStatusChanged);
+        };
+    }, [jitsiApi]);
 
     // Initial fetch of policies
     useEffect(() => {
@@ -58,7 +81,10 @@ export default function AdminLiveRoomClient({ session }: Props) {
     }, [session.id]);
 
     // Distributed Transcription for Admin Host
-    const transcriptionActive = modSettings ? !modSettings.disableAudio : true;
+    // Only active if: 
+    // 1. Audio is NOT globally disabled by settings
+    // 2. AND Local admin microphone is NOT muted
+    const transcriptionActive = (modSettings ? !modSettings.disableAudio : true) && !isLocalAudioMuted;
     console.log(`🔍 [AdminLiveRoomClient] About to call useDistributedTranscription with:`, {
         sessionId: session.id,
         userName: 'Admin (Host)',

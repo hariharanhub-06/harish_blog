@@ -125,6 +125,8 @@ export async function POST(req: Request) {
 
                                 <p style="margin-bottom: 32px;">Please use the button below to join the session at the scheduled time. We recommend joining 5 minutes early to test your audio/video.</p>
                                 
+                                <p style="margin-bottom: 32px; font-size: 14px; color: #ea580c; font-weight: 700;">Note: For the best experience and to enable features like Live Minutes, please join using a compatible browser like Google Chrome or Microsoft Edge.</p>
+                                
                                 <a href="${liveLink}" class="cta-button">Join Live Session</a>
                             </div>
                             <div class="footer">
