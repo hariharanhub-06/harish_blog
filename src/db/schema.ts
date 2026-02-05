@@ -683,3 +683,13 @@ export const registrationRelations = relations(sessionRegistrations, ({ one }) =
     references: [liveSessions.id],
   }),
 }));
+
+export const gameAssets = pgTable("game_assets", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  gameId: text("game_id").notNull(), // e.g., 'memory'
+  assetUrl: text("asset_url").notNull(),
+  assetType: text("asset_type").default("image"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});

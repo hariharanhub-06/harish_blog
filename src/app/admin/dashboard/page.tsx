@@ -37,8 +37,9 @@ import FinanceModule from "@/components/admin/FinanceModule";
 import LeaderboardModule from "@/components/admin/LeaderboardModule";
 import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
 import LiveSessionsModule from "@/components/admin/LiveSessionsModule";
+import GameAssetsModule from "@/components/admin/GameAssetsModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -50,7 +51,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings", "sessions"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings", "sessions", "game-assets"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -104,6 +105,7 @@ export default function AdminDashboard() {
         { id: "leaderboard", title: "Leaderboard", icon: Trophy, color: "bg-yellow-500" },
         { id: "meetings", title: "Meetings List", icon: Calendar, color: "bg-blue-600" },
         { id: "sessions", title: "Live Sessions", icon: Video, color: "bg-red-500" },
+        { id: "game-assets", title: "Game Content", icon: Gamepad2, color: "bg-violet-500" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
     ];
 
@@ -119,6 +121,7 @@ export default function AdminDashboard() {
             case "leaderboard": return <LeaderboardModule />;
             case "meetings": return <AdminMeetingsModule />;
             case "sessions": return <LiveSessionsModule />;
+            case "game-assets": return <GameAssetsModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <OverviewModule />

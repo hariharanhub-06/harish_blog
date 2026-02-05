@@ -19,7 +19,8 @@ import { useEffect, useState } from "react";
 import FeedbackSection from "./FeedbackSection";
 import dynamic from "next/dynamic";
 
-const DinoRunnerGame = dynamic(() => import("@/components/DinoRunnerGame"), { ssr: false });
+const GamesCarousel = dynamic(() => import("@/components/GamesCarousel"), { ssr: false });
+const GameOverlay = dynamic(() => import("@/components/GameOverlay"), { ssr: false });
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
@@ -165,6 +166,7 @@ export default function MainContent({
 
     const [loading, setLoading] = useState(!initialProfile || initialProjects?.length === 0);
     const [selectedItem, setSelectedItem] = useState<{ data: Project | Experience | Education | Volunteering, type: "project" | "experience" | "education" | "volunteering" } | null>(null);
+    const [activeGameId, setActiveGameId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!initialProfile || initialProjects?.length === 0) {
@@ -706,8 +708,8 @@ export default function MainContent({
 
             <FeedbackSection />
 
-            {/* DinoRunnerGame Section */}
-            <DinoRunnerGame />
+            {/* Games Section */}
+            <GamesCarousel onPlayGame={setActiveGameId} />
 
 
             {
@@ -736,6 +738,15 @@ export default function MainContent({
                         onClose={() => setSelectedItem(null)}
                         type={selectedItem.type}
                         data={selectedItem.data as any}
+                    />
+                )
+            }
+
+            {
+                activeGameId && (
+                    <GameOverlay
+                        gameId={activeGameId}
+                        onClose={() => setActiveGameId(null)}
                     />
                 )
             }

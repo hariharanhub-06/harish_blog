@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { profiles, projects, experience, education, volunteering } from "@/db/schema";
+import { profiles, projects, experience, education, volunteering, gameAssets } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -46,6 +46,10 @@ export async function GET() {
         } catch (e) {
             console.error("Quiz fetch failed in API:", e);
         }
+
+        const allGameAssets = await db.query.gameAssets.findMany({
+            where: (ga, { eq }) => eq(ga.isActive, true),
+        });
 
         const finalProfile = profileData || {
             name: "Hari Haran Jeyaramamoorthy",
@@ -131,7 +135,8 @@ export async function GET() {
             volunteerings,
             partnerships: finalPartnerships,
             skills: allSkills,
-            quizzes: allQuizzes
+            quizzes: allQuizzes,
+            gameAssets: allGameAssets
         });
     } catch (error) {
         console.error("Error fetching home data:", error);
