@@ -12,8 +12,6 @@ const LiveMinutesSidebar = dynamic(() => import("./LiveMinutesSidebar"), {
     loading: () => <div className="w-80 border-l border-white/5 bg-[#050505] animate-pulse" />
 });
 
-const LiveSubtitles = dynamic(() => import("./LiveSubtitles"), { ssr: false });
-
 interface Props {
     session: any;
     user: {
@@ -160,7 +158,7 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
 
 
 
-    const { interimTranscript, error: transcriptionError } = useDistributedTranscription({
+    const { interimTranscript } = useDistributedTranscription({
         sessionId: session.id,
         userName: user.name,
         // Only active if audio is NOT disabled by moderator AND not locally muted
@@ -291,14 +289,6 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
                         />
                     </div>
 
-                    {/* Subtitles Overlay (Mobile/Desktop) */}
-                    <LiveSubtitles
-                        sessionId={session.id}
-                        liveInterimText={interimTranscript}
-                        liveSpeakerName={user.name}
-                        error={transcriptionError}
-                        debugInfo={{ isActive: transcriptionActive }}
-                    />
 
                     {/* Minutes Sidebar (Visible to Everyone - Hidden on Mobile) */}
                     <div className="h-full hidden md:block w-80 border-l border-white/10 shrink-0">
