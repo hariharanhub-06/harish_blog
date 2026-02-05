@@ -40,7 +40,6 @@ interface Quiz {
 const MINI_GAMES = [
     { id: "all", name: "All Games" },
     { id: "dino", name: "Dino Runner" },
-    { id: "tictactoe", name: "Tic Tac Toe" },
     { id: "memory", name: "Memory Card" },
     { id: "puzzle", name: "Picture Puzzle" },
     { id: "scramble", name: "Word Scramble" }
@@ -307,9 +306,9 @@ export default function LeaderboardModule() {
                                         <tr key={entry.id} className="group hover:bg-gray-50/50 transition-colors border-b border-gray-100 last:border-0 border-l-4 border-l-transparent hover:border-l-primary/30">
                                             <td className="px-8 py-5">
                                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black ${index === 0 ? "bg-yellow-100 text-yellow-600 shadow-sm" :
-                                                        index === 1 ? "bg-gray-100 text-gray-600 shadow-sm" :
-                                                            index === 2 ? "bg-orange-100 text-orange-600 shadow-sm" :
-                                                                "bg-white text-gray-400 border border-gray-100"
+                                                    index === 1 ? "bg-gray-100 text-gray-600 shadow-sm" :
+                                                        index === 2 ? "bg-orange-100 text-orange-600 shadow-sm" :
+                                                            "bg-white text-gray-400 border border-gray-100"
                                                     }`}>
                                                     {index + 1}
                                                 </div>
