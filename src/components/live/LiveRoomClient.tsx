@@ -289,17 +289,15 @@ export default function LiveRoomClient({ session, user, isAdmin }: Props) {
                         />
                     </div>
 
-                    {/* Minutes Sidebar (Only for Admin) */}
-                    {isAdmin && (
-                        <div className="h-full">
-                            <LiveMinutesSidebar
-                                sessionId={session.id}
-                                isAdmin={isAdmin}
-                                liveInterimText={interimTranscript}
-                                liveSpeakerName={user.name}
-                            />
-                        </div>
-                    )}
+                    {/* Minutes Sidebar (Visible to Everyone) */}
+                    <div className="h-full hidden md:block">
+                        <LiveMinutesSidebar
+                            sessionId={session.id}
+                            isAdmin={isAdmin}
+                            liveInterimText={interimTranscript}
+                            liveSpeakerName={user.name}
+                        />
+                    </div>
                 </div>
 
                 <style jsx global>{`
