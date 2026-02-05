@@ -52,8 +52,11 @@ export default function AdminLiveRoomClient({ session }: Props) {
         if (!jitsiApi) return;
 
         const handleAudioMuteStatusChanged = ({ muted }: { muted: boolean }) => {
-            console.log(`🎤 [AdminLiveRoomClient] Local audio muted: ${muted}`);
-            setIsLocalAudioMuted(muted);
+            setIsLocalAudioMuted(prev => {
+                if (prev === muted) return prev;
+                console.log(`🎤 [AdminLiveRoomClient] Local audio muted changed: ${muted}`);
+                return muted;
+            });
         };
 
         // Listen for mute events
@@ -86,12 +89,6 @@ export default function AdminLiveRoomClient({ session }: Props) {
     // 1. Audio is NOT globally disabled by settings
     // 2. AND Local admin microphone is NOT muted
     const transcriptionActive = (modSettings ? !modSettings.disableAudio : true) && !isLocalAudioMuted;
-    console.log(`🔍 [AdminLiveRoomClient] About to call useDistributedTranscription with:`, {
-        sessionId: session.id,
-        userName: 'Admin (Host)',
-        isActive: transcriptionActive,
-        modSettings
-    });
 
     const { interimTranscript } = useDistributedTranscription({
         sessionId: session.id,
