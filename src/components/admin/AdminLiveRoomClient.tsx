@@ -45,6 +45,7 @@ export default function AdminLiveRoomClient({ session }: Props) {
     const [updating, setUpdating] = useState(false);
     const [showMobileSidebar, setShowMobileSidebar] = useState(false);
     const [isLocalAudioMuted, setIsLocalAudioMuted] = useState(true); // Start muted by default
+    const [selectedLang, setSelectedLang] = useState<'en-IN' | 'ta-IN'>('en-IN');
 
     // Track local audio mute state from Jitsi
     useEffect(() => {
@@ -95,7 +96,8 @@ export default function AdminLiveRoomClient({ session }: Props) {
     const { interimTranscript } = useDistributedTranscription({
         sessionId: session.id,
         userName: 'Admin (Host)',
-        isActive: transcriptionActive
+        isActive: transcriptionActive,
+        lang: selectedLang
     });
 
     // Push settings to DB whenever they change
@@ -223,6 +225,22 @@ export default function AdminLiveRoomClient({ session }: Props) {
                     >
                         <Menu size={20} />
                     </button>
+
+                    {/* Language Toggle */}
+                    <div className="hidden sm:flex items-center bg-gray-100 rounded-xl p-1 border border-gray-200">
+                        <button
+                            onClick={() => setSelectedLang('en-IN')}
+                            className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${selectedLang === 'en-IN' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
+                        >
+                            English/Mixed
+                        </button>
+                        <button
+                            onClick={() => setSelectedLang('ta-IN')}
+                            className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${selectedLang === 'ta-IN' ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
+                        >
+                            Tamil
+                        </button>
+                    </div>
                     <div className="hidden md:flex flex-col items-end mr-4">
                         <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Room Name (Secure)</span>
                         <span className="text-[10px] font-bold text-gray-900 font-mono truncate max-w-[150px]">{roomName}</span>
