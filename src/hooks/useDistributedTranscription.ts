@@ -61,7 +61,7 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
         }
 
         recognition.continuous = true;
-        recognition.interimResults = false; // independent transcription needs complete sentences usually
+        recognition.interimResults = true; // Show live transcription while speaking
         recognition.lang = 'en-US';
 
         recognition.onstart = () => {
@@ -90,9 +90,17 @@ export function useDistributedTranscription({ sessionId, userName, isActive }: P
 
         recognition.onresult = async (event: any) => {
             const result = event.results[event.resultIndex];
+            const transcript = result[0].transcript.trim();
+
+            // Show interim results live (while speaking)
+            if (!result.isFinal) {
+                console.log(`💬 [Distributed Transcription] Interim from ${userName}: "${transcript}"`);
+                // You could show this in UI with a different style (grayed out, italic, etc.)
+            }
+
+            // Send only final results to server
             if (result.isFinal) {
-                const transcript = result[0].transcript.trim();
-                console.log(`📝 [Distributed Transcription] Captured from ${userName}: "${transcript}"`);
+                console.log(`📝 [Distributed Transcription] Final from ${userName}: "${transcript}"`);
 
                 // Filter out short noise (less than 2 chars)
                 if (transcript && transcript.length > 1) {
