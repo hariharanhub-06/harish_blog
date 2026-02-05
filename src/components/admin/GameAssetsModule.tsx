@@ -31,7 +31,7 @@ export default function GameAssetsModule() {
     const [newAssetUrl, setNewAssetUrl] = useState("");
 
     const games = [
-        { id: "memory", name: "Memory Card", minAssets: 8 },
+        { id: "memory", name: "Memory Card", minAssets: 12 },
         { id: "puzzle", name: "Picture Puzzle", minAssets: 3 }
     ];
 

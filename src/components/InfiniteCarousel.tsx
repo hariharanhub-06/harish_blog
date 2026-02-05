@@ -17,6 +17,13 @@ export function InfiniteCarousel({
     const [scrollLeftState, setScrollLeftState] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        if (containerRef.current) {
+            const { scrollWidth } = containerRef.current;
+            containerRef.current.scrollLeft = scrollWidth / 4; // Start in the middle of set 1/2
+        }
+    }, [items]);
+
     const handleScroll = () => {
         if (!containerRef.current) return;
         const { scrollLeft, scrollWidth } = containerRef.current;
@@ -25,7 +32,7 @@ export function InfiniteCarousel({
         if (scrollLeft <= 0) {
             containerRef.current.scrollLeft = halfWidth;
         } else if (scrollLeft >= halfWidth) {
-            containerRef.current.scrollLeft = 0;
+            containerRef.current.scrollLeft = 1; // 1 to avoid sticking at 0 if multiple scroll events fire
         }
     };
 
