@@ -73,13 +73,13 @@ export default function GamesCarousel({ onPlayGame }: GamesCarouselProps) {
             </div>
 
             <div className="w-full relative">
-                {/* Horizontal Carousel */}
-                <div className="flex overflow-x-auto gap-6 px-6 py-4 scrollbar-hide snap-x snap-mandatory justify-center">
-                    {GAMES.map((game) => (
+                <InfiniteCarousel
+                    speed={25}
+                    items={GAMES.map((game) => (
                         <motion.div
                             key={game.id}
                             whileHover={{ y: -10 }}
-                            className="shrink-0 w-[280px] md:w-[350px] snap-center"
+                            className="shrink-0 w-[280px] md:w-[350px]"
                         >
                             <div className="group relative bg-[#1a1a1a] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl hover:border-white/20 transition-all duration-500 flex flex-col h-full">
                                 <div className="h-40 relative overflow-hidden">
@@ -119,7 +119,7 @@ export default function GamesCarousel({ onPlayGame }: GamesCarouselProps) {
                             </div>
                         </motion.div>
                     ))}
-                </div>
+                />
             </div>
 
             <style jsx>{`
