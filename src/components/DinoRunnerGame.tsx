@@ -10,7 +10,10 @@ import {
     Gamepad2,
     Mountain,
     Flame,
-    Play
+    Play,
+    Send,
+    CheckCircle2,
+    Loader2
 } from "lucide-react";
 
 interface Obstacle {
@@ -27,6 +30,9 @@ export default function DinoRunnerGame() {
     const [highScore, setHighScore] = useState(0);
     const [obstacles, setObstacles] = useState<Obstacle[]>([]);
     const [isJumping, setIsJumping] = useState(false);
+    const [userName, setUserName] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
 
     // Refs for Game Loop (No Re-renders)
     const dinoRef = useRef<HTMLDivElement>(null);
@@ -39,7 +45,7 @@ export default function DinoRunnerGame() {
         dinoY: 0,
         velocity: 0,
         score: 0,
-        gameSpeed: 8,
+        gameSpeed: 10, // Intermediate speed
         lastSpawn: 0,
         isJumping: false,
         obstacles: [] as Obstacle[], // Logic source of truth
@@ -63,7 +69,7 @@ export default function DinoRunnerGame() {
     }, [gameState]);
 
     const spawnObstacle = (time: number) => {
-        const minGap = 1200;
+        const minGap = 1000;
         const randomGap = Math.random() * 800;
         const { lastSpawn } = stateRef.current;
 
@@ -76,11 +82,9 @@ export default function DinoRunnerGame() {
                 height: 40 + Math.random() * 40
             };
 
-            // Update Logic Ref
             stateRef.current.obstacles.push(newObstacle);
             stateRef.current.lastSpawn = time;
 
-            // Trigger React Render for DOM mount only
             setObstacles(prev => [...prev, newObstacle]);
         }
     };
@@ -89,17 +93,11 @@ export default function DinoRunnerGame() {
         if (stateRef.current.status !== "playing") return;
 
         const state = stateRef.current;
-
-        // Calculate Delta Time (dt)
-        // Normalize to target 60 FPS (approx 16.67ms per frame)
-        // If 144Hz: time diff is ~7ms -> dt ≈ 0.42 (Game runs slower per frame, keeping same real-time speed)
-        // If 60Hz: time diff is ~16ms -> dt ≈ 1.0
         const now = time;
         const lastTime = state.lastFrameTime || now;
-        const dt = Math.min((now - lastTime) / 16.67, 2.0); // Cap at 2.0 to prevent huge jumps on lag spike
+        const dt = Math.min((now - lastTime) / 16.67, 2.0);
         state.lastFrameTime = now;
 
-        // 1. Physics (Dino) - Scaled by dt
         state.velocity += gravity * dt;
         state.dinoY += state.velocity * dt;
 
@@ -112,23 +110,19 @@ export default function DinoRunnerGame() {
             }
         }
 
-        // 2. Physics (Obstacles) - Scaled by dt
         state.obstacles.forEach(o => {
             o.x -= state.gameSpeed * dt;
         });
 
-        // 3. Cleanup Off-screen
         if (state.obstacles.length > 0 && state.obstacles[0].x < -100) {
             const removed = state.obstacles.shift();
-            // Trigger React Render to remove from DOM
             setObstacles(prev => prev.filter(o => o.id !== removed?.id));
             obstacleRefs.current.delete(removed!.id);
         }
 
-        // 4. Collision Detection
         const dinoRect = {
             left: 50 + 10,
-            right: 50 + 30, // Narrower hitbox
+            right: 50 + 30,
             bottom: state.dinoY,
             top: state.dinoY + 50
         };
@@ -151,13 +145,10 @@ export default function DinoRunnerGame() {
             }
         }
 
-        // 5. Render Updates (Direct DOM - No React Render)
-        // Dino
         if (dinoRef.current) {
             dinoRef.current.style.transform = `translateY(${-state.dinoY}px)`;
         }
 
-        // Obstacles
         state.obstacles.forEach(o => {
             const el = obstacleRefs.current.get(o.id);
             if (el) {
@@ -165,20 +156,18 @@ export default function DinoRunnerGame() {
             }
         });
 
-        // Score
-        state.score += 1 * dt; // Score based on time/distance
+        state.score += 1 * dt;
         if (scoreElemRef.current && Math.floor(state.score) % 5 === 0) {
             scoreElemRef.current.textContent = Math.floor(state.score).toString();
         }
 
-        // Loop
         spawnObstacle(time);
         requestRef.current = requestAnimationFrame(update);
     };
 
     const jump = useCallback(() => {
         if (stateRef.current.status !== "playing") return;
-        if (stateRef.current.dinoY <= groundY + 1) { // Tolerance
+        if (stateRef.current.dinoY <= groundY + 1) {
             stateRef.current.velocity = jumpPower;
             stateRef.current.isJumping = true;
             setIsJumping(true);
@@ -186,12 +175,11 @@ export default function DinoRunnerGame() {
     }, []);
 
     const startGame = () => {
-        // Reset State Ref
         stateRef.current = {
             dinoY: 0,
             velocity: 0,
             score: 0,
-            gameSpeed: 8,
+            gameSpeed: 10,
             lastSpawn: performance.now(),
             isJumping: false,
             obstacles: [],
@@ -199,11 +187,12 @@ export default function DinoRunnerGame() {
             lastFrameTime: performance.now()
         };
 
-        // Reset Logic
         obstacleRefs.current.clear();
-        setObstacles([]); // Clear DOM
+        setObstacles([]);
         setScore(0);
         setGameState("playing");
+        setSubmitted(false);
+        setUserName("");
 
         if (requestRef.current) cancelAnimationFrame(requestRef.current);
         requestRef.current = requestAnimationFrame(update);
@@ -212,13 +201,33 @@ export default function DinoRunnerGame() {
     const gameOver = () => {
         setGameState("gameover");
         stateRef.current.status = "gameover";
-        setScore(stateRef.current.score); // Sync final score
+        setScore(Math.floor(stateRef.current.score));
 
         if (requestRef.current) cancelAnimationFrame(requestRef.current);
 
         if (stateRef.current.score > highScore) {
-            setHighScore(stateRef.current.score);
-            localStorage.setItem("dino-ultra-score", stateRef.current.score.toString());
+            setHighScore(Math.floor(stateRef.current.score));
+            localStorage.setItem("dino-ultra-score", Math.floor(stateRef.current.score).toString());
+        }
+    };
+
+    const submitScore = async () => {
+        if (!userName.trim() || submitting || submitted) return;
+        setSubmitting(true);
+        try {
+            await fetch("/api/games/leaderboard", {
+                method: "POST",
+                body: JSON.stringify({
+                    gameId: "dino",
+                    userName,
+                    score: Math.floor(stateRef.current.score),
+                })
+            });
+            setSubmitted(true);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -230,30 +239,29 @@ export default function DinoRunnerGame() {
                 e.preventDefault();
                 if (stateRef.current.status === "playing") {
                     jump();
-                } else {
+                } else if (stateRef.current.status === "idle" || (stateRef.current.status === "gameover" && !submitted)) {
                     startGame();
                 }
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [jump]);
+    }, [jump, submitted]);
 
     return (
         <section id="dino-runner" className="py-12 md:py-16 px-4 md:px-6 bg-[#0a0a0a] relative overflow-hidden flex flex-col items-center justify-center min-h-[600px] md:min-h-[750px]">
             <div className="text-center mb-4 md:mb-8 space-y-2 md:space-y-4 px-4 w-full">
                 <span className="text-emerald-500 font-bold tracking-[0.3em] md:tracking-[0.5em] uppercase text-[9px] md:text-[10px] animate-pulse block">Retro Arcade</span>
-                <h2 className="text-[12vw] md:text-7xl font-black text-white tracking-widest uppercase italic leading-none">
+                <h2 className="text-[10vw] md:text-6xl font-black text-white tracking-widest uppercase italic leading-none">
                     Pixel <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Jump</span>
                 </h2>
-                <p className="text-gray-500 font-medium text-[8px] md:text-[10px] uppercase tracking-widest">A tribute to the classics • Jump over obstacles</p>
+                <p className="text-gray-500 font-medium text-[8px] md:text-[10px] uppercase tracking-widest">Speed Level: <span className="text-white">Intermediate</span></p>
             </div>
 
             <div
-                onClick={gameState === "playing" ? jump : startGame}
-                className="relative w-full max-w-[800px] h-64 bg-[#111] rounded-3xl border border-white/10 overflow-hidden cursor-pointer shadow-2xl"
+                onClick={gameState === "playing" ? jump : undefined}
+                className="relative w-full max-w-[800px] h-64 bg-[#111] rounded-[2.5rem] border border-white/10 overflow-hidden cursor-pointer shadow-2xl"
             >
-                {/* Background Decoration */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none">
                     <Cloud className="absolute top-10 left-20 text-white" size={40} />
                     <Cloud className="absolute top-5 left-[60%] text-white" size={30} />
@@ -266,35 +274,62 @@ export default function DinoRunnerGame() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-md"
+                            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-xl p-8"
                         >
                             {gameState === "gameover" ? (
-                                <>
-                                    <h3 className="text-2xl md:text-4xl font-black text-rose-500 tracking-tighter mb-1 italic">GAME OVER</h3>
-                                    <div className="flex gap-4 md:gap-6 mb-4 md:mb-6 mt-1">
+                                <motion.div initial={{ y: 20 }} animate={{ y: 0 }} className="w-full max-w-sm text-center">
+                                    <h3 className="text-4xl font-black text-rose-500 tracking-tighter mb-4 italic">CRASHED!</h3>
+                                    <div className="flex gap-10 justify-center mb-8 bg-white/5 border border-white/10 p-4 rounded-2xl">
                                         <div className="text-center">
-                                            <p className="text-[8px] md:text-[9px] uppercase tracking-widest text-gray-400">Distance</p>
-                                            <p className="text-xl md:text-2xl font-black text-white">{score}</p>
+                                            <p className="text-[8px] uppercase tracking-widest text-white/30 mb-1">Score</p>
+                                            <p className="text-3xl font-black text-white">{score}</p>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-[8px] md:text-[9px] uppercase tracking-widest text-gray-400">Record</p>
-                                            <p className="text-xl md:text-2xl font-black text-emerald-400">{highScore}</p>
+                                            <p className="text-[8px] uppercase tracking-widest text-white/30 mb-1">Best</p>
+                                            <p className="text-3xl font-black text-emerald-400">{highScore}</p>
                                         </div>
                                     </div>
-                                    <button className="flex items-center gap-2 px-6 md:px-8 py-2 md:py-3 bg-white text-black rounded-xl font-black uppercase text-[10px] md:text-xs tracking-widest active:scale-95 transition-transform">
-                                        <RefreshCcw size={14} /> Try Again
-                                    </button>
-                                </>
+
+                                    {!submitted ? (
+                                        <div className="space-y-4">
+                                            <input
+                                                type="text"
+                                                placeholder="Player Name"
+                                                value={userName}
+                                                onChange={(e) => setUserName(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-black text-xs uppercase text-center outline-none focus:border-primary transition-all"
+                                            />
+                                            <div className="flex gap-3">
+                                                <button onClick={startGame} className="flex-1 px-4 py-3 bg-white/5 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 border border-white/10">
+                                                    <RefreshCcw size={14} /> Retry
+                                                </button>
+                                                <button
+                                                    onClick={submitScore}
+                                                    disabled={!userName.trim() || submitting}
+                                                    className="flex-1 px-4 py-3 bg-emerald-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                                >
+                                                    {submitting ? <Loader2 className="animate-spin" size={14} /> : <Send size={14} />} Post
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-4 text-emerald-400">
+                                            <CheckCircle2 size={40} />
+                                            <p className="font-black uppercase tracking-widest text-xs">Ranked on Leaderboard!</p>
+                                            <button onClick={startGame} className="mt-4 px-10 py-3 bg-white text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-emerald-500 hover:text-white transition-all">New Run</button>
+                                        </div>
+                                    )}
+                                </motion.div>
                             ) : (
                                 <>
-                                    <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mb-6">
-                                        <Gamepad2 size={32} className="text-emerald-400" />
+                                    <div className="w-20 h-20 rounded-[2rem] bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mb-8">
+                                        <Gamepad2 size={40} className="text-emerald-400" />
                                     </div>
-                                    <p className="text-xs text-white/60 mb-8 max-w-[250px] text-center uppercase tracking-widest leading-loose">
-                                        Press <b>Space</b> or <b>Click</b> to jump and start the run.
+                                    <p className="text-xs text-white/60 mb-10 max-w-[250px] text-center uppercase tracking-[0.2em] leading-loose">
+                                        <b>Space</b> to Jump • <b>Click</b> to Play
                                     </p>
-                                    <button className="flex items-center gap-2 px-10 py-4 bg-emerald-500 text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-xl shadow-emerald-500/20">
-                                        <Play size={16} className="fill-current" /> Start Run
+                                    <button onClick={startGame} className="flex items-center gap-2 px-12 py-4 bg-emerald-500 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all">
+                                        <Play size={18} className="fill-current" /> Start Run
                                     </button>
                                 </>
                             )}
@@ -302,10 +337,8 @@ export default function DinoRunnerGame() {
                     )}
                 </AnimatePresence>
 
-                {/* Game Track */}
-                <div className="absolute bottom-10 left-0 w-full h-[2px] bg-white/20"></div>
+                <div className="absolute bottom-10 left-0 w-full h-[2px] bg-white/10"></div>
 
-                {/* Dino - Hardware Accelerated */}
                 <div
                     ref={dinoRef}
                     style={{
@@ -322,13 +355,12 @@ export default function DinoRunnerGame() {
                         <div className="absolute top-2 right-2 w-2 h-2 bg-black rounded-full" />
                         <div className="absolute top-6 right-0 w-4 h-1 bg-black/20" />
                         <div className="flex gap-2 mb-[-5px]">
-                            <div className="w-3 h-4 bg-emerald-600 rounded-sm" />
-                            <div className="w-3 h-4 bg-emerald-600 rounded-sm" />
+                            <motion.div animate={{ height: isJumping ? 4 : [4, 6, 4] }} transition={{ repeat: Infinity, duration: 0.2 }} className="w-3 bg-emerald-600 rounded-sm" />
+                            <motion.div animate={{ height: isJumping ? 4 : [6, 4, 6] }} transition={{ repeat: Infinity, duration: 0.2 }} className="w-3 bg-emerald-600 rounded-sm" />
                         </div>
                     </div>
                 </div>
 
-                {/* Obstacles (Cacti) - DOM Nodes managed by React, Positions managed by Ref/Loop */}
                 {obstacles.map(o => (
                     <div
                         key={o.id}
@@ -338,12 +370,12 @@ export default function DinoRunnerGame() {
                         }}
                         style={{
                             position: 'absolute',
-                            left: 0, // Reset default left, use transform
-                            bottom: 42,
+                            left: 0,
+                            bottom: 41,
                             width: o.width,
                             height: o.height,
                             willChange: 'transform',
-                            transform: `translate3d(${o.x}px, 0, 0)` // Initial position
+                            transform: `translate3d(${o.x}px, 0, 0)`
                         }}
                         className="flex items-end gap-1"
                     >
@@ -354,33 +386,32 @@ export default function DinoRunnerGame() {
                     </div>
                 ))}
 
-                {/* Score - Direct DOM Update */}
                 {gameState !== "idle" && (
-                    <div className="absolute top-6 right-8 flex gap-6">
+                    <div className="absolute top-6 right-8 flex gap-8 p-3 bg-black/40 backdrop-blur-md rounded-2xl border border-white/5">
                         <div className="text-right">
-                            <p className="text-[9px] font-black uppercase text-white/30 tracking-widest">Hi-Score</p>
-                            <p className="text-xl font-black text-white tabular-nums opacity-50">{highScore}</p>
+                            <p className="text-[8px] font-black uppercase text-white/30 tracking-widest">Hi-Score</p>
+                            <p className="text-lg font-black text-white tabular-nums opacity-50">{highScore}</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-[9px] font-black uppercase text-white/30 tracking-widest">Score</p>
-                            <p ref={scoreElemRef} className="text-xl font-black text-emerald-400 tabular-nums">0</p>
+                            <p className="text-[8px] font-black uppercase text-white/30 tracking-widest">Distance</p>
+                            <p ref={scoreElemRef} className="text-lg font-black text-emerald-400 tabular-nums">0</p>
                         </div>
                     </div>
                 )}
             </div>
 
-            <div className="mt-4 md:mt-8 flex flex-wrap justify-center gap-4 md:gap-8 px-6">
-                <div className="px-4 md:px-6 py-2 md:py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
+            <div className="mt-8 flex flex-wrap justify-center gap-6 px-6">
+                <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
                     <Flame className="text-orange-500" size={14} />
-                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/60">Fast Paced</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Fast Paced</span>
                 </div>
-                <div className="px-4 md:px-6 py-2 md:py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
+                <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
                     <Trophy className="text-yellow-500" size={14} />
-                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/60">Skill Based</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Skill Based</span>
                 </div>
-                <div className="px-4 md:px-6 py-2 md:py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
+                <div className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3">
                     <Zap className="text-blue-500" size={14} />
-                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/60">Infinite Run</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Infinite Run</span>
                 </div>
             </div>
         </section>

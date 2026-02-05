@@ -61,13 +61,22 @@ export function InfiniteCarousel({
         let animationFrameId: number;
         const drift = () => {
             if (containerRef.current && !isPaused && !isDragging) {
-                containerRef.current.scrollLeft += 1.0; // Increased speed (20%+)
+                containerRef.current.scrollLeft += 0.8;
             }
             animationFrameId = requestAnimationFrame(drift);
         };
         animationFrameId = requestAnimationFrame(drift);
         return () => cancelAnimationFrame(animationFrameId);
     }, [isPaused, isDragging]);
+
+    const handleTouchStart = () => {
+        setIsPaused(true);
+    };
+
+    const handleTouchEnd = () => {
+        // Keep paused for 2 seconds after touch to allow momentum to settle
+        setTimeout(() => setIsPaused(false), 2000);
+    };
 
     // Base items repeated enough to fill width
     const displayItems = items.length > 0
@@ -87,8 +96,8 @@ export function InfiniteCarousel({
                 onMouseDown={handleMouseDown}
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
-                onTouchStart={() => setIsPaused(true)}
-                onTouchEnd={() => setIsPaused(false)}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
                 style={{
                     WebkitOverflowScrolling: 'touch'
                 }}

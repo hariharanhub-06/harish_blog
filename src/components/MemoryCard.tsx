@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCcw, Trophy, Brain, Flame, Star, Zap, Heart, Music } from "lucide-react";
+import { RefreshCcw, Trophy, Brain, Flame, Star, Zap, Heart, Music, Rocket, Globe, Cpu, Cloud, Database, Send, CheckCircle2, Loader2 } from "lucide-react";
 import Image from "next/image";
 
 interface Card {
@@ -14,11 +14,12 @@ interface Card {
     color: string;
 }
 
-const ICONS = [Brain, Flame, Star, Zap, Heart, Music, Trophy, RefreshCcw];
+const ICONS = [Brain, Flame, Star, Zap, Heart, Music, Rocket, Globe, Cpu, Cloud, Database, Trophy];
 const COLORS = [
     "text-blue-500", "text-orange-500", "text-purple-500",
     "text-emerald-500", "text-pink-500", "text-amber-500",
-    "text-cyan-500", "text-indigo-500"
+    "text-cyan-500", "text-indigo-500", "text-rose-500",
+    "text-teal-500", "text-violet-500", "text-yellow-500"
 ];
 
 export default function MemoryCard() {
@@ -28,6 +29,12 @@ export default function MemoryCard() {
     const [moves, setMoves] = useState(0);
     const [matches, setMatches] = useState(0);
     const [isLocked, setIsLocked] = useState(false);
+    const [userName, setUserName] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [startTime, setStartTime] = useState<number>(Date.now());
+
+    const totalPairs = 12; // Intermediate level: 24 cards
 
     useEffect(() => {
         const fetchAssets = async () => {
@@ -47,17 +54,17 @@ export default function MemoryCard() {
     const initializeGame = useCallback(() => {
         let cardBase: any[] = [];
 
-        if (assets.length >= 8) {
+        if (assets.length >= totalPairs) {
             // Use custom images
-            cardBase = assets.slice(0, 8).map((url, index) => ({
+            cardBase = assets.slice(0, totalPairs).map((url, index) => ({
                 imageUrl: url,
                 color: COLORS[index % COLORS.length]
             }));
         } else {
             // Use icons fallback
-            cardBase = ICONS.map((Icon, index) => ({
+            cardBase = ICONS.slice(0, totalPairs).map((Icon, index) => ({
                 icon: Icon,
-                color: COLORS[index]
+                color: COLORS[index % COLORS.length]
             }));
         }
 
@@ -75,7 +82,10 @@ export default function MemoryCard() {
         setMoves(0);
         setMatches(0);
         setIsLocked(false);
-    }, [assets]);
+        setSubmitted(false);
+        setUserName("");
+        setStartTime(Date.now());
+    }, [assets, totalPairs]);
 
     useEffect(() => {
         initializeGame();
@@ -101,7 +111,6 @@ export default function MemoryCard() {
                 : cards[firstId].icon === cards[secondId].icon;
 
             if (isMatch) {
-                // Match found
                 setTimeout(() => {
                     setCards(prev => {
                         const updated = [...prev];
@@ -114,7 +123,6 @@ export default function MemoryCard() {
                     setIsLocked(false);
                 }, 300);
             } else {
-                // No match
                 setTimeout(() => {
                     setCards(prev => {
                         const updated = [...prev];
@@ -129,31 +137,58 @@ export default function MemoryCard() {
         }
     };
 
-    const isGameComplete = matches === ICONS.length;
+    const submitScore = async () => {
+        if (!userName.trim() || submitting || submitted) return;
+        setSubmitting(true);
+        try {
+            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+            // Score formula: Base (5000) - moves penalty - time penalty
+            const score = Math.max(100, 5000 - (moves * 20) - timeTaken);
+
+            await fetch("/api/games/leaderboard", {
+                method: "POST",
+                body: JSON.stringify({
+                    gameId: "memory",
+                    userName,
+                    score,
+                    moves,
+                    timeTaken
+                })
+            });
+            setSubmitted(true);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const isGameComplete = matches === totalPairs;
 
     return (
         <div className="flex flex-col items-center justify-center p-4 md:p-8 h-full">
             <div className="text-center mb-6">
                 <h3 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
-                    Memory <span className="text-emerald-500">Card</span>
+                    Memory <span className="text-primary italic">Expert</span>
                 </h3>
-                <div className="flex gap-6 justify-center">
+                <div className="flex gap-8 justify-center items-center">
                     <div className="text-center">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Moves</p>
-                        <p className="text-2xl font-black text-white">{moves}</p>
+                        <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30 mb-1">Moves</p>
+                        <p className="text-xl font-black text-white">{moves}</p>
                     </div>
+                    <div className="h-4 w-px bg-white/10" />
                     <div className="text-center">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Matches</p>
-                        <p className="text-2xl font-black text-emerald-500">{matches}/{ICONS.length}</p>
+                        <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30 mb-1">Matches</p>
+                        <p className="text-xl font-black text-primary">{matches}<span className="text-white/20">/{totalPairs}</span></p>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-3 max-w-sm md:max-w-md">
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 md:gap-3 max-w-2xl mx-auto p-3 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl backdrop-blur-xl">
                 {cards.map((card) => (
                     <div
                         key={card.id}
-                        className="relative w-16 h-16 md:w-24 md:h-24 perspective-1000 cursor-pointer"
+                        className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 perspective-1000 cursor-pointer"
                         onClick={() => handleCardClick(card.id)}
                     >
                         <motion.div
@@ -162,20 +197,22 @@ export default function MemoryCard() {
                             style={{ transformStyle: "preserve-3d" }}
                             className="w-full h-full relative"
                         >
-                            {/* Card Front (Back of game card) */}
-                            <div className="absolute inset-0 backface-hidden bg-white/5 border border-white/10 rounded-xl flex items-center justify-center">
-                                <Brain size={24} className="text-white/10" />
+                            <div className="absolute inset-0 backface-hidden bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center overflow-hidden">
+                                <Brain size={24} className="text-white/5" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
                             </div>
 
-                            {/* Card Back (Icon or Image of game card) */}
                             <div
-                                className={`absolute inset-0 backface-hidden rotateY-180 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center overflow-hidden ${card.isMatched ? "bg-emerald-500/10 border-emerald-500/30" : ""}`}
+                                className={`absolute inset-0 backface-hidden rotateY-180 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center overflow-hidden ${card.isMatched ? "ring-2 ring-emerald-500/50" : ""}`}
                             >
                                 {card.imageUrl ? (
                                     <Image src={card.imageUrl} alt="Card" fill className="object-cover" />
                                 ) : (
                                     card.icon && <card.icon size={32} className={card.color} strokeWidth={3} />
                                 )}
+                                {card.isMatched && <div className="absolute inset-0 bg-emerald-500/10 flex items-center justify-center">
+                                    <CheckCircle2 size={24} className="text-emerald-500 opacity-40" />
+                                </div>}
                             </div>
                         </motion.div>
                     </div>
@@ -185,45 +222,66 @@ export default function MemoryCard() {
             <AnimatePresence>
                 {isGameComplete && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="mt-8 text-center"
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl"
                     >
-                        <div className="flex flex-col items-center gap-2 mb-6">
-                            <Trophy size={48} className="text-emerald-500 animate-bounce" />
-                            <p className="text-2xl font-black text-white uppercase tracking-tighter italic">Well Done!</p>
-                            <p className="text-sm font-bold text-white/60">You completed it in {moves} moves.</p>
+                        <div className="bg-[#1a1a1a] border border-white/10 p-10 rounded-[3rem] max-w-sm w-full text-center shadow-2xl relative">
+                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center border border-primary/20 backdrop-blur-xl">
+                                <Trophy size={48} className="text-primary animate-bounce" />
+                            </div>
+
+                            <h4 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-2 mt-4">Brainiac!</h4>
+                            <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-8">Cleared {totalPairs} pairs in {moves} moves</p>
+
+                            {!submitted ? (
+                                <div className="space-y-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter Player Name"
+                                        value={userName}
+                                        onChange={(e) => setUserName(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-black text-sm uppercase tracking-widest outline-none focus:border-primary transition-all text-center"
+                                    />
+                                    <button
+                                        onClick={submitScore}
+                                        disabled={!userName.trim() || submitting}
+                                        className="w-full py-4 bg-primary text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:scale-105 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        {submitting ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
+                                        Submit Score
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center gap-4 text-emerald-400">
+                                    <CheckCircle2 size={48} />
+                                    <span className="text-xs font-black uppercase tracking-widest">Global Ranking Updated!</span>
+                                    <button
+                                        onClick={initializeGame}
+                                        className="mt-6 w-full py-4 bg-white text-black rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-primary hover:text-white transition-all"
+                                    >
+                                        <RefreshCcw size={16} className="inline mr-2" /> Play Again
+                                    </button>
+                                </div>
+                            )}
+
+                            {!submitted && (
+                                <button
+                                    onClick={initializeGame}
+                                    className="mt-6 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white transition-all"
+                                >
+                                    Dismiss
+                                </button>
+                            )}
                         </div>
-                        <button
-                            onClick={initializeGame}
-                            className="inline-flex items-center gap-2 px-8 py-3 bg-white text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-emerald-500 hover:text-white transition-all shadow-xl shadow-white/5"
-                        >
-                            <RefreshCcw size={16} /> Play Again
-                        </button>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {!isGameComplete && moves > 0 && (
-                <button
-                    onClick={initializeGame}
-                    className="mt-8 flex items-center gap-2 text-white/40 hover:text-white transition-colors text-[10px] font-black uppercase tracking-[0.2em]"
-                >
-                    <RefreshCcw size={12} /> Restart Game
-                </button>
-            )}
-
             <style jsx global>{`
-                .perspective-1000 {
-                    perspective: 1000px;
-                }
-                .backface-hidden {
-                    backface-visibility: hidden;
-                    -webkit-backface-visibility: hidden;
-                }
-                .rotateY-180 {
-                    transform: rotateY(180deg);
-                }
+                .perspective-1000 { perspective: 1000px; }
+                .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+                .rotateY-180 { transform: rotateY(180deg); }
             `}</style>
         </div>
     );

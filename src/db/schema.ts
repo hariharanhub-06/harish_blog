@@ -693,3 +693,13 @@ export const gameAssets = pgTable("game_assets", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const gameScores = pgTable("game_scores", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  gameId: text("game_id").notNull(), // 'dino', 'tictactoe', 'memory', 'puzzle', 'scramble'
+  userName: text("user_name").notNull(),
+  score: integer("score").default(0),
+  moves: integer("moves"),
+  timeTaken: integer("time_taken"), // in seconds
+  createdAt: timestamp("created_at").defaultNow(),
+});
