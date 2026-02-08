@@ -67,7 +67,7 @@ export default function OverviewModule() {
             if (messagesRes.ok) {
                 const data = await messagesRes.json();
                 setRecentMessages(data.slice(0, 5));
-                setStats(prev => ({ ...prev, unreadMessages: data.filter((m: any) => m.status === 'Fresh').length }));
+                setStats(prev => ({ ...prev, unreadMessages: data.filter((m: any) => m.status === 'New').length }));
             }
         } catch (err) {
             console.error("Failed to fetch dashboard data", err);
@@ -295,9 +295,9 @@ export default function OverviewModule() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${msg.status === 'Fresh' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-400'
+                                <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${msg.status === 'New' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-400'
                                     }`}>
-                                    {msg.status || 'Fresh'}
+                                    {msg.status || 'New'}
                                 </span>
                                 <div className="p-1.5 rounded-lg bg-gray-50 group-hover:bg-primary group-hover:text-white transition-all text-gray-300">
                                     <ArrowRight size={12} />

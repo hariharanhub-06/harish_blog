@@ -10,7 +10,7 @@ export async function GET() {
         const [result] = await db
             .select({ value: count() })
             .from(contactSubmissions)
-            .where(eq(contactSubmissions.status, "Fresh"));
+            .where(eq(contactSubmissions.status, "New"));
 
         return NextResponse.json({ count: result.value });
     } catch (error) {

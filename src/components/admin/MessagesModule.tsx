@@ -16,8 +16,11 @@ import {
     Eye,
     MessageCircle,
     Edit3,
-    RefreshCcw
+    RefreshCcw,
+    CheckCircle2,
+    Calculator as CalculatorIcon
 } from "lucide-react";
+import PricingCalculator from "./PricingCalculator";
 
 export default function MessagesModule() {
     const [messages, setMessages] = useState<any[]>([]);
@@ -25,6 +28,7 @@ export default function MessagesModule() {
     const [fetching, setFetching] = useState(true);
     const [viewing, setViewing] = useState<any>(null);
     const [editing, setEditing] = useState<any>(null);
+    const [showCalculator, setShowCalculator] = useState(false);
     const [updating, setUpdating] = useState(false);
 
     // Filter States
@@ -42,13 +46,27 @@ export default function MessagesModule() {
     ];
 
     const defaultStatuses = [
-        "Fresh",
-        "RNR",
-        "Call Connected",
-        "On Process",
-        "On Discussion",
-        "Delivered"
+        "New",
+        "Contacted",
+        "Qualified",
+        "Consultation Scheduled",
+        "Proposal Sent",
+        "Won",
+        "Lost"
     ];
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "New": return "bg-blue-50 text-blue-600 border-blue-100";
+            case "Contacted": return "bg-cyan-50 text-cyan-600 border-cyan-100";
+            case "Qualified": return "bg-purple-50 text-purple-600 border-purple-100";
+            case "Consultation Scheduled": return "bg-indigo-50 text-indigo-600 border-indigo-100";
+            case "Proposal Sent": return "bg-amber-50 text-amber-600 border-amber-100";
+            case "Won": return "bg-emerald-50 text-emerald-600 border-emerald-100 text-emerald-700";
+            case "Lost": return "bg-red-50 text-red-600 border-red-100";
+            default: return "bg-gray-50 text-gray-500 border-gray-100";
+        }
+    };
 
     useEffect(() => {
         fetchMessages();
@@ -90,21 +108,25 @@ export default function MessagesModule() {
         if (res.ok) fetchMessages();
     };
 
-    const handleUpdate = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleUpdate = async (e?: React.FormEvent, updateData?: any) => {
+        if (e) e.preventDefault();
         setUpdating(true);
         try {
+            const payload = updateData || {
+                id: editing.id,
+                category: editing.category,
+                status: editing.status,
+                adminNotes: editing.adminNotes
+            };
+
             const res = await fetch("/api/admin/messages", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id: editing.id,
-                    category: editing.category,
-                    status: editing.status
-                }),
+                body: JSON.stringify(payload),
             });
             if (res.ok) {
                 setEditing(null);
+                setViewing(null);
                 fetchMessages();
             } else {
                 const err = await res.json();
@@ -118,8 +140,45 @@ export default function MessagesModule() {
         }
     };
 
+    const handleConvertToProject = async (msg: any) => {
+        if (!confirm(`Convert ${msg.name} into a formal Client Project?`)) return;
+        setUpdating(true);
+        try {
+            const res = await fetch("/api/admin/client-projects", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    leadId: msg.id,
+                    title: msg.requestedService || `${msg.name}'s Project`,
+                    clientName: msg.name,
+                    businessName: msg.businessType || "",
+                    description: msg.message,
+                    price: 0 // Will be set in project management
+                }),
+            });
+            if (res.ok) {
+                alert("Lead successfully converted to Project! You can now manage it in the 'Client Projects' tab.");
+                handleUpdate(undefined, { ...msg, status: 'Won' }); // Ensure status is updated
+            } else {
+                const err = await res.json();
+                alert(err.error || "Failed to convert lead");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("An error occurred during conversion");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
     const availableCategories = Array.from(new Set([...defaultCategories, ...messages.map(m => m.category || "Not Determined")]));
-    const availableStatuses = Array.from(new Set([...defaultStatuses, ...messages.map(m => m.status || "Fresh")]));
+    const availableStatuses = Array.from(new Set([...defaultStatuses, ...messages.map(m => m.status || "New")]));
+
+    // Analytics Calculation
+    const totalLeads = messages.length;
+    const contactedLeads = messages.filter(m => m.status !== "New").length;
+    const wonLeads = messages.filter(m => m.status === "Won").length;
+    const conversionRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : "0";
 
     if (fetching) {
         return (
@@ -131,11 +190,31 @@ export default function MessagesModule() {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Analytics Block */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Total Leads</p>
+                    <p className="text-3xl font-black text-gray-900">{totalLeads}</p>
+                </div>
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Contacted</p>
+                    <p className="text-3xl font-black text-blue-600">{contactedLeads}</p>
+                </div>
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Won</p>
+                    <p className="text-3xl font-black text-emerald-500">{wonLeads}</p>
+                </div>
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Conversion %</p>
+                    <p className="text-3xl font-black text-purple-600">{conversionRate}%</p>
+                </div>
+            </div>
+
             {/* Header & Filters */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
-                        Inbox ({messages.length})
+                    <h2 className="text-lg font-black text-gray-900 flex items-center gap-2 uppercase tracking-tighter">
+                        Sales Opportunities ({filteredMessages.length})
                         <button
                             onClick={() => fetchMessages()}
                             disabled={fetching}
@@ -145,7 +224,7 @@ export default function MessagesModule() {
                             <RefreshCcw size={14} className={fetching ? "animate-spin" : ""} />
                         </button>
                     </h2>
-                    <p className="text-secondary text-xs font-bold mt-0.5">Manage your website inquiries</p>
+                    <p className="text-secondary text-xs font-bold mt-0.5">Track and convert leads into customers</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-xl border border-gray-100 shadow-sm">
@@ -202,11 +281,8 @@ export default function MessagesModule() {
                             </div>
 
                             <div>
-                                <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest inline-block border ${msg.status === 'Fresh' ? 'bg-green-50 text-green-600 border-green-100' :
-                                    msg.status === 'RNR' ? 'bg-red-50 text-red-500 border-red-100' :
-                                        'bg-gray-50 text-gray-400 border-gray-100'
-                                    }`}>
-                                    {msg.status || 'Fresh'}
+                                <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest inline-block border ${getStatusColor(msg.status || 'New')}`}>
+                                    {msg.status || 'New'}
                                 </span>
                             </div>
                         </div>
@@ -296,13 +372,116 @@ export default function MessagesModule() {
                             </div>
                         </div>
 
-                        <div className="space-y-1.5">
-                            <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Message Content</p>
-                            <div className="p-6 bg-gray-50 rounded-[2rem] border-l-4 border-primary">
+                        <div className="grid md:grid-cols-2 gap-6 mb-8">
+                            <div className="space-y-1.5">
+                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Business Type</p>
+                                <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center gap-2.5 text-sm">
+                                    <Briefcase size={16} className="text-orange-500" />
+                                    <span>{viewing.businessType || 'Personal'}</span>
+                                </div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Service Requested</p>
+                                <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center gap-2.5 text-sm">
+                                    <Edit3 size={16} className="text-purple-500" />
+                                    <span>{viewing.requestedService || 'General Inquiry'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5 mb-8">
+                            <div className="flex justify-between items-center ml-2">
+                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400">Current Status</p>
+                                <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusColor(viewing.status || 'New')}`}>
+                                    {viewing.status || 'New'}
+                                </span>
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded-2xl flex flex-wrap gap-2">
+                                {defaultStatuses.map(s => (
+                                    <button
+                                        key={s}
+                                        onClick={() => handleUpdate(undefined, { ...viewing, status: s })}
+                                        disabled={updating}
+                                        className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all ${viewing.status === s ? 'bg-gray-900 text-white shadow-lg' : 'bg-white text-gray-500 border border-gray-100 hover:border-primary/30'}`}
+                                    >
+                                        {s}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5 mb-8">
+                            <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Message</p>
+                            <div className="p-6 bg-gray-50 rounded-[2rem] border-l-4 border-gray-200">
                                 <p className="text-sm text-gray-800 leading-relaxed font-medium whitespace-pre-wrap">{viewing.message}</p>
                             </div>
                         </div>
+
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center ml-2">
+                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400">Admin Notes</p>
+                                {updating && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
+                            </div>
+                            <textarea
+                                className="w-full bg-blue-50/30 border border-primary/10 rounded-[2rem] p-6 text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-gray-300 min-h-[120px]"
+                                placeholder="Add follow-up notes, discussion points, or proposal details..."
+                                value={viewing.adminNotes || ""}
+                                onBlur={() => handleUpdate(undefined, viewing)}
+                                onChange={(e) => setViewing({ ...viewing, adminNotes: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="mt-8 flex flex-col gap-3">
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => handleUpdate(undefined, { ...viewing, status: 'Won' })}
+                                    disabled={updating}
+                                    className="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <CheckCircle2 size={16} /> Mark as Won
+                                </button>
+                                <button
+                                    onClick={() => handleUpdate(undefined, { ...viewing, status: 'Lost' })}
+                                    disabled={updating}
+                                    className="flex-1 bg-red-50 text-red-600 border border-red-100 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all"
+                                >
+                                    Mark as Lost
+                                </button>
+                            </div>
+
+                            <button
+                                onClick={() => handleConvertToProject(viewing)}
+                                disabled={updating}
+                                className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                <Briefcase size={16} /> Convert to formal Client Project
+                            </button>
+
+                            <button
+                                onClick={() => setShowCalculator(true)}
+                                className="w-full bg-blue-50 text-blue-600 border border-blue-100 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white"
+                            >
+                                <CalculatorIcon size={16} /> Pricing Calculator & Quote Generator
+                            </button>
+                        </div>
                     </div>
+                </div>
+            )}
+
+            {/* Pricing Calculator Modal */}
+            {showCalculator && viewing && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+                    <PricingCalculator
+                        leadName={viewing.name}
+                        leadMessage={viewing.message}
+                        onClose={() => setShowCalculator(false)}
+                        onSave={(quote) => {
+                            const updatedNotes = (viewing.adminNotes ? viewing.adminNotes + "\n\n" : "") + "--- PRICING QUOTE ---\n" + quote;
+                            handleUpdate(undefined, { ...viewing, adminNotes: updatedNotes });
+                            setShowCalculator(false);
+                            setViewing({ ...viewing, adminNotes: updatedNotes });
+                        }}
+                    />
                 </div>
             )}
 
@@ -370,6 +549,16 @@ export default function MessagesModule() {
                                         onChange={(e) => setEditing({ ...editing, status: e.target.value })}
                                     />
                                 )}
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Admin Notes</label>
+                                <textarea
+                                    className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary outline-none font-medium text-xs min-h-[100px]"
+                                    placeholder="Add notes..."
+                                    value={editing.adminNotes || ""}
+                                    onChange={(e) => setEditing({ ...editing, adminNotes: e.target.value })}
+                                />
                             </div>
 
                             <button

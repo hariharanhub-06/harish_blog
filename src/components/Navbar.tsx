@@ -3,11 +3,27 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase, ChevronDown, Monitor, Keyboard, Calendar, Video } from "lucide-react";
+import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase, ChevronDown, Monitor, Keyboard, Calendar, Video, Code, Database, IndianRupee } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
-const navLinks = [
+interface NavLinkItem {
+    name: string;
+    href: string;
+    icon: any;
+    color: string;
+    creative?: boolean;
+}
+
+interface NavLink {
+    name: string;
+    href: string;
+    icon: any;
+    isDropdown?: boolean;
+    items?: NavLinkItem[];
+}
+
+const navLinks: NavLink[] = [
     {
         name: "About",
         href: "#",
@@ -26,8 +42,21 @@ const navLinks = [
         isDropdown: true,
         items: [
             { name: "Quiz", href: "/#quiz", icon: Gamepad2, color: "text-blue-500" },
-            { name: "Dino Runner", href: "/#dino-runner", icon: Monitor, color: "text-emerald-500" },
+            { name: "Game Arena", href: "/#games", icon: Monitor, color: "text-emerald-500" },
             { name: "Type Test", href: "/#typing-test", icon: Keyboard, color: "text-orange-500", creative: true }
+        ]
+    },
+    {
+        name: "Services",
+        href: "/services",
+        icon: Briefcase,
+        isDropdown: true,
+        items: [
+            { name: "Digital Solutions", href: "/services#solutions", icon: Code, color: "text-blue-500" },
+            { name: "CRM Systems", href: "/services#crm", icon: Database, color: "text-purple-500" },
+            { name: "Industries", href: "/services#industries", icon: Briefcase, color: "text-emerald-500" },
+            { name: "Pricing", href: "/services#pricing", icon: IndianRupee, color: "text-pink-500" },
+            { name: "Contact Team", href: "/services#contact", icon: Mail, color: "text-orange-500" },
         ]
     },
     { name: "Live Session", href: "/#sessions", icon: Video },

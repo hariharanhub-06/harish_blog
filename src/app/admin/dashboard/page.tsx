@@ -22,7 +22,9 @@ import {
     Wallet,
     Trophy,
     Calendar,
-    Video
+    Video,
+    FileText,
+    ShieldAlert
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -38,8 +40,10 @@ import LeaderboardModule from "@/components/admin/LeaderboardModule";
 import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
 import LiveSessionsModule from "@/components/admin/LiveSessionsModule";
 import GameAssetsModule from "@/components/admin/GameAssetsModule";
+import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
+import OperationsGuide from "@/components/admin/OperationsGuide";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets" | "client-projects" | "ops-guide";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -51,7 +55,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings", "sessions", "game-assets"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings", "sessions", "game-assets", "client-projects", "ops-guide"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -106,6 +110,9 @@ export default function AdminDashboard() {
         { id: "meetings", title: "Meetings List", icon: Calendar, color: "bg-blue-600" },
         { id: "sessions", title: "Live Sessions", icon: Video, color: "bg-red-500" },
         { id: "game-assets", title: "Game Content", icon: Gamepad2, color: "bg-violet-500" },
+        { id: "divider", title: "Business Operations", icon: Briefcase, color: "bg-gray-400" },
+        { id: "client-projects", title: "Client Projects", icon: Briefcase, color: "bg-blue-700" },
+        { id: "ops-guide", title: "Operations Guide", icon: FileText, color: "bg-orange-600" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
     ];
 
@@ -122,6 +129,8 @@ export default function AdminDashboard() {
             case "meetings": return <AdminMeetingsModule />;
             case "sessions": return <LiveSessionsModule />;
             case "game-assets": return <GameAssetsModule />;
+            case "client-projects": return <ClientProjectsModule />;
+            case "ops-guide": return <OperationsGuide />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <OverviewModule />

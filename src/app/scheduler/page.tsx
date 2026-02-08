@@ -50,6 +50,11 @@ export default function MeetingScheduler() {
     const [bookedSessions, setBookedSessions] = useState<BookedSession[]>([]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
+    const [schedulerConfig, setSchedulerConfig] = useState({
+        enableMinDaysConstraint: true,
+        minDaysBeforeBooking: 3
+    });
+
     const [form, setForm] = useState({
         meetingType: "GRR Visit",
         clubName: "",
@@ -67,7 +72,20 @@ export default function MeetingScheduler() {
     useEffect(() => {
         fetchAvailability();
         fetchDocuments();
+        fetchSchedulerConfig();
     }, []);
+
+    const fetchSchedulerConfig = async () => {
+        try {
+            const res = await fetch("/api/meetings/config");
+            if (res.ok) {
+                const data = await res.json();
+                setSchedulerConfig(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch scheduler config:", error);
+        }
+    };
 
     const fetchAvailability = async () => {
         try {
@@ -293,8 +311,9 @@ export default function MeetingScheduler() {
 
                                                 const leadTimeDate = new Date();
                                                 leadTimeDate.setHours(0, 0, 0, 0);
+                                                const daysToWait = schedulerConfig.enableMinDaysConstraint ? schedulerConfig.minDaysBeforeBooking : 0;
                                                 const leadTimeLimit = new Date(leadTimeDate);
-                                                leadTimeLimit.setDate(leadTimeLimit.getDate() + 3);
+                                                leadTimeLimit.setDate(leadTimeLimit.getDate() + daysToWait);
 
                                                 const isTooEarly = date < leadTimeLimit;
                                                 const isSelected = selectedDate?.toDateString() === dateStr;
@@ -330,7 +349,9 @@ export default function MeetingScheduler() {
                                         </div>
                                         <div className="mt-auto p-4 bg-primary/5 rounded-2xl border border-dashed border-primary/20">
                                             <p className="text-[9px] text-primary-light font-bold text-center italic leading-relaxed uppercase tracking-tighter">
-                                                3-day buffer enforced for quality deployments.
+                                                {schedulerConfig.enableMinDaysConstraint
+                                                    ? `${schedulerConfig.minDaysBeforeBooking}-day buffer enforced for quality deployments.`
+                                                    : "Instant deployment available."}
                                             </p>
                                         </div>
                                     </motion.div>

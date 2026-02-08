@@ -31,7 +31,7 @@ export async function POST(req: Request) {
             "New Lead (AI Chat)",
             `Lead captured via AI Chat. \nEmail: ${email}\nMobile: ${mobile}`,
             "AI Lead",
-            "Fresh"
+            "New"
         ]);
 
         return NextResponse.json({ success: true });

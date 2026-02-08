@@ -108,14 +108,17 @@ export const contactSubmissions = pgTable("contact_submissions", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   company: text("company"),
+  businessType: text("business_type"),
+  requestedService: text("requested_service"),
   mobile: text("mobile").notNull(),
   email: text("email").notNull(),
   website: text("website"),
   socialMedia: text("social_media"),
   category: text("category").default("Not Determined"),
-  status: text("status").default("Fresh"),
+  status: text("status").default("New"),
   subject: text("subject"),
   message: text("message").notNull(),
+  adminNotes: text("admin_notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -703,3 +706,50 @@ export const gameScores = pgTable("game_scores", {
   timeTaken: integer("time_taken"), // in seconds
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const schedulerConfig = pgTable("scheduler_config", {
+  id: integer("id").primaryKey(), // Singleton: 1
+  enableMinDaysConstraint: boolean("enable_min_days_constraint").default(true),
+  minDaysBeforeBooking: integer("min_days_before_booking").default(3), // 1-5
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const clientProjects = pgTable("client_projects", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  leadId: text("lead_id").notNull(),
+  title: text("title").notNull(),
+  clientName: text("client_name").notNull(),
+  businessName: text("business_name"),
+  description: text("description"),
+  scopeSummary: text("scope_summary"),
+  timeline: text("timeline"),
+  price: real("price").default(0),
+  advancePaid: real("advance_paid").default(0),
+  balanceAmount: real("balance_amount").default(0),
+  paymentStatus: text("payment_status").default("pending"),
+  status: text("status").default("onboarding"),
+  agreementContent: text("agreement_content"),
+  invoiceUrl: text("invoice_url"),
+  onboardingChecklist: jsonb("onboarding_checklist").$default(() => ([
+    { id: 1, task: "Requirements Confirmed", completed: false },
+    { id: 2, task: "Agreement Signed", completed: false },
+    { id: 3, task: "Advance Payment Received", completed: false },
+    { id: 4, task: "Access & Assets Collected", completed: false }
+  ])),
+  progressMilestones: jsonb("progress_milestones").$default(() => ([])),
+  internalCost: real("internal_cost").default(0),
+  expectedProfit: real("expected_profit").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const clientProjectRelations = relations(clientProjects, ({ one }) => ({
+  lead: one(contactSubmissions, {
+    fields: [clientProjects.leadId],
+    references: [contactSubmissions.id],
+  }),
+}));
+
+export const contactSubmissionRelations = relations(contactSubmissions, ({ many }) => ({
+  projects: many(clientProjects),
+}));

@@ -19,7 +19,10 @@ import {
     Trash2,
     ChevronLeft,
     ChevronRight,
-    FileText
+    FileText,
+    Settings,
+    ToggleLeft,
+    ToggleRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MeetingChecklistModal from "./MeetingChecklistModal";
@@ -62,10 +65,51 @@ export default function AdminMeetingsModule() {
     const [isSavingAvailability, setIsSavingAvailability] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
+    // Scheduler Config
+    const [showSettings, setShowSettings] = useState(false);
+    const [schedulerConfig, setSchedulerConfig] = useState({
+        enableMinDaysConstraint: true,
+        minDaysBeforeBooking: 3
+    });
+    const [isSavingConfig, setIsSavingConfig] = useState(false);
+
     useEffect(() => {
         fetchMeetings();
         fetchAvailability();
+        fetchSchedulerConfig();
     }, []);
+
+    const fetchSchedulerConfig = async () => {
+        try {
+            const res = await fetch("/api/meetings/config");
+            if (res.ok) {
+                const data = await res.json();
+                setSchedulerConfig(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch scheduler config:", error);
+        }
+    };
+
+    const handleSaveConfig = async (newConfig: any) => {
+        setIsSavingConfig(true);
+        // Optimistic update
+        setSchedulerConfig(newConfig);
+        try {
+            await fetch("/api/meetings/config", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newConfig),
+            });
+        } catch (error) {
+            console.error("Failed to save config:", error);
+            // Revert on error - would need separate state for this to be perfect, 
+            // but fetching again is a simple fallback
+            fetchSchedulerConfig();
+        } finally {
+            setIsSavingConfig(false);
+        }
+    };
 
     const fetchAvailability = async () => {
         try {
@@ -266,6 +310,17 @@ export default function AdminMeetingsModule() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => {
+                            setShowSettings(!showSettings);
+                            setShowTemplates(false);
+                            setShowAvailability(false);
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${showSettings ? 'bg-gray-900 text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-600 hover:bg-gray-50'}`}
+                    >
+                        <Settings size={14} />
+                        {showSettings ? 'Close Settings' : 'Settings'}
+                    </button>
+                    <button
+                        onClick={() => {
                             setShowTemplates(!showTemplates);
                             setShowAvailability(false);
                         }}
@@ -293,6 +348,63 @@ export default function AdminMeetingsModule() {
                     </button>
                 </div>
             </div>
+
+            {/* Scheduler Settings */}
+            <AnimatePresence>
+                {showSettings && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="bg-white p-6 rounded-[2rem] border border-gray-100 mb-6 shadow-sm">
+                            <div className="flex items-start gap-4">
+                                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                                    <Clock size={24} />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="font-bold text-gray-900 text-lg">Booking Constraints</h3>
+                                    <p className="text-sm text-gray-500 mb-4">Control how far in advance meetings must be booked.</p>
+
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-gray-900 text-sm">Minimum Notice Period</span>
+                                                <span className="text-xs text-gray-500">Require bookings to be made X days in advance</span>
+                                            </div>
+                                            <button
+                                                onClick={() => handleSaveConfig({ ...schedulerConfig, enableMinDaysConstraint: !schedulerConfig.enableMinDaysConstraint })}
+                                                className={`transition-colors ${schedulerConfig.enableMinDaysConstraint ? 'text-emerald-600' : 'text-gray-400'}`}
+                                            >
+                                                {schedulerConfig.enableMinDaysConstraint ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
+                                            </button>
+                                        </div>
+
+                                        {schedulerConfig.enableMinDaysConstraint && (
+                                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                                <div className="flex flex-col flex-1">
+                                                    <span className="font-bold text-gray-900 text-sm">Days to Block</span>
+                                                    <span className="text-xs text-gray-500">Number of days from today that cannot be booked</span>
+                                                </div>
+                                                <select
+                                                    value={schedulerConfig.minDaysBeforeBooking}
+                                                    onChange={(e) => handleSaveConfig({ ...schedulerConfig, minDaysBeforeBooking: parseInt(e.target.value) })}
+                                                    className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 focus:ring-2 ring-primary/20 outline-none"
+                                                >
+                                                    {[1, 2, 3, 4, 5].map(days => (
+                                                        <option key={days} value={days}>{days} Days</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Availability Management */}
             <AnimatePresence>

@@ -14,6 +14,8 @@ export async function GET(req: Request) {
         id: contactSubmissions.id,
         name: contactSubmissions.name,
         company: contactSubmissions.company,
+        businessType: contactSubmissions.businessType,
+        requestedService: contactSubmissions.requestedService,
         mobile: contactSubmissions.mobile,
         email: contactSubmissions.email,
         website: contactSubmissions.website,
@@ -21,6 +23,8 @@ export async function GET(req: Request) {
         category: contactSubmissions.category,
         status: contactSubmissions.status,
         subject: contactSubmissions.subject,
+        message: contactSubmissions.message,
+        adminNotes: contactSubmissions.adminNotes,
         createdAt: contactSubmissions.createdAt,
     }).from(contactSubmissions).orderBy(desc(contactSubmissions.createdAt)).limit(limit).offset(offset);
 
@@ -40,14 +44,14 @@ export async function DELETE(req: Request) {
 export async function PUT(req: Request) {
     try {
         const body = await req.json();
-        const { id, category, status } = body;
+        const { id, category, status, adminNotes } = body;
 
         if (!id) {
             return NextResponse.json({ error: "Missing ID" }, { status: 400 });
         }
 
         await db.update(contactSubmissions)
-            .set({ category, status })
+            .set({ category, status, adminNotes })
             .where(eq(contactSubmissions.id, id));
 
         return NextResponse.json({ success: true });

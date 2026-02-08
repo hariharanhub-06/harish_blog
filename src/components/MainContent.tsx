@@ -24,6 +24,8 @@ const GameOverlay = dynamic(() => import("@/components/GameOverlay"), { ssr: fal
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
+import BusinessSolutionsSection from "./BusinessSolutionsSection";
+import ContactBusinessSection from "./ContactBusinessSection";
 
 interface Stat {
     icon: string;
@@ -249,6 +251,11 @@ export default function MainContent({
             {liveSessions.length > 0 && (
                 <LiveSessionsCarousel sessions={liveSessions} />
             )}
+
+
+
+            {/* Business Solutions Section */}
+            <BusinessSolutionsSection />
 
             {/* Training Programs Section (Replaces Skill Carousel) */}
             <TrainingPrograms
@@ -750,6 +757,7 @@ export default function MainContent({
                     />
                 )
             }
+            <ContactBusinessSection />
         </div >
     );
 }
