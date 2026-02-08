@@ -440,7 +440,7 @@ export default function ContactForm() {
             </AnimatePresence>
 
             {/* Scroll Progress Circle (Left Side) - Always visible or as before */}
-            <div className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-[60] flex items-center justify-center w-[36px] h-[36px] md:w-[40px] md:h-[40px]">
+            <div className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-[60] flex items-center justify-center w-[36px] h-[36px] md:w-[40px] md:h-[40px] bg-black/40 backdrop-blur-sm rounded-full border border-white/10 shadow-lg">
                 <svg
                     className="absolute w-full h-full -rotate-90 cursor-pointer hover:opacity-80 transition-opacity"
                     viewBox="0 0 100 100"
