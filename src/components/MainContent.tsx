@@ -267,8 +267,6 @@ export default function MainContent({
             {/* Experience Section */}
             {experiences.length > 0 && (
                 <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
-                    <div className="absolute top-0 left-0 h-full w-8 md:w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
-                    <div className="absolute top-0 right-0 h-full w-8 md:w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
                     <div className="flex flex-col items-center mb-4 text-center">
                         <span className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-500/80">Professional Journey</span>
@@ -301,8 +299,6 @@ export default function MainContent({
             {/* Education Section */}
             {educations.length > 0 && (
                 <section className="py-6 md:py-8 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 h-full w-8 md:w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
-                    <div className="absolute top-0 right-0 h-full w-8 md:w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
                     <div className="flex flex-col items-center mb-4 text-center">
                         <span className="text-[9px] font-black uppercase tracking-[0.3em] text-amber-500/80">Academic Background</span>
@@ -335,8 +331,6 @@ export default function MainContent({
             {/* Volunteering Section */}
             {volunteerings.length > 0 && (
                 <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
-                    <div className="absolute top-0 left-0 h-full w-8 md:w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
-                    <div className="absolute top-0 right-0 h-full w-8 md:w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
                     <div className="flex flex-col items-center mb-4 text-center">
                         <span className="text-[9px] font-black uppercase tracking-[0.3em] text-teal-500/80">Community Impact</span>
@@ -534,8 +528,6 @@ export default function MainContent({
             {/* Quiz Section */}
             {quizzes.length > 0 && (
                 <section id="quiz" className="py-8 md:py-12 bg-gradient-to-b from-transparent to-primary/5 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
-                    <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
 
                     <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center mb-8 gap-6 relative z-10">
                         <div className="text-center md:text-left">
