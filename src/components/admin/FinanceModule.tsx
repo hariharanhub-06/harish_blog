@@ -94,6 +94,8 @@ export default function FinanceModule() {
     // Category Editing States
     const [editingTxId, setEditingTxId] = useState<string | null>(null);
     const [editingCategory, setEditingCategory] = useState("");
+    const [showAllIncomes, setShowAllIncomes] = useState(false);
+    const [showAllExpenses, setShowAllExpenses] = useState(false);
 
     const [debtForm, setDebtForm] = useState({
         name: "",
@@ -566,57 +568,69 @@ export default function FinanceModule() {
                                             const cats = stats?.categories || [];
                                             const incomes = cats.filter((c: any) => c.type === 'income');
 
-                                            return incomes
-                                                .sort((a: any, b: any) => b.value - a.value)
-                                                .slice(0, 5)
-                                                .map((cat: any, i: number) => {
-                                                    const max = Math.max(...incomes.map((c: any) => c.value), 1);
-                                                    return (
-                                                        <div key={i} className="space-y-2 group/income">
-                                                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                                                <div className="flex items-center gap-2">
-                                                                    <span>{cat.category || 'Uncategorized'}</span>
-                                                                    {cat.category.toLowerCase() === 'revenue' && (
-                                                                        <button
-                                                                            onClick={async (e) => {
-                                                                                e.stopPropagation();
-                                                                                if (confirm("Rename ALL 'Revenue' entries to 'Loan Commission'?")) {
-                                                                                    setSaving(true);
-                                                                                    try {
-                                                                                        // Fetch all revenue transactions
-                                                                                        const r = await fetch(`/api/admin/finance/transactions?category=Revenue`);
-                                                                                        const txs = await r.json();
-                                                                                        for (const tx of txs) {
-                                                                                            await fetch("/api/admin/finance/transactions", {
-                                                                                                method: "PUT",
-                                                                                                headers: { "Content-Type": "application/json" },
-                                                                                                body: JSON.stringify({ id: tx.id, category: "Loan Commission" })
-                                                                                            });
+                                            const sortedIncomes = incomes.sort((a: any, b: any) => b.value - a.value);
+                                            const displayedIncomes = showAllIncomes ? sortedIncomes : sortedIncomes.slice(0, 5);
+
+                                            return (
+                                                <>
+                                                    {displayedIncomes.map((cat: any, i: number) => {
+                                                        const max = Math.max(...incomes.map((c: any) => c.value), 1);
+                                                        return (
+                                                            <div key={i} className="space-y-2 group/income">
+                                                                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span>{cat.category || 'Uncategorized'}</span>
+                                                                        {cat.category.toLowerCase() === 'revenue' && (
+                                                                            <button
+                                                                                onClick={async (e) => {
+                                                                                    e.stopPropagation();
+                                                                                    if (confirm("Rename ALL 'Revenue' entries to 'Loan Commission'?")) {
+                                                                                        setSaving(true);
+                                                                                        try {
+                                                                                            // Fetch all revenue transactions
+                                                                                            const r = await fetch(`/api/admin/finance/transactions?category=Revenue`);
+                                                                                            const txs = await r.json();
+                                                                                            for (const tx of txs) {
+                                                                                                await fetch("/api/admin/finance/transactions", {
+                                                                                                    method: "PUT",
+                                                                                                    headers: { "Content-Type": "application/json" },
+                                                                                                    body: JSON.stringify({ id: tx.id, category: "Loan Commission" })
+                                                                                                });
+                                                                                            }
+                                                                                            fetchData();
+                                                                                        } finally {
+                                                                                            setSaving(false);
                                                                                         }
-                                                                                        fetchData();
-                                                                                    } finally {
-                                                                                        setSaving(false);
                                                                                     }
-                                                                                }
-                                                                            }}
-                                                                            className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[8px] hover:bg-primary hover:text-white transition-all"
-                                                                        >
-                                                                            Fix to Loan Commission
-                                                                        </button>
-                                                                    )}
+                                                                                }}
+                                                                                className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[8px] hover:bg-primary hover:text-white transition-all"
+                                                                            >
+                                                                                Fix to Loan Commission
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                    <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
                                                                 </div>
-                                                                <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                                                <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
+                                                                    <motion.div
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: `${(cat.value / max) * 100}%` }}
+                                                                        className="h-full bg-emerald-400 rounded-full"
+                                                                    />
+                                                                </div>
                                                             </div>
-                                                            <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
-                                                                <motion.div
-                                                                    initial={{ width: 0 }}
-                                                                    animate={{ width: `${(cat.value / max) * 100}%` }}
-                                                                    className="h-full bg-emerald-400 rounded-full"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                });
+                                                        );
+                                                    })}
+                                                    {incomes.length > 5 && (
+                                                        <button
+                                                            onClick={() => setShowAllIncomes(!showAllIncomes)}
+                                                            className="text-xs font-bold text-primary mt-2"
+                                                        >
+                                                            {showAllIncomes ? "See Less" : "See More"}
+                                                        </button>
+                                                    )}
+                                                </>
+                                            );
                                         })()}
                                         {(stats?.categories || []).filter((c: any) => c.type === 'income').length === 0 && (
                                             <div className="h-[200px] flex items-center justify-center text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-50/50 rounded-2xl">
@@ -644,27 +658,39 @@ export default function FinanceModule() {
                                                 });
                                             }
 
-                                            return displayCats
-                                                .sort((a, b) => b.value - a.value)
-                                                .slice(0, 5)
-                                                .map((cat: any, i: number) => {
-                                                    const max = Math.max(...displayCats.map(c => c.value), 1);
-                                                    return (
-                                                        <div key={i} className="space-y-2">
-                                                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                                                <span className={cat.isSummary ? 'text-primary font-black' : ''}>{cat.category}</span>
-                                                                <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                            const sortedCats = displayCats.sort((a, b) => b.value - a.value);
+                                            const displayedCats = showAllExpenses ? sortedCats : sortedCats.slice(0, 5);
+
+                                            return (
+                                                <>
+                                                    {displayedCats.map((cat: any, i: number) => {
+                                                        const max = Math.max(...displayCats.map(c => c.value), 1);
+                                                        return (
+                                                            <div key={i} className="space-y-2">
+                                                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                                                    <span className={cat.isSummary ? 'text-primary font-black' : ''}>{cat.category}</span>
+                                                                    <span className="text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                                                </div>
+                                                                <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
+                                                                    <motion.div
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: `${(cat.value / max) * 100}%` }}
+                                                                        className={`h-full rounded-full ${cat.isSummary ? 'bg-primary' : 'bg-red-400'}`}
+                                                                    />
+                                                                </div>
                                                             </div>
-                                                            <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
-                                                                <motion.div
-                                                                    initial={{ width: 0 }}
-                                                                    animate={{ width: `${(cat.value / max) * 100}%` }}
-                                                                    className={`h-full rounded-full ${cat.isSummary ? 'bg-primary' : 'bg-red-400'}`}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                });
+                                                        );
+                                                    })}
+                                                    {displayCats.length > 5 && (
+                                                        <button
+                                                            onClick={() => setShowAllExpenses(!showAllExpenses)}
+                                                            className="text-xs font-bold text-primary mt-2"
+                                                        >
+                                                            {showAllExpenses ? "See Less" : "See More"}
+                                                        </button>
+                                                    )}
+                                                </>
+                                            );
                                         })()}
                                     </div>
                                 </div>
