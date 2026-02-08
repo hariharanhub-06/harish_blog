@@ -753,3 +753,69 @@ export const clientProjectRelations = relations(clientProjects, ({ one }) => ({
 export const contactSubmissionRelations = relations(contactSubmissions, ({ many }) => ({
   projects: many(clientProjects),
 }));
+
+export const pricingBaseCosts = pgTable("pricing_base_costs", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  component: text("component").notNull(),
+  internalCost: real("internal_cost").notNull().default(0),
+  type: text("type").notNull().default("Fixed"), // Fixed, Variable, Risk
+  notes: text("notes"),
+  displayOrder: integer("order").default(0),
+});
+
+export const pricingPageRates = pgTable("pricing_page_rates", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  pageType: text("page_type").notNull(),
+  internalCost: real("internal_cost").notNull().default(0),
+  sellingPrice: real("selling_price").notNull().default(0),
+  displayOrder: integer("order").default(0),
+});
+
+export const pricingFeatureRates = pgTable("pricing_feature_rates", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  feature: text("feature").notNull(),
+  category: text("category").notNull(), // Feature, CRM
+  internalCost: real("internal_cost").notNull().default(0),
+  sellingPrice: real("selling_price").notNull().default(0),
+  displayOrder: integer("order").default(0),
+});
+
+export const pricingMultipliers = pgTable("pricing_multipliers", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  category: text("category").notNull(), // Complexity, Client Value, Timeline, Scope Risk
+  label: text("label").notNull(),
+  value: real("value").notNull().default(1.0), // Multiplier or Additional Cost
+  isPercentage: boolean("is_percentage").default(false),
+  displayOrder: integer("order").default(0),
+});
+
+export const pricingDiscounts = pgTable("pricing_discounts", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  condition: text("condition").notNull(),
+  maxDiscount: real("max_discount").notNull().default(0), // Percentage
+  displayOrder: integer("order").default(0),
+});
+
+export const projectQuotes = pgTable("project_quotes", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  projectName: text("project_name").notNull(),
+  clientName: text("client_name").notNull(),
+  quoteToken: text("quote_token").unique().$defaultFn(() => crypto.randomUUID()),
+
+  // Storing config snapshot for full history
+  configuration: jsonb("configuration").notNull(), // { pages: [], features: [], crm: bool, multipliers: {} }
+
+  // Financial Result
+  finalPrice: real("final_price").notNull(),
+  internalCost: real("internal_cost").notNull(),
+  expectedProfit: real("expected_profit").notNull(),
+  profitMargin: real("profit_margin").notNull(),
+
+  // Metadata for Quote Generator
+  deliverables: jsonb("deliverables"),
+  timeline: text("timeline"),
+  status: text("status").default("draft"), // draft, sent, accepted
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
