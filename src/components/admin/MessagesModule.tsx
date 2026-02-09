@@ -27,7 +27,6 @@ export default function MessagesModule() {
     const [filteredMessages, setFilteredMessages] = useState<any[]>([]);
     const [fetching, setFetching] = useState(true);
     const [viewing, setViewing] = useState<any>(null);
-    const [editing, setEditing] = useState<any>(null);
     const [showCalculator, setShowCalculator] = useState(false);
     const [updating, setUpdating] = useState(false);
 
@@ -281,9 +280,14 @@ export default function MessagesModule() {
                             </div>
 
                             <div>
-                                <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest inline-block border ${getStatusColor(msg.status || 'New')}`}>
-                                    {msg.status || 'New'}
-                                </span>
+                                <select
+                                    value={msg.status || 'New'}
+                                    onChange={(e) => handleUpdate(undefined, { ...msg, status: e.target.value })}
+                                    disabled={updating}
+                                    className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border cursor-pointer transition-all appearance-none bg-white hover:shadow-md focus:ring-2 focus:ring-primary/20 outline-none disabled:opacity-50 ${getStatusColor(msg.status || 'New')}`}
+                                >
+                                    {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
                             </div>
                         </div>
 
@@ -308,13 +312,6 @@ export default function MessagesModule() {
                                     <MessageCircle size={16} />
                                 </a>
                             </div>
-
-                            <button
-                                onClick={() => setEditing(msg)}
-                                className="flex-1 sm:flex-none px-4 py-2.5 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-xl transition-all font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-sm shadow-amber-100/50 active:scale-95"
-                            >
-                                <Edit3 size={14} /> Update
-                            </button>
 
                             <button
                                 onClick={() => handleDelete(msg.id)}
@@ -485,94 +482,6 @@ export default function MessagesModule() {
                 </div>
             )}
 
-            {/* Edit Modal */}
-            {editing && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-8">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-black">Update Submission</h3>
-                            <button onClick={() => setEditing(null)} className="p-1.5 hover:bg-red-50 text-gray-300 rounded-full transition-all">
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleUpdate} className="space-y-5">
-                            <div className="space-y-1.5">
-                                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Category</label>
-                                <select
-                                    className="w-full bg-gray-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-primary appearance-none font-bold text-xs"
-                                    value={availableCategories.includes(editing.category) ? editing.category : '__new__'}
-                                    onChange={(e) => {
-                                        if (e.target.value === '__new__') {
-                                            setEditing({ ...editing, category: "", isNewCategory: true });
-                                        } else {
-                                            setEditing({ ...editing, category: e.target.value, isNewCategory: false });
-                                        }
-                                    }}
-                                >
-                                    {availableCategories.map(c => <option key={c} value={c}>{c}</option>)}
-                                    <option value="__new__">+ Add New Category...</option>
-                                </select>
-                                {editing.isNewCategory && (
-                                    <input
-                                        autoFocus
-                                        placeholder="New category..."
-                                        className="w-full mt-2 bg-white border-2 border-primary/10 rounded-2xl p-4 font-bold"
-                                        value={editing.category}
-                                        onChange={(e) => setEditing({ ...editing, category: e.target.value })}
-                                    />
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Status</label>
-                                <select
-                                    className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary appearance-none font-bold"
-                                    value={availableStatuses.includes(editing.status) ? editing.status : '__new__'}
-                                    onChange={(e) => {
-                                        if (e.target.value === '__new__') {
-                                            setEditing({ ...editing, status: "", isNewStatus: true });
-                                        } else {
-                                            setEditing({ ...editing, status: e.target.value, isNewStatus: false });
-                                        }
-                                    }}
-                                >
-                                    {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                                    <option value="__new__">+ Add New Status...</option>
-                                </select>
-                                {editing.isNewStatus && (
-                                    <input
-                                        autoFocus
-                                        placeholder="New status..."
-                                        className="w-full mt-2 bg-white border-2 border-primary/10 rounded-xl p-3 font-bold text-xs"
-                                        value={editing.status}
-                                        onChange={(e) => setEditing({ ...editing, status: e.target.value })}
-                                    />
-                                )}
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Admin Notes</label>
-                                <textarea
-                                    className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary outline-none font-medium text-xs min-h-[100px]"
-                                    placeholder="Add notes..."
-                                    value={editing.adminNotes || ""}
-                                    onChange={(e) => setEditing({ ...editing, adminNotes: e.target.value })}
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={updating}
-                                className="w-full bg-primary text-white py-4 rounded-xl font-black text-base shadow-xl shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-2.5 transition-all active:scale-95"
-                            >
-                                {updating && <Loader2 className="w-4 h-4 animate-spin" />}
-                                <span>{updating ? "Saving..." : "Save Updates"}</span>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
