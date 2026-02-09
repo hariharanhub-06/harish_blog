@@ -111,12 +111,8 @@ export default function MessagesModule() {
         if (e) e.preventDefault();
         setUpdating(true);
         try {
-            const payload = updateData || {
-                id: editing.id,
-                category: editing.category,
-                status: editing.status,
-                adminNotes: editing.adminNotes
-            };
+            const payload = updateData;
+            if (!payload) return; // robustness check
 
             const res = await fetch("/api/admin/messages", {
                 method: "PUT",
