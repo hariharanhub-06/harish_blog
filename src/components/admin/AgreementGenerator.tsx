@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 
 interface ProjectData {
+    id?: string;
+    updatedAt?: Date | string;
     clientName: string;
     businessName?: string;
     title: string;
@@ -22,6 +24,15 @@ interface ProjectData {
     scopeSummary: string;
 }
 
+const safeProject = (p: ProjectData) => ({
+    ...p,
+    clientName: p.clientName || 'Unknown Client',
+    title: p.title || 'Untitled Project',
+    price: p.price || 0,
+    timeline: p.timeline || 'TBD',
+    scopeSummary: p.scopeSummary || 'As discussed.'
+});
+
 interface AgreementGeneratorProps {
     project: ProjectData;
     onSave: (content: string) => void;
@@ -29,46 +40,48 @@ interface AgreementGeneratorProps {
 }
 
 export default function AgreementGenerator({ project, onSave, onClose }: AgreementGeneratorProps) {
+    const safe = safeProject(project);
     const [content, setContent] = useState("");
     const [isEditing, setIsEditing] = useState(false);
 
-    const defaultTemplate = `
-SERVICE AGREEMENT
-
-This Agreement is made on ${new Date().toLocaleDateString()} between:
-PROVIDER: Hariharan (harishblog / hariharanhub.com)
-CLIENT: ${project.clientName} ${project.businessName ? `(${project.businessName})` : ""}
-
-1. SERVICES PROVIDED
-The Provider agrees to perform the following services for the Client:
-- Project Title: ${project.title}
-- Scope of Work: ${project.scopeSummary || "As discussed in the initial requirements phase."}
-
-2. TIMELINE
-The services will be completed within the following timeframe:
-${project.timeline || "TBD - Subject to receipt of all required assets."}
-
-3. INVESTMENT & PAYMENT TERMS
-The total investment for the defined scope is ₹${project.price.toLocaleString()}.
-Payment Structure:
-- 50% Advance (₹${(project.price * 0.5).toLocaleString()}) to commence work.
-- 50% Final Balance (₹${(project.price * 0.5).toLocaleString()}) due upon completion and prior to final delivery/handover.
-
-4. CLIENT RESPONSIBILITIES
-The Client agrees to provide timely feedback and all necessary assets (content, credentials, images) to ensure project milestones are met.
-
-5. REVISIONS
-This project includes up to 2 rounds of minor revisions within the defined scope. Any significant changes to the scope will require a separate quote.
-
-6. CANCELLATION & REFUNDS
-The advance payment is non-refundable as it covers the research, planning, and initial development phase of the project.
-
-By acknowledging this agreement, both parties agree to the terms stated above.
-    `.trim();
+    const defaultTemplateArr = [
+        "SERVICE AGREEMENT",
+        "",
+        `This Agreement is made on ${new Date().toLocaleDateString()} between:`,
+        "PROVIDER: Hariharan (harishblog / hariharanhub.com)",
+        `CLIENT: ${safe.clientName} ${safe.businessName ? `(${safe.businessName})` : ""}`,
+        "",
+        "1. SERVICES PROVIDED",
+        "The Provider agrees to perform the following services for the Client:",
+        `- Project Title: ${safe.title}`,
+        `- Scope of Work: ${safe.scopeSummary}`,
+        "",
+        "2. TIMELINE",
+        "The services will be completed within the following timeframe:",
+        safe.timeline,
+        "",
+        "3. INVESTMENT & PAYMENT TERMS",
+        `The total investment for the defined scope is ₹${safe.price.toLocaleString()}.`,
+        "Payment Structure:",
+        `- 50% Advance (₹${(safe.price * 0.5).toLocaleString()}) to commence work.`,
+        `- 50% Final Balance (₹${(safe.price * 0.5).toLocaleString()}) due upon completion and prior to final delivery/handover.`,
+        "",
+        "4. CLIENT RESPONSIBILITIES",
+        "The Client agrees to provide timely feedback and all necessary assets (content, credentials, images) to ensure project milestones are met.",
+        "",
+        "5. REVISIONS",
+        "This project includes up to 2 rounds of minor revisions within the defined scope. Any significant changes to the scope will require a separate quote.",
+        "",
+        "6. CANCELLATION & REFUNDS",
+        "The advance payment is non-refundable as it covers the research, planning, and initial development phase of the project.",
+        "",
+        "By acknowledging this agreement, both parties agree to the terms stated above."
+    ];
+    const defaultTemplateString = defaultTemplateArr.join("\n");
 
     useEffect(() => {
-        setContent(defaultTemplate);
-    }, [project]);
+        setContent(defaultTemplateString);
+    }, [project.id, project.updatedAt]); // Use unique triggers if available, but for now we'll keep it simple
 
     const copyToClipboard = () => {
         navigator.clipboard.writeText(content);
@@ -81,7 +94,7 @@ By acknowledging this agreement, both parties agree to the terms stated above.
             printWindow.document.write(`
                 <html>
                     <head>
-                        <title>Service Agreement - ${project.title}</title>
+                        <title>Service Agreement - ${safe.title}</title>
                         <style>
                             body { font-family: serif; line-height: 1.6; padding: 40px; }
                             pre { white-space: pre-wrap; font-family: serif; font-size: 14px; }

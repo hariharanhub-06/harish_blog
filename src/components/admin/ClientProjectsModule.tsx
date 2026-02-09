@@ -43,7 +43,7 @@ export default function ClientProjectsModule() {
             const res = await fetch("/api/admin/client-projects");
             if (res.ok) {
                 const data = await res.json();
-                setProjects(data);
+                setProjects(Array.isArray(data) ? data : []);
             }
         } catch (error) {
             console.error(error);

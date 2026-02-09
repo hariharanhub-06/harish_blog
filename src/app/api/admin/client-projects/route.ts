@@ -5,36 +5,29 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        const projects = await db.select({
-            id: clientProjects.id,
-            leadId: clientProjects.leadId,
-            title: clientProjects.title,
-            clientName: clientProjects.clientName,
-            businessName: clientProjects.businessName,
-            description: clientProjects.description,
-            price: clientProjects.price,
-            status: clientProjects.status,
-            paymentStatus: clientProjects.paymentStatus,
-            onboardingChecklist: clientProjects.onboardingChecklist,
-            createdAt: clientProjects.createdAt,
-            lead: {
-                id: contactSubmissions.id,
-                name: contactSubmissions.name,
-                email: contactSubmissions.email,
-                mobile: contactSubmissions.mobile
-            }
-        })
-            .from(clientProjects)
-            .leftJoin(contactSubmissions, eq(clientProjects.leadId, contactSubmissions.id))
-            .orderBy(desc(clientProjects.createdAt));
+        // 1. Try to fetch projects alone first
+        const projects = await db.select().from(clientProjects).orderBy(desc(clientProjects.createdAt));
 
-        return NextResponse.json(projects);
+        // 2. Try to hydrate with leads separately (safer than complex join for debugging)
+        const hydrated = await Promise.all(projects.map(async (p) => {
+            try {
+                if (p.leadId) {
+                    const leadData = await db.select().from(contactSubmissions).where(eq(contactSubmissions.id, p.leadId)).limit(1);
+                    return { ...p, lead: leadData[0] || null };
+                }
+            } catch (e) {
+                console.error(`Failed to fetch lead for project ${p.id}:`, e);
+            }
+            return { ...p, lead: null };
+        }));
+
+        return NextResponse.json(hydrated);
     } catch (error: any) {
         console.error("GET /api/admin/client-projects error:", error);
         return NextResponse.json({
             error: "Database Fetch Failed",
-            message: error.message,
-            code: error.code
+            message: error?.message || String(error),
+            code: error?.code || "UNKNOWN"
         }, { status: 500 });
     }
 }
