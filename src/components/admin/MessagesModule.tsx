@@ -124,7 +124,6 @@ export default function MessagesModule() {
                 body: JSON.stringify(payload),
             });
             if (res.ok) {
-                setEditing(null);
                 setViewing(null);
                 fetchMessages();
             } else {
