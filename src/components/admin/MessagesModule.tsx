@@ -108,7 +108,7 @@ export default function MessagesModule() {
     };
 
     const handleUpdate = async (e?: React.FormEvent, updateData?: any) => {
-        console.log("DEBUG: Running handleUpdate v3 (No setEditing)");
+        console.log("DEBUG: Running handleUpdate v4 (No setEditing)");
         if (e) e.preventDefault();
         setUpdating(true);
         try {
@@ -218,7 +218,7 @@ export default function MessagesModule() {
                         >
                             <RefreshCcw size={14} className={fetching ? "animate-spin" : ""} />
                         </button>
-                        <span className="text-[8px] opacity-20 font-mono ml-1">v3</span>
+                        <span className="text-[8px] opacity-20 font-mono ml-1">v4</span>
                     </h2>
                     <p className="text-secondary text-xs font-bold mt-0.5">Track and convert leads into customers</p>
                 </div>
