@@ -1,20 +1,41 @@
 import { db } from "@/db";
-import { clientProjects } from "@/db/schema";
+import { clientProjects, contactSubmissions } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        const projects = await db.query.clientProjects.findMany({
-            orderBy: [desc(clientProjects.createdAt)],
-            with: {
-                lead: true
+        const projects = await db.select({
+            id: clientProjects.id,
+            leadId: clientProjects.leadId,
+            title: clientProjects.title,
+            clientName: clientProjects.clientName,
+            businessName: clientProjects.businessName,
+            description: clientProjects.description,
+            price: clientProjects.price,
+            status: clientProjects.status,
+            paymentStatus: clientProjects.paymentStatus,
+            onboardingChecklist: clientProjects.onboardingChecklist,
+            createdAt: clientProjects.createdAt,
+            lead: {
+                id: contactSubmissions.id,
+                name: contactSubmissions.name,
+                email: contactSubmissions.email,
+                mobile: contactSubmissions.mobile
             }
-        });
+        })
+            .from(clientProjects)
+            .leftJoin(contactSubmissions, eq(clientProjects.leadId, contactSubmissions.id))
+            .orderBy(desc(clientProjects.createdAt));
+
         return NextResponse.json(projects);
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: "Failed to fetch client projects" }, { status: 500 });
+    } catch (error: any) {
+        console.error("GET /api/admin/client-projects error:", error);
+        return NextResponse.json({
+            error: "Database Fetch Failed",
+            message: error.message,
+            code: error.code
+        }, { status: 500 });
     }
 }
 
@@ -24,10 +45,8 @@ export async function POST(req: Request) {
 
         // Check if project for this lead already exists
         if (data.leadId) {
-            const existing = await db.query.clientProjects.findFirst({
-                where: eq(clientProjects.leadId, data.leadId)
-            });
-            if (existing) {
+            const existing = await db.select().from(clientProjects).where(eq(clientProjects.leadId, data.leadId)).limit(1);
+            if (existing.length > 0) {
                 return NextResponse.json({ error: "A project already exists for this lead" }, { status: 400 });
             }
         }
@@ -52,8 +71,8 @@ export async function POST(req: Request) {
 
         return NextResponse.json(newProject[0]);
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: "Failed to create project" }, { status: 500 });
+        console.error("POST /api/admin/client-projects error:", error);
+        return NextResponse.json({ error: String(error) }, { status: 500 });
     }
 }
 
@@ -74,8 +93,8 @@ export async function PUT(req: Request) {
 
         return NextResponse.json(updated[0]);
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: "Failed to update project" }, { status: 500 });
+        console.error("PUT /api/admin/client-projects error:", error);
+        return NextResponse.json({ error: String(error) }, { status: 500 });
     }
 }
 
