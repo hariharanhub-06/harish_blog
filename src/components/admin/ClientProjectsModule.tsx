@@ -198,9 +198,9 @@ export default function ClientProjectsModule() {
 
             {/* Project Management Modal */}
             {viewing && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-10 relative scrollbar-hide">
-                        <button onClick={() => setViewing(null)} className="absolute top-8 right-8 p-2 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-full transition-all">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 md:p-10 leading-normal">
+                    <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto p-6 md:p-12 relative scrollbar-hide animate-in zoom-in-95 duration-300">
+                        <button onClick={() => setViewing(null)} className="absolute top-6 right-6 md:top-10 md:right-10 p-2 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-full transition-all z-10">
                             <X size={24} />
                         </button>
 
@@ -345,23 +345,27 @@ export default function ClientProjectsModule() {
 
             {/* Agreement Generator Overlay */}
             {showGenerator && viewing && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[110] flex items-center justify-center p-4">
-                    <AgreementGenerator
-                        project={{
-                            clientName: viewing.clientName,
-                            businessName: viewing.businessName,
-                            title: viewing.title,
-                            price: viewing.price,
-                            timeline: viewing.timeline,
-                            scopeSummary: viewing.scopeSummary
-                        }}
-                        onClose={() => setShowGenerator(false)}
-                        onSave={(content) => {
-                            handleUpdateProject({ ...viewing, agreementContent: content });
-                            setShowGenerator(false);
-                            alert("Agreement content saved to project record.");
-                        }}
-                    />
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+                    <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[3rem] scrollbar-hide shadow-2xl animate-in slide-in-from-bottom-8 duration-500">
+                        <AgreementGenerator
+                            project={{
+                                id: viewing.id,
+                                updatedAt: viewing.updatedAt,
+                                clientName: viewing.clientName,
+                                businessName: viewing.businessName,
+                                title: viewing.title,
+                                price: viewing.price,
+                                timeline: viewing.timeline,
+                                scopeSummary: viewing.scopeSummary
+                            }}
+                            onClose={() => setShowGenerator(false)}
+                            onSave={(content) => {
+                                handleUpdateProject({ ...viewing, agreementContent: content });
+                                setShowGenerator(false);
+                                alert("Agreement content saved to project record.");
+                            }}
+                        />
+                    </div>
                 </div>
             )}
         </div>

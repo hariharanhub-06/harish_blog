@@ -72,17 +72,35 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
     try {
         const data = await req.json();
-        const { id, ...updateData } = data;
+        const { id, lead, ...updateData } = data; // Filter out lead relation
 
         if (!id) return NextResponse.json({ error: "Project ID required" }, { status: 400 });
 
+        // Filter for valid database fields only
+        const validFields = [
+            "title", "clientName", "businessName", "description",
+            "scopeSummary", "timeline", "price", "advancePaid",
+            "balanceAmount", "paymentStatus", "status",
+            "agreementContent", "invoiceUrl", "onboardingChecklist",
+            "progressMilestones", "internalCost", "expectedProfit"
+        ];
+
+        const filteredUpdates = Object.keys(updateData)
+            .filter(key => validFields.includes(key))
+            .reduce((obj, key) => {
+                obj[key] = updateData[key];
+                return obj;
+            }, {} as any);
+
         const updated = await db.update(clientProjects)
             .set({
-                ...updateData,
+                ...filteredUpdates,
                 updatedAt: new Date()
             })
             .where(eq(clientProjects.id, id))
             .returning();
+
+        if (!updated.length) return NextResponse.json({ error: "Project not found" }, { status: 404 });
 
         return NextResponse.json(updated[0]);
     } catch (error) {

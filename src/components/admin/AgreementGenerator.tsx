@@ -111,15 +111,15 @@ export default function AgreementGenerator({ project, onSave, onClose }: Agreeme
     };
 
     return (
-        <div className="bg-white rounded-[2rem] p-8 md:p-10 border border-gray-100 shadow-2xl w-full max-w-4xl mx-auto overflow-hidden">
+        <div className="bg-white rounded-[2.5rem] p-6 md:p-12 border border-gray-100 shadow-2xl w-full mx-auto relative">
             <div className="flex justify-between items-center mb-10 pb-6 border-b border-gray-100">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center">
-                        <FileText size={24} />
+                    <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center shrink-0">
+                        <FileText size={20} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black uppercase tracking-tight text-gray-900 leading-none">Agreement Generator</h2>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Formalize your engagement with {project.clientName}</p>
+                        <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-gray-900 leading-none">Agreement Generator</h2>
+                        <p className="text-[9px] md:text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Formalize your engagement with {project.clientName}</p>
                     </div>
                 </div>
                 <button onClick={onClose} className="p-2 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-full transition-all">
@@ -149,10 +149,10 @@ export default function AgreementGenerator({ project, onSave, onClose }: Agreeme
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
-                                className="w-full h-[500px] bg-gray-50 border-2 border-primary/10 rounded-3xl p-8 font-serif text-sm leading-relaxed focus:ring-2 focus:ring-primary/20 outline-none transition-all scrollbar-hide"
+                                className="w-full h-[400px] md:h-[500px] bg-gray-50 border-2 border-primary/10 rounded-[2rem] p-6 md:p-10 font-serif text-sm leading-relaxed focus:ring-2 focus:ring-primary/20 outline-none transition-all scrollbar-hide"
                             />
                         ) : (
-                            <div className="w-full h-[500px] bg-white border border-gray-100 rounded-3xl p-10 font-serif text-sm leading-relaxed overflow-y-auto whitespace-pre-wrap shadow-inner text-gray-700">
+                            <div className="w-full h-[400px] md:h-[500px] bg-white border border-gray-100 rounded-[2rem] p-6 md:p-12 font-serif text-sm leading-relaxed overflow-y-auto whitespace-pre-wrap shadow-inner text-gray-700 scrollbar-hide">
                                 {content}
                             </div>
                         )}
