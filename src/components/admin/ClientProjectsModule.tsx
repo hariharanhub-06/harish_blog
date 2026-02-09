@@ -139,12 +139,12 @@ export default function ClientProjectsModule() {
                     >
                         <div className="flex items-center gap-5 min-w-[280px]">
                             <div className={`w-14 h-14 rounded-2xl ${getStatusColor(project.status)} flex items-center justify-center font-black text-xl shadow-sm group-hover:scale-110 transition-transform`}>
-                                {project.clientName.charAt(0)}
+                                {project.clientName?.charAt(0) || 'P'}
                             </div>
                             <div>
-                                <h3 className="font-black text-gray-900 text-lg leading-tight">{project.title}</h3>
+                                <h3 className="font-black text-gray-900 text-lg leading-tight">{project.title || 'Untitled Project'}</h3>
                                 <p className="text-secondary font-bold text-xs mt-1 flex items-center gap-1.5">
-                                    <User size={12} className="text-primary" /> {project.clientName}
+                                    <User size={12} className="text-primary" /> {project.clientName || 'Unknown Client'}
                                 </p>
                             </div>
                         </div>
@@ -153,13 +153,13 @@ export default function ClientProjectsModule() {
                             <div>
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 block mb-1.5">Investment</span>
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-xl font-black italic">₹{project.price.toLocaleString()}</span>
+                                    <span className="text-xl font-black italic">₹{(project.price || 0).toLocaleString()}</span>
                                 </div>
                             </div>
                             <div>
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 block mb-1.5">Payment</span>
-                                <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getPaymentColor(project.paymentStatus)}`}>
-                                    {project.paymentStatus.replace('_', ' ')}
+                                <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getPaymentColor(project.paymentStatus || 'pending')}`}>
+                                    {(project.paymentStatus || 'pending').replace('_', ' ')}
                                 </span>
                             </div>
                             <div className="hidden md:block">
@@ -206,7 +206,7 @@ export default function ClientProjectsModule() {
 
                         <div className="flex flex-col md:flex-row items-center gap-8 mb-12">
                             <div className={`w-20 h-20 rounded-3xl ${getStatusColor(viewing.status)} flex items-center justify-center font-black text-3xl shadow-lg border-2 border-white`}>
-                                {viewing.clientName.charAt(0)}
+                                {viewing.clientName?.charAt(0) || 'P'}
                             </div>
                             <div className="text-center md:text-left space-y-1">
                                 <h3 className="text-3xl font-black text-gray-900 tracking-tight">{viewing.title}</h3>
@@ -248,9 +248,9 @@ export default function ClientProjectsModule() {
                             <div className="p-6 bg-gray-900 rounded-[2rem] text-white space-y-4">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Commercials</p>
                                 <div className="space-y-1 px-2">
-                                    <p className="text-2xl font-black italic tracking-tighter">₹{viewing.price.toLocaleString()}</p>
+                                    <p className="text-2xl font-black italic tracking-tighter">₹{(viewing.price || 0).toLocaleString()}</p>
                                     <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">
-                                        Balance: ₹{(viewing.price - (viewing.advancePaid || 0)).toLocaleString()}
+                                        Balance: ₹{((viewing.price || 0) - (viewing.advancePaid || 0)).toLocaleString()}
                                     </p>
                                 </div>
                             </div>
@@ -263,11 +263,11 @@ export default function ClientProjectsModule() {
                                     <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Onboarding Checklist</h4>
                                     <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[9px] font-black">
                                         <TrendingUp size={10} />
-                                        {Math.round((viewing.onboardingChecklist.filter((t: any) => t.completed).length / viewing.onboardingChecklist.length) * 100)}%
+                                        {viewing.onboardingChecklist ? Math.round((viewing.onboardingChecklist.filter((t: any) => t.completed).length / viewing.onboardingChecklist.length) * 100) : 0}%
                                     </div>
                                 </div>
                                 <div className="space-y-3">
-                                    {viewing.onboardingChecklist.map((item: any, idx: number) => (
+                                    {(viewing.onboardingChecklist || []).map((item: any, idx: number) => (
                                         <button
                                             key={item.id}
                                             onClick={() => toggleChecklistItem(idx)}
