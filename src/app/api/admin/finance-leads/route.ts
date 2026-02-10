@@ -12,9 +12,13 @@ export async function GET(req: Request) {
             orderBy: [desc(financeLeads.createdAt)]
         });
         return NextResponse.json(data);
-    } catch (error) {
-        console.error("Failed to fetch finance leads:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    } catch (error: any) {
+        console.error("CRITICAL: Failed to fetch finance leads:", error);
+        return NextResponse.json({
+            error: "Internal Server Error",
+            message: error.message,
+            stack: error.stack
+        }, { status: 500 });
     }
 }
 

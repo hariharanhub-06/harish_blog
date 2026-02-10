@@ -1,5 +1,6 @@
 import { pgTable, text, integer, real, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { sql, relations } from "drizzle-orm";
+import crypto from "crypto";
 
 export const profiles = pgTable("profiles", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
