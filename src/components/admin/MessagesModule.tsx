@@ -184,8 +184,8 @@ export default function MessagesModule() {
                 alert("Lead successfully pushed to Finance Management!");
                 handleUpdate(undefined, { ...msg, status: 'Qualified' });
             } else {
-                const err = await res.json();
-                alert(err.error || "Failed to push lead");
+                const err = await res.json().catch(() => ({}));
+                alert(err.details || err.error || "Failed to push lead");
             }
         } catch (error) {
             console.error(error);

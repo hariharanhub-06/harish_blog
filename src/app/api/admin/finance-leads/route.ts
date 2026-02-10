@@ -33,9 +33,12 @@ export async function POST(req: Request) {
         }).returning();
 
         return NextResponse.json(newLead);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to create finance lead:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({
+            error: "Internal Server Error",
+            details: error.message || String(error)
+        }, { status: 500 });
     }
 }
 
