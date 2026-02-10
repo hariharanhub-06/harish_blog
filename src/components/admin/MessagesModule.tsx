@@ -182,7 +182,9 @@ export default function MessagesModule() {
             });
             if (res.ok) {
                 alert("Lead successfully pushed to Finance Management!");
-                handleUpdate(undefined, { ...msg, status: 'Qualified' });
+                // Keep status if already moved past New, otherwise mark as Qualified/Pushed
+                const nextStatus = msg.status === 'New' ? 'Qualified' : msg.status;
+                handleUpdate(undefined, { ...msg, status: nextStatus });
             } else {
                 const err = await res.json().catch(() => ({}));
                 alert(err.details || err.error || "Failed to push lead");
