@@ -18,7 +18,8 @@ import {
     Edit3,
     RefreshCcw,
     CheckCircle2,
-    Calculator as CalculatorIcon
+    Calculator as CalculatorIcon,
+    Wallet
 } from "lucide-react";
 import PricingCalculator from "./PricingCalculator";
 
@@ -161,6 +162,34 @@ export default function MessagesModule() {
         } catch (error) {
             console.error(error);
             alert("An error occurred during conversion");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handlePushToFinance = async (msg: any) => {
+        if (!confirm(`Track ${msg.name} as a Finance Lead?`)) return;
+        setUpdating(true);
+        try {
+            const res = await fetch("/api/admin/finance-leads", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    leadId: msg.id,
+                    loanType: msg.requestedService || "General Loan",
+                    adminNotes: `Transferred from messages. Initial message: ${msg.message}`
+                }),
+            });
+            if (res.ok) {
+                alert("Lead successfully pushed to Finance Management!");
+                handleUpdate(undefined, { ...msg, status: 'Qualified' });
+            } else {
+                const err = await res.json();
+                alert(err.error || "Failed to push lead");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("An error occurred");
         } finally {
             setUpdating(false);
         }
@@ -317,6 +346,15 @@ export default function MessagesModule() {
                                 <Trash2 size={16} />
                             </button>
                         </div>
+
+                        {msg.category === "Financial Logistics" && msg.status === "New" && (
+                            <button
+                                onClick={() => handlePushToFinance(msg)}
+                                className="w-full xl:w-auto bg-indigo-50 text-indigo-600 border border-indigo-100 px-4 py-2 rounded-xl font-black uppercase text-[8px] flex items-center justify-center gap-2 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                            >
+                                <Wallet size={12} /> Push to Finance Leads
+                            </button>
+                        )}
                     </div>
                 ))}
 

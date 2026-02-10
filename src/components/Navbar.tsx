@@ -54,8 +54,6 @@ const navLinks: NavLink[] = [
         items: [
             { name: "Business Digital Solution", href: "/services", icon: Code, color: "text-blue-500" },
             { name: "Financial Logistics", href: "/financial-logistics", icon: IndianRupee, color: "text-emerald-500" },
-            { name: "Pricing", href: "/services#pricing", icon: IndianRupee, color: "text-pink-500" },
-            { name: "Contact Team", href: "/services#contact", icon: Mail, color: "text-orange-500" },
         ]
     },
     { name: "Live Session", href: "/#sessions", icon: Video },

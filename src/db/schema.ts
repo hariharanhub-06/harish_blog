@@ -819,3 +819,41 @@ export const projectQuotes = pgTable("project_quotes", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const financeLeads = pgTable("finance_leads", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  leadId: text("lead_id").notNull(),
+  loanType: text("loan_type").notNull(),
+  status: text("status").default("Document Collection"), // Document Collection, Applied, Approved Pending, Approved, Disbursed, Commission Collected, Not Eligible/Reject
+
+  // Approval Details
+  approvedBank: text("approved_bank"),
+  approvedAmount: real("approved_amount").default(0),
+
+  // Payout Details
+  disbursementDate: timestamp("disbursement_date"),
+
+  // Commission Details
+  commissionAmount: real("commission_amount").default(0),
+  commissionCollectedDate: timestamp("commission_collected_date"),
+
+  // Rejection Details
+  rejectionReason: text("rejection_reason"),
+
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const financeLeadRelations = relations(financeLeads, ({ one }) => ({
+  lead: one(contactSubmissions, {
+    fields: [financeLeads.leadId],
+    references: [contactSubmissions.id],
+  }),
+}));
+
+export const contactSubmissionFinanceRelations = relations(contactSubmissions, ({ many }) => ({
+  projects: many(clientProjects),
+  financeLeads: many(financeLeads),
+}));
+

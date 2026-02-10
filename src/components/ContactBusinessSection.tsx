@@ -1,18 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, MessageSquare, CheckCircle2, ShieldCheck, Home, ArrowRight, Loader2, X } from "lucide-react";
 import Link from "next/link";
 
-export default function ContactBusinessSection() {
+interface ContactBusinessSectionProps {
+    category?: "Business Digital Solution" | "Financial Logistics";
+}
+
+export default function ContactBusinessSection({ category = "Business Digital Solution" }: ContactBusinessSectionProps) {
     const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
     const [formData, setFormData] = useState({
         name: "",
         businessType: "",
-        serviceNeeded: "Website Development",
+        serviceNeeded: "",
         contact: "",
         message: ""
     });
+
+    // Set default service based on category
+    useEffect(() => {
+        if (category === "Financial Logistics") {
+            setFormData(prev => ({ ...prev, serviceNeeded: "Personal Loan" }));
+        } else {
+            setFormData(prev => ({ ...prev, serviceNeeded: "Website Development" }));
+        }
+    }, [category]);
+
+    const digitalServices = [
+        "Website Development",
+        "CRM Solution",
+        "Lead Management",
+        "Sales Automation"
+    ];
+
+    const financeServices = [
+        "Personal Loan",
+        "Unsecured Loan",
+        "Secured Loan",
+        "LAP (Loan Against Property)",
+        "Business Loan",
+        "Two Wheeler Finance",
+        "Four Wheeler Finance"
+    ];
+
+    const currentServices = category === "Financial Logistics" ? financeServices : digitalServices;
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,13 +61,20 @@ export default function ContactBusinessSection() {
                     mobile: formData.contact,
                     email: formData.contact.includes("@") ? formData.contact : "not-provided@example.com",
                     message: formData.message,
-                    subject: `Inquiry: ${formData.businessType} - ${formData.serviceNeeded}`
+                    subject: `Inquiry: ${formData.businessType} - ${formData.serviceNeeded}`,
+                    category: category // Injecting the source category for admin grouping
                 }),
             });
 
             if (res.ok) {
                 setFormStatus("success");
-                setFormData({ name: "", businessType: "", serviceNeeded: "Website Development", contact: "", message: "" });
+                setFormData({
+                    name: "",
+                    businessType: "",
+                    serviceNeeded: category === "Financial Logistics" ? "Personal Loan" : "Website Development",
+                    contact: "",
+                    message: ""
+                });
             } else {
                 setFormStatus("error");
             }
@@ -51,8 +90,8 @@ export default function ContactBusinessSection() {
                 {/* Left: Info */}
                 <div className="md:w-1/3">
                     <span className="text-orange-500 font-black tracking-[0.3em] uppercase text-xs mb-4 block">Connect</span>
-                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6 leading-tight">Let's Talk <br /><span className="text-orange-500">Business</span></h2>
-                    <p className="text-gray-400 font-medium mb-10 text-sm leading-relaxed">Ready to upgrade your digital presence? We respond within 24 hours.</p>
+                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-6 leading-tight">Let's Talk <br /><span className="text-orange-500">{category === "Financial Logistics" ? "Finance" : "Business"}</span></h2>
+                    <p className="text-gray-400 font-medium mb-10 text-sm leading-relaxed">Ready to upgrade your {category === "Financial Logistics" ? "financial" : "digital"} presence? We respond within 24 hours.</p>
 
                     <div className="space-y-4">
                         <a href="https://wa.me/919042387152" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 hover:bg-emerald-500/10 transition-all group">
@@ -92,7 +131,7 @@ export default function ContactBusinessSection() {
                                     Thank you for contacting us. Your requirement has been received successfully.
                                 </p>
                                 <p className="text-gray-400 text-xs font-medium">
-                                    We will review your request and contact you within <span className="text-orange-500 font-bold">24–48 hours</span>.
+                                    Our team will review your request and contact you within <span className="text-orange-500 font-bold">24–48 hours</span>.
                                 </p>
                             </div>
 
@@ -105,8 +144,8 @@ export default function ContactBusinessSection() {
                                 <Link href="/" className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2">
                                     <Home size={14} /> Back to Home
                                 </Link>
-                                <Link href="/services#solutions" className="w-full sm:w-auto px-8 py-4 bg-orange-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2">
-                                    View Business Solutions <ArrowRight size={14} />
+                                <Link href={category === "Financial Logistics" ? "/financial-logistics" : "/services"} className="w-full sm:w-auto px-8 py-4 bg-orange-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2">
+                                    View Other Services <ArrowRight size={14} />
                                 </Link>
                             </div>
                         </div>
@@ -156,11 +195,9 @@ export default function ContactBusinessSection() {
                                     onChange={e => setFormData({ ...formData, serviceNeeded: e.target.value })}
                                     className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-orange-500 outline-none transition-all"
                                 >
-                                    <option value="Website Development" className="bg-[#1a1a1a]">Website Development</option>
-                                    <option value="CRM Solution" className="bg-[#1a1a1a]">CRM Solution</option>
-                                    <option value="Lead Management" className="bg-[#1a1a1a]">Lead Management</option>
-                                    <option value="Sales Automation" className="bg-[#1a1a1a]">Sales Automation</option>
-                                    <option value="Financial Logistics (Loans)" className="bg-[#1a1a1a]">Financial Logistics (Loans)</option>
+                                    {currentServices.map(s => (
+                                        <option key={s} value={s} className="bg-[#1a1a1a]">{s}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="space-y-2">

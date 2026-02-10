@@ -22,7 +22,7 @@ export async function POST(req: Request) {
             socialMedia: body.socialMedia,
             subject: body.subject || "No Subject",
             message: body.message,
-            category: body.category || "Not Determined",
+            category: body.category || "Business Digital Solution",
             status: "New"
         });
 

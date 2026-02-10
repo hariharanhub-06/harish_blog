@@ -158,7 +158,7 @@ export default function FinancialLogisticsPage() {
                 </div>
             </section>
 
-            <ContactBusinessSection />
+            <ContactBusinessSection category="Financial Logistics" />
         </div>
     );
 }
