@@ -21,23 +21,30 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
+        console.log("POST /api/admin/finance-leads - Body:", body);
+
         if (!body.leadId || !body.loanType) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        const [newLead] = await db.insert(financeLeads).values({
+        const values = {
             leadId: body.leadId,
             loanType: body.loanType,
             status: body.status || "Document Collection",
-            adminNotes: body.adminNotes || ""
-        }).returning();
+            adminNotes: (body.adminNotes || "")
+        };
+        console.log("Inserting values:", values);
 
-        return NextResponse.json(newLead);
+        const result = await db.insert(financeLeads).values(values).returning();
+        console.log("Insert result:", result);
+
+        return NextResponse.json(result[0] || { success: true });
     } catch (error: any) {
-        console.error("Failed to create finance lead:", error);
+        console.error("CRITICAL: Failed to create finance lead:", error);
         return NextResponse.json({
             error: "Internal Server Error",
-            details: error.message || String(error)
+            details: error.message || String(error),
+            stack: error.stack
         }, { status: 500 });
     }
 }
