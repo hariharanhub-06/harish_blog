@@ -1,16 +1,25 @@
 import { db } from "@/db";
-import { financeLeads } from "@/db/schema";
+import { financeLeads, contactSubmissions } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { eq, desc } from "drizzle-orm";
 
 export async function GET(req: Request) {
     try {
-        const data = await db.query.financeLeads.findMany({
-            with: {
-                lead: true
-            },
-            orderBy: [desc(financeLeads.createdAt)]
-        });
+        // 1. Fetch leads
+        const leads = await db.select().from(financeLeads).orderBy(desc(financeLeads.createdAt));
+
+        // 2. Fetch all contact submissions to hydrate
+        const allContacts = await db.select().from(contactSubmissions);
+        const contactMap = allContacts.reduce((acc: any, curr) => {
+            acc[curr.id] = curr;
+            return acc;
+        }, {});
+
+        const data = leads.map(l => ({
+            ...l,
+            lead: contactMap[l.leadId] || null
+        }));
+
         return NextResponse.json(data);
     } catch (error: any) {
         console.error("CRITICAL: Failed to fetch finance leads:", error);
