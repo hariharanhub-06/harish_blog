@@ -156,10 +156,11 @@ export default function ContactBusinessSection() {
                                     onChange={e => setFormData({ ...formData, serviceNeeded: e.target.value })}
                                     className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-orange-500 outline-none transition-all"
                                 >
-                                    <option value="Website Development">Website Development</option>
-                                    <option value="CRM Solution">CRM Solution</option>
-                                    <option value="Lead Management">Lead Management</option>
-                                    <option value="Sales Automation">Sales Automation</option>
+                                    <option value="Website Development" className="bg-[#1a1a1a]">Website Development</option>
+                                    <option value="CRM Solution" className="bg-[#1a1a1a]">CRM Solution</option>
+                                    <option value="Lead Management" className="bg-[#1a1a1a]">Lead Management</option>
+                                    <option value="Sales Automation" className="bg-[#1a1a1a]">Sales Automation</option>
+                                    <option value="Financial Logistics (Loans)" className="bg-[#1a1a1a]">Financial Logistics (Loans)</option>
                                 </select>
                             </div>
                             <div className="space-y-2">

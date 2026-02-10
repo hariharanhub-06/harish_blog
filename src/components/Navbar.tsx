@@ -52,9 +52,8 @@ const navLinks: NavLink[] = [
         icon: Briefcase,
         isDropdown: true,
         items: [
-            { name: "Digital Solutions", href: "/services#solutions", icon: Code, color: "text-blue-500" },
-            { name: "CRM Systems", href: "/services#crm", icon: Database, color: "text-purple-500" },
-            { name: "Industries", href: "/services#industries", icon: Briefcase, color: "text-emerald-500" },
+            { name: "Business Digital Solution", href: "/services", icon: Code, color: "text-blue-500" },
+            { name: "Financial Logistics", href: "/financial-logistics", icon: IndianRupee, color: "text-emerald-500" },
             { name: "Pricing", href: "/services#pricing", icon: IndianRupee, color: "text-pink-500" },
             { name: "Contact Team", href: "/services#contact", icon: Mail, color: "text-orange-500" },
         ]

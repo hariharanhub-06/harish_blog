@@ -111,12 +111,12 @@ export default function ServicesPage() {
 
             {/* Hero Section */}
             <section className="container mx-auto px-6 pt-4 pb-10 md:pt-6 md:pb-12 text-center relative z-10">
-                <span className="text-orange-500 font-black tracking-[0.3em] uppercase text-xs mb-4 block">Hariharan Hub Digital Solutions</span>
+                <span className="text-orange-500 font-black tracking-[0.3em] uppercase text-xs mb-4 block">Hariharan Hub</span>
                 <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6 leading-tight">
-                    Build, Manage, <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-purple-600">Grow</span> <br className="hidden md:block" /> Your Business Digitally
+                    Business <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-purple-600">Digital Solution</span> <br className="hidden md:block" /> Growth Engine
                 </h1>
                 <p className="text-gray-400 max-w-2xl mx-auto text-lg mb-10 font-medium">
-                    We empower small businesses, startups, and coaching centers with cutting-edge websites and CRM systems designed for growth.
+                    We empower small businesses, startups, and coaching centers with high-performance websites and automated CRM systems designed for digital scale.
                 </p>
                 <div className="flex flex-col md:flex-row gap-4 justify-center">
                     <Link href="/contact-business" className="px-8 py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-xl">
@@ -173,8 +173,8 @@ export default function ServicesPage() {
             {/* Solution Explanation Section */}
             <section id="solutions" className="container mx-auto px-6 py-10 relative z-10 scroll-mt-20">
                 <div className="flex flex-col items-center mb-16 text-center">
-                    <span className="text-blue-500 font-black tracking-[0.3em] uppercase text-xs mb-4 block">The Solution</span>
-                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-4">Our Business <span className="text-blue-500">Growth Engine</span></h2>
+                    <span className="text-blue-500 font-black tracking-[0.3em] uppercase text-xs mb-4 block">Our Expertise</span>
+                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-4">Digital <span className="text-blue-500">Solutions</span></h2>
                     <p className="text-gray-400 max-w-xl mx-auto text-sm font-medium">A unified system designed to automate your sales funnel and professionalize your brand.</p>
                 </div>
 

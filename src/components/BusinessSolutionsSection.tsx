@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Briefcase, Database, Rocket } from "lucide-react";
+import { ArrowRight, Briefcase, Database, Rocket, Code } from "lucide-react";
 
 export default function BusinessSolutionsSection() {
     return (
@@ -9,27 +9,27 @@ export default function BusinessSolutionsSection() {
             {/* Background Decorations */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-orange-600/10 to-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="relative z-10 bg-white/5 border border-white/10 rounded-[3rem] p-8 md:p-12 text-center md:text-left shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-white/20 transition-all duration-500">
+            <div className="relative z-10 bg-white/5 border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-white/20 transition-all duration-500">
                 <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity duration-700">
                     <Rocket size={200} className="text-white" />
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-                    <div className="max-w-xl">
-                        <span className="text-orange-500 font-black tracking-[0.3em] uppercase text-[10px] mb-4 block">For Entrepreneurs & Founders</span>
+                    <div className="max-w-xl text-center md:text-left">
+                        <span className="text-orange-500 font-black tracking-[0.3em] uppercase text-[10px] mb-4 block">Unified Systems</span>
                         <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-white mb-6 leading-none">
-                            Business <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-purple-600">Solutions</span>
+                            Expert <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-purple-600">Business Solutions</span>
                         </h2>
                         <p className="text-gray-400 font-medium leading-relaxed mb-8">
-                            Looking to scale? We build high-performance websites and automated CRM systems tailored for small businesses, coaching centers, and startups.
+                            We provide end-to-end digital growth engines and robust financial logistics to scale your operations.
                         </p>
 
-                        <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                            <Link href="/services" className="px-6 py-3 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-lg flex items-center gap-2">
-                                <Briefcase size={14} /> Explore Services
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <Link href="/services" className="px-8 py-5 bg-white text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-orange-600 hover:text-white transition-all shadow-xl flex items-center justify-center gap-3 group whitespace-nowrap">
+                                <Code size={18} className="group-hover:rotate-12 transition-transform" /> Business Digital Solution
                             </Link>
-                            <Link href="/crm-solutions" className="px-6 py-3 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-purple-500/20 hover:border-purple-500/50 transition-all flex items-center gap-2">
-                                <Database size={14} /> Custom CRM
+                            <Link href="/financial-logistics" className="px-8 py-5 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white/10 transition-all backdrop-blur-sm flex items-center justify-center gap-3 group whitespace-nowrap">
+                                <Briefcase size={18} className="group-hover:-rotate-12 transition-transform" /> Financial Logistics
                             </Link>
                         </div>
                     </div>
