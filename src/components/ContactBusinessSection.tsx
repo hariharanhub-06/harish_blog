@@ -159,7 +159,7 @@ export default function ContactBusinessSection({ category = "Business Digital So
                                     </p>
                                 </div>
                             )}
-                            <div className="grid md:grid-cols-2 gap-6">
+                            <div className={`${category === "Financial Logistics" ? "grid-cols-1" : "grid md:grid-cols-2"} gap-6`}>
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-1">Name</label>
                                     <input
@@ -169,15 +169,17 @@ export default function ContactBusinessSection({ category = "Business Digital So
                                         placeholder="Your Name"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-1">Business Type</label>
-                                    <input
-                                        type="text" required value={formData.businessType}
-                                        onChange={e => setFormData({ ...formData, businessType: e.target.value })}
-                                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-orange-500 outline-none transition-all placeholder:text-gray-800"
-                                        placeholder="e.g. Retail"
-                                    />
-                                </div>
+                                {category !== "Financial Logistics" && (
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-1">Business Type</label>
+                                        <input
+                                            type="text" required value={formData.businessType}
+                                            onChange={e => setFormData({ ...formData, businessType: e.target.value })}
+                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-orange-500 outline-none transition-all placeholder:text-gray-800"
+                                            placeholder="e.g. Retail"
+                                        />
+                                    </div>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[9px] font-black uppercase tracking-widest text-gray-500 ml-1">Contact (Phone/Email)</label>

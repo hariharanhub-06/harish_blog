@@ -101,11 +101,15 @@ export default function FinanceLeadModule() {
         if (res.ok) fetchLeads();
     };
 
-    const filteredLeads = leads.filter(l =>
-        l.lead?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        l.loanType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        l.lead?.mobile?.includes(searchQuery)
-    );
+    const filteredLeads = leads.filter(l => {
+        const query = searchQuery.toLowerCase();
+        return (
+            l.lead?.name?.toLowerCase().includes(query) ||
+            l.loanType?.toLowerCase().includes(query) ||
+            l.lead?.mobile?.includes(query) ||
+            (!l.lead && l.loanType?.toLowerCase().includes(query)) // Fallback if join fails
+        );
+    });
 
     if (fetching) {
         return (

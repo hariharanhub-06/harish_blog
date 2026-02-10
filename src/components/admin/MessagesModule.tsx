@@ -405,13 +405,15 @@ export default function MessagesModule() {
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6 mb-8">
-                            <div className="space-y-1.5">
-                                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Business Type</p>
-                                <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center gap-2.5 text-sm">
-                                    <Briefcase size={16} className="text-orange-500" />
-                                    <span>{viewing.businessType || 'Personal'}</span>
+                            {viewing.category !== "Financial Logistics" && (
+                                <div className="space-y-1.5">
+                                    <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Business Type</p>
+                                    <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center gap-2.5 text-sm">
+                                        <Briefcase size={16} className="text-orange-500" />
+                                        <span>{viewing.businessType || 'Personal'}</span>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                             <div className="space-y-1.5">
                                 <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Service Requested</p>
                                 <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center gap-2.5 text-sm">
@@ -464,37 +466,49 @@ export default function MessagesModule() {
                         </div>
 
                         <div className="mt-8 flex flex-col gap-3">
-                            <div className="flex gap-3">
+                            {viewing.category === "Financial Logistics" ? (
                                 <button
-                                    onClick={() => handleUpdate(undefined, { ...viewing, status: 'Won' })}
-                                    disabled={updating}
-                                    className="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                    onClick={() => handlePushToFinance(viewing)}
+                                    disabled={updating || viewing.status === 'Qualified'}
+                                    className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-indigo-600/20 active:scale-95 transition-all flex items-center justify-center gap-2"
                                 >
-                                    <CheckCircle2 size={16} /> Mark as Won
+                                    <Wallet size={16} /> {viewing.status === 'Qualified' ? 'Pushed to Finance Leads' : 'Push to Finance Leads'}
                                 </button>
-                                <button
-                                    onClick={() => handleUpdate(undefined, { ...viewing, status: 'Lost' })}
-                                    disabled={updating}
-                                    className="flex-1 bg-red-50 text-red-600 border border-red-100 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all"
-                                >
-                                    Mark as Lost
-                                </button>
-                            </div>
+                            ) : (viewing.category === "Business Digital Solution" || viewing.category?.includes("Development") || viewing.category?.includes("Designing")) ? (
+                                <>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => handleUpdate(undefined, { ...viewing, status: 'Won' })}
+                                            disabled={updating}
+                                            className="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <CheckCircle2 size={16} /> Mark as Won
+                                        </button>
+                                        <button
+                                            onClick={() => handleUpdate(undefined, { ...viewing, status: 'Lost' })}
+                                            disabled={updating}
+                                            className="flex-1 bg-red-50 text-red-600 border border-red-100 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all"
+                                        >
+                                            Mark as Lost
+                                        </button>
+                                    </div>
 
-                            <button
-                                onClick={() => handleConvertToProject(viewing)}
-                                disabled={updating}
-                                className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-2"
-                            >
-                                <Briefcase size={16} /> Convert to formal Client Project
-                            </button>
+                                    <button
+                                        onClick={() => handleConvertToProject(viewing)}
+                                        disabled={updating}
+                                        className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Briefcase size={16} /> Convert to formal Client Project
+                                    </button>
 
-                            <button
-                                onClick={() => setShowCalculator(true)}
-                                className="w-full bg-blue-50 text-blue-600 border border-blue-100 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white"
-                            >
-                                <CalculatorIcon size={16} /> Pricing Calculator & Quote Generator
-                            </button>
+                                    <button
+                                        onClick={() => setShowCalculator(true)}
+                                        className="w-full bg-blue-50 text-blue-600 border border-blue-100 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white"
+                                    >
+                                        <CalculatorIcon size={16} /> Pricing Calculator & Quote Generator
+                                    </button>
+                                </>
+                            ) : null}
                         </div>
                     </div>
                 </div>
