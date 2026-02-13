@@ -53,11 +53,13 @@ export async function uploadToImageKit(
 
         const uploadData: UploadResponse = await uploadResponse.json();
 
-        // Return URL with AVIF optimization parameters
-        // f-avif: Convert to AVIF format (30% smaller than WebP)
-        // q-80: 80% quality (visually identical)
-        // Auto adapts size based on use case
-        return `${uploadData.url}?tr=f-avif,q-80`;
+        // Return URL with AVIF optimization parameters for images only
+        if (file.type.startsWith('image/')) {
+            return `${uploadData.url}?tr=f-avif,q-80`;
+        }
+
+        // Return clean URL for videos (ImageKit does not support f-avif transformation for videos)
+        return uploadData.url;
     } catch (error) {
         console.error('ImageKit upload error:', error);
         throw error;

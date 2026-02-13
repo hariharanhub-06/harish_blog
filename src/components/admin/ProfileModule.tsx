@@ -100,7 +100,7 @@ export default function ProfileModule() {
         try {
             const file = e.target.files[0];
             // Check file size (limit to 10MB for images, 100MB for video/audio)
-            const isMedia = type === 'audio' || type === 'video';
+            const isMedia = ['audio', 'video', 'business_video'].includes(type);
             const limit = isMedia ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
 
             if (file.size > limit) {
