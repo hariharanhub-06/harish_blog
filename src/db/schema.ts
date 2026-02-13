@@ -730,12 +730,6 @@ export const clientProjects = pgTable("client_projects", {
   paymentStatus: text("payment_status").default("pending"),
   status: text("status").default("onboarding"),
   invoiceUrl: text("invoice_url"),
-  onboardingChecklist: jsonb("onboarding_checklist").$default(() => ([
-    { id: 1, task: "Requirements Confirmed", completed: false },
-    { id: 2, task: "Agreement Signed", completed: false },
-    { id: 3, task: "Advance Payment Received", completed: false },
-    { id: 4, task: "Access & Assets Collected", completed: false }
-  ])),
   progressMilestones: jsonb("progress_milestones").$default(() => ([])),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

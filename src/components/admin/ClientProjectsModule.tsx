@@ -19,7 +19,6 @@ import {
     X,
     ChevronRight,
     ArrowRight,
-    TrendingUp,
     AlertCircle,
     Copy,
     Save
@@ -80,17 +79,6 @@ export default function ClientProjectsModule() {
         }
     };
 
-    const toggleChecklistItem = (itemIdx: number) => {
-        const newChecklist = [...(viewing.onboardingChecklist || [])];
-        if (!newChecklist[itemIdx]) return;
-        newChecklist[itemIdx] = { ...newChecklist[itemIdx], completed: !newChecklist[itemIdx].completed };
-        // Update local state, let user save manually or we can auto-save this part if we want
-        // For checklist, auto-save is usually nice.
-        const updatedProject = { ...viewing, onboardingChecklist: newChecklist };
-        setViewing(updatedProject);
-        // Optional: auto-save checklist
-        // handleUpdateProject(updatedProject); 
-    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -139,7 +127,6 @@ export default function ClientProjectsModule() {
             price: 0,
             plannedDeliveryDate: "",
             projectCategory: "Web Development",
-            onboardingChecklist: [],
             projectNotes: [],
         });
     };
@@ -236,24 +223,28 @@ export default function ClientProjectsModule() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-4 flex-1 w-full bg-gray-50/50 p-6 rounded-[2rem] border border-gray-50">
-                            <div>
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary/40 block mb-2">Investment</span>
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 flex-1 w-full bg-gray-50/50 p-6 rounded-[2rem] border border-gray-50">
+                            <div className="flex flex-col justify-center">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-secondary/40 block mb-2">Investment</span>
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-xl font-black italic text-gray-900">₹{(project.price || 0).toLocaleString()}</span>
+                                    <span className="text-lg font-black italic text-gray-900">₹{(project.price || 0).toLocaleString()}</span>
                                 </div>
                             </div>
-                            <div>
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary/40 block mb-2">Payment</span>
-                                <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm inline-block ${getPaymentColor(project.paymentStatus || 'pending')}`}>
-                                    {(project.paymentStatus || 'pending').replace('_', ' ')}
-                                </span>
+                            <div className="flex flex-col justify-center">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-secondary/40 block mb-2">Payment</span>
+                                <div>
+                                    <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm inline-block ${getPaymentColor(project.paymentStatus || 'pending')}`}>
+                                        {(project.paymentStatus || 'pending').replace('_', ' ')}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="hidden lg:block">
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary/40 block mb-2">Project Status</span>
-                                <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm inline-block ${getStatusColor(project.status)}`}>
-                                    {project.status}
-                                </span>
+                            <div className="hidden lg:flex flex-col justify-center">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-secondary/40 block mb-2">Project Status</span>
+                                <div>
+                                    <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm inline-block ${getStatusColor(project.status)}`}>
+                                        {project.status}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -412,33 +403,13 @@ export default function ClientProjectsModule() {
                             </button>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-10">
-                            {/* Onboarding Checklist */}
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between ml-2">
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Onboarding Checklist</h4>
-                                    <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[9px] font-black">
-                                        <TrendingUp size={10} />
-                                        {viewing.onboardingChecklist ? Math.round((viewing.onboardingChecklist.filter((t: any) => t.completed).length / viewing.onboardingChecklist.length) * 100) : 0}%
-                                    </div>
-                                </div>
-                                <div className="space-y-3">
-                                    {(viewing.onboardingChecklist || []).map((item: any, idx: number) => (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => toggleChecklistItem(idx)}
-                                            className={`w-full flex items-center justify-between p-5 rounded-2xl border transition-all ${item.completed ? 'bg-emerald-50/50 border-emerald-100 text-emerald-700' : 'bg-white border-gray-100 text-gray-500 hover:border-primary/20'}`}
-                                        >
-                                            <span className="text-xs font-bold">{item.task}</span>
-                                            {item.completed ? <CheckCircle2 size={18} className="text-emerald-500" /> : <Clock size={18} className="text-gray-200" />}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
+                        <div className="max-w-2xl mx-auto w-full">
                             {/* Project Timeline & Notes */}
                             <div className="space-y-6">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Timeline & Notes</h4>
+                                <div className="flex items-center justify-between ml-2">
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Timeline & Notes</h4>
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-primary bg-primary/5 px-3 py-1 rounded-full">Project History</span>
+                                </div>
                                 <div className="space-y-4">
                                     <div className="flex gap-2">
                                         <input
@@ -482,7 +453,7 @@ export default function ClientProjectsModule() {
                                             <Plus size={16} />
                                         </button>
                                     </div>
-                                    <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                         {(viewing.projectNotes || []).map((note: any, idx: number) => (
                                             <div key={idx} className="flex gap-4 relative">
                                                 <div className="flex flex-col items-center">
@@ -491,7 +462,7 @@ export default function ClientProjectsModule() {
                                                         <div className="w-0.5 flex-1 bg-gray-100 my-1" />
                                                     )}
                                                 </div>
-                                                <div className="pb-4">
+                                                <div className="pb-4 w-full">
                                                     <p className="text-[10px] text-gray-400 font-bold mb-0.5">
                                                         {new Date(note.date).toLocaleDateString()} at {new Date(note.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </p>
