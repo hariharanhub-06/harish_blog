@@ -4,7 +4,7 @@ import { ArrowRight, Code, Database, BarChart, Zap, CheckCircle2, X, Globe, User
 import Link from "next/link";
 import { useState } from "react";
 import { MatrixBackground } from "@/components/MatrixBackground";
-import ContactBusinessSection from "@/components/ContactBusinessSection";
+
 
 export default function ServicesPage() {
     const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -443,7 +443,7 @@ export default function ServicesPage() {
                 </div>
             </section>
 
-            <ContactBusinessSection />
+
         </div>
     );
 }

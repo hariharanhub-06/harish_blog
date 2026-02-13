@@ -742,6 +742,8 @@ export const clientProjects = pgTable("client_projects", {
   expectedProfit: real("expected_profit").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  plannedDeliveryDate: timestamp("planned_delivery_date"),
+  projectCategory: text("project_category"),
 });
 
 export const clientProjectRelations = relations(clientProjects, ({ one }) => ({

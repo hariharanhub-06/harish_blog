@@ -3,7 +3,7 @@
 import { ArrowRight, CheckCircle2, ShieldCheck, IndianRupee, Briefcase, Rocket, Home, Building2, UserCheck, ShieldClose, HandCoins, FileCheck, Landmark, Phone, MessageSquare, Mail, Loader2, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { MatrixBackground } from "@/components/MatrixBackground";
-import ContactBusinessSection from "@/components/ContactBusinessSection";
+
 
 export default function FinancialLogisticsPage() {
     const loanTypes = [
@@ -158,7 +158,7 @@ export default function FinancialLogisticsPage() {
                 </div>
             </section>
 
-            <ContactBusinessSection category="Financial Logistics" />
+
         </div>
     );
 }

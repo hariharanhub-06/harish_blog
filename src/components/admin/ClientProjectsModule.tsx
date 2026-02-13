@@ -82,18 +82,25 @@ export default function ClientProjectsModule() {
     };
 
     const toggleChecklistItem = (itemIdx: number) => {
-        const newChecklist = [...viewing.onboardingChecklist];
-        newChecklist[itemIdx].completed = !newChecklist[itemIdx].completed;
-        handleUpdateProject({ ...viewing, onboardingChecklist: newChecklist });
+        const newChecklist = [...(viewing.onboardingChecklist || [])];
+        if (!newChecklist[itemIdx]) return;
+        newChecklist[itemIdx] = { ...newChecklist[itemIdx], completed: !newChecklist[itemIdx].completed };
+        // Update local state, let user save manually or we can auto-save this part if we want
+        // For checklist, auto-save is usually nice.
+        const updatedProject = { ...viewing, onboardingChecklist: newChecklist };
+        setViewing(updatedProject);
+        // Optional: auto-save checklist
+        // handleUpdateProject(updatedProject); 
     };
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case "onboarding": return "bg-blue-50 text-blue-600 border-blue-100";
-            case "development": return "bg-purple-50 text-purple-600 border-purple-100";
-            case "testing": return "bg-amber-50 text-amber-600 border-amber-100";
-            case "delivered": return "bg-emerald-50 text-emerald-600 border-emerald-100";
-            case "support": return "bg-cyan-50 text-cyan-600 border-cyan-100";
+            case "New": return "bg-blue-50 text-blue-600 border-blue-100";
+            case "Details Collected": return "bg-purple-50 text-purple-600 border-purple-100";
+            case "In progress": return "bg-amber-50 text-amber-600 border-amber-100";
+            case "Demo Shown": return "bg-cyan-50 text-cyan-600 border-cyan-100";
+            case "Project Completed": return "bg-emerald-50 text-emerald-600 border-emerald-100";
+            case "Project Dropped": return "bg-red-50 text-red-600 border-red-100";
             default: return "bg-gray-50 text-gray-500 border-gray-100";
         }
     };
@@ -115,8 +122,82 @@ export default function ClientProjectsModule() {
         );
     }
 
+    // Analytics Calculation
+    const totalProjects = projects.length;
+    const fullyPaid = projects.filter(p => p.paymentStatus === "fully_paid").length;
+    const advancePaid = projects.filter(p => p.paymentStatus === "advance_paid").length;
+    const newProjects = projects.filter(p => p.status === "New").length;
+    const inProgress = projects.filter(p => p.status === "In progress").length;
+    const completed = projects.filter(p => p.status === "Project Completed").length;
+
+    const resetForm = () => {
+        setViewing({
+            title: "",
+            clientName: "",
+            businessName: "",
+            status: "New",
+            paymentStatus: "pending",
+            price: 0,
+            plannedDeliveryDate: "",
+            projectCategory: "Web Development",
+            onboardingChecklist: [],
+        });
+    };
+
+    const handleCreateWrapper = () => {
+        resetForm();
+    };
+
+    const handleSave = async () => {
+        setUpdating(true);
+        try {
+            const method = viewing.id ? "PUT" : "POST";
+            const res = await fetch("/api/admin/client-projects", {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(viewing),
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                if (method === "POST") {
+                    setProjects(prev => [saved, ...prev]);
+                } else {
+                    setProjects(prev => prev.map(p => p.id === saved.id ? saved : p));
+                }
+                setViewing(null);
+            } else {
+                const err = await res.json();
+                alert("Error: " + (err.error || "Failed to save"));
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Failed to save project");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Dashboard Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Total Projects</p>
+                    <p className="text-3xl font-black text-gray-900">{totalProjects}</p>
+                </div>
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Completed</p>
+                    <p className="text-3xl font-black text-emerald-500">{completed}</p>
+                </div>
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">In Progress</p>
+                    <p className="text-3xl font-black text-blue-500">{inProgress}</p>
+                </div>
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Fully Paid</p>
+                    <p className="text-3xl font-black text-purple-500">{fullyPaid}</p>
+                </div>
+            </div>
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
@@ -128,6 +209,12 @@ export default function ClientProjectsModule() {
                     </h2>
                     <p className="text-secondary text-xs font-bold mt-0.5">Manage delivery, payments, and legal agreements</p>
                 </div>
+                <button
+                    onClick={handleCreateWrapper}
+                    className="bg-gray-900 text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                >
+                    <Plus size={16} /> New Project
+                </button>
             </div>
 
             {/* Project Grid */}
@@ -216,19 +303,64 @@ export default function ClientProjectsModule() {
                             </div>
                         </div>
 
+                        {/* Editable Fields */}
+                        <div className="grid md:grid-cols-2 gap-6 mb-8">
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Project Name</label>
+                                <input
+                                    type="text"
+                                    value={viewing.title || ""}
+                                    onChange={(e) => setViewing({ ...viewing, title: e.target.value })}
+                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g. E-Commerce Platform"
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Client Name / Project For</label>
+                                <input
+                                    type="text"
+                                    value={viewing.clientName || ""}
+                                    onChange={(e) => setViewing({ ...viewing, clientName: e.target.value })}
+                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g. John Doe"
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Project Category</label>
+                                <input
+                                    type="text"
+                                    value={viewing.projectCategory || ""}
+                                    onChange={(e) => setViewing({ ...viewing, projectCategory: e.target.value })}
+                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g. Web Development"
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Planned Delivery Date</label>
+                                <input
+                                    type="date"
+                                    value={viewing.plannedDeliveryDate ? new Date(viewing.plannedDeliveryDate).toISOString().split('T')[0] : ""}
+                                    onChange={(e) => setViewing({ ...viewing, plannedDeliveryDate: e.target.value })}
+                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Status & Commercials */}
                         <div className="grid md:grid-cols-3 gap-8 mb-12">
                             <div className="p-6 bg-gray-50 rounded-[2rem] border border-gray-100 space-y-4">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Progress Status</p>
                                 <select
                                     value={viewing.status}
-                                    onChange={(e) => handleUpdateProject({ ...viewing, status: e.target.value })}
+                                    onChange={(e) => setViewing({ ...viewing, status: e.target.value })}
                                     className="w-full bg-white border-0 rounded-2xl p-4 font-black uppercase text-[11px] tracking-widest focus:ring-2 focus:ring-primary shadow-sm"
                                 >
-                                    <option value="onboarding">Onboarding</option>
-                                    <option value="development">Development</option>
-                                    <option value="testing">Testing</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="support">Active Support</option>
+                                    <option value="New">New</option>
+                                    <option value="Details Collected">Details Collected</option>
+                                    <option value="In progress">In Progress</option>
+                                    <option value="Demo Shown">Demo Shown</option>
+                                    <option value="Project Completed">Project Completed</option>
+                                    <option value="Project Dropped">Project Dropped</option>
                                 </select>
                             </div>
 
@@ -236,11 +368,10 @@ export default function ClientProjectsModule() {
                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Payment Cycle</p>
                                 <select
                                     value={viewing.paymentStatus}
-                                    onChange={(e) => handleUpdateProject({ ...viewing, paymentStatus: e.target.value })}
+                                    onChange={(e) => setViewing({ ...viewing, paymentStatus: e.target.value })}
                                     className="w-full bg-white border-0 rounded-2xl p-4 font-black uppercase text-[11px] tracking-widest focus:ring-2 focus:ring-emerald-500 shadow-sm"
                                 >
-                                    <option value="pending">Pending Advance</option>
-                                    <option value="advance_paid">Advance Received</option>
+                                    <option value="advance_paid">Advance Paid</option>
                                     <option value="fully_paid">Fully Paid</option>
                                 </select>
                             </div>
@@ -248,12 +379,30 @@ export default function ClientProjectsModule() {
                             <div className="p-6 bg-gray-900 rounded-[2rem] text-white space-y-4">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-2">Commercials</p>
                                 <div className="space-y-1 px-2">
-                                    <p className="text-2xl font-black italic tracking-tighter">₹{(viewing.price || 0).toLocaleString()}</p>
+                                    <input
+                                        type="number"
+                                        value={viewing.price || 0}
+                                        onChange={(e) => setViewing({ ...viewing, price: parseFloat(e.target.value) })}
+                                        className="bg-transparent border-0 text-white w-full p-0 text-2xl font-black italic focus:ring-0 placeholder:text-gray-700"
+                                        placeholder="0"
+                                    />
                                     <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">
                                         Balance: ₹{((viewing.price || 0) - (viewing.advancePaid || 0)).toLocaleString()}
                                     </p>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Save Button */}
+                        <div className="flex justify-end mb-8">
+                            <button
+                                onClick={handleSave}
+                                disabled={updating}
+                                className="bg-primary text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                            >
+                                {updating ? <Loader2 className="animate-spin" /> : <Save size={18} />}
+                                Save Project Details
+                            </button>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-10">
@@ -324,7 +473,6 @@ export default function ClientProjectsModule() {
                                                     type="number"
                                                     value={viewing.internalCost || 0}
                                                     onChange={(e) => setViewing({ ...viewing, internalCost: parseFloat(e.target.value) })}
-                                                    onBlur={() => handleUpdateProject(viewing)}
                                                     className="w-full bg-white border-0 rounded-xl px-4 py-2 text-xs font-bold focus:ring-1 focus:ring-orange-200"
                                                 />
                                             </div>

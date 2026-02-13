@@ -25,7 +25,7 @@ import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
 import BusinessSolutionsSection from "./BusinessSolutionsSection";
-import ContactBusinessSection from "./ContactBusinessSection";
+
 
 interface Stat {
     icon: string;
@@ -749,7 +749,7 @@ export default function MainContent({
                     />
                 )
             }
-            <ContactBusinessSection />
+
         </div >
     );
 }

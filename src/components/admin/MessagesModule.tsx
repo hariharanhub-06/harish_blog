@@ -37,33 +37,26 @@ export default function MessagesModule() {
 
     // Default Options
     const defaultCategories = [
-        "Business Development",
-        "Web Development",
-        "Graphic or Poster Designing",
-        "Education Training purpose",
-        "HM Snack",
-        "Not Determined"
+        "Blog",
+        "Financial Logics",
+        "Web Development"
     ];
 
     const defaultStatuses = [
         "New",
-        "Contacted",
         "Qualified",
-        "Consultation Scheduled",
-        "Proposal Sent",
-        "Won",
-        "Lost"
+        "In Progress",
+        "Success",
+        "Failed"
     ];
 
     const getStatusColor = (status: string) => {
         switch (status) {
             case "New": return "bg-blue-50 text-blue-600 border-blue-100";
-            case "Contacted": return "bg-cyan-50 text-cyan-600 border-cyan-100";
             case "Qualified": return "bg-purple-50 text-purple-600 border-purple-100";
-            case "Consultation Scheduled": return "bg-indigo-50 text-indigo-600 border-indigo-100";
-            case "Proposal Sent": return "bg-amber-50 text-amber-600 border-amber-100";
-            case "Won": return "bg-emerald-50 text-emerald-600 border-emerald-100 text-emerald-700";
-            case "Lost": return "bg-red-50 text-red-600 border-red-100";
+            case "In Progress": return "bg-amber-50 text-amber-600 border-amber-100";
+            case "Success": return "bg-emerald-50 text-emerald-600 border-emerald-100 text-emerald-700";
+            case "Failed": return "bg-red-50 text-red-600 border-red-100";
             default: return "bg-gray-50 text-gray-500 border-gray-100";
         }
     };
@@ -203,7 +196,7 @@ export default function MessagesModule() {
     // Analytics Calculation
     const totalLeads = messages.length;
     const contactedLeads = messages.filter(m => m.status !== "New").length;
-    const wonLeads = messages.filter(m => m.status === "Won").length;
+    const wonLeads = messages.filter(m => m.status === "Success").length;
     const conversionRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : "0";
 
     if (fetching) {
@@ -278,12 +271,12 @@ export default function MessagesModule() {
                 </div>
             </div>
 
-            {/* Message List (Spacious Rows) */}
-            <div className="space-y-6">
+            {/* Message List (Grid Tiles) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredMessages.map((msg) => (
                     <div
                         key={msg.id}
-                        className="bg-white p-4 md:p-6 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col xl:flex-row items-start xl:items-center gap-4 xl:gap-8 hover:border-primary/20 relative group flex-wrap"
+                        className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col gap-4 hover:border-primary/20 relative group h-full"
                     >
                         <div className="flex items-center gap-4 shrink-0 min-w-0 md:min-w-[200px]">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gray-50 text-primary flex items-center justify-center font-black text-lg shrink-0 group-hover:scale-110 transition-transform">
@@ -480,18 +473,18 @@ export default function MessagesModule() {
                                 <>
                                     <div className="flex gap-3">
                                         <button
-                                            onClick={() => handleUpdate(undefined, { ...viewing, status: 'Won' })}
+                                            onClick={() => handleUpdate(undefined, { ...viewing, status: 'Success' })}
                                             disabled={updating}
                                             className="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
                                         >
-                                            <CheckCircle2 size={16} /> Mark as Won
+                                            <CheckCircle2 size={16} /> Mark as Success
                                         </button>
                                         <button
-                                            onClick={() => handleUpdate(undefined, { ...viewing, status: 'Lost' })}
+                                            onClick={() => handleUpdate(undefined, { ...viewing, status: 'Failed' })}
                                             disabled={updating}
                                             className="flex-1 bg-red-50 text-red-600 border border-red-100 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all"
                                         >
-                                            Mark as Lost
+                                            Mark as Failed
                                         </button>
                                     </div>
 
