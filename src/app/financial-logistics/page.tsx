@@ -84,9 +84,12 @@ export default function FinancialLogisticsPage() {
                     <Link href="#loan-types" className="px-8 py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-xl">
                         View Loan Options
                     </Link>
-                    <Link href="#contact" className="px-8 py-4 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-white/10 transition-all backdrop-blur-sm">
+                    <button
+                        onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+                        className="px-8 py-4 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-white/10 transition-all backdrop-blur-sm"
+                    >
                         Get Free Consultation
-                    </Link>
+                    </button>
                 </div>
             </section>
 
@@ -152,9 +155,12 @@ export default function FinancialLogisticsPage() {
                     <p className="text-gray-400 font-medium mb-10 max-w-xl mx-auto">
                         Don't let capital hold you back. Let our experts find you the best loan tailored to your budget and needs.
                     </p>
-                    <Link href="#contact" className="inline-flex items-center gap-3 px-10 py-5 bg-orange-600 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20">
+                    <button
+                        onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+                        className="inline-flex items-center gap-3 px-10 py-5 bg-orange-600 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20"
+                    >
                         Start Application Now <ArrowRight size={18} />
-                    </Link>
+                    </button>
                 </div>
             </section>
 

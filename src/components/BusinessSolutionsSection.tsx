@@ -10,17 +10,17 @@ export default function BusinessSolutionsSection() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-orange-600/10 to-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="relative z-10 bg-white/5 border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-white/20 transition-all duration-500">
-                <div className="absolute top-0 right-0 w-full h-full md:w-1/2 opacity-20 pointer-events-none group-hover:opacity-40 transition-opacity duration-1000 overflow-hidden rounded-r-[3rem]">
+                <div className="absolute top-0 right-0 w-full h-full md:w-1/2 opacity-30 pointer-events-none group-hover:opacity-60 transition-opacity duration-1000 overflow-hidden rounded-r-[3rem]">
                     <video
                         autoPlay
                         loop
                         muted
                         playsInline
-                        className="w-full h-full object-cover scale-150 rotate-12 blur-[2px] group-hover:blur-0 transition-all duration-1000"
+                        className="w-full h-full object-cover scale-125 rotate-6 transition-all duration-1000"
                     >
-                        <source src="https://cdn.pixabay.com/video/2021/08/21/85864-591550974_large.mp4" type="video/mp4" />
+                        <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-network-loops-2751-large.mp4" type="video/mp4" />
                     </video>
-                    <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/80" />
+                    <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black" />
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center justify-between gap-10">
@@ -50,9 +50,12 @@ export default function BusinessSolutionsSection() {
                                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Free Consultation</span>
                             </div>
                             <p className="text-sm font-bold text-white mb-4">Discuss your project with an expert today.</p>
-                            <Link href="/contact-business" className="text-orange-500 text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:translate-x-2 transition-transform">
+                            <button
+                                onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+                                className="text-orange-500 text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:translate-x-2 transition-transform"
+                            >
                                 Book Now <ArrowRight size={14} />
-                            </Link>
+                            </button>
                         </div>
                     </div>
                 </div>

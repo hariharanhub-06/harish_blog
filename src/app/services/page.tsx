@@ -119,9 +119,12 @@ export default function ServicesPage() {
                     We empower small businesses, startups, and coaching centers with high-performance websites and automated CRM systems designed for digital scale.
                 </p>
                 <div className="flex flex-col md:flex-row gap-4 justify-center">
-                    <Link href="/contact-business" className="px-8 py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-xl">
+                    <button
+                        onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+                        className="px-8 py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-xl"
+                    >
                         Get Free Consultation
-                    </Link>
+                    </button>
                     <Link href="/crm-solutions" className="px-8 py-4 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-white/10 transition-all backdrop-blur-sm">
                         Explore CRM Solutions
                     </Link>
@@ -144,9 +147,12 @@ export default function ServicesPage() {
                             <p className="text-gray-400 font-medium mb-8">
                                 Are you struggling to maintain growth with manual processes? Many businesses face these exact hurdles every day.
                             </p>
-                            <Link href="/contact-business" className="inline-flex items-center gap-3 px-8 py-4 bg-red-500 text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-red-600 transition-all shadow-xl shadow-red-500/20">
+                            <button
+                                onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+                                className="inline-flex items-center gap-3 px-8 py-4 bg-red-500 text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-red-600 transition-all shadow-xl shadow-red-500/20"
+                            >
                                 Solve These Challenges Now <ArrowRight size={16} />
-                            </Link>
+                            </button>
                         </div>
                         <div className="grid grid-cols-1 gap-4">
                             {[
@@ -196,9 +202,12 @@ export default function ServicesPage() {
                                     </li>
                                 ))}
                             </ul>
-                            <Link href="/contact-business" className={`inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest ${service.color} hover:opacity-80 transition-opacity`}>
+                            <button
+                                onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+                                className={`inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest ${service.color} hover:opacity-80 transition-opacity`}
+                            >
                                 Request Consultation <ArrowRight size={14} />
-                            </Link>
+                            </button>
                         </div>
                     ))}
                 </div>

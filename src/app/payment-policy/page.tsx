@@ -129,7 +129,10 @@ export default function PaymentPolicy() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
-                        <button className="bg-primary text-white px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+                        <button
+                            onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+                            className="bg-primary text-white px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                        >
                             Submit a Requirement
                         </button>
                     </div>

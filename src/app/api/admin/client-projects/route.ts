@@ -84,8 +84,8 @@ export async function PUT(req: Request) {
             "title", "clientName", "businessName", "description",
             "scopeSummary", "timeline", "price", "advancePaid",
             "balanceAmount", "paymentStatus", "status",
-            "agreementContent", "invoiceUrl", "onboardingChecklist",
-            "progressMilestones", "internalCost", "expectedProfit",
+            "invoiceUrl", "onboardingChecklist",
+            "progressMilestones",
             "plannedDeliveryDate", "projectCategory", "projectNotes"
         ];
 
