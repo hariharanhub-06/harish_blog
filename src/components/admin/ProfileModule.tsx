@@ -497,21 +497,18 @@ export default function ProfileModule() {
                                                 <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl bg-gray-900">
                                                     <video
                                                         key={profile.businessSolutionVideoUrl}
+                                                        src={profile.businessSolutionVideoUrl}
                                                         autoPlay
                                                         loop
                                                         muted
                                                         playsInline
                                                         controls
-                                                        crossOrigin="anonymous"
                                                         style={{
                                                             transform: `scale(${profile.businessSolutionVideoConfig?.scale || 1}) translate(${profile.businessSolutionVideoConfig?.x || 0}%, ${profile.businessSolutionVideoConfig?.y || 0}%)`,
-                                                            transition: 'transform 0.2s ease-out, opacity 0.5s ease-in'
+                                                            transition: 'transform 0.2s ease-out'
                                                         }}
                                                         className="w-full h-full object-cover"
-                                                    >
-                                                        <source src={profile.businessSolutionVideoUrl} type="video/mp4" />
-                                                        Your browser does not support the video tag.
-                                                    </video>
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
