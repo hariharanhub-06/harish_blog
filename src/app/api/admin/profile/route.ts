@@ -12,6 +12,10 @@ const DEFAULT_PROFILE = {
     avatarUrl: "/hari_photo.png",
     heroImageUrl: null,
     aboutImageUrl: null,
+    audioUrl: null,
+    featuredVideoUrl: null,
+    businessSolutionVideoUrl: null,
+    businessSolutionVideoConfig: { scale: 1, x: 0, y: 0, mixBlendMode: 'screen' },
     socialLinks: { linkedin: "https://linkedin.com/in/hari-haran-j", github: "https://github.com/hari-haran-j", twitter: "", instagram: "" },
     stats: [
         { label: "Years Experience", value: "3+", icon: "Briefcase" },
