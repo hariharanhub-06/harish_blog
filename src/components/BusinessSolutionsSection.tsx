@@ -1,9 +1,31 @@
-"use client";
-
+import { ArrowRight, Briefcase, Database, Rocket, Code, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Briefcase, Database, Rocket, Code } from "lucide-react";
 
 export default function BusinessSolutionsSection() {
+    const [profile, setProfile] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await fetch("/api/admin/profile");
+                if (res.ok) {
+                    const data = await res.json();
+                    setProfile(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch profile for video:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfile();
+    }, []);
+
+    const videoConfig = profile?.businessSolutionVideoConfig || { scale: 1.1, x: 0, y: 0, mixBlendMode: 'screen' };
+    const videoUrl = profile?.businessSolutionVideoUrl || "https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-connection-loop-2747-large.mp4";
+
     return (
         <section className="container mx-auto px-6 py-12 md:py-20 relative overflow-hidden">
             {/* Background Decorations */}
@@ -11,15 +33,26 @@ export default function BusinessSolutionsSection() {
 
             <div className="relative z-10 bg-white/5 border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-white/20 transition-all duration-500">
                 <div className="absolute top-0 right-0 w-full h-full md:w-2/3 opacity-90 group-hover:opacity-100 transition-opacity duration-1000 overflow-hidden rounded-r-[3rem] z-0">
-                    <video
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-full object-cover scale-110 transition-all duration-1000 mix-blend-screen"
-                    >
-                        <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-connection-loop-2747-large.mp4" type="video/mp4" />
-                    </video>
+                    {!loading ? (
+                        <video
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            key={videoUrl}
+                            className={`w-full h-full object-cover transition-all duration-1000`}
+                            style={{
+                                transform: `scale(${videoConfig.scale}) translate(${videoConfig.x}%, ${videoConfig.y}%)`,
+                                mixBlendMode: videoConfig.mixBlendMode as any
+                            }}
+                        >
+                            <source src={videoUrl} type="video/mp4" />
+                        </video>
+                    ) : (
+                        <div className="w-full h-full bg-black/20 animate-pulse flex items-center justify-center">
+                            <Loader2 className="animate-spin text-white/20" size={32} />
+                        </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-l from-black via-black/40 to-transparent z-10 rotate-180" />
                 </div>
 

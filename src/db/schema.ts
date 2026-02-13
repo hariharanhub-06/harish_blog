@@ -15,6 +15,13 @@ export const profiles = pgTable("profiles", {
   aboutImageUrl: text("about_image_url"),
   audioUrl: text("audio_url"),
   featuredVideoUrl: text("featured_video_url"),
+  businessSolutionVideoUrl: text("business_solution_video_url"),
+  businessSolutionVideoConfig: jsonb("business_solution_video_config").$default(() => ({
+    scale: 1,
+    x: 0,
+    y: 0,
+    mixBlendMode: "screen"
+  })),
   socialLinks: jsonb("social_links").$default(() => ({
     linkedin: "",
     github: "",

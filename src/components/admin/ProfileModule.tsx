@@ -36,6 +36,8 @@ export default function ProfileModule() {
                     aboutImageUrl: null,
                     audioUrl: null,
                     featuredVideoUrl: null,
+                    businessSolutionVideoUrl: null,
+                    businessSolutionVideoConfig: { scale: 1, x: 0, y: 0, mixBlendMode: 'screen' },
                     socialLinks: { linkedin: "https://linkedin.com/in/hari-haran-j", github: "https://github.com/hari-haran-j", twitter: "", instagram: "" },
                     stats: [
                         { label: "Years Experience", value: "3+", icon: "Briefcase" },
@@ -91,7 +93,7 @@ export default function ProfileModule() {
         });
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero' | 'about' | 'audio' | 'video') => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero' | 'about' | 'audio' | 'video' | 'business_video') => {
         if (!e.target.files?.[0]) return;
         setUploading(true);
 
@@ -120,6 +122,12 @@ export default function ProfileModule() {
                 setProfile({ ...profile, audioUrl: imagekitUrl });
             } else if (type === 'video') {
                 setProfile({ ...profile, featuredVideoUrl: imagekitUrl });
+            } else if (type === 'business_video') {
+                setProfile({
+                    ...profile,
+                    businessSolutionVideoUrl: imagekitUrl,
+                    businessSolutionVideoConfig: profile.businessSolutionVideoConfig || { scale: 1, x: 0, y: 0, mixBlendMode: 'screen' }
+                });
             }
         } catch (error) {
             console.error("Image upload failed", error);
@@ -358,6 +366,155 @@ export default function ProfileModule() {
                                         })()}
                                     </div>
                                 )}
+                            </div>
+                        </div>
+
+                        {/* Business Solutions Video Section */}
+                        <div className="flex flex-col items-center space-y-6 md:col-span-2 lg:col-span-3 pt-6 border-t border-gray-50">
+                            <div className="w-full max-w-xl space-y-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-orange-100 text-orange-600 rounded-xl">
+                                        <Video size={24} />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-black text-gray-900 uppercase tracking-wide">Business Solutions Animation</span>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Custom video for the Home Page Tech Section</p>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 bg-gray-50 rounded-[2.5rem] border border-gray-100 space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-black uppercase tracking-widest text-gray-400">Upload Media</span>
+                                        <label className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-2xl cursor-pointer hover:bg-gray-50 transition-all shadow-sm text-[10px] font-black uppercase tracking-widest text-gray-600">
+                                            {uploading ? <Loader2 size={16} className="animate-spin" /> : "Select Video"}
+                                            <input type="file" className="hidden" accept="video/*" onChange={(e) => handleImageUpload(e, 'business_video')} />
+                                        </label>
+                                    </div>
+
+                                    {profile.businessSolutionVideoUrl && (
+                                        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+                                            {/* Advanced Crop & Adjust Controls */}
+                                            <div className="grid grid-cols-2 gap-6 bg-white p-6 rounded-3xl border border-gray-100/50">
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between">
+                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Scale / Zoom</label>
+                                                        <span className="text-[10px] font-black text-primary">{profile.businessSolutionVideoConfig?.scale || 1}x</span>
+                                                    </div>
+                                                    <input
+                                                        type="range"
+                                                        min="1"
+                                                        max="3"
+                                                        step="0.1"
+                                                        value={profile.businessSolutionVideoConfig?.scale || 1}
+                                                        onChange={(e) => setProfile({
+                                                            ...profile,
+                                                            businessSolutionVideoConfig: {
+                                                                ...profile.businessSolutionVideoConfig,
+                                                                scale: parseFloat(e.target.value)
+                                                            }
+                                                        })}
+                                                        className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Styling Filter</label>
+                                                    <select
+                                                        value={profile.businessSolutionVideoConfig?.mixBlendMode || "screen"}
+                                                        onChange={(e) => setProfile({
+                                                            ...profile,
+                                                            businessSolutionVideoConfig: {
+                                                                ...profile.businessSolutionVideoConfig,
+                                                                mixBlendMode: e.target.value
+                                                            }
+                                                        })}
+                                                        className="w-full bg-gray-50 border-0 rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-primary"
+                                                    >
+                                                        <option value="normal">Normal / Clean</option>
+                                                        <option value="screen">Screen (Lighten)</option>
+                                                        <option value="overlay">Overlay (Punchy)</option>
+                                                        <option value="multiply">Multiply (Darken)</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between">
+                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Horizontal Adjust (X)</label>
+                                                        <span className="text-[10px] font-black text-primary">{profile.businessSolutionVideoConfig?.x || 0}%</span>
+                                                    </div>
+                                                    <input
+                                                        type="range"
+                                                        min="-50"
+                                                        max="50"
+                                                        step="1"
+                                                        value={profile.businessSolutionVideoConfig?.x || 0}
+                                                        onChange={(e) => setProfile({
+                                                            ...profile,
+                                                            businessSolutionVideoConfig: {
+                                                                ...profile.businessSolutionVideoConfig,
+                                                                x: parseInt(e.target.value)
+                                                            }
+                                                        })}
+                                                        className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between">
+                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Vertical Adjust (Y)</label>
+                                                        <span className="text-[10px] font-black text-primary">{profile.businessSolutionVideoConfig?.y || 0}%</span>
+                                                    </div>
+                                                    <input
+                                                        type="range"
+                                                        min="-50"
+                                                        max="50"
+                                                        step="1"
+                                                        value={profile.businessSolutionVideoConfig?.y || 0}
+                                                        onChange={(e) => setProfile({
+                                                            ...profile,
+                                                            businessSolutionVideoConfig: {
+                                                                ...profile.businessSolutionVideoConfig,
+                                                                y: parseInt(e.target.value)
+                                                            }
+                                                        })}
+                                                        className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Preview Window */}
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center px-2">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Live Crop Preview</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setProfile({ ...profile, businessSolutionVideoUrl: null })}
+                                                        className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline"
+                                                    >
+                                                        Remove Video
+                                                    </button>
+                                                </div>
+                                                <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl bg-black">
+                                                    <video
+                                                        autoPlay
+                                                        loop
+                                                        muted
+                                                        playsInline
+                                                        key={profile.businessSolutionVideoUrl}
+                                                        src={profile.businessSolutionVideoUrl}
+                                                        style={{
+                                                            transform: `scale(${profile.businessSolutionVideoConfig?.scale || 1}) translate(${profile.businessSolutionVideoConfig?.x || 0}%, ${profile.businessSolutionVideoConfig?.y || 0}%)`,
+                                                            mixBlendMode: (profile.businessSolutionVideoConfig?.mixBlendMode || "screen") as any,
+                                                            transition: 'transform 0.2s ease-out'
+                                                        }}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-l from-black/60 to-transparent pointer-events-none" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
