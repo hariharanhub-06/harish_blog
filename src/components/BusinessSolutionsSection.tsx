@@ -59,10 +59,10 @@ export default function BusinessSolutionsSection() {
                 <div className="relative z-20 flex flex-col md:flex-row items-center justify-between gap-10">
                     <div className="max-w-xl text-center md:text-left">
                         <span className="text-orange-500 font-black tracking-[0.3em] uppercase text-[10px] mb-4 block">Unified Systems</span>
-                        <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-6 leading-[0.9]">
+                        <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tighter text-white mb-6 leading-tight">
                             Expert <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-purple-500">Business <br className="hidden md:block" /> Solutions</span>
                         </h2>
-                        <p className="text-gray-300 font-medium leading-relaxed mb-10 text-lg opacity-80">
+                        <p className="text-gray-300 font-medium leading-relaxed mb-10 text-base opacity-80">
                             We provide end-to-end digital growth engines and robust financial logistics to scale your operations.
                         </p>
 
