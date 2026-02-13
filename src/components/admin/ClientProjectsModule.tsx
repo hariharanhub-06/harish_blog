@@ -205,63 +205,78 @@ export default function ClientProjectsModule() {
             </div>
 
             {/* Project Grid */}
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {projects.map((project) => (
                     <div
                         key={project.id}
-                        className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col xl:flex-row items-start xl:items-center gap-6 xl:gap-12 hover:border-primary/20 group"
+                        className={`bg-white p-5 rounded-[2rem] border-2 border-gray-50 shadow-sm hover:shadow-xl transition-all flex flex-col gap-4 hover:border-primary/20 relative group h-full ${project.status === "Project Completed" ? "border-l-[6px] border-l-emerald-500 bg-emerald-50/5" :
+                            project.status === "Project Dropped" ? "border-l-[6px] border-l-red-500 bg-red-50/5" :
+                                project.status === "In progress" ? "border-l-[6px] border-l-amber-500 bg-amber-50/5" : ""
+                            }`}
                     >
-                        <div className="flex items-center gap-5 min-w-[280px]">
-                            <div className={`w-14 h-14 rounded-2xl ${getStatusColor(project.status)} flex items-center justify-center font-black text-xl shadow-sm group-hover:scale-110 transition-transform`}>
+                        <div className="flex items-center gap-4 shrink-0 min-w-0">
+                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 group-hover:scale-110 transition-transform ${getStatusColor(project.status)}`}>
                                 {project.clientName?.charAt(0) || 'P'}
                             </div>
-                            <div>
-                                <h3 className="font-black text-gray-900 text-lg leading-tight">{project.title || 'Untitled Project'}</h3>
-                                <p className="text-secondary font-bold text-xs mt-1 flex items-center gap-1.5">
-                                    <User size={12} className="text-primary" /> {project.clientName || 'Unknown Client'}
-                                </p>
+                            <div className="min-w-0">
+                                <h3 className="font-black text-gray-900 truncate text-sm tracking-tight">{project.title || 'Untitled Project'}</h3>
+                                <div className="flex items-center gap-1.5 text-gray-500 font-bold text-[11px] mt-0.5">
+                                    <User size={11} className="shrink-0 text-primary/60" />
+                                    <span className="truncate">{project.clientName || 'Unknown Client'}</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-3 flex-1 w-full bg-gray-50/50 p-6 rounded-[2rem] border border-gray-50">
-                            <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-secondary/40">Investment:</span>
-                                <span className="text-sm font-black italic text-gray-900">₹{(project.price || 0).toLocaleString()}</span>
+                        <div className="flex flex-col gap-2 w-full">
+                            <div className="flex flex-col gap-1.5 p-3 bg-gray-50/80 rounded-2xl border border-gray-100">
+                                <div className="flex justify-between items-center text-[10px]">
+                                    <span className="font-black uppercase tracking-widest text-secondary/40">Investment</span>
+                                    <span className="font-black text-gray-900 italic">₹{project.price?.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[10px]">
+                                    <span className="font-black uppercase tracking-widest text-secondary/40">Payment</span>
+                                    <span className={`font-black uppercase tracking-widest ${project.paymentStatus === 'fully_paid' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                        {(project.paymentStatus || 'pending').replace('_', ' ')}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-secondary/40">Payment:</span>
-                                <span className={`text-[10px] font-black uppercase tracking-widest ${project.paymentStatus === 'fully_paid' ? 'text-emerald-600' : 'text-amber-600'}`}>
-                                    {(project.paymentStatus || 'pending').replace('_', ' ')}
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-secondary/40">Project Status:</span>
-                                <span className={`text-[10px] font-black uppercase tracking-widest ${project.status === 'Project Completed' ? 'text-emerald-600' : 'text-blue-600'}`}>
-                                    {project.status}
-                                </span>
-                            </div>
+
+                            <select
+                                value={project.status || 'New'}
+                                onChange={(e) => handleUpdateProject({ ...project, status: e.target.value })}
+                                disabled={updating}
+                                className={`w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 cursor-pointer transition-all appearance-none bg-white hover:shadow-md outline-none disabled:opacity-50 ${getStatusColor(project.status || 'New')}`}
+                            >
+                                <option value="New">New</option>
+                                <option value="Details Collected">Details Collected</option>
+                                <option value="In progress">In Progress</option>
+                                <option value="Demo Shown">Demo Shown</option>
+                                <option value="Project Completed">Project Completed</option>
+                                <option value="Project Dropped">Project Dropped</option>
+                            </select>
                         </div>
 
-                        <div className="flex items-center gap-3 w-full xl:w-auto pt-6 xl:pt-0 border-t xl:border-0 border-gray-50">
+                        <div className="flex items-center justify-between gap-2 mt-auto pt-2 border-t border-gray-50">
                             <button
                                 onClick={() => setViewing(project)}
-                                className="flex-1 xl:flex-none bg-primary text-white px-6 py-3.5 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                className="flex-1 bg-primary text-white py-2 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1"
                             >
-                                Manage <ChevronRight size={14} />
+                                Manage <ChevronRight size={12} />
                             </button>
-                            <button
-                                onClick={() => setViewing(project)}
-                                className="p-3.5 bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white rounded-2xl transition-all active:scale-95"
-                                title="Edit Project Details"
-                            >
-                                <Edit3 size={18} />
-                            </button>
-                            <button
-                                onClick={() => handleDelete(project.id)}
-                                className="p-3.5 bg-red-50 text-red-300 hover:bg-red-500 hover:text-white rounded-2xl transition-all active:scale-95"
-                            >
-                                <Trash2 size={18} />
-                            </button>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => setViewing(project)}
+                                    className="p-1.5 bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all"
+                                >
+                                    <Edit3 size={12} />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(project.id)}
+                                    className="p-1.5 bg-red-50 text-red-200 hover:bg-red-500 hover:text-white rounded-lg transition-all"
+                                >
+                                    <Trash2 size={12} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}
