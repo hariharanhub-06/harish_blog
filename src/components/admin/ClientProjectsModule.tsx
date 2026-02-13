@@ -223,28 +223,22 @@ export default function ClientProjectsModule() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 flex-1 w-full bg-gray-50/50 p-6 rounded-[2rem] border border-gray-50">
-                            <div className="flex flex-col justify-center">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-secondary/40 block mb-2">Investment</span>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-lg font-black italic text-gray-900">₹{(project.price || 0).toLocaleString()}</span>
-                                </div>
+                        <div className="flex flex-col gap-3 flex-1 w-full bg-gray-50/50 p-6 rounded-[2rem] border border-gray-50">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-secondary/40">Investment:</span>
+                                <span className="text-sm font-black italic text-gray-900">₹{(project.price || 0).toLocaleString()}</span>
                             </div>
-                            <div className="flex flex-col justify-center">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-secondary/40 block mb-2">Payment</span>
-                                <div>
-                                    <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm inline-block ${getPaymentColor(project.paymentStatus || 'pending')}`}>
-                                        {(project.paymentStatus || 'pending').replace('_', ' ')}
-                                    </span>
-                                </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-secondary/40">Payment:</span>
+                                <span className={`text-[10px] font-black uppercase tracking-widest ${project.paymentStatus === 'fully_paid' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                    {(project.paymentStatus || 'pending').replace('_', ' ')}
+                                </span>
                             </div>
-                            <div className="hidden lg:flex flex-col justify-center">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-secondary/40 block mb-2">Project Status</span>
-                                <div>
-                                    <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm inline-block ${getStatusColor(project.status)}`}>
-                                        {project.status}
-                                    </span>
-                                </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-secondary/40">Project Status:</span>
+                                <span className={`text-[10px] font-black uppercase tracking-widest ${project.status === 'Project Completed' ? 'text-emerald-600' : 'text-blue-600'}`}>
+                                    {project.status}
+                                </span>
                             </div>
                         </div>
 

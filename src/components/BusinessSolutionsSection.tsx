@@ -10,7 +10,7 @@ export default function BusinessSolutionsSection() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-orange-600/10 to-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="relative z-10 bg-white/5 border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-white/20 transition-all duration-500">
-                <div className="absolute top-0 right-0 w-full h-full md:w-1/2 opacity-70 group-hover:opacity-100 transition-opacity duration-1000 overflow-hidden rounded-r-[3rem] z-0">
+                <div className="absolute top-0 right-0 w-full h-full md:w-3/5 opacity-80 group-hover:opacity-100 transition-opacity duration-1000 overflow-hidden rounded-r-[3rem] z-0">
                     <video
                         autoPlay
                         loop
@@ -20,7 +20,7 @@ export default function BusinessSolutionsSection() {
                     >
                         <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-connection-loop-2747-large.mp4" type="video/mp4" />
                     </video>
-                    <div className="absolute inset-0 bg-gradient-to-l from-transparent via-black/20 to-black z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black z-10" />
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center justify-between gap-10">
