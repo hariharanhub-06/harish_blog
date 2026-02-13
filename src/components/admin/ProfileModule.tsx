@@ -494,7 +494,7 @@ export default function ProfileModule() {
                                                         Remove Video
                                                     </button>
                                                 </div>
-                                                <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl bg-black">
+                                                <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl bg-gray-900">
                                                     <video
                                                         autoPlay
                                                         loop
@@ -504,12 +504,10 @@ export default function ProfileModule() {
                                                         src={profile.businessSolutionVideoUrl}
                                                         style={{
                                                             transform: `scale(${profile.businessSolutionVideoConfig?.scale || 1}) translate(${profile.businessSolutionVideoConfig?.x || 0}%, ${profile.businessSolutionVideoConfig?.y || 0}%)`,
-                                                            mixBlendMode: (profile.businessSolutionVideoConfig?.mixBlendMode || "screen") as any,
                                                             transition: 'transform 0.2s ease-out'
                                                         }}
                                                         className="w-full h-full object-cover"
                                                     />
-                                                    <div className="absolute inset-0 bg-gradient-to-l from-black/60 to-transparent pointer-events-none" />
                                                 </div>
                                             </div>
                                         </div>

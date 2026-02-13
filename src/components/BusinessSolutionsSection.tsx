@@ -31,8 +31,8 @@ export default function BusinessSolutionsSection() {
             {/* Background Decorations */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-orange-600/10 to-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="relative z-10 bg-white/5 border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-white/20 transition-all duration-500">
-                <div className="absolute top-0 right-0 w-full h-full md:w-2/3 opacity-90 group-hover:opacity-100 transition-opacity duration-1000 overflow-hidden rounded-r-[3rem] z-0">
+            <div className="relative z-10 bg-white/5 border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-white/20 transition-all duration-500 min-h-[400px] flex items-center">
+                <div className="absolute top-0 left-0 w-full h-full opacity-90 group-hover:opacity-100 transition-opacity duration-1000 overflow-hidden rounded-[3rem] z-0">
                     {!loading ? (
                         <video
                             autoPlay
@@ -40,7 +40,7 @@ export default function BusinessSolutionsSection() {
                             muted
                             playsInline
                             key={videoUrl}
-                            className={`w-full h-full object-cover transition-all duration-1000`}
+                            className="w-full h-full object-cover transition-all duration-1000"
                             style={{
                                 transform: `scale(${videoConfig.scale}) translate(${videoConfig.x}%, ${videoConfig.y}%)`,
                                 mixBlendMode: videoConfig.mixBlendMode as any
@@ -53,7 +53,9 @@ export default function BusinessSolutionsSection() {
                             <Loader2 className="animate-spin text-white/20" size={32} />
                         </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-l from-black via-black/40 to-transparent z-10 rotate-180" />
+                    {/* Multi-layered gradient for deep contrast and readability */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent z-10" />
+                    <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent z-10 md:hidden" />
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center justify-between gap-10">
