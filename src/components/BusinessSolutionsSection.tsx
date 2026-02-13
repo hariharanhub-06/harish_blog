@@ -31,7 +31,7 @@ export default function BusinessSolutionsSection() {
             {/* Background Decorations */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-orange-600/10 to-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="relative z-10 bg-black/40 border border-white/10 rounded-[2.5rem] p-6 md:p-10 shadow-2xl backdrop-blur-md overflow-hidden group hover:border-white/20 transition-all duration-500 max-w-4xl mx-auto flex items-center justify-center text-center">
+            <div className="relative z-10 bg-black/40 border border-white/10 rounded-[2.5rem] p-6 md:p-10 shadow-2xl backdrop-blur-md overflow-hidden group hover:border-white/20 transition-all duration-500 max-w-7xl mx-auto flex items-center justify-center text-center">
                 {/* Full Background Video Container */}
                 <div className="absolute inset-0 z-0 pointer-events-none">
                     {!loading ? (
