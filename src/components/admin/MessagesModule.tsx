@@ -272,40 +272,40 @@ export default function MessagesModule() {
             </div>
 
             {/* Message List (Grid Tiles) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {filteredMessages.map((msg) => (
                     <div
                         key={msg.id}
-                        className={`bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col gap-2 hover:border-primary/20 relative group h-full ${msg.category === "Financial Logistics" ? "border-l-4 border-l-emerald-500" :
-                                msg.category?.includes("Web") || msg.category?.includes("Development") ? "border-l-4 border-l-purple-500" :
-                                    msg.category === "Blog" ? "border-l-4 border-l-blue-500" : ""
+                        className={`bg-white p-5 rounded-[2rem] border-2 border-gray-50 shadow-sm hover:shadow-xl transition-all flex flex-col gap-3 hover:border-primary/20 relative group h-full ${msg.category === "Financial Logistics" ? "border-l-[6px] border-l-emerald-500 bg-emerald-50/5" :
+                            msg.category?.includes("Web") || msg.category?.includes("Development") ? "border-l-[6px] border-l-purple-600 bg-purple-50/5" :
+                                msg.category === "Blog" ? "border-l-[6px] border-l-blue-600 bg-blue-50/5" : ""
                             }`}
                     >
-                        <div className="flex items-center gap-3 shrink-0 min-w-0">
-                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 group-hover:scale-110 transition-transform ${msg.category === "Financial Logistics" ? "bg-emerald-50 text-emerald-600" :
-                                    msg.category?.includes("Web") || msg.category?.includes("Development") ? "bg-purple-50 text-purple-600" :
-                                        "bg-blue-50 text-blue-600"
+                        <div className="flex items-center gap-4 shrink-0 min-w-0">
+                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 group-hover:scale-110 transition-transform ${msg.category === "Financial Logistics" ? "bg-emerald-100 text-emerald-700" :
+                                msg.category?.includes("Web") || msg.category?.includes("Development") ? "bg-purple-100 text-purple-700" :
+                                    "bg-blue-100 text-blue-700"
                                 }`}>
                                 {msg.name.charAt(0)}
                             </div>
                             <div className="min-w-0">
-                                <h3 className="font-black text-gray-900 truncate text-xs">{msg.name}</h3>
-                                <div className="flex items-center gap-1 text-gray-400 font-bold text-[10px] mt-0.5">
-                                    <Phone size={10} className="shrink-0" />
+                                <h3 className="font-black text-gray-900 truncate text-sm tracking-tight">{msg.name}</h3>
+                                <div className="flex items-center gap-1.5 text-gray-500 font-bold text-[11px] mt-0.5">
+                                    <Phone size={11} className="shrink-0 text-primary/60" />
                                     <span>{msg.mobile}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-1.5 w-full">
-                            <div className="flex justify-between items-center">
-                                <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${msg.category === "Financial Logistics" ? "bg-emerald-50 text-emerald-600" :
-                                        msg.category?.includes("Web") || msg.category?.includes("Development") ? "bg-purple-50 text-purple-600" :
-                                            "bg-blue-50 text-blue-600"
+                        <div className="flex flex-col gap-2 w-full">
+                            <div className="flex justify-between items-center bg-gray-50/50 p-2 rounded-xl border border-gray-100/50">
+                                <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg ${msg.category === "Financial Logistics" ? "bg-emerald-500 text-white" :
+                                    msg.category?.includes("Web") || msg.category?.includes("Development") ? "bg-purple-600 text-white" :
+                                        "bg-blue-600 text-white"
                                     }`}>
                                     {(msg.category || 'Inquiry').split(' ')[0]}
                                 </span>
-                                <span className="text-[9px] font-bold text-gray-300">
+                                <span className="text-[10px] font-bold text-gray-400">
                                     {new Date(msg.createdAt).toLocaleDateString()}
                                 </span>
                             </div>
@@ -314,14 +314,14 @@ export default function MessagesModule() {
                                 value={msg.status || 'New'}
                                 onChange={(e) => handleUpdate(undefined, { ...msg, status: e.target.value })}
                                 disabled={updating}
-                                className={`w-full px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border cursor-pointer transition-all appearance-none bg-white hover:shadow-sm outline-none disabled:opacity-50 ${getStatusColor(msg.status || 'New')}`}
+                                className={`w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 cursor-pointer transition-all appearance-none bg-white hover:shadow-md outline-none disabled:opacity-50 ${getStatusColor(msg.status || 'New')}`}
                             >
                                 {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
 
-                        <div className="flex-1 min-w-0 w-full overflow-hidden mt-1">
-                            <p className="text-[10px] text-gray-500 font-medium line-clamp-2 italic px-2 py-1.5 bg-gray-50/50 rounded-lg border border-dashed border-gray-200 group-hover:bg-white transition-colors">&quot;{msg.message}&quot;</p>
+                        <div className="flex-1 min-w-0 w-full overflow-hidden">
+                            <p className="text-[11px] text-gray-500 font-semibold line-clamp-2 italic px-3 py-2.5 bg-gray-50/80 rounded-[1.2rem] border border-dashed border-gray-200 group-hover:bg-white transition-colors">&quot;{msg.message}&quot;</p>
                         </div>
 
                         <div className="flex items-center justify-end gap-1 mt-2 border-t border-gray-50 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">

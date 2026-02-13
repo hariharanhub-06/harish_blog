@@ -54,6 +54,9 @@ export async function POST(req: Request) {
             timeline: data.timeline,
             price: data.price,
             status: "onboarding",
+            plannedDeliveryDate: data.plannedDeliveryDate ? new Date(data.plannedDeliveryDate) : null,
+            projectCategory: data.projectCategory || "Web Development",
+            projectNotes: data.projectNotes || [],
             onboardingChecklist: [
                 { id: 1, task: "Requirements Confirmed", completed: true },
                 { id: 2, task: "Agreement Signed", completed: false },
@@ -82,13 +85,18 @@ export async function PUT(req: Request) {
             "scopeSummary", "timeline", "price", "advancePaid",
             "balanceAmount", "paymentStatus", "status",
             "agreementContent", "invoiceUrl", "onboardingChecklist",
-            "progressMilestones", "internalCost", "expectedProfit"
+            "progressMilestones", "internalCost", "expectedProfit",
+            "plannedDeliveryDate", "projectCategory", "projectNotes"
         ];
 
         const filteredUpdates = Object.keys(updateData)
             .filter(key => validFields.includes(key))
             .reduce((obj, key) => {
-                obj[key] = updateData[key];
+                if (key === "plannedDeliveryDate" && updateData[key]) {
+                    obj[key] = new Date(updateData[key]);
+                } else {
+                    obj[key] = updateData[key];
+                }
                 return obj;
             }, {} as any);
 

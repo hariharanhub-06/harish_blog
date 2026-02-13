@@ -717,7 +717,7 @@ export const schedulerConfig = pgTable("scheduler_config", {
 
 export const clientProjects = pgTable("client_projects", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  leadId: text("lead_id").notNull(),
+  leadId: text("lead_id"),
   title: text("title").notNull(),
   clientName: text("client_name").notNull(),
   businessName: text("business_name"),
