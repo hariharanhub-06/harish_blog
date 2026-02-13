@@ -31,8 +31,9 @@ export default function BusinessSolutionsSection() {
             {/* Background Decorations */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-orange-600/10 to-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="relative z-10 bg-white/5 border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-white/20 transition-all duration-500 min-h-[400px] flex items-center">
-                <div className="absolute top-0 left-0 w-full h-full opacity-90 group-hover:opacity-100 transition-opacity duration-1000 overflow-hidden rounded-[3rem] z-0">
+            <div className="relative z-10 bg-black/40 border border-white/10 rounded-[3rem] p-8 md:p-16 shadow-2xl backdrop-blur-md overflow-hidden group hover:border-white/20 transition-all duration-500">
+                {/* Full Background Video Container */}
+                <div className="absolute inset-0 z-0 pointer-events-none">
                     {!loading ? (
                         <video
                             autoPlay
@@ -40,54 +41,52 @@ export default function BusinessSolutionsSection() {
                             muted
                             playsInline
                             key={videoUrl}
+                            src={videoUrl}
                             className="w-full h-full object-cover transition-all duration-1000"
                             style={{
                                 transform: `scale(${videoConfig.scale}) translate(${videoConfig.x}%, ${videoConfig.y}%)`,
-                                mixBlendMode: videoConfig.mixBlendMode as any
+                                mixBlendMode: videoConfig.mixBlendMode as any,
+                                opacity: 0.8
                             }}
-                        >
-                            <source src={videoUrl} type="video/mp4" />
-                        </video>
+                        />
                     ) : (
-                        <div className="w-full h-full bg-black/20 animate-pulse flex items-center justify-center">
-                            <Loader2 className="animate-spin text-white/20" size={32} />
-                        </div>
+                        <div className="w-full h-full bg-white/5 animate-pulse" />
                     )}
-                    {/* Multi-layered gradient for deep contrast and readability */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent z-10" />
-                    <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent z-10 md:hidden" />
+                    {/* Dynamic Overlay for Visibility */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/80 md:bg-gradient-to-r md:from-black/90 md:via-black/20 md:to-transparent z-10" />
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center justify-between gap-10">
+                <div className="relative z-20 flex flex-col md:flex-row items-center justify-between gap-10">
                     <div className="max-w-xl text-center md:text-left">
                         <span className="text-orange-500 font-black tracking-[0.3em] uppercase text-[10px] mb-4 block">Unified Systems</span>
-                        <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-white mb-6 leading-none">
-                            Expert <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-purple-600">Business Solutions</span>
+                        <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-6 leading-[0.9]">
+                            Expert <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-purple-500">Business <br className="hidden md:block" /> Solutions</span>
                         </h2>
-                        <p className="text-gray-400 font-medium leading-relaxed mb-8">
+                        <p className="text-gray-300 font-medium leading-relaxed mb-10 text-lg opacity-80">
                             We provide end-to-end digital growth engines and robust financial logistics to scale your operations.
                         </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Link href="/services" className="px-8 py-5 bg-white text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-orange-600 hover:text-white transition-all shadow-xl flex items-center justify-center gap-3 group whitespace-nowrap">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <Link href="/services" className="px-8 py-5 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-orange-600 hover:text-white transition-all shadow-xl flex items-center justify-center gap-3 group whitespace-nowrap">
                                 <Code size={18} className="group-hover:rotate-12 transition-transform" /> Business Digital Solution
                             </Link>
-                            <Link href="/financial-logistics" className="px-8 py-5 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white/10 transition-all backdrop-blur-sm flex items-center justify-center gap-3 group whitespace-nowrap">
+                            <Link href="/financial-logistics" className="px-8 py-5 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-white/10 transition-all backdrop-blur-sm flex items-center justify-center gap-3 group whitespace-nowrap">
                                 <Briefcase size={18} className="group-hover:-rotate-12 transition-transform" /> Financial Logistics
                             </Link>
                         </div>
                     </div>
 
-                    <div className="w-full md:w-auto flex flex-col gap-4">
-                        <div className="bg-black/40 p-6 rounded-2xl border border-white/5 md:w-[280px] hover:scale-105 transition-transform duration-300">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Free Consultation</span>
+                    <div className="w-full md:w-auto">
+                        <div className="bg-black/60 backdrop-blur-2xl p-8 rounded-[2rem] border border-white/10 md:w-[320px] hover:scale-105 transition-transform duration-500 shadow-2xl">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Fast Response</span>
                             </div>
-                            <p className="text-sm font-bold text-white mb-4">Discuss your project with an expert today.</p>
+                            <h3 className="text-xl font-black text-white mb-2 leading-tight">Free <br />Consultation</h3>
+                            <p className="text-sm font-bold text-gray-400 mb-6">Discuss your requirements with an expert today.</p>
                             <button
                                 onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
-                                className="text-orange-500 text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:translate-x-2 transition-transform"
+                                className="w-full py-4 bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 hover:bg-orange-700 transition-colors"
                             >
                                 Book Now <ArrowRight size={14} />
                             </button>
