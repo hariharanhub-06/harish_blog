@@ -272,89 +272,85 @@ export default function MessagesModule() {
             </div>
 
             {/* Message List (Grid Tiles) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {filteredMessages.map((msg) => (
                     <div
                         key={msg.id}
-                        className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col gap-4 hover:border-primary/20 relative group h-full"
+                        className={`bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col gap-2 hover:border-primary/20 relative group h-full ${msg.category === "Financial Logistics" ? "border-l-4 border-l-emerald-500" :
+                                msg.category?.includes("Web") || msg.category?.includes("Development") ? "border-l-4 border-l-purple-500" :
+                                    msg.category === "Blog" ? "border-l-4 border-l-blue-500" : ""
+                            }`}
                     >
-                        <div className="flex items-center gap-4 shrink-0 min-w-0 md:min-w-[200px]">
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gray-50 text-primary flex items-center justify-center font-black text-lg shrink-0 group-hover:scale-110 transition-transform">
+                        <div className="flex items-center gap-3 shrink-0 min-w-0">
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 group-hover:scale-110 transition-transform ${msg.category === "Financial Logistics" ? "bg-emerald-50 text-emerald-600" :
+                                    msg.category?.includes("Web") || msg.category?.includes("Development") ? "bg-purple-50 text-purple-600" :
+                                        "bg-blue-50 text-blue-600"
+                                }`}>
                                 {msg.name.charAt(0)}
                             </div>
                             <div className="min-w-0">
-                                <h3 className="font-black text-gray-900 truncate text-base">{msg.name}</h3>
-                                <div className="flex items-center gap-1.5 text-primary font-bold text-xs mt-0.5">
-                                    <Phone size={12} className="shrink-0" />
+                                <h3 className="font-black text-gray-900 truncate text-xs">{msg.name}</h3>
+                                <div className="flex items-center gap-1 text-gray-400 font-bold text-[10px] mt-0.5">
+                                    <Phone size={10} className="shrink-0" />
                                     <span>{msg.mobile}</span>
                                 </div>
-                                <span className="text-[8px] font-black uppercase tracking-widest text-secondary/40 block mt-1.5">
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5 w-full">
+                            <div className="flex justify-between items-center">
+                                <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${msg.category === "Financial Logistics" ? "bg-emerald-50 text-emerald-600" :
+                                        msg.category?.includes("Web") || msg.category?.includes("Development") ? "bg-purple-50 text-purple-600" :
+                                            "bg-blue-50 text-blue-600"
+                                    }`}>
+                                    {(msg.category || 'Inquiry').split(' ')[0]}
+                                </span>
+                                <span className="text-[9px] font-bold text-gray-300">
                                     {new Date(msg.createdAt).toLocaleDateString()}
                                 </span>
                             </div>
+
+                            <select
+                                value={msg.status || 'New'}
+                                onChange={(e) => handleUpdate(undefined, { ...msg, status: e.target.value })}
+                                disabled={updating}
+                                className={`w-full px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border cursor-pointer transition-all appearance-none bg-white hover:shadow-sm outline-none disabled:opacity-50 ${getStatusColor(msg.status || 'New')}`}
+                            >
+                                {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-4 md:gap-8 w-full xl:w-auto">
-                            <div className="min-w-[140px]">
-                                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-secondary/50 block mb-1">Category</span>
-                                <span className="text-xs font-bold text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 whitespace-nowrap">{msg.category || 'Inquiry'}</span>
-                            </div>
-
-                            <div>
-                                <select
-                                    value={msg.status || 'New'}
-                                    onChange={(e) => handleUpdate(undefined, { ...msg, status: e.target.value })}
-                                    disabled={updating}
-                                    className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border cursor-pointer transition-all appearance-none bg-white hover:shadow-md focus:ring-2 focus:ring-primary/20 outline-none disabled:opacity-50 ${getStatusColor(msg.status || 'New')}`}
-                                >
-                                    {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                            </div>
+                        <div className="flex-1 min-w-0 w-full overflow-hidden mt-1">
+                            <p className="text-[10px] text-gray-500 font-medium line-clamp-2 italic px-2 py-1.5 bg-gray-50/50 rounded-lg border border-dashed border-gray-200 group-hover:bg-white transition-colors">&quot;{msg.message}&quot;</p>
                         </div>
 
-                        <div className="flex-1 min-w-0 w-full overflow-hidden">
-                            <p className="text-xs text-gray-500 font-medium line-clamp-2 italic px-3 py-2 bg-gray-50/50 rounded-xl border border-dashed border-gray-200 group-hover:bg-white transition-colors">&quot;{msg.message}&quot;</p>
-                        </div>
-
-                        <div className="flex items-center gap-2 w-full sm:w-auto mt-3 xl:mt-0 pt-4 xl:pt-0 border-t xl:border-0 border-gray-50 flex-wrap justify-end ml-auto">
-                            <div className="flex items-center gap-1.5">
-                                <button
-                                    onClick={() => setViewing(msg)}
-                                    className="p-2 bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all shadow-sm active:scale-95"
-                                >
-                                    <Eye size={16} />
-                                </button>
-                                <a
-                                    href={`https://wa.me/${msg.mobile?.replace(/\D/g, '')}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-2 bg-gray-50 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-xl transition-all shadow-sm active:scale-95"
-                                >
-                                    <MessageCircle size={16} />
-                                </a>
-                            </div>
-
+                        <div className="flex items-center justify-end gap-1 mt-2 border-t border-gray-50 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                                onClick={() => setViewing(msg)}
+                                className="p-1.5 bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all"
+                            >
+                                <Eye size={12} />
+                            </button>
+                            <a
+                                href={`https://wa.me/${msg.mobile?.replace(/\D/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1.5 bg-gray-50 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-lg transition-all"
+                            >
+                                <MessageCircle size={12} />
+                            </a>
                             <button
                                 onClick={() => handleDelete(msg.id)}
-                                className="p-2 bg-red-50 text-red-200 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm active:scale-95"
+                                className="p-1.5 bg-red-50 text-red-200 hover:bg-red-500 hover:text-white rounded-lg transition-all"
                             >
-                                <Trash2 size={16} />
+                                <Trash2 size={12} />
                             </button>
                         </div>
-
-                        {msg.category === "Financial Logistics" && msg.status === "New" && (
-                            <button
-                                onClick={() => handlePushToFinance(msg)}
-                                className="w-full xl:w-auto bg-indigo-50 text-indigo-600 border border-indigo-100 px-4 py-2 rounded-xl font-black uppercase text-[8px] flex items-center justify-center gap-2 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                            >
-                                <Wallet size={12} /> Push to Finance Leads
-                            </button>
-                        )}
                     </div>
                 ))}
 
                 {filteredMessages.length === 0 && (
-                    <div className="text-center py-20 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-100">
+                    <div className="col-span-full text-center py-20 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-100">
                         <p className="text-secondary font-bold text-sm">No messages found matching your filters</p>
                     </div>
                 )}

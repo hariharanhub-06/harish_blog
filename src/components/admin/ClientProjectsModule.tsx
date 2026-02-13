@@ -141,6 +141,7 @@ export default function ClientProjectsModule() {
             plannedDeliveryDate: "",
             projectCategory: "Web Development",
             onboardingChecklist: [],
+            projectNotes: [],
         });
     };
 
@@ -263,6 +264,13 @@ export default function ClientProjectsModule() {
                                 className="flex-1 xl:flex-none bg-primary text-white px-6 py-3.5 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
                             >
                                 Manage <ChevronRight size={14} />
+                            </button>
+                            <button
+                                onClick={() => setViewing(project)}
+                                className="p-3.5 bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white rounded-2xl transition-all active:scale-95"
+                                title="Edit Project Details"
+                            >
+                                <Edit3 size={18} />
                             </button>
                             <button
                                 onClick={() => handleDelete(project.id)}
@@ -428,59 +436,116 @@ export default function ClientProjectsModule() {
                                     ))}
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Project Docs & Actions */}
-                            <div className="space-y-6">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Actions & Documents</h4>
-                                <div className="grid gap-3">
-                                    <button
-                                        onClick={() => setShowGenerator(true)}
-                                        className="w-full p-5 bg-purple-50 text-purple-600 rounded-3xl border border-purple-100 flex flex-col items-center justify-center gap-2 hover:bg-purple-600 hover:text-white transition-all group"
-                                    >
-                                        <FileText size={24} className="group-hover:scale-110 transition-transform" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Agreement Generator</span>
+                        {/* Project Timeline & Notes */}
+                        <div className="space-y-6">
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Timeline & Notes</h4>
+                            <div className="space-y-4">
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Add a progress note..."
+                                        className="flex-1 bg-gray-50 border-0 rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 focus:ring-primary"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                const val = (e.target as HTMLInputElement).value;
+                                                if (val.trim()) {
+                                                    const newNote = {
+                                                        date: new Date().toISOString(),
+                                                        note: val,
+                                                        author: 'Admin'
+                                                    };
+                                                    const updatedNotes = [newNote, ...(viewing.projectNotes || [])];
+                                                    setViewing({ ...viewing, projectNotes: updatedNotes });
+                                                    (e.target as HTMLInputElement).value = '';
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <button className="bg-primary text-white p-3 rounded-xl shadow-lg shadow-primary/20">
+                                        <Plus size={16} />
                                     </button>
-
-                                    {viewing.agreementContent && (
-                                        <div className="p-5 bg-gray-50 rounded-3xl border border-dashed border-gray-200 space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-emerald-600">
-                                                    <CheckCircle2 size={12} /> Agreement Saved
-                                                </div>
-                                                <button className="text-[9px] font-black uppercase text-primary hover:underline">View Preview</button>
+                                </div>
+                                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {(viewing.projectNotes || []).map((note: any, idx: number) => (
+                                        <div key={idx} className="flex gap-4 relative">
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-2 h-2 rounded-full bg-primary ring-4 ring-white shadow-sm z-10" />
+                                                {idx !== (viewing.projectNotes?.length || 0) - 1 && (
+                                                    <div className="w-0.5 flex-1 bg-gray-100 my-1" />
+                                                )}
                                             </div>
-                                            <button
-                                                onClick={() => {
-                                                    navigator.clipboard.writeText(viewing.agreementContent);
-                                                    alert("Saved agreement content copied to clipboard!");
-                                                }}
-                                                className="w-full py-3 bg-white border border-gray-100 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <Copy size={12} /> Copy Saved Agreement
-                                            </button>
+                                            <div className="pb-4">
+                                                <p className="text-[10px] text-gray-400 font-bold mb-0.5">
+                                                    {new Date(note.date).toLocaleDateString()} at {new Date(note.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </p>
+                                                <p className="text-xs text-gray-700 font-medium bg-gray-50/50 p-3 rounded-xl border border-dashed border-gray-100">
+                                                    {note.note}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {(!viewing.projectNotes || viewing.projectNotes.length === 0) && (
+                                        <div className="text-center py-8">
+                                            <p className="text-[10px] text-gray-300 font-black uppercase tracking-widest">No notes recorded</p>
                                         </div>
                                     )}
+                                </div>
+                            </div>
+                        </div>
 
-                                    <div className="bg-orange-50/50 p-6 rounded-3xl border border-orange-100 space-y-4">
-                                        <div className="flex items-center gap-2">
-                                            <AlertCircle size={14} className="text-orange-500" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-orange-900">Admin Controls</span>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div>
-                                                <p className="text-[8px] font-black text-orange-700 uppercase mb-1">Internal Cost</p>
-                                                <input
-                                                    type="number"
-                                                    value={viewing.internalCost || 0}
-                                                    onChange={(e) => setViewing({ ...viewing, internalCost: parseFloat(e.target.value) })}
-                                                    className="w-full bg-white border-0 rounded-xl px-4 py-2 text-xs font-bold focus:ring-1 focus:ring-orange-200"
-                                                />
+                        {/* Project Docs & Actions */}
+                        <div className="space-y-6">
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-2">Actions & Documents</h4>
+                            <div className="grid gap-3">
+                                <button
+                                    onClick={() => setShowGenerator(true)}
+                                    className="w-full p-5 bg-purple-50 text-purple-600 rounded-3xl border border-purple-100 flex flex-col items-center justify-center gap-2 hover:bg-purple-600 hover:text-white transition-all group"
+                                >
+                                    <FileText size={24} className="group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Agreement Generator</span>
+                                </button>
+
+                                {viewing.agreementContent && (
+                                    <div className="p-5 bg-gray-50 rounded-3xl border border-dashed border-gray-200 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-emerald-600">
+                                                <CheckCircle2 size={12} /> Agreement Saved
                                             </div>
-                                            <div>
-                                                <p className="text-[8px] font-black text-orange-700 uppercase mb-1">Expected Profit</p>
-                                                <div className="bg-white rounded-xl px-4 py-2 text-xs font-black italic">
-                                                    ₹{((viewing.price || 0) - (viewing.internalCost || 0)).toLocaleString()}
-                                                </div>
+                                            <button className="text-[9px] font-black uppercase text-primary hover:underline">View Preview</button>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(viewing.agreementContent);
+                                                alert("Saved agreement content copied to clipboard!");
+                                            }}
+                                            className="w-full py-3 bg-white border border-gray-100 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Copy size={12} /> Copy Saved Agreement
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className="bg-orange-50/50 p-6 rounded-3xl border border-orange-100 space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <AlertCircle size={14} className="text-orange-500" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-orange-900">Admin Controls</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <p className="text-[8px] font-black text-orange-700 uppercase mb-1">Internal Cost</p>
+                                            <input
+                                                type="number"
+                                                value={viewing.internalCost || 0}
+                                                onChange={(e) => setViewing({ ...viewing, internalCost: parseFloat(e.target.value) })}
+                                                className="w-full bg-white border-0 rounded-xl px-4 py-2 text-xs font-bold focus:ring-1 focus:ring-orange-200"
+                                            />
+                                        </div>
+                                        <div>
+                                            <p className="text-[8px] font-black text-orange-700 uppercase mb-1">Expected Profit</p>
+                                            <div className="bg-white rounded-xl px-4 py-2 text-xs font-black italic">
+                                                ₹{((viewing.price || 0) - (viewing.internalCost || 0)).toLocaleString()}
                                             </div>
                                         </div>
                                     </div>

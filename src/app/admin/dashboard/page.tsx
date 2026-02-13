@@ -42,11 +42,8 @@ import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
 import LiveSessionsModule from "@/components/admin/LiveSessionsModule";
 import GameAssetsModule from "@/components/admin/GameAssetsModule";
 import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
-import OperationsGuide from "@/components/admin/OperationsGuide";
-import PricingQuoteSystem from "@/components/admin/PricingQuoteSystem";
-import FinanceLeadModule from "@/components/admin/FinanceLeadModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets" | "client-projects" | "ops-guide" | "pricing-quote" | "finance-leads";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets" | "client-projects";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -115,9 +112,6 @@ export default function AdminDashboard() {
         { id: "game-assets", title: "Game Content", icon: Gamepad2, color: "bg-violet-500" },
         { id: "divider", title: "Business Operations", icon: Briefcase, color: "bg-gray-400" },
         { id: "client-projects", title: "Client Projects", icon: Briefcase, color: "bg-blue-700" },
-        { id: "pricing-quote", title: "Pricing & Quote", icon: Calculator, color: "bg-emerald-600" },
-        { id: "finance-leads", title: "Finance Leads", icon: Wallet, color: "bg-indigo-600" },
-        { id: "ops-guide", title: "Operations Guide", icon: FileText, color: "bg-orange-600" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
     ];
 
@@ -135,9 +129,6 @@ export default function AdminDashboard() {
             case "sessions": return <LiveSessionsModule />;
             case "game-assets": return <GameAssetsModule />;
             case "client-projects": return <ClientProjectsModule />;
-            case "ops-guide": return <OperationsGuide />;
-            case "pricing-quote": return <PricingQuoteSystem />;
-            case "finance-leads": return <FinanceLeadModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <OverviewModule />

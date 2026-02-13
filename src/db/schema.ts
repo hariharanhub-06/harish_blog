@@ -744,6 +744,7 @@ export const clientProjects = pgTable("client_projects", {
   updatedAt: timestamp("updated_at").defaultNow(),
   plannedDeliveryDate: timestamp("planned_delivery_date"),
   projectCategory: text("project_category"),
+  projectNotes: jsonb("project_notes").$default(() => ([])), // [{ date, note, author }]
 });
 
 export const clientProjectRelations = relations(clientProjects, ({ one }) => ({
