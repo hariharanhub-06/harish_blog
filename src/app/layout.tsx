@@ -54,6 +54,9 @@ export const metadata: Metadata = {
       },
     ],
   },
+  other: {
+    "google-adsense-account": "ca-pub-8379879880114790"
+  },
   robots: {
     index: true,
     follow: true,

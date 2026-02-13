@@ -20,15 +20,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <>
             {!isAdmin && !isScheduler && <AnalyticsTracker />}
             {!isAdmin && (
-                <>
-                    <meta name="google-adsense-account" content="ca-pub-8379879880114790" />
-                    <Script
-                        async
-                        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8379879880114790"
-                        crossOrigin="anonymous"
-                        strategy="afterInteractive"
-                    />
-                </>
+                <Script
+                    async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8379879880114790"
+                    crossOrigin="anonymous"
+                    strategy="afterInteractive"
+                />
             )}
             {!isAdmin && !isScheduler && <Navbar />}
 
