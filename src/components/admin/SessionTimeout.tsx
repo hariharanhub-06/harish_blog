@@ -6,7 +6,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 
-const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 Minutes
+const INACTIVITY_LIMIT = 60 * 60 * 1000; // 1 Hour
 
 export default function SessionTimeout() {
     const { user } = useAuth();
