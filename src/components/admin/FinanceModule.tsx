@@ -448,8 +448,8 @@ export default function FinanceModule() {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-                        <Wallet className="text-primary" size={32} />
+                    <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                        <Wallet className="text-primary" size={28} />
                         Finance Hub
                     </h2>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Smart tracking and wealth analysis</p>
@@ -1481,13 +1481,13 @@ function StatCard({ title, value, icon: Icon, color }: any) {
     };
 
     return (
-        <div className={`bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-4 group hover:-translate-y-1 transition-all`}>
-            <div className={`p-4 rounded-2xl ${colors[color]} group-hover:scale-110 transition-transform`}>
-                <Icon size={24} />
+        <div className={`bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-3 group hover:-translate-y-1 transition-all overflow-hidden`}>
+            <div className={`p-3 rounded-2xl ${colors[color]} group-hover:scale-110 transition-transform shrink-0`}>
+                <Icon size={20} />
             </div>
-            <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{title}</p>
-                <h4 className="text-xl font-black text-gray-900 mt-0.5">
+            <div className="min-w-0 flex-1">
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.1em] truncate">{title}</p>
+                <h4 className="text-lg font-black text-gray-900 mt-0.5 truncate">
                     {typeof value === 'number' ? `₹${value.toLocaleString()}` : value}
                 </h4>
             </div>
