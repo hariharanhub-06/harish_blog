@@ -18,7 +18,9 @@ import {
     LayoutDashboard,
     CreditCard,
     DollarSign,
-    Filter
+    Filter,
+    Flame,
+    Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -442,6 +444,7 @@ export default function FinanceModule() {
     const totalBalance = totalIncome - totalExpenseWithDebt;
     const debtBalance = stats?.debtBalance || 0;
     const savingsRate = totalIncome > 0 ? (((totalIncome - totalExpenseWithDebt) / totalIncome) * 100).toFixed(1) : "0";
+    const dailyBurnRate = analytics?.velocity?.dailyBurnRate || (totalExpenseWithDebt / 30).toFixed(0);
 
     return (
         <div className="space-y-8 pb-20">
@@ -468,12 +471,13 @@ export default function FinanceModule() {
             </div>
 
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <StatCard title="Total Income" value={totalIncome} icon={TrendingUp} color="emerald" />
                 <StatCard title="Total Expenses" value={totalExpenseWithDebt} icon={TrendingDown} color="red" />
                 <StatCard title="Total Balance" value={totalBalance} icon={Wallet} color="indigo" />
-                <StatCard title="Debt Balance" value={debtBalance} icon={CreditCard} color="orange" />
-                <StatCard title="Savings Rate" value={`${savingsRate}%`} icon={LayoutDashboard} color="blue" />
+                <StatCard title="Daily Burn Rate" value={`₹${dailyBurnRate}/day`} icon={Flame} color="orange" />
+                <StatCard title="Debt Balance" value={debtBalance} icon={CreditCard} color="blue" />
+                <StatCard title="Savings Rate" value={`${savingsRate}%`} icon={LayoutDashboard} color="emerald" />
             </div>
 
             {/* Shared Date Filter */}
