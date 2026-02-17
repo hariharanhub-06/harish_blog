@@ -71,6 +71,9 @@ interface ParsedEntry {
 export default function FinanceModule() {
     const [activeTab, setActiveTab] = useState<"dashboard" | "log" | "debts" | "history" | "analytics">("dashboard");
     const [logInput, setLogInput] = useState("");
+    const [suggestion, setSuggestion] = useState<string | null>(null);
+    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+    const ghostRef = React.useRef<HTMLDivElement>(null);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [debts, setDebts] = useState<Debt[]>([]);
     const [stats, setStats] = useState<any>(null);
@@ -251,6 +254,75 @@ export default function FinanceModule() {
         return entries;
     }, [logInput, debts, stats]);
 
+    // Autocomplete Logic
+    useEffect(() => {
+        if (!logInput) {
+            setSuggestion(null);
+            return;
+        }
+
+        const lines = logInput.split('\n');
+        const currentLine = lines[lines.length - 1];
+        if (!currentLine.trim() || currentLine.endsWith(' ')) {
+            setSuggestion(null);
+            return;
+        }
+
+        // Find the last "word" being typed
+        const words = currentLine.trim().split(/\s+/);
+        const lastWord = words[words.length - 1];
+
+        if (lastWord.length < 2) {
+            setSuggestion(null);
+            return;
+        }
+
+        // Get all possible suggestion sources
+        const sources = [
+            ...(stats?.categories || []).map((c: any) => c.category),
+            ...(debts || []).map((d: any) => d.name),
+            ...transactions.map(t => t.description)
+        ];
+
+        // Unique sources and filter out duplicates
+        const uniqueSources = Array.from(new Set(sources));
+
+        // Find match
+        const match = uniqueSources.find(s =>
+            s.toLowerCase().startsWith(lastWord.toLowerCase()) &&
+            s.toLowerCase() !== lastWord.toLowerCase()
+        );
+
+        if (match) {
+            setSuggestion(match);
+        } else {
+            setSuggestion(null);
+        }
+    }, [logInput, stats, debts, transactions]);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Tab' && suggestion) {
+            e.preventDefault();
+            const lines = logInput.split('\n');
+            const lastLine = lines[lines.length - 1];
+            const lastWordMatch = lastLine.match(/(\S+)$/);
+            if (lastWordMatch) {
+                const lastWord = lastWordMatch[1];
+                const prefix = lastLine.substring(0, lastLine.length - lastWord.length);
+                lines[lines.length - 1] = prefix + suggestion;
+                setLogInput(lines.join('\n') + ' ');
+                setSuggestion(null);
+            }
+        }
+    };
+
+    const handleScroll = () => {
+        if (textareaRef.current && ghostRef.current) {
+            ghostRef.current.scrollTop = textareaRef.current.scrollTop;
+            ghostRef.current.scrollLeft = textareaRef.current.scrollLeft;
+        }
+    };
+
     const handleSaveLog = async () => {
         const validEntries = parsedEntries.filter(e => e.isValid);
         if (validEntries.length === 0) return;
@@ -367,6 +439,7 @@ export default function FinanceModule() {
     const debtPayments = summaryData.find((s: any) => s.type === "debt_pay")?.total || 0;
     // Debt payments are also expenses
     const totalExpenseWithDebt = totalExpense + debtPayments;
+    const totalBalance = totalIncome - totalExpenseWithDebt;
     const debtBalance = stats?.debtBalance || 0;
     const savingsRate = totalIncome > 0 ? (((totalIncome - totalExpenseWithDebt) / totalIncome) * 100).toFixed(1) : "0";
 
@@ -395,9 +468,10 @@ export default function FinanceModule() {
             </div>
 
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                 <StatCard title="Total Income" value={totalIncome} icon={TrendingUp} color="emerald" />
                 <StatCard title="Total Expenses" value={totalExpenseWithDebt} icon={TrendingDown} color="red" />
+                <StatCard title="Total Balance" value={totalBalance} icon={Wallet} color="indigo" />
                 <StatCard title="Debt Balance" value={debtBalance} icon={CreditCard} color="orange" />
                 <StatCard title="Savings Rate" value={`${savingsRate}%`} icon={LayoutDashboard} color="blue" />
             </div>
@@ -940,15 +1014,30 @@ export default function FinanceModule() {
                             <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm space-y-8">
                                 <div>
                                     <h3 className="text-2xl font-black tracking-tight">AI Smart Log</h3>
-                                    <p className="text-sm font-bold text-gray-400 mt-2">Type your daily entries. I'll automatically detect the amounts and categories.</p>
+                                    <p className="text-sm font-bold text-gray-400 mt-2">Type your daily entries. I'll automatically detect the amounts and categories. {suggestion && <span className="text-primary animate-pulse ml-2">Press Tab to use "{suggestion}"</span>}</p>
                                 </div>
 
-                                <textarea
-                                    value={logInput}
-                                    onChange={(e) => setLogInput(e.target.value)}
-                                    placeholder="Debts Paid: X - 5000&#10;Expense Food 500 Lunch 200&#10;Income Extra - 1000"
-                                    className="w-full h-64 bg-gray-50 border-0 rounded-[2rem] p-8 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-medium leading-relaxed"
-                                />
+                                <div className="relative group/textarea">
+                                    <textarea
+                                        ref={textareaRef}
+                                        value={logInput}
+                                        onChange={(e) => setLogInput(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                        onScroll={handleScroll}
+                                        placeholder="Debts Paid: X - 5000&#10;Expense Food 500 Lunch 200&#10;Income Extra - 1000"
+                                        className="w-full h-64 bg-gray-50 border-0 rounded-[2rem] p-8 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-medium leading-relaxed relative z-10 bg-transparent custom-scrollbar resize-none"
+                                        spellCheck={false}
+                                    />
+                                    {suggestion && (
+                                        <div
+                                            ref={ghostRef}
+                                            className="absolute top-0 left-0 w-full h-64 p-8 text-sm font-medium leading-relaxed pointer-events-none text-gray-300 whitespace-pre-wrap overflow-hidden custom-scrollbar"
+                                        >
+                                            <span className="invisible">{logInput}</span>
+                                            <span className="opacity-50">{suggestion.substring(logInput.split(/[\s\n]+/).pop()?.trim().length || 0)}</span>
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Smart Context Suggestions */}
                                 {(() => {
@@ -1387,7 +1476,8 @@ function StatCard({ title, value, icon: Icon, color }: any) {
         emerald: "text-emerald-500 bg-emerald-50 shadow-emerald-100",
         red: "text-red-500 bg-red-50 shadow-red-100",
         orange: "text-orange-500 bg-orange-50 shadow-orange-100",
-        blue: "text-blue-500 bg-blue-50 shadow-blue-100"
+        blue: "text-blue-500 bg-blue-50 shadow-blue-100",
+        indigo: "text-indigo-500 bg-indigo-50 shadow-indigo-100"
     };
 
     return (
