@@ -468,7 +468,7 @@ export default function FinanceModule() {
             </div>
 
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                 <StatCard title="Total Income" value={totalIncome} icon={TrendingUp} color="emerald" />
                 <StatCard title="Total Expenses" value={totalExpenseWithDebt} icon={TrendingDown} color="red" />
                 <StatCard title="Total Balance" value={totalBalance} icon={Wallet} color="indigo" />
@@ -1481,13 +1481,13 @@ function StatCard({ title, value, icon: Icon, color }: any) {
     };
 
     return (
-        <div className={`bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-3 group hover:-translate-y-1 transition-all overflow-hidden`}>
+        <div className={`bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-3 group hover:-translate-y-1 transition-all`}>
             <div className={`p-3 rounded-2xl ${colors[color]} group-hover:scale-110 transition-transform shrink-0`}>
                 <Icon size={20} />
             </div>
             <div className="min-w-0 flex-1">
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.1em] truncate">{title}</p>
-                <h4 className="text-lg font-black text-gray-900 mt-0.5 truncate">
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.1em]">{title}</p>
+                <h4 className="text-lg font-black text-gray-900 mt-0.5 whitespace-nowrap">
                     {typeof value === 'number' ? `₹${value.toLocaleString()}` : value}
                 </h4>
             </div>
