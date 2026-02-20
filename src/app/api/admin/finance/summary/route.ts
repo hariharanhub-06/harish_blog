@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { financeTransactions, financeDebts } from "@/db/schema";
+import { financeTransactions, financeDebts, financeLoans } from "@/db/schema";
 import { eq, and, gte, lte, sql } from "drizzle-orm";
 
 export async function GET(req: Request) {
@@ -63,6 +63,13 @@ export async function GET(req: Request) {
         })
             .from(financeDebts)
             .where(eq(financeDebts.isActive, true));
+
+        // 3. Loan Balance (Current Receivables)
+        const loans = await db.select({
+            total: sql<number>`sum(${financeLoans.amount} - ${financeLoans.collectedAmount})`,
+        })
+            .from(financeLoans)
+            .where(eq(financeLoans.status, "active"));
 
         // 3. Category Breakdown (All types, grouped by category)
         const categories = await db.select({
@@ -132,6 +139,7 @@ export async function GET(req: Request) {
         return NextResponse.json({
             summary: stats,
             debtBalance: debts[0]?.total || 0,
+            loanBalance: loans[0]?.total || 0,
             categories,
             activeDebts,
             trend

@@ -59,6 +59,21 @@ interface Debt {
     repaymentType: "single" | "split";
     dueDate: string | null;
     isActive: boolean;
+    interestRate: number;
+    timePeriod: string;
+}
+
+interface Loan {
+    id: string;
+    borrowerName: string;
+    amount: number;
+    collectedAmount: number;
+    interestRate: number;
+    timePeriod: string;
+    startDate: string;
+    dueDate: string | null;
+    notes: string;
+    status: "active" | "collected" | "defaulted";
 }
 
 interface ParsedEntry {
@@ -71,13 +86,14 @@ interface ParsedEntry {
 }
 
 export default function FinanceModule() {
-    const [activeTab, setActiveTab] = useState<"dashboard" | "log" | "debts" | "history" | "analytics">("dashboard");
+    const [activeTab, setActiveTab] = useState<"dashboard" | "log" | "debts" | "loans" | "history" | "analytics">("dashboard");
     const [logInput, setLogInput] = useState("");
     const [suggestion, setSuggestion] = useState<string | null>(null);
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     const ghostRef = React.useRef<HTMLDivElement>(null);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [debts, setDebts] = useState<Debt[]>([]);
+    const [loans, setLoans] = useState<Loan[]>([]);
     const [stats, setStats] = useState<any>(null);
     const [analytics, setAnalytics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -108,7 +124,23 @@ export default function FinanceModule() {
         remainingAmount: "",
         notes: "",
         repaymentType: "single" as "single" | "split",
-        dueDate: ""
+        dueDate: "",
+        interestRate: "",
+        timePeriod: ""
+    });
+
+    const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
+    const [editingLoan, setEditingLoan] = useState<Loan | null>(null);
+    const [loanForm, setLoanForm] = useState({
+        borrowerName: "",
+        amount: "",
+        collectedAmount: "",
+        interestRate: "",
+        timePeriod: "",
+        startDate: new Date().toISOString().split('T')[0],
+        dueDate: "",
+        notes: "",
+        status: "active" as "active" | "collected" | "defaulted"
     });
 
     // Fetch initial data
@@ -127,14 +159,16 @@ export default function FinanceModule() {
                 analyticsUrl = `/api/admin/finance/analytics?startDate=${startDate}&endDate=${endDate}`;
             }
 
-            const [debtsRes, statsRes, transRes, analyticsRes] = await Promise.all([
+            const [debtsRes, loansRes, statsRes, transRes, analyticsRes] = await Promise.all([
                 fetch("/api/admin/finance/debts", { cache: "no-store" }),
+                fetch("/api/admin/finance/loans", { cache: "no-store" }),
                 fetch(summaryUrl, { cache: "no-store" }),
                 fetch(`/api/admin/finance/transactions?limit=100${selectedCategory !== 'All' ? `&category=${selectedCategory}` : ''}`, { cache: "no-store" }),
                 fetch(analyticsUrl, { cache: "no-store" })
             ]);
 
             if (debtsRes.ok) setDebts(await debtsRes.json());
+            if (loansRes.ok) setLoans(await loansRes.json());
             if (statsRes.ok) setStats(await statsRes.json());
             if (transRes.ok) setTransactions(await transRes.json());
             if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
@@ -380,12 +414,16 @@ export default function FinanceModule() {
                     ...editingDebt,
                     ...debtForm,
                     initialAmount: parseFloat(debtForm.initialAmount),
-                    remainingAmount: parseFloat(debtForm.remainingAmount || debtForm.initialAmount)
+                    remainingAmount: parseFloat(debtForm.remainingAmount || debtForm.initialAmount),
+                    interestRate: parseFloat(debtForm.interestRate || "0"),
+                    timePeriod: debtForm.timePeriod
                 }
                 : {
                     ...debtForm,
                     initialAmount: parseFloat(debtForm.initialAmount),
-                    remainingAmount: parseFloat(debtForm.initialAmount)
+                    remainingAmount: parseFloat(debtForm.initialAmount),
+                    interestRate: parseFloat(debtForm.interestRate || "0"),
+                    timePeriod: debtForm.timePeriod
                 };
 
             const res = await fetch(url, {
@@ -397,7 +435,7 @@ export default function FinanceModule() {
             if (res.ok) {
                 setIsDebtModalOpen(false);
                 setEditingDebt(null);
-                setDebtForm({ name: "", initialAmount: "", remainingAmount: "", notes: "", repaymentType: "single", dueDate: "" });
+                setDebtForm({ name: "", initialAmount: "", remainingAmount: "", notes: "", repaymentType: "single", dueDate: "", interestRate: "", timePeriod: "" });
                 setError(null);
                 fetchData();
             } else {
@@ -414,7 +452,7 @@ export default function FinanceModule() {
 
     const openAddDebt = () => {
         setEditingDebt(null);
-        setDebtForm({ name: "", initialAmount: "", remainingAmount: "", notes: "", repaymentType: "single", dueDate: "" });
+        setDebtForm({ name: "", initialAmount: "", remainingAmount: "", notes: "", repaymentType: "single", dueDate: "", interestRate: "", timePeriod: "" });
         setError(null);
         setIsDebtModalOpen(true);
     };
@@ -427,10 +465,91 @@ export default function FinanceModule() {
             remainingAmount: debt.remainingAmount.toString(),
             notes: debt.notes,
             repaymentType: (debt.repaymentType as any) || "single",
-            dueDate: debt.dueDate ? new Date(debt.dueDate).toISOString().split('T')[0] : ""
+            dueDate: debt.dueDate ? new Date(debt.dueDate).toISOString().split('T')[0] : "",
+            interestRate: (debt.interestRate || 0).toString(),
+            timePeriod: debt.timePeriod || ""
         });
         setError(null);
         setIsDebtModalOpen(true);
+    };
+
+    const handleSaveLoan = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const url = "/api/admin/finance/loans";
+            const method = editingLoan ? "PUT" : "POST";
+            const body = editingLoan
+                ? {
+                    ...editingLoan,
+                    ...loanForm,
+                    amount: parseFloat(loanForm.amount),
+                    collectedAmount: parseFloat(loanForm.collectedAmount || "0"),
+                    interestRate: parseFloat(loanForm.interestRate || "0")
+                }
+                : {
+                    ...loanForm,
+                    amount: parseFloat(loanForm.amount),
+                    collectedAmount: parseFloat(loanForm.collectedAmount || "0"),
+                    interestRate: parseFloat(loanForm.interestRate || "0")
+                };
+
+            const res = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                setIsLoanModalOpen(false);
+                setEditingLoan(null);
+                setLoanForm({ borrowerName: "", amount: "", collectedAmount: "", interestRate: "", timePeriod: "", startDate: new Date().toISOString().split('T')[0], dueDate: "", notes: "", status: "active" });
+                setError(null);
+                fetchData();
+            } else {
+                const errData = await res.json();
+                setError(errData.error || "Failed to save loan");
+            }
+        } catch (error) {
+            console.error("Failed to save loan", error);
+            setError("A network error occurred. Please try again.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const openAddLoan = () => {
+        setEditingLoan(null);
+        setLoanForm({ borrowerName: "", amount: "", collectedAmount: "", interestRate: "", timePeriod: "", startDate: new Date().toISOString().split('T')[0], dueDate: "", notes: "", status: "active" });
+        setError(null);
+        setIsLoanModalOpen(true);
+    };
+
+    const openEditLoan = (loan: Loan) => {
+        setEditingLoan(loan);
+        setLoanForm({
+            borrowerName: loan.borrowerName,
+            amount: loan.amount.toString(),
+            collectedAmount: loan.collectedAmount.toString(),
+            interestRate: loan.interestRate.toString(),
+            timePeriod: loan.timePeriod || "",
+            startDate: loan.startDate ? new Date(loan.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            dueDate: loan.dueDate ? new Date(loan.dueDate).toISOString().split('T')[0] : "",
+            notes: loan.notes,
+            status: loan.status
+        });
+        setError(null);
+        setIsLoanModalOpen(true);
+    };
+
+    const handleDeleteLoan = async (id: string) => {
+        if (!confirm("Delete this loan record?")) return;
+        try {
+            const res = await fetch(`/api/admin/finance/loans?id=${id}`, { method: 'DELETE' });
+            if (res.ok) fetchData();
+        } catch (error) {
+            console.error("Failed to delete loan", error);
+        }
     };
 
     if (loading && !stats) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary" /></div>;
@@ -443,6 +562,7 @@ export default function FinanceModule() {
     const totalExpenseWithDebt = totalExpense + debtPayments;
     const totalBalance = totalIncome - totalExpenseWithDebt;
     const debtBalance = stats?.debtBalance || 0;
+    const loanBalance = stats?.loanBalance || 0;
     const savingsRate = totalIncome > 0 ? (((totalIncome - totalExpenseWithDebt) / totalIncome) * 100).toFixed(1) : "0";
     const dailyBurnRate = analytics?.velocity?.dailyBurnRate || (totalExpenseWithDebt / 30).toFixed(0);
 
@@ -458,13 +578,13 @@ export default function FinanceModule() {
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Smart tracking and wealth analysis</p>
                 </div>
                 <div className="flex bg-white p-1 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
-                    {["dashboard", "analytics", "log", "debts", "history"].map((tab) => (
+                    {["dashboard", "analytics", "log", "debts", "loans", "history"].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
                             className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-400 hover:text-gray-600'}`}
                         >
-                            {tab}
+                            {tab === "loans" ? "Loans Given" : tab}
                         </button>
                     ))}
                 </div>
@@ -477,7 +597,8 @@ export default function FinanceModule() {
                 <StatCard title="Total Balance" value={totalBalance} icon={Wallet} color="indigo" />
                 <StatCard title="Daily Burn Rate" value={`₹${dailyBurnRate}/day`} icon={Flame} color="orange" />
                 <StatCard title="Debt Balance" value={debtBalance} icon={CreditCard} color="blue" />
-                <StatCard title="Savings Rate" value={`${savingsRate}%`} icon={LayoutDashboard} color="emerald" />
+                <StatCard title="Total Receivables" value={loanBalance} icon={TrendingUp} color="emerald" />
+                <StatCard title="Savings Rate" value={`${savingsRate}%`} icon={LayoutDashboard} color="indigo" />
             </div>
 
             {/* Shared Date Filter */}
@@ -1317,6 +1438,77 @@ export default function FinanceModule() {
                     )
                 }
 
+                {activeTab === "loans" && (
+                    <div className="lg:col-span-12 space-y-8">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-black text-xl uppercase tracking-tight">Loans Given (Receivables)</h3>
+                            <button
+                                onClick={openAddLoan}
+                                className="px-6 py-2 bg-primary text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                            >
+                                <Plus size={16} />
+                                Add New Loan
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {loans.map((loan) => (
+                                <div key={loan.id} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-all">
+                                    <div className={`absolute top-0 right-0 px-4 py-1 text-[8px] font-black uppercase tracking-widest rounded-bl-xl ${loan.status === 'active' ? 'bg-emerald-500 text-white' : loan.status === 'collected' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'}`}>
+                                        {loan.status}
+                                    </div>
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div className="p-3 bg-primary/5 text-primary rounded-2xl">
+                                            <TrendingUp size={24} />
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => openEditLoan(loan)} className="p-2 text-gray-300 hover:text-primary transition-all"><ArrowRight size={16} /></button>
+                                            <button onClick={() => handleDeleteLoan(loan.id)} className="p-2 text-gray-300 hover:text-red-500 transition-all"><Trash2 size={16} /></button>
+                                        </div>
+                                    </div>
+                                    <h4 className="font-black text-lg text-gray-900">{loan.borrowerName}</h4>
+                                    <div className="mt-4 space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-black text-gray-400 uppercase">Amount</span>
+                                            <span className="text-sm font-black text-gray-900">₹{loan.amount.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-black text-gray-400 uppercase">Collected</span>
+                                            <span className="text-sm font-black text-emerald-600">₹{loan.collectedAmount.toLocaleString()}</span>
+                                        </div>
+                                        <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden mt-2">
+                                            <div
+                                                className="bg-emerald-500 h-full rounded-full transition-all duration-1000"
+                                                style={{ width: `${Math.min(100, (loan.collectedAmount / loan.amount) * 100)}%` }}
+                                            />
+                                        </div>
+                                        {loan.interestRate > 0 && (
+                                            <div className="flex justify-between items-center pt-2 border-t border-gray-50">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase">Interest Rate</span>
+                                                <span className="text-xs font-black text-primary">{loan.interestRate}%</span>
+                                            </div>
+                                        )}
+                                        {loan.timePeriod && (
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase">Period</span>
+                                                <span className="text-xs font-bold text-gray-600">{loan.timePeriod}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {loan.notes && (
+                                        <p className="mt-4 text-[10px] text-gray-400 line-clamp-2">{loan.notes}</p>
+                                    )}
+                                </div>
+                            ))}
+                            {loans.length === 0 && (
+                                <div className="lg:col-span-3 h-[200px] flex items-center justify-center border-2 border-dashed border-gray-100 rounded-[2.5rem] text-xs font-black text-gray-300 uppercase tracking-widest">
+                                    No loans recorded
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {activeTab === "analytics" && <AnalyticsTab analytics={analytics} />}
             </main >
 
@@ -1376,22 +1568,35 @@ export default function FinanceModule() {
                                             className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Initial Amount (₹)</label>
-                                        <input
-                                            type="text"
-                                            inputMode="decimal"
-                                            required
-                                            value={debtForm.initialAmount}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                                                    setDebtForm({ ...debtForm, initialAmount: val });
-                                                }
-                                            }}
-                                            placeholder="0.00"
-                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
-                                        />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Initial Amount (₹)</label>
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                required
+                                                value={debtForm.initialAmount}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                        setDebtForm({ ...debtForm, initialAmount: val });
+                                                    }
+                                                }}
+                                                placeholder="0.00"
+                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Interest Rate (%)</label>
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                value={debtForm.interestRate}
+                                                onChange={(e) => setDebtForm({ ...debtForm, interestRate: e.target.value })}
+                                                placeholder="0"
+                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
@@ -1407,14 +1612,25 @@ export default function FinanceModule() {
                                             </select>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Target Date</label>
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Time Period</label>
                                             <input
-                                                type="date"
-                                                value={debtForm.dueDate}
-                                                onChange={(e) => setDebtForm({ ...debtForm, dueDate: e.target.value })}
+                                                type="text"
+                                                value={debtForm.timePeriod}
+                                                onChange={(e) => setDebtForm({ ...debtForm, timePeriod: e.target.value })}
+                                                placeholder="e.g. 1 Year"
                                                 className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
                                             />
                                         </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Target Date</label>
+                                        <input
+                                            type="date"
+                                            value={debtForm.dueDate}
+                                            onChange={(e) => setDebtForm({ ...debtForm, dueDate: e.target.value })}
+                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                        />
                                     </div>
 
                                     {editingDebt && (
@@ -1463,6 +1679,179 @@ export default function FinanceModule() {
                                         >
                                             {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
                                             {editingDebt ? "Update Profile" : "Create Profile"}
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        </div >
+                    )
+                }
+                {
+                    isLoanModalOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-12">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setIsLoanModalOpen(false)}
+                                className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="flex justify-between items-center mb-8">
+                                    <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                                        <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                            <TrendingUp size={24} />
+                                        </div>
+                                        {editingLoan ? "Edit Loan Profile" : "New Loan Given"}
+                                    </h3>
+                                    <button
+                                        onClick={() => setIsLoanModalOpen(false)}
+                                        className="p-3 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-2xl transition-all"
+                                    >
+                                        <Plus className="rotate-45" size={20} />
+                                    </button>
+                                </div>
+
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-red-500 text-center"
+                                    >
+                                        {error}
+                                    </motion.div>
+                                )}
+
+                                <form onSubmit={handleSaveLoan} className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Borrower Name</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={loanForm.borrowerName}
+                                            onChange={(e) => setLoanForm({ ...loanForm, borrowerName: e.target.value })}
+                                            placeholder="e.g. Someone Name"
+                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Loan Amount (₹)</label>
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                required
+                                                value={loanForm.amount}
+                                                onChange={(e) => setLoanForm({ ...loanForm, amount: e.target.value })}
+                                                placeholder="0.00"
+                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Interest Rate (%)</label>
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                value={loanForm.interestRate}
+                                                onChange={(e) => setLoanForm({ ...loanForm, interestRate: e.target.value })}
+                                                placeholder="0"
+                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Time Period</label>
+                                            <input
+                                                type="text"
+                                                value={loanForm.timePeriod}
+                                                onChange={(e) => setLoanForm({ ...loanForm, timePeriod: e.target.value })}
+                                                placeholder="e.g. 6 Months"
+                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Status</label>
+                                            <select
+                                                value={loanForm.status}
+                                                onChange={(e) => setLoanForm({ ...loanForm, status: e.target.value as any })}
+                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                            >
+                                                <option value="active">Active</option>
+                                                <option value="collected">Collected</option>
+                                                <option value="defaulted">Defaulted</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Start Date</label>
+                                            <input
+                                                type="date"
+                                                value={loanForm.startDate}
+                                                onChange={(e) => setLoanForm({ ...loanForm, startDate: e.target.value })}
+                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Due Date</label>
+                                            <input
+                                                type="date"
+                                                value={loanForm.dueDate}
+                                                onChange={(e) => setLoanForm({ ...loanForm, dueDate: e.target.value })}
+                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {editingLoan && (
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Current Collected Amount (₹)</label>
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                required
+                                                value={loanForm.collectedAmount}
+                                                onChange={(e) => setLoanForm({ ...loanForm, collectedAmount: e.target.value })}
+                                                className="w-full px-6 py-4 bg-primary/5 border-2 border-primary/10 rounded-2xl text-sm font-black text-primary focus:ring-2 focus:ring-primary/20 transition-all font-mono"
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-4">Terms / Notes</label>
+                                        <textarea
+                                            value={loanForm.notes}
+                                            onChange={(e) => setLoanForm({ ...loanForm, notes: e.target.value })}
+                                            placeholder="Specific terms or agreement details..."
+                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all h-24 resize-none"
+                                        />
+                                    </div>
+
+                                    <div className="pt-4 flex gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsLoanModalOpen(false)}
+                                            className="flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={saving}
+                                            className="flex-[2] py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                                            {editingLoan ? "Update Loan" : "Record Loan"}
                                         </button>
                                     </div>
                                 </form>

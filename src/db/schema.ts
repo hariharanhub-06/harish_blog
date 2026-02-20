@@ -545,8 +545,25 @@ export const financeDebts = pgTable("finance_debts", {
   remainingAmount: real("remaining_amount").notNull().default(0),
   notes: text("notes"), // For payment structure/method
   repaymentType: text("repayment_type").default("single"), // single or split
+  interestRate: real("interest_rate").default(0),
+  timePeriod: text("time_period"), // e.g. "12 months", "1 year"
   dueDate: timestamp("due_date"),
   isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const financeLoans = pgTable("finance_loans", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  borrowerName: text("borrower_name").notNull(),
+  amount: real("amount").notNull().default(0),
+  collectedAmount: real("collected_amount").notNull().default(0),
+  interestRate: real("interest_rate").default(0),
+  timePeriod: text("time_period"),
+  startDate: timestamp("start_date").defaultNow(),
+  dueDate: timestamp("due_date"),
+  notes: text("notes"),
+  status: text("status").default("active"), // active, collected, defaulted
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

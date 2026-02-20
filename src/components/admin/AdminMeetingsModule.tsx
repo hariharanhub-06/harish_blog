@@ -81,7 +81,7 @@ export default function AdminMeetingsModule() {
 
     const fetchSchedulerConfig = async () => {
         try {
-            const res = await fetch("/api/meetings/config");
+            const res = await fetch("/api/meetings/config", { cache: "no-store" });
             if (res.ok) {
                 const data = await res.json();
                 setSchedulerConfig(data);
@@ -94,17 +94,21 @@ export default function AdminMeetingsModule() {
     const handleSaveConfig = async (newConfig: any) => {
         setIsSavingConfig(true);
         // Optimistic update
+        const prevConfig = schedulerConfig;
         setSchedulerConfig(newConfig);
         try {
-            await fetch("/api/meetings/config", {
+            const res = await fetch("/api/meetings/config", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newConfig),
             });
+            if (!res.ok) {
+                throw new Error("Failed to save configuration");
+            }
         } catch (error) {
             console.error("Failed to save config:", error);
-            // Revert on error - would need separate state for this to be perfect, 
-            // but fetching again is a simple fallback
+            alert("Failed to save configuration. Reverting changes.");
+            setSchedulerConfig(prevConfig);
             fetchSchedulerConfig();
         } finally {
             setIsSavingConfig(false);
