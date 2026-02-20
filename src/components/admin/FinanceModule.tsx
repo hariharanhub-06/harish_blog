@@ -77,11 +77,12 @@ interface Loan {
 }
 
 interface ParsedEntry {
-    type: "expense" | "income" | "debt_pay";
+    type: "expense" | "income" | "debt_pay" | "loan_collect";
     item: string;
     amount: number;
     category: string;
     debtId?: string;
+    loanId?: string;
     isValid: boolean;
 }
 
@@ -184,7 +185,7 @@ export default function FinanceModule() {
         if (!logInput.trim()) return [];
 
         const entries: ParsedEntry[] = [];
-        let currentType: "expense" | "income" | "debt_pay" = "expense";
+        let currentType: "expense" | "income" | "debt_pay" | "loan_collect" = "expense";
 
         // Get existing categories for fuzzy matching
         const existingCategories = (stats?.categories || []).map((c: any) => c.category);
@@ -211,6 +212,10 @@ export default function FinanceModule() {
                 currentType = "income";
                 if (!hasNumber) return;
             }
+            if (lowerTrimmed.includes("loan collect:") || (lowerTrimmed.includes("loan") && lowerTrimmed.includes("collect") && !hasNumber)) {
+                currentType = "loan_collect";
+                if (!hasNumber) return;
+            }
 
             // Improved parsing: Handle multiple pairs on the same line
             const regex = /([a-zA-Z\s]+)(?:-?\s*)(\d+)/g;
@@ -222,7 +227,7 @@ export default function FinanceModule() {
                 const amount = parseFloat(match[2]);
 
                 // Strip common header words if they appear at the start of the category
-                const headers = ["income:", "income", "expense:", "expense", "debt:", "debt pay:", "debts paid:", "debts:", "debt"];
+                const headers = ["income:", "income", "expense:", "expense", "debt:", "debt pay:", "debts paid:", "debts:", "debt", "loan collect:", "loan:"];
                 for (const header of headers) {
                     if (item.toLowerCase().startsWith(header)) {
                         item = item.substring(header.length).trim();
@@ -234,6 +239,7 @@ export default function FinanceModule() {
                 if (item && !isNaN(amount)) {
                     let normalizedCategory = item;
                     let matchedDebtId = undefined;
+                    let matchedLoanId = undefined;
 
                     if (currentType === "debt_pay") {
                         const matchedDebt = debts.find(d =>
@@ -243,6 +249,14 @@ export default function FinanceModule() {
                         );
                         normalizedCategory = matchedDebt?.name || "Transfer";
                         matchedDebtId = matchedDebt?.id;
+                    } else if (currentType === "loan_collect") {
+                        const matchedLoan = loans.find(l =>
+                            l.borrowerName.toLowerCase() === item.toLowerCase() ||
+                            l.borrowerName.toLowerCase().includes(item.toLowerCase()) ||
+                            item.toLowerCase().includes(l.borrowerName.toLowerCase())
+                        );
+                        normalizedCategory = matchedLoan?.borrowerName || "Loan Return";
+                        matchedLoanId = matchedLoan?.id;
                     } else {
                         // Specific fuzzy match against existing categories for income/expense
                         const match = existingCategories.find((cat: string) => {
@@ -270,6 +284,7 @@ export default function FinanceModule() {
                         amount,
                         category: normalizedCategory,
                         debtId: matchedDebtId,
+                        loanId: matchedLoanId,
                         isValid: true
                     });
                     found = true;
@@ -317,6 +332,7 @@ export default function FinanceModule() {
         const sources = [
             ...(stats?.categories || []).map((c: any) => c.category),
             ...(debts || []).map((d: any) => d.name),
+            ...(loans || []).map((l: any) => l.borrowerName),
             ...transactions.map(t => t.description)
         ];
 
@@ -375,6 +391,7 @@ export default function FinanceModule() {
                         category: entry.category,
                         type: entry.type,
                         debtId: entry.debtId,
+                        loanId: entry.loanId,
                         date: new Date().toISOString()
                     })
                 });
@@ -564,7 +581,6 @@ export default function FinanceModule() {
     const debtBalance = stats?.debtBalance || 0;
     const loanBalance = stats?.loanBalance || 0;
     const savingsRate = totalIncome > 0 ? (((totalIncome - totalExpenseWithDebt) / totalIncome) * 100).toFixed(1) : "0";
-    const dailyBurnRate = analytics?.velocity?.dailyBurnRate || (totalExpenseWithDebt / 30).toFixed(0);
 
     return (
         <div className="space-y-8 pb-20">
@@ -575,14 +591,13 @@ export default function FinanceModule() {
                         <Wallet className="text-primary" size={28} />
                         Finance Hub
                     </h2>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Smart tracking and wealth analysis</p>
                 </div>
-                <div className="flex bg-white p-1 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
+                <div className="flex bg-white p-1 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto custom-scrollbar no-scrollbar">
                     {["dashboard", "analytics", "log", "debts", "loans", "history"].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
-                            className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-400 hover:text-gray-600'}`}
+                            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-400 hover:text-gray-600'}`}
                         >
                             {tab === "loans" ? "Loans Given" : tab}
                         </button>
@@ -595,7 +610,6 @@ export default function FinanceModule() {
                 <StatCard title="Total Income" value={totalIncome} icon={TrendingUp} color="emerald" />
                 <StatCard title="Total Expenses" value={totalExpenseWithDebt} icon={TrendingDown} color="red" />
                 <StatCard title="Total Balance" value={totalBalance} icon={Wallet} color="indigo" />
-                <StatCard title="Daily Burn Rate" value={`₹${dailyBurnRate}/day`} icon={Flame} color="orange" />
                 <StatCard title="Debt Balance" value={debtBalance} icon={CreditCard} color="blue" />
                 <StatCard title="Total Receivables" value={loanBalance} icon={TrendingUp} color="emerald" />
                 <StatCard title="Savings Rate" value={`${savingsRate}%`} icon={LayoutDashboard} color="indigo" />

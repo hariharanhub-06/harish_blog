@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { financeTransactions, financeDebts } from "@/db/schema";
-import { eq, desc, and, gte, lte } from "drizzle-orm";
+import { financeTransactions, financeDebts, financeLoans } from "@/db/schema";
+import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 
 export async function GET(req: Request) {
     try {
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
             category: data.category,
             type: data.type,
             debtId: data.debtId || null,
+            loanId: data.loanId || null,
             date: data.date ? new Date(data.date) : new Date(),
         }).returning();
 
@@ -50,6 +51,22 @@ export async function POST(req: Request) {
                         updatedAt: new Date(),
                     })
                     .where(eq(financeDebts.id, data.debtId));
+            }
+        }
+
+        // If it's a loan collection, update the collected amount and status in financeLoans
+        if (data.type === "loan_collect" && data.loanId) {
+            const [loan] = await db.select().from(financeLoans).where(eq(financeLoans.id, data.loanId));
+            if (loan) {
+                const newCollectedAmount = loan.collectedAmount + parseFloat(data.amount);
+                const newStatus = newCollectedAmount >= loan.amount ? "collected" : "active";
+                await db.update(financeLoans)
+                    .set({
+                        collectedAmount: newCollectedAmount,
+                        status: newStatus,
+                        updatedAt: new Date(),
+                    })
+                    .where(eq(financeLoans.id, data.loanId));
             }
         }
 
@@ -118,6 +135,22 @@ export async function DELETE(req: Request) {
                         updatedAt: new Date(),
                     })
                     .where(eq(financeDebts.id, transaction.debtId));
+            }
+        }
+
+        // Rollback loan collection if deleting a loan_collect transaction
+        if (transaction.type === "loan_collect" && transaction.loanId) {
+            const [loan] = await db.select().from(financeLoans).where(eq(financeLoans.id, transaction.loanId));
+            if (loan) {
+                const newCollectedAmount = loan.collectedAmount - transaction.amount;
+                const newStatus = newCollectedAmount >= loan.amount ? "collected" : "active";
+                await db.update(financeLoans)
+                    .set({
+                        collectedAmount: newCollectedAmount,
+                        status: newStatus,
+                        updatedAt: new Date(),
+                    })
+                    .where(eq(financeLoans.id, transaction.loanId));
             }
         }
 

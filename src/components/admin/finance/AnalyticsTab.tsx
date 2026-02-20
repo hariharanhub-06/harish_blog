@@ -152,11 +152,6 @@ export default function AnalyticsTab({ analytics }: AnalyticsTabProps) {
                         <p className="text-[10px] font-bold text-blue-600 mt-2">How long your income lasts</p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-2xl border-2 border-orange-200">
-                        <p className="text-xs font-black text-orange-600 uppercase tracking-widest mb-2">Daily Burn Rate</p>
-                        <p className="text-3xl font-black text-orange-900">₹{analytics.velocity?.dailyBurnRate || 0}<span className="text-lg">/day</span></p>
-                        <p className="text-[10px] font-bold text-orange-600 mt-2">Average daily spending</p>
-                    </div>
 
                     <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-2xl border-2 border-emerald-200">
                         <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2">Cash Runway</p>

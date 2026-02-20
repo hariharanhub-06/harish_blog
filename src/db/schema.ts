@@ -573,8 +573,9 @@ export const financeTransactions = pgTable("finance_transactions", {
   amount: real("amount").notNull(),
   description: text("description"),
   category: text("category").notNull(), // Food, Fuel, Salary, etc.
-  type: text("type").notNull(), // expense, income, debt_pay
+  type: text("type").notNull(), // expense, income, debt_pay, loan_collect
   debtId: text("debt_id"),
+  loanId: text("loan_id"),
   date: timestamp("date").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
