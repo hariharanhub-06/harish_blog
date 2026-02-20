@@ -234,6 +234,18 @@ export const adminPushTokens = pgTable("admin_push_tokens", {
   lastUsedAt: timestamp("last_used_at").defaultNow(),
 });
 
+export const adminSessions = pgTable("admin_sessions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userEmail: text("user_email").notNull(),
+  deviceName: text("device_name"),
+  browser: text("browser"),
+  os: text("os"),
+  ipAddress: text("ip_address"),
+  isCurrent: boolean("is_current").default(false), // Transitional flag for identifying current device during tracking
+  lastActive: timestamp("last_active").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const snackReviews = pgTable("snack_reviews", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   productId: text("product_id").notNull(),

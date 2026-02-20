@@ -9,18 +9,27 @@ async function run() {
     const sql = neon(process.env.DATABASE_URL);
 
     try {
-        console.log("Checking finance_transactions columns...");
-        let columns = await sql`SELECT column_name FROM information_schema.columns WHERE table_name = 'finance_transactions'`;
-        let hasLoanId = columns.some(c => c.column_name === 'loan_id');
-        console.log("Column 'loan_id' exists:", hasLoanId);
+        console.log("Listing all tables...");
+        const tables = await sql`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`;
+        console.log("Tables:", tables.map(t => t.table_name));
 
-        if (!hasLoanId) {
-            console.log("Attempting to manually add 'loan_id' column...");
-            await sql`ALTER TABLE finance_transactions ADD COLUMN loan_id text`;
-            console.log("Column added successfully!");
+        const hasAdminSessions = tables.some(t => t.table_name === 'admin_sessions');
+        console.log("Table 'admin_sessions' exists:", hasAdminSessions);
 
-            columns = await sql`SELECT column_name FROM information_schema.columns WHERE table_name = 'finance_transactions'`;
-            console.log("Verified columns:", columns.map(c => c.column_name));
+        if (!hasAdminSessions) {
+            console.log("Attempting to manually create 'admin_sessions' table...");
+            await sql`CREATE TABLE IF NOT EXISTS "admin_sessions" (
+                "id" text PRIMARY KEY NOT NULL,
+                "user_email" text NOT NULL,
+                "device_name" text,
+                "browser" text,
+                "os" text,
+                "ip_address" text,
+                "is_current" boolean DEFAULT false,
+                "last_active" timestamp DEFAULT now(),
+                "created_at" timestamp DEFAULT now()
+            )`;
+            console.log("Table created successfully!");
         }
 
         process.exit(0);

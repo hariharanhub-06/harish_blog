@@ -42,8 +42,10 @@ import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
 import LiveSessionsModule from "@/components/admin/LiveSessionsModule";
 import GameAssetsModule from "@/components/admin/GameAssetsModule";
 import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
+import SettingsModule from "@/components/admin/SettingsModule";
+import { Settings } from "lucide-react";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets" | "client-projects";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets" | "client-projects" | "settings";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -52,10 +54,73 @@ export default function AdminDashboard() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
 
+    // Session Tracking
+    useEffect(() => {
+        if (!user || loading) return;
+
+        const trackSession = async () => {
+            const sid = localStorage.getItem('admin_sessionId');
+            const ua = window.navigator.userAgent;
+
+            // Simple UA parsing
+            const browser = ua.includes("Chrome") ? "Chrome" : ua.includes("Firefox") ? "Firefox" : ua.includes("Safari") ? "Safari" : "Unknown Browser";
+            const os = ua.includes("Windows") ? "Windows" : ua.includes("Mac") ? "MacOS" : ua.includes("Linux") ? "Linux" : ua.includes("Android") ? "Android" : ua.includes("iPhone") ? "iOS" : "Unknown OS";
+            const deviceName = os === "Windows" || os === "MacOS" || os === "Linux" ? "Desktop" : "Mobile Device";
+
+            try {
+                const res = await fetch("/api/admin/sessions", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id: sid,
+                        userEmail: user.email,
+                        deviceName,
+                        browser,
+                        os
+                    })
+                });
+
+                if (res.ok) {
+                    const session = await res.json();
+                    if (!sid || sid !== session.id) {
+                        localStorage.setItem('admin_sessionId', session.id);
+                    }
+                } else if (res.status === 404 || res.status === 401) {
+                    // Session might have been revoked
+                    logout();
+                }
+            } catch (err) {
+                console.error("Session tracking failed", err);
+            }
+        };
+
+        const checkSession = async () => {
+            const sid = localStorage.getItem('admin_sessionId');
+            if (!sid) return;
+
+            try {
+                const res = await fetch("/api/admin/sessions");
+                if (res.ok) {
+                    const sessions = await res.json();
+                    const exists = sessions.some((s: any) => s.id === sid);
+                    if (!exists) {
+                        logout();
+                    }
+                }
+            } catch (err) {
+                console.error("Session check failed", err);
+            }
+        };
+
+        trackSession();
+        const interval = setInterval(checkSession, 30000); // Check every 30s
+        return () => clearInterval(interval);
+    }, [user, loading]);
+
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings", "sessions", "game-assets", "client-projects", "ops-guide", "pricing-quote", "finance-leads"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings", "sessions", "game-assets", "client-projects", "ops-guide", "pricing-quote", "finance-leads", "settings"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -113,6 +178,7 @@ export default function AdminDashboard() {
         { id: "divider", title: "Business Operations", icon: Briefcase, color: "bg-gray-400" },
         { id: "client-projects", title: "Client Projects", icon: Briefcase, color: "bg-blue-700" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
+        { id: "settings", title: "Settings", icon: Settings, color: "bg-gray-600" },
     ];
 
     const renderContent = () => {
@@ -129,6 +195,7 @@ export default function AdminDashboard() {
             case "sessions": return <LiveSessionsModule />;
             case "game-assets": return <GameAssetsModule />;
             case "client-projects": return <ClientProjectsModule />;
+            case "settings": return <SettingsModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
                     <OverviewModule />
