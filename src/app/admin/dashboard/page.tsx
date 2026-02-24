@@ -43,9 +43,10 @@ import LiveSessionsModule from "@/components/admin/LiveSessionsModule";
 import GameAssetsModule from "@/components/admin/GameAssetsModule";
 import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
 import SettingsModule from "@/components/admin/SettingsModule";
-import { Settings } from "lucide-react";
+import AgileScrumModule from "@/components/admin/AgileScrumModule";
+import { Settings, BarChart2 } from "lucide-react";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets" | "client-projects" | "settings";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets" | "client-projects" | "agile-scrum" | "settings";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -175,6 +176,7 @@ export default function AdminDashboard() {
         { id: "meetings", title: "Meetings List", icon: Calendar, color: "bg-blue-600" },
         { id: "sessions", title: "Live Sessions", icon: Video, color: "bg-red-500" },
         { id: "game-assets", title: "Game Content", icon: Gamepad2, color: "bg-violet-500" },
+        { id: "agile-scrum", title: "Agile Command", icon: BarChart2, color: "bg-teal-600" },
         { id: "divider", title: "Business Operations", icon: Briefcase, color: "bg-gray-400" },
         { id: "client-projects", title: "Client Projects", icon: Briefcase, color: "bg-blue-700" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
@@ -195,6 +197,7 @@ export default function AdminDashboard() {
             case "sessions": return <LiveSessionsModule />;
             case "game-assets": return <GameAssetsModule />;
             case "client-projects": return <ClientProjectsModule />;
+            case "agile-scrum": return <AgileScrumModule />;
             case "settings": return <SettingsModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
