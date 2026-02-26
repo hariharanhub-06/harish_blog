@@ -43,9 +43,10 @@ import LiveSessionsModule from "@/components/admin/LiveSessionsModule";
 import GameAssetsModule from "@/components/admin/GameAssetsModule";
 import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
 import SettingsModule from "@/components/admin/SettingsModule";
+import KanbanModule from "@/components/admin/KanbanModule";
 import { Settings, BarChart2 } from "lucide-react";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets" | "client-projects" | "settings";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets" | "client-projects" | "kanban" | "settings";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -176,6 +177,7 @@ export default function AdminDashboard() {
         { id: "sessions", title: "Live Sessions", icon: Video, color: "bg-red-500" },
         { id: "game-assets", title: "Game Content", icon: Gamepad2, color: "bg-violet-500" },
         { id: "divider", title: "Business Operations", icon: Briefcase, color: "bg-gray-400" },
+        { id: "kanban", title: "Kanban Board", icon: Layout, color: "bg-teal-500" },
         { id: "client-projects", title: "Client Projects", icon: Briefcase, color: "bg-blue-700" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
         { id: "settings", title: "Settings", icon: Settings, color: "bg-gray-600" },
@@ -195,6 +197,7 @@ export default function AdminDashboard() {
             case "sessions": return <LiveSessionsModule />;
             case "game-assets": return <GameAssetsModule />;
             case "client-projects": return <ClientProjectsModule />;
+            case "kanban": return <KanbanModule />;
             case "settings": return <SettingsModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">
