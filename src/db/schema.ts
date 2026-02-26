@@ -89,6 +89,7 @@ export const experience = pgTable("experience", {
   duration: text("duration"),
   description: text("description"),
   displayOrder: integer("order").default(0),
+  isCurrent: boolean("is_current").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

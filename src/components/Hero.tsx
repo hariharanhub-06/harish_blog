@@ -16,13 +16,14 @@ interface HeroProps {
         heroImageUrl: any;
         audioUrl: any;
     };
+    experiences?: any[];
     className?: string;
 }
 
 import { useState, useRef } from "react";
 import { Play, Pause } from "lucide-react";
 
-export default function Hero({ profile, className }: HeroProps) {
+export default function Hero({ profile, experiences, className }: HeroProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -212,6 +213,24 @@ export default function Hero({ profile, className }: HeroProps) {
                                 <span className="text-[clamp(2rem,10vw,5rem)] leading-[1] whitespace-nowrap block">Hari Haran</span>
                                 <span className="text-[clamp(1.2rem,7.5vw,3.8rem)] leading-[1] text-orange-600 whitespace-nowrap block mt-1 md:mt-1.5">Jeyaramamoorthy</span>
                             </h1>
+
+                            {/* Current Position Display */}
+                            {experiences && experiences.find(e => e.isCurrent) && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.8 }}
+                                    className="flex items-center justify-center lg:justify-start gap-2 mt-4"
+                                >
+                                    <div className="px-4 py-2 bg-orange-600/10 border border-orange-600/20 rounded-full flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-orange-600 animate-pulse" />
+                                        <span className="text-[10px] md:text-xs font-black text-orange-500 uppercase tracking-widest">
+                                            {experiences.find(e => e.isCurrent).role} @ {experiences.find(e => e.isCurrent).company}
+                                        </span>
+                                    </div>
+                                </motion.div>
+                            )}
+
                             <p className="max-w-2xl mx-auto mt-4 md:mt-6 text-[8px] md:text-sm font-bold leading-relaxed tracking-[0.1em] md:tracking-[0.2em] text-gray-400 uppercase lg:mx-0 opacity-80">
                                 {profile.headline?.replace(/ PRO$/i, "") || "Web/App Developer | Business Consultant | Job Placement Expert | Operations & Partnerships Manager | Snack Business Owner | Project Management"}
                             </p>

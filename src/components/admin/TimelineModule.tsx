@@ -14,7 +14,8 @@ import {
     Calendar,
     ArrowUp,
     ArrowDown,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Star
 } from "lucide-react";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import Image from "next/image";
@@ -90,6 +91,25 @@ export default function TimelineModule() {
         if (res.ok) fetchTimeline();
     };
 
+    const handleToggleCurrent = async (item: any) => {
+        setSaving(true);
+        try {
+            const updated = { ...item, isCurrent: !item.isCurrent };
+            const res = await fetch("/api/admin/experience", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updated),
+            });
+            if (res.ok) {
+                fetchTimeline();
+            }
+        } catch (error) {
+            console.error("Toggle current error:", error);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -124,7 +144,7 @@ export default function TimelineModule() {
                     <button
                         onClick={() => {
                             setActiveTab("experience");
-                            setEditing({ role: "", company: "", logo: "", duration: "", description: "", order: 0 });
+                            setEditing({ role: "", company: "", logo: "", duration: "", description: "", order: 0, isCurrent: false });
                         }}
                         className="flex items-center space-x-2 bg-primary text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
                     >
@@ -151,6 +171,13 @@ export default function TimelineModule() {
                                 <p className="text-xs font-black uppercase tracking-widest text-secondary/60 mt-1 ml-[64px]">{item.duration}</p>
                             </div>
                             <div className="flex space-x-2">
+                                <button
+                                    onClick={() => handleToggleCurrent(item)}
+                                    className={`p-3 rounded-xl transition-all ${item.isCurrent ? 'bg-amber-100 text-amber-600 font-black' : 'bg-gray-50 text-gray-400 hover:text-amber-500'}`}
+                                    title={item.isCurrent ? "Current Position" : "Mark as Current"}
+                                >
+                                    <Star size={18} fill={item.isCurrent ? "currentColor" : "none"} />
+                                </button>
                                 <button
                                     onClick={() => {
                                         setActiveTab("experience");

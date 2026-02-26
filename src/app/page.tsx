@@ -207,6 +207,7 @@ export default async function Home() {
             heroImageUrl: profile.heroImageUrl,
             audioUrl: profile.audioUrl
           } as any}
+          experiences={experiences}
           className=""
         />
       </section>

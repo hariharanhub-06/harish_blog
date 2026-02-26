@@ -11,6 +11,7 @@ export async function GET() {
         duration: experience.duration,
         displayOrder: experience.displayOrder,
         logo: experience.logo,
+        isCurrent: experience.isCurrent,
         createdAt: experience.createdAt,
     }).from(experience).orderBy(desc(experience.displayOrder));
     return NextResponse.json(data);
@@ -21,6 +22,11 @@ export async function POST(req: Request) {
         const body = await req.json();
         console.log("Experience POST body:", body);
         const { id, createdAt, ...data } = body;
+
+        // If this experience is set as current, reset all other experiences
+        if (data.isCurrent) {
+            await db.update(experience).set({ isCurrent: false });
+        }
 
         if (id) {
             await db.update(experience).set(data).where(eq(experience.id, id));
