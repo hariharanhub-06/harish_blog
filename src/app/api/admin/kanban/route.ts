@@ -7,7 +7,7 @@ export async function GET() {
     try {
         const tasks = await db.select().from(kanbanTasks).orderBy(asc(kanbanTasks.displayOrder));
         return NextResponse.json(tasks);
-    } catch (error: any) {
+    } catch (error) {
         console.error("GET /api/admin/kanban error:", error);
         return NextResponse.json({ error: "Failed to fetch tasks" }, { status: 500 });
     }
@@ -68,6 +68,33 @@ export async function PUT(req: Request) {
     } catch (error) {
         console.error("PUT /api/admin/kanban error:", error);
         return NextResponse.json({ error: String(error) }, { status: 500 });
+    }
+}
+
+export async function PATCH(req: Request) {
+    try {
+        const tasksData = await req.json(); // Expected: [{ id: string, columnId: string, displayOrder: number }, ...]
+
+        if (!Array.isArray(tasksData)) {
+            return NextResponse.json({ error: "Array of tasks expected" }, { status: 400 });
+        }
+
+        const updates = tasksData.map(task =>
+            db.update(kanbanTasks)
+                .set({
+                    columnId: task.columnId,
+                    displayOrder: task.displayOrder,
+                    updatedAt: new Date()
+                })
+                .where(eq(kanbanTasks.id, task.id))
+        );
+
+        await Promise.all(updates);
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("PATCH /api/admin/kanban error:", error);
+        return NextResponse.json({ error: "Failed to reorder tasks" }, { status: 500 });
     }
 }
 

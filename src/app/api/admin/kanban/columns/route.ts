@@ -53,6 +53,29 @@ export async function PUT(req: Request) {
     }
 }
 
+export async function PATCH(req: Request) {
+    try {
+        const columnsData = await req.json(); // Expected: [{ id: string, displayOrder: number }, ...]
+
+        if (!Array.isArray(columnsData)) {
+            return NextResponse.json({ error: "Array of columns expected" }, { status: 400 });
+        }
+
+        const updates = columnsData.map(col =>
+            db.update(kanbanColumns)
+                .set({ displayOrder: col.displayOrder, updatedAt: new Date() })
+                .where(eq(kanbanColumns.id, col.id))
+        );
+
+        await Promise.all(updates);
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("PATCH /api/admin/kanban/columns error:", error);
+        return NextResponse.json({ error: "Failed to reorder columns" }, { status: 500 });
+    }
+}
+
 export async function DELETE(req: Request) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
