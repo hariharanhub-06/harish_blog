@@ -64,6 +64,13 @@
       "when": 1772082279563,
       "tag": "0008_fresh_metal_master",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1772108406294,
+      "tag": "0009_worthless_piledriver",
+      "breakpoints": true
     }
   ]
 }
