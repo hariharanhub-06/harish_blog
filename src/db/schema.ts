@@ -895,12 +895,22 @@ export const contactSubmissionFinanceRelations = relations(contactSubmissions, (
   financeLeads: many(financeLeads),
 }));
 
+export const kanbanColumns = pgTable("kanban_columns", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  color: text("color").notNull().default("#3b82f6"), // Default blue
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const kanbanTasks = pgTable("kanban_tasks", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  columnId: text("column_id").references(() => kanbanColumns.id, { onDelete: 'cascade' }),
   title: text("title").notNull(),
   description: text("description"),
   priority: text("priority").notNull().default("Medium"), // Low, Medium, High
-  status: text("status").notNull().default("To Do"), // To Do, In Progress, Done
+  status: text("status"), // Deprecated, keeping for migration
   displayOrder: integer("display_order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

@@ -17,8 +17,8 @@ export async function POST(req: Request) {
     try {
         const data = await req.json();
 
-        // Get the current max display order for the status to append the new task
-        const existingTasks = await db.select().from(kanbanTasks).where(eq(kanbanTasks.status, data.status || "To Do"));
+        // Get the current max display order for the column to append the new task
+        const existingTasks = await db.select().from(kanbanTasks).where(eq(kanbanTasks.columnId, data.columnId));
         const maxOrder = existingTasks.length > 0
             ? Math.max(...existingTasks.map(t => t.displayOrder || 0))
             : -1;
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
             title: data.title,
             description: data.description,
             priority: data.priority || "Medium",
-            status: data.status || "To Do",
+            columnId: data.columnId,
             displayOrder: maxOrder + 1,
         }).returning();
 
@@ -44,6 +44,15 @@ export async function PUT(req: Request) {
         const { id, ...updateData } = data;
 
         if (!id) return NextResponse.json({ error: "Task ID required" }, { status: 400 });
+
+        // If columnId is changing, recalculate displayOrder for the new column
+        if (updateData.columnId) {
+            const existingTasks = await db.select().from(kanbanTasks).where(eq(kanbanTasks.columnId, updateData.columnId));
+            const maxOrder = existingTasks.length > 0
+                ? Math.max(...existingTasks.map(t => t.displayOrder || 0))
+                : -1;
+            updateData.displayOrder = maxOrder + 1;
+        }
 
         const updated = await db.update(kanbanTasks)
             .set({

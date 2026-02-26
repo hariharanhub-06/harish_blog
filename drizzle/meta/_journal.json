@@ -71,6 +71,13 @@
       "when": 1772108406294,
       "tag": "0009_worthless_piledriver",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1772109143374,
+      "tag": "0010_round_scourge",
+      "breakpoints": true
     }
   ]
 }
