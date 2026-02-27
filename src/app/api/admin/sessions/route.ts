@@ -32,39 +32,38 @@ export async function POST(req: Request) {
                 .where(eq(adminSessions.id, id))
                 .returning();
 
-            if (result.length === 0) {
-                console.warn(`[API/ADMIN/SESSIONS] Session ${id} not found for update`);
-                return NextResponse.json({ error: "Session not found" }, { status: 404 });
+            if (result.length > 0) {
+                return NextResponse.json(result[0]);
             }
 
-            return NextResponse.json(result[0]);
-        } else {
-            // Create new session
-            if (!userEmail) {
-                console.error("[API/ADMIN/SESSIONS] userEmail is required for new sessions");
-                return NextResponse.json({ error: "userEmail is required" }, { status: 400 });
-            }
-
-            // Manually generate a UUID if the DB default is failing
-            const newId = crypto.randomUUID();
-            console.log(`[API/ADMIN/SESSIONS] Creating new session with ID ${newId} for ${userEmail}`);
-
-            const result = await db.insert(adminSessions).values({
-                id: newId,
-                userEmail,
-                deviceName: deviceName || "Unknown Device",
-                browser: browser || "Unknown Browser",
-                os: os || "Unknown OS",
-                ipAddress: ipAddress || null,
-                lastActive: new Date(),
-            }).returning();
-
-            if (result.length === 0) {
-                throw new Error("Failed to create session - no record returned");
-            }
-
-            return NextResponse.json(result[0]);
+            console.warn(`[API/ADMIN/SESSIONS] Session ${id} not found for update. Retrying as new session.`);
         }
+
+        // Create new session
+        if (!userEmail) {
+            console.error("[API/ADMIN/SESSIONS] userEmail is required for new sessions");
+            return NextResponse.json({ error: "userEmail is required" }, { status: 400 });
+        }
+
+        // Manually generate a UUID if the DB default is failing
+        const newId = crypto.randomUUID();
+        console.log(`[API/ADMIN/SESSIONS] Creating new session with ID ${newId} for ${userEmail}`);
+
+        const result = await db.insert(adminSessions).values({
+            id: newId,
+            userEmail,
+            deviceName: deviceName || "Unknown Device",
+            browser: browser || "Unknown Browser",
+            os: os || "Unknown OS",
+            ipAddress: ipAddress || null,
+            lastActive: new Date(),
+        }).returning();
+
+        if (result.length === 0) {
+            throw new Error("Failed to create session - no record returned");
+        }
+
+        return NextResponse.json(result[0]);
     } catch (error: any) {
         console.error("[API/ADMIN/SESSIONS] Failed to track session:", error);
         return NextResponse.json({

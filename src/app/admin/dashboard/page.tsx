@@ -94,8 +94,13 @@ export default function AdminDashboard() {
                     const errorData = await res.json().catch(() => ({}));
                     console.error(`[Dashboard] Session tracking failed with status ${res.status}:`, errorData);
 
-                    if (res.status === 404 || res.status === 401) {
-                        console.warn("[Dashboard] Session invalid or revoked. Logging out...");
+                    if (res.status === 404) {
+                        console.warn("[Dashboard] Session ID not recognized by server. Retrying fresh registration...");
+                        localStorage.removeItem('admin_sessionId');
+                        // Intentionally not calling logout here to give it a chance to re-register
+                        setTimeout(trackSession, 1000);
+                    } else if (res.status === 401) {
+                        console.warn("[Dashboard] Auth revoked. Logging out...");
                         logout();
                     }
                 }
