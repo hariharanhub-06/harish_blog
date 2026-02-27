@@ -63,6 +63,8 @@ export default function AdminDashboard() {
             const sid = localStorage.getItem('admin_sessionId');
             const ua = window.navigator.userAgent;
 
+            console.log(`[Dashboard] Tracking session. Current Local SID: ${sid}`);
+
             // Simple UA parsing
             const browser = ua.includes("Chrome") ? "Chrome" : ua.includes("Firefox") ? "Firefox" : ua.includes("Safari") ? "Safari" : "Unknown Browser";
             const os = ua.includes("Windows") ? "Windows" : ua.includes("Mac") ? "MacOS" : ua.includes("Linux") ? "Linux" : ua.includes("Android") ? "Android" : ua.includes("iPhone") ? "iOS" : "Unknown OS";
@@ -83,21 +85,31 @@ export default function AdminDashboard() {
 
                 if (res.ok) {
                     const session = await res.json();
+                    console.log(`[Dashboard] Session tracked successfully. Server SID: ${session.id}`);
                     if (!sid || sid !== session.id) {
                         localStorage.setItem('admin_sessionId', session.id);
+                        console.log(`[Dashboard] Updated localStorage SID to ${session.id}`);
                     }
-                } else if (res.status === 404 || res.status === 401) {
-                    // Session might have been revoked
-                    logout();
+                } else {
+                    const errorData = await res.json().catch(() => ({}));
+                    console.error(`[Dashboard] Session tracking failed with status ${res.status}:`, errorData);
+
+                    if (res.status === 404 || res.status === 401) {
+                        console.warn("[Dashboard] Session invalid or revoked. Logging out...");
+                        logout();
+                    }
                 }
             } catch (err) {
-                console.error("Session tracking failed", err);
+                console.error("[Dashboard] Network error during session tracking:", err);
             }
         };
 
         const checkSession = async () => {
             const sid = localStorage.getItem('admin_sessionId');
-            if (!sid) return;
+            if (!sid) {
+                console.warn("[Dashboard] No session ID in localStorage during checkSession");
+                return;
+            }
 
             try {
                 const res = await fetch("/api/admin/sessions");
@@ -105,11 +117,14 @@ export default function AdminDashboard() {
                     const sessions = await res.json();
                     const exists = sessions.some((s: any) => s.id === sid);
                     if (!exists) {
+                        console.warn(`[Dashboard] Session ${sid} no longer exists on server. Logging out...`);
                         logout();
                     }
+                } else {
+                    console.error(`[Dashboard] Session check failed with status ${res.status}`);
                 }
             } catch (err) {
-                console.error("Session check failed", err);
+                console.error("[Dashboard] Network error during session check:", err);
             }
         };
 

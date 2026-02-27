@@ -20,19 +20,37 @@ export async function POST(req: Request) {
         const data = await req.json();
         const { id, userEmail, deviceName, browser, os, ipAddress } = data;
 
+        console.log(`[API/ADMIN/SESSIONS] POST ${id ? 'Update' : 'Create'} for ${userEmail}`);
+
         if (id) {
             // Update existing session
-            const [updated] = await db.update(adminSessions)
+            const result = await db.update(adminSessions)
                 .set({
                     lastActive: new Date(),
                     ipAddress: ipAddress || null,
                 })
                 .where(eq(adminSessions.id, id))
                 .returning();
-            return NextResponse.json(updated);
+
+            if (result.length === 0) {
+                console.warn(`[API/ADMIN/SESSIONS] Session ${id} not found for update`);
+                return NextResponse.json({ error: "Session not found" }, { status: 404 });
+            }
+
+            return NextResponse.json(result[0]);
         } else {
             // Create new session
-            const [session] = await db.insert(adminSessions).values({
+            if (!userEmail) {
+                console.error("[API/ADMIN/SESSIONS] userEmail is required for new sessions");
+                return NextResponse.json({ error: "userEmail is required" }, { status: 400 });
+            }
+
+            // Manually generate a UUID if the DB default is failing
+            const newId = crypto.randomUUID();
+            console.log(`[API/ADMIN/SESSIONS] Creating new session with ID ${newId} for ${userEmail}`);
+
+            const result = await db.insert(adminSessions).values({
+                id: newId,
                 userEmail,
                 deviceName: deviceName || "Unknown Device",
                 browser: browser || "Unknown Browser",
@@ -40,11 +58,20 @@ export async function POST(req: Request) {
                 ipAddress: ipAddress || null,
                 lastActive: new Date(),
             }).returning();
-            return NextResponse.json(session);
+
+            if (result.length === 0) {
+                throw new Error("Failed to create session - no record returned");
+            }
+
+            return NextResponse.json(result[0]);
         }
-    } catch (error) {
-        console.error("Failed to track session", error);
-        return NextResponse.json({ error: "Failed to track session" }, { status: 500 });
+    } catch (error: any) {
+        console.error("[API/ADMIN/SESSIONS] Failed to track session:", error);
+        return NextResponse.json({
+            error: "Failed to track session",
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 });
     }
 }
 
