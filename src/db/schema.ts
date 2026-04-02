@@ -916,5 +916,67 @@ export const kanbanTasks = pgTable("kanban_tasks", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const forms = pgTable("forms", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text("title").notNull(),
+  description: text("description"),
+  isPublished: boolean("is_published").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
+export const formQuestions = pgTable("form_questions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  formId: text("form_id").notNull(),
+  type: text("type").notNull(), // short_answer, paragraph, multiple_choice, checkboxes, dropdown
+  questionText: text("question_text").notNull(),
+  required: boolean("required").default(false),
+  options: jsonb("options"), // Array of strings for choices
+  displayOrder: integer("order").default(0),
+});
+
+export const formResponses = pgTable("form_responses", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  formId: text("form_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const formResponseAnswers = pgTable("form_response_answers", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  responseId: text("response_id").notNull(),
+  questionId: text("question_id").notNull(),
+  answerText: text("answer_text"), // For text answers
+  answerChoices: jsonb("answer_choices"), // For multiple options
+});
+
+export const formRelations = relations(forms, ({ many }) => ({
+  questions: many(formQuestions),
+  responses: many(formResponses),
+}));
+
+export const formQuestionRelations = relations(formQuestions, ({ one }) => ({
+  form: one(forms, {
+    fields: [formQuestions.formId],
+    references: [forms.id],
+  }),
+}));
+
+export const formResponseRelations = relations(formResponses, ({ one, many }) => ({
+  form: one(forms, {
+    fields: [formResponses.formId],
+    references: [forms.id],
+  }),
+  answers: many(formResponseAnswers),
+}));
+
+export const formResponseAnswerRelations = relations(formResponseAnswers, ({ one }) => ({
+  response: one(formResponses, {
+    fields: [formResponseAnswers.responseId],
+    references: [formResponses.id],
+  }),
+  question: one(formQuestions, {
+    fields: [formResponseAnswers.questionId],
+    references: [formQuestions.id],
+  }),
+}));
 

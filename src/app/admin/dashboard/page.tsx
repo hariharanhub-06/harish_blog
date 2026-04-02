@@ -38,7 +38,7 @@ import QuizModule from "@/components/admin/QuizModule";
 import FeedbackModule from "@/components/admin/FeedbackModule";
 import FinanceModule from "@/components/admin/FinanceModule";
 import LeaderboardModule from "@/components/admin/LeaderboardModule";
-import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
+import FormsModule from "@/components/admin/FormsModule";
 import LiveSessionsModule from "@/components/admin/LiveSessionsModule";
 import GameAssetsModule from "@/components/admin/GameAssetsModule";
 import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
@@ -46,7 +46,7 @@ import SettingsModule from "@/components/admin/SettingsModule";
 import KanbanModule from "@/components/admin/KanbanModule";
 import { Settings, BarChart2 } from "lucide-react";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "meetings" | "sessions" | "game-assets" | "client-projects" | "kanban" | "settings";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "settings";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "meetings", "sessions", "game-assets", "client-projects", "ops-guide", "pricing-quote", "finance-leads", "settings"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "ops-guide", "pricing-quote", "finance-leads", "settings"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
         { id: "quiz-manager", title: "Quiz Manager", icon: Gamepad2, color: "bg-cyan-500" },
         { id: "finance-hub", title: "Finance Hub", icon: Wallet, color: "bg-amber-500" },
         { id: "leaderboard", title: "Leaderboard", icon: Trophy, color: "bg-yellow-500" },
-        { id: "meetings", title: "Meetings List", icon: Calendar, color: "bg-blue-600" },
+        { id: "forms", title: "Forms Manager", icon: FileText, color: "bg-blue-600" },
         { id: "sessions", title: "Live Sessions", icon: Video, color: "bg-red-500" },
         { id: "game-assets", title: "Game Content", icon: Gamepad2, color: "bg-violet-500" },
         { id: "divider", title: "Business Operations", icon: Briefcase, color: "bg-gray-400" },
@@ -213,7 +213,7 @@ export default function AdminDashboard() {
             case "quiz-manager": return <QuizModule />;
             case "finance-hub": return <FinanceModule />;
             case "leaderboard": return <LeaderboardModule />;
-            case "meetings": return <AdminMeetingsModule />;
+            case "forms": return <FormsModule />;
             case "sessions": return <LiveSessionsModule />;
             case "game-assets": return <GameAssetsModule />;
             case "client-projects": return <ClientProjectsModule />;
