@@ -86,18 +86,13 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
         setAnswers({ ...answers, [qId]: checked ? [...current, opt] : current.filter((item: string) => item !== opt) });
     };
 
-    // Group into sections by sectionId to create the Wizard pages
+    // Group into sections by section headers to create the Wizard pages
     const sections: FormQuestion[][] = [];
     if (form) {
         let currentSection: FormQuestion[] = [];
         form.questions.forEach((q) => {
-            if (q.sectionId && currentSection.length > 0 && currentSection[0].sectionId !== q.sectionId) {
-                sections.push([...currentSection]);
-                currentSection = [q];
-            } else if (q.sectionId && currentSection.length === 0) {
-                currentSection.push(q);
-            } else if (!q.sectionId && currentSection.length > 0 && currentSection[0].sectionId) {
-                sections.push([...currentSection]);
+            if (q.type === 'section_header') {
+                if (currentSection.length > 0) sections.push([...currentSection]);
                 currentSection = [q];
             } else {
                 currentSection.push(q);
@@ -120,7 +115,7 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                 const targetId = q.logicConditions[ans];
                 if (targetId === "submit") isNextSubmit = true;
                 else {
-                    const idx = sections.findIndex(sec => sec[0]?.sectionId === targetId);
+                    const idx = sections.findIndex(sec => sec.some(sq => sq.type === 'section_header' && sq.questionText === targetId));
                     if (idx !== -1) explicitRoutedSectionIndex = idx;
                 }
             }
