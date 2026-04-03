@@ -139,6 +139,12 @@ export default function FormsModule() {
         setBuilderQuestions(newQs);
     };
 
+    const removeQuestion = (index: number) => {
+        const newQs = [...builderQuestions];
+        newQs.splice(index, 1);
+        setBuilderQuestions(newQs);
+    };
+
     const copyShareLink = () => {
         navigator.clipboard.writeText(`${window.location.origin}/forms/${activeForm?.id}`);
         toast.success("Link copied!");
@@ -505,8 +511,9 @@ export default function FormsModule() {
                             <div className="flex items-center justify-between pt-5 border-t border-gray-100 mt-auto">
                                 <span className="text-xs font-bold text-gray-400">{new Date(form.createdAt).toLocaleDateString()}</span>
                                 <div className="flex items-center gap-1.5">
-                                    <button onClick={() => handleEditForm(form.id)} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-primary/10 hover:text-primary"><Edit size={16} /></button>
-                                    <button onClick={() => handleViewResponses(form.id)} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-primary/10 hover:text-primary"><Eye size={16} /></button>
+                                    <button onClick={() => handleEditForm(form.id)} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-primary/10 hover:text-primary" title="Edit Form"><Edit size={16} /></button>
+                                    <button onClick={() => handleViewResponses(form.id)} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-primary/10 hover:text-primary" title="View Responses"><Eye size={16} /></button>
+                                    <button onClick={() => handleDeleteForm(form.id)} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-red-100 hover:text-red-600" title="Delete Form"><Trash2 size={16} /></button>
                                 </div>
                             </div>
                         </div>
