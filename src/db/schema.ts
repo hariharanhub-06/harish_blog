@@ -921,6 +921,13 @@ export const forms = pgTable("forms", {
   title: text("title").notNull(),
   description: text("description"),
   isPublished: boolean("is_published").default(false),
+  bannerUrl: text("banner_url"),
+  themeColor: text("theme_color"),
+  postSubmissionAction: text("post_submission_action").default('message'),
+  postSubmissionData: text("post_submission_data"),
+  automationEnabled: boolean("automation_enabled").default(false),
+  automationChannels: jsonb("automation_channels"),
+  automationTemplate: text("automation_template"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -931,7 +938,10 @@ export const formQuestions = pgTable("form_questions", {
   type: text("type").notNull(), // short_answer, paragraph, multiple_choice, checkboxes, dropdown
   questionText: text("question_text").notNull(),
   required: boolean("required").default(false),
-  options: jsonb("options"), // Array of strings for choices
+  options: jsonb("options"), // Array of strings for choices OR scale/file config
+  imageUrl: text("image_url"),
+  sectionId: text("section_id"),
+  logicConditions: jsonb("logic_conditions"),
   displayOrder: integer("order").default(0),
 });
 

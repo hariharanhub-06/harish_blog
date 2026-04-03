@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Plus, Edit, Trash2, Link as LinkIcon, Eye, Save, Trash, X, FileText } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Link as LinkIcon, Eye, Save, Trash, X, FileText, Image as ImageIcon, Settings, MessageSquare, ArrowRight, CornerDownRight } from "lucide-react";
 import toast from "react-hot-toast";
 
 type Form = {
@@ -10,9 +10,16 @@ type Form = {
     description: string;
     isPublished: boolean;
     createdAt: string;
+    bannerUrl?: string; // Phase 2
+    themeColor?: string;
+    postSubmissionAction?: string;
+    postSubmissionData?: string;
+    automationEnabled?: boolean;
+    automationChannels?: string[];
+    automationTemplate?: string;
 };
 
-type QuestionType = "short_answer" | "paragraph" | "multiple_choice" | "checkboxes" | "dropdown";
+type QuestionType = "short_answer" | "paragraph" | "multiple_choice" | "checkboxes" | "dropdown" | "linear_scale" | "file_upload";
 
 type FormQuestion = {
     id?: string;
@@ -20,16 +27,18 @@ type FormQuestion = {
     questionText: string;
     required: boolean;
     options: string[] | null;
+    // Phase 2
+    imageUrl?: string;
+    sectionId?: string;
+    logicConditions?: any;
 };
 
 export default function FormsModule() {
-    const [view, setView] = useState<"list" | "builder" | "responses">("list");
+    const [view, setView] = useState<"list" | "builder" | "settings" | "responses">("list");
     const [forms, setForms] = useState<Form[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const [activeFormId, setActiveFormId] = useState<string | null>(null);
-    const [builderTitle, setBuilderTitle] = useState("");
-    const [builderDescription, setBuilderDescription] = useState("");
+    const [activeForm, setActiveForm] = useState<Form | null>(null);
     const [builderQuestions, setBuilderQuestions] = useState<FormQuestion[]>([]);
     const [isPublished, setIsPublished] = useState(false);
 
@@ -75,13 +84,11 @@ export default function FormsModule() {
     const handleEditForm = async (id: string) => {
         setLoading(true);
         setView("builder");
-        setActiveFormId(id);
         try {
             const res = await fetch(`/api/admin/forms/${id}`);
             if (res.ok) {
                 const data = await res.json();
-                setBuilderTitle(data.title);
-                setBuilderDescription(data.description || "");
+                setActiveForm(data);
                 setIsPublished(data.isPublished);
                 setBuilderQuestions(data.questions || []);
             }
@@ -108,9 +115,7 @@ export default function FormsModule() {
     const handleViewResponses = async (id: string) => {
         setLoading(true);
         setView("responses");
-        setActiveFormId(id);
         try {
-            // First fetch the form to get the questions
             let formRes = await fetch(`/api/admin/forms/${id}`);
             let formData = await formRes.json();
             setBuilderQuestions(formData.questions || []);
@@ -128,18 +133,24 @@ export default function FormsModule() {
     };
 
     const handleSaveForm = async (publishStatus?: boolean) => {
-        if (!activeFormId) return;
-
+        if (!activeForm) return;
         const finalPublished = publishStatus !== undefined ? publishStatus : isPublished;
 
         try {
-            const res = await fetch(`/api/admin/forms/${activeFormId}`, {
+            const res = await fetch(`/api/admin/forms/${activeForm.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    title: builderTitle,
-                    description: builderDescription,
+                    title: activeForm.title,
+                    description: activeForm.description,
                     isPublished: finalPublished,
+                    bannerUrl: activeForm.bannerUrl,
+                    themeColor: activeForm.themeColor,
+                    postSubmissionAction: activeForm.postSubmissionAction,
+                    postSubmissionData: activeForm.postSubmissionData,
+                    automationEnabled: activeForm.automationEnabled,
+                    automationChannels: activeForm.automationChannels,
+                    automationTemplate: activeForm.automationTemplate,
                     questions: builderQuestions,
                 }),
             });
@@ -155,7 +166,7 @@ export default function FormsModule() {
     const addQuestion = (type: QuestionType) => {
         setBuilderQuestions([
             ...builderQuestions,
-            { type, questionText: "New Question", required: false, options: ["Option 1"] }
+            { type, questionText: "New Question", required: false, options: type === "linear_scale" ? ["1", "5"] : ["Option 1"] }
         ]);
     };
 
@@ -172,7 +183,7 @@ export default function FormsModule() {
     };
 
     const copyShareLink = () => {
-        navigator.clipboard.writeText(`${window.location.origin}/forms/${activeFormId}`);
+        navigator.clipboard.writeText(`${window.location.origin}/forms/${activeForm?.id}`);
         toast.success("Link copied!");
     };
 
@@ -222,171 +233,347 @@ export default function FormsModule() {
         );
     }
 
-    if (view === "builder") {
+    if (view === "builder" || view === "settings") {
         return (
             <div className="space-y-6 animate-in fade-in max-w-3xl mx-auto pb-20">
-                <div className="flex items-center justify-between sticky top-0 bg-[#fcfcfc]/80 backdrop-blur-md pt-4 pb-4 z-10 border-b border-gray-100 mb-6">
+                <div className="flex items-center justify-between sticky top-0 bg-[#fcfcfc]/90 backdrop-blur-md pt-4 pb-4 z-20 border-b border-gray-100 mb-6">
                     <button onClick={() => setView("list")} className="text-sm text-gray-400 hover:text-primary">&larr; Back</button>
+
+                    <div className="flex bg-gray-100/50 p-1 rounded-xl mx-auto">
+                        <button onClick={() => setView("builder")} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${view === 'builder' ? 'bg-white shadow-sm text-primary' : 'text-gray-500 hover:text-gray-900'}`}>Questions</button>
+                        <button onClick={() => setView("settings")} className={`px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-1 ${view === 'settings' ? 'bg-white shadow-sm text-primary' : 'text-gray-500 hover:text-gray-900'}`}><Settings size={14} /> Settings</button>
+                    </div>
+
                     <div className="flex gap-2">
                         {isPublished && (
-                            <button onClick={copyShareLink} className="flex gap-2 items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-bold transition">
-                                <LinkIcon size={16} /> Copy Link
+                            <button onClick={copyShareLink} className="flex gap-2 items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold transition">
+                                <LinkIcon size={16} /> <span className="hidden sm:inline">Copy Link</span>
                             </button>
                         )}
-                        <button onClick={() => handleSaveForm()} className="flex gap-2 items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-bold transition">
-                            <Save size={16} /> Save Draft
+                        <button onClick={() => handleSaveForm()} className="flex gap-2 items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition">
+                            <Save size={16} /> <span className="hidden sm:inline">Save Draft</span>
                         </button>
-                        <button onClick={() => handleSaveForm(!isPublished)} className={`flex gap-2 items-center px-4 py-2 text-white rounded-lg text-sm font-bold transition ${isPublished ? 'bg-orange-500 hover:bg-orange-600' : 'bg-primary hover:bg-primary/90'}`}>
+                        <button onClick={() => handleSaveForm(!isPublished)} className={`flex gap-2 items-center px-4 py-2 text-white rounded-xl text-sm font-bold transition ${isPublished ? 'bg-orange-500 hover:bg-orange-600' : 'bg-primary hover:bg-primary/90'}`}>
                             {isPublished ? "Unpublish" : "Publish"}
                         </button>
                     </div>
                 </div>
 
-                <div className="bg-white p-8 rounded-2xl shadow-sm border-t-8 border-t-primary border-x border-b border-gray-100 space-y-4">
-                    <input
-                        type="text"
-                        value={builderTitle}
-                        onChange={e => setBuilderTitle(e.target.value)}
-                        className="w-full text-3xl font-black text-gray-900 border-none outline-none focus:ring-0 px-0"
-                        placeholder="Form Title"
-                    />
-                    <textarea
-                        value={builderDescription}
-                        onChange={e => setBuilderDescription(e.target.value)}
-                        className="w-full text-gray-600 border-none outline-none focus:ring-0 px-0 resize-none h-20"
-                        placeholder="Form Description"
-                    />
-                </div>
+                {view === "settings" && activeForm && (
+                    <div className="space-y-6">
+                        <div className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60 pb-12">
+                            <h3 className="text-xl font-bold mb-6 flex items-center gap-2"><ArrowRight className="text-primary" /> Post-Submission Actions</h3>
+                            <div className="space-y-4">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">After they hit Submit...</label>
+                                <select
+                                    value={activeForm.postSubmissionAction || 'message'}
+                                    onChange={e => setActiveForm({ ...activeForm, postSubmissionAction: e.target.value })}
+                                    className="w-full bg-gray-50 border-none rounded-xl p-4 ring-1 ring-gray-200 focus:ring-primary text-gray-800"
+                                >
+                                    <option value="message">Show a default success message</option>
+                                    <option value="redirect_url">Redirect to a URL Link</option>
+                                    <option value="whatsapp_group">Invite to a WhatsApp Group</option>
+                                </select>
 
-                {builderQuestions.map((q, idx) => (
-                    <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4 relative group">
-                        <div className="flex items-start justify-between gap-4">
-                            <input
-                                type="text"
-                                value={q.questionText}
-                                onChange={e => updateQuestion(idx, { questionText: e.target.value })}
-                                className="flex-1 text-lg font-semibold bg-gray-50 border-none rounded-lg p-3 ring-1 ring-gray-200 focus:ring-primary"
-                                placeholder="Question"
-                            />
-                            <select
-                                value={q.type}
-                                onChange={e => updateQuestion(idx, { type: e.target.value as QuestionType })}
-                                className="bg-gray-50 border-none rounded-lg p-3 ring-1 ring-gray-200 focus:ring-primary text-sm font-medium"
-                            >
-                                <option value="short_answer">Short Answer</option>
-                                <option value="paragraph">Paragraph</option>
-                                <option value="multiple_choice">Multiple Choice</option>
-                                <option value="checkboxes">Checkboxes</option>
-                                <option value="dropdown">Dropdown</option>
-                            </select>
+                                {activeForm.postSubmissionAction !== 'message' && (
+                                    <div className="pt-2 animate-in slide-in-from-top-2">
+                                        <label className="block text-sm font-medium text-gray-500 mb-2">Redirect URL / Link</label>
+                                        <input
+                                            type="url"
+                                            value={activeForm.postSubmissionData || ''}
+                                            onChange={e => setActiveForm({ ...activeForm, postSubmissionData: e.target.value })}
+                                            className="w-full bg-gray-50 border-none rounded-xl p-4 ring-1 ring-gray-200 focus:ring-primary"
+                                            placeholder="https://..."
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="pl-2">
-                            {q.type === "short_answer" && <div className="text-gray-400 border-b border-gray-200 w-1/2 pb-1 text-sm inline-block">Short answer text</div>}
-                            {q.type === "paragraph" && <div className="text-gray-400 border-b border-gray-200 w-full pb-1 text-sm inline-block max-w-xl">Long answer text...</div>}
+                        <div className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60">
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold flex items-center gap-2"><MessageSquare className="text-primary" /> Automated Messaging</h3>
+                                <label className="flex items-center cursor-pointer">
+                                    <div className={`relative w-12 h-7 transition-colors rounded-full ${activeForm.automationEnabled ? 'bg-primary' : 'bg-gray-300'}`}>
+                                        <input type="checkbox" checked={activeForm.automationEnabled || false} onChange={e => setActiveForm({ ...activeForm, automationEnabled: e.target.checked })} className="sr-only" />
+                                        <div className={`absolute top-1 left-1 bg-white w-5 h-5 rounded-full transition-transform ${activeForm.automationEnabled ? 'translate-x-5' : ''}`} />
+                                    </div>
+                                </label>
+                            </div>
 
-                            {["multiple_choice", "checkboxes", "dropdown"].includes(q.type) && (
-                                <div className="space-y-2">
-                                    {q.options?.map((opt, oIdx) => (
-                                        <div key={oIdx} className="flex items-center gap-3">
-                                            <div className={`w-4 h-4 border-2 border-gray-300 ${q.type === 'multiple_choice' ? 'rounded-full' : 'rounded-sm'}`} />
-                                            <input
-                                                type="text"
-                                                value={opt}
-                                                onChange={e => {
-                                                    const newOpts = [...(q.options || [])];
-                                                    newOpts[oIdx] = e.target.value;
-                                                    updateQuestion(idx, { options: newOpts });
-                                                }}
-                                                className="border-none focus:ring-0 p-0 text-gray-700 w-full"
-                                                placeholder={`Option ${oIdx + 1}`}
-                                            />
-                                            <button onClick={() => {
-                                                const newOpts = [...(q.options || [])];
-                                                newOpts.splice(oIdx, 1);
-                                                updateQuestion(idx, { options: newOpts });
-                                            }} className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"><X size={14} /></button>
+                            {activeForm.automationEnabled && (
+                                <div className="space-y-6 pt-4 border-t border-gray-100 animate-in fade-in">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-3">Channels</label>
+                                        <div className="flex gap-4">
+                                            {['Email', 'WhatsApp', 'SMS'].map(ch => {
+                                                const channels = activeForm.automationChannels || [];
+                                                const isActive = channels.includes(ch.toLowerCase());
+                                                return (
+                                                    <label key={ch} className={`px-4 py-2 rounded-xl border-2 cursor-pointer transition select-none flex items-center gap-2 ${isActive ? 'border-primary bg-primary/5 text-primary font-bold' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isActive}
+                                                            onChange={e => {
+                                                                if (e.target.checked) setActiveForm({ ...activeForm, automationChannels: [...channels, ch.toLowerCase()] });
+                                                                else setActiveForm({ ...activeForm, automationChannels: channels.filter(c => c !== ch.toLowerCase()) });
+                                                            }}
+                                                            className="sr-only"
+                                                        />
+                                                        {ch}
+                                                    </label>
+                                                )
+                                            })}
                                         </div>
-                                    ))}
-                                    <button onClick={() => {
-                                        updateQuestion(idx, { options: [...(q.options || []), `Option ${(q.options?.length || 0) + 1}`] });
-                                    }} className="text-sm font-medium text-primary hover:underline hover:text-primary/80 flex items-center gap-2 mt-2">
-                                        <Plus size={14} /> Add option
-                                    </button>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Message Template <span className="text-gray-400 font-normal ml-2">Use {'{{QuestionName}}'} to inject answers dynamically.</span></label>
+                                        <textarea
+                                            value={activeForm.automationTemplate || ''}
+                                            onChange={e => setActiveForm({ ...activeForm, automationTemplate: e.target.value })}
+                                            className="w-full bg-gray-50 border-none rounded-xl p-4 ring-1 ring-gray-200 focus:ring-primary min-h-[160px] font-mono text-sm resize-y"
+                                            placeholder="Hello {{Name}},\nThank you for opting into our specific branch! You selected {{Role}}... "
+                                        />
+                                    </div>
                                 </div>
                             )}
                         </div>
-
-                        <div className="flex justify-end items-center gap-4 pt-4 border-t border-gray-100 mt-2">
-                            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 cursor-pointer">
-                                <span>Required</span>
-                                <div className={`relative w-10 h-6 transition-colors rounded-full ${q.required ? 'bg-primary' : 'bg-gray-300'}`}>
-                                    <input type="checkbox" checked={q.required} onChange={e => updateQuestion(idx, { required: e.target.checked })} className="sr-only" />
-                                    <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${q.required ? 'translate-x-4' : ''}`} />
-                                </div>
-                            </label>
-                            <div className="w-px h-6 bg-gray-200" />
-                            <button onClick={() => removeQuestion(idx)} className="text-gray-400 hover:text-red-500 transition p-2 hover:bg-red-50 rounded-lg">
-                                <Trash2 size={18} />
-                            </button>
-                        </div>
                     </div>
-                ))}
+                )}
 
-                <button onClick={() => addQuestion("multiple_choice")} className="w-full py-4 border-2 border-dashed border-gray-300 rounded-2xl text-gray-500 font-bold hover:bg-gray-50 hover:border-primary hover:text-primary transition flex items-center justify-center gap-2">
-                    <Plus size={20} /> Add Question
-                </button>
+                {view === "builder" && activeForm && (
+                    <>
+                        <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60 overflow-hidden mb-6 relative group">
+                            {/* Banner Field */}
+                            <div className="h-40 bg-gray-100 relative group overflow-hidden border-b border-gray-100">
+                                {activeForm.bannerUrl ? (
+                                    <img src={activeForm.bannerUrl} alt="Form Banner" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                                        <span className="flex items-center gap-2"><ImageIcon opacity={0.5} /> Drop Banner Image Here or enter URL below</span>
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center p-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Paste Image URL..."
+                                        value={activeForm.bannerUrl || ''}
+                                        onChange={e => setActiveForm({ ...activeForm, bannerUrl: e.target.value })}
+                                        className="w-full max-w-sm bg-white/90 border-none rounded-lg focus:ring-primary shadow-2xl"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Title & Desc */}
+                            <div className="p-8 space-y-4 border-l-8 border-l-primary relative">
+                                <input
+                                    type="text"
+                                    value={activeForm.title}
+                                    onChange={e => setActiveForm({ ...activeForm, title: e.target.value })}
+                                    className="w-full text-4xl font-black text-gray-900 border-none outline-none focus:ring-0 px-0 bg-transparent"
+                                    placeholder="Form Title"
+                                />
+                                <textarea
+                                    value={activeForm.description}
+                                    onChange={e => setActiveForm({ ...activeForm, description: e.target.value })}
+                                    className="w-full text-gray-600 border-none outline-none focus:ring-0 px-0 resize-none h-20 bg-transparent text-lg"
+                                    placeholder="Form Description"
+                                />
+                            </div>
+                        </div>
+
+                        {builderQuestions.map((q, idx) => (
+                            <div key={idx} className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60 flex flex-col gap-6 relative group transition-all">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1 space-y-3">
+                                        <input
+                                            type="text"
+                                            value={q.questionText}
+                                            onChange={e => updateQuestion(idx, { questionText: e.target.value })}
+                                            className="w-full text-xl font-bold bg-transparent border-none rounded-none border-b-2 border-gray-100 p-2 focus:border-primary focus:ring-0 px-0 transition-colors"
+                                            placeholder="Question"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={q.imageUrl || ''}
+                                            onChange={e => updateQuestion(idx, { imageUrl: e.target.value })}
+                                            className="w-full text-sm text-gray-500 bg-gray-50 border-none rounded-lg p-2 focus:ring-1 focus:ring-primary mt-2"
+                                            placeholder="Optional Image URL for this question..."
+                                        />
+                                    </div>
+                                    <select
+                                        value={q.type}
+                                        onChange={e => updateQuestion(idx, { type: e.target.value as QuestionType })}
+                                        className="bg-gray-50 border-none rounded-xl p-3 ring-1 ring-gray-200 focus:ring-primary text-sm font-semibold flex-shrink-0"
+                                    >
+                                        <option value="short_answer">Short Answer</option>
+                                        <option value="paragraph">Paragraph</option>
+                                        <option value="multiple_choice">Multiple Choice</option>
+                                        <option value="checkboxes">Checkboxes</option>
+                                        <option value="dropdown">Dropdown</option>
+                                        <option value="linear_scale">Linear Scale</option>
+                                        <option value="file_upload">File Upload</option>
+                                    </select>
+                                </div>
+
+                                <div className="pt-2">
+                                    {q.type === "short_answer" && <div className="text-gray-400 border-b border-dashed border-gray-300 w-1/2 pb-2 text-sm inline-block">Short answer text</div>}
+                                    {q.type === "paragraph" && <div className="text-gray-400 border-b border-dashed border-gray-300 w-full pb-2 text-sm inline-block max-w-xl">Long answer text...</div>}
+
+                                    {["multiple_choice", "checkboxes", "dropdown"].includes(q.type) && (
+                                        <div className="space-y-3">
+                                            {q.options?.map((opt, oIdx) => (
+                                                <div key={oIdx} className="flex items-center gap-3">
+                                                    <div className={`w-5 h-5 border-2 border-gray-300 ${q.type === 'multiple_choice' ? 'rounded-full' : 'rounded-md'}`} />
+                                                    <input
+                                                        type="text"
+                                                        value={opt}
+                                                        onChange={e => {
+                                                            const newOpts = [...(q.options || [])];
+                                                            newOpts[oIdx] = e.target.value;
+                                                            updateQuestion(idx, { options: newOpts });
+                                                        }}
+                                                        className="border-none focus:ring-0 p-0 text-gray-700 text-lg w-full"
+                                                        placeholder={`Option ${oIdx + 1}`}
+                                                    />
+                                                    <button onClick={() => {
+                                                        const newOpts = [...(q.options || [])];
+                                                        newOpts.splice(oIdx, 1);
+                                                        updateQuestion(idx, { options: newOpts });
+                                                    }} className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition p-1"><X size={16} /></button>
+                                                </div>
+                                            ))}
+                                            <button onClick={() => {
+                                                updateQuestion(idx, { options: [...(q.options || []), `Option ${(q.options?.length || 0) + 1}`] });
+                                            }} className="text-sm font-bold text-primary hover:text-primary/80 flex items-center gap-2 mt-4 ml-1">
+                                                <Plus size={16} /> Add option
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {q.type === "linear_scale" && (
+                                        <div className="flex items-center gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-100 w-max">
+                                            <div className="flex flex-col gap-2 relative">
+                                                <input type="number" className="w-16 rounded-lg border-gray-200 text-center font-bold font-mono" value={q.options?.[0] || '1'} onChange={e => {
+                                                    const newOpts = [...(q.options || ['1', '5'])]; newOpts[0] = e.target.value; updateQuestion(idx, { options: newOpts });
+                                                }} />
+                                                <span className="text-xs font-bold text-gray-400 uppercase text-center mt-2">Min</span>
+                                            </div>
+                                            <div className="w-12 h-0.5 bg-gray-300 mb-6 relative">
+                                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-gray-400">TO</div>
+                                            </div>
+                                            <div className="flex flex-col gap-2 relative">
+                                                <input type="number" className="w-16 rounded-lg border-gray-200 text-center font-bold font-mono" value={q.options?.[1] || '5'} onChange={e => {
+                                                    const newOpts = [...(q.options || ['1', '5'])]; newOpts[1] = e.target.value; updateQuestion(idx, { options: newOpts });
+                                                }} />
+                                                <span className="text-xs font-bold text-gray-400 uppercase text-center mt-2">Max</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {q.type === "file_upload" && (
+                                        <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                                            <ImageIcon className="mb-2" opacity={0.5} size={32} />
+                                            <span className="font-semibold text-sm">Responders will upload a file here.</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Advanced Question Settings */}
+                                <div className="mt-8 pt-4 border-t border-gray-100 space-y-4">
+                                    <details className="group/adv">
+                                        <summary className="cursor-pointer text-sm font-semibold text-gray-500 hover:text-primary select-none flex items-center gap-1"><CornerDownRight size={14} /> Conditional Logic & Sections</summary>
+                                        <div className="pt-4 pl-4 space-y-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">New Section ID (Optional)</label>
+                                                <input type="text" placeholder="Break to new page e.g., 'section2'" value={q.sectionId || ''} onChange={e => updateQuestion(idx, { sectionId: e.target.value })} className="w-full bg-gray-50 border-none rounded-lg text-sm p-2 focus:ring-1 focus:ring-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Show only if answer match (JSON)</label>
+                                                <input type="text" placeholder='{"dependsOnId": "q1", "requiredValue": "Yes"}' value={q.logicConditions ? JSON.stringify(q.logicConditions) : ''} onChange={e => {
+                                                    try {
+                                                        const val = e.target.value;
+                                                        updateQuestion(idx, { logicConditions: val ? JSON.parse(val) : null });
+                                                    } catch (err) { } // Just wait for valid JSON
+                                                }} className="w-full bg-gray-50 border-none rounded-lg text-sm p-2 focus:ring-1 focus:ring-primary font-mono" />
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
+
+                                <div className="flex justify-end items-center gap-6 pt-4 border-t border-gray-100 mt-2">
+                                    <label className="flex items-center gap-3 text-sm font-bold text-gray-700 cursor-pointer">
+                                        <span>Required</span>
+                                        <div className={`relative w-10 h-6 transition-colors rounded-full ${q.required ? 'bg-primary' : 'bg-gray-300'}`}>
+                                            <input type="checkbox" checked={q.required} onChange={e => updateQuestion(idx, { required: e.target.checked })} className="sr-only" />
+                                            <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm ${q.required ? 'translate-x-[15px]' : ''}`} />
+                                        </div>
+                                    </label>
+                                    <div className="w-px h-6 bg-gray-200" />
+                                    <button onClick={() => removeQuestion(idx)} className="text-gray-400 hover:text-red-500 transition p-2 hover:bg-red-50 rounded-lg">
+                                        <Trash2 size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+
+                        <button onClick={() => addQuestion("multiple_choice")} className="w-full py-5 bg-white border-2 border-dashed border-gray-200 rounded-3xl text-gray-500 font-bold hover:bg-primary/5 hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 shadow-sm">
+                            <Plus size={20} /> Add New Question
+                        </button>
+                    </>
+                )}
             </div>
         );
     }
 
     return (
         <div className="space-y-6 animate-in fade-in">
-            <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60">
                 <div>
-                    <h2 className="text-2xl font-bold">Forms Manager</h2>
-                    <p className="text-gray-500 text-sm mt-1">Create and manage your interactive forms.</p>
+                    <h2 className="text-3xl font-black tracking-tight mb-1">Forms Hub</h2>
+                    <p className="text-gray-500 text-sm font-medium">Create automated dynamic forms.</p>
                 </div>
                 <button
                     onClick={handleCreateForm}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition shadow-lg shadow-primary/20"
+                    className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition shadow-lg shadow-primary/20 hover:-translate-y-0.5"
                 >
                     <Plus size={18} /> New Form
                 </button>
             </div>
 
             {forms.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100 border-dashed border-2">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
-                        <FileText size={24} />
+                <div className="text-center py-24 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60 border-dashed border-2">
+                    <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 text-primary">
+                        <FileText size={32} />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">No forms created yet</h3>
-                    <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">Create a form to collect information, feedback, or applications from your audience.</p>
-                    <button onClick={handleCreateForm} className="text-primary font-bold hover:underline">Create your first form</button>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">No forms created yet</h3>
+                    <p className="text-gray-500 text-sm max-w-sm mx-auto mb-8 font-medium">Create a powerful form to collect leads, applications, or feedback with full automation built-in.</p>
+                    <button onClick={handleCreateForm} className="text-primary font-bold hover:underline text-lg">Create First Form</button>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {forms.map(form => (
-                        <div key={form.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-primary/20 transition-all group flex flex-col group relative">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${form.isPublished ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}`}>
+                        <div key={form.id} className="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 hover:border-primary/20 transition-all duration-300 group flex flex-col group relative overflow-hidden">
+                            {form.themeColor && <div className="absolute top-0 left-0 w-full h-1.5" style={{ backgroundColor: form.themeColor }}></div>}
+                            <div className="flex justify-between items-start mb-4 relative z-10 pt-2">
+                                <div className={`px-3 py-1.5 text-[11px] font-black uppercase tracking-wider rounded-lg ${form.isPublished ? 'bg-emerald-100/80 text-emerald-700' : 'bg-orange-100/80 text-orange-700'}`}>
                                     {form.isPublished ? "Published" : "Draft"}
                                 </div>
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2 truncate" title={form.title}>{form.title}</h3>
-                            <p className="text-sm text-gray-500 line-clamp-2 mb-6 flex-1">{form.description || "No description"}</p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1" title={form.title}>{form.title}</h3>
+                            <p className="text-sm text-gray-500 line-clamp-2 mb-6 flex-1 font-medium">{form.description || "No description provided."}</p>
 
-                            <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                                <span className="text-xs font-semibold text-gray-400">{new Date(form.createdAt).toLocaleDateString()}</span>
-                                <div className="flex items-center gap-1">
-                                    <button onClick={() => handleEditForm(form.id)} className="w-8 h-8 rounded-lg bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition" title="Edit Form">
-                                        <Edit size={14} />
+                            <div className="flex items-center justify-between pt-5 border-t border-gray-100">
+                                <span className="text-xs font-bold text-gray-400 tracking-wider uppercase">{new Date(form.createdAt).toLocaleDateString()}</span>
+                                <div className="flex items-center gap-1.5">
+                                    <button onClick={() => handleEditForm(form.id)} className="w-9 h-9 rounded-xl bg-gray-50 text-gray-500 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition" title="Edit Form">
+                                        <Edit size={16} />
                                     </button>
-                                    <button onClick={() => handleViewResponses(form.id)} className="w-8 h-8 rounded-lg bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition" title="View Responses">
-                                        <Eye size={14} />
+                                    <button onClick={() => handleViewResponses(form.id)} className="w-9 h-9 rounded-xl bg-gray-50 text-gray-500 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition" title="View Responses">
+                                        <Eye size={16} />
                                     </button>
-                                    <button onClick={() => handleDeleteForm(form.id)} className="w-8 h-8 rounded-lg bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition" title="Delete Form">
-                                        <Trash2 size={14} />
+                                    <button onClick={() => handleDeleteForm(form.id)} className="w-9 h-9 rounded-xl bg-gray-50 text-gray-500 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition" title="Delete Form">
+                                        <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>
