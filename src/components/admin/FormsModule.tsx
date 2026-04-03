@@ -259,6 +259,29 @@ export default function FormsModule() {
                                         />
                                     </div>
                                 )}
+
+                                <div className="pt-6 border-t border-gray-100">
+                                    <label className="block text-sm font-bold text-gray-700 mb-4">Brand Theme Color</label>
+                                    <div className="flex gap-4 flex-wrap">
+                                        {[
+                                            { name: 'Blue', color: '#2563eb' },
+                                            { name: 'Emerald', color: '#059669' },
+                                            { name: 'Purple', color: '#7c3aed' },
+                                            { name: 'Orange', color: '#ea580c' },
+                                            { name: 'Rose', color: '#e11d48' },
+                                            { name: 'Black', color: '#111827' }
+                                        ].map(t => (
+                                            <button
+                                                key={t.color}
+                                                type="button"
+                                                onClick={() => setActiveForm({ ...activeForm, themeColor: t.color })}
+                                                className={`w-12 h-12 rounded-2xl transition-all border-4 ${activeForm.themeColor === t.color ? 'border-primary ring-2 ring-primary/20 scale-110' : 'border-transparent hover:scale-105'}`}
+                                                style={{ backgroundColor: t.color }}
+                                                title={t.name}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

@@ -27,10 +27,20 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     try {
         const { id } = await params;
         const body = await req.json();
-        const { title, description, isPublished, questions } = body;
+        const {
+            title, description, isPublished, bannerUrl, themeColor,
+            postSubmissionAction, postSubmissionData, automationEnabled,
+            automationChannels, automationTemplate, customSuccessMessage,
+            questions
+        } = body;
 
         await db.update(forms)
-            .set({ title, description, isPublished, updatedAt: new Date() })
+            .set({
+                title, description, isPublished, bannerUrl, themeColor,
+                postSubmissionAction, postSubmissionData, automationEnabled,
+                automationChannels, automationTemplate, customSuccessMessage,
+                updatedAt: new Date()
+            })
             .where(eq(forms.id, id));
 
         if (questions && Array.isArray(questions)) {
@@ -43,6 +53,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                     questionText: q.questionText,
                     required: q.required || false,
                     options: q.options || null,
+                    imageUrl: q.imageUrl || null,
+                    sectionId: q.sectionId || null,
+                    logicConditions: q.logicConditions || null,
                     displayOrder: i,
                 }));
                 await db.insert(formQuestions).values(newQuestions);
