@@ -205,20 +205,34 @@ export default function FormsModule() {
     };
 
     const handleSendManualNotification = (r: any) => {
+        if (!activeForm) return;
         // This simulates sending the automation template with replaced tags
-        let template = activeForm?.automationTemplate || "No template configured.";
+        let template = activeForm.automationTemplate || "No template configured.";
         builderQuestions.forEach(q => {
+            if (!q.questionText) return;
             const ans = r.answers?.find((a: any) => a.questionId === q.id);
-            const text = ans?.answerText || (ans?.answerChoices ? JSON.parse(ans.answerChoices).join(", ") : "-");
-            template = template.replace(new RegExp(`{{${q.questionText}}}`, 'g'), text);
+            const text = ans?.answerText || (ans?.answerChoices ? (typeof ans.answerChoices === 'string' ? JSON.parse(ans.answerChoices).join(", ") : ans.answerChoices.join(", ")) : "-");
+
+            // Escape questionText for Regex
+            const escapedTag = q.questionText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            template = template.replace(new RegExp(`{{${escapedTag}}}`, 'g'), text);
         });
 
-        const channels = (activeForm?.automationChannels || []).join(", ");
-        toast(`${channels ? 'Sending to ' + channels : 'No channels set'}:\n\n${template}`, {
-            duration: 5000,
-            icon: '📩',
-            style: { maxWidth: '500px' }
-        });
+        const channels = (activeForm.automationChannels || []).join(", ");
+        toast((t) => (
+            <div className="flex flex-col gap-2 min-w-[300px]">
+                <div className="flex items-center justify-between border-b pb-2 mb-1">
+                    <span className="font-black text-xs uppercase tracking-widest text-primary">Mock {channels || 'No Channels'} Sent</span>
+                    <button onClick={() => toast.dismiss(t.id)} className="text-gray-400 hover:text-gray-600"><X size={14} /></button>
+                </div>
+                <div className="text-sm font-medium text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    {template}
+                </div>
+                <div className="mt-2 pt-2 border-t text-[10px] text-gray-400 italic">
+                    Note: Integration is currently in Sandbox/Mock mode.
+                </div>
+            </div>
+        ), { duration: 6000, position: 'top-right' });
     };
 
     const availableSections = builderQuestions.filter(q => q.type === 'section_header').map(q => q.questionText).filter(Boolean);
