@@ -43,6 +43,7 @@ export default function FormsModule() {
     const [isPublished, setIsPublished] = useState(false);
 
     const [responses, setResponses] = useState<any[]>([]);
+    const [selectedResponses, setSelectedResponses] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         if (view === "list") fetchForms();
@@ -160,11 +161,85 @@ export default function FormsModule() {
         toast.success("Link copied!");
     };
 
+    const handleExportCSV = (ids?: string[]) => {
+        const rowsToExport = ids ? responses.filter(r => ids.includes(r.id)) : responses;
+        if (rowsToExport.length === 0) { toast.error("No responses to export"); return; }
+
+        const headers = ["Timestamp", ...builderQuestions.map(q => q.questionText)];
+        const csvRows = rowsToExport.map(r => {
+            const timestamp = new Date(r.createdAt).toLocaleString();
+            const answers = builderQuestions.map(q => {
+                const ans = r.answers?.find((a: any) => a.questionId === q.id);
+                const text = ans?.answerText || (ans?.answerChoices ? JSON.parse(ans.answerChoices).join(", ") : "-");
+                return `"${text.replace(/"/g, '""')}"`;
+            });
+            return [timestamp, ...answers].join(",");
+        });
+
+        const csvContent = [headers.join(","), ...csvRows].join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `${activeForm?.title || 'Form'}_Responses.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleDeleteResponses = async (ids: string[]) => {
+        if (!confirm(`Are you sure you want to delete ${ids.length} response(s)?`)) return;
+        try {
+            const res = await fetch(`/api/admin/forms/${activeForm?.id}/responses`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ responseIds: ids })
+            });
+            if (res.ok) {
+                toast.success("Deleted");
+                setResponses(responses.filter(r => !ids.includes(r.id)));
+                setSelectedResponses(new Set());
+            }
+        } catch (e) { toast.error("Delete failed"); }
+    };
+
+    const handleSendManualNotification = (r: any) => {
+        // This simulates sending the automation template with replaced tags
+        let template = activeForm?.automationTemplate || "No template configured.";
+        builderQuestions.forEach(q => {
+            const ans = r.answers?.find((a: any) => a.questionId === q.id);
+            const text = ans?.answerText || (ans?.answerChoices ? JSON.parse(ans.answerChoices).join(", ") : "-");
+            template = template.replace(new RegExp(`{{${q.questionText}}}`, 'g'), text);
+        });
+
+        const channels = (activeForm?.automationChannels || []).join(", ");
+        toast(`${channels ? 'Sending to ' + channels : 'No channels set'}:\n\n${template}`, {
+            duration: 5000,
+            icon: '📩',
+            style: { maxWidth: '500px' }
+        });
+    };
+
     const availableSections = builderQuestions.filter(q => q.type === 'section_header').map(q => q.questionText).filter(Boolean);
 
     if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary w-8 h-8" /></div>;
 
     if (view === "responses") {
+        const isAllSelected = responses.length > 0 && selectedResponses.size === responses.length;
+
+        const toggleSelectAll = () => {
+            if (isAllSelected) setSelectedResponses(new Set());
+            else setSelectedResponses(new Set(responses.map(r => r.id)));
+        };
+
+        const toggleSelectOne = (id: string) => {
+            const next = new Set(selectedResponses);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            setSelectedResponses(next);
+        };
+
         return (
             <div className="space-y-6 animate-in fade-in">
                 <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -172,26 +247,65 @@ export default function FormsModule() {
                         <h2 className="text-2xl font-bold">Responses ({responses.length})</h2>
                         <button onClick={() => setView("list")} className="text-sm text-gray-400 hover:text-primary mt-1">&larr; Back to Forms</button>
                     </div>
+                    <div className="flex gap-2">
+                        <button onClick={() => handleExportCSV()} className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold transition">
+                            <FileText size={16} /> Export All CSV
+                        </button>
+                    </div>
                 </div>
 
+                {selectedResponses.size > 0 && (
+                    <div className="bg-primary/5 border border-primary/20 p-4 rounded-2xl flex items-center justify-between sticky top-4 z-50 backdrop-blur-md animate-in slide-in-from-top-4">
+                        <span className="font-bold text-primary ml-2">{selectedResponses.size} selected</span>
+                        <div className="flex gap-2">
+                            <button onClick={() => handleExportCSV(Array.from(selectedResponses))} className="bg-white text-primary border border-primary/20 px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/5 transition">Export Selected</button>
+                            <button onClick={() => {
+                                const selected = responses.filter(r => selectedResponses.has(r.id));
+                                selected.forEach(r => handleSendManualNotification(r));
+                                toast.success("Triggered batch notifications (Mock)");
+                            }} className="bg-white text-primary border border-primary/20 px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/5 transition">Send Batch Message</button>
+                            <button onClick={() => handleDeleteResponses(Array.from(selectedResponses))} className="bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition flex items-center gap-2">
+                                <Trash2 size={16} /> Delete
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse min-w-[1000px]">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-100 text-sm">
+                                <th className="p-4 w-10">
+                                    <input type="checkbox" checked={isAllSelected} onChange={toggleSelectAll} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
+                                </th>
                                 <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Timestamp</th>
-                                {builderQuestions.map((q, i) => <th key={i} className="p-4 font-semibold text-gray-600 truncate max-w-xs">{q.questionText}</th>)}
+                                {builderQuestions.map((q, i) => <th key={i} className="p-4 font-semibold text-gray-600 truncate max-w-[200px]">{q.questionText}</th>)}
+                                <th className="p-4 font-semibold text-gray-600 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {responses.length === 0 ? <tr><td colSpan={builderQuestions.length + 1} className="p-8 text-center text-gray-400">No responses yet.</td></tr>
+                            {responses.length === 0 ? <tr><td colSpan={builderQuestions.length + 3} className="p-8 text-center text-gray-400">No responses yet.</td></tr>
                                 : responses.map(r => (
-                                    <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                                    <tr key={r.id} className={`border-b border-gray-50 hover:bg-gray-50/50 transition ${selectedResponses.has(r.id) ? 'bg-primary/5 hover:bg-primary/10' : ''}`}>
+                                        <td className="p-4">
+                                            <input type="checkbox" checked={selectedResponses.has(r.id)} onChange={() => toggleSelectOne(r.id)} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
+                                        </td>
                                         <td className="p-4 text-sm text-gray-600 whitespace-nowrap">{new Date(r.createdAt).toLocaleString()}</td>
                                         {builderQuestions.map((q, j) => {
                                             const ans = r.answers?.find((a: any) => a.questionId === q.id);
                                             const text = ans?.answerText || (ans?.answerChoices ? JSON.parse(ans.answerChoices).join(", ") : "-");
-                                            return <td key={j} className="p-4 text-sm text-gray-900 truncate max-w-xs">{text}</td>;
+                                            return <td key={j} className="p-4 text-sm text-gray-900 truncate max-w-[200px]" title={text}>{text}</td>;
                                         })}
+                                        <td className="p-4 text-right">
+                                            <div className="flex justify-end gap-1">
+                                                <button onClick={() => handleSendManualNotification(r)} className="p-2 text-primary hover:bg-primary/10 rounded-lg transition" title="Send Mock Automation Message">
+                                                    <MessageSquare size={18} />
+                                                </button>
+                                                <button onClick={() => handleDeleteResponses([r.id])} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Response">
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))}
                         </tbody>

@@ -41,3 +41,28 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         return NextResponse.json({ error: String(error) }, { status: 500 });
     }
 }
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const { id } = await params;
+        const { responseIds } = await req.json();
+
+        if (!responseIds || !Array.isArray(responseIds)) {
+            return NextResponse.json({ error: "Invalid response IDs" }, { status: 400 });
+        }
+
+        // Delete answers for these responses
+        for (const rId of responseIds) {
+            await db.delete(formResponseAnswers).where(eq(formResponseAnswers.responseId, rId));
+        }
+
+        // Delete responses
+        for (const rId of responseIds) {
+            await db.delete(formResponses).where(eq(formResponses.id, rId));
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("DELETE /api/admin/forms/[id]/responses error:", error);
+        return NextResponse.json({ error: String(error) }, { status: 500 });
+    }
+}
