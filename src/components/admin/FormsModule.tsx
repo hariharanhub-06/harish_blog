@@ -20,7 +20,7 @@ type Form = {
     automationTemplate?: string;
 };
 
-type QuestionType = "short_answer" | "paragraph" | "multiple_choice" | "checkboxes" | "dropdown" | "linear_scale" | "file_upload";
+type QuestionType = "short_answer" | "paragraph" | "multiple_choice" | "checkboxes" | "dropdown" | "linear_scale" | "file_upload" | "section_header";
 
 type FormQuestion = {
     id?: string;
@@ -107,10 +107,20 @@ export default function FormsModule() {
     const handleSaveForm = async (publishStatus?: boolean) => {
         if (!activeForm) return;
         const finalPublished = publishStatus !== undefined ? publishStatus : isPublished;
+
+        let curSectionName = "";
+        const finalQuestions = builderQuestions.map(q => {
+            if (q.type === "section_header") {
+                curSectionName = q.questionText;
+                return { ...q, sectionId: curSectionName };
+            }
+            return { ...q, sectionId: curSectionName || '' };
+        });
+
         try {
             const res = await fetch(`/api/admin/forms/${activeForm.id}`, {
                 method: "PUT", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...activeForm, isPublished: finalPublished, questions: builderQuestions }),
+                body: JSON.stringify({ ...activeForm, isPublished: finalPublished, questions: finalQuestions }),
             });
             if (res.ok) { setIsPublished(finalPublished); toast.success("Saved"); }
         } catch (e) { toast.error("Failed to save"); }
@@ -150,8 +160,7 @@ export default function FormsModule() {
         toast.success("Link copied!");
     };
 
-    // Unique Sections available
-    const availableSections = Array.from(new Set(builderQuestions.map(q => q.sectionId).filter(Boolean))) as string[];
+    const availableSections = builderQuestions.filter(q => q.type === 'section_header').map(q => q.questionText).filter(Boolean);
 
     if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary w-8 h-8" /></div>;
 
@@ -340,151 +349,170 @@ export default function FormsModule() {
                         </div>
 
                         {builderQuestions.map((q, idx) => (
-                            <div key={idx} className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100/60 flex flex-col gap-6 relative group transition-all">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex-1 space-y-3">
-                                        <input type="text" value={q.questionText} onChange={e => updateQuestion(idx, { questionText: e.target.value })} className="w-full text-xl font-bold bg-transparent border-none rounded-none border-b-2 border-gray-100 p-2 focus:border-primary focus:ring-0 px-0 transition-colors" placeholder="Question" />
-
-                                        {/* Question Image Preview & Uploader */}
-                                        {q.imageUrl ? (
-                                            <div className="relative group/qImg max-w-sm rounded-xl overflow-hidden mt-4 border border-gray-100">
-                                                <img src={q.imageUrl} alt="Context" className="w-full h-auto" />
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover/qImg:opacity-100 transition">
-                                                    <button onClick={() => updateQuestion(idx, { imageUrl: '' })} className="bg-red-500 text-white rounded-full p-2"><Trash2 size={16} /></button>
-                                                </div>
+                            <div key={idx} className="relative group transition-all">
+                                {q.type === 'section_header' ? (
+                                    <div className="bg-primary/90 text-white p-8 sm:p-10 rounded-3xl shadow-sm border border-primary relative overflow-hidden group">
+                                        <div className="absolute top-0 right-12 w-24 h-2 bg-white/30 rounded-b-xl border-t-0"></div>
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1 space-y-4">
+                                                <input type="text" value={q.questionText} onChange={e => updateQuestion(idx, { questionText: e.target.value })} className="w-full text-3xl font-black bg-transparent border-none focus:ring-0 px-0 placeholder-white/70" placeholder="Section Title" />
+                                                <input type="text" value={q.options?.[0] || ''} onChange={e => updateQuestion(idx, { options: [e.target.value] })} className="w-full text-lg font-medium bg-transparent border-none focus:ring-0 px-0 placeholder-white/50" placeholder="Optional description..." />
                                             </div>
-                                        ) : (
-                                            <label className="cursor-pointer inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-primary transition mt-2">
-                                                <ImageIcon size={16} /> Add Image Context
-                                                <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, base64 => updateQuestion(idx, { imageUrl: base64 }))} />
-                                            </label>
-                                        )}
+                                            <button onClick={() => removeQuestion(idx)} className="text-white/60 hover:text-white transition p-2 hover:bg-black/10 rounded-lg"><Trash2 size={20} /></button>
+                                        </div>
                                     </div>
+                                ) : (
+                                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100/60 flex flex-col gap-6 relative">
+                                        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                                            <div className="flex-1 space-y-3 w-full">
+                                                <input type="text" value={q.questionText} onChange={e => updateQuestion(idx, { questionText: e.target.value })} className="w-full text-xl font-bold bg-transparent border-none rounded-none border-b-2 border-gray-100 p-2 focus:border-primary focus:ring-0 px-0 transition-colors" placeholder="Question" />
 
-                                    <select value={q.type} onChange={e => updateQuestion(idx, { type: e.target.value as QuestionType })} className="bg-gray-50 border-none rounded-xl p-3 ring-1 ring-gray-200 focus:ring-primary text-sm font-semibold flex-shrink-0">
-                                        <option value="short_answer">Short Answer</option>
-                                        <option value="paragraph">Paragraph</option>
-                                        <option value="multiple_choice">Multiple Choice</option>
-                                        <option value="checkboxes">Checkboxes</option>
-                                        <option value="dropdown">Dropdown</option>
-                                        <option value="linear_scale">Linear Scale</option>
-                                        <option value="file_upload">File Upload</option>
-                                    </select>
-                                </div>
+                                                {/* Question Image Preview & Uploader */}
+                                                {q.imageUrl ? (
+                                                    <div className="relative group/qImg max-w-sm rounded-xl overflow-hidden mt-4 border border-gray-100">
+                                                        <img src={q.imageUrl} alt="Context" className="w-full h-auto" />
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover/qImg:opacity-100 transition">
+                                                            <button onClick={() => updateQuestion(idx, { imageUrl: '' })} className="bg-red-500 text-white rounded-full p-2"><Trash2 size={16} /></button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <label className="cursor-pointer inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-primary transition mt-2">
+                                                        <ImageIcon size={16} /> Add Image Context
+                                                        <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, base64 => updateQuestion(idx, { imageUrl: base64 }))} />
+                                                    </label>
+                                                )}
+                                            </div>
 
-                                <div className="pt-2">
-                                    {q.type === "short_answer" && <div className="text-gray-400 border-b border-dashed border-gray-300 w-1/2 pb-2 text-sm inline-block">Short answer text</div>}
-                                    {q.type === "paragraph" && <div className="text-gray-400 border-b border-dashed border-gray-300 w-full pb-2 text-sm inline-block max-w-xl">Long answer text...</div>}
+                                            <select value={q.type} onChange={e => updateQuestion(idx, { type: e.target.value as QuestionType })} className="bg-gray-50 border-none rounded-xl p-3 ring-1 ring-gray-200 focus:ring-primary text-sm font-semibold flex-shrink-0 w-full sm:w-auto">
+                                                <option value="short_answer">Short Answer</option>
+                                                <option value="paragraph">Paragraph</option>
+                                                <option value="multiple_choice">Multiple Choice</option>
+                                                <option value="checkboxes">Checkboxes</option>
+                                                <option value="dropdown">Dropdown</option>
+                                                <option value="linear_scale">Linear Scale</option>
+                                                <option value="file_upload">File Upload</option>
+                                            </select>
+                                        </div>
 
-                                    {["multiple_choice", "checkboxes", "dropdown"].includes(q.type) && (
-                                        <div className="space-y-4">
-                                            {q.options?.map((opt, oIdx) => (
-                                                <div key={oIdx} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-gray-50 hover:bg-gray-100/50 p-2 pl-3 rounded-xl transition">
-                                                    <div className={`w-5 h-5 flex-shrink-0 border-2 border-gray-300 mt-1 sm:mt-0 ${q.type === 'multiple_choice' || q.type === 'dropdown' ? 'rounded-full' : 'rounded-md'}`} />
-                                                    <input
-                                                        type="text"
-                                                        value={opt}
-                                                        onChange={e => {
-                                                            const newOpts = [...(q.options || [])];
-                                                            const oldVal = newOpts[oIdx];
-                                                            const newVal = e.target.value;
-                                                            newOpts[oIdx] = newVal;
+                                        <div className="pt-2">
+                                            {q.type === "short_answer" && <div className="text-gray-400 border-b border-dashed border-gray-300 w-1/2 pb-2 text-sm inline-block">Short answer text</div>}
+                                            {q.type === "paragraph" && <div className="text-gray-400 border-b border-dashed border-gray-300 w-full pb-2 text-sm inline-block max-w-xl">Long answer text...</div>}
 
-                                                            // Update Logic map keys if option changed
-                                                            let newLogic = { ...q.logicConditions };
-                                                            if (newLogic[oldVal]) {
-                                                                newLogic[newVal] = newLogic[oldVal];
-                                                                delete newLogic[oldVal];
-                                                            }
-                                                            updateQuestion(idx, { options: newOpts, logicConditions: newLogic });
-                                                        }}
-                                                        className="border-none focus:ring-0 p-0 text-gray-800 font-medium text-lg w-full bg-transparent flex-1"
-                                                        placeholder={`Option ${oIdx + 1}`}
-                                                    />
+                                            {["multiple_choice", "checkboxes", "dropdown"].includes(q.type) && (
+                                                <div className="space-y-4">
+                                                    {q.options?.map((opt, oIdx) => (
+                                                        <div key={oIdx} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-gray-50 hover:bg-gray-100/50 p-2 pl-3 rounded-xl transition">
+                                                            <div className={`w-5 h-5 flex-shrink-0 border-2 border-gray-300 mt-1 sm:mt-0 ${q.type === 'multiple_choice' || q.type === 'dropdown' ? 'rounded-full' : 'rounded-md'}`} />
+                                                            <input
+                                                                type="text"
+                                                                value={opt}
+                                                                onChange={e => {
+                                                                    const newOpts = [...(q.options || [])];
+                                                                    const oldVal = newOpts[oIdx];
+                                                                    const newVal = e.target.value;
+                                                                    newOpts[oIdx] = newVal;
 
-                                                    {/* Visual Section Routing for Multiple Choice / Dropdown */}
-                                                    {(q.type === 'multiple_choice' || q.type === 'dropdown') && (
-                                                        <select
-                                                            className="text-xs font-semibold text-gray-500 bg-white border border-gray-200 rounded-lg p-2 focus:ring-primary w-full sm:w-auto"
-                                                            value={q.logicConditions?.[opt] || ''}
-                                                            onChange={e => {
-                                                                const routeVal = e.target.value;
-                                                                const newLogic = { ...(q.logicConditions || {}) };
-                                                                if (routeVal === '') delete newLogic[opt]; // Default continue
-                                                                else newLogic[opt] = routeVal;
-                                                                updateQuestion(idx, { logicConditions: newLogic });
-                                                            }}
-                                                        >
-                                                            <option value="" className="text-gray-400">Continue to next section</option>
-                                                            <option value="submit" className="font-bold text-gray-900">Submit form</option>
-                                                            {availableSections.map(sec => <option key={sec} value={sec}>Go to Section: {sec}</option>)}
-                                                        </select>
-                                                    )}
+                                                                    // Update Logic map keys if option changed
+                                                                    let newLogic = { ...q.logicConditions };
+                                                                    if (newLogic[oldVal]) {
+                                                                        newLogic[newVal] = newLogic[oldVal];
+                                                                        delete newLogic[oldVal];
+                                                                    }
+                                                                    updateQuestion(idx, { options: newOpts, logicConditions: newLogic });
+                                                                }}
+                                                                className="border-none focus:ring-0 p-0 text-gray-800 font-medium text-lg w-full bg-transparent flex-1"
+                                                                placeholder={`Option ${oIdx + 1}`}
+                                                            />
 
-                                                    <button onClick={() => {
-                                                        const newOpts = [...(q.options || [])];
-                                                        newOpts.splice(oIdx, 1);
-                                                        const newLogic = { ...q.logicConditions };
-                                                        delete newLogic[opt];
-                                                        updateQuestion(idx, { options: newOpts, logicConditions: newLogic });
-                                                    }} className="text-gray-400 hover:text-red-500 p-1 bg-white rounded-md shadow-sm sm:shadow-none"><X size={16} /></button>
+                                                            {/* Visual Section Routing for Multiple Choice / Dropdown */}
+                                                            {(q.type === 'multiple_choice' || q.type === 'dropdown') && (
+                                                                <select
+                                                                    className="text-xs font-semibold text-gray-500 bg-white border border-gray-200 rounded-lg p-2 focus:ring-primary w-full sm:w-auto"
+                                                                    value={q.logicConditions?.[opt] || ''}
+                                                                    onChange={e => {
+                                                                        const routeVal = e.target.value;
+                                                                        const newLogic = { ...(q.logicConditions || {}) };
+                                                                        if (routeVal === '') delete newLogic[opt]; // Default continue
+                                                                        else newLogic[opt] = routeVal;
+                                                                        updateQuestion(idx, { logicConditions: newLogic });
+                                                                    }}
+                                                                >
+                                                                    <option value="" className="text-gray-400">Continue to next section</option>
+                                                                    <option value="submit" className="font-bold text-gray-900">Submit form</option>
+                                                                    {availableSections.map(sec => <option key={sec} value={sec}>Go to Section: {sec}</option>)}
+                                                                </select>
+                                                            )}
+
+                                                            <button onClick={() => {
+                                                                const newOpts = [...(q.options || [])];
+                                                                newOpts.splice(oIdx, 1);
+                                                                const newLogic = { ...q.logicConditions };
+                                                                delete newLogic[opt];
+                                                                updateQuestion(idx, { options: newOpts, logicConditions: newLogic });
+                                                            }} className="text-gray-400 hover:text-red-500 p-1 bg-white rounded-md shadow-sm sm:shadow-none"><X size={16} /></button>
+                                                        </div>
+                                                    ))}
+                                                    <button onClick={() => updateQuestion(idx, { options: [...(q.options || []), `Option ${(q.options?.length || 0) + 1}`] })}
+                                                        className="text-sm font-bold text-primary hover:text-primary/80 flex items-center gap-2 mt-4 ml-1">
+                                                        <Plus size={16} /> Add option
+                                                    </button>
                                                 </div>
-                                            ))}
-                                            <button onClick={() => updateQuestion(idx, { options: [...(q.options || []), `Option ${(q.options?.length || 0) + 1}`] })}
-                                                className="text-sm font-bold text-primary hover:text-primary/80 flex items-center gap-2 mt-4 ml-1">
-                                                <Plus size={16} /> Add option
-                                            </button>
-                                        </div>
-                                    )}
+                                            )}
 
-                                    {q.type === "linear_scale" && (
-                                        <div className="flex items-center gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-100 w-max">
-                                            <div className="flex flex-col gap-2 relative">
-                                                <input type="number" className="w-16 rounded-lg border-gray-200 text-center font-bold font-mono" value={q.options?.[0] || '1'} onChange={e => {
-                                                    const newOpts = [...(q.options || ['1', '5'])]; newOpts[0] = e.target.value; updateQuestion(idx, { options: newOpts });
-                                                }} />
-                                                <span className="text-xs font-bold text-gray-400 uppercase text-center mt-2">Min</span>
+                                            {q.type === "linear_scale" && (
+                                                <div className="flex items-center gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-100 w-max">
+                                                    <div className="flex flex-col gap-2 relative">
+                                                        <input type="number" className="w-16 rounded-lg border-gray-200 text-center font-bold font-mono" value={q.options?.[0] || '1'} onChange={e => {
+                                                            const newOpts = [...(q.options || ['1', '5'])]; newOpts[0] = e.target.value; updateQuestion(idx, { options: newOpts });
+                                                        }} />
+                                                        <span className="text-xs font-bold text-gray-400 uppercase text-center mt-2">Min</span>
+                                                    </div>
+                                                    <div className="w-12 h-0.5 bg-gray-300 mb-6 relative"><div className="absolute -top-3 left-1/2 -translate-x-1/2 text-gray-400">TO</div></div>
+                                                    <div className="flex flex-col gap-2 relative">
+                                                        <input type="number" className="w-16 rounded-lg border-gray-200 text-center font-bold font-mono" value={q.options?.[1] || '5'} onChange={e => {
+                                                            const newOpts = [...(q.options || ['1', '5'])]; newOpts[1] = e.target.value; updateQuestion(idx, { options: newOpts });
+                                                        }} />
+                                                        <span className="text-xs font-bold text-gray-400 uppercase text-center mt-2">Max</span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {q.type === "file_upload" && (
+                                                <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                                                    <UploadCloud className="mb-2" opacity={0.5} size={32} />
+                                                    <span className="font-semibold text-sm">Responders will upload a file here.</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="flex justify-between items-center pt-6 border-t border-gray-100 mt-2">
+                                            <div className="flex-1"></div>
+                                            <div className="flex items-center gap-4">
+                                                <label className="flex items-center gap-3 text-sm font-bold text-gray-700 cursor-pointer">
+                                                    <div className={`relative w-10 h-6 transition-colors rounded-full ${q.required ? 'bg-primary' : 'bg-gray-300'}`}>
+                                                        <input type="checkbox" checked={q.required} onChange={e => updateQuestion(idx, { required: e.target.checked })} className="sr-only" />
+                                                        <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm ${q.required ? 'translate-x-[15px]' : ''}`} />
+                                                    </div>
+                                                    <span>Required</span>
+                                                </label>
+                                                <div className="w-px h-6 bg-gray-200" />
+                                                <button onClick={() => removeQuestion(idx)} className="text-gray-400 hover:text-red-500 transition p-2 hover:bg-red-50 rounded-lg"><Trash2 size={20} /></button>
                                             </div>
-                                            <div className="w-12 h-0.5 bg-gray-300 mb-6 relative"><div className="absolute -top-3 left-1/2 -translate-x-1/2 text-gray-400">TO</div></div>
-                                            <div className="flex flex-col gap-2 relative">
-                                                <input type="number" className="w-16 rounded-lg border-gray-200 text-center font-bold font-mono" value={q.options?.[1] || '5'} onChange={e => {
-                                                    const newOpts = [...(q.options || ['1', '5'])]; newOpts[1] = e.target.value; updateQuestion(idx, { options: newOpts });
-                                                }} />
-                                                <span className="text-xs font-bold text-gray-400 uppercase text-center mt-2">Max</span>
-                                            </div>
                                         </div>
-                                    )}
-
-                                    {q.type === "file_upload" && (
-                                        <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center text-gray-400 bg-gray-50">
-                                            <UploadCloud className="mb-2" opacity={0.5} size={32} />
-                                            <span className="font-semibold text-sm">Responders will upload a file here.</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="flex justify-end items-center gap-6 pt-6 border-t border-gray-100 mt-2">
-                                    <div className="flex-1 flex items-center">
-                                        {/* Quick Section ID Definition for Page Breaks */}
-                                        <input type="text" placeholder="Section Name (e.g., 'Payment')" value={q.sectionId || ''} onChange={e => updateQuestion(idx, { sectionId: e.target.value })} className="bg-gray-50 text-xs font-bold border-none rounded-lg p-2 focus:ring-1 focus:ring-primary w-48 text-gray-600" />
                                     </div>
-
-                                    <label className="flex items-center gap-3 text-sm font-bold text-gray-700 cursor-pointer">
-                                        <div className={`relative w-10 h-6 transition-colors rounded-full ${q.required ? 'bg-primary' : 'bg-gray-300'}`}>
-                                            <input type="checkbox" checked={q.required} onChange={e => updateQuestion(idx, { required: e.target.checked })} className="sr-only" />
-                                            <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm ${q.required ? 'translate-x-[15px]' : ''}`} />
-                                        </div>
-                                        <span>Required</span>
-                                    </label>
-                                    <div className="w-px h-6 bg-gray-200" />
-                                    <button onClick={() => removeQuestion(idx)} className="text-gray-400 hover:text-red-500 transition p-2 hover:bg-red-50 rounded-lg"><Trash2 size={20} /></button>
-                                </div>
+                                )}
                             </div>
                         ))}
 
-                        <button onClick={() => addQuestion("multiple_choice")} className="w-full py-5 bg-white border-2 border-dashed border-gray-200 rounded-3xl text-gray-500 font-bold hover:bg-primary/5 hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 shadow-sm">
-                            <Plus size={20} /> Add New Question
-                        </button>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <button onClick={() => addQuestion("multiple_choice")} className="flex-1 py-5 bg-white border-2 border-dashed border-gray-200 rounded-3xl text-gray-500 font-bold hover:bg-primary/5 hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 shadow-sm">
+                                <Plus size={20} /> Add New Question
+                            </button>
+                            <button onClick={() => setBuilderQuestions([...builderQuestions, { type: 'section_header', questionText: `Section ${availableSections.length + 2}`, required: false, options: [''] }])}
+                                className="sm:w-1/3 py-5 bg-primary/5 border-2 border-dashed border-primary/30 rounded-3xl text-primary font-bold hover:bg-primary/10 hover:border-primary transition-all flex items-center justify-center gap-2 shadow-sm">
+                                <Plus size={20} /> Add Section Break
+                            </button>
+                        </div>
                     </>
                 )}
             </div>
