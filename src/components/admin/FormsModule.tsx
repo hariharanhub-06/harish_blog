@@ -480,8 +480,8 @@ export default function FormsModule() {
                             </label>
 
                             <div className="p-8 space-y-4 border-l-8 border-l-primary relative">
-                                <input type="text" value={activeForm.title} onChange={e => setActiveForm({ ...activeForm, title: e.target.value })} className="w-full text-4xl font-black text-gray-900 border-none outline-none focus:ring-0 px-0 bg-transparent" placeholder="Form Title" />
-                                <textarea value={activeForm.description} onChange={e => setActiveForm({ ...activeForm, description: e.target.value })} className="w-full text-gray-600 border-none outline-none focus:ring-0 px-0 resize-none h-20 bg-transparent text-lg" placeholder="Form Description" />
+                                <input type="text" value={activeForm.title} onChange={e => setActiveForm({ ...activeForm, title: e.target.value })} className="w-full text-2xl font-black text-gray-900 border-none outline-none focus:ring-0 px-0 bg-transparent" placeholder="Form Title" />
+                                <textarea value={activeForm.description} onChange={e => setActiveForm({ ...activeForm, description: e.target.value })} className="w-full text-gray-500 border-none outline-none focus:ring-0 px-0 resize-none h-12 bg-transparent text-base" placeholder="Form Description" />
                             </div>
                         </div>
 
@@ -491,9 +491,9 @@ export default function FormsModule() {
                                     <div className="bg-primary/90 text-white p-8 sm:p-10 rounded-3xl shadow-sm border border-primary relative overflow-hidden group">
                                         <div className="absolute top-0 right-12 w-24 h-2 bg-white/30 rounded-b-xl border-t-0"></div>
                                         <div className="flex justify-between items-start">
-                                            <div className="flex-1 space-y-4">
-                                                <input type="text" value={q.questionText} onChange={e => updateQuestion(idx, { questionText: e.target.value })} className="w-full text-3xl font-black bg-transparent border-none focus:ring-0 px-0 placeholder-white/70" placeholder="Section Title" />
-                                                <input type="text" value={q.options?.[0] || ''} onChange={e => updateQuestion(idx, { options: [e.target.value] })} className="w-full text-lg font-medium bg-transparent border-none focus:ring-0 px-0 placeholder-white/50" placeholder="Optional description..." />
+                                            <div className="flex-1 space-y-2">
+                                                <input type="text" value={q.questionText} onChange={e => updateQuestion(idx, { questionText: e.target.value })} className="w-full text-xl font-black bg-transparent border-none focus:ring-0 px-0 placeholder-white/70" placeholder="Section Title" />
+                                                <input type="text" value={q.options?.[0] || ''} onChange={e => updateQuestion(idx, { options: [e.target.value] })} className="w-full text-sm font-medium bg-transparent border-none focus:ring-0 px-0 placeholder-white/50" placeholder="Optional description..." />
                                             </div>
                                             <button onClick={() => removeQuestion(idx)} className="text-white/60 hover:text-white transition p-2 hover:bg-black/10 rounded-lg"><Trash2 size={20} /></button>
                                         </div>
@@ -502,7 +502,7 @@ export default function FormsModule() {
                                     <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100/60 flex flex-col gap-6 relative">
                                         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                                             <div className="flex-1 space-y-3 w-full">
-                                                <input type="text" value={q.questionText} onChange={e => updateQuestion(idx, { questionText: e.target.value })} className="w-full text-xl font-bold bg-transparent border-none rounded-none border-b-2 border-gray-100 p-2 focus:border-primary focus:ring-0 px-0 transition-colors" placeholder="Question" />
+                                                <input type="text" value={q.questionText} onChange={e => updateQuestion(idx, { questionText: e.target.value })} className="w-full text-lg font-bold bg-transparent border-none rounded-none border-b-2 border-gray-100 p-2 focus:border-primary focus:ring-0 px-0 transition-colors" placeholder="Question" />
 
                                                 {/* Question Image Preview & Uploader */}
                                                 {q.imageUrl ? (
