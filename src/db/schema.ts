@@ -928,6 +928,7 @@ export const forms = pgTable("forms", {
   automationEnabled: boolean("automation_enabled").default(false),
   automationChannels: jsonb("automation_channels"),
   automationTemplate: text("automation_template"),
+  customSuccessMessage: text("custom_success_message"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
