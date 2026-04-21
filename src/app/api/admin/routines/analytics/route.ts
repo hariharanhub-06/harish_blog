@@ -1,56 +1,78 @@
 import { db } from "@/db";
 import { routines, routineLogs } from "@/db/schema";
-import { eq, sql, and, gte } from "drizzle-orm";
+import { eq, sql, and, gte, lte } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { subDays, format } from "date-fns";
+import {
+    subDays,
+    format,
+    eachDayOfInterval,
+    parseISO,
+    getDay,
+    getDate,
+    isBefore,
+    isAfter,
+    startOfDay
+} from "date-fns";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
-        const routineId = searchParams.get("routineId");
+        const startDateParam = searchParams.get("startDate");
+        const endDateParam = searchParams.get("endDate");
 
-        if (routineId) {
-            // Detailed stats for a single routine
-            const thirtyDaysAgo = format(subDays(new Date(), 30), "yyyy-MM-dd");
+        // Default to last 7 days if not provided
+        const endDate = endDateParam ? parseISO(endDateParam) : new Date();
+        const startDate = startDateParam ? parseISO(startDateParam) : subDays(endDate, 6);
 
+        const allRoutines = await db.select().from(routines);
+
+        const stats = await Promise.all(allRoutines.map(async (r) => {
+            // Get logs in the range
             const logs = await db.select().from(routineLogs).where(and(
-                eq(routineLogs.routineId, routineId),
-                gte(routineLogs.date, thirtyDaysAgo)
+                eq(routineLogs.routineId, r.id),
+                gte(routineLogs.date, format(startDate, "yyyy-MM-dd")),
+                lte(routineLogs.date, format(endDate, "yyyy-MM-dd"))
             ));
 
-            const totalCompleted = logs.filter(l => l.isCompleted).length;
-            const completionRate = logs.length > 0 ? (totalCompleted / logs.length) * 100 : 0;
+            const completedLogs = logs.filter(l => l.isCompleted).length;
 
-            return NextResponse.json({
-                routineId,
-                totalLogs: logs.length,
-                totalCompleted,
-                completionRate,
-                last30Days: logs
+            // Calculate "Expected" days based on schedule
+            const interval = eachDayOfInterval({ start: startDate, end: endDate });
+            let expectedDays = 0;
+
+            const schedule = (r.schedule as any) || { type: "daily" };
+
+            interval.forEach(day => {
+                // Don't expect things in the future relative to today
+                if (isAfter(startOfDay(day), startOfDay(new Date()))) return;
+
+                // Also don't expect things before routine was created (not strictly enforced here yet as we don't have created_at filter in logic, but good to note)
+
+                if (schedule.type === "daily") {
+                    expectedDays++;
+                } else if (schedule.type === "weekly") {
+                    if (schedule.days?.includes(getDay(day))) expectedDays++;
+                } else if (schedule.type === "monthly") {
+                    if (schedule.dates?.includes(getDate(day))) expectedDays++;
+                }
             });
-        } else {
-            // Summary for all routines
-            const allRoutines = await db.select().from(routines);
-            const stats = await Promise.all(allRoutines.map(async (r) => {
-                const logs = await db.select({
-                    count: sql<number>`count(*)`,
-                    completed: sql<number>`count(*) filter (where is_completed = true)`
-                }).from(routineLogs).where(eq(routineLogs.routineId, r.id));
 
-                const result = logs[0] || { count: 0, completed: 0 };
-                return {
-                    id: r.id,
-                    title: r.title,
-                    totalDays: Number(result.count),
-                    completedDays: Number(result.completed),
-                    completionRate: Number(result.count) > 0 ? (Number(result.completed) / Number(result.count)) * 100 : 0
-                };
-            }));
+            const completionRate = expectedDays > 0 ? (completedLogs / expectedDays) * 100 : 0;
 
-            return NextResponse.json(stats);
-        }
+            return {
+                id: r.id,
+                title: r.title,
+                category: r.category,
+                schedule: r.schedule,
+                totalExpected: expectedDays,
+                completedDays: completedLogs,
+                completionRate: Math.min(100, completionRate)
+            };
+        }));
+
+        return NextResponse.json(stats);
     } catch (error) {
         console.error("GET routine analytics error:", error);
         return NextResponse.json({ error: "Failed to fetch analytics" }, { status: 500 });

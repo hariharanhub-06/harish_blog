@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
     Plus,
     Trash2,
@@ -12,12 +12,36 @@ import {
     ListTodo,
     Calendar as CalendarIcon,
     Loader2,
-    CalendarDays,
     Settings2,
-    X
+    X,
+    Filter,
+    MoreHorizontal,
+    Edit2,
+    CalendarDays
 } from "lucide-react";
-import { format, addDays, subDays, startOfToday, isSameDay, getDay, getDate } from "date-fns";
+import {
+    format,
+    addDays,
+    subDays,
+    startOfToday,
+    isSameDay,
+    getDay,
+    getDate,
+    startOfWeek,
+    endOfWeek,
+    startOfMonth,
+    endOfMonth,
+    parseISO,
+    differenceInDays
+} from "date-fns";
 import { toast } from "react-hot-toast";
+import {
+    PieChart,
+    Pie,
+    Cell,
+    ResponsiveContainer,
+    Tooltip as RechartsTooltip
+} from "recharts";
 
 interface Routine {
     id: string;
@@ -26,8 +50,8 @@ interface Routine {
     category: string | null;
     schedule: {
         type: "daily" | "weekly" | "monthly";
-        days?: number[]; // 0-6 for weekly
-        dates?: number[]; // 1-31 for monthly
+        days?: number[];
+        dates?: number[];
     };
     displayOrder: number;
     isActive: boolean;
@@ -46,10 +70,13 @@ export default function RoutinesModule() {
     const [logs, setLogs] = useState<RoutineLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [startDate, setStartDate] = useState(subDays(startOfToday(), 6));
+    const [endDate, setEndDate] = useState(startOfToday());
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState<Routine | null>(null);
+    const [filterType, setFilterType] = useState<"week" | "month" | "custom">("week");
+
     const [newRoutine, setNewRoutine] = useState<{
         title: string;
-        description: string;
         category: string;
         schedule: {
             type: "daily" | "weekly" | "monthly";
@@ -58,26 +85,33 @@ export default function RoutinesModule() {
         }
     }>({
         title: "",
-        description: "",
         category: "Daily",
         schedule: { type: "daily", days: [], dates: [] }
     });
+
     const [analytics, setAnalytics] = useState<any[]>([]);
     const [view, setView] = useState<"grid" | "analytics">("grid");
 
-    const days = Array.from({ length: 7 }).map((_, i) => addDays(startDate, i));
+    // Dynamic grid days based on date range (capped for sanity in grid view, e.g. max 31 days)
+    const days = useMemo(() => {
+        const diff = differenceInDays(endDate, startDate) + 1;
+        const count = Math.min(Math.max(diff, 1), 31);
+        return Array.from({ length: count }).map((_, i) => addDays(startDate, i));
+    }, [startDate, endDate]);
 
     useEffect(() => {
         fetchData();
-    }, [startDate]);
+    }, [startDate, endDate]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
+            const sStr = format(startDate, "yyyy-MM-dd");
+            const eStr = format(endDate, "yyyy-MM-dd");
             const [routinesRes, logsRes, analyticsRes] = await Promise.all([
                 fetch("/api/admin/routines"),
-                fetch(`/api/admin/routines/logs?startDate=${format(days[0], "yyyy-MM-dd")}&endDate=${format(days[6], "yyyy-MM-dd")}`),
-                fetch("/api/admin/routines/analytics")
+                fetch(`/api/admin/routines/logs?startDate=${sStr}&endDate=${eStr}`),
+                fetch(`/api/admin/routines/analytics?startDate=${sStr}&endDate=${eStr}`)
             ]);
 
             if (routinesRes.ok && logsRes.ok && analyticsRes.ok) {
@@ -95,15 +129,22 @@ export default function RoutinesModule() {
         }
     };
 
+    const handleFilterChange = (type: "week" | "month") => {
+        setFilterType(type);
+        if (type === "week") {
+            setStartDate(startOfWeek(new Date()));
+            setEndDate(endOfWeek(new Date()));
+        } else {
+            setStartDate(startOfMonth(new Date()));
+            setEndDate(endOfMonth(new Date()));
+        }
+    };
+
     const isTaskDue = (routine: Routine, date: Date) => {
         const schedule = routine.schedule;
         if (!schedule || schedule.type === "daily") return true;
-        if (schedule.type === "weekly") {
-            return schedule.days?.includes(getDay(date)) || false;
-        }
-        if (schedule.type === "monthly") {
-            return schedule.dates?.includes(getDate(date)) || false;
-        }
+        if (schedule.type === "weekly") return schedule.days?.includes(getDay(date)) || false;
+        if (schedule.type === "monthly") return schedule.dates?.includes(getDate(date)) || false;
         return true;
     };
 
@@ -124,166 +165,177 @@ export default function RoutinesModule() {
                     const filtered = prev.filter(l => !(l.routineId === routineId && l.date === dateStr));
                     return [...filtered, { routineId, date: dateStr, isCompleted: newStatus }];
                 });
-                fetch("/api/admin/routines/analytics")
-                    .then(r => r.json())
-                    .then(data => setAnalytics(data));
+                // Update analytics inline
+                refreshAnalytics();
             }
         } catch (error) {
             toast.error("Failed to update status");
         }
     };
 
-    const handleAddRoutine = async () => {
-        if (!newRoutine.title) {
-            toast.error("Title is required");
-            return;
-        }
+    const refreshAnalytics = () => {
+        const sStr = format(startDate, "yyyy-MM-dd");
+        const eStr = format(endDate, "yyyy-MM-dd");
+        fetch(`/api/admin/routines/analytics?startDate=${sStr}&endDate=${eStr}`)
+            .then(r => r.json())
+            .then(data => setAnalytics(data));
+    };
 
-        // Validation for weekly/monthly
-        if (newRoutine.schedule.type === "weekly" && newRoutine.schedule.days.length === 0) {
-            toast.error("Please select at least one day");
-            return;
-        }
-        if (newRoutine.schedule.type === "monthly" && newRoutine.schedule.dates.length === 0) {
-            toast.error("Please select at least one date");
-            return;
-        }
-
+    const handleAction = async (type: "add" | "edit", routineData: any) => {
         try {
-            console.log("Submitting routine:", newRoutine);
             const res = await fetch("/api/admin/routines", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newRoutine)
+                body: JSON.stringify(routineData)
             });
-            const result = await res.json();
-
             if (res.ok) {
-                toast.success("Routine added successfully");
+                toast.success(`Routine ${type === "add" ? "added" : "updated"} successfully`);
                 setShowAddModal(false);
-                setNewRoutine({
-                    title: "",
-                    description: "",
-                    category: "Daily",
-                    schedule: { type: "daily", days: [], dates: [] }
-                });
+                setShowEditModal(null);
                 fetchData();
-            } else {
-                toast.error(result.error || "Failed to add routine");
-                console.error("Add routine failed:", result);
             }
         } catch (error) {
-            console.error("Add routine error:", error);
-            toast.error("Network error while adding routine");
+            toast.error("Operation failed");
         }
     };
 
-    const toggleDaySelection = (day: number) => {
-        setNewRoutine(prev => {
-            const currentDays = [...prev.schedule.days];
-            const index = currentDays.indexOf(day);
-            if (index > -1) currentDays.splice(index, 1);
-            else currentDays.push(day);
-            return { ...prev, schedule: { ...prev.schedule, days: currentDays } };
-        });
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure? All related logs will be deleted.")) return;
+        try {
+            const res = await fetch(`/api/admin/routines?id=${id}`, { method: "DELETE" });
+            if (res.ok) {
+                setRoutines(prev => prev.filter(r => r.id !== id));
+                toast.success("Routine deleted");
+                refreshAnalytics();
+            }
+        } catch (error) {
+            toast.error("Delete failed");
+        }
     };
 
-    const toggleDateSelection = (date: number) => {
-        setNewRoutine(prev => {
-            const currentDates = [...prev.schedule.dates];
-            const index = currentDates.indexOf(date);
-            if (index > -1) currentDates.splice(index, 1);
-            else currentDates.push(date);
-            return { ...prev, schedule: { ...prev.schedule, dates: currentDates } };
-        });
-    };
-
-    if (loading && routines.length === 0) {
+    const DonutChartComponent = ({ rate }: { rate: number }) => {
+        const data = [
+            { name: "Done", value: rate },
+            { name: "Remaining", value: 100 - rate }
+        ];
         return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                <p className="text-sm font-medium text-gray-500">Loading your routines...</p>
+            <div className="h-40 w-40 relative">
+                <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                        <Pie
+                            data={data}
+                            innerRadius={50}
+                            outerRadius={70}
+                            paddingAngle={5}
+                            dataKey="value"
+                            startAngle={90}
+                            endAngle={450}
+                        >
+                            <Cell fill="#6366f1" />
+                            <Cell fill="#f3f4f6" />
+                        </Pie>
+                        <RechartsTooltip />
+                    </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-xl font-black text-gray-900">{Math.round(rate)}%</span>
+                </div>
             </div>
         );
-    }
+    };
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-indigo-500/10 rounded-xl">
-                        <ListTodo className="w-6 h-6 text-indigo-600" />
+        <div className="space-y-6">
+            {/* Header + Unified Filter Bar */}
+            <div className="flex flex-col gap-6 bg-white/70 backdrop-blur-xl border border-gray-100 p-8 rounded-[40px] shadow-sm">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-indigo-500/10 rounded-2xl">
+                            <ListTodo className="w-8 h-8 text-indigo-600" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Routines & Habits</h1>
+                            <div className="flex items-center gap-4 mt-1">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                                    <TrendingUp size={12} /> Live Tracking
+                                </span>
+                                <div className="h-1 w-1 rounded-full bg-gray-300" />
+                                <span className="text-xs font-bold text-indigo-500">{routines.length} Active Tasks</span>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-xl font-black text-gray-900 leading-tight">Routine Checklist</h1>
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Habit & Task Performance</p>
+                    <div className="flex items-center gap-3">
+                        <div className="flex bg-gray-100/80 p-1.5 rounded-2xl border border-gray-100">
+                            <button
+                                onClick={() => setView("grid")}
+                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${view === "grid" ? "bg-white text-indigo-600 shadow-sm ring-1 ring-black/5" : "text-gray-400 hover:text-gray-600"}`}
+                            >
+                                Checklist
+                            </button>
+                            <button
+                                onClick={() => setView("analytics")}
+                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${view === "analytics" ? "bg-white text-indigo-600 shadow-sm ring-1 ring-black/5" : "text-gray-400 hover:text-gray-600"}`}
+                            >
+                                Analysis
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black text-xs shadow-xl shadow-indigo-600/20 hover:scale-[1.03] active:scale-[0.97] transition-all flex items-center gap-2"
+                        >
+                            <Plus size={18} /> New Routine
+                        </button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <div className="flex bg-gray-100/50 p-1 rounded-xl">
+                <div className="h-px bg-gray-100 w-full" />
+
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                        <Filter size={16} className="text-gray-400 mr-2" />
                         <button
-                            onClick={() => setView("grid")}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${view === "grid" ? "bg-white text-primary shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                            onClick={() => handleFilterChange("week")}
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${filterType === "week" ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100" : "text-gray-400 hover:bg-gray-50"}`}
                         >
-                            Log View
+                            This Week
                         </button>
                         <button
-                            onClick={() => setView("analytics")}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${view === "analytics" ? "bg-white text-primary shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                            onClick={() => handleFilterChange("month")}
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${filterType === "month" ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100" : "text-gray-400 hover:bg-gray-50"}`}
                         >
-                            Performance
+                            This Month
                         </button>
                     </div>
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-xl font-black text-xs shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                    >
-                        <Plus size={16} />
-                        New Task
-                    </button>
+
+                    <div className="flex items-center gap-4 bg-gray-50/50 px-6 py-3 rounded-[24px] border border-gray-100 ring-1 ring-black/5">
+                        <button onClick={() => setStartDate(subDays(startDate, 1))} className="text-gray-400 hover:text-indigo-600 transition-colors"><ChevronLeft size={16} /></button>
+                        <div className="flex items-center gap-3 px-2">
+                            <CalendarIcon size={14} className="text-indigo-500" />
+                            <span className="text-xs font-black text-gray-900 min-w-[160px] text-center">
+                                {format(startDate, "MMM d")} - {format(endDate, "MMM d, yyyy")}
+                            </span>
+                        </div>
+                        <button onClick={() => setEndDate(addDays(endDate, 1))} className="text-gray-400 hover:text-indigo-600 transition-colors"><ChevronRight size={16} /></button>
+                    </div>
                 </div>
             </div>
 
             {view === "grid" ? (
-                <div className="bg-white/80 backdrop-blur-xl border border-gray-100 rounded-[32px] shadow-sm overflow-hidden">
-                    <div className="flex items-center justify-between p-6 bg-gradient-to-r from-gray-50/50 to-transparent">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => setStartDate(subDays(startDate, 7))}
-                                className="p-2 hover:bg-white hover:shadow-md rounded-xl transition-all border border-gray-100 text-gray-400 hover:text-primary"
-                            >
-                                <ChevronLeft size={16} />
-                            </button>
-                            <div className="flex flex-col items-center">
-                                <span className="text-lg font-black text-gray-900">
-                                    {format(days[0], "MMM d")} - {format(days[6], "MMM d, yyyy")}
-                                </span>
-                            </div>
-                            <button
-                                onClick={() => setStartDate(addDays(startDate, 7))}
-                                className="p-2 hover:bg-white hover:shadow-md rounded-xl transition-all border border-gray-100 text-gray-400 hover:text-primary"
-                            >
-                                <ChevronRight size={16} />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="overflow-x-auto">
+                <div className="bg-white/80 backdrop-blur-xl border border-gray-100 rounded-[40px] shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto scrollbar-hide">
                         <table className="w-full">
                             <thead>
-                                <tr>
-                                    <th className="px-8 py-5 text-left border-b border-gray-100 bg-gray-50/30">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Routines</span>
+                                <tr className="bg-gray-50/40 divide-x divide-gray-100">
+                                    <th className="sticky left-0 bg-white/95 backdrop-blur z-20 px-10 py-6 text-left border-b border-gray-100 min-w-[320px]">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Habit Architecture</span>
                                     </th>
                                     {days.map((day) => (
-                                        <th key={day.toISOString()} className={`px-4 py-5 text-center border-b border-gray-100 ${isSameDay(day, new Date()) ? "bg-primary/5" : "bg-gray-50/30"}`}>
-                                            <div className="flex flex-col">
-                                                <span className={`text-[10px] font-black uppercase ${isSameDay(day, new Date()) ? "text-primary" : "text-gray-400"}`}>
+                                        <th key={day.toISOString()} className={`px-4 py-6 border-b border-gray-100 min-w-[80px] ${isSameDay(day, new Date()) ? "bg-indigo-50/50" : ""}`}>
+                                            <div className="flex flex-col items-center">
+                                                <span className={`text-[10px] font-black uppercase ${isSameDay(day, new Date()) ? "text-indigo-600" : "text-gray-400"}`}>
                                                     {format(day, "EEE")}
                                                 </span>
-                                                <span className={`text-lg font-black ${isSameDay(day, new Date()) ? "text-primary" : "text-gray-900"}`}>
+                                                <span className={`text-xl font-black ${isSameDay(day, new Date()) ? "text-indigo-600 scale-110" : "text-gray-900"}`}>
                                                     {format(day, "d")}
                                                 </span>
                                             </div>
@@ -293,17 +345,32 @@ export default function RoutinesModule() {
                             </thead>
                             <tbody className="divide-y divide-gray-50">
                                 {routines.map((routine) => (
-                                    <tr key={routine.id} className="group hover:bg-gray-50/20 transition-all">
-                                        <td className="px-8 py-6 max-w-[300px]">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-black text-gray-900">{routine.title}</span>
-                                                <div className="flex gap-2 mt-1">
-                                                    <span className="text-[9px] font-black uppercase text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">
-                                                        {routine.category}
-                                                    </span>
-                                                    <span className="text-[9px] font-black uppercase text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                                                        {routine.schedule?.type}
-                                                    </span>
+                                    <tr key={routine.id} className="group hover:bg-gray-50/30 transition-all duration-300">
+                                        <td className="sticky left-0 bg-white/95 backdrop-blur z-20 px-10 py-7 border-r border-gray-50 group-hover:shadow-[10px_0_20px_-10px_rgba(0,0,0,0.05)] transition-all">
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-1.5">
+                                                    <h4 className="text-sm font-black text-gray-900 group-hover:text-indigo-600 transition-colors">{routine.title}</h4>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-[9px] font-black text-indigo-500 uppercase tracking-tighter">
+                                                            {routine.category}
+                                                        </span>
+                                                        <div className="h-1 w-1 rounded-full bg-gray-200" />
+                                                        <span className="text-[9px] font-bold text-gray-400 capitalize">{routine.schedule?.type}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all ml-4">
+                                                    <button
+                                                        onClick={() => setShowEditModal(routine)}
+                                                        className="p-2 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+                                                    >
+                                                        <Edit2 size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(routine.id)}
+                                                        className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-xl transition-all"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
                                                 </div>
                                             </div>
                                         </td>
@@ -313,19 +380,19 @@ export default function RoutinesModule() {
                                             const isDone = logs.find(l => l.routineId === routine.id && l.date === dateStr)?.isCompleted;
 
                                             return (
-                                                <td key={day.toISOString()} className={`px-4 py-6 text-center ${isSameDay(day, new Date()) ? "bg-primary/5" : ""}`}>
+                                                <td key={day.toISOString()} className={`px-4 py-7 text-center transition-all ${isSameDay(day, new Date()) ? "bg-indigo-50/20" : ""}`}>
                                                     {due ? (
                                                         <button
                                                             onClick={() => toggleComplete(routine.id, day)}
-                                                            className={`mx-auto w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 transform shadow-sm ${isDone
+                                                            className={`mx-auto w-10 h-10 rounded-[14px] flex items-center justify-center transition-all duration-300 transform shadow-sm ${isDone
                                                                 ? "bg-emerald-500 text-white shadow-emerald-500/30 scale-105"
-                                                                : "bg-white text-gray-200 border border-gray-100 hover:border-emerald-300 hover:text-emerald-400 hover:scale-105"}`}
+                                                                : "bg-white text-gray-200 border border-gray-100 hover:border-indigo-300 hover:text-indigo-400 hover:scale-105"}`}
                                                         >
-                                                            {isDone ? <CheckCircle2 size={24} strokeWidth={2.5} /> : <Circle size={20} />}
+                                                            {isDone ? <CheckCircle2 size={22} strokeWidth={2.5} /> : <Circle size={18} />}
                                                         </button>
                                                     ) : (
-                                                        <div className="mx-auto w-8 h-8 rounded-xl bg-gray-50 border border-dotted border-gray-200 flex items-center justify-center opacity-40">
-                                                            <span className="text-[8px] font-black uppercase text-gray-300">N/A</span>
+                                                        <div className="mx-auto w-10 h-10 rounded-[14px] bg-gray-50/50 border border-dotted border-gray-100 flex items-center justify-center opacity-30 select-none">
+                                                            <div className="h-1 w-1 rounded-full bg-gray-300" />
                                                         </div>
                                                     )}
                                                 </td>
@@ -338,131 +405,174 @@ export default function RoutinesModule() {
                     </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {analytics.map((item) => (
-                        <div key={item.id} className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="space-y-1">
-                                    <h3 className="font-black text-gray-900 group-hover:text-primary transition-colors">{item.title}</h3>
-                                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Global Statistics</p>
-                                </div>
-                                <div className={`p-2.5 rounded-2xl ${item.completionRate > 75 ? "bg-emerald-50 text-emerald-600 shadow-sm" : "bg-gray-50 text-gray-500"}`}>
-                                    <TrendingUp size={20} />
-                                </div>
-                            </div>
+                        <div key={item.id} className="bg-white p-10 rounded-[48px] border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group overflow-hidden relative">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full -mr-16 -mt-16 blur-3xl" />
 
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-gray-400 uppercase">Success Rate</span>
-                                    <span className="text-2xl font-black text-gray-900">{Math.round(item.completionRate)}%</span>
+                            <div className="relative z-10 flex flex-col items-center text-center">
+                                <div className="mb-6 flex flex-col items-center">
+                                    <DonutChartComponent rate={item.completionRate} />
                                 </div>
-                                <div className="w-full h-3 bg-gray-50 rounded-full overflow-hidden shadow-inner">
-                                    <div
-                                        className={`h-full transition-all duration-1000 ${item.completionRate > 80 ? "bg-emerald-500" :
-                                                item.completionRate > 50 ? "bg-indigo-500" : "bg-amber-500"
-                                            }`}
-                                        style={{ width: `${item.completionRate}%` }}
-                                    />
+
+                                <div className="space-y-1 mt-2">
+                                    <h3 className="text-xl font-black text-gray-900 group-hover:text-indigo-600 transition-colors">{item.title}</h3>
+                                    <span className="text-[10px] font-black uppercase text-indigo-400 tracking-[0.2em] bg-indigo-50/50 px-3 py-1 rounded-full">{item.category}</span>
                                 </div>
-                                <div className="flex justify-between text-[10px] font-black uppercase tracking-wider text-gray-400">
-                                    <span>{item.completedDays} / {item.totalDays} Checkpoints</span>
-                                    <span>Target: 100%</span>
+
+                                <div className="grid grid-cols-2 gap-8 w-full mt-10 p-6 bg-gray-50/50 rounded-3xl border border-gray-100">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Success</span>
+                                        <span className="text-xl font-black text-gray-900">{item.completedDays} <span className="text-[10px] text-gray-400">Checkpoints</span></span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Expected</span>
+                                        <span className="text-xl font-black text-gray-900">{item.totalExpected} <span className="text-[10px] text-gray-400">Total</span></span>
+                                    </div>
                                 </div>
+
+                                <p className="mt-6 text-[9px] font-bold text-gray-400 italic">
+                                    Target consistency: 100% · Current performance: {Math.round(item.completionRate)}%
+                                </p>
                             </div>
                         </div>
                     ))}
+                    {analytics.length === 0 && (
+                        <div className="col-span-full bg-white p-20 rounded-[48px] border border-dashed border-gray-200 flex flex-col items-center text-center">
+                            <div className="p-5 bg-gray-50 rounded-full mb-6">
+                                <TrendingUp className="w-12 h-12 text-gray-300" />
+                            </div>
+                            <h3 className="text-xl font-black text-gray-900 mb-2">Architect Your Habits</h3>
+                            <p className="text-sm text-gray-500 max-w-sm">No data found for the selected timeframe. Consistency is built day by day.</p>
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* Add Routine Modal */}
-            {showAddModal && (
+            {/* Combined Modal for Add/Edit */}
+            {(showAddModal || showEditModal) && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setShowAddModal(false)} />
-                    <div className="bg-white w-full max-w-lg rounded-[40px] p-10 shadow-2xl relative animate-in zoom-in-95 duration-300">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => { setShowAddModal(false); setShowEditModal(null); }} />
+                    <div className="bg-white w-full max-w-xl rounded-[48px] p-12 shadow-2xl relative animate-in zoom-in-95 duration-300">
                         <button
-                            onClick={() => setShowAddModal(false)}
-                            className="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-400"
+                            onClick={() => { setShowAddModal(false); setShowEditModal(null); }}
+                            className="absolute top-8 right-8 p-3 rounded-2xl hover:bg-gray-100 transition-all text-gray-400 hover:text-gray-900"
                         >
                             <X size={20} />
                         </button>
 
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="p-3 bg-primary/10 rounded-2xl">
-                                <Settings2 className="w-6 h-6 text-primary" />
+                        <div className="flex items-center gap-4 mb-10">
+                            <div className="p-4 bg-indigo-600 rounded-3xl shadow-lg shadow-indigo-600/20">
+                                <Settings2 className="w-7 h-7 text-white" />
                             </div>
-                            <h3 className="text-2xl font-black text-gray-900">Task Configuration</h3>
+                            <div>
+                                <h3 className="text-2xl font-black text-gray-900">{showAddModal ? "Initialize Habit" : "Modify Habit"}</h3>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Configuration Module</p>
+                            </div>
                         </div>
 
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Task Name</label>
+                        <div className="space-y-8">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Routine Name</label>
                                 <input
                                     type="text"
-                                    value={newRoutine.title}
-                                    onChange={e => setNewRoutine({ ...newRoutine, title: e.target.value })}
+                                    value={showEditModal ? showEditModal.title : newRoutine.title}
+                                    onChange={e => showEditModal ? setShowEditModal({ ...showEditModal, title: e.target.value }) : setNewRoutine({ ...newRoutine, title: e.target.value })}
                                     placeholder="Enter habit name..."
-                                    className="w-full bg-gray-50 border-2 border-transparent rounded-2xl p-5 text-sm font-bold placeholder:text-gray-300 focus:border-primary/20 focus:bg-white focus:outline-none transition-all shadow-sm"
+                                    className="w-full bg-gray-50/50 border-2 border-gray-100 rounded-[24px] p-6 text-sm font-black placeholder:text-gray-300 focus:border-indigo-600/20 focus:bg-white focus:outline-none transition-all shadow-sm"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Frequency</label>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Architectural Frequency</label>
                                     <select
-                                        value={newRoutine.schedule.type}
-                                        onChange={e => setNewRoutine({ ...newRoutine, schedule: { ...newRoutine.schedule, type: e.target.value as any } })}
-                                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl p-4 text-sm font-bold focus:border-primary/20 focus:bg-white focus:outline-none transition-all shadow-sm cursor-pointer"
+                                        value={showEditModal ? showEditModal.schedule?.type : newRoutine.schedule.type}
+                                        onChange={e => {
+                                            const val = e.target.value as any;
+                                            if (showEditModal) setShowEditModal({ ...showEditModal, schedule: { ...showEditModal.schedule, type: val } });
+                                            else setNewRoutine({ ...newRoutine, schedule: { ...newRoutine.schedule, type: val } });
+                                        }}
+                                        className="w-full bg-gray-50/50 border-2 border-gray-100 rounded-[24px] p-5 text-sm font-black focus:border-indigo-600/20 focus:bg-white focus:outline-none transition-all shadow-sm cursor-pointer"
                                     >
-                                        <option value="daily">Every Day</option>
-                                        <option value="weekly">Weekly Selected Days</option>
-                                        <option value="monthly">Monthly Selected Dates</option>
+                                        <option value="daily">Continuous (Daily)</option>
+                                        <option value="weekly">Interval (Weekly)</option>
+                                        <option value="monthly">Episodic (Monthly)</option>
                                     </select>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Category</label>
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Tag Group</label>
                                     <input
                                         type="text"
-                                        value={newRoutine.category}
-                                        onChange={e => setNewRoutine({ ...newRoutine, category: e.target.value })}
-                                        placeholder="e.g. Health"
-                                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl p-4 text-sm font-bold focus:border-primary/20 focus:bg-white focus:outline-none transition-all shadow-sm"
+                                        value={showEditModal ? showEditModal.category || "" : newRoutine.category}
+                                        onChange={e => showEditModal ? setShowEditModal({ ...showEditModal, category: e.target.value }) : setNewRoutine({ ...newRoutine, category: e.target.value })}
+                                        placeholder="Category..."
+                                        className="w-full bg-gray-50/50 border-2 border-gray-100 rounded-[24px] p-5 text-sm font-black focus:border-indigo-600/20 focus:bg-white focus:outline-none transition-all shadow-sm"
                                     />
                                 </div>
                             </div>
 
-                            {newRoutine.schedule.type === "weekly" && (
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Select Active Days</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {DAYS_OF_WEEK.map((day, idx) => (
-                                            <button
-                                                key={day}
-                                                onClick={() => toggleDaySelection(idx)}
-                                                className={`flex-1 py-3 px-1 rounded-xl text-[10px] font-black transition-all border-2 ${newRoutine.schedule.days.includes(idx)
-                                                        ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
-                                                        : "bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100"
-                                                    }`}
-                                            >
-                                                {day}
-                                            </button>
-                                        ))}
+                            {(showEditModal ? (showEditModal.schedule?.type === "weekly") : (newRoutine.schedule.type === "weekly")) && (
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Selected Cadence (Days)</label>
+                                    <div className="flex flex-wrap gap-2.5">
+                                        {DAYS_OF_WEEK.map((day, idx) => {
+                                            const isActive = showEditModal ? showEditModal.schedule?.days?.includes(idx) : newRoutine.schedule.days.includes(idx);
+                                            return (
+                                                <button
+                                                    key={day}
+                                                    onClick={() => {
+                                                        if (showEditModal) {
+                                                            const d = [...(showEditModal.schedule?.days || [])];
+                                                            const i = d.indexOf(idx);
+                                                            if (i > -1) d.splice(i, 1); else d.push(idx);
+                                                            setShowEditModal({ ...showEditModal, schedule: { ...showEditModal.schedule, days: d } });
+                                                        } else {
+                                                            const d = [...newRoutine.schedule.days];
+                                                            const i = d.indexOf(idx);
+                                                            if (i > -1) d.splice(i, 1); else d.push(idx);
+                                                            setNewRoutine({ ...newRoutine, schedule: { ...newRoutine.schedule, days: d } });
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-4 px-2 rounded-2xl text-[10px] font-black transition-all border-2 ${isActive
+                                                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-600/20 scale-105"
+                                                            : "bg-gray-50/50 text-gray-400 border-gray-100 hover:bg-gray-100"
+                                                        }`}
+                                                >
+                                                    {day}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
 
-                            {newRoutine.schedule.type === "monthly" && (
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Select Dates</label>
-                                    <div className="grid grid-cols-7 gap-1.5 h-48 overflow-y-auto p-2 border border-gray-100 rounded-2xl scrollbar-hide">
+                            {(showEditModal ? (showEditModal.schedule?.type === "monthly") : (newRoutine.schedule.type === "monthly")) && (
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Active Epochs (Dates)</label>
+                                    <div className="grid grid-cols-7 gap-2 h-48 overflow-y-auto p-4 custom-scrollbar bg-gray-50/50 rounded-[32px] border border-gray-100">
                                         {Array.from({ length: 31 }).map((_, i) => {
                                             const date = i + 1;
+                                            const isActive = showEditModal ? showEditModal.schedule?.dates?.includes(date) : newRoutine.schedule.dates.includes(date);
                                             return (
                                                 <button
                                                     key={date}
-                                                    onClick={() => toggleDateSelection(date)}
-                                                    className={`aspect-square rounded-lg text-[10px] font-black transition-all border-2 ${newRoutine.schedule.dates.includes(date)
-                                                            ? "bg-primary text-white border-primary"
-                                                            : "bg-gray-50 text-gray-400 border-transparent hover:bg-primary/5"
+                                                    onClick={() => {
+                                                        if (showEditModal) {
+                                                            const d = [...(showEditModal.schedule?.dates || [])];
+                                                            const i = d.indexOf(date);
+                                                            if (i > -1) d.splice(i, 1); else d.push(date);
+                                                            setShowEditModal({ ...showEditModal, schedule: { ...showEditModal.schedule, dates: d } });
+                                                        } else {
+                                                            const d = [...newRoutine.schedule.dates];
+                                                            const i = d.indexOf(date);
+                                                            if (i > -1) d.splice(i, 1); else d.push(date);
+                                                            setNewRoutine({ ...newRoutine, schedule: { ...newRoutine.schedule, dates: d } });
+                                                        }
+                                                    }}
+                                                    className={`aspect-square rounded-xl text-[10px] font-black transition-all border-2 ${isActive
+                                                            ? "bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/10 scale-105"
+                                                            : "bg-white text-gray-400 border-gray-100 hover:bg-indigo-50/50"
                                                         }`}
                                                 >
                                                     {date}
@@ -473,18 +583,18 @@ export default function RoutinesModule() {
                                 </div>
                             )}
 
-                            <div className="pt-4 flex gap-4">
+                            <div className="pt-6 flex gap-6">
                                 <button
-                                    onClick={() => setShowAddModal(false)}
-                                    className="flex-1 bg-gray-50 text-gray-500 py-4 rounded-2xl font-black text-xs hover:bg-gray-100 transition-all border border-gray-100"
+                                    onClick={() => { setShowAddModal(false); setShowEditModal(null); }}
+                                    className="flex-1 bg-gray-50 text-gray-500 py-6 rounded-[24px] font-black text-xs hover:bg-gray-100 transition-all border border-gray-100"
                                 >
                                     Dismiss
                                 </button>
                                 <button
-                                    onClick={handleAddRoutine}
-                                    className="flex-1 bg-primary text-white py-4 rounded-2xl font-black text-xs shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    onClick={() => showAddModal ? handleAction("add", newRoutine) : handleAction("edit", showEditModal)}
+                                    className="flex-1 bg-indigo-600 text-white py-6 rounded-[24px] font-black text-xs shadow-2xl shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                 >
-                                    Confirm Task
+                                    {showAddModal ? "Initialize" : "Commit Changes"}
                                 </button>
                             </div>
                         </div>
