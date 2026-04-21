@@ -805,6 +805,7 @@ export const routines = pgTable("routines", {
   title: text("title").notNull(),
   description: text("description"),
   category: text("category"),
+  schedule: jsonb("schedule").$default(() => ({ type: "daily" })),
   displayOrder: integer("order").default(0),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),

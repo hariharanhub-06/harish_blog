@@ -18,23 +18,34 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const data = await req.json();
+        console.log("[API] POST routines data:", data);
+
         if (data.id) {
             // Update existing
             const { id, ...updateData } = data;
-            await db.update(routines).set({ ...updateData, updatedAt: new Date() }).where(eq(routines.id, id));
+            await db.update(routines).set({
+                ...updateData,
+                updatedAt: new Date()
+            }).where(eq(routines.id, id));
             return NextResponse.json({ success: true, id: id });
         } else {
             // Create new
             const [newRoutine] = await db.insert(routines).values({
-                ...data,
+                title: data.title,
+                description: data.description || "",
+                category: data.category || "General",
+                schedule: data.schedule || { type: "daily" },
+                displayOrder: data.displayOrder || 0,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             }).returning();
+
+            console.log("[API] New routine created:", newRoutine);
             return NextResponse.json({ success: true, routine: newRoutine });
         }
     } catch (error) {
         console.error("POST routines error:", error);
-        return NextResponse.json({ error: "Failed to save routine" }, { status: 500 });
+        return NextResponse.json({ error: "Failed to save routine", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
     }
 }
 
