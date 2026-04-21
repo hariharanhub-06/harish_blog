@@ -44,9 +44,10 @@ import GameAssetsModule from "@/components/admin/GameAssetsModule";
 import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
 import SettingsModule from "@/components/admin/SettingsModule";
 import KanbanModule from "@/components/admin/KanbanModule";
-import { Settings, BarChart2 } from "lucide-react";
+import RoutinesModule from "@/components/admin/RoutinesModule";
+import { Settings, BarChart2, CheckSquare } from "lucide-react";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "settings";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "settings";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -141,7 +142,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash for persistence on refresh
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "ops-guide", "pricing-quote", "finance-leads", "settings"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "ops-guide", "pricing-quote", "finance-leads", "kanban", "routines", "settings"];
         if (hash && (validTabs as string[]).includes(hash)) {
             setActiveTab(hash);
         }
@@ -200,6 +201,7 @@ export default function AdminDashboard() {
         { id: "kanban", title: "Kanban Board", icon: Layout, color: "bg-teal-500" },
         { id: "client-projects", title: "Client Projects", icon: Briefcase, color: "bg-blue-700" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount },
+        { id: "routines", title: "Routine Checklist", icon: CheckSquare, color: "bg-indigo-600" },
         { id: "settings", title: "Settings", icon: Settings, color: "bg-gray-600" },
     ];
 
@@ -218,6 +220,7 @@ export default function AdminDashboard() {
             case "game-assets": return <GameAssetsModule />;
             case "client-projects": return <ClientProjectsModule />;
             case "kanban": return <KanbanModule />;
+            case "routines": return <RoutinesModule />;
             case "settings": return <SettingsModule />;
             default: return (
                 <div className="space-y-16 animate-in fade-in duration-700">

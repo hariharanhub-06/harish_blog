@@ -800,6 +800,38 @@ export const pricingBaseCosts = pgTable("pricing_base_costs", {
   displayOrder: integer("order").default(0),
 });
 
+export const routines = pgTable("routines", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category"),
+  displayOrder: integer("order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const routineLogs = pgTable("routine_logs", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  routineId: text("routine_id").notNull(),
+  date: text("date").notNull(), // ISO Date string YYYY-MM-DD
+  isCompleted: boolean("is_completed").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const routineRelations = relations(routines, ({ many }) => ({
+  logs: many(routineLogs),
+}));
+
+export const routineLogRelations = relations(routineLogs, ({ one }) => ({
+  routine: one(routines, {
+    fields: [routineLogs.routineId],
+    references: [routines.id],
+  }),
+}));
+
 export const pricingPageRates = pgTable("pricing_page_rates", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   pageType: text("page_type").notNull(),
