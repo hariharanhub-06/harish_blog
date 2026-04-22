@@ -239,14 +239,14 @@ export default function AdminDashboard() {
 
             {/* Sidebar */}
             <aside className="w-64 bg-white/70 backdrop-blur-xl border-r border-gray-100 hidden lg:flex flex-col fixed inset-y-0 z-50 print:hidden shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-                <div className="p-6">
-                    <Link href="/" className="group flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-all text-white">
-                            <Layout size={16} />
+                <div className="p-8">
+                    <Link href="/" className="group flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-[14px] bg-indigo-600 flex items-center justify-center shadow-xl shadow-indigo-600/20 group-hover:scale-110 transition-all text-white">
+                            <Layout size={20} strokeWidth={2.5} />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-400 leading-none mb-0.5">Nexus</span>
-                            <span className="text-lg font-bold tracking-tight text-gray-900 leading-none">Admin<span className="text-primary italic">.</span></span>
+                            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 leading-none mb-1">Hariharanhub</span>
+                            <span className="text-xl font-black tracking-tight text-gray-900 leading-none">Admin<span className="text-indigo-600 animate-pulse">.</span></span>
                         </div>
                     </Link>
                 </div>
@@ -303,39 +303,45 @@ export default function AdminDashboard() {
 
             {/* Main Content */}
             <main className="flex-1 lg:ml-64 w-full overflow-x-hidden min-h-screen relative print:ml-0">
-                <header className="bg-white/60 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-40 print:hidden shadow-sm">
-                    <div className="max-w-7xl mx-auto px-6 md:px-8 py-3.5 flex justify-between items-center">
-                        <div className="flex items-center gap-4">
+                <header className="bg-white/70 backdrop-blur-xl border-b border-gray-100/50 sticky top-0 z-40 print:hidden">
+                    <div className="max-w-7xl mx-auto px-10 py-5 flex justify-between items-center">
+                        <div className="flex items-center gap-6">
                             <button
                                 onClick={() => setIsMobileMenuOpen(true)}
-                                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-100 bg-white shadow-sm"
+                                className="lg:hidden p-3 hover:bg-gray-100 rounded-2xl transition-colors border border-gray-100 bg-white"
                             >
-                                <Menu size={18} />
+                                <Menu size={20} />
                             </button>
                             <div className="flex flex-col">
-                                <div className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-gray-400 mb-0.5">
-                                    <div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 mb-1">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
                                     <span>System Online</span>
                                 </div>
-                                <h2 className="text-sm font-black text-gray-900 tracking-tight flex items-center gap-1.5 lowercase">
-                                    <span className="text-primary">/</span> {activeTab === 'overview' ? 'Command Center' : activeTab.replace('-', ' ')}
+                                <h2 className="text-base font-black text-gray-900 tracking-tight flex items-center gap-2 lowercase">
+                                    <span className="text-indigo-600">/</span> {activeTab === 'overview' ? 'command center' : activeTab.replace('-', ' ')}
                                 </h2>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <Link
-                                href="/"
-                                target="_blank"
-                                className="p-2 rounded-lg border border-gray-100 bg-white text-gray-400 hover:text-primary hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all shadow-sm group"
-                            >
-                                <ExternalLink size={16} className="group-hover:scale-110 transition-transform" />
-                            </Link>
-                            <div className="flex items-center gap-2 pl-2 border-l border-gray-100">
+
+                        {/* Search Bar in Header */}
+                        <div className="hidden md:flex items-center gap-3 bg-gray-50 px-6 py-3 rounded-2xl border border-gray-100 group focus-within:ring-2 focus-within:ring-indigo-100 transition-all grow max-w-sm mx-10">
+                            <Search size={16} className="text-gray-400 group-focus-within:text-indigo-600" />
+                            <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-xs font-bold text-gray-900 placeholder:text-gray-400 w-full" />
+                            <div className="px-1.5 py-0.5 rounded-md bg-white border border-gray-100 text-[10px] font-black text-gray-400">⌘ K</div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <div className="relative group p-2 rounded-2xl border border-gray-100 hover:bg-gray-50 transition-all cursor-pointer">
+                                <ShieldAlert size={18} className="text-gray-400 group-hover:text-red-500" />
+                                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 border-2 border-white" />
+                            </div>
+
+                            <div className="flex items-center gap-3 pl-4 border-l border-gray-100">
                                 <div className="flex flex-col items-end hidden sm:flex">
-                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-0.5">Admin</span>
-                                    <span className="text-[10px] font-bold text-gray-900 leading-none">{user.email?.split('@')[0]}</span>
+                                    <span className="text-[10px] font-black text-gray-900 leading-none mb-1">Designsolid</span>
+                                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Admin</span>
                                 </div>
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 shadow-lg shadow-primary/20 flex items-center justify-center font-black text-white text-sm border-2 border-white">
+                                <div className="w-10 h-10 rounded-2xl bg-indigo-600 shadow-xl shadow-indigo-600/20 flex items-center justify-center font-black text-white text-sm border-2 border-white overflow-hidden group hover:scale-105 transition-all">
                                     {user.email?.charAt(0).toUpperCase()}
                                 </div>
                             </div>

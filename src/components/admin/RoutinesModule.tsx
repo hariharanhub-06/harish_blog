@@ -224,21 +224,21 @@ export default function RoutinesModule() {
                     <PieChart>
                         <Pie
                             data={data}
-                            innerRadius={50}
-                            outerRadius={70}
-                            paddingAngle={5}
+                            innerRadius={55}
+                            outerRadius={75}
+                            paddingAngle={8}
                             dataKey="value"
                             startAngle={90}
                             endAngle={450}
+                            stroke="none"
                         >
-                            <Cell fill="#6366f1" />
-                            <Cell fill="#f3f4f6" />
+                            <Cell fill="rgba(255,255,255,1)" />
+                            <Cell fill="rgba(255,255,255,0.15)" />
                         </Pie>
-                        <RechartsTooltip />
                     </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-xl font-black text-gray-900">{Math.round(rate)}%</span>
+                    <span className="text-2xl font-black text-white">{Math.round(rate)}%</span>
                 </div>
             </div>
         );
@@ -321,21 +321,21 @@ export default function RoutinesModule() {
             </div>
 
             {view === "grid" ? (
-                <div className="bg-white/80 backdrop-blur-xl border border-gray-100 rounded-[40px] shadow-sm overflow-hidden">
+                <div className="bg-white rounded-[40px] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.02)] overflow-hidden">
                     <div className="overflow-x-auto scrollbar-hide">
                         <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-50/40 divide-x divide-gray-100">
-                                    <th className="sticky left-0 bg-white/95 backdrop-blur z-20 px-10 py-6 text-left border-b border-gray-100 min-w-[320px]">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Habit Architecture</span>
+                                <tr className="bg-indigo-600 divide-x divide-white/10">
+                                    <th className="sticky left-0 bg-indigo-600 z-20 px-10 py-8 text-left border-b border-indigo-500 min-w-[320px]">
+                                        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">Habit Architecture</span>
                                     </th>
                                     {days.map((day) => (
-                                        <th key={day.toISOString()} className={`px-4 py-6 border-b border-gray-100 min-w-[80px] ${isSameDay(day, new Date()) ? "bg-indigo-50/50" : ""}`}>
+                                        <th key={day.toISOString()} className={`px-4 py-8 border-b border-indigo-500 min-w-[85px] ${isSameDay(day, new Date()) ? "bg-white/10" : ""}`}>
                                             <div className="flex flex-col items-center">
-                                                <span className={`text-[10px] font-black uppercase ${isSameDay(day, new Date()) ? "text-indigo-600" : "text-gray-400"}`}>
+                                                <span className={`text-[10px] font-black uppercase ${isSameDay(day, new Date()) ? "text-white" : "text-white/40"}`}>
                                                     {format(day, "EEE")}
                                                 </span>
-                                                <span className={`text-xl font-black ${isSameDay(day, new Date()) ? "text-indigo-600 scale-110" : "text-gray-900"}`}>
+                                                <span className={`text-xl font-black ${isSameDay(day, new Date()) ? "text-white scale-110" : "text-white/80"}`}>
                                                     {format(day, "d")}
                                                 </span>
                                             </div>
@@ -344,14 +344,15 @@ export default function RoutinesModule() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
-                                {routines.map((routine) => (
-                                    <tr key={routine.id} className="group hover:bg-gray-50/30 transition-all duration-300">
-                                        <td className="sticky left-0 bg-white/95 backdrop-blur z-20 px-10 py-7 border-r border-gray-50 group-hover:shadow-[10px_0_20px_-10px_rgba(0,0,0,0.05)] transition-all">
+                                {routines.map((routine, ridx) => (
+                                    <tr key={routine.id} className="group hover:bg-indigo-50/10 transition-all duration-300">
+                                        <td className="sticky left-0 bg-white z-20 px-10 py-7 border-r border-gray-50 group-hover:shadow-[10px_0_20px_-10px_rgba(0,0,0,0.05)] transition-all">
                                             <div className="flex items-center justify-between">
-                                                <div className="space-y-1.5">
-                                                    <h4 className="text-sm font-black text-gray-900 group-hover:text-indigo-600 transition-colors">{routine.title}</h4>
+                                                <div className="space-y-1.5 text-left">
+                                                    <h4 className="text-sm font-black text-gray-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{routine.title}</h4>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-[9px] font-black text-indigo-500 uppercase tracking-tighter">
+                                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black text-white uppercase tracking-tighter ${['bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-cyan-500'][ridx % 5]
+                                                            }`}>
                                                             {routine.category}
                                                         </span>
                                                         <div className="h-1 w-1 rounded-full bg-gray-200" />
@@ -367,7 +368,7 @@ export default function RoutinesModule() {
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(routine.id)}
-                                                        className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-xl transition-all"
+                                                        className="p-2 hover:bg-rose-50 text-gray-400 hover:text-rose-600 rounded-xl transition-all"
                                                     >
                                                         <Trash2 size={14} />
                                                     </button>
@@ -384,14 +385,14 @@ export default function RoutinesModule() {
                                                     {due ? (
                                                         <button
                                                             onClick={() => toggleComplete(routine.id, day)}
-                                                            className={`mx-auto w-10 h-10 rounded-[14px] flex items-center justify-center transition-all duration-300 transform shadow-sm ${isDone
-                                                                ? "bg-emerald-500 text-white shadow-emerald-500/30 scale-105"
-                                                                : "bg-white text-gray-200 border border-gray-100 hover:border-indigo-300 hover:text-indigo-400 hover:scale-105"}`}
+                                                            className={`mx-auto w-11 h-11 rounded-[16px] flex items-center justify-center transition-all duration-300 transform shadow-sm ${isDone
+                                                                ? `${['bg-indigo-600', 'bg-emerald-500', 'bg-amber-400', 'bg-rose-500', 'bg-cyan-500'][ridx % 5]} text-white shadow-lg scale-105`
+                                                                : "bg-white text-gray-200 border-2 border-gray-50 hover:border-indigo-300 hover:text-indigo-400 hover:scale-105"}`}
                                                         >
-                                                            {isDone ? <CheckCircle2 size={22} strokeWidth={2.5} /> : <Circle size={18} />}
+                                                            {isDone ? <CheckCircle2 size={24} strokeWidth={2.5} /> : <Circle size={20} strokeWidth={3} />}
                                                         </button>
                                                     ) : (
-                                                        <div className="mx-auto w-10 h-10 rounded-[14px] bg-gray-50/50 border border-dotted border-gray-100 flex items-center justify-center opacity-30 select-none">
+                                                        <div className="mx-auto w-11 h-11 rounded-[16px] bg-gray-50/50 border border-dotted border-gray-200 flex items-center justify-center opacity-30 select-none">
                                                             <div className="h-1 w-1 rounded-full bg-gray-300" />
                                                         </div>
                                                     )}
@@ -405,35 +406,31 @@ export default function RoutinesModule() {
                     </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {analytics.map((item) => (
-                        <div key={item.id} className="bg-white p-10 rounded-[48px] border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group overflow-hidden relative">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full -mr-16 -mt-16 blur-3xl" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {analytics.map((item, idx) => (
+                        <div key={item.id} className={`${['bg-indigo-600', 'bg-emerald-500', 'bg-amber-400', 'bg-rose-500', 'bg-cyan-500'][idx % 5]} p-10 rounded-[48px] text-white shadow-2xl hover:-translate-y-2 transition-all group overflow-hidden relative`}>
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
 
                             <div className="relative z-10 flex flex-col items-center text-center">
-                                <div className="mb-6 flex flex-col items-center">
+                                <div className="mb-6 flex flex-col items-center filter drop-shadow-2xl">
                                     <DonutChartComponent rate={item.completionRate} />
                                 </div>
 
                                 <div className="space-y-1 mt-2">
-                                    <h3 className="text-xl font-black text-gray-900 group-hover:text-indigo-600 transition-colors">{item.title}</h3>
-                                    <span className="text-[10px] font-black uppercase text-indigo-400 tracking-[0.2em] bg-indigo-50/50 px-3 py-1 rounded-full">{item.category}</span>
+                                    <h3 className="text-xl font-black truncate max-w-[200px]">{item.title}</h3>
+                                    <span className="text-[10px] font-black uppercase text-white/50 tracking-[0.2em] bg-white/10 px-3 py-1 rounded-full">{item.category}</span>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-8 w-full mt-10 p-6 bg-gray-50/50 rounded-3xl border border-gray-100">
+                                <div className="grid grid-cols-2 gap-4 w-full mt-10 p-6 bg-white/10 backdrop-blur-md rounded-3xl">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Success</span>
-                                        <span className="text-xl font-black text-gray-900">{item.completedDays} <span className="text-[10px] text-gray-400">Checkpoints</span></span>
+                                        <span className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Success</span>
+                                        <span className="text-xl font-black">{item.completedDays}</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Expected</span>
-                                        <span className="text-xl font-black text-gray-900">{item.totalExpected} <span className="text-[10px] text-gray-400">Total</span></span>
+                                        <span className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Expected</span>
+                                        <span className="text-xl font-black">{item.totalExpected}</span>
                                     </div>
                                 </div>
-
-                                <p className="mt-6 text-[9px] font-bold text-gray-400 italic">
-                                    Target consistency: 100% · Current performance: {Math.round(item.completionRate)}%
-                                </p>
                             </div>
                         </div>
                     ))}
@@ -535,8 +532,8 @@ export default function RoutinesModule() {
                                                         }
                                                     }}
                                                     className={`flex-1 py-4 px-2 rounded-2xl text-[10px] font-black transition-all border-2 ${isActive
-                                                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-600/20 scale-105"
-                                                            : "bg-gray-50/50 text-gray-400 border-gray-100 hover:bg-gray-100"
+                                                        ? "bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-600/20 scale-105"
+                                                        : "bg-gray-50/50 text-gray-400 border-gray-100 hover:bg-gray-100"
                                                         }`}
                                                 >
                                                     {day}
@@ -571,8 +568,8 @@ export default function RoutinesModule() {
                                                         }
                                                     }}
                                                     className={`aspect-square rounded-xl text-[10px] font-black transition-all border-2 ${isActive
-                                                            ? "bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/10 scale-105"
-                                                            : "bg-white text-gray-400 border-gray-100 hover:bg-indigo-50/50"
+                                                        ? "bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/10 scale-105"
+                                                        : "bg-white text-gray-400 border-gray-100 hover:bg-indigo-50/50"
                                                         }`}
                                                 >
                                                     {date}
