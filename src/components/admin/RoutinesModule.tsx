@@ -118,9 +118,9 @@ export default function RoutinesModule() {
                 const routinesData = await routinesRes.json();
                 const logsData = await logsRes.json();
                 const analyticsData = await analyticsRes.json();
-                setRoutines(routinesData);
-                setLogs(logsData);
-                setAnalytics(analyticsData);
+                setRoutines(Array.isArray(routinesData) ? routinesData : []);
+                setLogs(Array.isArray(logsData) ? logsData : []);
+                setAnalytics(Array.isArray(analyticsData) ? analyticsData : []);
             }
         } catch (error) {
             toast.error("Failed to fetch routine data");
@@ -178,7 +178,8 @@ export default function RoutinesModule() {
         const eStr = format(endDate, "yyyy-MM-dd");
         fetch(`/api/admin/routines/analytics?startDate=${sStr}&endDate=${eStr}`)
             .then(r => r.json())
-            .then(data => setAnalytics(data));
+            .then(data => setAnalytics(Array.isArray(data) ? data : []))
+            .catch(() => setAnalytics([]));
     };
 
     const handleAction = async (type: "add" | "edit", routineData: any) => {
@@ -378,7 +379,7 @@ export default function RoutinesModule() {
                                         {days.map((day) => {
                                             const due = isTaskDue(routine, day);
                                             const dateStr = format(day, "yyyy-MM-dd");
-                                            const isDone = logs.find(l => l.routineId === routine.id && l.date === dateStr)?.isCompleted;
+                                            const isDone = (logs || []).find(l => l.routineId === routine.id && l.date === dateStr)?.isCompleted;
 
                                             return (
                                                 <td key={day.toISOString()} className={`px-4 py-7 text-center transition-all ${isSameDay(day, new Date()) ? "bg-indigo-50/20" : ""}`}>
@@ -407,13 +408,13 @@ export default function RoutinesModule() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {analytics.map((item, idx) => (
+                    {(analytics || []).map((item, idx) => (
                         <div key={item.id} className={`${['bg-indigo-600', 'bg-emerald-500', 'bg-amber-400', 'bg-rose-500', 'bg-cyan-500'][idx % 5]} p-10 rounded-[48px] text-white shadow-2xl hover:-translate-y-2 transition-all group overflow-hidden relative`}>
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
 
                             <div className="relative z-10 flex flex-col items-center text-center">
                                 <div className="mb-6 flex flex-col items-center filter drop-shadow-2xl">
-                                    <DonutChartComponent rate={item.completionRate} />
+                                    <DonutChartComponent rate={item.completionRate || 0} />
                                 </div>
 
                                 <div className="space-y-1 mt-2">
@@ -424,17 +425,17 @@ export default function RoutinesModule() {
                                 <div className="grid grid-cols-2 gap-4 w-full mt-10 p-6 bg-white/10 backdrop-blur-md rounded-3xl">
                                     <div className="flex flex-col">
                                         <span className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Success</span>
-                                        <span className="text-xl font-black">{item.completedDays}</span>
+                                        <span className="text-xl font-black">{item.completedDays || 0}</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Expected</span>
-                                        <span className="text-xl font-black">{item.totalExpected}</span>
+                                        <span className="text-xl font-black">{item.totalExpected || 0}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ))}
-                    {analytics.length === 0 && (
+                    {(!analytics || analytics.length === 0) && (
                         <div className="col-span-full bg-white p-20 rounded-[48px] border border-dashed border-gray-200 flex flex-col items-center text-center">
                             <div className="p-5 bg-gray-50 rounded-full mb-6">
                                 <TrendingUp className="w-12 h-12 text-gray-300" />

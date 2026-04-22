@@ -25,7 +25,8 @@ import {
     Calendar,
     Video,
     FileText,
-    ShieldAlert
+    ShieldAlert,
+    Search
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";

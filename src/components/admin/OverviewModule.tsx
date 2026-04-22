@@ -64,16 +64,21 @@ export default function OverviewModule() {
 
             if (analyticsRes.ok) {
                 const data = await analyticsRes.json();
-                setAnalytics(data.stats.reverse());
-                const views = data.stats.reduce((acc: number, curr: any) => acc + curr.views, 0);
-                const visitors = data.stats.reduce((acc: number, curr: any) => acc + curr.visitors, 0);
-                setStats(prev => ({ ...prev, totalViews: views, totalVisitors: visitors }));
+                if (data && Array.isArray(data.stats)) {
+                    const sortedStats = [...data.stats].reverse();
+                    setAnalytics(sortedStats);
+                    const views = sortedStats.reduce((acc: number, curr: any) => acc + (curr.views || 0), 0);
+                    const visitors = sortedStats.reduce((acc: number, curr: any) => acc + (curr.visitors || 0), 0);
+                    setStats(prev => ({ ...prev, totalViews: views, totalVisitors: visitors }));
+                }
             }
 
             if (messagesRes.ok) {
                 const data = await messagesRes.json();
-                setRecentMessages(data.slice(0, 5));
-                setStats(prev => ({ ...prev, unreadMessages: data.filter((m: any) => m.status === 'New').length }));
+                if (Array.isArray(data)) {
+                    setRecentMessages(data.slice(0, 5));
+                    setStats(prev => ({ ...prev, unreadMessages: data.filter((m: any) => m.status === 'New').length }));
+                }
             }
         } catch (err) {
             console.error("Failed to fetch dashboard data", err);
@@ -89,14 +94,14 @@ export default function OverviewModule() {
                     </div>
                     <div className="text-right">
                         <p className="text-white/60 text-[10px] font-black uppercase tracking-widest">{title}</p>
-                        <h3 className="text-3xl font-black mt-1">{value.toLocaleString()}</h3>
+                        <h3 className="text-3xl font-black mt-1">{(value || 0).toLocaleString()}</h3>
                     </div>
                 </div>
 
                 <div className="mt-8 flex items-end justify-between gap-4">
                     <div className="h-[60px] w-full max-w-[120px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={data.slice(-7)}>
+                            <LineChart data={(data || []).slice(-7)}>
                                 <Line
                                     type="monotone"
                                     dataKey={dataKey}
@@ -306,7 +311,7 @@ export default function OverviewModule() {
                                     <div className="flex items-center gap-4">
                                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black text-white shadow-lg ${['bg-indigo-500', 'bg-purple-500', 'bg-cyan-500', 'bg-pink-500', 'bg-amber-500'][idx % 5]
                                             }`}>
-                                            {msg.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
+                                            {msg.name ? msg.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : '??'}
                                         </div>
                                         <div className="flex flex-col">
                                             <h4 className="text-sm font-black text-gray-900 group-hover:text-indigo-600 transition-colors">{msg.name}</h4>
