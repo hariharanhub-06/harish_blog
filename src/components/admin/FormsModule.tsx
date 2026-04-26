@@ -453,6 +453,43 @@ export default function FormsModule() {
                         ))}
                     </div>
                 )}
+                {/* Image Preview Modal */}
+                <AnimatePresence>
+                    {isPreviewOpen && previewImage && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setIsPreviewOpen(false)}
+                                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                className="relative max-w-5xl max-h-full aspect-auto bg-white rounded-[2rem] overflow-hidden shadow-2xl flex flex-col"
+                            >
+                                <button
+                                    onClick={() => setIsPreviewOpen(false)}
+                                    className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-all"
+                                >
+                                    <X size={24} />
+                                </button>
+                                <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
+                                    <img src={previewImage} alt="Preview" className="max-w-full max-h-[80vh] object-contain rounded-xl" />
+                                </div>
+                                <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+                                    <span className="font-bold text-gray-500 uppercase tracking-widest text-xs">Response Attachment</span>
+                                    <div className="flex gap-3">
+                                        <a href={previewImage} target="_blank" rel="noopener noreferrer" className="px-6 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-200 transition">Open Original</a>
+                                        <a href={previewImage} download="submission_image.png" className="px-6 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:opacity-90 transition flex items-center gap-2"><Download size={14} /> Download</a>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </div>
         );
     }

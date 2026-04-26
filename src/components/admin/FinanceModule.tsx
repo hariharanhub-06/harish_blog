@@ -787,90 +787,70 @@ export default function FinanceModule() {
 
                                             return (
                                                 <>
-                                                    <div className="h-[250px] w-full">
-                                                        <ResponsiveContainer width="100%" height="100%">
-                                                            <PieChart>
-                                                                <Pie
-                                                                    data={incomes}
-                                                                    cx="50%"
-                                                                    cy="50%"
-                                                                    innerRadius={60}
-                                                                    outerRadius={80}
-                                                                    paddingAngle={5}
-                                                                    dataKey="value"
-                                                                    nameKey="category"
-                                                                >
-                                                                    {incomes.map((_entry: any, index: number) => (
-                                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                                    ))}
-                                                                </Pie>
-                                                                <Tooltip
-                                                                    content={({ active, payload }: any) => {
-                                                                        if (active && payload && payload.length) {
-                                                                            return (
-                                                                                <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-xl">
-                                                                                    <p className="text-[10px] font-black uppercase text-gray-400 mb-1">{payload[0].name}</p>
-                                                                                    <p className="text-sm font-black text-emerald-600">₹{payload[0].value.toLocaleString()}</p>
-                                                                                </div>
-                                                                            );
-                                                                        }
-                                                                        return null;
-                                                                    }}
-                                                                />
-                                                            </PieChart>
-                                                        </ResponsiveContainer>
-                                                    </div>
-
-                                                    <div className="space-y-4">
-                                                        {(showAllIncomes ? incomes : incomes.slice(0, 5)).map((cat: any, i: number) => (
-                                                            <div key={i} className="flex justify-between items-center group/income">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                                                                    <div className="flex flex-col">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{cat.category || 'Uncategorized'}</span>
-                                                                            {cat.category.toLowerCase() === 'revenue' && (
-                                                                                <button
-                                                                                    onClick={async (e) => {
-                                                                                        e.stopPropagation();
-                                                                                        if (confirm("Rename ALL 'Revenue' entries to 'Loan Commission'?")) {
-                                                                                            setSaving(true);
-                                                                                            try {
-                                                                                                const r = await fetch(`/api/admin/finance/transactions?category=Revenue`);
-                                                                                                const txs = await r.json();
-                                                                                                for (const tx of txs) {
-                                                                                                    await fetch("/api/admin/finance/transactions", {
-                                                                                                        method: "PUT",
-                                                                                                        headers: { "Content-Type": "application/json" },
-                                                                                                        body: JSON.stringify({ id: tx.id, category: "Loan Commission" })
-                                                                                                    });
+                                                    <div className="space-y-6 pr-2">
+                                                        {(showAllIncomes ? incomes : incomes.slice(0, 5)).map((cat: any, i: number) => {
+                                                            const total = incomes.reduce((acc: number, curr: any) => acc + curr.value, 0);
+                                                            const percentage = (cat.value / total) * 100;
+                                                            return (
+                                                                <div key={i} className="group/income flex flex-col gap-2">
+                                                                    <div className="flex justify-between items-end">
+                                                                        <div className="flex flex-col gap-1.5">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <div className="w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                                                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{cat.category || 'Uncategorized'}</span>
+                                                                                {cat.category.toLowerCase() === 'revenue' && (
+                                                                                    <button
+                                                                                        onClick={async (e) => {
+                                                                                            e.stopPropagation();
+                                                                                            if (confirm("Rename ALL 'Revenue' entries to 'Loan Commission'?")) {
+                                                                                                setSaving(true);
+                                                                                                try {
+                                                                                                    const r = await fetch(`/api/admin/finance/transactions?category=Revenue`);
+                                                                                                    const txs = await r.json();
+                                                                                                    for (const tx of txs) {
+                                                                                                        await fetch("/api/admin/finance/transactions", {
+                                                                                                            method: "PUT",
+                                                                                                            headers: { "Content-Type": "application/json" },
+                                                                                                            body: JSON.stringify({ id: tx.id, category: "Loan Commission" })
+                                                                                                        });
+                                                                                                    }
+                                                                                                    fetchData();
+                                                                                                } finally {
+                                                                                                    setSaving(false);
                                                                                                 }
-                                                                                                fetchData();
-                                                                                            } finally {
-                                                                                                setSaving(false);
                                                                                             }
-                                                                                        }
-                                                                                    }}
-                                                                                    className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[8px] hover:bg-primary hover:text-white transition-all"
-                                                                                >
-                                                                                    Fix to Loan Commission
-                                                                                </button>
-                                                                            )}
+                                                                                        }}
+                                                                                        className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[8px] hover:bg-primary hover:text-white transition-all ml-2"
+                                                                                    >
+                                                                                        Fix to Loan Commission
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
+                                                                            <span className="text-sm font-black text-gray-900 dark:text-white">₹{cat.value.toLocaleString()}</span>
                                                                         </div>
-                                                                        <span className="text-xs font-black text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                                                        <span className="text-[10px] font-bold text-gray-500 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg">
+                                                                            {percentage.toFixed(1)}%
+                                                                        </span>
+                                                                    </div>
+                                                                    {/* Progress Bar */}
+                                                                    <div className="w-full h-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-full overflow-hidden border border-gray-100 dark:border-gray-800">
+                                                                        <motion.div
+                                                                            initial={{ width: 0 }}
+                                                                            animate={{ width: `${Math.max(percentage, 1)}%` }} // Minimum 1%
+                                                                            transition={{ duration: 1, delay: i * 0.1, ease: "easeOut" }}
+                                                                            className="h-full rounded-full"
+                                                                            style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                                                                        />
                                                                     </div>
                                                                 </div>
-                                                                <span className="text-[10px] font-bold text-gray-400">
-                                                                    {((cat.value / incomes.reduce((acc: number, curr: any) => acc + curr.value, 0)) * 100).toFixed(1)}%
-                                                                </span>
-                                                            </div>
-                                                        ))}
+                                                            );
+                                                        })}
                                                         {incomes.length > 5 && (
                                                             <button
                                                                 onClick={() => setShowAllIncomes(!showAllIncomes)}
-                                                                className="text-xs font-bold text-primary mt-2"
+                                                                className="text-xs font-bold text-primary mt-4 w-full py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition"
                                                             >
-                                                                {showAllIncomes ? "See Less" : "See More"}
+                                                                {showAllIncomes ? "See Less" : `See ${incomes.length - 5} More`}
                                                             </button>
                                                         )}
                                                     </div>
@@ -909,63 +889,45 @@ export default function FinanceModule() {
 
                                             return (
                                                 <>
-                                                    <div className="h-[250px] w-full">
-                                                        <ResponsiveContainer width="100%" height="100%">
-                                                            <PieChart>
-                                                                <Pie
-                                                                    data={sortedCats}
-                                                                    cx="50%"
-                                                                    cy="50%"
-                                                                    innerRadius={60}
-                                                                    outerRadius={80}
-                                                                    paddingAngle={5}
-                                                                    dataKey="value"
-                                                                    nameKey="category"
-                                                                >
-                                                                    {sortedCats.map((_entry: any, index: number) => (
-                                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                                    ))}
-                                                                </Pie>
-                                                                <Tooltip
-                                                                    content={({ active, payload }: any) => {
-                                                                        if (active && payload && payload.length) {
-                                                                            return (
-                                                                                <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-xl">
-                                                                                    <p className="text-[10px] font-black uppercase text-gray-400 mb-1">{payload[0].name}</p>
-                                                                                    <p className="text-sm font-black text-red-600">₹{payload[0].value.toLocaleString()}</p>
-                                                                                </div>
-                                                                            );
-                                                                        }
-                                                                        return null;
-                                                                    }}
-                                                                />
-                                                            </PieChart>
-                                                        </ResponsiveContainer>
-                                                    </div>
-
-                                                    <div className="space-y-4">
-                                                        {(showAllExpenses ? sortedCats : sortedCats.slice(0, 5)).map((cat: any, i: number) => (
-                                                            <div key={i} className="flex justify-between items-center">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                                                                    <div className="flex flex-col">
-                                                                        <span className={`text-[10px] font-black uppercase tracking-widest ${cat.isSummary ? 'text-primary' : 'text-gray-400'}`}>
-                                                                            {cat.category}
+                                                    <div className="space-y-6 pr-2">
+                                                        {(showAllExpenses ? sortedCats : sortedCats.slice(0, 5)).map((cat: any, i: number) => {
+                                                            const total = sortedCats.reduce((acc: number, curr: any) => acc + curr.value, 0);
+                                                            const percentage = (cat.value / total) * 100;
+                                                            return (
+                                                                <div key={i} className="flex flex-col gap-2">
+                                                                    <div className="flex justify-between items-end">
+                                                                        <div className="flex flex-col gap-1.5">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <div className="w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                                                                                <span className={`text-[10px] font-black uppercase tracking-widest ${cat.isSummary ? 'text-primary' : 'text-gray-500'}`}>
+                                                                                    {cat.category}
+                                                                                </span>
+                                                                            </div>
+                                                                            <span className="text-sm font-black text-gray-900 dark:text-white">₹{cat.value.toLocaleString()}</span>
+                                                                        </div>
+                                                                        <span className="text-[10px] font-bold text-gray-500 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg">
+                                                                            {percentage.toFixed(1)}%
                                                                         </span>
-                                                                        <span className="text-xs font-black text-gray-900">₹{cat.value.toLocaleString()}</span>
+                                                                    </div>
+                                                                    {/* Progress Bar */}
+                                                                    <div className="w-full h-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-full overflow-hidden border border-gray-100 dark:border-gray-800">
+                                                                        <motion.div
+                                                                            initial={{ width: 0 }}
+                                                                            animate={{ width: `${Math.max(percentage, 1)}%` }} // Minimum 1%
+                                                                            transition={{ duration: 1, delay: i * 0.1, ease: "easeOut" }}
+                                                                            className="h-full rounded-full"
+                                                                            style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                                                                        />
                                                                     </div>
                                                                 </div>
-                                                                <span className="text-[10px] font-bold text-gray-400">
-                                                                    {((cat.value / sortedCats.reduce((acc: number, curr: any) => acc + curr.value, 0)) * 100).toFixed(1)}%
-                                                                </span>
-                                                            </div>
-                                                        ))}
+                                                            );
+                                                        })}
                                                         {displayCats.length > 5 && (
                                                             <button
                                                                 onClick={() => setShowAllExpenses(!showAllExpenses)}
-                                                                className="text-xs font-bold text-primary mt-2"
+                                                                className="text-xs font-bold text-primary mt-4 w-full py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition"
                                                             >
-                                                                {showAllExpenses ? "See Less" : "See More"}
+                                                                {showAllExpenses ? "See Less" : `See ${displayCats.length - 5} More`}
                                                             </button>
                                                         )}
                                                     </div>
