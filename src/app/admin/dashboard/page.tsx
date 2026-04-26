@@ -239,7 +239,7 @@ export default function AdminDashboard() {
                         <button
                             key={item.id}
                             onClick={() => handleTabChange(item.id as Tab)}
-                            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-bold text-sm transition-all group ${activeTab === item.id
+                            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-bold text-sm transition-all group ${activeTab === item.id
                                 ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-sm"
                                 : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary"
                                 }`}
@@ -268,7 +268,7 @@ export default function AdminDashboard() {
 
             {/* Main Content */}
             <main className="flex-1 lg:ml-[260px] w-full overflow-x-hidden min-h-screen relative flex flex-col">
-                <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 h-16 transition-colors duration-300">
+                <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 h-20 transition-colors duration-300">
                     <div className="max-w-7xl mx-auto px-6 h-full flex justify-between items-center">
                         <div className="flex items-center gap-4 flex-1">
                             <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
@@ -277,7 +277,7 @@ export default function AdminDashboard() {
 
                             {/* Global Search Container */}
                             <div className="relative max-w-md w-full hidden md:block">
-                                <div className="flex items-center gap-3 bg-gray-100/80 dark:bg-white/5 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
+                                <div className="flex items-center gap-3 bg-gray-100/80 dark:bg-white/5 px-5 py-3 rounded-2xl border border-gray-200 dark:border-gray-800 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
                                     <Search size={16} className="text-gray-500 dark:text-gray-400 font-bold" />
                                     <input
                                         type="text"
@@ -318,9 +318,9 @@ export default function AdminDashboard() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
                             {/* Theme Switcher */}
-                            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 border border-gray-200 dark:border-gray-700">
+                            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1.5 border border-gray-200 dark:border-gray-700 items-center">
                                 <button
                                     onClick={() => setTheme("light")}
                                     title="Light Mode"
