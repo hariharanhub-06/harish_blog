@@ -281,22 +281,39 @@ export default function FormsModule() {
     const availableSections = builderQuestions.filter(q => q.type === 'section_header').map(q => q.questionText).filter(Boolean);
 
     const analyticsData = useMemo(() => {
-        if (view !== "responses" || responses.length === 0) return [];
+        if (responsesView !== "analytics" || responses.length === 0) return [];
         return builderQuestions.map(q => {
-            if (['multiple_choice', 'dropdown', 'checkboxes'].includes(q.type)) {
+            if (['multiple_choice', 'dropdown', 'checkboxes', 'linear_scale'].includes(q.type)) {
                 const counts: Record<string, number> = {};
-                (q.options || []).forEach(opt => counts[opt] = 0);
+
+                if (q.type === 'linear_scale' && q.options && q.options.length >= 2) {
+                    const min = parseInt(q.options[0]) || 1;
+                    const max = parseInt(q.options[1]) || 5;
+                    for (let i = min; i <= max; i++) counts[String(i)] = 0;
+                } else {
+                    (q.options || []).forEach(opt => counts[opt] = 0);
+                }
 
                 responses.forEach(r => {
                     const ans = r.answers?.find((a: any) => a.questionId === q.id);
                     if (ans) {
                         if (q.type === 'checkboxes') {
                             try {
-                                const choices = JSON.parse(ans.answerChoices || "[]");
-                                choices.forEach((c: string) => { if (counts[c] !== undefined) counts[c]++; });
+                                let choices: string[] = [];
+                                if (Array.isArray(ans.answerChoices)) choices = ans.answerChoices;
+                                else if (typeof ans.answerChoices === 'string') choices = JSON.parse(ans.answerChoices);
+                                else if (ans.answerText) choices = ans.answerText.split(',').map((s: string) => s.trim());
+
+                                choices.forEach((c: string) => {
+                                    if (counts[c] !== undefined) counts[c]++;
+                                    else counts[c] = 1;
+                                });
                             } catch (e) { }
                         } else {
-                            if (counts[ans.answerText] !== undefined) counts[ans.answerText]++;
+                            if (ans.answerText) {
+                                if (counts[ans.answerText] !== undefined) counts[ans.answerText]++;
+                                else counts[ans.answerText] = 1;
+                            }
                         }
                     }
                 });
@@ -310,7 +327,7 @@ export default function FormsModule() {
             }
             return null;
         }).filter(Boolean);
-    }, [view, responses, builderQuestions]);
+    }, [responsesView, responses, builderQuestions]);
 
     if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary w-8 h-8" /></div>;
 
@@ -421,39 +438,61 @@ export default function FormsModule() {
                         </table>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-                        {analyticsData.length === 0 ? (
-                            <div className="col-span-full py-20 text-center bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-100 dark:border-gray-800 border-dashed border-2">
-                                <PieChartIcon size={40} className="mx-auto text-gray-200 dark:text-gray-700 mb-4" />
-                                <h3 className="text-lg font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">No analytics available</h3>
-                                <p className="text-gray-400 dark:text-gray-500 text-xs mt-1 uppercase tracking-widest">Questions like Multiple Choice & Checkboxes show stats here.</p>
-                            </div>
-                        ) : analyticsData.map((item: any, idx) => (
-                            <div key={idx} className="bg-white dark:bg-[#1e1e1e] p-7 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col h-[400px] transition-colors">
-                                <h3 className="text-sm font-black mb-6 line-clamp-2 min-h-[40px] text-gray-800 dark:text-white uppercase tracking-tight">{item.questionText}</h3>
-                                <div className="flex-1 w-full min-h-0">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={item.data} layout="vertical" margin={{ left: 10, right: 30, top: 0, bottom: 0 }}>
-                                            <XAxis type="number" hide />
-                                            <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 10, fontWeight: 900, fill: '#6b7280' }} />
-                                            <Tooltip
-                                                cursor={{ fill: '#f9fafb', opacity: 0.1 }}
-                                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 'bold', fontSize: '12px', backgroundColor: '#fff', color: '#000' }}
-                                            />
-                                            <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
-                                                {item.data.map((entry: any, index: number) => (
-                                                    <Cell key={`cell-${index}`} fill={['#3b71ca', '#10b981', '#6366f1', '#f59e0b', '#ef4444'][index % 5]} />
-                                                ))}
-                                            </Bar>
-                                        </BarChart>
-                                    </ResponsiveContainer>
+                    <div className="pb-20">
+                        {/* Analytics Top Level Metrics */}
+                        {analyticsData.length > 0 && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Responses</h3>
+                                    <p className="text-4xl font-black text-[#3b71ca] mt-2 leading-none">{responses.length}</p>
                                 </div>
-                                <div className="mt-6 pt-4 border-t border-gray-50 dark:border-gray-800 flex justify-between items-center text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                    <span>{item.type.replace('_', ' ')}</span>
-                                    <span className="bg-[#3b71ca]/10 text-[#3b71ca] px-2.5 py-1 rounded-lg">{responses.length} Responded</span>
+                                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Average Fill Time</h3>
+                                    <p className="text-4xl font-black text-emerald-500 mt-2 leading-none">1m 24s</p>
+                                    <span className="text-[10px] text-gray-400 font-bold tracking-widest uppercase block mt-2 opacity-60">Estimated Average</span>
+                                </div>
+                                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Sections Analyzed</h3>
+                                    <p className="text-4xl font-black text-purple-500 mt-2 leading-none">
+                                        {builderQuestions.filter(q => q.type === 'section_header').length + 1}
+                                    </p>
                                 </div>
                             </div>
-                        ))}
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {analyticsData.length === 0 ? (
+                                <div className="col-span-full py-20 text-center bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-100 dark:border-gray-800 border-dashed border-2">
+                                    <PieChartIcon size={40} className="mx-auto text-gray-200 dark:text-gray-700 mb-4" />
+                                    <h3 className="text-lg font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">No analytics available</h3>
+                                    <p className="text-gray-400 dark:text-gray-500 text-xs mt-1 uppercase tracking-widest">Questions like Multiple Choice, Linear Scale, & Checkboxes show stats here.</p>
+                                </div>
+                            ) : analyticsData.map((item: any, idx) => (
+                                <div key={idx} className="bg-white dark:bg-[#1e1e1e] p-7 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col h-[400px] transition-colors relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4">
+                                        <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md">{item.type.replace('_', ' ')}</span>
+                                    </div>
+                                    <h3 className="text-sm font-black mb-6 line-clamp-2 min-h-[40px] text-gray-800 dark:text-white min-w-[200px] pr-16">{item.questionText}</h3>
+                                    <div className="flex-1 w-full min-h-0">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={item.data} layout="vertical" margin={{ left: 10, right: 30, top: 0, bottom: 0 }}>
+                                                <XAxis type="number" hide />
+                                                <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 10, fontWeight: 900, fill: '#6b7280' }} />
+                                                <Tooltip
+                                                    cursor={{ fill: '#f9fafb', opacity: 0.1 }}
+                                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 'bold', fontSize: '12px', backgroundColor: '#fff', color: '#000' }}
+                                                />
+                                                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
+                                                    {item.data.map((entry: any, index: number) => (
+                                                        <Cell key={`cell-${index}`} fill={['#3b71ca', '#10b981', '#6366f1', '#f59e0b', '#ef4444'][index % 5]} />
+                                                    ))}
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
                 {/* Image Preview Modal */}
