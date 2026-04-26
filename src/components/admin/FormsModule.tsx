@@ -13,6 +13,7 @@ type Form = {
     isPublished: boolean;
     createdAt: string;
     bannerUrl?: string; // Base64 or URL
+    bannerPosition?: string;
     themeColor?: string;
     postSubmissionAction?: string;
     postSubmissionData?: string;
@@ -331,49 +332,51 @@ export default function FormsModule() {
                 )}
 
                 {responsesView === "table" ? (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+                    <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-x-auto transition-colors">
                         <table className="w-full text-left border-collapse min-w-[1000px]">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100 text-sm">
+                                <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-gray-100 dark:border-gray-800 text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
                                     <th className="p-4 w-10">
-                                        <input type="checkbox" checked={isAllSelected} onChange={toggleSelectAll} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
+                                        <input type="checkbox" checked={isAllSelected} onChange={toggleSelectAll} className="w-5 h-5 rounded border-gray-300 dark:border-gray-700 text-primary focus:ring-primary bg-transparent" />
                                     </th>
-                                    <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Timestamp</th>
-                                    {builderQuestions.map((q, i) => <th key={i} className="p-4 font-semibold text-gray-600 truncate max-w-[200px]">{q.questionText}</th>)}
-                                    <th className="p-4 font-semibold text-gray-600 text-right">Actions</th>
+                                    <th className="p-4 whitespace-nowrap">Timestamp</th>
+                                    {builderQuestions.map((q, i) => <th key={i} className="p-4 truncate max-w-[200px]">{q.questionText}</th>)}
+                                    <th className="p-4 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {responses.length === 0 ? <tr><td colSpan={builderQuestions.length + 3} className="p-8 text-center text-gray-400">No responses yet.</td></tr>
+                                {responses.length === 0 ? <tr><td colSpan={builderQuestions.length + 3} className="p-8 text-center text-gray-400 dark:text-gray-600 font-bold uppercase tracking-widest text-xs">No responses yet.</td></tr>
                                     : responses.map(r => (
-                                        <tr key={r.id} className={`border-b border-gray-50 hover:bg-gray-50/50 transition ${selectedResponses.has(r.id) ? 'bg-primary/5 hover:bg-primary/10' : ''}`}>
+                                        <tr key={r.id} className={`border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50/50 dark:hover:bg-white/5 transition ${selectedResponses.has(r.id) ? 'bg-primary/5 dark:bg-primary/10' : ''}`}>
                                             <td className="p-4">
-                                                <input type="checkbox" checked={selectedResponses.has(r.id)} onChange={() => toggleSelectOne(r.id)} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
+                                                <input type="checkbox" checked={selectedResponses.has(r.id)} onChange={() => toggleSelectOne(r.id)} className="w-5 h-5 rounded border-gray-300 dark:border-gray-700 text-primary focus:ring-primary bg-transparent" />
                                             </td>
-                                            <td className="p-4 text-sm text-gray-600 whitespace-nowrap">{new Date(r.createdAt).toLocaleString()}</td>
+                                            <td className="p-4 text-[11px] font-bold text-gray-600 dark:text-gray-300 whitespace-nowrap group-hover:text-primary transition-colors">{new Date(r.createdAt).toLocaleString()}</td>
                                             {builderQuestions.map((q, j) => {
                                                 const ans = r.answers?.find((a: any) => a.questionId === q.id);
                                                 const text = ans?.answerText || (ans?.answerChoices ? (typeof ans.answerChoices === 'string' ? JSON.parse(ans.answerChoices).join(", ") : ans.answerChoices.join(", ")) : "-");
                                                 const isImage = q.type === 'file_upload' && text?.startsWith('data:image');
 
                                                 return (
-                                                    <td key={j} className="p-4 text-sm text-gray-900 truncate max-w-[200px]" title={isImage ? "Click to view image" : text}>
+                                                    <td key={j} className="p-4 text-sm text-gray-800 dark:text-gray-200 truncate max-w-[200px] font-medium" title={isImage ? "Click to view image" : text}>
                                                         {isImage ? (
                                                             <button onClick={() => { setPreviewImage(text); setIsPreviewOpen(true); }} className="relative group flex items-center gap-2">
-                                                                <img src={text} className="w-10 h-10 object-cover rounded-lg border border-gray-100 group-hover:scale-110 transition-transform shadow-md" />
+                                                                <img src={text} className="w-10 h-10 object-cover rounded-lg border border-gray-100 dark:border-gray-800 group-hover:scale-110 transition-transform shadow-md" />
                                                                 <Eye size={14} className="text-gray-400 group-hover:text-primary transition" />
                                                             </button>
-                                                        ) : text}
+                                                        ) : (
+                                                            <span className="line-clamp-1">{text}</span>
+                                                        )}
                                                     </td>
                                                 );
                                             })}
                                             <td className="p-4 text-right">
                                                 <div className="flex justify-end gap-1">
-                                                    <button onClick={() => handleSendManualNotification(r)} className="p-2 text-primary hover:bg-primary/10 rounded-lg transition" title="Send Mock Automation Message">
-                                                        <MessageSquare size={18} />
+                                                    <button onClick={() => handleSendManualNotification(r)} className="w-9 h-9 flex items-center justify-center text-primary hover:bg-primary/10 rounded-lg transition" title="Send Notification">
+                                                        <MessageSquare size={16} />
                                                     </button>
-                                                    <button onClick={() => handleDeleteResponses([r.id])} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Response">
-                                                        <Trash2 size={18} />
+                                                    <button onClick={() => handleDeleteResponses([r.id])} className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition" title="Delete">
+                                                        <Trash2 size={16} />
                                                     </button>
                                                 </div>
                                             </td>
@@ -572,19 +575,57 @@ export default function FormsModule() {
                     <>
                         <div className="bg-white rounded-3xl shadow-sm border border-gray-100/60 overflow-hidden mb-6 relative group">
                             {/* Banner Field with FilePicker */}
-                            <label className="block h-48 bg-gray-50 relative group overflow-hidden border-b border-gray-100 cursor-pointer">
-                                {activeForm.bannerUrl ? (
-                                    <img src={activeForm.bannerUrl} alt="Form Banner" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                                        <div className="flex flex-col items-center gap-2"><UploadCloud className="text-gray-300" size={32} /><span className="font-bold text-sm">Click to upload custom Banner</span></div>
+                            <div className="relative group">
+                                <label className="block h-48 bg-gray-50 relative group overflow-hidden border-b border-gray-100 cursor-pointer">
+                                    {activeForm.bannerUrl ? (
+                                        <img
+                                            src={activeForm.bannerUrl}
+                                            alt="Form Banner"
+                                            className="w-full h-full object-cover transition-all duration-300"
+                                            style={{ objectPosition: activeForm.bannerPosition || 'center' }}
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                                            <div className="flex flex-col items-center gap-2"><UploadCloud className="text-gray-300" size={32} /><span className="font-bold text-sm">Click to upload custom Banner</span></div>
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center p-4 gap-4">
+                                        <span className="text-white font-bold tracking-widest uppercase text-xs border border-white/40 px-4 py-2 rounded-xl backdrop-blur-sm">Change Banner</span>
+                                        {activeForm.bannerUrl && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setPreviewImage(activeForm.bannerUrl!);
+                                                    setIsPreviewOpen(true);
+                                                }}
+                                                className="p-3 bg-white/20 hover:bg-white/40 text-white rounded-xl backdrop-blur-md transition-all border border-white/30"
+                                            >
+                                                <Eye size={20} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, (b64) => setActiveForm({ ...activeForm, bannerUrl: b64 }))} />
+                                </label>
+
+                                {activeForm.bannerUrl && (
+                                    <div className="absolute bottom-4 right-4 flex gap-2 bg-white/90 backdrop-blur-sm p-1.5 rounded-xl shadow-lg border border-white/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {['top', 'center', 'bottom'].map((pos) => (
+                                            <button
+                                                key={pos}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setActiveForm({ ...activeForm, bannerPosition: pos });
+                                                }}
+                                                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition ${activeForm.bannerPosition === pos || (!activeForm.bannerPosition && pos === 'center') ? 'bg-[#3b71ca] text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                                            >
+                                                {pos}
+                                            </button>
+                                        ))}
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center p-4">
-                                    <span className="text-white font-bold tracking-widest uppercase text-sm">Change Banner</span>
-                                </div>
-                                <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, (b64) => setActiveForm({ ...activeForm, bannerUrl: b64 }))} />
-                            </label>
+                            </div>
 
                             <div className="p-8 space-y-4 border-l-8 border-l-primary relative">
                                 <input type="text" value={activeForm.title} onChange={e => setActiveForm({ ...activeForm, title: e.target.value })} className="w-full text-2xl font-black text-gray-900 border-none outline-none focus:ring-0 px-0 bg-transparent" placeholder="Form Title" />

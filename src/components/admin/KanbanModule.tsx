@@ -87,7 +87,7 @@ function SortableTask({ task, onEdit, onDelete }: { task: Task, onEdit: (t: Task
         <div
             ref={setNodeRef}
             style={style}
-            className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group relative cursor-default"
+            className="bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group relative cursor-default"
         >
             <div className="flex justify-between items-start mb-2">
                 <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest text-white ${getPriorityColor(task.priority)}`}>
@@ -111,11 +111,11 @@ function SortableTask({ task, onEdit, onDelete }: { task: Task, onEdit: (t: Task
                     </button>
                 </div>
             </div>
-            <h4 className="font-bold text-gray-900 text-sm mb-1">{task.title}</h4>
+            <h4 className="font-bold text-gray-900 dark:text-gray-100 text-sm mb-1">{task.title}</h4>
             {task.description && (
-                <p className="text-[10px] text-gray-500 line-clamp-2 mb-2 leading-relaxed">{task.description}</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 mb-2 leading-relaxed">{task.description}</p>
             )}
-            <div className="text-[8px] font-bold text-gray-300 uppercase tracking-widest mt-2 border-t border-gray-50 pt-2">
+            <div className="text-[8px] font-bold text-gray-300 dark:text-gray-600 uppercase tracking-widest mt-2 border-t border-gray-50 dark:border-gray-800/50 pt-2">
                 {new Date(task.createdAt).toLocaleDateString()}
             </div>
         </div>
@@ -176,7 +176,7 @@ function SortableColumn({ column, tasks, onEdit, onAddTask, onEditTask, onDelete
                 </div>
             </div>
             <div
-                className="bg-gray-50/50 rounded-[1.5rem] p-3 min-h-[400px] border border-gray-100/50 space-y-3 transition-all"
+                className="bg-gray-50/50 dark:bg-gray-800/20 rounded-[1.5rem] p-3 min-h-[400px] border border-gray-100/50 dark:border-white/5 space-y-3 transition-all"
                 style={{ borderTop: `4px solid ${column.color}` }}
             >
                 <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
@@ -427,7 +427,7 @@ export default function KanbanModule() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => setIsManagingColumns(!isManagingColumns)}
-                        className={`px-4 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${isManagingColumns ? 'bg-primary text-white shadow-lg' : 'bg-white text-gray-900 border-2 border-gray-900'}`}
+                        className={`px-4 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${isManagingColumns ? 'bg-primary text-white shadow-lg' : 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white border-2 border-gray-900 dark:border-white'}`}
                     >
                         <Settings2 size={16} /> {isManagingColumns ? "Close Editor" : "Edit Columns"}
                     </button>
@@ -523,11 +523,11 @@ export default function KanbanModule() {
             {/* Task Modal */}
             {editingTask && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg p-8 relative animate-in zoom-in-95 duration-300">
-                        <button onClick={() => setEditingTask(null)} className="absolute top-8 right-8 p-2 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-full transition-all">
+                    <div className="bg-white dark:bg-[#1e1e1e] rounded-[2rem] shadow-2xl w-full max-w-lg p-8 relative animate-in zoom-in-95 duration-300 transition-colors">
+                        <button onClick={() => setEditingTask(null)} className="absolute top-8 right-8 p-2 hover:bg-red-50 dark:hover:bg-red-500/10 text-gray-300 hover:text-red-500 rounded-full transition-all">
                             <X size={20} />
                         </button>
-                        <h3 className="text-xl font-black text-gray-900 tracking-tight mb-6 uppercase">
+                        <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight mb-6 uppercase">
                             {editingTask.id ? "Edit Task" : "New Task"}
                         </h3>
                         <div className="space-y-4">
@@ -537,7 +537,7 @@ export default function KanbanModule() {
                                     type="text"
                                     value={editingTask.title || ""}
                                     onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 font-bold text-sm text-gray-900 focus:ring-2 focus:ring-primary shadow-inner"
+                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border-0 rounded-xl px-4 py-3 font-bold text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary shadow-inner transition-colors"
                                     placeholder="Task title..."
                                 />
                             </div>
@@ -546,7 +546,7 @@ export default function KanbanModule() {
                                 <textarea
                                     value={editingTask.description || ""}
                                     onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 font-bold text-sm text-gray-900 focus:ring-2 focus:ring-primary min-h-[100px] shadow-inner"
+                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border-0 rounded-xl px-4 py-3 font-bold text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary min-h-[100px] shadow-inner transition-colors"
                                     placeholder="Details..."
                                 />
                             </div>
@@ -556,7 +556,7 @@ export default function KanbanModule() {
                                     <select
                                         value={editingTask.priority}
                                         onChange={(e) => setEditingTask({ ...editingTask, priority: e.target.value as Priority })}
-                                        className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 font-black uppercase text-[9px] tracking-widest focus:ring-2 focus:ring-primary"
+                                        className="w-full bg-gray-50 dark:bg-gray-800/50 border-0 rounded-xl px-4 py-3 font-black uppercase text-[9px] tracking-widest focus:ring-2 focus:ring-primary dark:text-white transition-colors"
                                     >
                                         <option value="Low">Low</option>
                                         <option value="Medium">Medium</option>
@@ -594,7 +594,7 @@ export default function KanbanModule() {
                         <button onClick={() => setEditingColumn(null)} className="absolute top-8 right-8 p-2 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-full transition-all">
                             <X size={20} />
                         </button>
-                        <h3 className="text-xl font-black text-gray-900 tracking-tight mb-6 uppercase">
+                        <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight mb-6 uppercase">
                             {editingColumn.id ? "Edit List" : "New List"}
                         </h3>
                         <div className="space-y-6">
@@ -604,7 +604,7 @@ export default function KanbanModule() {
                                     type="text"
                                     value={editingColumn.name || ""}
                                     onChange={(e) => setEditingColumn({ ...editingColumn, name: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 font-bold text-sm text-gray-900 focus:ring-2 focus:ring-primary shadow-inner"
+                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border-0 rounded-xl px-4 py-3 font-bold text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary shadow-inner transition-colors"
                                     placeholder="e.g. Done"
                                 />
                             </div>

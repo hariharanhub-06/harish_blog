@@ -18,7 +18,7 @@ export async function POST(req: Request) {
             organization,
             rating: parseInt(String(rating)),
             content,
-            status: isAdmin ? "Approved" : "Fresh", // Admin submissions are auto-approved
+            status: isAdmin ? "Approved" : "New", // Admin submissions are auto-approved
         }).returning();
 
         return NextResponse.json(newFeedback);

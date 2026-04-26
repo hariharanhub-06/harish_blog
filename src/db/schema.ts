@@ -955,6 +955,7 @@ export const forms = pgTable("forms", {
   description: text("description"),
   isPublished: boolean("is_published").default(false),
   bannerUrl: text("banner_url"),
+  bannerPosition: text("banner_position").default("center"),
   themeColor: text("theme_color"),
   postSubmissionAction: text("post_submission_action").default('message'),
   postSubmissionData: text("post_submission_data"),

@@ -11,12 +11,12 @@ export async function GET() {
         const [unreadResult] = await db
             .select({ value: count() })
             .from(contactSubmissions)
-            .where(eq(contactSubmissions.status, "Fresh"));
+            .where(eq(contactSubmissions.status, "New"));
 
         const [pendingFeedbackResult] = await db
             .select({ value: count() })
             .from(feedbacks)
-            .where(eq(feedbacks.status, "Fresh"));
+            .where(eq(feedbacks.status, "New"));
 
         return NextResponse.json({
             unreadMessages: unreadResult.value,

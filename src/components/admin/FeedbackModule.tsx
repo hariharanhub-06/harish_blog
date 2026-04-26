@@ -38,7 +38,7 @@ export default function FeedbackModule() {
     const [isAdding, setIsAdding] = useState(false);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [expandedId, setExpandedId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<"All" | "Fresh" | "Approved">("All");
+    const [activeTab, setActiveTab] = useState<"All" | "New" | "Approved">("All");
 
     const [formData, setFormData] = useState({
         name: "",
@@ -179,7 +179,7 @@ export default function FeedbackModule() {
             {/* Filters & Search */}
             <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
                 <div className="flex items-center gap-2 bg-gray-50/50 p-1 rounded-2xl border border-gray-100 shrink-0">
-                    {["All", "Fresh", "Approved"].map((tab) => (
+                    {["All", "New", "Approved"].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
@@ -188,10 +188,10 @@ export default function FeedbackModule() {
                                 : "text-secondary hover:text-primary"
                                 }`}
                         >
-                            {tab === "Fresh" ? "Pending" : tab}
-                            {tab === "Fresh" && feedbacks.filter(f => f.status === "Fresh").length > 0 && (
+                            {tab === "New" ? "Pending" : tab}
+                            {tab === "New" && feedbacks.filter(f => f.status === "New").length > 0 && (
                                 <span className="ml-2 bg-orange-500 text-white px-1.5 py-0.5 rounded-full text-[8px] animate-pulse">
-                                    {feedbacks.filter(f => f.status === "Fresh").length}
+                                    {feedbacks.filter(f => f.status === "New").length}
                                 </span>
                             )}
                         </button>
@@ -237,7 +237,7 @@ export default function FeedbackModule() {
                                         <div className="flex items-center gap-2 mb-1">
                                             <h4 className="text-sm font-black text-gray-900 uppercase tracking-tight">{f.name}</h4>
                                             <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border ${f.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-orange-100 text-orange-600 border-orange-200"}`}>
-                                                {f.status}
+                                                {f.status === "New" ? "Pending" : f.status}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-3 text-[10px] font-bold text-secondary uppercase tracking-widest opacity-60">
@@ -269,7 +269,7 @@ export default function FeedbackModule() {
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        {f.status === "Fresh" && (
+                                        {f.status === "New" && (
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleApprove(f.id); }}
                                                 disabled={updatingId === f.id}

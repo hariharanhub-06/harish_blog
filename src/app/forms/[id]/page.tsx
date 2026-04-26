@@ -24,6 +24,7 @@ type Form = {
     description: string;
     isPublished: boolean;
     bannerUrl?: string;
+    bannerPosition?: string;
     themeColor?: string;
     postSubmissionAction?: string;
     postSubmissionData?: string;
@@ -253,8 +254,13 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
 
                     <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] shadow-[0_32px_64px_rgb(0,0,0,0.1)] border border-white/50 overflow-hidden relative transition-all duration-500 hover:shadow-[0_40px_80px_rgb(0,0,0,0.15)]">
                         {form?.bannerUrl && (
-                            <div className="w-full h-48 sm:h-64 relative bg-gray-100">
-                                <img src={form.bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+                            <div className="w-full h-48 sm:h-64 relative bg-gray-100 overflow-hidden">
+                                <img
+                                    src={form.bannerUrl}
+                                    alt="Banner"
+                                    className="w-full h-full object-cover transition-all duration-700"
+                                    style={{ objectPosition: (form as any).bannerPosition || 'center' }}
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                             </div>
                         )}

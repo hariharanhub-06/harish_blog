@@ -36,7 +36,7 @@ const COLORS = {
     growth: "#ef4444"     // Red
 };
 
-export default function OverviewModule() {
+export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: any) => void }) {
     const [analytics, setAnalytics] = useState<any[]>([]);
     const [recentMessages, setRecentMessages] = useState<any[]>([]);
 
@@ -86,27 +86,33 @@ export default function OverviewModule() {
     };
 
     const SummaryCard = ({ title, value, icon: Icon, color, data, dataKey }: any) => (
-        <div className={`${color} p-6 rounded-2xl text-white shadow-lg relative overflow-hidden group hover:translate-y-[-2px] transition-all duration-300`}>
+        <div className={`bg-white dark:bg-[#1e1e1e] p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group flex flex-col relative overflow-hidden`}>
             <div className="relative z-10 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-6">
-                    <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-xl">
-                        <Icon size={20} strokeWidth={2.5} />
+                    <div className={`p-3 rounded-xl ${color.split(' ')[0]} bg-opacity-10 text-primary dark:text-white dark:bg-opacity-20 transition-all`}>
+                        <Icon size={22} strokeWidth={2.5} />
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] font-black bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-lg uppercase tracking-tight">
+                        <TrendingUp size={10} strokeWidth={3} />
+                        +12.5%
                     </div>
                 </div>
 
                 <div>
-                    <p className="text-white/70 text-[11px] font-black uppercase tracking-wider">{title}</p>
-                    <h3 className="text-2xl font-black mt-0.5">{(value || 0).toLocaleString()}</h3>
+                    <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{title}</h3>
+                    <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                        {(value || 0).toLocaleString()}
+                    </p>
                 </div>
 
-                <div className="mt-8 flex items-end justify-between">
+                <div className="mt-8 flex items-end justify-between pt-4 border-t border-gray-50 dark:border-gray-800/50">
                     <div className="h-[40px] w-[100px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={(data || []).slice(-7)}>
                                 <Line
                                     type="monotone"
                                     dataKey={dataKey}
-                                    stroke="white"
+                                    stroke="#3b71ca"
                                     strokeWidth={2.5}
                                     dot={false}
                                     animationDuration={1500}
@@ -114,14 +120,13 @@ export default function OverviewModule() {
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
-                    <div className="flex items-center gap-1 text-[10px] font-black bg-white/20 px-2 py-1 rounded-lg">
-                        <TrendingUp size={10} />
-                        +12.5%
+                    <div className="text-[10px] font-black text-primary dark:text-blue-400 uppercase tracking-widest hover:underline cursor-pointer">
+                        Reports
                     </div>
                 </div>
             </div>
             {/* Soft accent */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:scale-125 transition-transform duration-500" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[#3b71ca]/5 rounded-full -mr-12 -mt-12 blur-2xl group-hover:scale-125 transition-transform duration-500" />
         </div>
     );
 
@@ -240,7 +245,10 @@ export default function OverviewModule() {
                 <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl p-8 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col transition-colors duration-300">
                     <div className="flex items-center justify-between mb-8">
                         <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Recent Inquiries</h3>
-                        <button className="text-[10px] font-black text-primary uppercase tracking-widest hover:translate-x-1 transition-transform">View All</button>
+                        <button
+                            onClick={() => onTabChange?.('messages')}
+                            className="text-[10px] font-black text-primary uppercase tracking-widest hover:translate-x-1 transition-transform cursor-pointer"
+                        >View All</button>
                     </div>
 
                     <div className="space-y-6 flex-1">
@@ -276,7 +284,10 @@ export default function OverviewModule() {
                         )}
                     </div>
 
-                    <button className="mt-10 p-5 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50 flex items-center justify-between group hover:bg-primary hover:border-primary transition-all">
+                    <button
+                        onClick={() => onTabChange?.('messages')}
+                        className="mt-10 p-5 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50 flex items-center justify-between group hover:bg-primary hover:border-primary transition-all cursor-pointer"
+                    >
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
                                 <MessageCircle className="text-primary group-hover:text-primary transition-colors" size={18} />

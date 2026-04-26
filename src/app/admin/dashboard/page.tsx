@@ -215,7 +215,7 @@ export default function AdminDashboard() {
             case "settings": return <SettingsModule />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">
-                    <OverviewModule />
+                    <OverviewModule onTabChange={handleTabChange} />
                 </div>
             );
         }
@@ -234,38 +234,25 @@ export default function AdminDashboard() {
                     </Link>
                 </div>
 
-                <nav className="flex-1 px-3 space-y-1 mt-4 overflow-y-auto pb-6 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800">
-                    {menuItems.reduce((acc: any[], item, idx) => {
-                        const prevItem = menuItems[idx - 1];
-                        if (item.group !== prevItem?.group) {
-                            acc.push(
-                                <div key={`header-${item.group}`} className="px-4 pt-4 pb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">{item.group}</span>
-                                </div>
-                            );
-                        }
-                        if (item.id !== "divider") {
-                            acc.push(
-                                <button
-                                    key={item.id}
-                                    onClick={() => handleTabChange(item.id as Tab)}
-                                    className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all group ${activeTab === item.id
-                                        ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-sm shadow-primary/5"
-                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary"
-                                        }`}
-                                >
-                                    <item.icon size={18} className={`${activeTab === item.id ? "text-primary" : "text-gray-400 dark:text-gray-500 group-hover:text-primary"}`} />
-                                    <span className="flex-1 text-left">{item.title}</span>
-                                    {item.badge && item.badge > 0 && (
-                                        <span className="bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                                            {item.badge}
-                                        </span>
-                                    )}
-                                </button>
-                            );
-                        }
-                        return acc;
-                    }, [])}
+                <nav className="flex-1 px-3 space-y-1 mt-6 overflow-y-auto pb-6 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800">
+                    {menuItems.filter(item => item.id !== "divider").map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => handleTabChange(item.id as Tab)}
+                            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-bold text-sm transition-all group ${activeTab === item.id
+                                ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-sm"
+                                : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary"
+                                }`}
+                        >
+                            <item.icon size={18} className={`${activeTab === item.id ? "text-primary" : "text-gray-400 dark:text-gray-500 group-hover:text-primary"} transition-colors`} />
+                            <span className="flex-1 text-left">{item.title}</span>
+                            {item.badge && item.badge > 0 && (
+                                <span className="bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">
+                                    {item.badge}
+                                </span>
+                            )}
+                        </button>
+                    ))}
                 </nav>
 
                 <div className="p-4 border-t border-gray-100 dark:border-gray-800">
@@ -290,44 +277,40 @@ export default function AdminDashboard() {
 
                             {/* Global Search Container */}
                             <div className="relative max-w-md w-full hidden md:block">
-                                <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
-                                    <Search size={16} className="text-gray-400" />
+                                <div className="flex items-center gap-3 bg-gray-100/80 dark:bg-white/5 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
+                                    <Search size={16} className="text-gray-500 dark:text-gray-400 font-bold" />
                                     <input
                                         type="text"
-                                        placeholder="Search features..."
+                                        placeholder="Search features (e.g. Finance, Forms...)"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="bg-transparent border-none outline-none text-sm font-medium text-gray-900 dark:text-gray-100 placeholder:text-gray-400 w-full"
+                                        className="bg-transparent border-none outline-none text-sm font-bold text-gray-900 dark:text-gray-100 placeholder:text-gray-400 w-full"
                                     />
-                                    {searchQuery && (
-                                        <button onClick={() => setSearchQuery("")} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                                            <X size={14} />
-                                        </button>
-                                    )}
                                 </div>
-
-                                {/* Search Results Dropdown */}
                                 {searchQuery && (
-                                    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-50 max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <div className="p-2">
+                                    <div className="absolute top-full left-0 right-0 mt-3 bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="p-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-white/5">
+                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Search Results</span>
+                                        </div>
+                                        <div className="max-h-[300px] overflow-y-auto p-2">
                                             {filteredMenuItems.length > 0 ? (
                                                 filteredMenuItems.map(item => (
                                                     <button
                                                         key={item.id}
                                                         onClick={() => handleTabChange(item.id as Tab)}
-                                                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg text-left group"
+                                                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl text-left group"
                                                     >
-                                                        <div className={`p-2 rounded-lg ${item.color} bg-opacity-10 text-primary`}>
+                                                        <div className={`p-2 rounded-lg ${item.color} bg-opacity-10 text-primary dark:text-white`}>
                                                             <item.icon size={18} />
                                                         </div>
                                                         <div>
-                                                            <div className="text-sm font-bold text-gray-900 dark:text-gray-100">{item.title}</div>
-                                                            <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{item.group}</div>
+                                                            <div className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{item.title}</div>
+                                                            <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{item.group}</div>
                                                         </div>
                                                     </button>
                                                 ))
                                             ) : (
-                                                <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">No results found for "{searchQuery}"</div>
+                                                <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm italic">No features found for "{searchQuery}"</div>
                                             )}
                                         </div>
                                     </div>
@@ -337,27 +320,27 @@ export default function AdminDashboard() {
 
                         <div className="flex items-center gap-3">
                             {/* Theme Switcher */}
-                            <div className="flex bg-gray-50 dark:bg-gray-800 rounded-lg p-1 border border-gray-100 dark:border-gray-800">
+                            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 border border-gray-200 dark:border-gray-700">
                                 <button
                                     onClick={() => setTheme("light")}
                                     title="Light Mode"
-                                    className={`p-1.5 rounded-md transition-all ${theme === "light" ? "bg-white dark:bg-gray-700 shadow-sm text-primary" : "text-gray-400 hover:text-gray-600"}`}
+                                    className={`p-2 rounded-lg transition-all ${theme === "light" ? "bg-white dark:bg-gray-600 shadow-md text-primary" : "text-gray-400 hover:text-gray-600"}`}
                                 >
-                                    <Sun size={15} />
+                                    <Sun size={15} strokeWidth={2.5} />
                                 </button>
                                 <button
                                     onClick={() => setTheme("dark")}
                                     title="Dark Mode"
-                                    className={`p-1.5 rounded-md transition-all ${theme === "dark" ? "bg-white dark:bg-gray-700 shadow-sm text-primary" : "text-gray-400 hover:text-gray-600"}`}
+                                    className={`p-2 rounded-lg transition-all ${theme === "dark" ? "bg-white dark:bg-gray-600 shadow-md text-primary" : "text-gray-400 hover:text-gray-600"}`}
                                 >
-                                    <Moon size={15} />
+                                    <Moon size={15} strokeWidth={2.5} />
                                 </button>
                                 <button
                                     onClick={() => setTheme("system")}
                                     title="System Mode"
-                                    className={`p-1.5 rounded-md transition-all ${theme === "system" ? "bg-white dark:bg-gray-700 shadow-sm text-primary" : "text-gray-400 hover:text-gray-600"}`}
+                                    className={`p-2 rounded-lg transition-all ${theme === "system" ? "bg-white dark:bg-gray-600 shadow-md text-primary" : "text-gray-400 hover:text-gray-600"}`}
                                 >
-                                    <Monitor size={15} />
+                                    <Monitor size={15} strokeWidth={2.5} />
                                 </button>
                             </div>
 
@@ -365,46 +348,54 @@ export default function AdminDashboard() {
                             <div className="relative">
                                 <button
                                     onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                                    className="p-2 border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all relative group"
+                                    className={`p-2.5 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all relative group ${unreadCount > 0 ? 'bg-primary/5 border-primary/20' : ''}`}
                                 >
-                                    <ShieldAlert size={20} className="text-gray-500 dark:text-gray-400 group-hover:text-primary" />
+                                    <ShieldAlert size={20} className={unreadCount > 0 ? 'text-primary' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary'} />
                                     {unreadCount > 0 && (
-                                        <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-primary rounded-full border-2 border-white dark:border-[#1e1e1e]" />
+                                        <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-4 w-4 bg-primary text-[9px] font-black text-white items-center justify-center">
+                                                {unreadCount}
+                                            </span>
+                                        </span>
                                     )}
                                 </button>
 
                                 {isNotificationsOpen && (
                                     <>
                                         <div className="fixed inset-0 z-40" onClick={() => setIsNotificationsOpen(false)} />
-                                        <div className="absolute top-full right-0 mt-3 w-80 bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
-                                                <span className="font-bold text-sm">Notifications</span>
-                                                <span className="text-[10px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full">{unreadCount} New</span>
+                                        <div className="absolute top-full right-0 mt-3 w-85 bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-800 rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-white/3">
+                                                <span className="font-black text-xs uppercase tracking-widest text-gray-900 dark:text-white">Recent Alerts</span>
+                                                <span className="text-[10px] font-black bg-primary text-white px-2.5 py-1 rounded-full uppercase tracking-tighter shadow-lg shadow-primary/20">{unreadCount} New Action Items</span>
                                             </div>
                                             <div className="max-h-[350px] overflow-y-auto p-2">
                                                 {unreadCount > 0 ? (
                                                     <div className="space-y-1">
-                                                        <button onClick={() => { handleTabChange("messages"); setIsNotificationsOpen(false); }} className="w-full p-3 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl text-left flex gap-3 items-start group">
-                                                            <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg"><MessageSquare size={16} /></div>
+                                                        <button onClick={() => { handleTabChange("messages"); setIsNotificationsOpen(false); }} className="w-full p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl text-left flex gap-4 items-start group transition-all">
+                                                            <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-xl group-hover:scale-110 transition-transform"><MessageSquare size={18} /></div>
                                                             <div>
-                                                                <div className="text-sm font-bold">New Messages</div>
-                                                                <div className="text-[11px] text-gray-500">You have unread client messages</div>
+                                                                <div className="text-sm font-black text-gray-900 dark:text-gray-100">Client Enquiries</div>
+                                                                <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">You have unread submissions from the website.</div>
                                                             </div>
                                                         </button>
-                                                        <button onClick={() => { handleTabChange("feedbacks"); setIsNotificationsOpen(false); }} className="w-full p-3 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl text-left flex gap-3 items-start group">
-                                                            <div className="p-2 bg-pink-500/10 text-pink-500 rounded-lg"><HeartHandshake size={16} /></div>
+                                                        <button onClick={() => { handleTabChange("feedbacks"); setIsNotificationsOpen(false); }} className="w-full p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl text-left flex gap-4 items-start group transition-all">
+                                                            <div className="p-2.5 bg-pink-500/10 text-pink-500 rounded-xl group-hover:scale-110 transition-transform"><HeartHandshake size={18} /></div>
                                                             <div>
-                                                                <div className="text-sm font-bold">Pending Feedbacks</div>
-                                                                <div className="text-[11px] text-gray-500">New student testimonials to review</div>
+                                                                <div className="text-sm font-black text-gray-900 dark:text-gray-100">Student Testimonials</div>
+                                                                <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">New testimonials pending approval and review.</div>
                                                             </div>
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <div className="p-8 text-center text-gray-400 text-sm">No new notifications</div>
+                                                    <div className="py-12 px-6 text-center text-gray-400 text-sm italic font-medium uppercase tracking-widest flex flex-col items-center gap-3">
+                                                        <ShieldAlert size={32} className="opacity-20" />
+                                                        Everything is up to date
+                                                    </div>
                                                 )}
                                             </div>
                                             <div className="p-3 bg-gray-50 dark:bg-white/5 border-t border-gray-100 dark:border-gray-800">
-                                                <button className="w-full py-2 text-[11px] font-black text-gray-500 hover:text-primary transition-colors text-center uppercase tracking-widest">Mark all as read</button>
+                                                <button className="w-full py-2.5 text-[10px] font-black text-gray-400 dark:text-gray-500 hover:text-primary transition-colors text-center uppercase tracking-widest">Mark everything as seen</button>
                                             </div>
                                         </div>
                                     </>
