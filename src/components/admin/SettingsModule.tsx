@@ -34,10 +34,11 @@ export default function SettingsModule() {
 
     const fetchSessions = async () => {
         setIsRefreshing(true);
+        const sid = localStorage.getItem('admin_sessionId') || '';
         try {
             const [sessRes, devRes] = await Promise.all([
                 fetch("/api/admin/sessions"),
-                fetch("/api/admin/devices")
+                fetch("/api/admin/devices", { headers: { 'X-Session-Id': sid } })
             ]);
             
             if (sessRes.ok) {
@@ -116,6 +117,7 @@ export default function SettingsModule() {
 
     const handleEnrollDevice = async () => {
         setIsEnrolling(true);
+        const sid = localStorage.getItem('admin_sessionId') || '';
         try {
             const ua = window.navigator.userAgent;
             let browserName = "Web Browser";
@@ -135,7 +137,10 @@ export default function SettingsModule() {
 
             const res = await fetch("/api/admin/devices", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "X-Session-Id": sid
+                },
                 body: JSON.stringify({
                     deviceName: `Admin Portal (${deviceType})`,
                     browser: browserName,
@@ -159,8 +164,12 @@ export default function SettingsModule() {
 
     const handleRevokeDevice = async (id: string, isCurrentToken: boolean) => {
         setRevokingId(id);
+        const sid = localStorage.getItem('admin_sessionId') || '';
         try {
-            const res = await fetch(`/api/admin/devices/${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/devices/${id}`, { 
+                method: "DELETE",
+                headers: { "X-Session-Id": sid }
+            });
             if (res.ok) {
                 setTrustedDevices(trustedDevices.filter(d => d.id !== id));
                 if (isCurrentToken) {
