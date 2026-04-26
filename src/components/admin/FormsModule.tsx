@@ -54,6 +54,7 @@ export default function FormsModule() {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [imageToCrop, setImageToCrop] = useState<string | null>(null);
     const [isCropping, setIsCropping] = useState(false);
+    const [isLinkCopied, setIsLinkCopied] = useState<string | null>(null);
 
     useEffect(() => {
         if (view === "list") fetchForms();
@@ -199,6 +200,8 @@ export default function FormsModule() {
     const copyShareLink = () => {
         navigator.clipboard.writeText(`${window.location.origin}/forms/${activeForm?.id}`);
         toast.success("Link copied!");
+        setIsLinkCopied("builder");
+        setTimeout(() => setIsLinkCopied(null), 2000);
     };
 
     const handleExportCSV = (ids?: string[]) => {
@@ -506,7 +509,11 @@ export default function FormsModule() {
                     </div>
 
                     <div className="flex gap-2">
-                        {isPublished && <button onClick={copyShareLink} className="flex gap-2 items-center px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-[10px] font-black uppercase tracking-widest transition"><LinkIcon size={14} /> <span className="hidden lg:inline">Copy Link</span></button>}
+                        {isPublished && (
+                            <button onClick={copyShareLink} className={`flex gap-2 items-center px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition ${isLinkCopied === 'builder' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200'}`}>
+                                <LinkIcon size={14} /> <span className="hidden lg:inline">{isLinkCopied === 'builder' ? 'Copied!' : 'Copy Link'}</span>
+                            </button>
+                        )}
                         <button onClick={() => handleSaveForm()} className="flex gap-2 items-center px-4 py-2 bg-[#3b71ca] text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-[#3b71ca]/20 hover:-translate-y-0.5"><Save size={14} /> <span className="hidden lg:inline">{isPublished ? 'Save' : 'Save Draft'}</span></button>
                         <button onClick={() => handleSaveForm(!isPublished)} className={`flex gap-2 items-center px-4 py-2 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition ${isPublished ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'} shadow-lg hover:-translate-y-0.5`}><span className="hidden sm:inline">{isPublished ? "Unpublish" : "Publish"}</span></button>
                     </div>
@@ -893,6 +900,18 @@ export default function FormsModule() {
                             <div className="flex items-center justify-between pt-5 border-t border-gray-50 dark:border-gray-800 mt-auto">
                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{new Date(form.createdAt).toLocaleDateString()}</span>
                                 <div className="flex items-center gap-1.5">
+                                    <button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(`${window.location.origin}/forms/${form.id}`);
+                                            toast.success("Link copied!");
+                                            setIsLinkCopied(form.id);
+                                            setTimeout(() => setIsLinkCopied(null), 2000);
+                                        }}
+                                        className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${isLinkCopied === form.id ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600' : 'hover:bg-[#3b71ca]/10 hover:text-[#3b71ca] text-gray-400 dark:text-gray-500'}`}
+                                        title="Copy Link"
+                                    >
+                                        <LinkIcon size={14} />
+                                    </button>
                                     <button onClick={() => handleEditForm(form.id)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[#3b71ca]/10 hover:text-[#3b71ca] transition-colors text-gray-400 dark:text-gray-500" title="Edit Form"><Edit size={14} /></button>
                                     <button onClick={() => handleViewResponses(form.id)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[#3b71ca]/10 hover:text-[#3b71ca] transition-colors text-gray-400 dark:text-gray-500" title="View Responses"><Eye size={14} /></button>
                                     <button onClick={() => handleDeleteForm(form.id)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 transition-colors text-gray-400 dark:text-gray-500" title="Delete Form"><Trash2 size={14} /></button>
