@@ -59,6 +59,7 @@ export default function AdminDashboard() {
     const [searchQuery, setSearchQuery] = useState("");
     const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const [notifications, setNotifications] = useState<any[]>([]);
 
     // Sidebar Menu Configuration
     const menuItems = useMemo(() => [
@@ -179,7 +180,8 @@ export default function AdminDashboard() {
                 const res = await fetch("/api/admin/notifications");
                 if (res.ok) {
                     const data = await res.json();
-                    setUnreadCount((data.unreadMessages || 0) + (data.pendingFeedbacks || 0));
+                    setUnreadCount(data.totalNew || 0);
+                    setNotifications(data.items || []);
                 }
             } catch (err) { console.error("Failed to fetch notification counts", err); }
         };
@@ -385,22 +387,26 @@ export default function AdminDashboard() {
                                                 <span className="text-[10px] font-black bg-primary text-white px-2.5 py-1 rounded-full uppercase tracking-tighter shadow-lg shadow-primary/20">{unreadCount} Pending</span>
                                             </div>
                                             <div className="max-h-[350px] overflow-y-auto p-2">
-                                                {unreadCount > 0 ? (
+                                                {notifications.length > 0 ? (
                                                     <div className="space-y-1">
-                                                        <button onClick={() => { handleTabChange("messages"); setIsNotificationsOpen(false); }} className="w-full p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl text-left flex gap-4 items-start group transition-all">
-                                                            <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-xl group-hover:scale-110 transition-transform"><MessageSquare size={18} /></div>
-                                                            <div>
-                                                                <div className="text-sm font-black text-gray-900 dark:text-gray-100">Client Enquiries</div>
-                                                                <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">You have unread submissions from the website.</div>
-                                                            </div>
-                                                        </button>
-                                                        <button onClick={() => { handleTabChange("feedbacks"); setIsNotificationsOpen(false); }} className="w-full p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl text-left flex gap-4 items-start group transition-all">
-                                                            <div className="p-2.5 bg-pink-500/10 text-pink-500 rounded-xl group-hover:scale-110 transition-transform"><HeartHandshake size={18} /></div>
-                                                            <div>
-                                                                <div className="text-sm font-black text-gray-900 dark:text-gray-100">Student Testimonials</div>
-                                                                <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">New testimonials pending approval and review.</div>
-                                                            </div>
-                                                        </button>
+                                                        {notifications.map((item, idx) => (
+                                                            <button key={idx} onClick={() => { handleTabChange(item.actionTab); setIsNotificationsOpen(false); }} className="w-full p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl text-left flex gap-4 items-start group transition-all">
+                                                                <div className={`p-2.5 ${item.bg} ${item.color} rounded-xl group-hover:scale-110 transition-transform`}>
+                                                                    {item.icon === "MessageSquare" && <MessageSquare size={18} />}
+                                                                    {item.icon === "HeartHandshake" && <HeartHandshake size={18} />}
+                                                                    {item.icon === "FileText" && <FileText size={18} />}
+                                                                </div>
+                                                                <div className="flex-1 w-full overflow-hidden">
+                                                                    <div className="text-sm font-black text-gray-900 dark:text-gray-100 flex justify-between items-center gap-2">
+                                                                        <span className="truncate">{item.title}</span>
+                                                                        <span className="text-[9px] text-gray-400 font-bold tracking-widest uppercase shrink-0 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">
+                                                                            {new Date(item.date).toLocaleDateString()}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 pr-4">{item.message}</div>
+                                                                </div>
+                                                            </button>
+                                                        ))}
                                                     </div>
                                                 ) : (
                                                     <div className="py-12 px-6 text-center text-gray-400 text-sm italic font-medium uppercase tracking-widest flex flex-col items-center gap-3">
