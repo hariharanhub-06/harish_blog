@@ -25,6 +25,39 @@ export default function AdminLogin() {
         }
     }, []);
 
+    // Trusted Device Passwordless Bypass
+    useEffect(() => {
+        const checkDeviceToken = async () => {
+            const deviceToken = localStorage.getItem("admin_deviceToken");
+            if (!deviceToken) return;
+            
+            setLoading(true);
+            try {
+                const res = await fetch("/api/admin/auth/device-login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ deviceToken })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        router.push("/admin/dashboard");
+                    }
+                } else {
+                    // Token is invalid/revoked, remove it
+                    localStorage.removeItem("admin_deviceToken");
+                }
+            } catch (err) {
+                console.error("Device token login failed", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkDeviceToken();
+    }, [router]);
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);

@@ -246,6 +246,16 @@ export const adminSessions = pgTable("admin_sessions", {
   lastActive: timestamp("last_active").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
+export const adminTrustedDevices = pgTable("admin_trusted_devices", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userEmail: text("user_email").notNull(),
+  deviceName: text("device_name").notNull(),
+  deviceTokenHash: text("device_token_hash").notNull().unique(), // The hashed crypto token
+  browser: text("browser"),
+  os: text("os"),
+  lastUsedAt: timestamp("last_used_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 export const snackReviews = pgTable("snack_reviews", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),

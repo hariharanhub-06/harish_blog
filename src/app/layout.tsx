@@ -30,6 +30,12 @@ export const metadata: Metadata = {
     "Freelance Developer Coimbatore",
     "Next.js Developer"
   ],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Admin Portal",
+  },
   icons: {
     icon: [
       { url: "/hari-favicon.png" },

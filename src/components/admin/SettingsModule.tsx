@@ -23,18 +23,30 @@ export default function SettingsModule() {
     const [revokingId, setRevokingId] = useState<string | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    const [trustedDevices, setTrustedDevices] = useState<any[]>([]);
+    const [isEnrolling, setIsEnrolling] = useState(false);
+
     const currentSessionId = typeof window !== 'undefined' ? localStorage.getItem('admin_sessionId') : null;
+    const hasTrustedToken = typeof window !== 'undefined' ? !!localStorage.getItem('admin_deviceToken') : false;
 
     const fetchSessions = async () => {
         setIsRefreshing(true);
         try {
-            const res = await fetch("/api/admin/sessions");
-            if (res.ok) {
-                const data = await res.json();
+            const [sessRes, devRes] = await Promise.all([
+                fetch("/api/admin/sessions"),
+                fetch("/api/admin/devices")
+            ]);
+            
+            if (sessRes.ok) {
+                const data = await sessRes.json();
                 setSessions(data);
             }
+            if (devRes.ok) {
+                const devData = await devRes.json();
+                setTrustedDevices(devData);
+            }
         } catch (error) {
-            console.error("Failed to fetch sessions", error);
+            console.error("Failed to fetch security data", error);
         } finally {
             setLoading(false);
             setIsRefreshing(false);
@@ -44,6 +56,66 @@ export default function SettingsModule() {
     useEffect(() => {
         fetchSessions();
     }, []);
+
+    const handleEnrollDevice = async () => {
+        setIsEnrolling(true);
+        try {
+            const ua = window.navigator.userAgent;
+            let browserName = "Web Browser";
+            if (ua.includes("Chrome")) browserName = "Chrome";
+            else if (ua.includes("Safari")) browserName = "Safari";
+            else if (ua.includes("Firefox")) browserName = "Firefox";
+
+            let osName = "Unknown OS";
+            if (ua.includes("Win")) osName = "Windows";
+            else if (ua.includes("Mac")) osName = "MacOS";
+            else if (ua.includes("Linux")) osName = "Linux";
+            else if (ua.includes("Android")) osName = "Android";
+            else if (ua.includes("like Mac")) osName = "iOS";
+
+            const isMobile = /Mobi|Android/i.test(ua);
+            const deviceType = isMobile ? "Mobile App" : "Desktop App";
+
+            const res = await fetch("/api/admin/devices", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    deviceName: `Admin Portal (${deviceType})`,
+                    browser: browserName,
+                    os: osName
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.rawToken) {
+                    localStorage.setItem("admin_deviceToken", data.rawToken);
+                    fetchSessions(); // Refresh list to show new device
+                }
+            }
+        } catch (error) {
+            console.error("Failed to enroll device", error);
+        } finally {
+            setIsEnrolling(false);
+        }
+    };
+
+    const handleRevokeDevice = async (id: string, isCurrentToken: boolean) => {
+        setRevokingId(id);
+        try {
+            const res = await fetch(`/api/admin/devices/${id}`, { method: "DELETE" });
+            if (res.ok) {
+                setTrustedDevices(trustedDevices.filter(d => d.id !== id));
+                if (isCurrentToken) {
+                    localStorage.removeItem("admin_deviceToken");
+                }
+            }
+        } catch (error) {
+            console.error("Failed to revoke device", error);
+        } finally {
+            setRevokingId(null);
+        }
+    };
 
     const handleRevoke = async (id: string) => {
         setRevokingId(id);
@@ -180,6 +252,90 @@ export default function SettingsModule() {
                                         title={isCurrent ? "Logout from this device" : "Force logout device"}
                                     >
                                         {revokingId === session.id ? (
+                                            <RefreshCw size={18} className="animate-spin" />
+                                        ) : (
+                                            <Trash2 size={18} />
+                                        )}
+                                    </button>
+                                </motion.div>
+                            );
+                        })}
+                    </AnimatePresence>
+                </div>
+            </div>
+
+            {/* Trusted Devices (Passwordless Auth) */}
+            <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                    <div className="space-y-4 max-w-2xl">
+                        <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                            🔑 Passwordless Devices
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-black">{trustedDevices.length} Enrolled</span>
+                        </h3>
+                        <p className="text-xs font-bold text-gray-400 leading-relaxed uppercase tracking-wider">
+                            Enrolled mobile apps and devices can access the Admin Portal natively without passwords. 
+                            Turn your web portal into an "Always-On App" by adding it to your home screen and trusting this device!
+                        </p>
+                    </div>
+                    {!hasTrustedToken && (
+                        <button
+                            onClick={handleEnrollDevice}
+                            disabled={isEnrolling}
+                            className="shrink-0 px-6 py-3 rounded-2xl bg-emerald-50 text-emerald-600 font-black text-xs uppercase tracking-widest hover:bg-emerald-100 transition-all flex items-center justify-center gap-2 border border-emerald-100 shadow-sm disabled:opacity-50"
+                        >
+                            {isEnrolling ? <RefreshCw size={16} className="animate-spin" /> : <Smartphone size={16} />}
+                            Trust This App / Device
+                        </button>
+                    )}
+                </div>
+
+                <div className="grid gap-4">
+                    <AnimatePresence mode="popLayout">
+                        {trustedDevices.length === 0 && (
+                            <div className="text-center p-8 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">No devices have been enrolled for passwordless access yet.</p>
+                            </div>
+                        )}
+                        {trustedDevices.map((device) => {
+                            const Icon = getDeviceIcon(device.os);
+                            // We don't have a strict match, but we can assume if hasTrustedToken is true and we just enrolled it, 
+                            // we'll just allow revocation which also wipes local storage.
+                            const isPotentiallyCurrent = hasTrustedToken && device.os.includes(currentSessionId ? "!" : ""); // simplified
+
+                            return (
+                                <motion.div
+                                    key={device.id}
+                                    layout
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className={`p-6 rounded-3xl border bg-gray-50/50 border-gray-100 flex items-center justify-between group hover:shadow-md transition-all`}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className={`p-4 rounded-2xl bg-white text-emerald-500 shadow-sm border border-emerald-100`}>
+                                            <Icon size={24} />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-black text-gray-900">{device.deviceName}</span>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                <span>{device.browser} on {device.os}</span>
+                                                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                                <span>Authorized: {new Date(device.createdAt).toLocaleDateString()}</span>
+                                                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                                <span>Last Used: {device.lastUsedAt ? new Date(device.lastUsedAt).toLocaleDateString() : 'Never'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => handleRevokeDevice(device.id, isPotentiallyCurrent)}
+                                        disabled={revokingId === device.id}
+                                        className={`p-3 rounded-2xl transition-all text-gray-300 hover:text-red-500 hover:bg-red-50`}
+                                        title="Revoke Passwordless Access"
+                                    >
+                                        {revokingId === device.id ? (
                                             <RefreshCw size={18} className="animate-spin" />
                                         ) : (
                                             <Trash2 size={18} />
