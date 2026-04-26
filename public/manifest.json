@@ -1,21 +1,26 @@
 {
-    "name": "Hariharanhub Admin Portal",
-    "short_name": "Admin",
+    "name": "Hariharanhub Admin",
+    "short_name": "Admin HQ",
     "description": "Secure Administration Portal",
-    "start_url": "/admin",
+    "start_url": "/admin/login",
+    "scope": "/admin",
     "display": "standalone",
-    "background_color": "#ffffff",
+    "orientation": "portrait",
+    "background_color": "#1e1e1e",
     "theme_color": "#3b71ca",
     "icons": [
         {
-            "src": "/vite.svg",
+            "src": "/admin-icon.png",
             "sizes": "192x192",
-            "type": "image/svg+xml"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
-            "src": "/vite.svg",
+            "src": "/admin-icon.png",
             "sizes": "512x512",
-            "type": "image/svg+xml"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ]
 }
+

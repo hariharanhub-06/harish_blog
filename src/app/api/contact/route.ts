@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { contactSubmissions } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { sendEmail } from "@/lib/mail";
+import { sendAdminPushNotification } from "@/lib/webpush";
 
 export async function POST(req: Request) {
     try {
@@ -25,6 +26,13 @@ export async function POST(req: Request) {
             category: body.category || "Business Digital Solution",
             status: "New"
         });
+
+        // Fire push notification to admin's phone (non-blocking)
+        sendAdminPushNotification(
+            `📩 New Client Enquiry`,
+            `From ${body.name} (${body.email}) - ${body.requestedService || body.subject || 'No Subject'}`,
+            `/admin/dashboard#messages`
+        ).catch(() => {});
 
         // Send automatic acknowledgement email (non-blocking)
         try {

@@ -49,7 +49,8 @@
         "stream-chat-react": "^13.13.6",
         "tailwind-merge": "^2.6.0",
         "tailwindcss-animate": "^1.0.7",
-        "vanilla-tilt": "^1.8.1"
+        "vanilla-tilt": "^1.8.1",
+        "web-push": "^3.6.7"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3",
@@ -58,6 +59,7 @@
         "@types/nodemailer": "^6.4.17",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "@types/web-push": "^3.6.4",
         "autoprefixer": "^10.4.17",
         "dotenv": "^16.4.7",
         "drizzle-kit": "^0.30.0",

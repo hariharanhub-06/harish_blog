@@ -169,6 +169,15 @@ export default function AdminDashboard() {
         return () => clearInterval(interval);
     }, [user, loading, logout]);
 
+    // Register Service Worker for PWA push notifications
+    useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(err => {
+                console.warn('[PWA] Service Worker registration failed:', err);
+            });
+        }
+    }, []);
+
     // Sync tab with URL hash and fetch notifications
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;

@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { forms, formQuestions, formResponses, formResponseAnswers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { sendAdminPushNotification } from "@/lib/webpush";
 
 export const dynamic = 'force-dynamic';
 
@@ -93,6 +94,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
                 // if (channel === 'email') await sendEmail(..., finalMessage);
             }
         }
+
+        // 6. Fire push notification to admin's phone (non-blocking)
+        sendAdminPushNotification(
+            `📋 New Form Response`,
+            `Someone just submitted: "${form.title}"`,
+            `/admin/dashboard#forms`
+        ).catch(() => {}); // Fire-and-forget
 
         return NextResponse.json({ success: true, responseId, action: form.postSubmissionAction });
     } catch (error) {

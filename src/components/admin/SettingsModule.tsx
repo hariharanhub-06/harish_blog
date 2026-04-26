@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { Shield, Smartphone, Monitor, Globe, Trash2, LogOut, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
+import { Shield, Smartphone, Monitor, Globe, Trash2, LogOut, RefreshCw, CheckCircle2, XCircle, BellRing } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { NEXT_PUBLIC_VAPID_KEY } from "@/lib/webpush";
 
 interface Session {
     id: string;
@@ -25,6 +26,8 @@ export default function SettingsModule() {
 
     const [trustedDevices, setTrustedDevices] = useState<any[]>([]);
     const [isEnrolling, setIsEnrolling] = useState(false);
+    const [isPushEnrolling, setIsPushEnrolling] = useState(false);
+    const [pushStatus, setPushStatus] = useState<"unsupported" | "default" | "granted" | "denied">("default");
 
     const currentSessionId = typeof window !== 'undefined' ? localStorage.getItem('admin_sessionId') : null;
     const hasTrustedToken = typeof window !== 'undefined' ? !!localStorage.getItem('admin_deviceToken') : false;
@@ -55,7 +58,61 @@ export default function SettingsModule() {
 
     useEffect(() => {
         fetchSessions();
+
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            setPushStatus(Notification.permission);
+        } else {
+            setPushStatus("unsupported");
+        }
     }, []);
+
+    const urlBase64ToUint8Array = (base64String: string) => {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+      
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+      
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    };
+
+    const handleEnablePush = async () => {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+        
+        setIsPushEnrolling(true);
+        try {
+            const swRegistration = await navigator.serviceWorker.register('/sw.js');
+            const permission = await window.Notification.requestPermission();
+            setPushStatus(permission);
+
+            if (permission === 'granted') {
+                const subscription = await swRegistration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(NEXT_PUBLIC_VAPID_KEY)
+                });
+
+                await fetch("/api/admin/push", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ subscription })
+                });
+                
+                alert("Push Notifications securely enabled for this device!");
+            } else {
+                alert("Notification permissions denied by user or OS.");
+            }
+        } catch (error) {
+            console.error("Failed to setup push subs", error);
+            alert("Error enabling push notifications. Check browser settings.");
+        } finally {
+            setIsPushEnrolling(false);
+        }
+    };
 
     const handleEnrollDevice = async () => {
         setIsEnrolling(true);
@@ -277,16 +334,28 @@ export default function SettingsModule() {
                             Turn your web portal into an "Always-On App" by adding it to your home screen and trusting this device!
                         </p>
                     </div>
-                    {!hasTrustedToken && (
-                        <button
-                            onClick={handleEnrollDevice}
-                            disabled={isEnrolling}
-                            className="shrink-0 px-6 py-3 rounded-2xl bg-emerald-50 text-emerald-600 font-black text-xs uppercase tracking-widest hover:bg-emerald-100 transition-all flex items-center justify-center gap-2 border border-emerald-100 shadow-sm disabled:opacity-50"
-                        >
-                            {isEnrolling ? <RefreshCw size={16} className="animate-spin" /> : <Smartphone size={16} />}
-                            Trust This App / Device
-                        </button>
-                    )}
+                    <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
+                        {pushStatus !== "granted" && pushStatus !== "unsupported" && (
+                            <button
+                                onClick={handleEnablePush}
+                                disabled={isPushEnrolling}
+                                className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-blue-50 text-blue-600 font-black text-xs uppercase tracking-widest hover:bg-blue-100 transition-all flex items-center justify-center gap-2 border border-blue-100 shadow-sm disabled:opacity-50"
+                            >
+                                {isPushEnrolling ? <RefreshCw size={16} className="animate-spin" /> : <BellRing size={16} />}
+                                Enable Notifications
+                            </button>
+                        )}
+                        {!hasTrustedToken && (
+                            <button
+                                onClick={handleEnrollDevice}
+                                disabled={isEnrolling}
+                                className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-emerald-50 text-emerald-600 font-black text-xs uppercase tracking-widest hover:bg-emerald-100 transition-all flex items-center justify-center gap-2 border border-emerald-100 shadow-sm disabled:opacity-50"
+                            >
+                                {isEnrolling ? <RefreshCw size={16} className="animate-spin" /> : <Smartphone size={16} />}
+                                Trust This App
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="grid gap-4">
