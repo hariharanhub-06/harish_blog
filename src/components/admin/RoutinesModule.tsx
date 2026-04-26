@@ -248,8 +248,8 @@ export default function RoutinesModule() {
     return (
         <div className="space-y-6">
             {/* Header + Unified Filter Bar */}
-            <div className="flex flex-col gap-6 bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 p-8 rounded-2xl shadow-sm transition-colors duration-300">
-                <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-6 bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 p-6 md:p-8 rounded-2xl shadow-sm transition-colors duration-300">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-[#3b71ca]/10 rounded-xl">
                             <ListTodo className="w-6 h-6 text-[#3b71ca]" />
@@ -265,7 +265,7 @@ export default function RoutinesModule() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                         <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl transition-colors">
                             <button
                                 onClick={() => setView("grid")}

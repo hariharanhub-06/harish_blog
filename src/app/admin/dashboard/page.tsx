@@ -27,7 +27,8 @@ import {
     CheckSquare,
     Settings,
     User,
-    Video
+    Video,
+    Pin
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -60,6 +61,7 @@ export default function AdminDashboard() {
     const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [notifications, setNotifications] = useState<any[]>([]);
+    const [pinnedItems, setPinnedItems] = useState<string[]>([]);
 
     // Sidebar Menu Configuration
     const menuItems = useMemo(() => [
@@ -86,7 +88,18 @@ export default function AdminDashboard() {
     useEffect(() => {
         const savedTheme = localStorage.getItem("admin-theme") as any;
         if (savedTheme) setTheme(savedTheme);
+        // Load pinned items from localStorage
+        const pinned = localStorage.getItem("admin-pinned-items");
+        if (pinned) setPinnedItems(JSON.parse(pinned));
     }, []);
+
+    const togglePin = (id: string) => {
+        setPinnedItems(prev => {
+            const next = prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id];
+            localStorage.setItem("admin-pinned-items", JSON.stringify(next));
+            return next;
+        });
+    };
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -260,25 +273,67 @@ export default function AdminDashboard() {
                     </Link>
                 </div>
 
-                <nav className="flex-1 px-3 space-y-1 mt-6 overflow-y-auto pb-6 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800">
-                    {menuItems.filter(item => item.id !== "divider").map((item) => (
-                        <button
-                            key={item.id}
-                            onClick={() => handleTabChange(item.id as Tab)}
-                            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-bold text-sm transition-all group ${activeTab === item.id
-                                ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-sm"
-                                : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary"
-                                }`}
-                        >
-                            <item.icon size={18} className={`${activeTab === item.id ? "text-primary" : "text-gray-400 dark:text-gray-500 group-hover:text-primary"} transition-colors`} />
-                            <span className="flex-1 text-left">{item.title}</span>
-                            {item.badge && item.badge > 0 && (
-                                <span className="bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">
-                                    {item.badge}
-                                </span>
-                            )}
-                        </button>
-                    ))}
+                <nav className="flex-1 px-3 mt-4 overflow-y-auto pb-6 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800">
+                    {(() => {
+                        const nonDivider = menuItems.filter(item => item.id !== "divider");
+                        const pinned = nonDivider.filter(item => pinnedItems.includes(item.id));
+                        const unpinned = nonDivider.filter(item => !pinnedItems.includes(item.id));
+
+                        const renderItem = (item: typeof nonDivider[0]) => {
+                            const isPinned = pinnedItems.includes(item.id);
+                            return (
+                                <div key={item.id} className="relative group/row">
+                                    <button
+                                        onClick={() => handleTabChange(item.id as Tab)}
+                                        className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-bold text-sm transition-all group pr-10 ${activeTab === item.id
+                                                ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-sm"
+                                                : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary"
+                                            }`}
+                                    >
+                                        <item.icon size={17} className={`shrink-0 ${activeTab === item.id ? "text-primary" : "text-gray-400 dark:text-gray-500 group-hover:text-primary"} transition-colors`} />
+                                        <span className="flex-1 text-left">{item.title}</span>
+                                        {item.badge && item.badge > 0 && (
+                                            <span className="bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">
+                                                {item.badge}
+                                            </span>
+                                        )}
+                                    </button>
+                                    {/* Pin Button — visible on hover */}
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); togglePin(item.id); }}
+                                        title={isPinned ? "Unpin" : "Pin to top"}
+                                        className={`absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-all ${isPinned
+                                                ? "opacity-100 text-primary"
+                                                : "opacity-0 group-hover/row:opacity-100 text-gray-400 hover:text-primary"
+                                            }`}
+                                    >
+                                        <Pin size={12} className={isPinned ? "fill-primary" : ""} />
+                                    </button>
+                                </div>
+                            );
+                        };
+
+                        return (
+                            <>
+                                {pinned.length > 0 && (
+                                    <>
+                                        <div className="px-2 pb-1 pt-2">
+                                            <span className="text-[9px] font-black text-primary uppercase tracking-[0.15em] flex items-center gap-1.5">
+                                                <Pin size={8} className="fill-primary" /> Pinned
+                                            </span>
+                                        </div>
+                                        <div className="space-y-0.5 mb-1">
+                                            {pinned.map(renderItem)}
+                                        </div>
+                                        <div className="mx-2 mb-3 border-t border-gray-100 dark:border-gray-800" />
+                                    </>
+                                )}
+                                <div className="space-y-0.5">
+                                    {unpinned.map(renderItem)}
+                                </div>
+                            </>
+                        );
+                    })()}
                 </nav>
 
                 <div className="p-4 border-t border-gray-100 dark:border-gray-800">
@@ -294,8 +349,8 @@ export default function AdminDashboard() {
 
             {/* Main Content */}
             <main className="flex-1 lg:ml-[260px] w-full overflow-x-hidden min-h-screen relative flex flex-col">
-                <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 h-20 transition-colors duration-300">
-                    <div className="max-w-7xl mx-auto px-6 h-full flex justify-between items-center">
+                <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 h-24 transition-colors duration-300">
+                    <div className="max-w-7xl mx-auto px-6 md:px-8 h-full flex justify-between items-center">
                         <div className="flex items-center gap-4 flex-1">
                             <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
                                 <Menu size={20} />
