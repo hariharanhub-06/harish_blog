@@ -159,10 +159,10 @@ function SortableColumn({ column, tasks, onEdit, onAddTask, onEditTask, onDelete
                     className="flex items-center gap-2 cursor-grab active:cursor-grabbing flex-1 overflow-hidden"
                 >
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: column.color }} />
-                    <h3 className="font-black text-gray-900 uppercase text-[10px] tracking-widest truncate">
+                    <h3 className="font-black text-gray-900 dark:text-white uppercase text-[10px] tracking-widest truncate">
                         {column.name}
                     </h3>
-                    <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full text-[9px] shrink-0">
+                    <span className="bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full text-[9px] shrink-0">
                         {tasks.length}
                     </span>
                 </div>
@@ -427,7 +427,7 @@ export default function KanbanModule() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => setIsManagingColumns(!isManagingColumns)}
-                        className={`px-4 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${isManagingColumns ? 'bg-primary text-white shadow-lg' : 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white border-2 border-gray-900 dark:border-white'}`}
+                        className={`px-4 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${isManagingColumns ? 'bg-primary text-white shadow-lg' : 'bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white border-2 border-gray-900 dark:border-white/20 hover:border-primary/50'}`}
                     >
                         <Settings2 size={16} /> {isManagingColumns ? "Close Editor" : "Edit Columns"}
                     </button>
@@ -505,15 +505,15 @@ export default function KanbanModule() {
                 }}>
                     {activeId ? (
                         activeType === "Column" ? (
-                            <div className="bg-white p-3 rounded-xl shadow-2xl border-2 border-primary w-[200px] opacity-90 cursor-grabbing">
+                            <div className="bg-white dark:bg-[#1e1e1e] p-3 rounded-xl shadow-2xl border-2 border-primary w-[200px] opacity-90 cursor-grabbing">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: columns.find(c => c.id === activeId)?.color }} />
-                                    <span className="font-black uppercase text-[9px] tracking-widest">{columns.find(c => c.id === activeId)?.name}</span>
+                                    <span className="font-black uppercase text-[9px] tracking-widest dark:text-white">{columns.find(c => c.id === activeId)?.name}</span>
                                 </div>
                             </div>
                         ) : (
-                            <div className="bg-white p-4 rounded-2xl shadow-2xl border-2 border-primary w-[240px] opacity-90 cursor-grabbing">
-                                <h4 className="font-bold text-gray-900 text-xs">{tasks.find(t => t.id === activeId)?.title}</h4>
+                            <div className="bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl shadow-2xl border-2 border-primary w-[240px] opacity-90 cursor-grabbing">
+                                <h4 className="font-bold text-gray-900 dark:text-white text-xs">{tasks.find(t => t.id === activeId)?.title}</h4>
                             </div>
                         )
                     ) : null}
@@ -568,7 +568,7 @@ export default function KanbanModule() {
                                     <select
                                         value={editingTask.columnId}
                                         onChange={(e) => setEditingTask({ ...editingTask, columnId: e.target.value })}
-                                        className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 font-black uppercase text-[9px] tracking-widest focus:ring-2 focus:ring-primary"
+                                        className="w-full bg-gray-50 dark:bg-gray-800/50 border-0 rounded-xl px-4 py-3 font-black uppercase text-[9px] tracking-widest focus:ring-2 focus:ring-primary dark:text-white transition-colors"
                                     >
                                         {columns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
@@ -622,9 +622,9 @@ export default function KanbanModule() {
                                         />
                                     ))}
                                 </div>
-                                <div className="flex items-center gap-3 mt-2 bg-gray-50 p-2 rounded-xl">
+                                <div className="flex items-center gap-3 mt-2 bg-gray-50 dark:bg-gray-800/50 p-2 rounded-xl">
                                     <input type="color" value={editingColumn.color || "#3b82f6"} onChange={(e) => setEditingColumn({ ...editingColumn, color: e.target.value })} className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0" />
-                                    <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest">{editingColumn.color || "#3b82f6"}</span>
+                                    <span className="text-[9px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-widest">{editingColumn.color || "#3b82f6"}</span>
                                 </div>
                             </div>
                             <button

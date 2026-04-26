@@ -607,12 +607,12 @@ export default function FinanceModule() {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <StatCard title="Total Income" value={totalIncome} icon={TrendingUp} color="emerald" />
-                <StatCard title="Total Expenses" value={totalExpenseWithDebt} icon={TrendingDown} color="red" />
-                <StatCard title="Total Balance" value={totalBalance} icon={Wallet} color="indigo" />
-                <StatCard title="Debt Balance" value={debtBalance} icon={CreditCard} color="blue" />
-                <StatCard title="Total Receivables" value={loanBalance} icon={TrendingUp} color="emerald" />
-                <StatCard title="Savings Rate" value={`${savingsRate}%`} icon={LayoutDashboard} color="indigo" />
+                <StatCard title="Total Income" value={totalIncome} icon={TrendingUp} color="emerald" gradient="from-emerald-500/20 to-teal-500/20" />
+                <StatCard title="Total Expenses" value={totalExpenseWithDebt} icon={TrendingDown} color="red" gradient="from-rose-500/20 to-orange-500/20" />
+                <StatCard title="Total Balance" value={totalBalance} icon={Wallet} color="indigo" gradient="from-[#3b71ca]/20 to-blue-500/20" />
+                <StatCard title="Debt Balance" value={debtBalance} icon={CreditCard} color="blue" gradient="from-blue-600/20 to-indigo-600/20" />
+                <StatCard title="Total Receivables" value={loanBalance} icon={TrendingUp} color="emerald" gradient="from-teal-600/20 to-emerald-600/20" />
+                <StatCard title="Savings Rate" value={`${savingsRate}%`} icon={Zap} color="indigo" gradient="from-indigo-600/20 to-purple-600/20" />
             </div>
 
             {/* Shared Date Filter */}
@@ -1878,40 +1878,50 @@ export default function FinanceModule() {
     );
 }
 
-function StatCard({ title, value, icon: Icon, color }: any) {
+function StatCard({ title, value, icon: Icon, color, gradient }: any) {
     const colors: any = {
-        emerald: "bg-emerald-500 shadow-emerald-500/20",
-        red: "bg-rose-500 shadow-rose-500/20",
-        orange: "bg-amber-500 shadow-amber-500/20",
-        blue: "bg-blue-500 shadow-blue-500/20",
-        indigo: "bg-[#3b71ca] shadow-[#3b71ca]/20"
+        emerald: "bg-emerald-500 shadow-emerald-500/20 text-emerald-500",
+        red: "bg-rose-500 shadow-rose-500/20 text-rose-500",
+        orange: "bg-amber-500 shadow-amber-500/20 text-amber-500",
+        blue: "bg-blue-500 shadow-blue-500/20 text-blue-500",
+        indigo: "bg-[#3b71ca] shadow-[#3b71ca]/20 text-[#3b71ca]"
+    };
+
+    const bgColors: any = {
+        emerald: "bg-emerald-500",
+        red: "bg-rose-500",
+        orange: "bg-amber-500",
+        blue: "bg-blue-500",
+        indigo: "bg-[#3b71ca]"
     };
 
     return (
-        <div className="relative group overflow-hidden bg-white dark:bg-[#1e1e1e] rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
-            <div className={`absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full opacity-[0.03] dark:opacity-[0.07] ${colors[color]}`} />
+        <div className="relative group overflow-hidden bg-white dark:bg-[#1e1e1e] rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            {/* Background Gradient Mesh */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+            <div className={`absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl opacity-[0.05] dark:opacity-[0.1] ${bgColors[color]}`} />
 
-            <div className="relative flex items-center gap-5">
-                <div className={`w-14 h-14 rounded-2xl ${colors[color]} flex items-center justify-center text-white shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
-                    <Icon size={24} strokeWidth={2.5} />
+            <div className="relative flex items-center gap-6">
+                <div className={`w-16 h-16 rounded-2xl ${bgColors[color]} flex items-center justify-center text-white shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
+                    <Icon size={28} strokeWidth={2.5} />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{title}</p>
-                    <h4 className="text-2xl font-black text-gray-900 dark:text-white mt-1 flex items-baseline gap-1">
-                        <span className="text-sm font-bold opacity-40">₹</span>
+                    <p className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">{title}</p>
+                    <h4 className="text-3xl font-black text-gray-900 dark:text-white mt-1 flex items-baseline gap-1 tracking-tight">
+                        {!title.includes('%') && <span className="text-sm font-bold opacity-30">₹</span>}
                         {typeof value === 'number' ? value.toLocaleString() : value}
                     </h4>
                 </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800/50 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                    <div className={`w-1.5 h-1.5 rounded-full ${colors[color]} animate-pulse`} />
-                    <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Live Metrics</span>
+            <div className="mt-8 pt-6 border-t border-gray-50 dark:border-gray-800/50 flex items-center justify-between relative">
+                <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${bgColors[color]} animate-pulse shadow-[0_0_8px_rgba(0,0,0,0.2)] shadow-${color}-400`} />
+                    <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Real-time Data</span>
                 </div>
-                <div className="text-[9px] font-black text-gray-300 dark:text-gray-600 group-hover:text-primary transition-colors">
-                    {color.toUpperCase()}
+                <div className={`text-[10px] font-black ${colors[color]} opacity-40 group-hover:opacity-100 transition-all uppercase tracking-widest flex items-center gap-1`}>
+                    Insight <ArrowRight size={10} />
                 </div>
             </div>
         </div>

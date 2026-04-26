@@ -168,33 +168,33 @@ export default function ClientProjectsModule() {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Dashboard Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Total Projects</p>
-                    <p className="text-3xl font-black text-gray-900">{totalProjects}</p>
+                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 dark:text-gray-500 tracking-widest mb-1">Total Projects</p>
+                    <p className="text-3xl font-black text-gray-900 dark:text-white">{totalProjects}</p>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Completed</p>
+                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 dark:text-gray-500 tracking-widest mb-1">Completed</p>
                     <p className="text-3xl font-black text-emerald-500">{completed}</p>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">In Progress</p>
+                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 dark:text-gray-500 tracking-widest mb-1">In Progress</p>
                     <p className="text-3xl font-black text-blue-500">{inProgress}</p>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Fully Paid</p>
+                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 dark:text-gray-500 tracking-widest mb-1">Fully Paid</p>
                     <p className="text-3xl font-black text-purple-500">{fullyPaid}</p>
                 </div>
             </div>
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h2 className="text-xl font-black text-gray-900 flex items-center gap-2 uppercase tracking-tighter">
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2 uppercase tracking-tighter">
                         Active Client Projects ({projects.length})
-                        <button onClick={() => fetchProjects()} className="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-all">
+                        <button onClick={() => fetchProjects()} className="p-1.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 rounded-lg transition-all">
                             <RefreshCcw size={14} className={fetching ? "animate-spin" : ""} />
                         </button>
                     </h2>
-                    <p className="text-secondary text-xs font-bold mt-0.5">Manage delivery, payments, and legal agreements</p>
+                    <p className="text-secondary dark:text-gray-400 text-xs font-bold mt-0.5">Manage delivery, payments, and legal agreements</p>
                 </div>
                 <button
                     onClick={handleCreateWrapper}
@@ -209,9 +209,9 @@ export default function ClientProjectsModule() {
                 {projects.map((project) => (
                     <div
                         key={project.id}
-                        className={`bg-white p-5 rounded-[2rem] border-2 border-gray-50 shadow-sm hover:shadow-xl transition-all flex flex-col gap-4 hover:border-primary/20 relative group h-full ${project.status === "Project Completed" ? "border-l-[6px] border-l-emerald-500 bg-emerald-50/5" :
-                            project.status === "Project Dropped" ? "border-l-[6px] border-l-red-500 bg-red-50/5" :
-                                project.status === "In progress" ? "border-l-[6px] border-l-amber-500 bg-amber-50/5" : ""
+                        className={`bg-white dark:bg-[#1e1e1e] p-5 rounded-[2rem] border-2 border-gray-50 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all flex flex-col gap-4 hover:border-primary/20 relative group h-full ${project.status === "Project Completed" ? "border-l-[6px] border-l-emerald-500 bg-emerald-50/5 dark:bg-emerald-500/5" :
+                            project.status === "Project Dropped" ? "border-l-[6px] border-l-red-500 bg-red-50/5 dark:bg-red-500/5" :
+                                project.status === "In progress" ? "border-l-[6px] border-l-amber-500 bg-amber-50/5 dark:bg-amber-500/5" : ""
                             }`}
                     >
                         <div className="flex items-center gap-4 shrink-0 min-w-0">
@@ -219,8 +219,8 @@ export default function ClientProjectsModule() {
                                 {project.clientName?.charAt(0) || 'P'}
                             </div>
                             <div className="min-w-0">
-                                <h3 className="font-black text-gray-900 truncate text-sm tracking-tight">{project.title || 'Untitled Project'}</h3>
-                                <div className="flex items-center gap-1.5 text-gray-500 font-bold text-[11px] mt-0.5">
+                                <h3 className="font-black text-gray-900 dark:text-white truncate text-sm tracking-tight">{project.title || 'Untitled Project'}</h3>
+                                <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 font-bold text-[11px] mt-0.5">
                                     <User size={11} className="shrink-0 text-primary/60" />
                                     <span className="truncate">{project.clientName || 'Unknown Client'}</span>
                                 </div>
@@ -228,13 +228,13 @@ export default function ClientProjectsModule() {
                         </div>
 
                         <div className="flex flex-col gap-2 w-full">
-                            <div className="flex flex-col gap-1.5 p-3 bg-gray-50/80 rounded-2xl border border-gray-100">
+                            <div className="flex flex-col gap-1.5 p-3 bg-gray-50/80 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-gray-800">
                                 <div className="flex justify-between items-center text-[10px]">
-                                    <span className="font-black uppercase tracking-widest text-secondary/40">Investment</span>
-                                    <span className="font-black text-gray-900 italic">₹{project.price?.toLocaleString()}</span>
+                                    <span className="font-black uppercase tracking-widest text-secondary/40 dark:text-gray-500">Investment</span>
+                                    <span className="font-black text-gray-900 dark:text-white italic">₹{project.price?.toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-[10px]">
-                                    <span className="font-black uppercase tracking-widest text-secondary/40">Payment</span>
+                                    <span className="font-black uppercase tracking-widest text-secondary/40 dark:text-gray-500">Payment</span>
                                     <span className={`font-black uppercase tracking-widest ${project.paymentStatus === 'fully_paid' ? 'text-emerald-600' : 'text-amber-600'}`}>
                                         {(project.paymentStatus || 'pending').replace('_', ' ')}
                                     </span>

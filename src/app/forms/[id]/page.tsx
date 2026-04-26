@@ -427,13 +427,18 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                                     </div>
                                                 )}
                                                 <input type="file" className="hidden"
-                                                    onChange={(e) => {
+                                                    onChange={async (e) => {
                                                         const file = e.target.files?.[0];
                                                         if (!file) return;
-                                                        toast.loading('Optimizing image...', { id: 'upload' });
-                                                        const reader = new FileReader();
-                                                        reader.onloadend = () => { handleAnswerChange(q.id, reader.result as string); toast.success('Upload complete!', { id: 'upload' }); };
-                                                        reader.readAsDataURL(file);
+                                                        const tid = toast.loading('Uploading attachment...', { id: 'upload' });
+                                                        try {
+                                                            const { uploadToImageKit } = await import("@/lib/imagekit-upload");
+                                                            const url = await uploadToImageKit(file, 'responses');
+                                                            handleAnswerChange(q.id, url);
+                                                            toast.success('Upload complete!', { id: tid });
+                                                        } catch (error) {
+                                                            toast.error('Upload failed', { id: tid });
+                                                        }
                                                     }}
                                                 />
                                             </label>

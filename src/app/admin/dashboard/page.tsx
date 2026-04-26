@@ -57,7 +57,7 @@ export default function AdminDashboard() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
-    const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+    const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
     // Sidebar Menu Configuration
@@ -83,19 +83,34 @@ export default function AdminDashboard() {
 
     // Theme Management
     useEffect(() => {
+        const savedTheme = localStorage.getItem("admin-theme") as any;
+        if (savedTheme) setTheme(savedTheme);
+    }, []);
+
+    useEffect(() => {
         const root = window.document.documentElement;
         const applyTheme = () => {
-            if (theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+            const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+            if (isDark) {
                 root.classList.add("dark");
+                root.style.colorScheme = "dark";
             } else {
                 root.classList.remove("dark");
+                root.style.colorScheme = "light";
             }
+            localStorage.setItem("admin-theme", theme);
         };
         applyTheme();
         if (theme === "system") {
             const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-            mediaQuery.addEventListener("change", applyTheme);
-            return () => mediaQuery.removeEventListener("change", applyTheme);
+            const listener = (e: MediaQueryListEvent) => {
+                if (theme === "system") {
+                    if (e.matches) root.classList.add("dark");
+                    else root.classList.remove("dark");
+                }
+            };
+            mediaQuery.addEventListener("change", listener);
+            return () => mediaQuery.removeEventListener("change", listener);
         }
     }, [theme]);
 
@@ -366,8 +381,8 @@ export default function AdminDashboard() {
                                         <div className="fixed inset-0 z-40" onClick={() => setIsNotificationsOpen(false)} />
                                         <div className="absolute top-full right-0 mt-3 w-85 bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-800 rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                                             <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-white/3">
-                                                <span className="font-black text-xs uppercase tracking-widest text-gray-900 dark:text-white">Recent Alerts</span>
-                                                <span className="text-[10px] font-black bg-primary text-white px-2.5 py-1 rounded-full uppercase tracking-tighter shadow-lg shadow-primary/20">{unreadCount} New Action Items</span>
+                                                <span className="font-black text-xs uppercase tracking-widest text-gray-900 dark:text-white">Recent Enquiries</span>
+                                                <span className="text-[10px] font-black bg-primary text-white px-2.5 py-1 rounded-full uppercase tracking-tighter shadow-lg shadow-primary/20">{unreadCount} Pending</span>
                                             </div>
                                             <div className="max-h-[350px] overflow-y-auto p-2">
                                                 {unreadCount > 0 ? (

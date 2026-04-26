@@ -151,25 +151,25 @@ export default function FeedbackModule() {
             {/* Header Area */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h2 className="text-xl font-black text-gray-900 flex items-center gap-3">
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-3 uppercase tracking-tighter">
                         Student Testimonials
-                        <span className="text-secondary text-xs opacity-40 font-bold bg-gray-100 px-3 py-1 rounded-full">{feedbacks.length} Total</span>
+                        <span className="text-secondary dark:text-gray-400 text-[10px] opacity-40 font-bold bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-full">{feedbacks.length} Total</span>
                     </h2>
-                    <p className="text-secondary text-xs font-bold mt-1.5 flex items-center gap-2">
-                        Managing the impact you've created <span className="text-orange-600 italic">★ {averageRating} Avg Rating</span>
+                    <p className="text-secondary dark:text-gray-400 text-xs font-bold mt-1.5 flex items-center gap-2">
+                        Managing the impact you've created <span className="text-amber-500 italic">★ {averageRating} Avg Rating</span>
                     </p>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => fetchFeedbacks()}
-                        className="p-3 bg-white border border-gray-100 text-gray-400 hover:text-primary hover:border-primary/20 rounded-2xl transition-all shadow-sm active:scale-95"
+                        className="p-3 bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500 hover:text-primary hover:border-primary/20 rounded-2xl transition-all shadow-sm active:scale-95"
                     >
                         <RefreshCcw size={18} className={fetching ? "animate-spin" : ""} />
                     </button>
                     <button
                         onClick={() => setIsAdding(true)}
-                        className="px-6 py-3.5 bg-primary text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                        className="px-6 py-3.5 bg-primary text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
                     >
                         <Plus size={18} /> Add Testimonial
                     </button>
@@ -177,20 +177,20 @@ export default function FeedbackModule() {
             </div>
 
             {/* Filters & Search */}
-            <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-2 bg-gray-50/50 p-1 rounded-2xl border border-gray-100 shrink-0">
+            <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-white dark:bg-[#1e1e1e] p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+                <div className="flex items-center gap-2 bg-gray-50/50 dark:bg-white/5 p-1 rounded-2xl border border-gray-100 dark:border-gray-800 shrink-0">
                     {["All", "New", "Approved"].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
                             className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab
-                                ? "bg-white text-primary shadow-sm border border-gray-100"
-                                : "text-secondary hover:text-primary"
+                                ? "bg-white dark:bg-white/10 text-primary dark:text-white shadow-sm border border-gray-100 dark:border-white/5"
+                                : "text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white"
                                 }`}
                         >
                             {tab === "New" ? "Pending" : tab}
                             {tab === "New" && feedbacks.filter(f => f.status === "New").length > 0 && (
-                                <span className="ml-2 bg-orange-500 text-white px-1.5 py-0.5 rounded-full text-[8px] animate-pulse">
+                                <span className="ml-2 bg-amber-500 text-white px-1.5 py-0.5 rounded-full text-[8px] animate-pulse">
                                     {feedbacks.filter(f => f.status === "New").length}
                                 </span>
                             )}
@@ -226,21 +226,21 @@ export default function FeedbackModule() {
                     return (
                         <div
                             key={f.id}
-                            className={`group bg-white p-4 md:p-6 rounded-[2rem] border transition-all duration-300 flex flex-col justify-between gap-4 ${isExpanded ? "ring-2 ring-primary/20 border-primary/20 shadow-xl" : "border-gray-100 hover:border-gray-200"} ${f.status === "Fresh" && !isExpanded ? "border-orange-100 bg-orange-50/30" : ""}`}
+                            className={`group bg-white dark:bg-[#1e1e1e] p-4 md:p-6 rounded-[2rem] border transition-all duration-300 flex flex-col justify-between gap-4 ${isExpanded ? "ring-2 ring-primary/20 border-primary/20 shadow-xl" : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"} ${f.status === "New" && !isExpanded ? "border-amber-100 dark:border-amber-500/20 bg-amber-50/30 dark:bg-amber-500/5" : ""}`}
                         >
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div className="flex items-center gap-4 flex-1">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isExpanded ? "bg-primary text-white" : "bg-gray-50 text-primary"}`}>
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isExpanded ? "bg-primary text-white" : "bg-gray-50 dark:bg-white/5 text-primary"}`}>
                                         {f.role === "Student" ? <GraduationCap size={20} /> : f.role === "Professional" ? <Briefcase size={20} /> : <Lightbulb size={20} />}
                                     </div>
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h4 className="text-sm font-black text-gray-900 uppercase tracking-tight">{f.name}</h4>
-                                            <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border ${f.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-orange-100 text-orange-600 border-orange-200"}`}>
+                                            <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">{f.name}</h4>
+                                            <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border ${f.status === "Approved" ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20" : "bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20"}`}>
                                                 {f.status === "New" ? "Pending" : f.status}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-3 text-[10px] font-bold text-secondary uppercase tracking-widest opacity-60">
+                                        <div className="flex items-center gap-3 text-[10px] font-bold text-secondary dark:text-gray-500 uppercase tracking-widest opacity-60">
                                             <span className="flex items-center gap-1"><Building size={10} /> {f.organization}</span>
                                             <span>•</span>
                                             <span className="flex items-center gap-1"><Quote size={10} /> {f.role}</span>
@@ -250,7 +250,7 @@ export default function FeedbackModule() {
 
                                 {!isExpanded && (
                                     <div className="flex-1 max-w-xl">
-                                        <p className="text-xs text-secondary/60 font-medium line-clamp-2 md:line-clamp-1 italic">
+                                        <p className="text-xs text-secondary/60 dark:text-gray-400 font-medium line-clamp-2 md:line-clamp-1 italic">
                                             &ldquo;{f.content}&rdquo;
                                         </p>
                                     </div>
@@ -299,10 +299,10 @@ export default function FeedbackModule() {
                             </div>
 
                             {isExpanded && (
-                                <div className="mt-4 pt-6 border-t border-gray-50 animate-in slide-in-from-top-2 duration-300">
+                                <div className="mt-4 pt-6 border-t border-gray-50 dark:border-gray-800 animate-in slide-in-from-top-2 duration-300">
                                     <div className="relative">
-                                        <Quote className="absolute -top-4 -left-2 text-primary/5" size={60} />
-                                        <p className="text-sm text-secondary font-medium leading-relaxed italic relative z-10 px-4 md:px-8">
+                                        <Quote className="absolute -top-4 -left-2 text-primary/5 dark:text-white/5" size={60} />
+                                        <p className="text-sm text-secondary dark:text-gray-300 font-medium leading-relaxed italic relative z-10 px-4 md:px-8">
                                             &ldquo;{f.content}&rdquo;
                                         </p>
                                     </div>

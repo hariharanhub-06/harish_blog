@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Loader2, Plus, Edit, Trash2, Link as LinkIcon, Eye, Save, Trash, X, FileText, ImageIcon, Settings, MessageSquare, ArrowRight, CornerDownRight, UploadCloud, Link, BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Link as LinkIcon, Eye, Save, Trash, X, FileText, ImageIcon, Settings, MessageSquare, ArrowRight, CornerDownRight, UploadCloud, Link, BarChart3, PieChart as PieChartIcon, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from "recharts";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
+import ImageCropper from "./ImageCropper";
 
 type Form = {
     id: string;
@@ -50,6 +52,8 @@ export default function FormsModule() {
     const [responsesView, setResponsesView] = useState<"table" | "analytics">("table");
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+    const [isCropping, setIsCropping] = useState(false);
 
     useEffect(() => {
         if (view === "list") fetchForms();
@@ -133,18 +137,44 @@ export default function FormsModule() {
         } catch (e) { toast.error("Failed to save"); }
     };
 
-    // File Upload Handler Base64
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
+    // File Upload Handler with ImageKit
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | Blob | File, callback: (url: string) => void) => {
+        let file: File | Blob;
+        if (e instanceof Blob || e instanceof File) {
+            file = e;
+        } else {
+            file = (e as React.ChangeEvent<HTMLInputElement>).target.files?.[0] || new Blob();
+        }
+
+        if (!file || (file instanceof Blob && file.size === 0)) return;
+
+        const tid = toast.loading("Uploading to ImageKit...");
+        try {
+            const url = await uploadToImageKit(file, 'forms');
+            callback(url);
+            toast.success("Uploaded successfully!", { id: tid });
+        } catch (error) {
+            console.error("Upload error:", error);
+            toast.error("Upload failed", { id: tid });
+        }
+    };
+
+    const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        toast.loading("Processing image...", { id: "uploading" });
         const reader = new FileReader();
-        reader.onloadend = () => {
-            callback(reader.result as string);
-            toast.success("Image processed!", { id: "uploading" });
+        reader.onload = () => {
+            setImageToCrop(reader.result as string);
+            setIsCropping(true);
         };
         reader.readAsDataURL(file);
+    };
+
+    const onCropComplete = async (croppedBlob: Blob) => {
+        setIsCropping(false);
+        if (!activeForm) return;
+        await handleFileUpload(croppedBlob, (url) => setActiveForm({ ...activeForm, bannerUrl: url }));
     };
 
     const addQuestion = (type: QuestionType) => {
@@ -358,10 +388,12 @@ export default function FormsModule() {
                                                 const isImage = q.type === 'file_upload' && text?.startsWith('data:image');
 
                                                 return (
-                                                    <td key={j} className="p-4 text-sm text-gray-800 dark:text-gray-200 truncate max-w-[200px] font-medium" title={isImage ? "Click to view image" : text}>
-                                                        {isImage ? (
+                                                    <td key={j} className="p-4 text-sm text-gray-800 dark:text-gray-200 truncate max-w-[200px] font-medium" title={isImage || text?.includes('imagekit.io') ? "Click to view image" : text}>
+                                                        {isImage || text?.includes('imagekit.io') ? (
                                                             <button onClick={() => { setPreviewImage(text); setIsPreviewOpen(true); }} className="relative group flex items-center gap-2">
-                                                                <img src={text} className="w-10 h-10 object-cover rounded-lg border border-gray-100 dark:border-gray-800 group-hover:scale-110 transition-transform shadow-md" />
+                                                                <div className="w-10 h-10 rounded-lg border border-gray-100 dark:border-gray-800 overflow-hidden shadow-md group-hover:scale-110 transition-transform bg-gray-50 dark:bg-white/5">
+                                                                    <img src={text} className="w-full h-full object-cover" />
+                                                                </div>
                                                                 <Eye size={14} className="text-gray-400 group-hover:text-primary transition" />
                                                             </button>
                                                         ) : (
@@ -605,7 +637,7 @@ export default function FormsModule() {
                                             </button>
                                         )}
                                     </div>
-                                    <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, (b64) => setActiveForm({ ...activeForm, bannerUrl: b64 }))} />
+                                    <input type="file" accept="image/*" className="hidden" onChange={handleBannerChange} />
                                 </label>
 
                                 {activeForm.bannerUrl && (
@@ -862,12 +894,24 @@ export default function FormsModule() {
                             </div>
                             <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
                                 <span className="font-bold text-gray-500 uppercase tracking-widest text-xs">Response Attachment</span>
-                                <a href={previewImage} download="submission_image.png" className="px-6 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:opacity-90 transition">Download Image</a>
+                                <div className="flex gap-3">
+                                    <a href={previewImage} target="_blank" rel="noopener noreferrer" className="px-6 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-200 transition">Open Original</a>
+                                    <a href={previewImage} download="submission_image.png" className="px-6 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:opacity-90 transition flex items-center gap-2"><Download size={14} /> Download</a>
+                                </div>
                             </div>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
+            {/* Cropper Modal */}
+            {isCropping && imageToCrop && (
+                <ImageCropper
+                    image={imageToCrop}
+                    onCropComplete={onCropComplete}
+                    onCancel={() => setIsCropping(false)}
+                    aspectRatio={19 / 6}
+                />
+            )}
         </div>
     );
 }

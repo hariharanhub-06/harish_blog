@@ -244,10 +244,10 @@ export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: an
                 {/* Recent Inquiries Section */}
                 <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl p-8 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col transition-colors duration-300">
                     <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Recent Inquiries</h3>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Recent Enquiries</h3>
                         <button
                             onClick={() => onTabChange?.('messages')}
-                            className="text-[10px] font-black text-primary uppercase tracking-widest hover:translate-x-1 transition-transform cursor-pointer"
+                            className="text-[10px] font-black text-primary dark:text-blue-400 uppercase tracking-widest hover:translate-x-1 transition-transform cursor-pointer"
                         >View All</button>
                     </div>
 
@@ -279,7 +279,7 @@ export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: an
                                 <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <MessageSquare className="text-gray-300 dark:text-gray-600" size={20} />
                                 </div>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No inquiries found</p>
+                                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">No enquiries found</p>
                             </div>
                         )}
                     </div>
@@ -290,14 +290,14 @@ export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: an
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm">
-                                <MessageCircle className="text-primary group-hover:text-primary transition-colors" size={18} />
+                                <MessageCircle className="text-primary" size={18} />
                             </div>
                             <div className="text-left">
                                 <h5 className="text-[11px] font-black text-gray-900 dark:text-white group-hover:text-white transition-colors uppercase tracking-wider">Inbox Center</h5>
-                                <p className="text-[9px] font-bold text-gray-400 group-hover:text-white/60 transition-colors">{stats.unreadMessages} Unread threads</p>
+                                <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 group-hover:text-white/60 transition-colors">{stats.unreadMessages} Unread threads</p>
                             </div>
                         </div>
-                        <ChevronRight size={16} className="text-gray-300 group-hover:text-white transition-all group-hover:translate-x-1" />
+                        <ChevronRight size={16} className="text-gray-300 dark:text-gray-600 group-hover:text-white transition-all group-hover:translate-x-1" />
                     </button>
                 </div>
             </div>

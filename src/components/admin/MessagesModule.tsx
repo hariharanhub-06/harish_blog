@@ -211,40 +211,39 @@ export default function MessagesModule() {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Analytics Block */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Total Leads</p>
-                    <p className="text-3xl font-black text-gray-900">{totalLeads}</p>
+                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 dark:text-gray-500 tracking-widest mb-1">Total Leads</p>
+                    <p className="text-3xl font-black text-gray-900 dark:text-white">{totalLeads}</p>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Contacted</p>
-                    <p className="text-3xl font-black text-blue-600">{contactedLeads}</p>
+                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 dark:text-gray-500 tracking-widest mb-1">Contacted</p>
+                    <p className="text-3xl font-black text-blue-600 dark:text-blue-400">{contactedLeads}</p>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Won</p>
+                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 dark:text-gray-500 tracking-widest mb-1">Won</p>
                     <p className="text-3xl font-black text-emerald-500">{wonLeads}</p>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-secondary/60 tracking-widest mb-1">Conversion %</p>
-                    <p className="text-3xl font-black text-purple-600">{conversionRate}%</p>
+                <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+                    <p className="text-[10px] font-black uppercase text-secondary/60 dark:text-gray-500 tracking-widest mb-1">Conversion %</p>
+                    <p className="text-3xl font-black text-purple-600 dark:text-purple-400">{conversionRate}%</p>
                 </div>
             </div>
 
             {/* Header & Filters */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h2 className="text-lg font-black text-gray-900 flex items-center gap-2 uppercase tracking-tighter">
+                    <h2 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2 uppercase tracking-tighter">
                         Sales Opportunities ({filteredMessages.length})
                         <button
                             onClick={() => fetchMessages()}
                             disabled={fetching}
-                            className="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-all disabled:opacity-50"
+                            className="p-1.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 rounded-lg transition-all disabled:opacity-50"
                             title="Refresh Messages"
                         >
                             <RefreshCcw size={14} className={fetching ? "animate-spin" : ""} />
                         </button>
-                        <span className="text-[8px] opacity-20 font-mono ml-1">v4</span>
                     </h2>
-                    <p className="text-secondary text-xs font-bold mt-0.5">Track and convert leads into customers</p>
+                    <p className="text-secondary dark:text-gray-400 text-xs font-bold mt-0.5">Track and convert leads into customers</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-xl border border-gray-100 shadow-sm">
@@ -276,21 +275,21 @@ export default function MessagesModule() {
                 {filteredMessages.map((msg) => (
                     <div
                         key={msg.id}
-                        className={`bg-white p-5 rounded-[2rem] border-2 border-gray-50 shadow-sm hover:shadow-xl transition-all flex flex-col gap-3 hover:border-primary/20 relative group h-full ${msg.category === "Financial Logistics" ? "border-l-[6px] border-l-emerald-500 bg-emerald-50/5" :
-                            msg.category?.includes("Web") || msg.category?.includes("Development") ? "border-l-[6px] border-l-purple-600 bg-purple-50/5" :
-                                msg.category === "Blog" ? "border-l-[6px] border-l-blue-600 bg-blue-50/5" : ""
+                        className={`bg-white dark:bg-[#1e1e1e] p-5 rounded-[2rem] border-2 border-gray-50 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all flex flex-col gap-3 hover:border-primary/20 relative group h-full ${msg.category === "Financial Logistics" ? "border-l-[6px] border-l-emerald-500 bg-emerald-50/5 dark:bg-emerald-500/5" :
+                            msg.category?.includes("Web") || msg.category?.includes("Development") ? "border-l-[6px] border-l-purple-600 bg-purple-50/5 dark:bg-purple-600/5" :
+                                msg.category === "Blog" ? "border-l-[6px] border-l-blue-600 bg-blue-50/5 dark:bg-blue-600/5" : ""
                             }`}
                     >
                         <div className="flex items-center gap-4 shrink-0 min-w-0">
-                            <div className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black text-xs shrink-0 group-hover:scale-110 transition-transform ${msg.category === "Financial Logistics" ? "bg-emerald-100 text-emerald-700" :
-                                msg.category?.includes("Web") || msg.category?.includes("Development") ? "bg-purple-100 text-purple-700" :
-                                    "bg-blue-100 text-blue-700"
+                            <div className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black text-xs shrink-0 group-hover:scale-110 transition-transform ${msg.category === "Financial Logistics" ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400" :
+                                msg.category?.includes("Web") || msg.category?.includes("Development") ? "bg-purple-100 dark:bg-purple-600/20 text-purple-700 dark:text-purple-400" :
+                                    "bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400"
                                 }`}>
                                 {msg.name.charAt(0)}
                             </div>
                             <div className="min-w-0">
-                                <h3 className="font-black text-gray-900 truncate text-xs tracking-tight leading-none">{msg.name}</h3>
-                                <div className="flex items-center gap-1.5 text-gray-500 font-bold text-[9px] mt-1">
+                                <h3 className="font-black text-gray-900 dark:text-white truncate text-xs tracking-tight leading-none">{msg.name}</h3>
+                                <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 font-bold text-[9px] mt-1">
                                     <Phone size={9} className="shrink-0 text-primary/60" />
                                     <span>{msg.mobile}</span>
                                 </div>
@@ -298,14 +297,14 @@ export default function MessagesModule() {
                         </div>
 
                         <div className="flex flex-col gap-2 w-full">
-                            <div className="flex justify-between items-center bg-gray-50/50 p-1.5 rounded-xl border border-gray-100/50">
+                            <div className="flex justify-between items-center bg-gray-50/50 dark:bg-white/5 p-1.5 rounded-xl border border-gray-100/50 dark:border-gray-800">
                                 <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${msg.category === "Financial Logistics" ? "bg-emerald-500 text-white" :
                                     msg.category?.includes("Web") || msg.category?.includes("Development") ? "bg-purple-600 text-white" :
                                         "bg-blue-600 text-white"
                                     }`}>
                                     {(msg.category || 'Inquiry').split(' ')[0]}
                                 </span>
-                                <span className="text-[8px] font-bold text-gray-400">
+                                <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500">
                                     {new Date(msg.createdAt).toLocaleDateString()}
                                 </span>
                             </div>
@@ -314,14 +313,14 @@ export default function MessagesModule() {
                                 value={msg.status || 'New'}
                                 onChange={(e) => handleUpdate(undefined, { ...msg, status: e.target.value })}
                                 disabled={updating}
-                                className={`w-full px-2 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 cursor-pointer transition-all appearance-none bg-white hover:shadow-md outline-none disabled:opacity-50 ${getStatusColor(msg.status || 'New')}`}
+                                className={`w-full px-2 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 cursor-pointer transition-all appearance-none bg-white dark:bg-[#1e1e1e] hover:shadow-md outline-none disabled:opacity-50 ${getStatusColor(msg.status || 'New')}`}
                             >
                                 {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
 
                         <div className="flex-1 min-w-0 w-full overflow-hidden">
-                            <p className="text-[9px] text-gray-500 font-semibold line-clamp-2 italic px-2.5 py-2 bg-gray-50/80 rounded-[1.2rem] border border-dashed border-gray-200 group-hover:bg-white transition-colors">&quot;{msg.message}&quot;</p>
+                            <p className="text-[9px] text-gray-500 dark:text-gray-400 font-semibold line-clamp-2 italic px-2.5 py-2 bg-gray-50/80 dark:bg-white/5 rounded-[1.2rem] border border-dashed border-gray-200 dark:border-gray-800 group-hover:bg-white dark:group-hover:bg-white/10 transition-colors">&quot;{msg.message}&quot;</p>
                         </div>
 
                         <div className="flex items-center justify-end gap-1 mt-2 border-t border-gray-50 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
