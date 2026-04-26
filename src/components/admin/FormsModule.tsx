@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Loader2, Plus, Edit, Trash2, Link as LinkIcon, Eye, Save, Trash, X, FileText, ImageIcon, Settings, MessageSquare, ArrowRight, CornerDownRight, UploadCloud, Link } from "lucide-react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { Loader2, Plus, Edit, Trash2, Link as LinkIcon, Eye, Save, Trash, X, FileText, ImageIcon, Settings, MessageSquare, ArrowRight, CornerDownRight, UploadCloud, Link, BarChart3, PieChart as PieChartIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from "recharts";
 
 type Form = {
     id: string;
@@ -44,6 +46,9 @@ export default function FormsModule() {
 
     const [responses, setResponses] = useState<any[]>([]);
     const [selectedResponses, setSelectedResponses] = useState<Set<string>>(new Set());
+    const [responsesView, setResponsesView] = useState<"table" | "analytics">("table");
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     useEffect(() => {
         if (view === "list") fetchForms();
@@ -131,9 +136,13 @@ export default function FormsModule() {
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        if (file.size > 2 * 1024 * 1024) { toast.error("Image too large (Max 2MB for DB storage)"); return; }
+
+        toast.loading("Processing image...", { id: "uploading" });
         const reader = new FileReader();
-        reader.onloadend = () => callback(reader.result as string);
+        reader.onloadend = () => {
+            callback(reader.result as string);
+            toast.success("Image processed!", { id: "uploading" });
+        };
         reader.readAsDataURL(file);
     };
 
@@ -237,6 +246,38 @@ export default function FormsModule() {
 
     const availableSections = builderQuestions.filter(q => q.type === 'section_header').map(q => q.questionText).filter(Boolean);
 
+    const analyticsData = useMemo(() => {
+        if (view !== "responses" || responses.length === 0) return [];
+        return builderQuestions.map(q => {
+            if (['multiple_choice', 'dropdown', 'checkboxes'].includes(q.type)) {
+                const counts: Record<string, number> = {};
+                (q.options || []).forEach(opt => counts[opt] = 0);
+
+                responses.forEach(r => {
+                    const ans = r.answers?.find((a: any) => a.questionId === q.id);
+                    if (ans) {
+                        if (q.type === 'checkboxes') {
+                            try {
+                                const choices = JSON.parse(ans.answerChoices || "[]");
+                                choices.forEach((c: string) => { if (counts[c] !== undefined) counts[c]++; });
+                            } catch (e) { }
+                        } else {
+                            if (counts[ans.answerText] !== undefined) counts[ans.answerText]++;
+                        }
+                    }
+                });
+
+                return {
+                    questionId: q.id,
+                    questionText: q.questionText,
+                    type: q.type,
+                    data: Object.entries(counts).map(([name, value]) => ({ name, value }))
+                };
+            }
+            return null;
+        }).filter(Boolean);
+    }, [view, responses, builderQuestions]);
+
     if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary w-8 h-8" /></div>;
 
     if (view === "responses") {
@@ -256,14 +297,18 @@ export default function FormsModule() {
 
         return (
             <div className="space-y-6 animate-in fade-in">
-                <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex justify-between items-center bg-white dark:bg-[#1e1e1e] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
                     <div>
-                        <h2 className="text-2xl font-bold">Responses ({responses.length})</h2>
-                        <button onClick={() => setView("list")} className="text-sm text-gray-400 hover:text-primary mt-1">&larr; Back to Forms</button>
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Responses ({responses.length})</h2>
+                        <button onClick={() => setView("list")} className="text-sm text-gray-400 hover:text-primary mt-1">&larr; Back to Forms List</button>
                     </div>
                     <div className="flex gap-2">
-                        <button onClick={() => handleExportCSV()} className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold transition">
-                            <FileText size={16} /> Export All CSV
+                        <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mr-4 transition-colors">
+                            <button onClick={() => setResponsesView("table")} className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${responsesView === 'table' ? 'bg-white dark:bg-gray-700 shadow-sm text-primary' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}><FileText size={14} /> Table</button>
+                            <button onClick={() => setResponsesView("analytics")} className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${responsesView === 'analytics' ? 'bg-white dark:bg-gray-700 shadow-sm text-primary' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}><BarChart3 size={14} /> Analytics</button>
+                        </div>
+                        <button onClick={() => handleExportCSV()} className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition text-gray-700 dark:text-gray-200">
+                            <FileText size={14} /> Export CSV
                         </button>
                     </div>
                 </div>
@@ -285,46 +330,94 @@ export default function FormsModule() {
                     </div>
                 )}
 
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[1000px]">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-100 text-sm">
-                                <th className="p-4 w-10">
-                                    <input type="checkbox" checked={isAllSelected} onChange={toggleSelectAll} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
-                                </th>
-                                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Timestamp</th>
-                                {builderQuestions.map((q, i) => <th key={i} className="p-4 font-semibold text-gray-600 truncate max-w-[200px]">{q.questionText}</th>)}
-                                <th className="p-4 font-semibold text-gray-600 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {responses.length === 0 ? <tr><td colSpan={builderQuestions.length + 3} className="p-8 text-center text-gray-400">No responses yet.</td></tr>
-                                : responses.map(r => (
-                                    <tr key={r.id} className={`border-b border-gray-50 hover:bg-gray-50/50 transition ${selectedResponses.has(r.id) ? 'bg-primary/5 hover:bg-primary/10' : ''}`}>
-                                        <td className="p-4">
-                                            <input type="checkbox" checked={selectedResponses.has(r.id)} onChange={() => toggleSelectOne(r.id)} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
-                                        </td>
-                                        <td className="p-4 text-sm text-gray-600 whitespace-nowrap">{new Date(r.createdAt).toLocaleString()}</td>
-                                        {builderQuestions.map((q, j) => {
-                                            const ans = r.answers?.find((a: any) => a.questionId === q.id);
-                                            const text = ans?.answerText || (ans?.answerChoices ? JSON.parse(ans.answerChoices).join(", ") : "-");
-                                            return <td key={j} className="p-4 text-sm text-gray-900 truncate max-w-[200px]" title={text}>{text}</td>;
-                                        })}
-                                        <td className="p-4 text-right">
-                                            <div className="flex justify-end gap-1">
-                                                <button onClick={() => handleSendManualNotification(r)} className="p-2 text-primary hover:bg-primary/10 rounded-lg transition" title="Send Mock Automation Message">
-                                                    <MessageSquare size={18} />
-                                                </button>
-                                                <button onClick={() => handleDeleteResponses([r.id])} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Response">
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
+                {responsesView === "table" ? (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+                        <table className="w-full text-left border-collapse min-w-[1000px]">
+                            <thead>
+                                <tr className="bg-gray-50 border-b border-gray-100 text-sm">
+                                    <th className="p-4 w-10">
+                                        <input type="checkbox" checked={isAllSelected} onChange={toggleSelectAll} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
+                                    </th>
+                                    <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Timestamp</th>
+                                    {builderQuestions.map((q, i) => <th key={i} className="p-4 font-semibold text-gray-600 truncate max-w-[200px]">{q.questionText}</th>)}
+                                    <th className="p-4 font-semibold text-gray-600 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {responses.length === 0 ? <tr><td colSpan={builderQuestions.length + 3} className="p-8 text-center text-gray-400">No responses yet.</td></tr>
+                                    : responses.map(r => (
+                                        <tr key={r.id} className={`border-b border-gray-50 hover:bg-gray-50/50 transition ${selectedResponses.has(r.id) ? 'bg-primary/5 hover:bg-primary/10' : ''}`}>
+                                            <td className="p-4">
+                                                <input type="checkbox" checked={selectedResponses.has(r.id)} onChange={() => toggleSelectOne(r.id)} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
+                                            </td>
+                                            <td className="p-4 text-sm text-gray-600 whitespace-nowrap">{new Date(r.createdAt).toLocaleString()}</td>
+                                            {builderQuestions.map((q, j) => {
+                                                const ans = r.answers?.find((a: any) => a.questionId === q.id);
+                                                const text = ans?.answerText || (ans?.answerChoices ? (typeof ans.answerChoices === 'string' ? JSON.parse(ans.answerChoices).join(", ") : ans.answerChoices.join(", ")) : "-");
+                                                const isImage = q.type === 'file_upload' && text?.startsWith('data:image');
+
+                                                return (
+                                                    <td key={j} className="p-4 text-sm text-gray-900 truncate max-w-[200px]" title={isImage ? "Click to view image" : text}>
+                                                        {isImage ? (
+                                                            <button onClick={() => { setPreviewImage(text); setIsPreviewOpen(true); }} className="relative group flex items-center gap-2">
+                                                                <img src={text} className="w-10 h-10 object-cover rounded-lg border border-gray-100 group-hover:scale-110 transition-transform shadow-md" />
+                                                                <Eye size={14} className="text-gray-400 group-hover:text-primary transition" />
+                                                            </button>
+                                                        ) : text}
+                                                    </td>
+                                                );
+                                            })}
+                                            <td className="p-4 text-right">
+                                                <div className="flex justify-end gap-1">
+                                                    <button onClick={() => handleSendManualNotification(r)} className="p-2 text-primary hover:bg-primary/10 rounded-lg transition" title="Send Mock Automation Message">
+                                                        <MessageSquare size={18} />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteResponses([r.id])} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Response">
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
+                        {analyticsData.length === 0 ? (
+                            <div className="col-span-full py-20 text-center bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-100 dark:border-gray-800 border-dashed border-2">
+                                <PieChartIcon size={40} className="mx-auto text-gray-200 dark:text-gray-700 mb-4" />
+                                <h3 className="text-lg font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">No analytics available</h3>
+                                <p className="text-gray-400 dark:text-gray-500 text-xs mt-1 uppercase tracking-widest">Questions like Multiple Choice & Checkboxes show stats here.</p>
+                            </div>
+                        ) : analyticsData.map((item: any, idx) => (
+                            <div key={idx} className="bg-white dark:bg-[#1e1e1e] p-7 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col h-[400px] transition-colors">
+                                <h3 className="text-sm font-black mb-6 line-clamp-2 min-h-[40px] text-gray-800 dark:text-white uppercase tracking-tight">{item.questionText}</h3>
+                                <div className="flex-1 w-full min-h-0">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={item.data} layout="vertical" margin={{ left: 10, right: 30, top: 0, bottom: 0 }}>
+                                            <XAxis type="number" hide />
+                                            <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 10, fontWeight: 900, fill: '#6b7280' }} />
+                                            <Tooltip
+                                                cursor={{ fill: '#f9fafb', opacity: 0.1 }}
+                                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 'bold', fontSize: '12px', backgroundColor: '#fff', color: '#000' }}
+                                            />
+                                            <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
+                                                {item.data.map((entry: any, index: number) => (
+                                                    <Cell key={`cell-${index}`} fill={['#3b71ca', '#10b981', '#6366f1', '#f59e0b', '#ef4444'][index % 5]} />
+                                                ))}
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="mt-6 pt-4 border-t border-gray-50 dark:border-gray-800 flex justify-between items-center text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    <span>{item.type.replace('_', ' ')}</span>
+                                    <span className="bg-[#3b71ca]/10 text-[#3b71ca] px-2.5 py-1 rounded-lg">{responses.length} Responded</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         );
     }
@@ -332,18 +425,18 @@ export default function FormsModule() {
     if (view === "builder" || view === "settings") {
         return (
             <div className="space-y-6 animate-in fade-in max-w-4xl mx-auto pb-20">
-                <div className="flex items-center justify-between sticky top-0 bg-[#fcfcfc]/90 backdrop-blur-md pt-4 pb-4 z-40 border-b border-gray-100 mb-6">
-                    <button onClick={() => setView("list")} className="text-sm text-gray-400 hover:text-primary">&larr; Back</button>
+                <div className="flex items-center justify-between sticky top-0 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md pt-4 pb-4 z-40 border-b border-gray-100 dark:border-gray-800 mb-6 px-4 transition-colors">
+                    <button onClick={() => setView("list")} className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#3b71ca] transition-colors">&larr; Back to hub</button>
 
-                    <div className="flex bg-gray-100/50 p-1 rounded-xl mx-auto">
-                        <button onClick={() => setView("builder")} className={`px-4 py-2 rounded-lg text-sm font-bold transition ${view === 'builder' ? 'bg-white shadow-sm text-primary' : 'text-gray-500 hover:text-gray-900'}`}>Questions</button>
-                        <button onClick={() => setView("settings")} className={`px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-1 ${view === 'settings' ? 'bg-white shadow-sm text-primary' : 'text-gray-500 hover:text-gray-900'}`}><Settings size={14} /> Settings</button>
+                    <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mx-auto transition-colors">
+                        <button onClick={() => setView("builder")} className={`px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider transition ${view === 'builder' ? 'bg-white dark:bg-gray-700 shadow-sm text-[#3b71ca]' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'}`}>Questions</button>
+                        <button onClick={() => setView("settings")} className={`px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider transition flex items-center gap-1.5 ${view === 'settings' ? 'bg-white dark:bg-gray-700 shadow-sm text-[#3b71ca]' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'}`}><Settings size={12} /> Settings</button>
                     </div>
 
                     <div className="flex gap-2">
-                        {isPublished && <button onClick={copyShareLink} className="flex gap-2 items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold transition"><LinkIcon size={16} /> <span className="hidden sm:inline">Copy Link</span></button>}
-                        <button onClick={() => handleSaveForm()} className="flex gap-2 items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition"><Save size={16} /> <span className="hidden sm:inline">Save Draft</span></button>
-                        <button onClick={() => handleSaveForm(!isPublished)} className={`flex gap-2 items-center px-4 py-2 text-white rounded-xl text-sm font-bold transition ${isPublished ? 'bg-orange-500 hover:bg-orange-600' : 'bg-primary hover:bg-primary/90'}`}>{isPublished ? "Unpublish" : "Publish"}</button>
+                        {isPublished && <button onClick={copyShareLink} className="flex gap-2 items-center px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-[10px] font-black uppercase tracking-widest transition"><LinkIcon size={14} /> <span className="hidden lg:inline">Copy Link</span></button>}
+                        <button onClick={() => handleSaveForm()} className="flex gap-2 items-center px-4 py-2 bg-[#3b71ca] text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-[#3b71ca]/20 hover:-translate-y-0.5"><Save size={14} /> <span className="hidden lg:inline">{isPublished ? 'Save' : 'Save Draft'}</span></button>
+                        <button onClick={() => handleSaveForm(!isPublished)} className={`flex gap-2 items-center px-4 py-2 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition ${isPublished ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'} shadow-lg hover:-translate-y-0.5`}><span className="hidden sm:inline">{isPublished ? "Unpublish" : "Publish"}</span></button>
                     </div>
                 </div>
 
@@ -672,33 +765,68 @@ export default function FormsModule() {
 
     return (
         <div className="space-y-6 animate-in fade-in">
-            <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60">
-                <div><h2 className="text-3xl font-black tracking-tight mb-1">Forms Hub</h2><p className="text-gray-500 text-sm font-medium">Create automated dynamic forms.</p></div>
-                <button onClick={handleCreateForm} className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition shadow-lg shadow-primary/20 hover:-translate-y-0.5"><Plus size={18} /> New Form</button>
+            <div className="flex justify-between items-center bg-white dark:bg-[#1e1e1e] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
+                <div><h2 className="text-xl font-black tracking-tight mb-1 text-gray-900 dark:text-white uppercase">Forms Hub</h2><p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Create automated dynamic forms.</p></div>
+                <button onClick={handleCreateForm} className="flex items-center gap-2 px-6 py-2.5 bg-[#3b71ca] text-white font-black text-[11px] uppercase tracking-wider rounded-xl hover:bg-[#3b71ca]/90 transition shadow-lg shadow-[#3b71ca]/20 hover:-translate-y-0.5"><Plus size={16} /> New Form</button>
             </div>
             {forms.length === 0 ? (
-                <div className="text-center py-24 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/60 border-dashed border-2">
-                    <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 text-primary"><FileText size={32} /></div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">No forms created yet</h3>
-                    <button onClick={handleCreateForm} className="text-primary font-bold hover:underline text-lg">Create First Form</button>
+                <div className="text-center py-24 bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 border-dashed border-2">
+                    <div className="w-16 h-16 bg-[#3b71ca]/5 rounded-full flex items-center justify-center mx-auto mb-6 text-[#3b71ca]"><FileText size={28} /></div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No forms created yet</h3>
+                    <button onClick={handleCreateForm} className="text-[#3b71ca] font-black hover:underline text-sm uppercase tracking-widest">Create First Form</button>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {forms.map(form => (
-                        <div key={form.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all group flex flex-col relative overflow-hidden">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1 mt-2">{form.title}</h3>
-                            <div className="flex items-center justify-between pt-5 border-t border-gray-100 mt-auto">
-                                <span className="text-xs font-bold text-gray-400">{new Date(form.createdAt).toLocaleDateString()}</span>
+                        <div key={form.id} className="bg-white dark:bg-[#1e1e1e] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all group flex flex-col relative overflow-hidden">
+                            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-2 line-clamp-1 mt-2 uppercase tracking-tight">{form.title}</h3>
+                            <div className="flex items-center justify-between pt-5 border-t border-gray-50 dark:border-gray-800 mt-auto">
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{new Date(form.createdAt).toLocaleDateString()}</span>
                                 <div className="flex items-center gap-1.5">
-                                    <button onClick={() => handleEditForm(form.id)} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-primary/10 hover:text-primary" title="Edit Form"><Edit size={16} /></button>
-                                    <button onClick={() => handleViewResponses(form.id)} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-primary/10 hover:text-primary" title="View Responses"><Eye size={16} /></button>
-                                    <button onClick={() => handleDeleteForm(form.id)} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-red-100 hover:text-red-600" title="Delete Form"><Trash2 size={16} /></button>
+                                    <button onClick={() => handleEditForm(form.id)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[#3b71ca]/10 hover:text-[#3b71ca] transition-colors text-gray-400 dark:text-gray-500" title="Edit Form"><Edit size={14} /></button>
+                                    <button onClick={() => handleViewResponses(form.id)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[#3b71ca]/10 hover:text-[#3b71ca] transition-colors text-gray-400 dark:text-gray-500" title="View Responses"><Eye size={14} /></button>
+                                    <button onClick={() => handleDeleteForm(form.id)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 transition-colors text-gray-400 dark:text-gray-500" title="Delete Form"><Trash2 size={14} /></button>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
             )}
+
+            {/* Image Preview Modal */}
+            <AnimatePresence>
+                {isPreviewOpen && previewImage && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsPreviewOpen(false)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="relative max-w-5xl max-h-full aspect-auto bg-white rounded-[2rem] overflow-hidden shadow-2xl flex flex-col"
+                        >
+                            <button
+                                onClick={() => setIsPreviewOpen(false)}
+                                className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-all"
+                            >
+                                <X size={24} />
+                            </button>
+                            <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
+                                <img src={previewImage} alt="Preview" className="max-w-full max-h-[80vh] object-contain rounded-xl" />
+                            </div>
+                            <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+                                <span className="font-bold text-gray-500 uppercase tracking-widest text-xs">Response Attachment</span>
+                                <a href={previewImage} download="submission_image.png" className="px-6 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:opacity-90 transition">Download Image</a>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

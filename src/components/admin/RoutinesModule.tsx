@@ -248,95 +248,95 @@ export default function RoutinesModule() {
     return (
         <div className="space-y-6">
             {/* Header + Unified Filter Bar */}
-            <div className="flex flex-col gap-6 bg-white/70 backdrop-blur-xl border border-gray-100 p-8 rounded-[40px] shadow-sm">
+            <div className="flex flex-col gap-6 bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 p-8 rounded-2xl shadow-sm transition-colors duration-300">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-indigo-500/10 rounded-2xl">
-                            <ListTodo className="w-8 h-8 text-indigo-600" />
+                        <div className="p-3 bg-[#3b71ca]/10 rounded-xl">
+                            <ListTodo className="w-6 h-6 text-[#3b71ca]" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Routines & Habits</h1>
+                            <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Routines & Habits</h1>
                             <div className="flex items-center gap-4 mt-1">
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                                    <TrendingUp size={12} /> Live Tracking
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                                    <TrendingUp size={11} /> Live Tracking
                                 </span>
-                                <div className="h-1 w-1 rounded-full bg-gray-300" />
-                                <span className="text-xs font-bold text-indigo-500">{routines.length} Active Tasks</span>
+                                <div className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+                                <span className="text-[10px] font-bold text-[#3b71ca]">{routines.length} Active Tasks</span>
                             </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="flex bg-gray-100/80 p-1.5 rounded-2xl border border-gray-100">
+                        <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl transition-colors">
                             <button
                                 onClick={() => setView("grid")}
-                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${view === "grid" ? "bg-white text-indigo-600 shadow-sm ring-1 ring-black/5" : "text-gray-400 hover:text-gray-600"}`}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${view === "grid" ? "bg-white dark:bg-gray-700 text-[#3b71ca] shadow-sm" : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"}`}
                             >
                                 Checklist
                             </button>
                             <button
                                 onClick={() => setView("analytics")}
-                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${view === "analytics" ? "bg-white text-indigo-600 shadow-sm ring-1 ring-black/5" : "text-gray-400 hover:text-gray-600"}`}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${view === "analytics" ? "bg-white dark:bg-gray-700 text-[#3b71ca] shadow-sm" : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"}`}
                             >
                                 Analysis
                             </button>
                         </div>
                         <button
                             onClick={() => setShowAddModal(true)}
-                            className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-black text-xs shadow-xl shadow-indigo-600/20 hover:scale-[1.03] active:scale-[0.97] transition-all flex items-center gap-2"
+                            className="bg-[#3b71ca] text-white px-5 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-wider shadow-lg shadow-[#3b71ca]/20 hover:translate-y-[-1px] active:translate-y-[0px] transition-all flex items-center gap-2"
                         >
-                            <Plus size={18} /> New Routine
+                            <Plus size={16} /> New Routine
                         </button>
                     </div>
                 </div>
 
-                <div className="h-px bg-gray-100 w-full" />
+                <div className="h-px bg-gray-100 dark:bg-gray-800 w-full" />
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                        <Filter size={16} className="text-gray-400 mr-2" />
+                        <Filter size={14} className="text-gray-400 mr-2" />
                         <button
                             onClick={() => handleFilterChange("week")}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${filterType === "week" ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100" : "text-gray-400 hover:bg-gray-50"}`}
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${filterType === "week" ? "bg-[#3b71ca]/10 text-[#3b71ca]" : "text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"}`}
                         >
                             This Week
                         </button>
                         <button
                             onClick={() => handleFilterChange("month")}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${filterType === "month" ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100" : "text-gray-400 hover:bg-gray-50"}`}
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${filterType === "month" ? "bg-[#3b71ca]/10 text-[#3b71ca]" : "text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"}`}
                         >
                             This Month
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-4 bg-gray-50/50 px-6 py-3 rounded-[24px] border border-gray-100 ring-1 ring-black/5">
-                        <button onClick={() => setStartDate(subDays(startDate, 1))} className="text-gray-400 hover:text-indigo-600 transition-colors"><ChevronLeft size={16} /></button>
+                    <div className="flex items-center gap-4 bg-gray-50/50 dark:bg-gray-800/30 px-5 py-2 rounded-xl border border-gray-100 dark:border-gray-800 transition-colors">
+                        <button onClick={() => setStartDate(subDays(startDate, 1))} className="text-gray-400 hover:text-[#3b71ca] transition-colors"><ChevronLeft size={14} /></button>
                         <div className="flex items-center gap-3 px-2">
-                            <CalendarIcon size={14} className="text-indigo-500" />
-                            <span className="text-xs font-black text-gray-900 min-w-[160px] text-center">
+                            <CalendarIcon size={12} className="text-[#3b71ca]" />
+                            <span className="text-[11px] font-black text-gray-900 dark:text-gray-100 min-w-[140px] text-center">
                                 {format(startDate, "MMM d")} - {format(endDate, "MMM d, yyyy")}
                             </span>
                         </div>
-                        <button onClick={() => setEndDate(addDays(endDate, 1))} className="text-gray-400 hover:text-indigo-600 transition-colors"><ChevronRight size={16} /></button>
+                        <button onClick={() => setEndDate(addDays(endDate, 1))} className="text-gray-400 hover:text-[#3b71ca] transition-colors"><ChevronRight size={14} /></button>
                     </div>
                 </div>
             </div>
 
             {view === "grid" ? (
-                <div className="bg-white rounded-[40px] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.02)] overflow-hidden">
+                <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden transition-colors">
                     <div className="overflow-x-auto scrollbar-hide">
-                        <table className="w-full">
+                        <table className="w-full border-collapse">
                             <thead>
-                                <tr className="bg-indigo-600 divide-x divide-white/10">
-                                    <th className="sticky left-0 bg-indigo-600 z-20 px-10 py-8 text-left border-b border-indigo-500 min-w-[320px]">
-                                        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">Habit Architecture</span>
+                                <tr className="bg-[#3b71ca] dark:bg-[#3b71ca]/90">
+                                    <th className="sticky left-0 bg-[#3b71ca] dark:bg-[#3b71ca] z-20 px-8 py-6 text-left border-b border-white/10 min-w-[300px]">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-white/70">Habit Checklist</span>
                                     </th>
                                     {days.map((day) => (
-                                        <th key={day.toISOString()} className={`px-4 py-8 border-b border-indigo-500 min-w-[85px] ${isSameDay(day, new Date()) ? "bg-white/10" : ""}`}>
+                                        <th key={day.toISOString()} className={`px-4 py-6 border-b border-white/10 min-w-[80px] ${isSameDay(day, new Date()) ? "bg-white/10" : ""}`}>
                                             <div className="flex flex-col items-center">
-                                                <span className={`text-[10px] font-black uppercase ${isSameDay(day, new Date()) ? "text-white" : "text-white/40"}`}>
+                                                <span className={`text-[9px] font-black uppercase ${isSameDay(day, new Date()) ? "text-white" : "text-white/40"}`}>
                                                     {format(day, "EEE")}
                                                 </span>
-                                                <span className={`text-xl font-black ${isSameDay(day, new Date()) ? "text-white scale-110" : "text-white/80"}`}>
+                                                <span className={`text-lg font-black ${isSameDay(day, new Date()) ? "text-white scale-110" : "text-white"}`}>
                                                     {format(day, "d")}
                                                 </span>
                                             </div>
@@ -344,34 +344,34 @@ export default function RoutinesModule() {
                                     ))}
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                                 {routines.map((routine, ridx) => (
-                                    <tr key={routine.id} className="group hover:bg-indigo-50/10 transition-all duration-300">
-                                        <td className="sticky left-0 bg-white z-20 px-10 py-7 border-r border-gray-50 group-hover:shadow-[10px_0_20px_-10px_rgba(0,0,0,0.05)] transition-all">
+                                    <tr key={routine.id} className="group hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-all duration-200">
+                                        <td className="sticky left-0 bg-white dark:bg-[#1e1e1e] z-20 px-8 py-5 border-r border-gray-50 dark:border-gray-800 group-hover:shadow-[5px_0_15px_-5px_rgba(0,0,0,0.05)] transition-all">
                                             <div className="flex items-center justify-between">
-                                                <div className="space-y-1.5 text-left">
-                                                    <h4 className="text-sm font-black text-gray-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{routine.title}</h4>
+                                                <div className="space-y-1 text-left">
+                                                    <h4 className="text-[13px] font-black text-gray-900 dark:text-white group-hover:text-[#3b71ca] transition-colors">{routine.title}</h4>
                                                     <div className="flex items-center gap-2">
-                                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black text-white uppercase tracking-tighter ${['bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-cyan-500'][ridx % 5]
+                                                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black text-white uppercase tracking-wider ${['bg-[#3b71ca]', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-cyan-500'][ridx % 5]
                                                             }`}>
                                                             {routine.category}
                                                         </span>
-                                                        <div className="h-1 w-1 rounded-full bg-gray-200" />
-                                                        <span className="text-[9px] font-bold text-gray-400 capitalize">{routine.schedule?.type}</span>
+                                                        <div className="h-1 w-1 rounded-full bg-gray-200 dark:bg-gray-700" />
+                                                        <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 capitalize">{routine.schedule?.type}</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all ml-4">
                                                     <button
                                                         onClick={() => setShowEditModal(routine)}
-                                                        className="p-2 hover:bg-indigo-50 text-gray-400 hover:text-indigo-600 rounded-xl transition-all"
+                                                        className="p-1.5 hover:bg-[#3b71ca]/10 text-gray-400 hover:text-[#3b71ca] rounded-lg transition-all"
                                                     >
-                                                        <Edit2 size={14} />
+                                                        <Edit2 size={13} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(routine.id)}
-                                                        className="p-2 hover:bg-rose-50 text-gray-400 hover:text-rose-600 rounded-xl transition-all"
+                                                        className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-gray-400 hover:text-rose-500 rounded-lg transition-all"
                                                     >
-                                                        <Trash2 size={14} />
+                                                        <Trash2 size={13} />
                                                     </button>
                                                 </div>
                                             </div>
@@ -382,19 +382,19 @@ export default function RoutinesModule() {
                                             const isDone = (logs || []).find(l => l.routineId === routine.id && l.date === dateStr)?.isCompleted;
 
                                             return (
-                                                <td key={day.toISOString()} className={`px-4 py-7 text-center transition-all ${isSameDay(day, new Date()) ? "bg-indigo-50/20" : ""}`}>
+                                                <td key={day.toISOString()} className={`px-4 py-5 text-center transition-all ${isSameDay(day, new Date()) ? "bg-[#3b71ca]/5" : ""}`}>
                                                     {due ? (
                                                         <button
                                                             onClick={() => toggleComplete(routine.id, day)}
-                                                            className={`mx-auto w-11 h-11 rounded-[16px] flex items-center justify-center transition-all duration-300 transform shadow-sm ${isDone
-                                                                ? `${['bg-indigo-600', 'bg-emerald-500', 'bg-amber-400', 'bg-rose-500', 'bg-cyan-500'][ridx % 5]} text-white shadow-lg scale-105`
-                                                                : "bg-white text-gray-200 border-2 border-gray-50 hover:border-indigo-300 hover:text-indigo-400 hover:scale-105"}`}
+                                                            className={`mx-auto w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 transform shadow-sm ${isDone
+                                                                ? `${['bg-[#3b71ca]', 'bg-emerald-500', 'bg-amber-400', 'bg-rose-500', 'bg-cyan-500'][ridx % 5]} text-white shadow-md scale-105`
+                                                                : "bg-white dark:bg-gray-800 text-gray-200 dark:text-gray-700 border-2 border-gray-50 dark:border-gray-800 hover:border-[#3b71ca] dark:hover:border-[#3b71ca] hover:text-[#3b71ca] hover:scale-105"}`}
                                                         >
-                                                            {isDone ? <CheckCircle2 size={24} strokeWidth={2.5} /> : <Circle size={20} strokeWidth={3} />}
+                                                            {isDone ? <CheckCircle2 size={20} strokeWidth={2.5} /> : <Circle size={18} strokeWidth={2.5} />}
                                                         </button>
                                                     ) : (
-                                                        <div className="mx-auto w-11 h-11 rounded-[16px] bg-gray-50/50 border border-dotted border-gray-200 flex items-center justify-center opacity-30 select-none">
-                                                            <div className="h-1 w-1 rounded-full bg-gray-300" />
+                                                        <div className="mx-auto w-10 h-10 rounded-xl bg-gray-50/50 dark:bg-gray-800/10 border border-dotted border-gray-200 dark:border-gray-800 flex items-center justify-center opacity-30 select-none">
+                                                            <div className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-700" />
                                                         </div>
                                                     )}
                                                 </td>
@@ -407,41 +407,41 @@ export default function RoutinesModule() {
                     </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {(analytics || []).map((item, idx) => (
-                        <div key={item.id} className={`${['bg-indigo-600', 'bg-emerald-500', 'bg-amber-400', 'bg-rose-500', 'bg-cyan-500'][idx % 5]} p-10 rounded-[48px] text-white shadow-2xl hover:-translate-y-2 transition-all group overflow-hidden relative`}>
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
+                        <div key={item.id} className={`${['bg-[#3b71ca]', 'bg-emerald-500', 'bg-amber-400', 'bg-rose-500', 'bg-cyan-500'][idx % 5]} p-8 rounded-2xl text-white shadow-lg hover:translate-y-[-4px] transition-all group overflow-hidden relative`}>
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:scale-150 transition-transform duration-500" />
 
                             <div className="relative z-10 flex flex-col items-center text-center">
-                                <div className="mb-6 flex flex-col items-center filter drop-shadow-2xl">
+                                <div className="mb-4 flex flex-col items-center">
                                     <DonutChartComponent rate={item.completionRate || 0} />
                                 </div>
 
                                 <div className="space-y-1 mt-2">
-                                    <h3 className="text-xl font-black truncate max-w-[200px]">{item.title}</h3>
-                                    <span className="text-[10px] font-black uppercase text-white/50 tracking-[0.2em] bg-white/10 px-3 py-1 rounded-full">{item.category}</span>
+                                    <h3 className="text-lg font-black truncate max-w-[180px] text-white tracking-tight">{item.title}</h3>
+                                    <span className="text-[9px] font-black uppercase text-white/60 tracking-wider bg-white/10 px-3 py-1 rounded-full">{item.category}</span>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 w-full mt-10 p-6 bg-white/10 backdrop-blur-md rounded-3xl">
+                                <div className="grid grid-cols-2 gap-4 w-full mt-8 p-5 bg-white/10 backdrop-blur-md rounded-xl">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Success</span>
-                                        <span className="text-xl font-black">{item.completedDays || 0}</span>
+                                        <span className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1">Success</span>
+                                        <span className="text-lg font-black">{item.completedDays || 0}</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Expected</span>
-                                        <span className="text-xl font-black">{item.totalExpected || 0}</span>
+                                        <span className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1">Target</span>
+                                        <span className="text-lg font-black">{item.totalExpected || 0}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ))}
                     {(!analytics || analytics.length === 0) && (
-                        <div className="col-span-full bg-white p-20 rounded-[48px] border border-dashed border-gray-200 flex flex-col items-center text-center">
-                            <div className="p-5 bg-gray-50 rounded-full mb-6">
-                                <TrendingUp className="w-12 h-12 text-gray-300" />
+                        <div className="col-span-full bg-white dark:bg-[#1e1e1e] p-16 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center text-center transition-colors">
+                            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-full mb-6">
+                                <TrendingUp className="w-10 h-10 text-gray-300 dark:text-gray-600" />
                             </div>
-                            <h3 className="text-xl font-black text-gray-900 mb-2">Architect Your Habits</h3>
-                            <p className="text-sm text-gray-500 max-w-sm">No data found for the selected timeframe. Consistency is built day by day.</p>
+                            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-2">No Tracking Data</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">Start checking off your tasks to see your consistency analytics here.</p>
                         </div>
                     )}
                 </div>
@@ -450,40 +450,40 @@ export default function RoutinesModule() {
             {/* Combined Modal for Add/Edit */}
             {(showAddModal || showEditModal) && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => { setShowAddModal(false); setShowEditModal(null); }} />
-                    <div className="bg-white w-full max-w-xl rounded-[48px] p-12 shadow-2xl relative animate-in zoom-in-95 duration-300">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setShowAddModal(false); setShowEditModal(null); }} />
+                    <div className="bg-white dark:bg-[#1e1e1e] w-full max-w-lg rounded-2xl p-10 shadow-2xl relative animate-in zoom-in-95 duration-300 transition-colors">
                         <button
                             onClick={() => { setShowAddModal(false); setShowEditModal(null); }}
-                            className="absolute top-8 right-8 p-3 rounded-2xl hover:bg-gray-100 transition-all text-gray-400 hover:text-gray-900"
+                            className="absolute top-6 right-6 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-400 hover:text-gray-900 dark:hover:text-white"
                         >
-                            <X size={20} />
+                            <X size={18} />
                         </button>
 
-                        <div className="flex items-center gap-4 mb-10">
-                            <div className="p-4 bg-indigo-600 rounded-3xl shadow-lg shadow-indigo-600/20">
-                                <Settings2 className="w-7 h-7 text-white" />
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="p-3 bg-[#3b71ca] rounded-xl shadow-lg shadow-[#3b71ca]/20">
+                                <Settings2 className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-black text-gray-900">{showAddModal ? "Initialize Habit" : "Modify Habit"}</h3>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Configuration Module</p>
+                                <h3 className="text-xl font-black text-gray-900 dark:text-white">{showAddModal ? "New Routine" : "Edit Routine"}</h3>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Habit Configuration</p>
                             </div>
                         </div>
 
-                        <div className="space-y-8">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Routine Name</label>
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Routine Label</label>
                                 <input
                                     type="text"
                                     value={showEditModal ? showEditModal.title : newRoutine.title}
                                     onChange={e => showEditModal ? setShowEditModal({ ...showEditModal, title: e.target.value }) : setNewRoutine({ ...newRoutine, title: e.target.value })}
-                                    placeholder="Enter habit name..."
-                                    className="w-full bg-gray-50/50 border-2 border-gray-100 rounded-[24px] p-6 text-sm font-black placeholder:text-gray-300 focus:border-indigo-600/20 focus:bg-white focus:outline-none transition-all shadow-sm"
+                                    placeholder="e.g. Daily Standup..."
+                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-xl p-4 text-sm font-bold text-gray-900 dark:text-white focus:border-[#3b71ca] focus:ring-0 outline-none transition-all"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Architectural Frequency</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Frequency</label>
                                     <select
                                         value={showEditModal ? showEditModal.schedule?.type : newRoutine.schedule.type}
                                         onChange={e => {
@@ -491,29 +491,29 @@ export default function RoutinesModule() {
                                             if (showEditModal) setShowEditModal({ ...showEditModal, schedule: { ...showEditModal.schedule, type: val } });
                                             else setNewRoutine({ ...newRoutine, schedule: { ...newRoutine.schedule, type: val } });
                                         }}
-                                        className="w-full bg-gray-50/50 border-2 border-gray-100 rounded-[24px] p-5 text-sm font-black focus:border-indigo-600/20 focus:bg-white focus:outline-none transition-all shadow-sm cursor-pointer"
+                                        className="w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-xl p-4 text-sm font-bold text-gray-900 dark:text-white focus:border-[#3b71ca] outline-none transition-all cursor-pointer"
                                     >
-                                        <option value="daily">Continuous (Daily)</option>
-                                        <option value="weekly">Interval (Weekly)</option>
-                                        <option value="monthly">Episodic (Monthly)</option>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
                                     </select>
                                 </div>
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Tag Group</label>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Category</label>
                                     <input
                                         type="text"
                                         value={showEditModal ? showEditModal.category || "" : newRoutine.category}
                                         onChange={e => showEditModal ? setShowEditModal({ ...showEditModal, category: e.target.value }) : setNewRoutine({ ...newRoutine, category: e.target.value })}
-                                        placeholder="Category..."
-                                        className="w-full bg-gray-50/50 border-2 border-gray-100 rounded-[24px] p-5 text-sm font-black focus:border-indigo-600/20 focus:bg-white focus:outline-none transition-all shadow-sm"
+                                        placeholder="Tag..."
+                                        className="w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-xl p-4 text-sm font-bold text-gray-900 dark:text-white focus:border-[#3b71ca] outline-none transition-all"
                                     />
                                 </div>
                             </div>
 
                             {(showEditModal ? (showEditModal.schedule?.type === "weekly") : (newRoutine.schedule.type === "weekly")) && (
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Selected Cadence (Days)</label>
-                                    <div className="flex flex-wrap gap-2.5">
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Days of Week</label>
+                                    <div className="flex flex-wrap gap-2">
                                         {DAYS_OF_WEEK.map((day, idx) => {
                                             const isActive = showEditModal ? showEditModal.schedule?.days?.includes(idx) : newRoutine.schedule.days.includes(idx);
                                             return (
@@ -532,9 +532,9 @@ export default function RoutinesModule() {
                                                             setNewRoutine({ ...newRoutine, schedule: { ...newRoutine.schedule, days: d } });
                                                         }
                                                     }}
-                                                    className={`flex-1 py-4 px-2 rounded-2xl text-[10px] font-black transition-all border-2 ${isActive
-                                                        ? "bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-600/20 scale-105"
-                                                        : "bg-gray-50/50 text-gray-400 border-gray-100 hover:bg-gray-100"
+                                                    className={`flex-1 py-1.5 rounded-lg text-[9px] font-black transition-all border ${isActive
+                                                        ? "bg-[#3b71ca] text-white border-[#3b71ca] shadow-md shadow-[#3b71ca]/10"
+                                                        : "bg-gray-50 dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-800"
                                                         }`}
                                                 >
                                                     {day}
@@ -546,9 +546,9 @@ export default function RoutinesModule() {
                             )}
 
                             {(showEditModal ? (showEditModal.schedule?.type === "monthly") : (newRoutine.schedule.type === "monthly")) && (
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Active Epochs (Dates)</label>
-                                    <div className="grid grid-cols-7 gap-2 h-48 overflow-y-auto p-4 custom-scrollbar bg-gray-50/50 rounded-[32px] border border-gray-100">
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Days of Month</label>
+                                    <div className="grid grid-cols-7 gap-1 h-32 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 custom-scrollbar">
                                         {Array.from({ length: 31 }).map((_, i) => {
                                             const date = i + 1;
                                             const isActive = showEditModal ? showEditModal.schedule?.dates?.includes(date) : newRoutine.schedule.dates.includes(date);
@@ -568,9 +568,9 @@ export default function RoutinesModule() {
                                                             setNewRoutine({ ...newRoutine, schedule: { ...newRoutine.schedule, dates: d } });
                                                         }
                                                     }}
-                                                    className={`aspect-square rounded-xl text-[10px] font-black transition-all border-2 ${isActive
-                                                        ? "bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/10 scale-105"
-                                                        : "bg-white text-gray-400 border-gray-100 hover:bg-indigo-50/50"
+                                                    className={`aspect-square rounded-lg text-[9px] font-black transition-all border ${isActive
+                                                        ? "bg-[#3b71ca] text-white border-[#3b71ca]"
+                                                        : "bg-white dark:bg-gray-800 text-gray-400 border-gray-100 dark:border-gray-800"
                                                         }`}
                                                 >
                                                     {date}
@@ -581,18 +581,18 @@ export default function RoutinesModule() {
                                 </div>
                             )}
 
-                            <div className="pt-6 flex gap-6">
+                            <div className="pt-4 flex gap-4">
                                 <button
                                     onClick={() => { setShowAddModal(false); setShowEditModal(null); }}
-                                    className="flex-1 bg-gray-50 text-gray-500 py-6 rounded-[24px] font-black text-xs hover:bg-gray-100 transition-all border border-gray-100"
+                                    className="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 py-3 rounded-xl font-black text-[11px] uppercase tracking-wider hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                                 >
-                                    Dismiss
+                                    Cancel
                                 </button>
                                 <button
                                     onClick={() => showAddModal ? handleAction("add", newRoutine) : handleAction("edit", showEditModal)}
-                                    className="flex-1 bg-indigo-600 text-white py-6 rounded-[24px] font-black text-xs shadow-2xl shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    className="flex-1 bg-[#3b71ca] text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-wider shadow-xl shadow-[#3b71ca]/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                 >
-                                    {showAddModal ? "Initialize" : "Commit Changes"}
+                                    {showAddModal ? "Save Routine" : "Apply Changes"}
                                 </button>
                             </div>
                         </div>
