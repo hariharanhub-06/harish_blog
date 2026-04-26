@@ -265,19 +265,19 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                             </div>
                         )}
 
-                        <div className={`p-8 sm:p-12 ${form?.bannerUrl ? 'pt-8' : 'pt-12'}`}>
+                        <div className={`p-6 sm:p-12 ${form?.bannerUrl ? 'pt-6 sm:pt-8' : 'pt-8 sm:pt-12'}`}>
                             {form?.themeColor && <div className="absolute top-0 left-0 w-full h-2 z-20" style={{ backgroundColor: form.themeColor }}></div>}
-                            <h1 className="text-3xl sm:text-4xl font-black mb-4 tracking-tight leading-tight" style={{ color: form?.bannerUrl ? '#111827' : themeBg }}>{form?.title}</h1>
-                            {form?.description && <p className="text-gray-600 text-base font-medium whitespace-pre-wrap leading-relaxed opacity-80">{form.description}</p>}
-                            <div className="mt-8 pt-5 border-t border-gray-100/80 text-[10px] text-red-500 font-black uppercase tracking-[0.2em] bg-red-50/50 inline-block px-4 py-2 rounded-full border border-red-100/50">Required Fields</div>
+                            <h1 className="text-2xl sm:text-4xl font-black mb-4 tracking-tight leading-tight" style={{ color: form?.bannerUrl ? '#111827' : themeBg }}>{form?.title}</h1>
+                            {form?.description && <p className="text-gray-600 text-sm sm:text-base font-medium whitespace-pre-wrap leading-relaxed opacity-80">{form.description}</p>}
+                            <div className="mt-6 sm:mt-8 pt-5 border-t border-gray-100/80 text-[10px] text-red-500 font-black uppercase tracking-[0.2em] bg-red-50/50 inline-block px-4 py-2 rounded-full border border-red-100/50">Required Fields</div>
                         </div>
                     </div>
 
                     {currentQuestions.map((q, i) => (
                         q.type === 'section_header' ? (
-                            <div key={q.id || Math.random()} className="bg-white/20 backdrop-blur-xl border border-white/40 rounded-[3rem] p-10 sm:p-14 text-center my-12 shadow-[0_20px_50px_rgba(0,0,0,0.05)] relative overflow-hidden group">
+                            <div key={q.id || Math.random()} className="bg-white/20 backdrop-blur-xl border border-white/40 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-14 text-center my-8 sm:my-12 shadow-[0_20px_50px_rgba(0,0,0,0.05)] relative overflow-hidden group">
                                 <div className="absolute top-0 left-0 w-full h-2 group-hover:h-3 transition-all duration-500" style={{ backgroundColor: themeBg }}></div>
-                                <h2 className="text-4xl font-black tracking-tight" style={{ color: themeBg }}>{q.questionText}</h2>
+                                <h2 className="text-2xl sm:text-4xl font-black tracking-tight" style={{ color: themeBg }}>{q.questionText}</h2>
                                 {q.options?.[0] && <p className="text-gray-600 font-bold mt-4 text-lg opacity-80">{q.options[0]}</p>}
                                 <div className="absolute -right-10 -bottom-10 w-32 h-32 rounded-full blur-3xl opacity-10" style={{ backgroundColor: themeBg }}></div>
                             </div>
@@ -288,7 +288,7 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.05, duration: 0.6 }}
-                                className="bg-white/80 backdrop-blur-2xl p-10 sm:p-12 rounded-[3.5rem] shadow-[0_24px_48px_rgba(0,0,0,0.04)] border border-white/50 hover:shadow-[0_32px_64px_rgba(0,0,0,0.08)] transition-all duration-500 relative group overflow-hidden active:scale-[0.99]"
+                                className="bg-white/80 backdrop-blur-2xl p-6 sm:p-12 rounded-[2rem] sm:rounded-[3.5rem] shadow-[0_24px_48px_rgba(0,0,0,0.04)] border border-white/50 hover:shadow-[0_32px_64px_rgba(0,0,0,0.08)] transition-all duration-500 relative group overflow-hidden active:scale-[0.99]"
                             >
                                 {q.required && <div className="absolute top-0 right-16 w-16 h-1.5 bg-red-500 rounded-b-xl border-t-0 shadow-[0_4px_12px_rgba(239,68,68,0.3)]"></div>}
 
@@ -298,8 +298,8 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
                                     </div>
                                 )}
-                                <label className="text-2xl font-black text-gray-900 mb-8 block leading-tight tracking-tight">
-                                    {q.questionText} {q.required && <span className="text-red-500 ml-1 select-none font-bold text-3xl leading-none opacity-40">*</span>}
+                                <label className="text-[1.25rem] sm:text-2xl font-black text-gray-900 mb-6 sm:mb-8 block leading-tight tracking-tight">
+                                    {q.questionText} {q.required && <span className="text-red-500 ml-1 select-none font-bold text-xl sm:text-3xl leading-none opacity-40">*</span>}
                                 </label>
 
                                 <div className="mt-8">
@@ -307,7 +307,7 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                         <div className="relative group/input">
                                             <input
                                                 type={q.type === 'short_answer' ? "text" : "textarea"}
-                                                className={`w-full ${q.type === 'short_answer' ? 'sm:w-4/5' : ''} border-b-4 border-gray-100 border-t-0 border-x-0 rounded-none bg-transparent px-2 py-4 focus:ring-0 text-2xl font-bold transition-all duration-300 placeholder:text-gray-200`}
+                                                className={`w-full ${q.type === 'short_answer' ? 'sm:w-4/5' : ''} border-b-4 border-gray-100 border-t-0 border-x-0 rounded-none bg-transparent px-2 py-2 sm:py-4 focus:ring-0 text-lg sm:text-2xl font-bold transition-all duration-300 placeholder:text-gray-200`}
                                                 placeholder="Write your answer here..."
                                                 style={{ outline: 'none' }}
                                                 value={answers[q.id] || ""}
@@ -324,18 +324,18 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                             {q.options?.map((opt, i) => {
                                                 const isSelected = answers[q.id] === opt;
                                                 return (
-                                                    <label key={i} className={`flex items-center gap-6 cursor-pointer group/opt p-6 rounded-[2rem] transition-all duration-400 border-2 ${isSelected ? 'bg-primary/5 border-primary/20 shadow-inner' : 'bg-gray-50/50 border-transparent hover:bg-white hover:border-gray-100 hover:shadow-md'}`}>
+                                                    <label key={i} className={`flex items-center gap-4 sm:gap-6 cursor-pointer group/opt p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-400 border-2 ${isSelected ? 'bg-primary/5 border-primary/20 shadow-inner' : 'bg-gray-50/50 border-transparent hover:bg-white hover:border-gray-100 hover:shadow-md'}`}>
                                                         <div className="relative">
                                                             <input type="radio"
                                                                 name={q.id} value={opt} checked={isSelected}
                                                                 onChange={(e) => handleAnswerChange(q.id, e.target.value)}
                                                                 className="w-8 h-8 opacity-0 absolute cursor-pointer z-10"
                                                             />
-                                                            <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'border-primary ring-4 ring-primary/10' : 'border-gray-300 group-hover/opt:border-primary/40'}`}>
-                                                                {isSelected && <div className="w-4 h-4 rounded-full bg-primary animate-pulse" />}
+                                                            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'border-primary ring-4 ring-primary/10' : 'border-gray-300 group-hover/opt:border-primary/40'}`}>
+                                                                {isSelected && <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-primary animate-pulse" />}
                                                             </div>
                                                         </div>
-                                                        <span className={`text-xl font-bold transition-colors ${isSelected ? 'text-primary' : 'text-gray-700'}`}>{opt}</span>
+                                                        <span className={`text-lg sm:text-xl font-bold transition-colors ${isSelected ? 'text-primary' : 'text-gray-700'}`}>{opt}</span>
                                                     </label>
                                                 )
                                             })}
@@ -348,17 +348,17 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                                 const currentAnswers = answers[q.id] ? (Array.isArray(answers[q.id]) ? answers[q.id] : JSON.parse(answers[q.id])) : [];
                                                 const isChecked = currentAnswers.includes(opt);
                                                 return (
-                                                    <label key={i} className={`flex items-center gap-6 cursor-pointer group/opt p-6 rounded-[2rem] transition-all duration-400 border-2 ${isChecked ? 'bg-green-50/50 border-green-200/50 shadow-inner' : 'bg-gray-50/50 border-transparent hover:bg-white hover:border-gray-100 hover:shadow-md'}`}>
+                                                    <label key={i} className={`flex items-center gap-4 sm:gap-6 cursor-pointer group/opt p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-400 border-2 ${isChecked ? 'bg-green-50/50 border-green-200/50 shadow-inner' : 'bg-gray-50/50 border-transparent hover:bg-white hover:border-gray-100 hover:shadow-md'}`}>
                                                         <div className="relative">
                                                             <input type="checkbox" value={opt} checked={isChecked}
                                                                 onChange={(e) => handleCheckboxChange(q.id, opt, e.target.checked)}
                                                                 className="w-8 h-8 opacity-0 absolute cursor-pointer z-10"
                                                             />
-                                                            <div className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300 ${isChecked ? 'bg-green-500 border-green-500 scale-110 shadow-lg shadow-green-200' : 'border-gray-300 group-hover/opt:border-green-400/40'}`}>
-                                                                {isChecked && <X size={18} className="text-white" />}
+                                                            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl border-2 flex items-center justify-center transition-all duration-300 ${isChecked ? 'bg-green-500 border-green-500 scale-110 shadow-lg shadow-green-200' : 'border-gray-300 group-hover/opt:border-green-400/40'}`}>
+                                                                {isChecked && <X size={16} className="text-white" />}
                                                             </div>
                                                         </div>
-                                                        <span className={`text-xl font-bold transition-colors ${isChecked ? 'text-green-700' : 'text-gray-700'}`}>{opt}</span>
+                                                        <span className={`text-lg sm:text-xl font-bold transition-colors ${isChecked ? 'text-green-700' : 'text-gray-700'}`}>{opt}</span>
                                                     </label>
                                                 )
                                             })}
@@ -368,7 +368,7 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                     {q.type === 'dropdown' && (
                                         <div className="relative">
                                             <select value={answers[q.id] || ""} onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                                                className="w-full sm:w-2/3 border-4 border-gray-50 rounded-[2rem] p-6 pr-12 focus:ring-4 focus:border-primary/20 text-xl font-black bg-white appearance-none transition-all shadow-sm hover:shadow-md outline-none cursor-pointer"
+                                                className="w-full sm:w-2/3 border-4 border-gray-50 rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 pr-12 focus:ring-4 focus:border-primary/20 text-lg sm:text-xl font-black bg-white appearance-none transition-all shadow-sm hover:shadow-md outline-none cursor-pointer"
                                                 style={{ '--tw-ring-color': themeBg } as any}
                                             >
                                                 <option value="" disabled className="text-gray-300">Choose option...</option>
@@ -406,7 +406,7 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
 
                                     {q.type === "file_upload" && (
                                         <div className="space-y-6">
-                                            <label className={`border-4 border-dashed rounded-[3rem] p-12 sm:p-20 flex flex-col items-center justify-center transition-all duration-500 group cursor-pointer relative overflow-hidden ${answers[q.id] ? 'bg-green-50/30 border-green-200/50' : 'bg-white/40 border-gray-100 hover:bg-white hover:border-gray-200 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)]'}`}>
+                                            <label className={`border-4 border-dashed rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-20 flex flex-col items-center justify-center transition-all duration-500 group cursor-pointer relative overflow-hidden ${answers[q.id] ? 'bg-green-50/30 border-green-200/50' : 'bg-white/40 border-gray-100 hover:bg-white hover:border-gray-200 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)]'}`}>
                                                 {answers[q.id] ? (
                                                     <div className="flex flex-col items-center animate-in fade-in zoom-in duration-500">
                                                         <div className="w-24 h-24 rounded-full bg-green-500 flex items-center justify-center text-white mb-6 shadow-xl shadow-green-200 scale-110">
