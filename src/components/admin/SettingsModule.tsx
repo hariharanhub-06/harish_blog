@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Shield, Smartphone, Monitor, Globe, Trash2, LogOut, RefreshCw, CheckCircle2, XCircle, BellRing } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { NEXT_PUBLIC_VAPID_KEY } from "@/lib/webpush";
+import { NEXT_PUBLIC_VAPID_KEY } from "@/lib/vapid";
 
 interface Session {
     id: string;

@@ -1,3 +1,4 @@
+import 'server-only';
 import webpush from 'web-push';
 import { db } from "@/db";
 import { adminPushTokens } from "@/db/schema";
@@ -47,5 +48,3 @@ export async function sendAdminPushNotification(title: string, message: string, 
         console.error("General Push Notification Error:", error);
     }
 }
-
-export const NEXT_PUBLIC_VAPID_KEY = vapidPublicKey;
