@@ -211,6 +211,8 @@ export default function KanbanModule() {
     const [activeId, setActiveId] = useState<string | null>(null);
     const [activeType, setActiveType] = useState<"Column" | "Task" | null>(null);
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -224,8 +226,8 @@ export default function KanbanModule() {
         setFetching(true);
         try {
             const [colsRes, tasksRes] = await Promise.all([
-                fetch("/api/admin/kanban/columns"),
-                fetch("/api/admin/kanban")
+                fetch("/api/admin/kanban/columns", { headers: { "X-Session-Id": sessionId } }),
+                fetch("/api/admin/kanban", { headers: { "X-Session-Id": sessionId } })
             ]);
             if (colsRes.ok && tasksRes.ok) {
                 const [colsData, tasksData]: [KanbanColumn[], Task[]] = await Promise.all([colsRes.json(), tasksRes.json()]);
@@ -301,7 +303,7 @@ export default function KanbanModule() {
                 try {
                     await fetch("/api/admin/kanban/columns", {
                         method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
+                        headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                         body: JSON.stringify(newCols.map(c => ({ id: c.id, displayOrder: c.displayOrder })))
                     });
                 } catch (err) {
@@ -339,7 +341,7 @@ export default function KanbanModule() {
             try {
                 await fetch("/api/admin/kanban", {
                     method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                     body: JSON.stringify(finalTasks.map(t => ({ id: t.id, columnId: t.columnId, displayOrder: t.displayOrder })))
                 });
             } catch (err) {
@@ -357,7 +359,7 @@ export default function KanbanModule() {
             const method = editingTask.id ? "PUT" : "POST";
             const res = await fetch("/api/admin/kanban", {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(editingTask),
             });
             if (res.ok) {
@@ -373,7 +375,7 @@ export default function KanbanModule() {
     const handleDeleteTask = async (id: string) => {
         if (!confirm("Are you sure you want to delete this task?")) return;
         try {
-            const res = await fetch(`/api/admin/kanban?id=${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/kanban?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) setTasks(prev => prev.filter(t => t.id !== id));
         } catch (error) { console.error("Failed to delete task:", error); }
     };
@@ -385,7 +387,7 @@ export default function KanbanModule() {
             const method = editingColumn.id ? "PUT" : "POST";
             const res = await fetch("/api/admin/kanban/columns", {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({ ...editingColumn, displayOrder: editingColumn.displayOrder ?? columns.length }),
             });
             if (res.ok) {
@@ -406,7 +408,7 @@ export default function KanbanModule() {
         }
         if (!confirm("Are you sure you want to delete this column?")) return;
         try {
-            const res = await fetch(`/api/admin/kanban/columns?id=${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/kanban/columns?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) setColumns(prev => prev.filter(c => c.id !== id));
         } catch (error) { console.error("Failed to delete column:", error); }
     };

@@ -52,7 +52,7 @@ export default function SettingsModule() {
         const sid = localStorage.getItem('admin_sessionId') || '';
         try {
             const [sessRes, devRes] = await Promise.all([
-                fetch("/api/admin/sessions"),
+                fetch("/api/admin/sessions", { headers: { 'X-Session-Id': sid } }),
                 fetch("/api/admin/devices", { headers: { 'X-Session-Id': sid } })
             ]);
 
@@ -208,7 +208,8 @@ export default function SettingsModule() {
     const handleRevoke = async (id: string) => {
         setRevokingId(id);
         try {
-            const res = await fetch(`/api/admin/sessions?id=${id}`, { method: "DELETE" });
+            const sid = localStorage.getItem('admin_sessionId') || '';
+            const res = await fetch(`/api/admin/sessions?id=${id}`, { method: "DELETE", headers: { 'X-Session-Id': sid } });
             if (res.ok) {
                 if (id === currentSessionId) {
                     logout();
@@ -227,7 +228,8 @@ export default function SettingsModule() {
         if (!confirm("Are you sure you want to logout from all devices? This will also logout your current session.")) return;
 
         try {
-            const res = await fetch("/api/admin/sessions?action=logout-all", { method: "DELETE" });
+            const sid = localStorage.getItem('admin_sessionId') || '';
+            const res = await fetch("/api/admin/sessions?action=logout-all", { method: "DELETE", headers: { 'X-Session-Id': sid } });
             if (res.ok) {
                 logout();
             }

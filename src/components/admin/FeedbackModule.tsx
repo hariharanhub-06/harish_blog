@@ -52,6 +52,8 @@ export default function FeedbackModule() {
     const [searchQuery, setSearchQuery] = useState("");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchFeedbacks();
     }, []);
@@ -59,7 +61,7 @@ export default function FeedbackModule() {
     const fetchFeedbacks = async () => {
         setFetching(true);
         try {
-            const res = await fetch("/api/admin/feedbacks");
+            const res = await fetch("/api/admin/feedbacks", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
                 setFeedbacks(data);
@@ -79,7 +81,7 @@ export default function FeedbackModule() {
 
             const res = await fetch("/api/admin/feedbacks", {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({ ...feedback, status: "Approved" })
             });
 
@@ -95,7 +97,7 @@ export default function FeedbackModule() {
         if (!confirm("Are you sure you want to delete this testimonial?")) return;
         setUpdatingId(id);
         try {
-            const res = await fetch(`/api/admin/feedbacks?id=${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/feedbacks?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) fetchFeedbacks();
         } catch (error) {
             console.error("Deletion error", error);
@@ -110,7 +112,7 @@ export default function FeedbackModule() {
         try {
             const res = await fetch("/api/admin/feedbacks", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(formData)
             });
             if (res.ok) {

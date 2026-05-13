@@ -56,6 +56,8 @@ export default function FormsModule() {
     const [isCropping, setIsCropping] = useState(false);
     const [isLinkCopied, setIsLinkCopied] = useState<string | null>(null);
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         if (view === "list") fetchForms();
     }, [view]);
@@ -63,7 +65,7 @@ export default function FormsModule() {
     const fetchForms = async () => {
         setLoading(true);
         try {
-            const res = await fetch("/api/admin/forms");
+            const res = await fetch("/api/admin/forms", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) setForms(await res.json());
         } catch (e) { toast.error("Failed to load forms"); }
         setLoading(false);
@@ -72,7 +74,7 @@ export default function FormsModule() {
     const handleCreateForm = async () => {
         try {
             const res = await fetch("/api/admin/forms", {
-                method: "POST", headers: { "Content-Type": "application/json" },
+                method: "POST", headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({ title: "Untitled Form", description: "" }),
             });
             if (res.ok) {
@@ -86,7 +88,7 @@ export default function FormsModule() {
         setLoading(true);
         setView("builder");
         try {
-            const res = await fetch(`/api/admin/forms/${id}`);
+            const res = await fetch(`/api/admin/forms/${id}`, { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
                 setActiveForm(data);
@@ -100,7 +102,7 @@ export default function FormsModule() {
     const handleDeleteForm = async (id: string) => {
         if (!confirm("Are you sure?")) return;
         try {
-            const res = await fetch(`/api/admin/forms/${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/forms/${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) fetchForms();
         } catch (e) { toast.error("Failed to delete form"); }
     };
@@ -108,9 +110,9 @@ export default function FormsModule() {
     const handleViewResponses = async (id: string) => {
         setLoading(true); setView("responses");
         try {
-            const formRes = await fetch(`/api/admin/forms/${id}`);
+            const formRes = await fetch(`/api/admin/forms/${id}`, { headers: { "X-Session-Id": sessionId } });
             setBuilderQuestions((await formRes.json()).questions || []);
-            const res = await fetch(`/api/admin/forms/${id}/responses`);
+            const res = await fetch(`/api/admin/forms/${id}/responses`, { headers: { "X-Session-Id": sessionId } });
             if (res.ok) setResponses(await res.json());
         } catch (e) { setView("list"); }
         setLoading(false);
@@ -131,7 +133,7 @@ export default function FormsModule() {
 
         try {
             const res = await fetch(`/api/admin/forms/${activeForm.id}`, {
-                method: "PUT", headers: { "Content-Type": "application/json" },
+                method: "PUT", headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({ ...activeForm, isPublished: finalPublished, questions: finalQuestions }),
             });
             if (res.ok) { setIsPublished(finalPublished); toast.success("Saved"); }
@@ -236,7 +238,7 @@ export default function FormsModule() {
         try {
             const res = await fetch(`/api/admin/forms/${activeForm?.id}/responses`, {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({ responseIds: ids })
             });
             if (res.ok) {

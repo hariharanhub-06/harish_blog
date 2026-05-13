@@ -20,6 +20,8 @@ export default function YouTubeModule() {
     const [fetching, setFetching] = useState(true);
     const [saving, setSaving] = useState(false);
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchVideos();
     }, []);
@@ -27,7 +29,7 @@ export default function YouTubeModule() {
     const fetchVideos = async () => {
         setFetching(true);
         try {
-            const res = await fetch("/api/admin/youtube");
+            const res = await fetch("/api/admin/youtube", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) setVideos(await res.json());
         } catch (err) {
             console.error(err);
@@ -42,7 +44,7 @@ export default function YouTubeModule() {
         try {
             const res = await fetch("/api/admin/youtube", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(editing),
             });
             if (res.ok) {
@@ -58,7 +60,7 @@ export default function YouTubeModule() {
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure?")) return;
-        const res = await fetch(`/api/admin/youtube?id=${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/admin/youtube?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
         if (res.ok) fetchVideos();
     };
 

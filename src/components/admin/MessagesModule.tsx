@@ -56,6 +56,8 @@ export default function MessagesModule() {
     const [filterCategory, setFilterCategory] = useState("All");
     const [filterStatus, setFilterStatus] = useState("All");
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     // Default Options
     const defaultCategories = [
         "Blog",
@@ -100,7 +102,7 @@ export default function MessagesModule() {
     const fetchMessages = async (silent = false) => {
         if (!silent) setFetching(true);
         try {
-            const res = await fetch("/api/admin/messages");
+            const res = await fetch("/api/admin/messages", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
 
@@ -118,7 +120,7 @@ export default function MessagesModule() {
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this message?")) return;
-        const res = await fetch(`/api/admin/messages?id=${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/admin/messages?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
         if (res.ok) fetchMessages();
     };
 
@@ -132,7 +134,7 @@ export default function MessagesModule() {
 
             const res = await fetch("/api/admin/messages", {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(payload),
             });
             if (res.ok) {
@@ -156,7 +158,7 @@ export default function MessagesModule() {
         try {
             const res = await fetch("/api/admin/client-projects", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({
                     leadId: msg.id,
                     title: msg.requestedService || `${msg.name}'s Project`,
@@ -187,7 +189,7 @@ export default function MessagesModule() {
         try {
             const res = await fetch("/api/admin/finance-leads", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({
                     leadId: msg.id,
                     loanType: msg.requestedService || "General Loan",

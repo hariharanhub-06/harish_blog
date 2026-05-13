@@ -31,6 +31,8 @@ export default function ClientProjectsModule() {
     const [viewing, setViewing] = useState<any>(null);
     const [updating, setUpdating] = useState(false);
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchProjects();
     }, []);
@@ -38,7 +40,7 @@ export default function ClientProjectsModule() {
     const fetchProjects = async (silent = false) => {
         if (!silent) setFetching(true);
         try {
-            const res = await fetch("/api/admin/client-projects");
+            const res = await fetch("/api/admin/client-projects", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
                 setProjects(Array.isArray(data) ? data : []);
@@ -54,7 +56,7 @@ export default function ClientProjectsModule() {
         try {
             const res = await fetch("/api/admin/client-projects", {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(updateData),
             });
             if (res.ok) {
@@ -72,7 +74,7 @@ export default function ClientProjectsModule() {
     const handleDelete = async (id: string) => {
         if (!confirm("Remove this project record? This cannot be undone.")) return;
         try {
-            const res = await fetch(`/api/admin/client-projects?id=${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/client-projects?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) fetchProjects();
         } catch (error) {
             console.error(error);
@@ -141,7 +143,7 @@ export default function ClientProjectsModule() {
             const method = viewing.id ? "PUT" : "POST";
             const res = await fetch("/api/admin/client-projects", {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(viewing),
             });
             if (res.ok) {

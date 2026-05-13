@@ -126,6 +126,8 @@ export default function PricingQuoteSystem() {
         discountId: ""
     });
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -133,7 +135,7 @@ export default function PricingQuoteSystem() {
     const fetchData = async () => {
         try {
             const [pricingRes, historyRes] = await Promise.all([
-                fetch("/api/admin/pricing"),
+                fetch("/api/admin/pricing", { headers: { "X-Session-Id": sessionId } }),
                 getQuotes()
             ]);
 
@@ -244,7 +246,7 @@ export default function PricingQuoteSystem() {
         try {
             const res = await fetch("/api/admin/pricing", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({ type, action: "update", data })
             });
             if (res.ok) {

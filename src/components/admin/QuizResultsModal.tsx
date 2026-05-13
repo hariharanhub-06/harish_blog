@@ -28,13 +28,15 @@ export default function QuizResultsModal({ quizId, quizTitle, onClose }: QuizRes
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [search, setSearch] = useState("");
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchResults();
     }, [quizId]);
 
     const fetchResults = async () => {
         try {
-            const res = await fetch(`/api/admin/quiz-results?quizId=${quizId}`);
+            const res = await fetch(`/api/admin/quiz-results?quizId=${quizId}`, { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
                 setSubmissions(data);
@@ -50,7 +52,7 @@ export default function QuizResultsModal({ quizId, quizTitle, onClose }: QuizRes
         if (!confirm("Are you sure you want to delete this submission?")) return;
         setDeletingId(id);
         try {
-            const res = await fetch(`/api/admin/quiz-results?id=${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/quiz-results?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) fetchResults();
         } catch (error) {
             console.error("Delete failed", error);

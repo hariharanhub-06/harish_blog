@@ -49,13 +49,15 @@ export default function QuizModule() {
     const [catOpen, setCatOpen] = useState(false);
     const router = useRouter();
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchQuizzes();
     }, []);
 
     const fetchQuizzes = async () => {
         try {
-            const res = await fetch("/api/admin/quizzes");
+            const res = await fetch("/api/admin/quizzes", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
                 setQuizzes(data);
@@ -111,7 +113,7 @@ export default function QuizModule() {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this quiz?")) return;
         try {
-            const res = await fetch(`/api/admin/quizzes/${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/quizzes/${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 setQuizzes(quizzes.filter(q => q.id !== id));
             }
@@ -135,7 +137,7 @@ export default function QuizModule() {
 
             const res = await fetch(url, {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(currentQuiz)
             });
 

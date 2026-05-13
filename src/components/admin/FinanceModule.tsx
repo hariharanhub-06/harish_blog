@@ -148,6 +148,8 @@ export default function FinanceModule() {
         status: "active" as "active" | "collected" | "defaulted"
     });
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     // Fetch initial data
     useEffect(() => {
         fetchData();
@@ -165,11 +167,11 @@ export default function FinanceModule() {
             }
 
             const [debtsRes, loansRes, statsRes, transRes, analyticsRes] = await Promise.all([
-                fetch("/api/admin/finance/debts", { cache: "no-store" }),
-                fetch("/api/admin/finance/loans", { cache: "no-store" }),
-                fetch(summaryUrl, { cache: "no-store" }),
-                fetch(`/api/admin/finance/transactions?limit=100${selectedCategory !== 'All' ? `&category=${selectedCategory}` : ''}`, { cache: "no-store" }),
-                fetch(analyticsUrl, { cache: "no-store" })
+                fetch("/api/admin/finance/debts", { cache: "no-store", headers: { "X-Session-Id": sessionId } }),
+                fetch("/api/admin/finance/loans", { cache: "no-store", headers: { "X-Session-Id": sessionId } }),
+                fetch(summaryUrl, { cache: "no-store", headers: { "X-Session-Id": sessionId } }),
+                fetch(`/api/admin/finance/transactions?limit=100${selectedCategory !== 'All' ? `&category=${selectedCategory}` : ''}`, { cache: "no-store", headers: { "X-Session-Id": sessionId } }),
+                fetch(analyticsUrl, { cache: "no-store", headers: { "X-Session-Id": sessionId } })
             ]);
 
             if (debtsRes.ok) setDebts(await debtsRes.json());
@@ -388,7 +390,7 @@ export default function FinanceModule() {
             for (const entry of validEntries) {
                 const res = await fetch("/api/admin/finance/transactions", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                     body: JSON.stringify({
                         amount: entry.amount,
                         description: entry.item,
@@ -449,7 +451,7 @@ export default function FinanceModule() {
 
             const res = await fetch(url, {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(body)
             });
 
@@ -521,7 +523,7 @@ export default function FinanceModule() {
 
             const res = await fetch(url, {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(body)
             });
 
@@ -570,7 +572,7 @@ export default function FinanceModule() {
     const handleDeleteLoan = async (id: string) => {
         if (!confirm("Delete this loan record?")) return;
         try {
-            const res = await fetch(`/api/admin/finance/loans?id=${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/admin/finance/loans?id=${id}`, { method: 'DELETE', headers: { "X-Session-Id": sessionId } });
             if (res.ok) fetchData();
         } catch (error) {
             console.error("Failed to delete loan", error);
@@ -826,12 +828,12 @@ export default function FinanceModule() {
                                                                                             if (confirm("Rename ALL 'Revenue' entries to 'Loan Commission'?")) {
                                                                                                 setSaving(true);
                                                                                                 try {
-                                                                                                    const r = await fetch(`/api/admin/finance/transactions?category=Revenue`);
+                                                                                                    const r = await fetch(`/api/admin/finance/transactions?category=Revenue`, { headers: { "X-Session-Id": sessionId } });
                                                                                                     const txs = await r.json();
                                                                                                     for (const tx of txs) {
                                                                                                         await fetch("/api/admin/finance/transactions", {
                                                                                                             method: "PUT",
-                                                                                                            headers: { "Content-Type": "application/json" },
+                                                                                                            headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                                                                                                             body: JSON.stringify({ id: tx.id, category: "Loan Commission" })
                                                                                                         });
                                                                                                     }
@@ -1111,7 +1113,7 @@ export default function FinanceModule() {
                                                 <button
                                                     onClick={async () => {
                                                         if (confirm(`Delete debt ${debt.name}?`)) {
-                                                            await fetch(`/api/admin/finance/debts?id=${debt.id}`, { method: "DELETE" });
+                                                            await fetch(`/api/admin/finance/debts?id=${debt.id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
                                                             fetchData();
                                                         }
                                                     }}
@@ -1373,7 +1375,7 @@ export default function FinanceModule() {
                                                                     if (editingCategory.trim() && editingCategory !== tx.category) {
                                                                         await fetch("/api/admin/finance/transactions", {
                                                                             method: "PUT",
-                                                                            headers: { "Content-Type": "application/json" },
+                                                                            headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                                                                             body: JSON.stringify({ id: tx.id, category: editingCategory.trim() })
                                                                         });
                                                                         fetchData();
@@ -1428,7 +1430,7 @@ export default function FinanceModule() {
                                                                 <button
                                                                     onClick={async () => {
                                                                         if (confirm("Delete this entry?")) {
-                                                                            await fetch(`/api/admin/finance/transactions?id=${tx.id}`, { method: 'DELETE' });
+                                                                            await fetch(`/api/admin/finance/transactions?id=${tx.id}`, { method: 'DELETE', headers: { "X-Session-Id": sessionId } });
                                                                             fetchData();
                                                                         }
                                                                     }}

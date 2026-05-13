@@ -30,6 +30,8 @@ export default function GameAssetsModule() {
     const [selectedGame, setSelectedGame] = useState("memory");
     const [newAssetUrl, setNewAssetUrl] = useState("");
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     const games = [
         { id: "memory", name: "Memory Card", minAssets: 12 },
         { id: "puzzle", name: "Picture Puzzle", minAssets: 3 }
@@ -39,7 +41,7 @@ export default function GameAssetsModule() {
 
     const fetchAssets = async () => {
         try {
-            const res = await fetch("/api/admin/game-assets");
+            const res = await fetch("/api/admin/game-assets", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) setAssets(await res.json());
         } catch (error) {
             console.error("Failed to fetch assets", error);
@@ -66,7 +68,7 @@ export default function GameAssetsModule() {
         try {
             const res = await fetch("/api/admin/game-assets", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({ gameId: selectedGame, assetUrl: url }),
             });
             if (res.ok) { fetchAssets(); setNewAssetUrl(""); }
@@ -77,7 +79,7 @@ export default function GameAssetsModule() {
 
     const handleDelete = async (id: string) => {
         try {
-            const res = await fetch(`/api/admin/game-assets?id=${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/game-assets?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) setAssets(assets.filter((a) => a.id !== id));
         } catch (error) {
             console.error("Delete failed", error);

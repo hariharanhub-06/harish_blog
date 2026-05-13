@@ -25,13 +25,15 @@ export default function ProjectsModule() {
 
     const [error, setError] = useState<string | null>(null);
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchProjects();
     }, []);
 
     const fetchProjects = async () => {
         setFetching(true);
-        const res = await fetch("/api/admin/projects");
+        const res = await fetch("/api/admin/projects", { headers: { "X-Session-Id": sessionId } });
         if (res.ok) {
             const data = await res.json();
             setProjects(data);
@@ -46,7 +48,7 @@ export default function ProjectsModule() {
         try {
             const res = await fetch("/api/admin/projects", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(editing),
             });
 
@@ -70,7 +72,7 @@ export default function ProjectsModule() {
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure?")) return;
-        const res = await fetch(`/api/admin/projects?id=${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/admin/projects?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
         if (res.ok) fetchProjects();
     };
 

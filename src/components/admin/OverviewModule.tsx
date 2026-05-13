@@ -51,6 +51,8 @@ export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: an
         unreadMessages: 0
     });
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchData();
     }, [dateRange]);
@@ -59,7 +61,7 @@ export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: an
         try {
             const [analyticsRes, messagesRes] = await Promise.all([
                 fetch(`/api/analytics?start=${dateRange.start}&end=${dateRange.end}`),
-                fetch("/api/admin/messages")
+                fetch("/api/admin/messages", { headers: { "X-Session-Id": sessionId } })
             ]);
 
             if (analyticsRes.ok) {

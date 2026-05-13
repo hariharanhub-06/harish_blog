@@ -212,9 +212,10 @@ export default function AdminDashboard() {
 
         const fetchAllCounts = async () => {
             try {
+                const sid = localStorage.getItem('admin_sessionId') || "";
                 const [notifRes, msgRes] = await Promise.all([
-                    fetch("/api/admin/notifications"),
-                    fetch("/api/admin/messages")
+                    fetch("/api/admin/notifications", { headers: { "X-Session-Id": sid } }),
+                    fetch("/api/admin/messages", { headers: { "X-Session-Id": sid } })
                 ]);
                 if (notifRes.ok) {
                     const data = await notifRes.json();
@@ -263,7 +264,8 @@ export default function AdminDashboard() {
 
     const handleMarkAllSeen = async () => {
         try {
-            await fetch("/api/admin/notifications", { method: "PATCH" });
+            const sid = localStorage.getItem('admin_sessionId') || "";
+            await fetch("/api/admin/notifications", { method: "PATCH", headers: { "X-Session-Id": sid } });
             setUnreadCount(0);
             setNotifications([]);
             setIsNotificationsOpen(false);

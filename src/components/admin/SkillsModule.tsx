@@ -11,6 +11,8 @@ export default function SkillsModule() {
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchSkills();
     }, []);
@@ -18,7 +20,7 @@ export default function SkillsModule() {
     const fetchSkills = async () => {
         setFetching(true);
         try {
-            const res = await fetch("/api/admin/skills");
+            const res = await fetch("/api/admin/skills", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
                 setSkills(data);
@@ -36,7 +38,7 @@ export default function SkillsModule() {
         try {
             const res = await fetch("/api/admin/skills", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(editing),
             });
 
@@ -57,7 +59,7 @@ export default function SkillsModule() {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this skill?")) return;
         try {
-            const res = await fetch(`/api/admin/skills?id=${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/skills?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 fetchSkills();
             } else {

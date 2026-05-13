@@ -18,13 +18,15 @@ export default function SchedulerDocumentsModule() {
     const [showAddForm, setShowAddForm] = useState(false);
     const [newDoc, setNewDoc] = useState({ name: "", fileUrl: "" });
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchDocuments();
     }, []);
 
     const fetchDocuments = async () => {
         try {
-            const res = await fetch("/api/admin/scheduler-documents");
+            const res = await fetch("/api/admin/scheduler-documents", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
                 setDocuments(data);
@@ -61,7 +63,7 @@ export default function SchedulerDocumentsModule() {
         try {
             const res = await fetch("/api/admin/scheduler-documents", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(newDoc),
             });
             if (res.ok) {
@@ -79,6 +81,7 @@ export default function SchedulerDocumentsModule() {
         try {
             const res = await fetch(`/api/admin/scheduler-documents?id=${id}`, {
                 method: "DELETE",
+                headers: { "X-Session-Id": sessionId },
             });
             if (res.ok) {
                 fetchDocuments();

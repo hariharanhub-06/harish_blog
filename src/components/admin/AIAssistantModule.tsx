@@ -12,13 +12,15 @@ export default function AIAssistantModule() {
     const [saving, setSaving] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchConfig();
     }, []);
 
     const fetchConfig = async () => {
         try {
-            const res = await fetch("/api/admin/ai-config");
+            const res = await fetch("/api/admin/ai-config", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
                 if (data) {
@@ -40,7 +42,7 @@ export default function AIAssistantModule() {
         try {
             const res = await fetch("/api/admin/ai-config", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(config),
             });
             if (res.ok) {

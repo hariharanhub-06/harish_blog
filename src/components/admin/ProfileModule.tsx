@@ -11,6 +11,8 @@ export default function ProfileModule() {
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchProfile();
     }, []);
@@ -20,7 +22,7 @@ export default function ProfileModule() {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
 
-            const res = await fetch("/api/admin/profile", { signal: controller.signal });
+            const res = await fetch("/api/admin/profile", { signal: controller.signal, headers: { "X-Session-Id": sessionId } });
             clearTimeout(timeoutId);
 
             if (res.ok) {
@@ -143,7 +145,7 @@ export default function ProfileModule() {
         try {
             const res = await fetch("/api/admin/profile", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(profile),
             });
             if (res.ok) {

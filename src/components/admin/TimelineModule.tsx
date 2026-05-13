@@ -32,6 +32,8 @@ export default function TimelineModule() {
     const [uploading, setUploading] = useState(false);
     const [activeTab, setActiveTab] = useState<"experience" | "education" | "volunteering">("experience"); // Added volunteering
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchTimeline();
     }, []);
@@ -39,9 +41,9 @@ export default function TimelineModule() {
     const fetchTimeline = async () => {
         setFetching(true);
         const [expRes, eduRes, volRes] = await Promise.all([
-            fetch("/api/admin/experience"),
-            fetch("/api/admin/education"),
-            fetch("/api/admin/volunteering") // Fetch volunteering
+            fetch("/api/admin/experience", { headers: { "X-Session-Id": sessionId } }),
+            fetch("/api/admin/education", { headers: { "X-Session-Id": sessionId } }),
+            fetch("/api/admin/volunteering", { headers: { "X-Session-Id": sessionId } }) // Fetch volunteering
         ]);
 
         if (expRes.ok) setExperiences(await expRes.json());
@@ -61,7 +63,7 @@ export default function TimelineModule() {
 
             const res = await fetch(endpoint, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(editing),
             });
             if (res.ok) {
@@ -86,7 +88,7 @@ export default function TimelineModule() {
             : type === "education" ? "/api/admin/education"
             : "/api/admin/volunteering";
         try {
-            const res = await fetch(`${endpoint}?id=${id}`, { method: "DELETE" });
+            const res = await fetch(`${endpoint}?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) fetchTimeline();
             else toast.error("Failed to delete entry");
         } catch {
@@ -103,7 +105,7 @@ export default function TimelineModule() {
                 : "/api/admin/volunteering";
             const res = await fetch(endpoint, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(updated),
             });
             if (res.ok) {

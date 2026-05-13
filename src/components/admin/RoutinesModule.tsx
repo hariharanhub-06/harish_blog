@@ -92,6 +92,8 @@ export default function RoutinesModule() {
     const [analytics, setAnalytics] = useState<any[]>([]);
     const [view, setView] = useState<"grid" | "analytics">("grid");
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     // Dynamic grid days based on date range (capped for sanity in grid view, e.g. max 31 days)
     const days = useMemo(() => {
         const diff = differenceInDays(endDate, startDate) + 1;
@@ -109,9 +111,9 @@ export default function RoutinesModule() {
             const sStr = format(startDate, "yyyy-MM-dd");
             const eStr = format(endDate, "yyyy-MM-dd");
             const [routinesRes, logsRes, analyticsRes] = await Promise.all([
-                fetch("/api/admin/routines"),
-                fetch(`/api/admin/routines/logs?startDate=${sStr}&endDate=${eStr}`),
-                fetch(`/api/admin/routines/analytics?startDate=${sStr}&endDate=${eStr}`)
+                fetch("/api/admin/routines", { headers: { "X-Session-Id": sessionId } }),
+                fetch(`/api/admin/routines/logs?startDate=${sStr}&endDate=${eStr}`, { headers: { "X-Session-Id": sessionId } }),
+                fetch(`/api/admin/routines/analytics?startDate=${sStr}&endDate=${eStr}`, { headers: { "X-Session-Id": sessionId } })
             ]);
 
             if (routinesRes.ok && logsRes.ok && analyticsRes.ok) {
@@ -157,7 +159,7 @@ export default function RoutinesModule() {
         try {
             const res = await fetch("/api/admin/routines/logs", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({ routineId, date: dateStr, isCompleted: newStatus })
             });
 
@@ -177,7 +179,7 @@ export default function RoutinesModule() {
     const refreshAnalytics = () => {
         const sStr = format(startDate, "yyyy-MM-dd");
         const eStr = format(endDate, "yyyy-MM-dd");
-        fetch(`/api/admin/routines/analytics?startDate=${sStr}&endDate=${eStr}`)
+        fetch(`/api/admin/routines/analytics?startDate=${sStr}&endDate=${eStr}`, { headers: { "X-Session-Id": sessionId } })
             .then(r => r.json())
             .then(data => setAnalytics(Array.isArray(data) ? data : []))
             .catch(() => setAnalytics([]));
@@ -187,7 +189,7 @@ export default function RoutinesModule() {
         try {
             const res = await fetch("/api/admin/routines", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(routineData)
             });
             if (res.ok) {
@@ -204,7 +206,7 @@ export default function RoutinesModule() {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure? All related logs will be deleted.")) return;
         try {
-            const res = await fetch(`/api/admin/routines?id=${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/routines?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 setRoutines(prev => prev.filter(r => r.id !== id));
                 toast.success("Routine deleted");

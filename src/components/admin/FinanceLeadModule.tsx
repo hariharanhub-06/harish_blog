@@ -31,6 +31,8 @@ export default function FinanceLeadModule() {
     const [updating, setUpdating] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     const statuses = [
         "Document Collection",
         "Applied",
@@ -63,7 +65,7 @@ export default function FinanceLeadModule() {
     const fetchLeads = async () => {
         setFetching(true);
         try {
-            const res = await fetch("/api/admin/finance-leads");
+            const res = await fetch("/api/admin/finance-leads", { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
                 setLeads(data);
@@ -80,7 +82,7 @@ export default function FinanceLeadModule() {
         try {
             const res = await fetch("/api/admin/finance-leads", {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({ id, ...updateData }),
             });
             if (res.ok) {
@@ -97,7 +99,7 @@ export default function FinanceLeadModule() {
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this lead record?")) return;
-        const res = await fetch(`/api/admin/finance-leads?id=${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/admin/finance-leads?id=${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
         if (res.ok) fetchLeads();
     };
 

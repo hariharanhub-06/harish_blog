@@ -29,6 +29,8 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
 
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
     useEffect(() => {
         fetchPartnerships();
     }, []);
@@ -36,7 +38,7 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
     const fetchPartnerships = async () => {
         setFetching(true);
         try {
-            const res = await fetch(`/api/admin/partnerships?t=${Date.now()}`);
+            const res = await fetch(`/api/admin/partnerships?t=${Date.now()}`, { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 let fetchedData = await res.json();
                 console.log("[Partnerships] Fetched data:", fetchedData);
@@ -75,7 +77,7 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
             console.log(`[Partnerships] Sending ${method} request to ${url}`);
             const res = await fetch(url, {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(editing),
             });
             console.log("[Partnerships] Response received:", res.status);
@@ -100,7 +102,7 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this partner?")) return;
         try {
-            const res = await fetch(`/api/admin/partnerships/${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/partnerships/${id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 fetchPartnerships();
             } else {
