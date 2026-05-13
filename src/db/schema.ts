@@ -992,6 +992,7 @@ export const formQuestions = pgTable("form_questions", {
 export const formResponses = pgTable("form_responses", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   formId: text("form_id").notNull(),
+  status: text("status").default("New"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

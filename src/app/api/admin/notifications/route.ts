@@ -11,6 +11,7 @@ export async function PATCH(req: Request) {
         await Promise.all([
             db.update(contactSubmissions).set({ status: "Seen" }).where(eq(contactSubmissions.status, "New")),
             db.update(feedbacks).set({ status: "Seen" }).where(eq(feedbacks.status, "New")),
+            db.update(formResponses).set({ status: "Seen" }).where(eq(formResponses.status, "New")),
         ]);
         return NextResponse.json({ success: true });
     } catch (error: any) {
@@ -81,6 +82,7 @@ export async function GET(req: Request) {
             })
             .from(formResponses)
             .innerJoin(forms, eq(formResponses.formId, forms.id))
+            .where(eq(formResponses.status, "New"))
             .orderBy(desc(formResponses.createdAt))
             .limit(10);
 
