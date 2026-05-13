@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase, ChevronDown, Monitor, Keyboard, Calendar, Video, Code, Database, IndianRupee } from "lucide-react";
+import { Menu, X, User, GraduationCap, FileText, Mail, Home, Gamepad2, Briefcase, ChevronDown, Monitor, Keyboard, Calendar, Video, Database } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
@@ -44,16 +44,6 @@ const navLinks: NavLink[] = [
             { name: "Quiz", href: "/#quiz", icon: Gamepad2, color: "text-blue-500" },
             { name: "Game Arena", href: "/#games", icon: Monitor, color: "text-emerald-500" },
             { name: "Type Test", href: "/#typing-test", icon: Keyboard, color: "text-orange-500", creative: true }
-        ]
-    },
-    {
-        name: "Services",
-        href: "/services",
-        icon: Briefcase,
-        isDropdown: true,
-        items: [
-            { name: "Business Digital Solution", href: "/services", icon: Code, color: "text-blue-500" },
-            { name: "Financial Logistics", href: "/financial-logistics", icon: IndianRupee, color: "text-emerald-500" },
         ]
     },
     { name: "Live Session", href: "/#sessions", icon: Video },
