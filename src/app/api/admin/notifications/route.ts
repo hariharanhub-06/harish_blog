@@ -2,11 +2,29 @@ import { db } from "@/db";
 import { contactSubmissions, feedbacks, formResponses, forms } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
+
+export async function PATCH(req: Request) {
+    try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
+        await Promise.all([
+            db.update(contactSubmissions).set({ status: "Seen" }).where(eq(contactSubmissions.status, "New")),
+            db.update(feedbacks).set({ status: "Seen" }).where(eq(feedbacks.status, "New")),
+        ]);
+        return NextResponse.json({ success: true });
+    } catch (error: any) {
+        console.error("Mark notifications seen error:", error.message);
+        return NextResponse.json({ error: "Failed to mark as seen" }, { status: 500 });
+    }
+}
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const notifications: any[] = [];
 
         // Fetch recent contact submissions (Enquiries)

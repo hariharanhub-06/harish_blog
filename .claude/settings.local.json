@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Hari Haran\\\\Documents\\\\Harishblog\\\\public\" -File -Recurse -Force | Select-Object FullName, @{Name='SizeKB';Expression={[math]::Round\\($_.Length/1KB, 2\\)}} | Sort-Object SizeKB -Descending)"
+    ]
+  }
+}

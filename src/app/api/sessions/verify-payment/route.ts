@@ -64,12 +64,11 @@ export async function POST(req: Request) {
         });
 
         if (session && userData?.email) {
-            const origin = req.headers.get("origin") || "https://hariharan.me";
+            const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://hariharan.me";
             const liveLink = `${origin}/live/${session.id}?email=${encodeURIComponent(userData.email)}`;
             const sessionTitle = session.title || "Live Webinar Session";
             const userName = userData.name || "Attendee";
 
-            console.log(`Sending confirmation email to ${userData.email} for session: ${sessionTitle}`);
 
             const emailContent = {
                 to: userData.email,

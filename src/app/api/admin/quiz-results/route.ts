@@ -3,11 +3,14 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { quizSubmissions } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const quizId = searchParams.get("quizId");
 
@@ -29,6 +32,8 @@ export async function GET(req: Request) {
 }
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
 

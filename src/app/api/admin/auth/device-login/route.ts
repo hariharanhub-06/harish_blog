@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { adminTrustedDevices, adminSessions } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
@@ -41,8 +41,12 @@ export async function POST(request: Request) {
             deviceName: adminSessions.deviceName,
         });
 
+        if (!newSession) {
+            return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
+        }
+
         // Set session cookie securely
-        const response = NextResponse.json({ 
+        const response = NextResponse.json({
             success: true, 
             message: "Passwordless login successful",
             sessionId: newSession.id,

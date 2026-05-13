@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { financeTransactions, financeDebts, financeLoans } from "@/db/schema";
 import { eq, and, gte, lte, sql } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         let startDate = searchParams.get("startDate");
         let endDate = searchParams.get("endDate");

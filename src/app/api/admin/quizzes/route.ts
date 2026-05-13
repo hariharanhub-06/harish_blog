@@ -3,9 +3,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { quizzes, quizQuestions, quizOptions } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const allQuizzes = await db.query.quizzes.findMany({
             with: {
                 questions: {
@@ -25,6 +28,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         const { title, description, category, coverImage, isPublished, timeLimit, questions } = body;
 

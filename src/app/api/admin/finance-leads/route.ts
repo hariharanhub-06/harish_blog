@@ -2,9 +2,12 @@ import { db } from "@/db";
 import { financeLeads, contactSubmissions } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { eq, desc } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         // 1. Fetch leads
         const leads = await db.select().from(financeLeads).orderBy(desc(financeLeads.createdAt));
 
@@ -33,6 +36,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         console.log("POST /api/admin/finance-leads - Body:", body);
 
@@ -64,6 +69,8 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         if (!body.id) {
             return NextResponse.json({ error: "ID is required" }, { status: 400 });
@@ -96,6 +103,8 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
         if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });

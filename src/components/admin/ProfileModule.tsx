@@ -187,14 +187,14 @@ export default function ProfileModule() {
 
     return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-8 md:p-12">
+            <div className="bg-white dark:bg-[#1e1e1e] rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-800 p-8 md:p-12">
                 <form onSubmit={handleSave} className="space-y-12">
                     {/* Images Section */}
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {/* Avatar Section */}
                         <div className="flex flex-col items-center space-y-6">
                             <div className="relative group">
-                                <div className="w-48 h-48 rounded-full overflow-hidden border-8 border-gray-50 shadow-inner bg-gray-100 flex items-center justify-center relative">
+                                <div className="w-48 h-48 rounded-full overflow-hidden border-8 border-gray-50 dark:border-gray-800 shadow-inner bg-gray-100 dark:bg-white/10 flex items-center justify-center relative">
                                     {profile.avatarUrl ? (
                                         <Image src={profile.avatarUrl} alt="Avatar" fill className="object-cover" />
                                     ) : (
@@ -218,7 +218,7 @@ export default function ProfileModule() {
                         {/* Hero Image Section */}
                         <div className="flex flex-col items-center space-y-6">
                             <div className="relative group w-full">
-                                <div className="aspect-video w-full rounded-[2.5rem] overflow-hidden border-8 border-gray-50 shadow-inner bg-gray-100 flex items-center justify-center relative">
+                                <div className="aspect-video w-full rounded-[2.5rem] overflow-hidden border-8 border-gray-50 dark:border-gray-800 shadow-inner bg-gray-100 dark:bg-white/10 flex items-center justify-center relative">
                                     {profile.heroImageUrl ? (
                                         <Image src={profile.heroImageUrl} alt="Hero" fill className="object-cover" />
                                     ) : (
@@ -241,7 +241,7 @@ export default function ProfileModule() {
                         {/* About Image Section */}
                         <div className="flex flex-col items-center space-y-6">
                             <div className="relative group">
-                                <div className="w-48 h-48 rounded-full overflow-hidden border-8 border-gray-50 shadow-inner bg-gray-100 flex items-center justify-center relative">
+                                <div className="w-48 h-48 rounded-full overflow-hidden border-8 border-gray-50 dark:border-gray-800 shadow-inner bg-gray-100 dark:bg-white/10 flex items-center justify-center relative">
                                     {profile.aboutImageUrl ? (
                                         <Image src={profile.aboutImageUrl} alt="About" fill className="object-cover" />
                                     ) : (
@@ -263,13 +263,13 @@ export default function ProfileModule() {
 
                         {/* Audio Upload Section */}
                         <div className="flex flex-col items-center space-y-6 md:col-span-2 lg:col-span-3">
-                            <div className="w-full max-w-md bg-gray-50 rounded-2xl p-6 border border-gray-100 flex items-center justify-between">
+                            <div className="w-full max-w-md bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-pink-100 text-pink-600 rounded-xl">
                                         <Music size={24} />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-black text-gray-900 uppercase tracking-wide">Profile Audio</span>
+                                        <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wide">Profile Audio</span>
                                         {profile.audioUrl ? (
                                             <span className="text-xs text-green-600 font-bold flex items-center gap-1">
                                                 Audio Uploaded
@@ -280,7 +280,7 @@ export default function ProfileModule() {
                                     </div>
                                 </div>
 
-                                <label className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors shadow-sm text-xs font-black uppercase tracking-widest text-gray-600">
+                                <label className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm text-xs font-black uppercase tracking-widest text-gray-600 dark:text-white">
                                     {uploading ? <Loader2 size={16} className="animate-spin" /> : "Upload MP3"}
                                     <input type="file" className="hidden" accept="audio/*" onChange={(e) => handleImageUpload(e, 'audio')} />
                                 </label>
@@ -291,14 +291,14 @@ export default function ProfileModule() {
                         </div>
 
                         {/* Video Section */}
-                        <div className="flex flex-col items-center space-y-6 md:col-span-2 lg:col-span-3 pt-6 border-t border-gray-50">
+                        <div className="flex flex-col items-center space-y-6 md:col-span-2 lg:col-span-3 pt-6 border-t border-gray-50 dark:border-gray-800">
                             <div className="w-full max-w-xl space-y-4">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-red-100 text-red-600 rounded-xl">
                                         <Presentation size={24} />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-black text-gray-900 uppercase tracking-wide">Featured Blog Video</span>
+                                        <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wide">Featured Blog Video</span>
                                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Only one video will be displayed on the blog</p>
                                     </div>
                                 </div>
@@ -317,12 +317,12 @@ export default function ProfileModule() {
                                                 const id = (match && match[2].length === 11) ? match[2] : val;
                                                 setProfile({ ...profile, featuredVideoUrl: id });
                                             }}
-                                            className="w-full bg-white border border-gray-100 rounded-xl p-4 text-sm font-bold focus:ring-2 focus:ring-primary transition-all"
+                                            className="w-full bg-white dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-xl p-4 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Or Upload File</label>
-                                        <label className="flex items-center justify-center gap-2 w-full h-[54px] bg-white border border-gray-100 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors shadow-sm text-xs font-black uppercase tracking-widest text-gray-600">
+                                        <label className="flex items-center justify-center gap-2 w-full h-[54px] bg-white dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm text-xs font-black uppercase tracking-widest text-gray-600 dark:text-white">
                                             {uploading ? <Loader2 size={16} className="animate-spin" /> : "Select Video File"}
                                             <input type="file" className="hidden" accept="video/*" onChange={(e) => handleImageUpload(e, 'video')} />
                                         </label>
@@ -330,7 +330,7 @@ export default function ProfileModule() {
                                 </div>
 
                                 {profile.featuredVideoUrl && (
-                                    <div className="mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <div className="mt-4 p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-gray-800">
                                         <div className="flex items-center justify-between mb-2">
                                             <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Preview</span>
                                             <button
@@ -370,22 +370,22 @@ export default function ProfileModule() {
                         </div>
 
                         {/* Business Solutions Video Section */}
-                        <div className="flex flex-col items-center space-y-6 md:col-span-2 lg:col-span-3 pt-6 border-t border-gray-50">
+                        <div className="flex flex-col items-center space-y-6 md:col-span-2 lg:col-span-3 pt-6 border-t border-gray-50 dark:border-gray-800">
                             <div className="w-full max-w-xl space-y-6">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-orange-100 text-orange-600 rounded-xl">
                                         <Video size={24} />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-black text-gray-900 uppercase tracking-wide">Business Solutions Animation</span>
+                                        <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wide">Business Solutions Animation</span>
                                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Custom video for the Home Page Tech Section</p>
                                     </div>
                                 </div>
 
-                                <div className="p-6 bg-gray-50 rounded-[2.5rem] border border-gray-100 space-y-6">
+                                <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 space-y-6">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-black uppercase tracking-widest text-gray-400">Upload Media</span>
-                                        <label className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-2xl cursor-pointer hover:bg-gray-50 transition-all shadow-sm text-[10px] font-black uppercase tracking-widest text-gray-600">
+                                        <label className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-700 rounded-2xl cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-all shadow-sm text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-white">
                                             {uploading ? <Loader2 size={16} className="animate-spin" /> : "Select Video"}
                                             <input type="file" className="hidden" accept="video/*" onChange={(e) => handleImageUpload(e, 'business_video')} />
                                         </label>
@@ -394,7 +394,7 @@ export default function ProfileModule() {
                                     {profile.businessSolutionVideoUrl && (
                                         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
                                             {/* Advanced Crop & Adjust Controls */}
-                                            <div className="grid grid-cols-2 gap-6 bg-white p-6 rounded-3xl border border-gray-100/50">
+                                            <div className="grid grid-cols-2 gap-6 bg-white dark:bg-[#2a2a2a] p-6 rounded-3xl border border-gray-100/50 dark:border-gray-700">
                                                 <div className="space-y-2">
                                                     <div className="flex justify-between">
                                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Scale / Zoom</label>
@@ -413,7 +413,7 @@ export default function ProfileModule() {
                                                                 scale: parseFloat(e.target.value)
                                                             }
                                                         })}
-                                                        className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                        className="w-full h-1.5 bg-gray-100 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
                                                     />
                                                 </div>
 
@@ -428,7 +428,7 @@ export default function ProfileModule() {
                                                                 mixBlendMode: e.target.value
                                                             }
                                                         })}
-                                                        className="w-full bg-gray-50 border-0 rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-primary"
+                                                        className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white focus:ring-2 focus:ring-primary"
                                                     >
                                                         <option value="normal">Normal / Clean</option>
                                                         <option value="screen">Screen (Lighten)</option>
@@ -455,7 +455,7 @@ export default function ProfileModule() {
                                                                 x: parseInt(e.target.value)
                                                             }
                                                         })}
-                                                        className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                        className="w-full h-1.5 bg-gray-100 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
                                                     />
                                                 </div>
 
@@ -477,7 +477,7 @@ export default function ProfileModule() {
                                                                 y: parseInt(e.target.value)
                                                             }
                                                         })}
-                                                        className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                        className="w-full h-1.5 bg-gray-100 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
                                                     />
                                                 </div>
                                             </div>
@@ -526,7 +526,7 @@ export default function ProfileModule() {
                                 type="text"
                                 value={profile.name}
                                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                                className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold"
+                                className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-gray-900 dark:text-white"
                             />
                         </div>
                         <div className="space-y-2">
@@ -535,7 +535,7 @@ export default function ProfileModule() {
                                 type="text"
                                 value={profile.location}
                                 onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                                className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold"
+                                className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-gray-900 dark:text-white"
                             />
                         </div>
                     </div>
@@ -561,12 +561,12 @@ export default function ProfileModule() {
                     </div>
 
                     {/* Training Program Stats Section */}
-                    <div className="space-y-6 pt-12 border-t border-gray-100">
+                    <div className="space-y-6 pt-12 border-t border-gray-100 dark:border-gray-800">
                         <div className="flex items-center space-x-3 ml-2">
                             <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
                                 <GraduationCap size={20} />
                             </div>
-                            <h2 className="text-xl font-black text-gray-900">Training Program Stats</h2>
+                            <h2 className="text-xl font-black text-gray-900 dark:text-white">Training Program Stats</h2>
                         </div>
                         <p className="text-secondary text-xs ml-2 max-w-2xl font-medium">Configure the counters shown in the Training Programs section. Use keywords like <span className="text-primary italic">"Session"</span>, <span className="text-primary italic">"College"</span>, and <span className="text-primary italic">"Student"</span> in labels for auto-detection.</p>
 
@@ -574,7 +574,7 @@ export default function ProfileModule() {
                             {[0, 1, 2].map((i) => {
                                 const stat = profile.trainingStats?.[i] || { label: "", value: "", icon: i === 0 ? "Presentation" : i === 1 ? "GraduationCap" : "Users" };
                                 return (
-                                    <div key={i} className="bg-gray-50 p-6 rounded-2xl space-y-4 border border-gray-100">
+                                    <div key={i} className="bg-gray-50 dark:bg-white/5 p-6 rounded-2xl space-y-4 border border-gray-100 dark:border-gray-800">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-gray-400">Stat Label</label>
                                             <input
@@ -587,7 +587,7 @@ export default function ProfileModule() {
                                                     newStats[i].label = e.target.value;
                                                     setProfile({ ...profile, trainingStats: newStats });
                                                 }}
-                                                className="w-full bg-white border-gray-100 border rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-primary transition-all"
+                                                className="w-full bg-white dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-xl p-3 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary transition-all"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -602,7 +602,7 @@ export default function ProfileModule() {
                                                     newStats[i].value = e.target.value;
                                                     setProfile({ ...profile, trainingStats: newStats });
                                                 }}
-                                                className="w-full bg-white border-gray-100 border rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-primary transition-all"
+                                                className="w-full bg-white dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-xl p-3 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary transition-all"
                                             />
                                         </div>
                                     </div>
@@ -612,11 +612,11 @@ export default function ProfileModule() {
                     </div>
 
                     {/* Quick Stats Section */}
-                    <div className="space-y-6 pt-12 border-t border-gray-100">
-                        <h2 className="text-xl font-black text-gray-900 ml-2">Quick Stats (Home Page)</h2>
+                    <div className="space-y-6 pt-12 border-t border-gray-100 dark:border-gray-800">
+                        <h2 className="text-xl font-black text-gray-900 dark:text-white ml-2">Quick Stats (Home Page)</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {(profile.stats || []).map((stat: any, index: number) => (
-                                <div key={index} className="bg-gray-50 p-6 rounded-2xl space-y-4">
+                                <div key={index} className="bg-gray-50 dark:bg-white/5 p-6 rounded-2xl space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-gray-400">Label</label>
@@ -628,7 +628,7 @@ export default function ProfileModule() {
                                                     newStats[index].label = e.target.value;
                                                     setProfile({ ...profile, stats: newStats });
                                                 }}
-                                                className="w-full bg-white border-0 rounded-xl p-3 text-sm font-bold"
+                                                className="w-full bg-white dark:bg-[#2a2a2a] border-0 rounded-xl p-3 text-sm font-bold text-gray-900 dark:text-white"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -641,7 +641,7 @@ export default function ProfileModule() {
                                                     newStats[index].value = e.target.value;
                                                     setProfile({ ...profile, stats: newStats });
                                                 }}
-                                                className="w-full bg-white border-0 rounded-xl p-3 text-sm font-bold"
+                                                className="w-full bg-white dark:bg-[#2a2a2a] border-0 rounded-xl p-3 text-sm font-bold text-gray-900 dark:text-white"
                                             />
                                         </div>
                                     </div>
@@ -661,7 +661,7 @@ export default function ProfileModule() {
             </div>
 
             {/* Timeline Module Integration */}
-            <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-8 md:p-12">
+            <div className="bg-white dark:bg-[#1e1e1e] rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-800 p-8 md:p-12">
                 <TimelineModule />
             </div>
         </div>

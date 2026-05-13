@@ -1,19 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "firebase/auth";
+import { useState, useEffect, useRef } from "react";
+import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { Lock, Mail, AlertCircle, Layout, ArrowRight, Loader2 } from "lucide-react";
+import { Lock, Mail, AlertCircle, Layout, ArrowRight, Loader2, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
 export default function AdminLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    const [forgotLoading, setForgotLoading] = useState(false);
     const router = useRouter();
+    const emailInputRef = useRef<HTMLInputElement>(null);
+
+    // Configure Firebase persistence once on mount (prevents first-click timeout)
+    useEffect(() => {
+        setPersistence(auth, browserSessionPersistence).catch(console.error);
+    }, []);
 
     // System theme sync
     useEffect(() => {
@@ -30,7 +39,7 @@ export default function AdminLogin() {
         const checkDeviceToken = async () => {
             const deviceToken = localStorage.getItem("admin_deviceToken");
             if (!deviceToken) return;
-            
+
             setLoading(true);
             try {
                 const res = await fetch("/api/admin/auth/device-login", {
@@ -45,7 +54,6 @@ export default function AdminLogin() {
                         router.push("/admin/dashboard");
                     }
                 } else {
-                    // Token is invalid/revoked, remove it
                     localStorage.removeItem("admin_deviceToken");
                 }
             } catch (err) {
@@ -62,8 +70,8 @@ export default function AdminLogin() {
         e.preventDefault();
         setLoading(true);
         setError("");
+        setSuccessMessage("");
         try {
-            await setPersistence(auth, browserSessionPersistence);
             await signInWithEmailAndPassword(auth, email, password);
             router.push("/admin/dashboard");
         } catch (err: any) {
@@ -71,6 +79,26 @@ export default function AdminLogin() {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleForgot = async () => {
+        if (!email.trim()) {
+            emailInputRef.current?.focus();
+            setError("Enter your email address above first, then click Forgot.");
+            return;
+        }
+        setForgotLoading(true);
+        setError("");
+        setSuccessMessage("");
+        try {
+            await sendPasswordResetEmail(auth, email);
+            setSuccessMessage("Password reset email sent! Check your inbox.");
+        } catch (err: any) {
+            setError("Failed to send reset email. Please check your email address.");
+            console.error(err);
+        } finally {
+            setForgotLoading(false);
         }
     };
 
@@ -104,6 +132,7 @@ export default function AdminLogin() {
                     <AnimatePresence mode="wait">
                         {error && (
                             <motion.div
+                                key="error"
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: "auto" }}
                                 exit={{ opacity: 0, height: 0 }}
@@ -111,6 +140,18 @@ export default function AdminLogin() {
                             >
                                 <AlertCircle size={16} className="shrink-0" />
                                 <span>{error}</span>
+                            </motion.div>
+                        )}
+                        {successMessage && (
+                            <motion.div
+                                key="success"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 p-3 rounded-lg flex items-center gap-3 mb-6 text-xs font-bold border border-green-100 dark:border-green-500/20"
+                            >
+                                <CheckCircle size={16} className="shrink-0" />
+                                <span>{successMessage}</span>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -121,6 +162,7 @@ export default function AdminLogin() {
                             <div className="relative group">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
                                 <input
+                                    ref={emailInputRef}
                                     required
                                     type="email"
                                     value={email}
@@ -134,18 +176,33 @@ export default function AdminLogin() {
                         <div className="space-y-1.5">
                             <div className="flex justify-between items-center px-1">
                                 <label className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Password</label>
-                                <button type="button" className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">Forgot?</button>
+                                <button
+                                    type="button"
+                                    onClick={handleForgot}
+                                    disabled={forgotLoading}
+                                    className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline disabled:opacity-50"
+                                >
+                                    {forgotLoading ? "Sending..." : "Forgot?"}
+                                </button>
                             </div>
                             <div className="relative group">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
                                 <input
                                     required
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-xl p-3.5 pl-12 text-sm font-medium text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-gray-400"
+                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-xl p-3.5 pl-12 pr-12 text-sm font-medium text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-gray-400"
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(v => !v)}
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
                         </div>
 
@@ -169,11 +226,6 @@ export default function AdminLogin() {
                         </div>
                     </form>
 
-                    <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Need help? Contact <a href="#" className="font-bold text-gray-900 dark:text-white hover:text-primary transition-colors">IT Support</a>
-                        </p>
-                    </div>
                 </div>
 
                 {/* Footer Links */}

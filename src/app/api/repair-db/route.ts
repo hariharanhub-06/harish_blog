@@ -1,10 +1,15 @@
 import { db } from "@/db";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
+import { adminSessions } from "@/db/schema";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: Request) {
+    const sid = req.headers.get("X-Session-Id");
+    if (!sid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const [session] = await db.select().from(adminSessions).where(eq(adminSessions.id, sid));
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     try {
-        console.log("Starting repair migration...");
         const queries = [
             `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS featured_video_url TEXT`,
             `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS about_image_url TEXT`,

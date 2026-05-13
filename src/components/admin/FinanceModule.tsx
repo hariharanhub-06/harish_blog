@@ -20,7 +20,9 @@ import {
     DollarSign,
     Filter,
     Flame,
-    Zap
+    Zap,
+    ChevronDown,
+    Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -100,6 +102,7 @@ export default function FinanceModule() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [dateRange, setDateRange] = useState("Last 30 Days");
+    const [filterOpen, setFilterOpen] = useState(false);
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
@@ -116,6 +119,7 @@ export default function FinanceModule() {
     // Category Editing States
     const [editingTxId, setEditingTxId] = useState<string | null>(null);
     const [editingCategory, setEditingCategory] = useState("");
+    const [historySearch, setHistorySearch] = useState("");
     const [showAllIncomes, setShowAllIncomes] = useState(false);
     const [showAllExpenses, setShowAllExpenses] = useState(false);
 
@@ -450,10 +454,7 @@ export default function FinanceModule() {
             });
 
             if (res.ok) {
-                setIsDebtModalOpen(false);
-                setEditingDebt(null);
-                setDebtForm({ name: "", initialAmount: "", remainingAmount: "", notes: "", repaymentType: "single", dueDate: "", interestRate: "", timePeriod: "" });
-                setError(null);
+                closeDebtModal();
                 fetchData();
             } else {
                 const errData = await res.json();
@@ -465,6 +466,13 @@ export default function FinanceModule() {
         } finally {
             setSaving(false);
         }
+    };
+
+    const closeDebtModal = () => {
+        setIsDebtModalOpen(false);
+        setEditingDebt(null);
+        setDebtForm({ name: "", initialAmount: "", remainingAmount: "", notes: "", repaymentType: "single", dueDate: "", interestRate: "", timePeriod: "" });
+        setError(null);
     };
 
     const openAddDebt = () => {
@@ -583,16 +591,16 @@ export default function FinanceModule() {
     const savingsRate = totalIncome > 0 ? (((totalIncome - totalExpenseWithDebt) / totalIncome) * 100).toFixed(1) : "0";
 
     return (
-        <div className="space-y-8 pb-20">
+        <div className="space-y-8 pb-20 animate-in fade-in slide-in-from-bottom-2 duration-500">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
                         <Wallet className="text-primary" size={28} />
                         Finance Hub
                     </h2>
                 </div>
-                <div className="flex bg-white p-1 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto custom-scrollbar no-scrollbar">
+                <div className="flex bg-white dark:bg-[#1e1e1e] p-1 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-x-auto custom-scrollbar no-scrollbar">
                     {["dashboard", "analytics", "log", "debts", "loans", "history"].map((tab) => (
                         <button
                             key={tab}
@@ -616,22 +624,35 @@ export default function FinanceModule() {
             </div>
 
             {/* Shared Date Filter */}
-            <div className="flex flex-wrap items-center gap-4 bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+            <div className="flex flex-wrap items-center gap-4 bg-white dark:bg-[#1e1e1e] p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gray-50 rounded-xl text-gray-400">
+                    <div className="p-2 bg-gray-100 dark:bg-white/10 rounded-xl text-gray-500 dark:text-gray-400">
                         <Calendar size={18} />
                     </div>
-                    <select
-                        value={dateRange}
-                        onChange={(e) => setDateRange(e.target.value)}
-                        className="bg-gray-50 border-0 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                    >
-                        <option>Last 30 Days</option>
-                        <option>Last 6 Months</option>
-                        <option>This Year</option>
-                        <option>This Month</option>
-                        <option value="Custom">📅 Custom Range</option>
-                    </select>
+                    {/* Custom dark-mode dropdown */}
+                    <div className="relative" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setFilterOpen(false); }}>
+                        <button
+                            onClick={() => setFilterOpen((v) => !v)}
+                            className="flex items-center gap-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest text-gray-700 dark:text-gray-200 transition-colors"
+                        >
+                            {dateRange === "Custom" ? "📅 Custom Range" : dateRange}
+                            <ChevronDown size={13} className={`transition-transform ${filterOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        {filterOpen && (
+                            <div className="absolute z-50 top-full left-0 mt-2 w-48 bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden">
+                                {["Last 30 Days", "Last 6 Months", "This Year", "This Month", "Custom"].map((opt) => (
+                                    <button
+                                        key={opt}
+                                        onClick={() => { setDateRange(opt); setFilterOpen(false); }}
+                                        className={`w-full flex items-center justify-between px-4 py-2.5 text-left text-xs font-black uppercase tracking-widest transition-colors hover:bg-gray-50 dark:hover:bg-white/5 ${dateRange === opt ? "text-primary" : "text-gray-700 dark:text-gray-300"}`}
+                                    >
+                                        {opt === "Custom" ? "📅 Custom Range" : opt}
+                                        {dateRange === opt && <Check size={12} className="text-primary" />}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {dateRange === "Custom" && (
@@ -646,7 +667,7 @@ export default function FinanceModule() {
                                 type="date"
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
-                                className="bg-gray-50 border-0 rounded-xl px-4 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20"
+                                className="bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary/20 focus:outline-none dark:[color-scheme:dark]"
                             />
                         </div>
                         <div className="flex items-center gap-2">
@@ -655,7 +676,7 @@ export default function FinanceModule() {
                                 type="date"
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
-                                className="bg-gray-50 border-0 rounded-xl px-4 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20"
+                                className="bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary/20 focus:outline-none dark:[color-scheme:dark]"
                             />
                         </div>
                     </motion.div>
@@ -667,7 +688,7 @@ export default function FinanceModule() {
                     <>
                         {/* Charts Area */}
                         <div className="lg:col-span-8 space-y-8">
-                            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                            <div className="bg-white dark:bg-[#1e1e1e] p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                                     <h3 className="font-black text-xl uppercase tracking-tight">Income vs Expense Trend</h3>
                                     <div className="flex items-center gap-4 flex-wrap">
@@ -735,7 +756,7 @@ export default function FinanceModule() {
                             </div>
 
                             {/* Daily Cash Flow Grid (Reference to image) */}
-                            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                            <div className="bg-white dark:bg-[#1e1e1e] p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                                 <h3 className="font-black text-xl uppercase tracking-tight mb-8">Daily Cash Flow</h3>
                                 <div className="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-12 lg:grid-cols-16 gap-3">
                                     {(analytics?.cashFlowPatterns?.dailyFlow || Array.from({ length: 31 }, (_, i) => ({ day: i + 1, net: 0 }))).map((day: any) => {
@@ -764,17 +785,17 @@ export default function FinanceModule() {
                                 <div className="flex items-center justify-center gap-8 mt-8">
                                     <div className="flex items-center gap-2">
                                         <div className="w-4 h-4 rounded-lg bg-emerald-300" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Positive Flow</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">Positive Flow</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <div className="w-4 h-4 rounded-lg bg-red-300" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Negative Flow</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">Negative Flow</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                                <div className="bg-white dark:bg-[#1e1e1e] p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                                     <h3 className="font-black text-lg uppercase tracking-tight mb-8">Top Incomes</h3>
                                     <div className="space-y-8">
                                         {(() => {
@@ -797,7 +818,7 @@ export default function FinanceModule() {
                                                                         <div className="flex flex-col gap-1.5">
                                                                             <div className="flex items-center gap-2">
                                                                                 <div className="w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                                                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{cat.category || 'Uncategorized'}</span>
+                                                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">{cat.category || 'Uncategorized'}</span>
                                                                                 {cat.category.toLowerCase() === 'revenue' && (
                                                                                     <button
                                                                                         onClick={async (e) => {
@@ -864,7 +885,7 @@ export default function FinanceModule() {
                                         )}
                                     </div>
                                 </div>
-                                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                                <div className="bg-white dark:bg-[#1e1e1e] p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                                     <h3 className="font-black text-lg uppercase tracking-tight mb-8">Top Expenses</h3>
                                     <div className="space-y-8">
                                         {(() => {
@@ -941,7 +962,7 @@ export default function FinanceModule() {
 
                         {/* Recent Activity Mini Log */}
                         <div className="lg:col-span-4 space-y-8">
-                            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                            <div className="bg-white dark:bg-[#1e1e1e] p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                                 <h3 className="font-black text-lg uppercase tracking-tight mb-6 flex items-center gap-2">
                                     <History size={18} className="text-primary" />
                                     Recent Log
@@ -954,7 +975,7 @@ export default function FinanceModule() {
                                                     {tx.type === 'income' ? <TrendingUp size={14} /> : tx.type === 'debt_pay' ? <CreditCard size={14} /> : <TrendingDown size={14} />}
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs font-bold text-gray-900 group-hover:text-primary transition-colors">{tx.description}</p>
+                                                    <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors">{tx.description}</p>
                                                     <p className="text-[10px] font-bold text-gray-400 uppercase">{tx.category}</p>
                                                 </div>
                                             </div>
@@ -977,10 +998,10 @@ export default function FinanceModule() {
 
                 {activeTab === "debts" && (
                     <div className="lg:col-span-12 space-y-8">
-                        <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+                        <div className="bg-white dark:bg-[#1e1e1e] p-10 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm">
                             <div className="flex justify-between items-center mb-10">
                                 <div>
-                                    <h3 className="text-2xl font-black tracking-tight">Debt Profiles</h3>
+                                    <h3 className="text-2xl font-black tracking-tight dark:text-white">Debt Profiles</h3>
                                     <p className="text-sm font-bold text-gray-400 mt-2">Manage your creditors and payment structures.</p>
                                 </div>
                                 <button
@@ -996,7 +1017,7 @@ export default function FinanceModule() {
                             {debts.length > 0 && (
                                 <div className="mb-12 bg-gray-50/50 p-8 md:p-10 rounded-[2.5rem] border border-gray-100">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                                        <h4 className="text-xl font-black uppercase tracking-tight text-gray-900">Debt Payoff Status</h4>
+                                        <h4 className="text-xl font-black uppercase tracking-tight text-gray-900 dark:text-white">Debt Payoff Status</h4>
                                         <div className="flex items-center gap-4">
                                             <div className="text-right">
                                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Total Remaining</p>
@@ -1021,8 +1042,8 @@ export default function FinanceModule() {
                                             return (
                                                 <div key={debt.id} className="space-y-3">
                                                     <div className="flex justify-between items-end">
-                                                        <span className="text-xs font-black uppercase tracking-widest text-gray-900 truncate pr-4">{debt.name}</span>
-                                                        <span className="text-xs font-black text-gray-900">{progress.toFixed(2)}%</span>
+                                                        <span className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-white truncate pr-4">{debt.name}</span>
+                                                        <span className="text-xs font-black text-gray-900 dark:text-white">{progress.toFixed(2)}%</span>
                                                     </div>
                                                     <div className="h-3 bg-white rounded-full overflow-hidden border border-gray-100">
                                                         <div
@@ -1031,7 +1052,7 @@ export default function FinanceModule() {
                                                         />
                                                     </div>
                                                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                                                        <span className="text-gray-400">Paid: <span className="text-gray-900">₹{paid.toLocaleString()}</span></span>
+                                                        <span className="text-gray-400">Paid: <span className="text-gray-900 dark:text-white">₹{paid.toLocaleString()}</span></span>
                                                         <span className="text-gray-400">Left: <span className="text-primary">₹{debt.remainingAmount.toLocaleString()}</span></span>
                                                     </div>
                                                 </div>
@@ -1043,14 +1064,14 @@ export default function FinanceModule() {
 
                             <div className="space-y-4">
                                 {debts.map(debt => (
-                                    <div key={debt.id} className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
+                                    <div key={debt.id} className="bg-gray-50 dark:bg-white/5 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
                                         <div className="flex items-center gap-5 flex-1">
-                                            <div className="p-3 bg-white rounded-2xl shadow-sm group-hover:bg-primary group-hover:text-white transition-all">
+                                            <div className="p-3 bg-white dark:bg-[#2a2a2a] rounded-2xl shadow-sm group-hover:bg-primary group-hover:text-white transition-all">
                                                 <CreditCard size={20} />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-3 mb-1">
-                                                    <h4 className="text-base font-black text-gray-900 truncate">{debt.name}</h4>
+                                                    <h4 className="text-base font-black text-gray-900 dark:text-white truncate">{debt.name}</h4>
                                                     <span className={`px-2 py-0.5 rounded-[4px] text-[8px] font-black uppercase ${debt.repaymentType === 'split' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
                                                         {debt.repaymentType || 'Single'}
                                                     </span>
@@ -1112,9 +1133,9 @@ export default function FinanceModule() {
                     activeTab === "log" && (
                         <div className="lg:col-span-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {/* Smart Log Input */}
-                            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm space-y-8">
+                            <div className="bg-white dark:bg-[#1e1e1e] p-10 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-8">
                                 <div>
-                                    <h3 className="text-2xl font-black tracking-tight">AI Smart Log</h3>
+                                    <h3 className="text-2xl font-black tracking-tight dark:text-white">AI Smart Log</h3>
                                     <p className="text-sm font-bold text-gray-400 mt-2">Type your daily entries. I'll automatically detect the amounts and categories. {suggestion && <span className="text-primary animate-pulse ml-2">Press Tab to use "{suggestion}"</span>}</p>
                                 </div>
 
@@ -1203,7 +1224,7 @@ export default function FinanceModule() {
                                         <AlertCircle size={12} />
                                         Tips
                                     </h4>
-                                    <ul className="text-[11px] font-bold text-gray-500 space-y-1">
+                                    <ul className="text-[11px] font-bold text-gray-500 dark:text-gray-400 space-y-1">
                                         <li>• Use headers like "Debts Paid:", "Expense", "Income"</li>
                                         <li>• Format: "Item Name - Amount" or "Item Name Amount"</li>
                                         <li>• Multiple entries per line are supported</li>
@@ -1212,9 +1233,9 @@ export default function FinanceModule() {
                             </div>
 
                             {/* Live Preview */}
-                            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm flex flex-col h-full">
+                            <div className="bg-white dark:bg-[#1e1e1e] p-10 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full">
                                 <div className="flex justify-between items-center mb-8">
-                                    <h3 className="text-xl font-black uppercase tracking-tight">Live Intent Preview</h3>
+                                    <h3 className="text-xl font-black uppercase tracking-tight dark:text-white">Live Intent Preview</h3>
                                     <div className="px-4 py-1.5 bg-gray-50 rounded-full text-[10px] font-black uppercase text-gray-400">
                                         {parsedEntries.length} Items Detected
                                     </div>
@@ -1236,14 +1257,14 @@ export default function FinanceModule() {
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-sm font-black text-gray-900">{entry.item}</span>
+                                                            <span className="text-sm font-black text-gray-900 dark:text-white">{entry.item}</span>
                                                             {entry.debtId && <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[8px] font-black uppercase rounded">Linked: Debt</span>}
                                                         </div>
                                                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{entry.category}</span>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="text-sm font-black text-gray-900">₹{entry.amount.toLocaleString()}</p>
+                                                    <p className="text-sm font-black text-gray-900 dark:text-white">₹{entry.amount.toLocaleString()}</p>
                                                     {!entry.isValid && <p className="text-[8px] font-black text-red-500 uppercase">Invalid Amount</p>}
                                                 </div>
                                             </motion.div>
@@ -1274,10 +1295,10 @@ export default function FinanceModule() {
                 {
                     activeTab === "history" && (
                         <div className="lg:col-span-12">
-                            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm overflow-hidden">
+                            <div className="bg-white dark:bg-[#1e1e1e] p-10 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
                                     <div>
-                                        <h3 className="text-2xl font-black tracking-tight">Audit Log</h3>
+                                        <h3 className="text-2xl font-black tracking-tight dark:text-white">Audit Log</h3>
                                         <p className="text-sm font-bold text-gray-400 mt-2">Browse and filter all financial transactions.</p>
                                     </div>
                                     <div className="flex items-center gap-4 w-full md:w-auto">
@@ -1285,25 +1306,39 @@ export default function FinanceModule() {
                                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                             <input
                                                 type="text"
+                                                value={historySearch}
+                                                onChange={(e) => setHistorySearch(e.target.value)}
                                                 placeholder="Search items..."
-                                                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-0 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-primary/20"
+                                                className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl text-xs font-bold text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary/20 focus:outline-none transition-colors"
                                             />
                                         </div>
-                                        <select
-                                            value={selectedCategory}
-                                            onChange={(e) => setSelectedCategory(e.target.value)}
-                                            className="p-3 bg-gray-50 border-0 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 focus:ring-2 focus:ring-primary/20"
+                                        {/* Custom category dropdown */}
+                                        <div
+                                            className="relative"
+                                            onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setFilterOpen(false); }}
                                         >
-                                            <option value="All">All Categories</option>
-                                            {/* Dynamic categories from stats */}
-                                            {stats?.categories?.map((cat: any) => (
-                                                <option key={cat.category} value={cat.category}>{cat.category}</option>
-                                            ))}
-                                            {/* Dynamic active debts */}
-                                            {stats?.activeDebts?.map((debt: any) => (
-                                                <option key={debt.id} value={debt.name}>{debt.name}</option>
-                                            ))}
-                                        </select>
+                                            <button
+                                                onClick={() => setFilterOpen((v) => !v)}
+                                                className="flex items-center gap-2 p-3 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 border border-gray-200 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300 transition-colors whitespace-nowrap"
+                                            >
+                                                {selectedCategory === "All" ? "All Categories" : selectedCategory}
+                                                <ChevronDown size={12} className={`transition-transform ${filterOpen ? "rotate-180" : ""}`} />
+                                            </button>
+                                            {filterOpen && (
+                                                <div className="absolute z-50 top-full right-0 mt-2 min-w-[180px] bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden">
+                                                    {["All", ...(stats?.categories?.map((c: any) => c.category) || []), ...(stats?.activeDebts?.map((d: any) => d.name) || [])].map((opt: string) => (
+                                                        <button
+                                                            key={opt}
+                                                            onClick={() => { setSelectedCategory(opt); setFilterOpen(false); }}
+                                                            className={`w-full flex items-center justify-between px-4 py-2.5 text-left text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-white/5 transition-colors ${selectedCategory === opt ? "text-primary" : "text-gray-700 dark:text-gray-300"}`}
+                                                        >
+                                                            {opt === "All" ? "All Categories" : opt}
+                                                            {selectedCategory === opt && <Check size={11} className="text-primary" />}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -1319,13 +1354,13 @@ export default function FinanceModule() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
-                                            {transactions.map((tx) => (
+                                            {transactions.filter(tx => !historySearch || tx.description?.toLowerCase().includes(historySearch.toLowerCase()) || tx.category?.toLowerCase().includes(historySearch.toLowerCase())).map((tx) => (
                                                 <tr key={tx.id} className="group hover:bg-gray-50 transition-all">
                                                     <td className="py-6 pl-4">
-                                                        <span className="text-xs font-bold text-gray-900">{new Date(tx.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                                                        <span className="text-xs font-bold text-gray-900 dark:text-white">{new Date(tx.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
                                                     </td>
                                                     <td className="py-6">
-                                                        <span className="text-sm font-black text-gray-900 group-hover:text-primary transition-all">{tx.description}</span>
+                                                        <span className="text-sm font-black text-gray-900 dark:text-white group-hover:text-primary transition-all">{tx.description}</span>
                                                     </td>
                                                     <td className="py-6">
                                                         {editingTxId === tx.id ? (
@@ -1429,7 +1464,7 @@ export default function FinanceModule() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {loans.map((loan) => (
-                                <div key={loan.id} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-all">
+                                <div key={loan.id} className="bg-white dark:bg-[#1e1e1e] p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-all">
                                     <div className={`absolute top-0 right-0 px-4 py-1 text-[8px] font-black uppercase tracking-widest rounded-bl-xl ${loan.status === 'active' ? 'bg-emerald-500 text-white' : loan.status === 'collected' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'}`}>
                                         {loan.status}
                                     </div>
@@ -1442,11 +1477,11 @@ export default function FinanceModule() {
                                             <button onClick={() => handleDeleteLoan(loan.id)} className="p-2 text-gray-300 hover:text-red-500 transition-all"><Trash2 size={16} /></button>
                                         </div>
                                     </div>
-                                    <h4 className="font-black text-lg text-gray-900">{loan.borrowerName}</h4>
+                                    <h4 className="font-black text-lg text-gray-900 dark:text-white">{loan.borrowerName}</h4>
                                     <div className="mt-4 space-y-3">
                                         <div className="flex justify-between items-center">
                                             <span className="text-[10px] font-black text-gray-400 uppercase">Amount</span>
-                                            <span className="text-sm font-black text-gray-900">₹{loan.amount.toLocaleString()}</span>
+                                            <span className="text-sm font-black text-gray-900 dark:text-white">₹{loan.amount.toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-[10px] font-black text-gray-400 uppercase">Collected</span>
@@ -1497,25 +1532,25 @@ export default function FinanceModule() {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                onClick={() => setIsDebtModalOpen(false)}
+                                onClick={closeDebtModal}
                                 className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
                             />
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                className="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
+                                className="bg-white dark:bg-[#1e1e1e] w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <div className="flex justify-between items-center mb-8">
-                                    <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                                    <h3 className="text-2xl font-black tracking-tight dark:text-white flex items-center gap-3">
                                         <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                                             <CreditCard size={24} />
                                         </div>
                                         {editingDebt ? "Edit Debt Profile" : "New Debt Profile"}
                                     </h3>
                                     <button
-                                        onClick={() => setIsDebtModalOpen(false)}
+                                        onClick={closeDebtModal}
                                         className="p-3 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-2xl transition-all"
                                     >
                                         <Plus className="rotate-45" size={20} />
@@ -1643,7 +1678,7 @@ export default function FinanceModule() {
                                     <div className="pt-4 flex gap-4">
                                         <button
                                             type="button"
-                                            onClick={() => setIsDebtModalOpen(false)}
+                                            onClick={closeDebtModal}
                                             className="flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all"
                                         >
                                             Cancel
@@ -1676,11 +1711,11 @@ export default function FinanceModule() {
                                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                className="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
+                                className="bg-white dark:bg-[#1e1e1e] w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <div className="flex justify-between items-center mb-8">
-                                    <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                                    <h3 className="text-2xl font-black tracking-tight dark:text-white flex items-center gap-3">
                                         <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                                             <TrendingUp size={24} />
                                         </div>

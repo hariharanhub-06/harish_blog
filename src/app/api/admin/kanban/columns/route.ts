@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { kanbanColumns } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const columns = await db.select().from(kanbanColumns).orderBy(asc(kanbanColumns.displayOrder));
         return NextResponse.json(columns);
     } catch (error) {
@@ -15,6 +18,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         const { name, color, displayOrder } = body;
 
@@ -33,6 +38,8 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         const { id, name, color, displayOrder } = body;
 
@@ -55,6 +62,8 @@ export async function PUT(req: Request) {
 
 export async function PATCH(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const columnsData = await req.json(); // Expected: [{ id: string, displayOrder: number }, ...]
 
         if (!Array.isArray(columnsData)) {
@@ -77,6 +86,8 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 

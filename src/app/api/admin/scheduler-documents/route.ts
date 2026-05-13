@@ -2,9 +2,12 @@ import { db } from "@/db";
 import { schedulerDocuments } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { eq, desc } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const docs = await db.query.schedulerDocuments.findMany({
             orderBy: [desc(schedulerDocuments.createdAt)]
         });
@@ -17,6 +20,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         const { name, fileUrl } = body;
 
@@ -39,6 +44,8 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
 

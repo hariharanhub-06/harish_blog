@@ -3,6 +3,7 @@ import { profiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 const DEFAULT_PROFILE = {
     name: "Hari Haran Jeyaramamoorthy",
@@ -30,8 +31,10 @@ const DEFAULT_PROFILE = {
     ]
 };
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const profile = await db.query.profiles.findFirst();
         return NextResponse.json(profile || DEFAULT_PROFILE);
     } catch (error: any) {
@@ -42,6 +45,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
         const existing = await db.query.profiles.findFirst();
 

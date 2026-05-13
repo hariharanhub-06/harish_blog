@@ -2,11 +2,14 @@ import { db } from "@/db";
 import { routines } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const allRoutines = await db.select().from(routines).orderBy(asc(routines.displayOrder));
         return NextResponse.json(allRoutines);
     } catch (error) {
@@ -17,9 +20,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
-        console.log("[API] POST routines data:", data);
-
         if (data.id) {
             // Update existing
             const { id, ...updateData } = data;
@@ -40,7 +43,7 @@ export async function POST(req: Request) {
                 updatedAt: new Date(),
             }).returning();
 
-            console.log("[API] New routine created:", newRoutine);
+            if (!newRoutine) return NextResponse.json({ error: "Failed to create routine" }, { status: 500 });
             return NextResponse.json({ success: true, routine: newRoutine });
         }
     } catch (error) {
@@ -51,6 +54,8 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
         if (id) {

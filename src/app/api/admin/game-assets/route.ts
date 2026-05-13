@@ -3,9 +3,12 @@ import { gameAssets } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const gameId = searchParams.get("gameId");
 
@@ -25,6 +28,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
         const { gameId, assetUrl } = data;
 
@@ -49,6 +54,8 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
 

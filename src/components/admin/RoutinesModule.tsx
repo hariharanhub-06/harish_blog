@@ -141,6 +141,7 @@ export default function RoutinesModule() {
     };
 
     const isTaskDue = (routine: Routine, date: Date) => {
+        if (!routine.isActive) return false;
         const schedule = routine.schedule;
         if (!schedule || schedule.type === "daily") return true;
         if (schedule.type === "weekly") return schedule.days?.includes(getDay(date)) || false;
@@ -246,7 +247,7 @@ export default function RoutinesModule() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
             {/* Header + Unified Filter Bar */}
             <div className="flex flex-col gap-6 bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 p-6 md:p-8 rounded-2xl shadow-sm transition-colors duration-300">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">

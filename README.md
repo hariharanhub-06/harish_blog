@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Harishblog — Hari Haran's Portfolio & Admin Hub
 
-## Getting Started
+Personal portfolio, live session platform, and admin dashboard for [Hari Haran Jeyaramamoorthy](https://hariharan.me).
 
-First, run the development server:
+## Stack
+
+- **Next.js 15** — App Router, SSR + Client Components
+- **PostgreSQL** — Neon serverless via Drizzle ORM
+- **Firebase Auth** — Admin authentication
+- **Tailwind CSS** — Styling with dark mode
+- **Razorpay** — Payment integration for live sessions
+- **ImageKit** — CDN for images
+- **PWA** — Service Worker + Web Push notifications
+
+## Local Development
 
 ```bash
+npm install
+cp .env.local.example .env.local   # fill in credentials
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Database
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx drizzle-kit push    # push schema changes to DB
+npx drizzle-kit studio  # open Drizzle Studio (GUI)
+```
 
-## Learn More
+Migration and diagnostic scripts are in `scripts/`.
 
-To learn more about Next.js, take a look at the following resources:
+## Key Routes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Route | Description |
+|-------|-------------|
+| `/` | Public portfolio homepage |
+| `/admin/login` | Admin login |
+| `/admin/dashboard` | Admin control panel |
+| `/live/[sessionId]` | Live session viewer |
+| `/forms/[id]` | Public form viewer |
+| `/quote/[token]` | Public quote page |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Auth Pattern
 
-## Deploy on Vercel
+Admin API routes use `X-Session-Id` header validated against the `adminSessions` PostgreSQL table. See `src/lib/adminAuth.ts`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Documentation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All implementation details, bug fixes, and feature changes are documented in [CHANGES.md](./CHANGES.md).

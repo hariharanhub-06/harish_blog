@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { routines, routineLogs } from "@/db/schema";
 import { eq, sql, and, gte, lte } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 import {
     subDays,
     format,
@@ -18,6 +19,8 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const startDateParam = searchParams.get("startDate");
         const endDateParam = searchParams.get("endDate");

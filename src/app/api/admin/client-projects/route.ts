@@ -2,9 +2,12 @@ import { db } from "@/db";
 import { clientProjects, contactSubmissions } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         // 1. Try to fetch projects alone first
         const projects = await db.select().from(clientProjects).orderBy(desc(clientProjects.createdAt));
 
@@ -34,6 +37,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
 
         // Check if project for this lead already exists
@@ -74,6 +79,8 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
         const { id, lead, ...updateData } = data; // Filter out lead relation
 
@@ -119,6 +126,8 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
         if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });

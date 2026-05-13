@@ -12,11 +12,16 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "All fields are required" }, { status: 400 });
         }
 
+        const parsedRating = parseInt(String(rating));
+        if (!(parsedRating >= 1 && parsedRating <= 5)) {
+            return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });
+        }
+
         const [newFeedback] = await db.insert(feedbacks).values({
             name,
             role,
             organization,
-            rating: parseInt(String(rating)),
+            rating: parsedRating,
             content,
             status: isAdmin ? "Approved" : "New", // Admin submissions are auto-approved
         }).returning();

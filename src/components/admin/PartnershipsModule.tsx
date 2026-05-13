@@ -130,7 +130,7 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-xl font-black text-gray-900 tracking-tight">Partnership <span className="text-primary italic">Center</span></h2>
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Partnership <span className="text-primary italic">Center</span></h2>
                     <p className="text-secondary font-medium mt-0.5 text-[10px] uppercase tracking-widest">Manage brand partners and sponsors.</p>
                 </div>
                 <button
@@ -155,8 +155,8 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     {partnerships.map((partner) => (
-                        <div key={partner.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-lg transition-all group">
-                            <div className="relative aspect-video bg-gray-50 rounded-xl mb-4 overflow-hidden flex items-center justify-center border border-gray-50 p-3">
+                        <div key={partner.id} className="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all group">
+                            <div className="relative aspect-video bg-gray-50 dark:bg-white/5 rounded-xl mb-4 overflow-hidden flex items-center justify-center border border-gray-50 dark:border-gray-800 p-3">
                                 {partner.logo ? (
                                     <Image
                                         loader={imageKitLoader}
@@ -171,17 +171,17 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
                             </div>
                             <div className="flex justify-between items-start mb-3">
                                 <div>
-                                    <h3 className="text-base font-black text-gray-900 group-hover:text-primary transition-colors tracking-tight">{partner.name}</h3>
+                                    <h3 className="text-base font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors tracking-tight">{partner.name}</h3>
                                     <p className="text-[9px] font-black uppercase tracking-widest text-primary mt-0.5 opacity-70">{partner.partnerType}</p>
                                 </div>
                                 <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${partner.isActive ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}>
                                     {partner.isActive ? "Active" : "Inactive"}
                                 </div>
                             </div>
-                            <div className="flex gap-2 pt-4 border-t border-gray-50 mt-auto">
+                            <div className="flex gap-2 pt-4 border-t border-gray-50 dark:border-gray-800 mt-auto">
                                 <button
                                     onClick={() => setEditing(partner)}
-                                    className="flex-1 flex items-center justify-center space-x-2 bg-gray-50 text-secondary px-4 py-3 rounded-xl font-black text-xs hover:bg-primary hover:text-white transition-all"
+                                    className="flex-1 flex items-center justify-center space-x-2 bg-gray-50 dark:bg-white/5 text-secondary px-4 py-3 rounded-xl font-black text-xs hover:bg-primary dark:hover:bg-primary hover:text-white transition-all"
                                 >
                                     <Edit3 size={16} />
                                     <span>Edit</span>
@@ -202,8 +202,8 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
             {editing && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditing(null)} />
-                    <div className="relative bg-white w-full max-w-lg rounded-[2rem] p-8 md:p-10 shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
-                        <button onClick={() => setEditing(null)} className="absolute top-6 right-6 text-secondary hover:text-gray-900 p-2">
+                    <div className="relative bg-white dark:bg-[#1e1e1e] w-full max-w-lg rounded-[2rem] p-8 md:p-10 shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
+                        <button onClick={() => setEditing(null)} className="absolute top-6 right-6 text-secondary hover:text-gray-900 dark:hover:text-white p-2">
                             <X size={20} />
                         </button>
 
@@ -212,7 +212,7 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
                                 <Layout size={20} />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black text-gray-900">{editing.id ? "Edit Partner" : "New Partner"}</h3>
+                                <h3 className="text-xl font-black text-gray-900 dark:text-white">{editing.id ? "Edit Partner" : "New Partner"}</h3>
                                 <p className="text-secondary font-medium text-[10px] uppercase tracking-widest">Configure partner details and branding.</p>
                             </div>
                         </div>
@@ -220,7 +220,7 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
                         <form onSubmit={handleSave} className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-secondary ml-2">Logo</label>
-                                <div className="relative aspect-video bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden flex flex-col items-center justify-center group hover:border-primary transition-colors cursor-pointer" onClick={() => document.getElementById('logo-upload')?.click()}>
+                                <div className="relative aspect-video bg-gray-50 dark:bg-white/5 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col items-center justify-center group hover:border-primary transition-colors cursor-pointer" onClick={() => document.getElementById('logo-upload')?.click()}>
                                     {editing.logo ? (
                                         <Image
                                             loader={imageKitLoader}
@@ -231,14 +231,14 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
                                         />
                                     ) : (
                                         <div className="text-center p-6">
-                                            <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mx-auto mb-3 text-secondary group-hover:text-primary group-hover:scale-110 transition-all">
+                                            <div className="w-12 h-12 bg-white dark:bg-white/10 rounded-xl shadow-sm flex items-center justify-center mx-auto mb-3 text-secondary group-hover:text-primary group-hover:scale-110 transition-all">
                                                 <ImageIcon size={24} />
                                             </div>
                                             <p className="text-xs font-black text-secondary group-hover:text-primary">Click to Upload Logo</p>
                                         </div>
                                     )}
                                     {uploading && (
-                                        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                                        <div className="absolute inset-0 bg-white/80 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center">
                                             <Loader2 className="w-8 h-8 text-primary animate-spin" />
                                         </div>
                                     )}
@@ -254,7 +254,7 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
                                         type="text"
                                         value={editing.name}
                                         onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 font-black text-sm focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all placeholder:text-gray-300"
+                                        className="w-full bg-gray-50 dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-2xl p-4 font-black text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:bg-white dark:focus:bg-[#2a2a2a] outline-none transition-all placeholder:text-gray-300"
                                         placeholder="Enter name..."
                                     />
                                 </div>
@@ -263,7 +263,7 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
                                     <select
                                         value={editing.partnerType}
                                         onChange={(e) => setEditing({ ...editing, partnerType: e.target.value })}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 font-black text-sm focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all"
+                                        className="w-full bg-gray-50 dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-2xl p-4 font-black text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:bg-white dark:focus:bg-[#2a2a2a] outline-none transition-all"
                                     >
                                         {PARTNER_TYPES
                                             .filter(type => !allowedTypes || allowedTypes.includes(type))
@@ -280,23 +280,23 @@ export default function PartnershipsModule({ allowedTypes, excludedTypes }: Part
                                         type="number"
                                         value={editing.displayOrder}
                                         onChange={(e) => setEditing({ ...editing, displayOrder: parseInt(e.target.value) })}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3.5 font-black text-xs focus:ring-2 focus:ring-primary focus:bg-white outline-none transition-all"
+                                        className="w-full bg-gray-50 dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-xl p-3.5 font-black text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:bg-white dark:focus:bg-[#2a2a2a] outline-none transition-all"
                                     />
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-[9px] font-black uppercase tracking-widest text-secondary ml-1.5">Visibility</label>
-                                    <div className="flex items-center space-x-1.5 bg-gray-50 p-1.5 rounded-xl h-[47px]">
+                                    <div className="flex items-center space-x-1.5 bg-gray-50 dark:bg-white/5 p-1.5 rounded-xl h-[47px]">
                                         <button
                                             type="button"
                                             onClick={() => setEditing({ ...editing, isActive: true })}
-                                            className={`flex-1 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${editing.isActive ? "bg-white text-emerald-500 shadow-sm" : "text-gray-400"}`}
+                                            className={`flex-1 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${editing.isActive ? "bg-white dark:bg-white/10 text-emerald-500 shadow-sm" : "text-gray-400"}`}
                                         >
                                             Active
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setEditing({ ...editing, isActive: false })}
-                                            className={`flex-1 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${!editing.isActive ? "bg-white text-rose-500 shadow-sm" : "text-gray-400"}`}
+                                            className={`flex-1 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${!editing.isActive ? "bg-white dark:bg-white/10 text-rose-500 shadow-sm" : "text-gray-400"}`}
                                         >
                                             Inactive
                                         </button>

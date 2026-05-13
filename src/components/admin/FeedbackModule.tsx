@@ -108,7 +108,7 @@ export default function FeedbackModule() {
         e.preventDefault();
         setFetching(true);
         try {
-            const res = await fetch("/api/feedback", {
+            const res = await fetch("/api/admin/feedbacks", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
@@ -135,8 +135,8 @@ export default function FeedbackModule() {
         });
 
     const averageRating = feedbacks.length > 0
-        ? (feedbacks.reduce((acc, f) => acc + f.rating, 0) / feedbacks.length).toFixed(1)
-        : "5.0";
+        ? (feedbacks.reduce((acc, f) => acc + (Number(f.rating) || 0), 0) / feedbacks.length).toFixed(1)
+        : "N/A";
 
     if (fetching && feedbacks.length === 0) {
         return (
@@ -182,7 +182,7 @@ export default function FeedbackModule() {
                     {["All", "New", "Approved"].map((tab) => (
                         <button
                             key={tab}
-                            onClick={() => setActiveTab(tab as any)}
+                            onClick={() => { setActiveTab(tab as any); setSearchQuery(""); }}
                             className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab
                                 ? "bg-white dark:bg-white/10 text-primary dark:text-white shadow-sm border border-gray-100 dark:border-white/5"
                                 : "text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white"

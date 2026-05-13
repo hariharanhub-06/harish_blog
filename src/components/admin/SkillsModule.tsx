@@ -84,10 +84,10 @@ export default function SkillsModule() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center bg-white p-6 rounded-3xl border border-gray-100">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="flex justify-between items-center bg-white dark:bg-[#1e1e1e] p-6 rounded-3xl border border-gray-100 dark:border-gray-800">
                 <div>
-                    <h2 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+                    <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
                         <Award className="text-primary" size={24} />
                         Domain <span className="text-primary italic">Skills</span>
                     </h2>
@@ -109,9 +109,9 @@ export default function SkillsModule() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                     {skills.map((skill) => (
-                        <div key={skill.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-lg transition-all group relative">
+                        <div key={skill.id} className="bg-white dark:bg-[#1e1e1e] rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none hover:shadow-lg transition-all group relative">
                             <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-xl overflow-hidden p-1">
+                                <div className="w-12 h-12 bg-gray-50 dark:bg-white/5 rounded-xl flex items-center justify-center text-xl overflow-hidden p-1">
                                     {skill.icon && skill.icon.startsWith('http') ? (
                                         <img src={skill.icon} alt="" className="w-full h-full object-contain" />
                                     ) : (
@@ -119,7 +119,7 @@ export default function SkillsModule() {
                                     )}
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="text-sm font-black text-gray-900 truncate tracking-tight">{skill.name}</h3>
+                                    <h3 className="text-sm font-black text-gray-900 dark:text-white truncate tracking-tight">{skill.name}</h3>
                                     <p className="text-[9px] font-bold text-secondary uppercase tracking-widest">{skill.category}</p>
                                 </div>
                                 <div className="flex flex-col gap-1">
@@ -139,18 +139,18 @@ export default function SkillsModule() {
             {editing && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditing(null)} />
-                    <div className="relative bg-white w-full max-w-md rounded-[2rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-                        <button onClick={() => setEditing(null)} className="absolute top-6 right-6 text-secondary hover:text-gray-900">
+                    <div className="relative bg-white dark:bg-[#1e1e1e] w-full max-w-md rounded-[2rem] p-8 shadow-2xl dark:shadow-none animate-in zoom-in-95 duration-200">
+                        <button onClick={() => setEditing(null)} className="absolute top-6 right-6 text-secondary hover:text-gray-900 dark:hover:text-white">
                             <X size={20} />
                         </button>
 
-                        <h3 className="text-xl font-black text-gray-900 mb-6">{editing.id ? "Edit Skill" : "New Skill"}</h3>
+                        <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6">{editing.id ? "Edit Skill" : "New Skill"}</h3>
 
                         <form onSubmit={handleSave} className="space-y-4">
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-secondary ml-1.5">Icon / Logo</label>
                                 <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-200 text-2xl overflow-hidden">
+                                    <div className="w-16 h-16 bg-gray-50 dark:bg-white/5 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-700 text-2xl overflow-hidden">
                                         {editing.icon && editing.icon.startsWith('http') ? (
                                             <img src={editing.icon} alt="" className="w-full h-full object-contain p-2" />
                                         ) : (
@@ -163,9 +163,9 @@ export default function SkillsModule() {
                                             value={editing.icon}
                                             onChange={(e) => setEditing({ ...editing, icon: e.target.value })}
                                             placeholder="Emoji or URL"
-                                            className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-xs font-bold"
+                                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-xl p-3 text-xs font-bold"
                                         />
-                                        <label className="block text-center bg-white border border-gray-200 rounded-xl p-2 text-[10px] font-black uppercase cursor-pointer hover:bg-gray-50 transition-colors">
+                                        <label className="block text-center bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-700 rounded-xl p-2 text-[10px] font-black uppercase cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                                             {uploading ? <Loader2 className="animate-spin mx-auto" size={12} /> : "Upload Logo"}
                                             <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
                                         </label>
@@ -180,7 +180,7 @@ export default function SkillsModule() {
                                     type="text"
                                     value={editing.name}
                                     onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                                    className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3.5 text-sm font-bold focus:ring-2 focus:ring-primary outline-none transition-all"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-xl p-3.5 text-sm font-bold focus:ring-2 focus:ring-primary outline-none transition-all"
                                     placeholder="e.g. Next.js"
                                 />
                             </div>
@@ -192,7 +192,7 @@ export default function SkillsModule() {
                                         type="text"
                                         value={editing.category}
                                         onChange={(e) => setEditing({ ...editing, category: e.target.value })}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3.5 text-xs font-bold focus:ring-2 focus:ring-primary outline-none"
+                                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-xl p-3.5 text-xs font-bold focus:ring-2 focus:ring-primary outline-none"
                                         placeholder="Category"
                                     />
                                 </div>
@@ -202,7 +202,7 @@ export default function SkillsModule() {
                                         type="number"
                                         value={editing.displayOrder || 0}
                                         onChange={(e) => setEditing({ ...editing, displayOrder: parseInt(e.target.value) })}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3.5 text-xs font-bold focus:ring-2 focus:ring-primary outline-none"
+                                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-xl p-3.5 text-xs font-bold focus:ring-2 focus:ring-primary outline-none"
                                     />
                                 </div>
                             </div>

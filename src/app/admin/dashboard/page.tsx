@@ -28,7 +28,8 @@ import {
     Settings,
     User,
     Video,
-    Pin
+    Pin,
+    Globe2
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -48,8 +49,9 @@ import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
 import SettingsModule from "@/components/admin/SettingsModule";
 import KanbanModule from "@/components/admin/KanbanModule";
 import RoutinesModule from "@/components/admin/RoutinesModule";
+import TravelledModule from "@/components/admin/TravelledModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "settings";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "settings" | "travelled";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -57,6 +59,7 @@ export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<Tab>("overview");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [unreadMessages, setUnreadMessages] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -67,6 +70,7 @@ export default function AdminDashboard() {
     const menuItems = useMemo(() => [
         { id: "overview", title: "Command Center", icon: Home, color: "bg-blue-500", group: "Main" },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500", group: "Personal" },
+        { id: "travelled", title: "Travelled", icon: Globe2, color: "bg-sky-500", group: "Personal" },
         { id: "training-academy", title: "Training Academy", icon: GraduationCap, color: "bg-orange-500", group: "Learning" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500", group: "Professional" },
         { id: "feedbacks", title: "Testimonials", icon: HeartHandshake, color: "bg-pink-500", group: "Communication" },
@@ -79,16 +83,19 @@ export default function AdminDashboard() {
         { id: "divider", title: "Business Operations", icon: Briefcase, color: "bg-gray-400", group: "Admin" },
         { id: "kanban", title: "Kanban Board", icon: Layout, color: "bg-teal-500", group: "Project" },
         { id: "client-projects", title: "Client Projects", icon: Briefcase, color: "bg-blue-700", group: "Professional" },
-        { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadCount, group: "Communication" },
+        { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadMessages, group: "Communication" },
         { id: "routines", title: "Routine Checklist", icon: CheckSquare, color: "bg-indigo-600", group: "Admin" },
         { id: "settings", title: "Settings", icon: Settings, color: "bg-gray-600", group: "Admin" },
-    ], [unreadCount]);
+    ], [unreadMessages]);
 
     // Theme Management
     useEffect(() => {
         const savedTheme = localStorage.getItem("admin-theme") as any;
-        if (savedTheme) setTheme(savedTheme);
-        // Load pinned items from localStorage
+        if (savedTheme) {
+            setTheme(savedTheme);
+        } else {
+            setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        }
         const pinned = localStorage.getItem("admin-pinned-items");
         if (pinned) setPinnedItems(JSON.parse(pinned));
     }, []);
@@ -155,7 +162,8 @@ export default function AdminDashboard() {
                     localStorage.removeItem('admin_sessionId');
                     setTimeout(trackSession, 1000);
                 } else if (res.status === 401) {
-                    logout();
+                    await logout();
+                    router.push('/admin/login');
                 }
             } catch (err) {
                 console.error("[Dashboard] Network error during session tracking:", err);
@@ -166,11 +174,16 @@ export default function AdminDashboard() {
             const sid = localStorage.getItem('admin_sessionId');
             if (!sid) return;
             try {
-                const res = await fetch("/api/admin/sessions");
+                const res = await fetch("/api/admin/sessions", {
+                    headers: { "X-Session-Id": sid }
+                });
                 if (res.ok) {
                     const sessions = await res.json();
                     const exists = sessions.some((s: any) => s.id === sid);
-                    if (!exists) logout();
+                    if (!exists) {
+                        await logout();
+                        router.push('/admin/login');
+                    }
                 }
             } catch (err) {
                 console.error("[Dashboard] Network error during session check:", err);
@@ -199,11 +212,19 @@ export default function AdminDashboard() {
 
         const fetchAllCounts = async () => {
             try {
-                const res = await fetch("/api/admin/notifications");
-                if (res.ok) {
-                    const data = await res.json();
+                const [notifRes, msgRes] = await Promise.all([
+                    fetch("/api/admin/notifications"),
+                    fetch("/api/admin/messages")
+                ]);
+                if (notifRes.ok) {
+                    const data = await notifRes.json();
                     setUnreadCount(data.totalNew || 0);
                     setNotifications(data.items || []);
+                }
+                if (msgRes.ok) {
+                    const msgs = await msgRes.json();
+                    const unread = Array.isArray(msgs) ? msgs.filter((m: any) => m.status === "New").length : 0;
+                    setUnreadMessages(unread);
                 }
             } catch (err) { console.error("Failed to fetch notification counts", err); }
         };
@@ -227,13 +248,27 @@ export default function AdminDashboard() {
                 item.group.toLowerCase().includes(searchQuery.toLowerCase()))
         ), [menuItems, searchQuery]);
 
-    if (loading || !user) {
+    if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-[#f8f9fa] dark:bg-[#121212]">
                 <Loader2 className="w-10 h-10 text-primary animate-spin" />
             </div>
         );
     }
+
+    if (!user) {
+        router.push('/admin/login');
+        return null;
+    }
+
+    const handleMarkAllSeen = async () => {
+        try {
+            await fetch("/api/admin/notifications", { method: "PATCH" });
+            setUnreadCount(0);
+            setNotifications([]);
+            setIsNotificationsOpen(false);
+        } catch (err) { console.error("Failed to mark notifications as seen", err); }
+    };
 
     const renderContent = () => {
         switch (activeTab) {
@@ -252,6 +287,7 @@ export default function AdminDashboard() {
             case "kanban": return <KanbanModule />;
             case "routines": return <RoutinesModule />;
             case "settings": return <SettingsModule />;
+            case "travelled": return <TravelledModule />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">
                     <OverviewModule onTabChange={handleTabChange} />
@@ -349,7 +385,7 @@ export default function AdminDashboard() {
 
             {/* Main Content */}
             <main className="flex-1 lg:ml-[260px] w-full overflow-x-hidden min-h-screen relative flex flex-col">
-                <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 h-24 transition-colors duration-300">
+                <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 h-28 transition-colors duration-300">
                     <div className="max-w-7xl mx-auto px-6 md:px-8 h-full flex justify-between items-center">
                         <div className="flex items-center gap-4 flex-1">
                             <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
@@ -445,8 +481,8 @@ export default function AdminDashboard() {
                                 {isNotificationsOpen && (
                                     <>
                                         <div className="fixed inset-0 z-40" onClick={() => setIsNotificationsOpen(false)} />
-                                        <div className="absolute top-full right-0 mt-3 w-85 bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-800 rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-white/3">
+                                        <div className="absolute top-full right-0 mt-3 w-[380px] bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-800 rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
                                                 <span className="font-black text-xs uppercase tracking-widest text-gray-900 dark:text-white">Recent Enquiries</span>
                                                 <span className="text-[10px] font-black bg-primary text-white px-2.5 py-1 rounded-full uppercase tracking-tighter shadow-lg shadow-primary/20">{unreadCount} Pending</span>
                                             </div>
@@ -454,7 +490,7 @@ export default function AdminDashboard() {
                                                 {notifications.length > 0 ? (
                                                     <div className="space-y-1">
                                                         {notifications.map((item, idx) => (
-                                                            <button key={idx} onClick={() => { handleTabChange(item.actionTab); setIsNotificationsOpen(false); }} className="w-full p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl text-left flex gap-4 items-start group transition-all">
+                                                            <button key={idx} onClick={() => { if (item.actionTab) handleTabChange(item.actionTab); setIsNotificationsOpen(false); setIsMobileMenuOpen(false); }} className="w-full p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl text-left flex gap-4 items-start group transition-all">
                                                                 <div className={`p-2.5 ${item.bg} ${item.color} rounded-xl group-hover:scale-110 transition-transform`}>
                                                                     {item.icon === "MessageSquare" && <MessageSquare size={18} />}
                                                                     {item.icon === "HeartHandshake" && <HeartHandshake size={18} />}
@@ -480,7 +516,7 @@ export default function AdminDashboard() {
                                                 )}
                                             </div>
                                             <div className="p-3 bg-gray-50 dark:bg-white/5 border-t border-gray-100 dark:border-gray-800">
-                                                <button className="w-full py-2.5 text-[10px] font-black text-gray-400 dark:text-gray-500 hover:text-primary transition-colors text-center uppercase tracking-widest">Mark everything as seen</button>
+                                                <button onClick={handleMarkAllSeen} className="w-full py-2.5 text-[10px] font-black text-gray-400 dark:text-gray-500 hover:text-primary transition-colors text-center uppercase tracking-widest">Mark everything as seen</button>
                                             </div>
                                         </div>
                                     </>
@@ -500,7 +536,7 @@ export default function AdminDashboard() {
                     </div>
                 </header>
 
-                <div className="p-6 md:p-8 max-w-7xl mx-auto w-full flex-1">
+                <div className="px-6 md:px-8 py-8 md:py-10 max-w-7xl mx-auto w-full flex-1">
                     {/* Header Breadcrumb */}
                     <div className="mb-8 flex items-center justify-between">
                         <div>
@@ -514,7 +550,7 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2">
+                            <button onClick={() => window.open('/', '_blank')} className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2">
                                 <ExternalLink size={14} /> Visit Website
                             </button>
                         </div>

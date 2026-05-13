@@ -102,7 +102,7 @@ export default function FormsModule() {
         try {
             const res = await fetch(`/api/admin/forms/${id}`, { method: "DELETE" });
             if (res.ok) fetchForms();
-        } catch (e) { }
+        } catch (e) { toast.error("Failed to delete form"); }
     };
 
     const handleViewResponses = async (id: string) => {
@@ -151,7 +151,7 @@ export default function FormsModule() {
 
         const tid = toast.loading("Uploading to ImageKit...");
         try {
-            const url = await uploadToImageKit(file, 'forms');
+            const url = await uploadToImageKit(file as File, 'forms');
             callback(url);
             toast.success("Uploaded successfully!", { id: tid });
         } catch (error) {
@@ -308,7 +308,7 @@ export default function FormsModule() {
                                     if (counts[c] !== undefined) counts[c]++;
                                     else counts[c] = 1;
                                 });
-                            } catch (e) { }
+                            } catch (e) { console.error("Failed to parse choice data", e); }
                         } else {
                             if (ans.answerText) {
                                 if (counts[ans.answerText] !== undefined) counts[ans.answerText]++;

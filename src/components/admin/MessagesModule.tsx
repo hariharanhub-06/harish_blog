@@ -23,6 +23,27 @@ import {
 } from "lucide-react";
 import PricingCalculator from "./PricingCalculator";
 
+function FilterDropdown({ value, onChange, options, label }: { value: string; onChange: (v: string) => void; options: string[]; label: (v: string) => string }) {
+    const [open, setOpen] = useState(false);
+    return (
+        <div className="relative" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setOpen(false); }}>
+            <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-1.5 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 border border-gray-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300 transition-colors whitespace-nowrap">
+                {label(value)}
+                <ChevronDown size={11} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+            </button>
+            {open && (
+                <div className="absolute z-50 top-full left-0 mt-1.5 min-w-[140px] bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden">
+                    {options.map((opt) => (
+                        <button key={opt} onClick={() => { onChange(opt); setOpen(false); }} className={`w-full px-3 py-2 text-left text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-white/5 transition-colors ${value === opt ? "text-primary" : "text-gray-700 dark:text-gray-300"}`}>
+                            {label(opt)}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function MessagesModule() {
     const [messages, setMessages] = useState<any[]>([]);
     const [filteredMessages, setFilteredMessages] = useState<any[]>([]);
@@ -57,7 +78,7 @@ export default function MessagesModule() {
             case "In Progress": return "bg-amber-50 text-amber-600 border-amber-100";
             case "Success": return "bg-emerald-50 text-emerald-600 border-emerald-100 text-emerald-700";
             case "Failed": return "bg-red-50 text-red-600 border-red-100";
-            default: return "bg-gray-50 text-gray-500 border-gray-100";
+            default: return "bg-gray-50 dark:bg-white/5 text-gray-500 border-gray-100 dark:border-gray-800";
         }
     };
 
@@ -246,27 +267,23 @@ export default function MessagesModule() {
                     <p className="text-secondary dark:text-gray-400 text-xs font-bold mt-0.5">Track and convert leads into customers</p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-xl border border-gray-100 shadow-sm">
+                <div className="flex flex-wrap items-center gap-2 bg-white dark:bg-[#1e1e1e] p-1.5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
                     <div className="flex items-center gap-1.5 px-2">
                         <SlidersHorizontal size={12} className="text-secondary" />
                         <span className="text-[8px] font-black uppercase text-secondary">Filter</span>
                     </div>
-                    <select
+                    <FilterDropdown
                         value={filterCategory}
-                        onChange={(e) => setFilterCategory(e.target.value)}
-                        className="bg-gray-50 border-0 rounded-lg text-[10px] font-bold px-2 py-1.5 outline-none focus:ring-2 focus:ring-primary/20"
-                    >
-                        <option value="All">All Categories</option>
-                        {availableCategories.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <select
+                        onChange={setFilterCategory}
+                        options={["All", ...availableCategories]}
+                        label={(v) => v === "All" ? "All Categories" : v}
+                    />
+                    <FilterDropdown
                         value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="bg-gray-50 border-0 rounded-lg text-[10px] font-bold px-2 py-1.5 outline-none focus:ring-2 focus:ring-primary/20"
-                    >
-                        <option value="All">All Statuses</option>
-                        {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                        onChange={setFilterStatus}
+                        options={["All", ...availableStatuses]}
+                        label={(v) => v === "All" ? "All Statuses" : v}
+                    />
                 </div>
             </div>
 
@@ -323,10 +340,10 @@ export default function MessagesModule() {
                             <p className="text-[9px] text-gray-500 dark:text-gray-400 font-semibold line-clamp-2 italic px-2.5 py-2 bg-gray-50/80 dark:bg-white/5 rounded-[1.2rem] border border-dashed border-gray-200 dark:border-gray-800 group-hover:bg-white dark:group-hover:bg-white/10 transition-colors">&quot;{msg.message}&quot;</p>
                         </div>
 
-                        <div className="flex items-center justify-end gap-1 mt-2 border-t border-gray-50 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-1 mt-2 border-t border-gray-50 dark:border-gray-800 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                                 onClick={() => setViewing(msg)}
-                                className="p-1.5 bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all"
+                                className="p-1.5 bg-gray-50 dark:bg-white/5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all"
                             >
                                 <Eye size={12} />
                             </button>
@@ -334,7 +351,7 @@ export default function MessagesModule() {
                                 href={`https://wa.me/${msg.mobile?.replace(/\D/g, '')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-1.5 bg-gray-50 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-lg transition-all"
+                                className="p-1.5 bg-gray-50 dark:bg-white/5 text-gray-400 hover:bg-green-50 hover:text-green-500 rounded-lg transition-all"
                             >
                                 <MessageCircle size={12} />
                             </a>
@@ -349,7 +366,7 @@ export default function MessagesModule() {
                 ))}
 
                 {filteredMessages.length === 0 && (
-                    <div className="col-span-full text-center py-20 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-100">
+                    <div className="col-span-full text-center py-20 bg-gray-50 dark:bg-white/5 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-gray-800">
                         <p className="text-secondary font-bold text-sm">No messages found matching your filters</p>
                     </div>
                 )}
@@ -358,7 +375,7 @@ export default function MessagesModule() {
             {/* View Modal (Ensuring it's bigger and clearer) */}
             {viewing && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8 md:p-10 relative">
+                    <div className="bg-white dark:bg-[#1e1e1e] rounded-[2rem] shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-8 md:p-10 relative">
                         <button onClick={() => setViewing(null)} className="absolute top-6 right-6 p-2 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-full transition-all">
                             <X size={20} />
                         </button>
@@ -368,7 +385,7 @@ export default function MessagesModule() {
                                 {viewing.name.charAt(0)}
                             </div>
                             <div>
-                                <h3 className="text-2xl font-black text-gray-900 mb-0.5">{viewing.name}</h3>
+                                <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-0.5">{viewing.name}</h3>
                                 <p className="text-secondary font-bold flex items-center gap-1.5 text-xs">
                                     <Calendar size={12} /> {new Date(viewing.createdAt).toLocaleDateString()}
                                 </p>
@@ -378,16 +395,16 @@ export default function MessagesModule() {
                         <div className="grid md:grid-cols-2 gap-6 mb-8">
                             <div className="space-y-1.5">
                                 <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Mobile</p>
-                                <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center justify-between text-sm">
+                                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl font-bold flex items-center justify-between text-sm">
                                     <span className="flex items-center gap-2.5"><Phone size={16} className="text-primary" /> {viewing.mobile}</span>
-                                    <a href={`https://wa.me/${viewing.mobile?.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-green-500 bg-white p-1.5 rounded-lg shadow-sm">
+                                    <a href={`https://wa.me/${viewing.mobile?.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-green-500 bg-white dark:bg-white/10 p-1.5 rounded-lg shadow-sm">
                                         <MessageCircle size={16} />
                                     </a>
                                 </div>
                             </div>
                             <div className="space-y-1.5">
                                 <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Email</p>
-                                <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center gap-2.5 text-sm">
+                                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl font-bold flex items-center gap-2.5 text-sm">
                                     <Mail size={16} className="text-blue-400" />
                                     <span className="truncate">{viewing.email}</span>
                                 </div>
@@ -398,7 +415,7 @@ export default function MessagesModule() {
                             {viewing.category !== "Financial Logistics" && (
                                 <div className="space-y-1.5">
                                     <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Business Type</p>
-                                    <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center gap-2.5 text-sm">
+                                    <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl font-bold flex items-center gap-2.5 text-sm">
                                         <Briefcase size={16} className="text-orange-500" />
                                         <span>{viewing.businessType || 'Personal'}</span>
                                     </div>
@@ -406,7 +423,7 @@ export default function MessagesModule() {
                             )}
                             <div className="space-y-1.5">
                                 <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Service Requested</p>
-                                <div className="p-4 bg-gray-50 rounded-xl font-bold flex items-center gap-2.5 text-sm">
+                                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl font-bold flex items-center gap-2.5 text-sm">
                                     <Edit3 size={16} className="text-purple-500" />
                                     <span>{viewing.requestedService || 'General Inquiry'}</span>
                                 </div>
@@ -420,13 +437,13 @@ export default function MessagesModule() {
                                     {viewing.status || 'New'}
                                 </span>
                             </div>
-                            <div className="p-4 bg-gray-50 rounded-2xl flex flex-wrap gap-2">
+                            <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl flex flex-wrap gap-2">
                                 {defaultStatuses.map(s => (
                                     <button
                                         key={s}
                                         onClick={() => handleUpdate(undefined, { ...viewing, status: s })}
                                         disabled={updating}
-                                        className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all ${viewing.status === s ? 'bg-gray-900 text-white shadow-lg' : 'bg-white text-gray-500 border border-gray-100 hover:border-primary/30'}`}
+                                        className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all ${viewing.status === s ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg' : 'bg-white dark:bg-white/10 text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700 hover:border-primary/30'}`}
                                     >
                                         {s}
                                     </button>
@@ -436,8 +453,8 @@ export default function MessagesModule() {
 
                         <div className="space-y-1.5 mb-8">
                             <p className="text-[8px] font-black uppercase tracking-widest text-gray-400 ml-2">Message</p>
-                            <div className="p-6 bg-gray-50 rounded-[2rem] border-l-4 border-gray-200">
-                                <p className="text-sm text-gray-800 leading-relaxed font-medium whitespace-pre-wrap">{viewing.message}</p>
+                            <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-[2rem] border-l-4 border-gray-200 dark:border-gray-700">
+                                <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">{viewing.message}</p>
                             </div>
                         </div>
 

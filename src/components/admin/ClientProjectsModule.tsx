@@ -245,7 +245,7 @@ export default function ClientProjectsModule() {
                                 value={project.status || 'New'}
                                 onChange={(e) => handleUpdateProject({ ...project, status: e.target.value })}
                                 disabled={updating}
-                                className={`w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 cursor-pointer transition-all appearance-none bg-white hover:shadow-md outline-none disabled:opacity-50 ${getStatusColor(project.status || 'New')}`}
+                                className={`w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 cursor-pointer transition-all appearance-none bg-white dark:bg-[#2a2a2a] dark:border-gray-700 dark:text-white hover:shadow-md outline-none disabled:opacity-50 ${getStatusColor(project.status || 'New')}`}
                             >
                                 <option value="New">New</option>
                                 <option value="Details Collected">Details Collected</option>
@@ -256,7 +256,7 @@ export default function ClientProjectsModule() {
                             </select>
                         </div>
 
-                        <div className="flex items-center justify-between gap-2 mt-auto pt-2 border-t border-gray-50">
+                        <div className="flex items-center justify-between gap-2 mt-auto pt-2 border-t border-gray-50 dark:border-gray-800">
                             <button
                                 onClick={() => setViewing(project)}
                                 className="flex-1 bg-primary text-white py-2 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1"
@@ -266,7 +266,7 @@ export default function ClientProjectsModule() {
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                     onClick={() => setViewing(project)}
-                                    className="p-1.5 bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all"
+                                    className="p-1.5 bg-gray-50 dark:bg-white/5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all"
                                 >
                                     <Edit3 size={12} />
                                 </button>
@@ -282,7 +282,7 @@ export default function ClientProjectsModule() {
                 ))}
 
                 {projects.length === 0 && (
-                    <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-100 flex flex-col items-center">
+                    <div className="text-center py-20 bg-gray-50 dark:bg-white/5 rounded-[3rem] border-2 border-dashed border-gray-100 dark:border-gray-800 flex flex-col items-center">
                         <Briefcase size={40} className="text-gray-200 mb-4" />
                         <p className="text-secondary font-black uppercase tracking-widest text-sm">No active projects found</p>
                         <p className="text-[10px] text-gray-400 font-bold mt-2">Convert won leads into projects to start tracking</p>
@@ -293,7 +293,7 @@ export default function ClientProjectsModule() {
             {/* Project Management Modal */}
             {viewing && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 md:p-10 leading-normal">
-                    <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto p-6 md:p-12 relative scrollbar-hide animate-in zoom-in-95 duration-300">
+                    <div className="bg-white dark:bg-[#1e1e1e] rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto p-6 md:p-12 relative scrollbar-hide animate-in zoom-in-95 duration-300">
                         <button onClick={() => setViewing(null)} className="absolute top-6 right-6 md:top-10 md:right-10 p-2 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-full transition-all z-10">
                             <X size={24} />
                         </button>
@@ -303,7 +303,7 @@ export default function ClientProjectsModule() {
                                 {viewing.clientName?.charAt(0) || 'P'}
                             </div>
                             <div className="text-center md:text-left space-y-1">
-                                <h3 className="text-3xl font-black text-gray-900 tracking-tight">{viewing.title}</h3>
+                                <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{viewing.title}</h3>
                                 <p className="text-primary font-black uppercase text-xs tracking-widest flex items-center justify-center md:justify-start gap-2">
                                     <User size={14} /> {viewing.clientName} {viewing.businessName && `| ${viewing.businessName}`}
                                 </p>
@@ -318,7 +318,7 @@ export default function ClientProjectsModule() {
                                     type="text"
                                     value={viewing.title || ""}
                                     onChange={(e) => setViewing({ ...viewing, title: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-primary"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary"
                                     placeholder="e.g. E-Commerce Platform"
                                 />
                             </div>
@@ -328,7 +328,7 @@ export default function ClientProjectsModule() {
                                     type="text"
                                     value={viewing.clientName || ""}
                                     onChange={(e) => setViewing({ ...viewing, clientName: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-primary"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary"
                                     placeholder="e.g. John Doe"
                                 />
                             </div>
@@ -338,7 +338,7 @@ export default function ClientProjectsModule() {
                                     type="text"
                                     value={viewing.projectCategory || ""}
                                     onChange={(e) => setViewing({ ...viewing, projectCategory: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-primary"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary"
                                     placeholder="e.g. Web Development"
                                 />
                             </div>
@@ -348,19 +348,19 @@ export default function ClientProjectsModule() {
                                     type="date"
                                     value={viewing.plannedDeliveryDate ? new Date(viewing.plannedDeliveryDate).toISOString().split('T')[0] : ""}
                                     onChange={(e) => setViewing({ ...viewing, plannedDeliveryDate: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-2 focus:ring-primary"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl px-5 py-4 font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary"
                                 />
                             </div>
                         </div>
 
                         {/* Status & Commercials */}
                         <div className="grid md:grid-cols-3 gap-8 mb-12">
-                            <div className="p-6 bg-gray-50 rounded-[2rem] border border-gray-100 space-y-4">
+                            <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-[2rem] border border-gray-100 dark:border-gray-800 space-y-4">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Progress Status</p>
                                 <select
                                     value={viewing.status}
                                     onChange={(e) => setViewing({ ...viewing, status: e.target.value })}
-                                    className="w-full bg-white border-0 rounded-2xl p-4 font-black uppercase text-[11px] tracking-widest focus:ring-2 focus:ring-primary shadow-sm"
+                                    className="w-full bg-white dark:bg-[#2a2a2a] dark:border-gray-700 dark:text-white border-0 rounded-2xl p-4 font-black uppercase text-[11px] tracking-widest focus:ring-2 focus:ring-primary shadow-sm"
                                 >
                                     <option value="New">New</option>
                                     <option value="Details Collected">Details Collected</option>
@@ -371,12 +371,12 @@ export default function ClientProjectsModule() {
                                 </select>
                             </div>
 
-                            <div className="p-6 bg-gray-50 rounded-[2rem] border border-gray-100 space-y-4">
+                            <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-[2rem] border border-gray-100 dark:border-gray-800 space-y-4">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Payment Cycle</p>
                                 <select
                                     value={viewing.paymentStatus}
                                     onChange={(e) => setViewing({ ...viewing, paymentStatus: e.target.value })}
-                                    className="w-full bg-white border-0 rounded-2xl p-4 font-black uppercase text-[11px] tracking-widest focus:ring-2 focus:ring-emerald-500 shadow-sm"
+                                    className="w-full bg-white dark:bg-[#2a2a2a] dark:border-gray-700 dark:text-white border-0 rounded-2xl p-4 font-black uppercase text-[11px] tracking-widest focus:ring-2 focus:ring-emerald-500 shadow-sm"
                                 >
                                     <option value="advance_paid">Advance Paid</option>
                                     <option value="fully_paid">Fully Paid</option>
@@ -425,7 +425,7 @@ export default function ClientProjectsModule() {
                                             id="new-note-input"
                                             type="text"
                                             placeholder="Add a progress note..."
-                                            className="flex-1 bg-gray-50 border-0 rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 focus:ring-primary"
+                                            className="flex-1 bg-gray-50 dark:bg-white/5 border-0 rounded-xl px-4 py-3 text-xs font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary"
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter') {
                                                     const val = (e.target as HTMLInputElement).value;
@@ -466,16 +466,16 @@ export default function ClientProjectsModule() {
                                         {(viewing.projectNotes || []).map((note: any, idx: number) => (
                                             <div key={idx} className="flex gap-4 relative">
                                                 <div className="flex flex-col items-center">
-                                                    <div className="w-2 h-2 rounded-full bg-primary ring-4 ring-white shadow-sm z-10" />
+                                                    <div className="w-2 h-2 rounded-full bg-primary ring-4 ring-white dark:ring-[#1e1e1e] shadow-sm z-10" />
                                                     {idx !== (viewing.projectNotes?.length || 0) - 1 && (
-                                                        <div className="w-0.5 flex-1 bg-gray-100 my-1" />
+                                                        <div className="w-0.5 flex-1 bg-gray-100 dark:bg-gray-800 my-1" />
                                                     )}
                                                 </div>
                                                 <div className="pb-4 w-full">
                                                     <p className="text-[10px] text-gray-400 font-bold mb-0.5">
                                                         {new Date(note.date).toLocaleDateString()} at {new Date(note.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </p>
-                                                    <p className="text-xs text-gray-700 font-medium bg-gray-50/50 p-3 rounded-xl border border-dashed border-gray-100">
+                                                    <p className="text-xs text-gray-700 dark:text-gray-300 font-medium bg-gray-50/50 dark:bg-white/5 p-3 rounded-xl border border-dashed border-gray-100 dark:border-gray-800">
                                                         {note.note}
                                                     </p>
                                                 </div>

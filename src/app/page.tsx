@@ -2,14 +2,13 @@ import Hero from "@/components/Hero";
 import MainContent from "@/components/MainContent";
 import { MatrixBackground } from "@/components/MatrixBackground";
 import { db } from "@/db";
+import { travelledPlaces as travelledPlacesTable } from "@/db/schema";
 
 // Enable Incremental Static Regeneration (ISR)
 // Revalidate every 0 seconds to ensure fresh data during debugging
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  console.log("Server: Rendering Home Page at " + new Date().toISOString());
-
   // Fetch all data with safe fallbacks
   let dbProfile: any = null;
   let dbProjects: any[] = [];
@@ -20,6 +19,7 @@ export default async function Home() {
   let partnerships: any[] = [];
   let quizzes: any[] = [];
   let liveSessions: any[] = [];
+  let travelledPlaces: any[] = [];
 
   try {
     // Parallel fetch with failure isolation (Promise.allSettled)
@@ -66,6 +66,13 @@ export default async function Home() {
     dbSkills = val(results[5], 'skills') || [];
     partnerships = val(results[6], 'partnerships') || [];
     liveSessions = val(results[7], 'liveSessions') || [];
+
+    // Fetch travelledPlaces separately (new table, graceful failure)
+    try {
+      travelledPlaces = await db.select().from(travelledPlacesTable);
+    } catch {
+      // table may not exist yet — silently ignore
+    }
 
     // Fetch Quizzes separately as it has relations that might fail if not pushed
     try {
@@ -223,6 +230,7 @@ export default async function Home() {
         partnerships={partnerships as any}
         quizzes={quizzes as any}
         liveSessions={liveSessions as any}
+        travelledPlaces={travelledPlaces as any}
       />
     </div>
   );

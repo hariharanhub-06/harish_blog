@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import {
     Plus,
     Loader2,
@@ -303,7 +304,11 @@ export default function KanbanModule() {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(newCols.map(c => ({ id: c.id, displayOrder: c.displayOrder })))
                     });
-                } catch (err) { console.error("Sync columns failed:", err); }
+                } catch (err) {
+                    console.error("Sync columns failed:", err);
+                    toast.error("Failed to save column order — refresh to reset");
+                    fetchData(); // Rollback optimistic state
+                }
             }
         } else if (activeType === "Task") {
             const activeIndex = tasks.findIndex(t => t.id === active.id);
@@ -337,7 +342,11 @@ export default function KanbanModule() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(finalTasks.map(t => ({ id: t.id, columnId: t.columnId, displayOrder: t.displayOrder })))
                 });
-            } catch (err) { console.error("Sync tasks failed:", err); }
+            } catch (err) {
+                console.error("Sync tasks failed:", err);
+                toast.error("Failed to save task order — refresh to reset");
+                fetchData(); // Rollback optimistic state
+            }
         }
     };
 
@@ -432,8 +441,10 @@ export default function KanbanModule() {
                         <Settings2 size={16} /> {isManagingColumns ? "Close Editor" : "Edit Columns"}
                     </button>
                     <button
-                        onClick={() => setEditingTask({ columnId: columns[0]?.id, priority: "Medium" })}
-                        className="bg-gray-900 text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                        onClick={() => columns.length > 0 && setEditingTask({ columnId: columns[0].id, priority: "Medium" })}
+                        disabled={columns.length === 0}
+                        title={columns.length === 0 ? "Create a column first" : undefined}
+                        className="bg-gray-900 text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                         <Plus size={16} /> New Task
                     </button>

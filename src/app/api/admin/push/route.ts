@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
     try {
-        const sid = cookies().get("admin_session")?.value;
+        const sid = req.headers.get("X-Session-Id");
         if (!sid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         const [session] = await db.select().from(adminSessions).where(eq(adminSessions.id, sid));

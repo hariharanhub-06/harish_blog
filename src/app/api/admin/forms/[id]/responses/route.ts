@@ -2,11 +2,14 @@ import { db } from "@/db";
 import { formResponses, formResponseAnswers } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { id } = await params;
 
         // Fetch all responses for the form
@@ -43,6 +46,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 }
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { id } = await params;
         const { responseIds } = await req.json();
 

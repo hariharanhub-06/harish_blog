@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { volunteering } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await db.select({
             id: volunteering.id,
             role: volunteering.role,
@@ -21,6 +24,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         const { id, ...data } = body;
         console.log("Volunteering POST data:", data);
@@ -38,6 +43,8 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
         if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });

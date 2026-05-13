@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { adminSessions } from "@/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const sessions = await db.select()
             .from(adminSessions)
             .orderBy(desc(adminSessions.lastActive));
@@ -20,8 +23,6 @@ export async function POST(req: Request) {
         const data = await req.json();
         const { id, userEmail, deviceName, browser, os, ipAddress } = data;
 
-        console.log(`[API/ADMIN/SESSIONS] POST ${id ? 'Update' : 'Create'} for ${userEmail}`);
-
         if (id) {
             // Update existing session
             const result = await db.update(adminSessions)
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
                 return NextResponse.json(result[0]);
             }
 
-            console.warn(`[API/ADMIN/SESSIONS] Session ${id} not found for update. Retrying as new session.`);
+            // session not found — fall through to create a new one
         }
 
         // Create new session
@@ -45,9 +46,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "userEmail is required" }, { status: 400 });
         }
 
-        // Manually generate a UUID if the DB default is failing
         const newId = crypto.randomUUID();
-        console.log(`[API/ADMIN/SESSIONS] Creating new session with ID ${newId} for ${userEmail}`);
 
         const result = await db.insert(adminSessions).values({
             id: newId,
@@ -76,6 +75,8 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
         const action = searchParams.get("action");

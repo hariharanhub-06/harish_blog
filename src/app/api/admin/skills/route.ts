@@ -2,10 +2,13 @@ import { db } from "@/db";
 import { skills } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     const allSkills = await db.select({
         id: skills.id,
         name: skills.name,
@@ -18,6 +21,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     const data = await req.json();
     if (data.id) {
         await db.update(skills).set(data).where(eq(skills.id, data.id));
@@ -28,6 +33,8 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (id) {

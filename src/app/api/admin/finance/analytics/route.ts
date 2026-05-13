@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { financeTransactions } from "@/db/schema";
 import { and, gte, lte, sql } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 interface DailyFlow {
     day: number;
@@ -19,6 +20,8 @@ interface Insight {
 
 export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         let startDateParam = searchParams.get("startDate");
         let endDateParam = searchParams.get("endDate");

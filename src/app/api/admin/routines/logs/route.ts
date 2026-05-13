@@ -2,11 +2,14 @@ import { db } from "@/db";
 import { routineLogs } from "@/db/schema";
 import { eq, and, between } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const routineId = searchParams.get("routineId");
         const startDate = searchParams.get("startDate");
@@ -35,6 +38,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json(); // { routineId, date, isCompleted, notes }
         const { routineId, date, isCompleted, notes } = data;
 

@@ -1,13 +1,13 @@
 import { db } from "@/db";
 import { gameScores } from "@/db/schema";
-import { desc, eq, and } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const gameId = searchParams.get("gameId");
-        const limit = parseInt(searchParams.get("limit") || "10");
+        const limit = Math.min(parseInt(searchParams.get("limit") || "10") || 10, 100);
 
         let scores;
         if (gameId) {

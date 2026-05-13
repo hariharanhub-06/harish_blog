@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { financeTransactions, financeDebts, financeLoans } from "@/db/schema";
 import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const startDate = searchParams.get("startDate");
         const endDate = searchParams.get("endDate");
@@ -29,6 +32,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
         // neon-http driver does not support transactions, so executing sequentially
         const [transaction] = await db.insert(financeTransactions).values({
@@ -40,6 +45,8 @@ export async function POST(req: Request) {
             loanId: data.loanId || null,
             date: data.date ? new Date(data.date) : new Date(),
         }).returning();
+
+        if (!transaction) return NextResponse.json({ error: "Failed to create transaction" }, { status: 500 });
 
         // If it's a debt payment, update the remaining amount in financeDebts
         if (data.type === "debt_pay" && data.debtId) {
@@ -70,9 +77,7 @@ export async function POST(req: Request) {
             }
         }
 
-        const res = transaction;
-
-        return NextResponse.json(res);
+        return NextResponse.json(transaction);
     } catch (error: any) {
         console.error("Failed to create transaction", error);
         return NextResponse.json({
@@ -84,6 +89,8 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
         const { id, ...updates } = data;
 
@@ -117,6 +124,8 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
         if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });

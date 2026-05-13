@@ -318,7 +318,7 @@ export default function AdminMeetingsModule() {
                             setShowTemplates(false);
                             setShowAvailability(false);
                         }}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${showSettings ? 'bg-gray-900 text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-600 hover:bg-gray-50'}`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${showSettings ? 'bg-gray-900 dark:bg-white/10 text-white shadow-lg' : 'bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
                     >
                         <Settings size={14} />
                         {showSettings ? 'Close Settings' : 'Settings'}
@@ -328,7 +328,7 @@ export default function AdminMeetingsModule() {
                             setShowTemplates(!showTemplates);
                             setShowAvailability(false);
                         }}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${showTemplates ? 'bg-gray-900 text-white shadow-lg' : 'bg-white border border-gray-100 text-emerald-600 hover:bg-emerald-50'}`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${showTemplates ? 'bg-gray-900 dark:bg-white/10 text-white shadow-lg' : 'bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 text-emerald-600 hover:bg-emerald-50'}`}
                     >
                         <FileText size={14} />
                         {showTemplates ? 'Hide Templates' : 'Meeting Templates'}
@@ -338,7 +338,7 @@ export default function AdminMeetingsModule() {
                             setShowAvailability(!showAvailability);
                             setShowTemplates(false);
                         }}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${showAvailability ? 'bg-gray-900 text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-600 hover:bg-gray-50'}`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${showAvailability ? 'bg-gray-900 dark:bg-white/10 text-white shadow-lg' : 'bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
                     >
                         <Calendar size={14} />
                         {showAvailability ? 'Close Availability' : 'Set Availability'}
@@ -362,19 +362,19 @@ export default function AdminMeetingsModule() {
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden"
                     >
-                        <div className="bg-white p-6 rounded-[2rem] border border-gray-100 mb-6 shadow-sm">
+                        <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 mb-6 shadow-sm">
                             <div className="flex items-start gap-4">
                                 <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
                                     <Clock size={24} />
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-bold text-gray-900 text-lg">Booking Constraints</h3>
+                                    <h3 className="font-bold text-gray-900 dark:text-white text-lg">Booking Constraints</h3>
                                     <p className="text-sm text-gray-500 mb-4">Control how far in advance meetings must be booked.</p>
 
                                     <div className="flex flex-col gap-4">
-                                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-800">
                                             <div className="flex flex-col">
-                                                <span className="font-bold text-gray-900 text-sm">Minimum Notice Period</span>
+                                                <span className="font-bold text-gray-900 dark:text-white text-sm">Minimum Notice Period</span>
                                                 <span className="text-xs text-gray-500">Require bookings to be made X days in advance</span>
                                             </div>
                                             <button
@@ -386,15 +386,15 @@ export default function AdminMeetingsModule() {
                                         </div>
 
                                         {schedulerConfig.enableMinDaysConstraint && (
-                                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-800">
                                                 <div className="flex flex-col flex-1">
-                                                    <span className="font-bold text-gray-900 text-sm">Days to Block</span>
+                                                    <span className="font-bold text-gray-900 dark:text-white text-sm">Days to Block</span>
                                                     <span className="text-xs text-gray-500">Number of days from today that cannot be booked</span>
                                                 </div>
                                                 <select
                                                     value={schedulerConfig.minDaysBeforeBooking}
                                                     onChange={(e) => handleSaveConfig({ ...schedulerConfig, minDaysBeforeBooking: parseInt(e.target.value) })}
-                                                    className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 focus:ring-2 ring-primary/20 outline-none"
+                                                    className="bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 ring-primary/20 outline-none"
                                                 >
                                                     {[1, 2, 3, 4, 5].map(days => (
                                                         <option key={days} value={days}>{days} Days</option>
@@ -514,7 +514,7 @@ export default function AdminMeetingsModule() {
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden"
                     >
-                        <div className="bg-gray-50/50 p-8 rounded-[2rem] border border-gray-100 mb-6 font-primary text-gray-900">
+                        <div className="bg-gray-50/50 dark:bg-white/5 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 mb-6 font-primary text-gray-900 dark:text-white">
                             <SchedulerDocumentsModule />
                         </div>
                     </motion.div>
@@ -522,13 +522,13 @@ export default function AdminMeetingsModule() {
             </AnimatePresence>
 
             {/* Filters */}
-            <div className="bg-white p-4 rounded-2xl border border-gray-100 flex flex-col md:flex-row gap-4 items-center">
-                <div className="relative flex-1 text-gray-900">
+            <div className="bg-white dark:bg-[#1e1e1e] p-4 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4 items-center">
+                <div className="relative flex-1 text-gray-900 dark:text-white">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                     <input
                         type="search"
                         placeholder="Search by club or president..."
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 ring-primary/20 transition-all font-medium"
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-[#2a2a2a] border-none rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 ring-primary/20 transition-all font-medium"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -536,7 +536,7 @@ export default function AdminMeetingsModule() {
                 <div className="flex items-center gap-2">
                     <Filter size={16} className="text-gray-400" />
                     <select
-                        className="bg-gray-50 border-none rounded-xl text-sm py-2 px-4 focus:ring-2 ring-primary/20 font-bold transition-all text-gray-900"
+                        className="bg-gray-50 dark:bg-[#2a2a2a] border-none rounded-xl text-sm py-2 px-4 focus:ring-2 ring-primary/20 font-bold transition-all text-gray-900 dark:text-white"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -549,11 +549,11 @@ export default function AdminMeetingsModule() {
             </div>
 
             {/* Meetings Table */}
-            <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-[#1e1e1e] rounded-3xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-gray-50/50 border-b border-gray-100">
+                            <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-gray-100 dark:border-gray-800">
                                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Club Details</th>
                                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Meeting Info</th>
                                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
@@ -562,7 +562,7 @@ export default function AdminMeetingsModule() {
                                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                             {filteredMeetings.length === 0 ? (
                                 <motion.tr
                                     initial={{ opacity: 0, y: 10 }}
@@ -571,11 +571,11 @@ export default function AdminMeetingsModule() {
                                 >
                                     <td colSpan={6} className="px-6 py-24 text-center">
                                         <div className="flex flex-col items-center justify-center gap-4">
-                                            <div className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center text-gray-200">
+                                            <div className="w-20 h-20 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-200">
                                                 <Calendar size={40} />
                                             </div>
                                             <div>
-                                                <p className="text-gray-900 font-bold">No meetings found</p>
+                                                <p className="text-gray-900 dark:text-white font-bold">No meetings found</p>
                                                 <p className="text-sm text-gray-400 font-medium">Try adjusting your search or filters</p>
                                             </div>
                                             <button
@@ -594,17 +594,17 @@ export default function AdminMeetingsModule() {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ duration: 0.3, delay: index * 0.05 }}
-                                        className="hover:bg-gray-50/50 transition-colors group"
+                                        className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors group"
                                     >
-                                        <td className="px-6 py-4 text-gray-900">
+                                        <td className="px-6 py-4 text-gray-900 dark:text-white">
                                             <div className="flex flex-col">
-                                                <span className="font-bold text-gray-900">{meeting.clubName}</span>
+                                                <span className="font-bold text-gray-900 dark:text-white">{meeting.clubName}</span>
                                                 <span className="text-xs text-gray-500 font-medium">{meeting.presidentName}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-1">
-                                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
+                                                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-gray-300">
                                                     <Calendar size={12} className="text-primary" />
                                                     {new Date(meeting.scheduledDate).toLocaleDateString("en-GB")}
                                                 </div>
@@ -637,7 +637,7 @@ export default function AdminMeetingsModule() {
                                                     onClick={() => { setActiveMeeting(meeting); setModalType("checklist"); }}
                                                     className="flex flex-col items-center gap-1 group/eye"
                                                 >
-                                                    <div className="p-2 rounded-xl bg-gray-50 group-hover/eye:bg-primary/10 group-hover/eye:text-primary transition-all">
+                                                    <div className="p-2 rounded-xl bg-gray-50 dark:bg-white/5 group-hover/eye:bg-primary/10 group-hover/eye:text-primary transition-all">
                                                         <Eye size={18} className="text-gray-400 group-hover/eye:text-primary" />
                                                     </div>
                                                     <span className="text-[8px] font-black text-gray-400">
@@ -648,7 +648,7 @@ export default function AdminMeetingsModule() {
                                                     onClick={() => { setActiveMeeting(meeting); setModalType("scoring"); }}
                                                     className="flex flex-col items-center gap-1 group/star"
                                                 >
-                                                    <div className="p-2 rounded-xl bg-gray-50 group-hover/star:bg-yellow-500/10 group-hover/star:text-yellow-600 transition-all">
+                                                    <div className="p-2 rounded-xl bg-gray-50 dark:bg-white/5 group-hover/star:bg-yellow-500/10 group-hover/star:text-yellow-600 transition-all">
                                                         <Star size={18} className="text-gray-400 group-hover/star:text-yellow-600" />
                                                     </div>
                                                     <div className="flex flex-col items-center">
@@ -670,7 +670,7 @@ export default function AdminMeetingsModule() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col min-w-[120px]">
-                                                <span className="text-xs font-bold text-gray-900">{meeting.venue || "No Venue"}</span>
+                                                <span className="text-xs font-bold text-gray-900 dark:text-white">{meeting.venue || "No Venue"}</span>
                                                 <span className="text-[10px] text-gray-500 font-medium truncate max-w-[150px]" title={meeting.venueDetails}>
                                                     {meeting.venueDetails || "No Details"}
                                                 </span>
@@ -681,7 +681,7 @@ export default function AdminMeetingsModule() {
                                                 {/* Edit Button */}
                                                 <button
                                                     onClick={() => { setActiveMeeting(meeting); setModalType("edit"); }}
-                                                    className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                                                    className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
                                                     title="Edit Meeting"
                                                 >
                                                     <MoreVertical size={16} />

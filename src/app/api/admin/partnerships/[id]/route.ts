@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { partnerships } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,8 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { id } = await params;
         const body = await req.json();
 
@@ -40,6 +43,8 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { id } = await params;
 
         await db.delete(partnerships).where(eq(partnerships.id, id));

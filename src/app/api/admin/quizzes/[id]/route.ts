@@ -3,9 +3,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { quizzes, quizQuestions, quizOptions } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { id } = await params;
         const quiz = await db.query.quizzes.findFirst({
             where: eq(quizzes.id, id),
@@ -31,6 +34,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { id } = await params;
         const body = await req.json();
         const { title, description, category, coverImage, isPublished, timeLimit, questions } = body;
@@ -88,6 +93,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { id } = await params;
         // Delete cascading items manually if DB doesn't have cascades
         const existingQuestions = await db.select({ id: quizQuestions.id }).from(quizQuestions).where(eq(quizQuestions.quizId, id));

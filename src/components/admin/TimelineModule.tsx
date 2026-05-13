@@ -18,6 +18,7 @@ import {
     Star
 } from "lucide-react";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
+import { toast } from "react-hot-toast";
 import Image from "next/image";
 import imageKitLoader from "@/lib/imagekitLoader";
 
@@ -66,36 +67,41 @@ export default function TimelineModule() {
             if (res.ok) {
                 setEditing(null);
                 fetchTimeline();
-                alert("Saved successfully!");
+                toast.success("Saved successfully!");
             } else {
                 const errorData = await res.json();
                 console.error("Save failure:", errorData);
-                alert(`Failed to save: ${errorData.error || "Unknown error"}`);
+                toast.error(`Failed to save: ${errorData.error || "Unknown error"}`);
             }
         } catch (error) {
             console.error("Save error:", error);
-            alert("An error occurred while saving. Please check the console.");
+            toast.error("An error occurred while saving.");
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (id: string, type: "experience" | "education" | "volunteering") => {
-        if (!confirm("Are you sure?")) return;
-        let endpoint = "";
-        if (type === "experience") endpoint = "/api/admin/experience";
-        else if (type === "education") endpoint = "/api/admin/education";
-        else endpoint = "/api/admin/volunteering";
-
-        const res = await fetch(`${endpoint}?id=${id}`, { method: "DELETE" });
-        if (res.ok) fetchTimeline();
+        const endpoint = type === "experience" ? "/api/admin/experience"
+            : type === "education" ? "/api/admin/education"
+            : "/api/admin/volunteering";
+        try {
+            const res = await fetch(`${endpoint}?id=${id}`, { method: "DELETE" });
+            if (res.ok) fetchTimeline();
+            else toast.error("Failed to delete entry");
+        } catch {
+            toast.error("Failed to delete entry");
+        }
     };
 
-    const handleToggleCurrent = async (item: any) => {
+    const handleToggleCurrent = async (item: any, type: "experience" | "education" | "volunteering" = activeTab) => {
         setSaving(true);
         try {
             const updated = { ...item, isCurrent: !item.isCurrent };
-            const res = await fetch("/api/admin/experience", {
+            const endpoint = type === "experience" ? "/api/admin/experience"
+                : type === "education" ? "/api/admin/education"
+                : "/api/admin/volunteering";
+            const res = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(updated),
@@ -137,8 +143,8 @@ export default function TimelineModule() {
             {/* Work Experience Section */}
             <div className="space-y-8">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <h2 className="text-3xl font-black text-gray-900 flex items-center gap-3">
-                        <div className="bg-blue-50 p-3 rounded-2xl text-primary"><Briefcase size={24} /></div>
+                    <h2 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                        <div className="bg-blue-50 dark:bg-white/5 p-3 rounded-2xl text-primary"><Briefcase size={24} /></div>
                         Work Experience
                     </h2>
                     <button
@@ -155,11 +161,11 @@ export default function TimelineModule() {
 
                 <div className="space-y-4">
                     {experiences.map((item) => (
-                        <div key={item.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div key={item.id} className="bg-white dark:bg-[#1e1e1e] p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                             <div>
                                 <div className="flex items-center gap-4">
                                     {item.logo && (
-                                        <div className="relative w-12 h-12 rounded-xl bg-gray-50 p-2 overflow-hidden border border-gray-100">
+                                        <div className="relative w-12 h-12 rounded-xl bg-gray-50 dark:bg-white/5 p-2 overflow-hidden border border-gray-100 dark:border-gray-800">
                                             <Image loader={imageKitLoader} src={item.logo} alt={item.company} fill className="object-contain" />
                                         </div>
                                     )}
@@ -173,7 +179,7 @@ export default function TimelineModule() {
                             <div className="flex space-x-2">
                                 <button
                                     onClick={() => handleToggleCurrent(item)}
-                                    className={`p-3 rounded-xl transition-all ${item.isCurrent ? 'bg-amber-100 text-amber-600 font-black' : 'bg-gray-50 text-gray-400 hover:text-amber-500'}`}
+                                    className={`p-3 rounded-xl transition-all ${item.isCurrent ? 'bg-amber-100 text-amber-600 font-black' : 'bg-gray-50 dark:bg-white/5 text-gray-400 hover:text-amber-500'}`}
                                     title={item.isCurrent ? "Current Position" : "Mark as Current"}
                                 >
                                     <Star size={18} fill={item.isCurrent ? "currentColor" : "none"} />
@@ -183,7 +189,7 @@ export default function TimelineModule() {
                                         setActiveTab("experience");
                                         setEditing(item);
                                     }}
-                                    className="p-3 bg-gray-50 text-secondary rounded-xl hover:bg-primary hover:text-white transition-all"
+                                    className="p-3 bg-gray-50 dark:bg-white/5 text-secondary rounded-xl hover:bg-primary hover:text-white transition-all"
                                 >
                                     <Edit3 size={18} />
                                 </button>
@@ -197,20 +203,20 @@ export default function TimelineModule() {
                         </div>
                     ))}
                     {experiences.length === 0 && (
-                        <div className="text-center py-12 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+                        <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-gray-700">
                             <p className="text-secondary font-black uppercase tracking-widest opacity-50">No experience entries</p>
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="border-t border-gray-200" />
+            <div className="border-t border-gray-200 dark:border-gray-700" />
 
             {/* Education Section */}
             <div className="space-y-8">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <h2 className="text-3xl font-black text-gray-900 flex items-center gap-3">
-                        <div className="bg-amber-50 p-3 rounded-2xl text-accent"><GraduationCap size={24} /></div>
+                    <h2 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                        <div className="bg-amber-50 dark:bg-white/5 p-3 rounded-2xl text-accent"><GraduationCap size={24} /></div>
                         Education
                     </h2>
                     <button
@@ -227,11 +233,11 @@ export default function TimelineModule() {
 
                 <div className="space-y-4">
                     {educations.map((item) => (
-                        <div key={item.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div key={item.id} className="bg-white dark:bg-[#1e1e1e] p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                             <div>
                                 <div className="flex items-center gap-4">
                                     {item.logo && (
-                                        <div className="relative w-12 h-12 rounded-xl bg-gray-50 p-2 overflow-hidden border border-gray-100">
+                                        <div className="relative w-12 h-12 rounded-xl bg-gray-50 dark:bg-white/5 p-2 overflow-hidden border border-gray-100 dark:border-gray-800">
                                             <Image loader={imageKitLoader} src={item.logo} alt={item.institution} fill className="object-contain" />
                                         </div>
                                     )}
@@ -248,7 +254,7 @@ export default function TimelineModule() {
                                         setActiveTab("education");
                                         setEditing(item);
                                     }}
-                                    className="p-3 bg-gray-50 text-secondary rounded-xl hover:bg-primary hover:text-white transition-all"
+                                    className="p-3 bg-gray-50 dark:bg-white/5 text-secondary rounded-xl hover:bg-primary hover:text-white transition-all"
                                 >
                                     <Edit3 size={18} />
                                 </button>
@@ -262,20 +268,20 @@ export default function TimelineModule() {
                         </div>
                     ))}
                     {educations.length === 0 && (
-                        <div className="text-center py-12 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+                        <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-gray-700">
                             <p className="text-secondary font-black uppercase tracking-widest opacity-50">No education entries</p>
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="border-t border-gray-200" />
+            <div className="border-t border-gray-200 dark:border-gray-700" />
 
             {/* Volunteering Section */}
             <div className="space-y-8">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <h2 className="text-3xl font-black text-gray-900 flex items-center gap-3">
-                        <div className="bg-teal-50 p-3 rounded-2xl text-teal-600"><HeartHandshake size={24} /></div>
+                    <h2 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                        <div className="bg-teal-50 dark:bg-white/5 p-3 rounded-2xl text-teal-600"><HeartHandshake size={24} /></div>
                         Volunteering / Rotaract
                     </h2>
                     <button
@@ -292,11 +298,11 @@ export default function TimelineModule() {
 
                 <div className="space-y-4">
                     {volunteerings.map((item) => (
-                        <div key={item.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div key={item.id} className="bg-white dark:bg-[#1e1e1e] p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                             <div>
                                 <div className="flex items-center gap-4">
                                     {item.logo && (
-                                        <div className="relative w-12 h-12 rounded-xl bg-gray-50 p-2 overflow-hidden border border-gray-100">
+                                        <div className="relative w-12 h-12 rounded-xl bg-gray-50 dark:bg-white/5 p-2 overflow-hidden border border-gray-100 dark:border-gray-800">
                                             <Image loader={imageKitLoader} src={item.logo} alt={item.organization} fill className="object-contain" />
                                         </div>
                                     )}
@@ -313,7 +319,7 @@ export default function TimelineModule() {
                                         setActiveTab("volunteering");
                                         setEditing(item);
                                     }}
-                                    className="p-3 bg-gray-50 text-secondary rounded-xl hover:bg-primary hover:text-white transition-all"
+                                    className="p-3 bg-gray-50 dark:bg-white/5 text-secondary rounded-xl hover:bg-primary hover:text-white transition-all"
                                 >
                                     <Edit3 size={18} />
                                 </button>
@@ -327,7 +333,7 @@ export default function TimelineModule() {
                         </div>
                     ))}
                     {volunteerings.length === 0 && (
-                        <div className="text-center py-12 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+                        <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-gray-700">
                             <p className="text-secondary font-black uppercase tracking-widest opacity-50">No volunteering entries</p>
                         </div>
                     )}
@@ -338,7 +344,7 @@ export default function TimelineModule() {
             {/* Edit Modal / Form Overlay */}
             {editing && (
                 <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 md:p-10 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="bg-white dark:bg-[#1e1e1e] rounded-[3rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 md:p-10 animate-in fade-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center mb-8">
                             <h3 className="text-2xl font-black">
                                 {editing.id ? "Edit" : "New"} {activeTab === "experience" ? "Experience" : activeTab === "education" ? "Education" : "Volunteering"}
@@ -351,7 +357,7 @@ export default function TimelineModule() {
                         <form onSubmit={handleSave} className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-2">Logo / Icon</label>
-                                <div className="relative w-full h-32 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 overflow-hidden flex flex-col items-center justify-center group hover:border-primary transition-colors cursor-pointer" onClick={() => document.getElementById('logo-upload')?.click()}>
+                                <div className="relative w-full h-32 bg-gray-50 dark:bg-white/5 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col items-center justify-center group hover:border-primary transition-colors cursor-pointer" onClick={() => document.getElementById('logo-upload')?.click()}>
                                     {editing.logo ? (
                                         <Image
                                             loader={imageKitLoader}
@@ -388,7 +394,7 @@ export default function TimelineModule() {
                                             const field = activeTab === "experience" || activeTab === "volunteering" ? "role" : "degree";
                                             setEditing({ ...editing, [field]: e.target.value })
                                         }}
-                                        className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
+                                        className="w-full bg-gray-50 dark:bg-white/10 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -403,7 +409,7 @@ export default function TimelineModule() {
                                             const field = activeTab === "experience" ? "company" : activeTab === "education" ? "institution" : "organization";
                                             setEditing({ ...editing, [field]: e.target.value })
                                         }}
-                                        className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
+                                        className="w-full bg-gray-50 dark:bg-white/10 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
                                     />
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
@@ -416,7 +422,7 @@ export default function TimelineModule() {
                                             const field = activeTab === "experience" || activeTab === "volunteering" ? "duration" : "period";
                                             setEditing({ ...editing, [field]: e.target.value })
                                         }}
-                                        className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
+                                        className="w-full bg-gray-50 dark:bg-white/10 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
                                     />
                                 </div>
                             </div>
@@ -431,7 +437,7 @@ export default function TimelineModule() {
                                         const field = activeTab === "experience" || activeTab === "volunteering" ? "description" : "details";
                                         setEditing({ ...editing, [field]: e.target.value })
                                     }}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
+                                    className="w-full bg-gray-50 dark:bg-white/10 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-primary transition-all font-bold"
                                 />
                             </div>
 

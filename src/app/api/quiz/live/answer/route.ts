@@ -64,15 +64,14 @@ export async function POST(req: Request) {
         let newStreak = participant.streak || 0;
 
         if (isCorrect) {
-            // Base points
-            pointsAwarded = currentQuestion.points || 1000;
+            // Base points — use ?? so that 0 points stays 0, not 1000
+            pointsAwarded = currentQuestion.points ?? 1000;
 
-            // Speed bonus (simple linear decay based on timeLeft if provided, else max)
-            // Assuming timeLimit is around 30s. 
-            // If we don't trust client time, we just give base points. 
-            // For now, let's use a simple multiplier if timeLeft is sent.
-            if (timeLeft && currentQuestion.timeLimit) {
-                const percentage = Math.max(0, Math.min(1, timeLeft / currentQuestion.timeLimit));
+            // Speed bonus calculated server-side from when the question was last advanced
+            if (currentQuestion.timeLimit && session.updatedAt) {
+                const elapsedMs = Date.now() - new Date(session.updatedAt).getTime();
+                const timeLimitMs = currentQuestion.timeLimit * 1000;
+                const percentage = Math.max(0, Math.min(1, 1 - elapsedMs / timeLimitMs));
                 pointsAwarded += Math.floor(pointsAwarded * percentage * 0.5); // Up to 50% bonus
             }
 

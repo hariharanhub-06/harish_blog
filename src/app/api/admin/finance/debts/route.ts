@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { financeDebts } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const debts = await db.select().from(financeDebts).orderBy(desc(financeDebts.createdAt));
         return NextResponse.json(debts);
     } catch (error) {
@@ -15,6 +18,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
         const newDebt = await db.insert(financeDebts).values({
             name: data.name,
@@ -33,6 +38,8 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
         const updated = await db.update(financeDebts)
             .set({
@@ -56,6 +63,8 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
         if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });

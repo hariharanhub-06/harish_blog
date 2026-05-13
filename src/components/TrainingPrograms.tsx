@@ -97,8 +97,8 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
                 {academicPartners.length > 0 && (
                     <div className="py-4 md:py-6 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
                         <div className="flex flex-col gap-1 md:gap-2 px-6 mb-3 md:mb-4 text-center">
-                            <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-orange-500/80">Collaborations</span>
-                            <h4 className="text-lg md:text-xl font-black text-white uppercase tracking-tighter">Institution Experienced</h4>
+                            <span className="text-[10px] font-black uppercase tracking-[0.35em] text-orange-500">Collaborations</span>
+                            <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter">Institution Experienced</h3>
                         </div>
 
                         <InfiniteCarousel
@@ -120,8 +120,8 @@ export function TrainingPrograms({ trainingStats = [], partnerships, skills }: T
 
                 <div className="py-4 md:py-6 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
                     <div className="flex flex-col gap-1 md:gap-2 px-6 mb-3 md:mb-4 text-center">
-                        <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-blue-500/80">Expertise Sharing</span>
-                        <h4 className="text-lg md:text-xl font-black text-white uppercase tracking-tighter">Domain Skills</h4>
+                        <span className="text-[10px] font-black uppercase tracking-[0.35em] text-orange-500">Expertise Sharing</span>
+                        <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter">Domain Skills</h3>
                     </div>
 
                     <InfiniteCarousel

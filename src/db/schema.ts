@@ -33,7 +33,6 @@ export const profiles = pgTable("profiles", {
     { label: "Projects Completed", value: "10+", icon: "Code" },
     { label: "Clubs Led", value: "5+", icon: "Award" },
     { label: "Colleges Partnered", value: "42", icon: "User" },
-    { label: "Colleges Partnered", value: "42", icon: "User" },
   ])),
   trainingStats: jsonb("training_stats").$default(() => ([
     { label: "Expert Sessions", value: "150+", icon: "Presentation" },
@@ -449,7 +448,7 @@ export const feedbacks = pgTable("feedbacks", {
   organization: text("organization").notNull(), // College or Company
   rating: integer("rating").notNull().default(5),
   content: text("content").notNull(),
-  status: text("status").notNull().default("Fresh"), // Fresh (Pending), Approved
+  status: text("status").notNull().default("New"), // New (Pending), Approved, Seen
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1034,4 +1033,13 @@ export const formResponseAnswerRelations = relations(formResponseAnswers, ({ one
     references: [formQuestions.id],
   }),
 }));
+
+export const travelledPlaces = pgTable('travelledPlaces', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  cityName: text('cityName').notNull(),
+  country: text('country').notNull(),
+  lat: real('lat').notNull(),
+  lng: real('lng').notNull(),
+  createdAt: timestamp('createdAt').defaultNow(),
+});
 

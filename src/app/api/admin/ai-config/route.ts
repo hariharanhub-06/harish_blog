@@ -1,8 +1,11 @@
 
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { validateAdminSession } from "@/lib/adminAuth";
 export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const sql = neon(process.env.DATABASE_URL!);
 
         // Safety: Ensure table and column exists
@@ -36,6 +39,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         const { knowledgeBase } = body;
 

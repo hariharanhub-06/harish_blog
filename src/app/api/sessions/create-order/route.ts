@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
         const amount = (session.price || 0) * 100;
 
-        if (amount === 0) {
+        if (amount <= 0) {
             return NextResponse.json({
                 error: "Zero amount session should not initiate payment flow.",
                 isFree: true
@@ -37,7 +37,6 @@ export async function POST(req: Request) {
             receipt: `rcpt_${sessionId.substring(0, 8)}_${Date.now().toString().slice(-10)}`,
         };
 
-        console.log("Initiating Razorpay Order with options:", options);
         const order = await razorpay.orders.create(options);
 
         return NextResponse.json({

@@ -110,7 +110,7 @@ export function InfiniteCarousel({
                 }}
             >
                 <div
-                    className="flex gap-12 items-center px-6 shrink-0"
+                    className="flex gap-6 sm:gap-12 items-center px-6 shrink-0"
                     style={{ width: 'max-content' }}
                 >
                     {/* Render items twice for a perfect infinite loop */}

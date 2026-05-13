@@ -11,7 +11,9 @@ import {
     ShieldCheck,
     Globe,
     ExternalLink,
-    Loader2
+    Loader2,
+    Zap,
+    Layout as LayoutIcon
 } from "lucide-react";
 import Link from "next/link";
 import { MatrixBackground } from "@/components/MatrixBackground";

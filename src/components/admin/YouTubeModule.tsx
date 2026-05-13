@@ -73,7 +73,7 @@ export default function YouTubeModule() {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <h2 className="text-3xl font-black text-gray-900 flex items-center gap-3">
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
                     <div className="bg-red-50 p-3 rounded-2xl text-red-600"><Youtube size={24} /></div>
                     YouTube Video Manager
                 </h2>
@@ -88,8 +88,8 @@ export default function YouTubeModule() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {videos.map((video) => (
-                    <div key={video.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden group hover:shadow-xl transition-all duration-300">
-                        <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                    <div key={video.id} className="bg-white dark:bg-[#1e1e1e] rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none overflow-hidden group hover:shadow-xl transition-all duration-300">
+                        <div className="relative aspect-video bg-gray-100 dark:bg-white/10 overflow-hidden">
                             {video.youtubeVideoId ? (
                                 <img
                                     src={`https://img.youtube.com/vi/${video.youtubeVideoId}/mqdefault.jpg`}
@@ -104,7 +104,7 @@ export default function YouTubeModule() {
                             <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all">
                                 <button
                                     onClick={() => setEditing(video)}
-                                    className="p-2 bg-white/90 backdrop-blur-sm text-gray-700 rounded-xl hover:bg-white transition-colors shadow-lg"
+                                    className="p-2 bg-white/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-xl hover:bg-white dark:hover:bg-white/10 transition-colors shadow-lg"
                                 >
                                     <Edit3 size={16} />
                                 </button>
@@ -137,7 +137,7 @@ export default function YouTubeModule() {
             </div>
 
             {videos.length === 0 && (
-                <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+                <div className="text-center py-20 bg-gray-50 dark:bg-white/5 rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-gray-700">
                     <Youtube size={48} className="mx-auto mb-4 text-gray-300" />
                     <p className="text-gray-500 font-bold">No videos added yet.</p>
                 </div>
@@ -145,7 +145,7 @@ export default function YouTubeModule() {
 
             {editing && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 md:p-10 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="bg-white dark:bg-[#1e1e1e] rounded-[3rem] shadow-2xl dark:shadow-none w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 md:p-10 animate-in fade-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center mb-8">
                             <h3 className="text-2xl font-black">{editing.id ? "Edit Video" : "New Video"}</h3>
                             <button onClick={() => setEditing(null)} className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full transition-colors">
@@ -161,7 +161,7 @@ export default function YouTubeModule() {
                                     type="text"
                                     value={editing.title}
                                     onChange={(e) => setEditing({ ...editing, title: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 transition-all font-bold"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 transition-all font-bold"
                                 />
                             </div>
 
@@ -172,7 +172,7 @@ export default function YouTubeModule() {
                                     type="text"
                                     value={editing.youtubeVideoId}
                                     onChange={(e) => setEditing({ ...editing, youtubeVideoId: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 transition-all font-bold"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 transition-all font-bold"
                                 />
                                 <p className="text-[10px] text-gray-400 ml-2 italic">Tip: The ID is the random characters after ?v= in the URL.</p>
                             </div>
@@ -184,7 +184,7 @@ export default function YouTubeModule() {
                                         type="text"
                                         value={editing.category || ""}
                                         onChange={(e) => setEditing({ ...editing, category: e.target.value })}
-                                        className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 transition-all font-bold text-sm"
+                                        className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 transition-all font-bold text-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -193,7 +193,7 @@ export default function YouTubeModule() {
                                         type="number"
                                         value={editing.displayOrder || 0}
                                         onChange={(e) => setEditing({ ...editing, displayOrder: parseInt(e.target.value) })}
-                                        className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 transition-all font-bold text-sm"
+                                        className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 transition-all font-bold text-sm"
                                     />
                                 </div>
                             </div>
@@ -204,7 +204,7 @@ export default function YouTubeModule() {
                                     rows={3}
                                     value={editing.description || ""}
                                     onChange={(e) => setEditing({ ...editing, description: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 transition-all font-bold"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-4 focus:ring-2 focus:ring-red-500 transition-all font-bold"
                                 />
                             </div>
 
@@ -216,7 +216,7 @@ export default function YouTubeModule() {
                                     onChange={(e) => setEditing({ ...editing, isActive: e.target.checked })}
                                     className="w-5 h-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
                                 />
-                                <label htmlFor="isActive" className="text-sm font-bold text-gray-700">Display this video on public site</label>
+                                <label htmlFor="isActive" className="text-sm font-bold text-gray-700 dark:text-gray-300">Display this video on public site</label>
                             </div>
 
                             <button

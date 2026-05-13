@@ -2,9 +2,12 @@ import { db } from "@/db";
 import { kanbanTasks } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const tasks = await db.select().from(kanbanTasks).orderBy(asc(kanbanTasks.displayOrder));
         return NextResponse.json(tasks);
     } catch (error) {
@@ -15,6 +18,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
 
         // Get the current max display order for the column to append the new task
@@ -31,6 +36,7 @@ export async function POST(req: Request) {
             displayOrder: maxOrder + 1,
         }).returning();
 
+        if (!newTask[0]) return NextResponse.json({ error: "Failed to create task" }, { status: 500 });
         return NextResponse.json(newTask[0]);
     } catch (error) {
         console.error("POST /api/admin/kanban error:", error);
@@ -40,6 +46,8 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const data = await req.json();
         const { id, ...updateData } = data;
 
@@ -73,6 +81,8 @@ export async function PUT(req: Request) {
 
 export async function PATCH(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const tasksData = await req.json(); // Expected: [{ id: string, columnId: string, displayOrder: number }, ...]
 
         if (!Array.isArray(tasksData)) {
@@ -100,6 +110,8 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
         if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });

@@ -112,7 +112,7 @@ export default function LiveSessionsCarousel({ sessions }: LiveSessionsCarouselP
                                 {session.posterUrl ? (
                                     <img
                                         src={session.posterUrl}
-                                        alt={session.title}
+                                        alt={session.title || "Live session poster"}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-50 group-hover:opacity-100"
                                     />
                                 ) : (

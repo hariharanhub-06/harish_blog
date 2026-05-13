@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { partnerships } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
 // GET - Fetch all partnerships (admin)
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const allPartnerships = await db
             .select()
             .from(partnerships)
@@ -23,6 +26,8 @@ export async function GET() {
 // POST - Create new partnership
 export async function POST(req: NextRequest) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         console.log("[API Partnerships] Received POST body:", body);
         const { name, logo, partnerType, displayOrder = 0 } = body;

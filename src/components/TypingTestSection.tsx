@@ -15,6 +15,7 @@ export default function TypingTestSection() {
     const [isFinished, setIsFinished] = useState(false);
     const [userName, setUserName] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const activeCharRef = useRef<HTMLSpanElement>(null);
@@ -157,25 +158,24 @@ export default function TypingTestSection() {
     };
 
     const submitResult = async () => {
-        if (!userName.trim()) return alert("Please enter your name!");
+        if (!userName.trim()) {
+            setSubmitMessage({ type: "error", text: "Please enter your name!" });
+            return;
+        }
         setSubmitting(true);
+        setSubmitMessage(null);
         try {
             await fetch("/api/typing-test/submit", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    userName,
-                    wpm,
-                    accuracy,
-                    duration,
-                    difficulty
-                })
+                body: JSON.stringify({ userName, wpm, accuracy, duration, difficulty })
             });
-            alert("Score submitted to leaderboard!");
+            setSubmitMessage({ type: "success", text: "Score submitted to leaderboard!" });
             setUserName("");
-            resetTest();
+            setTimeout(() => { setSubmitMessage(null); resetTest(); }, 2000);
         } catch (error) {
             console.error("Failed to submit score", error);
+            setSubmitMessage({ type: "error", text: "Failed to submit. Please try again." });
         } finally {
             setSubmitting(false);
         }
@@ -359,6 +359,11 @@ export default function TypingTestSection() {
                                                 Initiate Again
                                             </button>
                                         </div>
+                                        {submitMessage && (
+                                            <p className={`text-xs font-bold text-center ${submitMessage.type === "success" ? "text-green-400" : "text-red-400"}`}>
+                                                {submitMessage.text}
+                                            </p>
+                                        )}
                                     </div>
                                 </>
                             ) : (

@@ -2,8 +2,11 @@ import { db } from "@/db";
 import { experience } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     const data = await db.select({
         id: experience.id,
         company: experience.company,
@@ -19,6 +22,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         console.log("Experience POST body:", body);
         const { id, createdAt, ...data } = body;
@@ -49,6 +54,8 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (id) {

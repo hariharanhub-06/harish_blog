@@ -2,11 +2,14 @@ import { db } from "@/db";
 import { forms, formQuestions, formResponses, formResponseAnswers } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { id } = await params;
         const formData = await db.select().from(forms).where(eq(forms.id, id)).limit(1);
 
@@ -25,6 +28,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { id } = await params;
         const body = await req.json();
         const {
@@ -71,6 +76,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { id } = await params;
 
         // Clean up answers and responses

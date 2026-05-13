@@ -8,37 +8,32 @@ import {
 } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { asc, eq } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const baseCosts = await db.query.pricingBaseCosts.findMany({
             orderBy: [asc(pricingBaseCosts.displayOrder)]
         });
 
-        // If no data, seed with defaults
         if (baseCosts.length === 0) {
             await seedDefaults();
-            return GET(); // Recursive call to fetch new data
         }
 
-        const pageRates = await db.query.pricingPageRates.findMany({
-            orderBy: [asc(pricingPageRates.displayOrder)]
-        });
-
-        const featureRates = await db.query.pricingFeatureRates.findMany({
-            orderBy: [asc(pricingFeatureRates.displayOrder)]
-        });
-
-        const multipliers = await db.query.pricingMultipliers.findMany({
-            orderBy: [asc(pricingMultipliers.displayOrder)]
-        });
-
-        const discounts = await db.query.pricingDiscounts.findMany({
-            orderBy: [asc(pricingDiscounts.displayOrder)]
-        });
+        const [seededBaseCosts, pageRates, featureRates, multipliers, discounts] = await Promise.all([
+            baseCosts.length === 0
+                ? db.query.pricingBaseCosts.findMany({ orderBy: [asc(pricingBaseCosts.displayOrder)] })
+                : Promise.resolve(baseCosts),
+            db.query.pricingPageRates.findMany({ orderBy: [asc(pricingPageRates.displayOrder)] }),
+            db.query.pricingFeatureRates.findMany({ orderBy: [asc(pricingFeatureRates.displayOrder)] }),
+            db.query.pricingMultipliers.findMany({ orderBy: [asc(pricingMultipliers.displayOrder)] }),
+            db.query.pricingDiscounts.findMany({ orderBy: [asc(pricingDiscounts.displayOrder)] }),
+        ]);
 
         return NextResponse.json({
-            baseCosts,
+            baseCosts: seededBaseCosts,
             pageRates,
             featureRates,
             multipliers,
@@ -120,6 +115,8 @@ async function seedDefaults() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         const { type, action, data } = body;
 

@@ -3,11 +3,14 @@ import { db } from "@/db";
 import { feedbacks } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const allFeedbacks = await db.select().from(feedbacks).orderBy(desc(feedbacks.createdAt));
         return NextResponse.json(allFeedbacks);
     } catch (error: any) {
@@ -18,6 +21,8 @@ export async function GET() {
 
 export async function PUT(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         const { id, status, name, role, organization, rating, content } = body;
 
@@ -36,6 +41,8 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
 

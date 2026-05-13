@@ -4,26 +4,22 @@ import { useState, useEffect } from "react";
 import {
     Plus,
     Search,
-    MoreVertical,
     Edit,
     Trash2,
-    Eye,
     Gamepad2,
     Clock,
     Target,
     Check,
-    X,
     Save,
     PlusCircle,
     Loader2,
-    Image as ImageIcon,
     Upload,
     FileText,
     Users,
     BarChart2,
-    ArrowRight
+    ArrowRight,
+    ChevronDown
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { uploadToImageKit } from "@/lib/imagekit-upload"; // Import ImageKit helper
@@ -50,6 +46,7 @@ export default function QuizModule() {
     const [saving, setSaving] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
+    const [catOpen, setCatOpen] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -165,7 +162,7 @@ export default function QuizModule() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
                         <Gamepad2 className="text-primary" size={24} />
                         Quiz Manager
                     </h2>
@@ -188,23 +185,26 @@ export default function QuizModule() {
                         placeholder="Search quizzes by title or category..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-white border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
+                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
                     />
                 </div>
-                <div className="relative w-full md:w-64">
-                    <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full appearance-none pl-4 pr-10 py-3 bg-white border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium cursor-pointer"
+                <div className="relative w-full md:w-64" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setCatOpen(false); }}>
+                    <button
+                        onClick={() => setCatOpen((v) => !v)}
+                        className="w-full flex items-center justify-between pl-4 pr-4 py-3 bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 hover:border-primary/40 rounded-2xl text-sm font-medium text-gray-700 dark:text-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
-                        <option value="All">All Categories</option>
-                        {Array.from(new Set(quizzes.map(q => q.category))).filter(Boolean).map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                        <ArrowRight size={14} className="rotate-90" />
-                    </div>
+                        {selectedCategory === "All" ? "All Categories" : selectedCategory}
+                        <ChevronDown size={15} className={`text-gray-400 transition-transform ${catOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    {catOpen && (
+                        <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden">
+                            {["All", ...Array.from(new Set(quizzes.map((q: any) => q.category))).filter(Boolean)].map((cat: any) => (
+                                <button key={cat} onClick={() => { setSelectedCategory(cat); setCatOpen(false); }} className={`w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition-colors ${selectedCategory === cat ? "text-primary font-bold" : "text-gray-700 dark:text-gray-300"}`}>
+                                    {cat === "All" ? "All Categories" : cat}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -213,7 +213,7 @@ export default function QuizModule() {
                     <QuizEditor
                         quiz={currentQuiz as Quiz}
                         onSave={handleSave}
-                        onCancel={() => setIsEditing(false)}
+                        onCancel={() => { setIsEditing(false); setCurrentQuiz(null); }}
                         onChange={setCurrentQuiz}
                         saving={saving}
                     />
@@ -225,7 +225,7 @@ export default function QuizModule() {
                             const matchesCategory = selectedCategory === "All" || quiz.category === selectedCategory;
                             return matchesSearch && matchesCategory;
                         }).map((quiz) => (
-                            <div key={quiz.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                            <div key={quiz.id} className="bg-white dark:bg-[#1e1e1e] rounded-3xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none hover:shadow-xl transition-all group">
                                 <div className="flex justify-between items-start mb-6">
                                     <div className={`p-4 rounded-2xl ${quiz.timeLimit === 60 ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
                                         <Gamepad2 size={24} />
@@ -253,7 +253,7 @@ export default function QuizModule() {
                                     </div>
                                 </div>
 
-                                <h3 className="font-black text-xl text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem] leading-tight">
+                                <h3 className="font-black text-xl text-gray-900 dark:text-white mb-2 line-clamp-2 min-h-[3.5rem] leading-tight">
                                     {quiz.title}
                                 </h3>
                                 <p className="text-gray-500 text-sm mb-6 line-clamp-2 min-h-[2.5rem] font-medium">
@@ -349,7 +349,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
             lines.forEach(line => {
                 if (line.match(/^[A-H]\)/i)) {
                     options.push({
-                        id: Math.random().toString(36).substr(2, 9),
+                        id: Math.random().toString(36).substring(2, 11),
                         optionText: line.replace(/^[A-H]\)/i, '').trim(),
                         isCorrect: false
                     });
@@ -362,13 +362,13 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
             // Map the correct answer letters to the options
             correctLetters.forEach(letter => {
                 const charToIndex = letter.charCodeAt(0) - 65;
-                if (options[charToIndex]) {
+                if (charToIndex >= 0 && charToIndex < options.length) {
                     options[charToIndex].isCorrect = true;
                 }
             });
 
             return {
-                id: Math.random().toString(36).substr(2, 9),
+                id: Math.random().toString(36).substring(2, 11),
                 questionText,
                 points: 1000,
                 timeLimit: 30,
@@ -383,7 +383,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
 
     const addQuestion = () => {
         const newQuestion = {
-            id: Math.random().toString(36).substr(2, 9),
+            id: Math.random().toString(36).substring(2, 11),
             questionText: "New Question",
             points: 1000,
             timeLimit: 30,
@@ -408,17 +408,17 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
     };
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden">
-            <div className="flex border-b border-gray-100">
+        <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl dark:shadow-none overflow-hidden">
+            <div className="flex border-b border-gray-100 dark:border-gray-800">
                 <button
                     onClick={() => setActiveSection("basic")}
-                    className={`flex-1 px-6 py-4 font-bold text-sm transition-all ${activeSection === "basic" ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-gray-400 hover:text-gray-600'}`}
+                    className={`flex-1 px-6 py-4 font-bold text-sm transition-all ${activeSection === "basic" ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
                 >
                     Basic Info
                 </button>
                 <button
                     onClick={() => setActiveSection("questions")}
-                    className={`flex-1 px-6 py-4 font-bold text-sm transition-all ${activeSection === "questions" ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-gray-400 hover:text-gray-600'}`}
+                    className={`flex-1 px-6 py-4 font-bold text-sm transition-all ${activeSection === "questions" ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
                 >
                     Questions ({quiz.questions?.length || 0})
                 </button>
@@ -441,7 +441,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                     type="text"
                                     value={quiz.title}
                                     onChange={(e) => onChange({ ...quiz, title: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
                                     placeholder="Enter quiz title..."
                                 />
                             </div>
@@ -451,7 +451,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                     type="text"
                                     value={quiz.category}
                                     onChange={(e) => onChange({ ...quiz, category: e.target.value })}
-                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
                                 />
                             </div>
                         </div>
@@ -461,7 +461,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                             <textarea
                                 value={quiz.description}
                                 onChange={(e) => onChange({ ...quiz, description: e.target.value })}
-                                className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all h-24"
+                                className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all h-24"
                                 placeholder="What is this quiz about?"
                             />
                         </div>
@@ -470,7 +470,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Thumbnail (19:6 Aspect Ratio)</label>
                             <div className="flex flex-col gap-4">
                                 {quiz.coverImage ? (
-                                    <div className="relative w-full aspect-[19/6] rounded-2xl overflow-hidden border border-gray-100 group">
+                                    <div className="relative w-full aspect-[19/6] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 group">
                                         <Image src={quiz.coverImage} alt="Thumbnail" fill className="object-cover" />
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                             <button
@@ -485,7 +485,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                     <div className="space-y-4">
                                         <div className="flex gap-4 items-center">
                                             <div className="flex-1">
-                                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all">
+                                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                         {uploading ? (
                                                             <Loader2 className="animate-spin text-primary" size={24} />
@@ -507,7 +507,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                                     type="text"
                                                     value={quiz.coverImage}
                                                     onChange={(e) => onChange({ ...quiz, coverImage: e.target.value })}
-                                                    className="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-primary/20 transition-all font-bold"
+                                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-primary/20 transition-all font-bold"
                                                     placeholder="Paste URL..."
                                                 />
                                             </div>
@@ -527,16 +527,16 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                     onChange={(e) => onChange({ ...quiz, isPublished: e.target.checked })}
                                     className="w-5 h-5 rounded-lg border-gray-300 text-primary focus:ring-primary/20"
                                 />
-                                <label htmlFor="published" className="text-sm font-bold text-gray-700">Published</label>
+                                <label htmlFor="published" className="text-sm font-bold text-gray-700 dark:text-gray-300">Published</label>
                             </div>
                             <div className="flex items-center gap-3">
                                 <Clock className="text-gray-400" size={18} />
-                                <label className="text-sm font-bold text-gray-700">Time Limit (sec)</label>
+                                <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Time Limit (sec)</label>
                                 <input
                                     type="number"
                                     value={quiz.timeLimit}
                                     onChange={(e) => onChange({ ...quiz, timeLimit: parseInt(e.target.value) || 30 })}
-                                    className="w-20 bg-gray-50 border-0 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
+                                    className="w-20 bg-gray-50 dark:bg-white/5 border-0 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary/20 transition-all font-bold"
                                 />
                             </div>
                         </div>
@@ -544,10 +544,10 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                 ) : (
                     <div className="space-y-8">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-black text-gray-900 uppercase tracking-tight text-lg">Manage Questions</h3>
+                            <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-tight text-lg">Manage Questions</h3>
                             <button
                                 onClick={() => setShowBulk(!showBulk)}
-                                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold text-xs hover:bg-gray-200 transition-all"
+                                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 rounded-xl font-bold text-xs hover:bg-gray-200 dark:hover:bg-white/20 transition-all"
                             >
                                 <FileText size={14} />
                                 {showBulk ? "Cancel Import" : "Bulk Import Questions"}
@@ -568,7 +568,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                 <textarea
                                     value={bulkInput}
                                     onChange={(e) => setBulkInput(e.target.value)}
-                                    className="w-full h-48 bg-white border border-gray-200 rounded-xl p-4 text-xs font-mono"
+                                    className="w-full h-48 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-xs font-mono"
                                     placeholder="1. Question... Answer: A"
                                 />
                             </div>
@@ -576,7 +576,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
 
                         <div className="space-y-12">
                             {quiz.questions?.map((q: any, qIdx: number) => (
-                                <div key={q.id || qIdx} className="bg-gray-50 rounded-2xl p-6 relative border border-gray-100">
+                                <div key={q.id || qIdx} className="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 relative border border-gray-100 dark:border-gray-800">
                                     <button
                                         onClick={() => removeQuestion(q.id)}
                                         className="absolute top-4 right-4 p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
@@ -590,13 +590,13 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                                 type="text"
                                                 value={q.questionText}
                                                 onChange={(e) => updateQuestion(q.id, { questionText: e.target.value })}
-                                                className="flex-1 bg-transparent border-b-2 border-gray-200 focus:border-primary px-0 py-1 text-base font-bold outline-none"
+                                                className="flex-1 bg-transparent border-b-2 border-gray-200 dark:border-gray-700 focus:border-primary px-0 py-1 text-base font-bold outline-none"
                                             />
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {q.options?.map((opt: any, oIdx: number) => (
-                                                <div key={opt.id || oIdx} className={`flex items-center gap-3 p-3 rounded-xl border ${opt.isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-100'}`}>
+                                                <div key={opt.id || oIdx} className={`flex items-center gap-3 p-3 rounded-xl border ${opt.isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-white dark:bg-white/5 border-gray-100 dark:border-gray-800'}`}>
                                                     <button
                                                         onClick={() => {
                                                             const newOpts = q.options.map((o: any, idx: number) =>
@@ -604,7 +604,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                                                             );
                                                             updateQuestion(q.id, { options: newOpts });
                                                         }}
-                                                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${opt.isCorrect ? 'bg-emerald-500 text-white' : 'border-2 border-gray-200'}`}
+                                                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${opt.isCorrect ? 'bg-emerald-500 text-white' : 'border-2 border-gray-200 dark:border-gray-700'}`}
                                                     >
                                                         {opt.isCorrect && <Check size={14} />}
                                                     </button>
@@ -627,7 +627,7 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                             ))}
                             <button
                                 onClick={addQuestion}
-                                className="w-full py-8 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-primary hover:border-primary/20 hover:bg-primary/5 transition-all group"
+                                className="w-full py-8 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-primary hover:border-primary/20 hover:bg-primary/5 transition-all group"
                             >
                                 <PlusCircle size={32} />
                                 <span className="font-bold text-sm">Add Question</span>
@@ -637,10 +637,10 @@ function QuizEditor({ quiz, onSave, onCancel, onChange, saving }: any) {
                 )}
             </div>
 
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+            <div className="p-6 bg-gray-50 dark:bg-white/5 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
                 <button
                     onClick={onCancel}
-                    className="px-6 py-2.5 rounded-xl font-bold text-sm text-gray-500 hover:bg-gray-100 transition-all font-bold"
+                    className="px-6 py-2.5 rounded-xl font-bold text-sm text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 transition-all"
                 >
                     Cancel
                 </button>

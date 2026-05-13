@@ -21,7 +21,7 @@ export default function TrainingAcademyModule() {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header Section */}
-            <div className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-gray-100 shadow-sm relative overflow-hidden">
+            <div className="bg-white dark:bg-[#1e1e1e] rounded-[2.5rem] p-8 md:p-10 border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -mr-32 -mt-32" />
                 <div className="relative z-10">
                     <div className="flex items-center space-x-4 mb-4">
@@ -29,7 +29,7 @@ export default function TrainingAcademyModule() {
                             <GraduationCap size={32} />
                         </div>
                         <div>
-                            <h2 className="text-3xl font-black text-gray-900 tracking-tight">Training <span className="text-primary italic">Academy</span></h2>
+                            <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Training <span className="text-primary italic">Academy</span></h2>
                             <p className="text-secondary font-medium text-xs uppercase tracking-[0.2em]">The Central Command for your Education & Mentorship Impact.</p>
                         </div>
                     </div>
@@ -40,8 +40,8 @@ export default function TrainingAcademyModule() {
                                 key={tab.id}
                                 onClick={() => setActiveSubTab(tab.id as SubTab)}
                                 className={`flex items-center space-x-3 px-6 py-3.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all ${activeSubTab === tab.id
-                                    ? "bg-gray-900 text-white shadow-xl shadow-gray-900/20 translate-y-[-2px]"
-                                    : "bg-gray-50 text-secondary hover:bg-gray-100 hover:text-gray-900"
+                                    ? "bg-gray-900 dark:bg-white/10 text-white shadow-xl shadow-gray-900/20 translate-y-[-2px]"
+                                    : "bg-gray-50 dark:bg-white/5 text-secondary hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white"
                                     }`}
                             >
                                 <div className={`p-1.5 rounded-lg ${activeSubTab === tab.id ? "bg-white/10" : tab.bg}`}>

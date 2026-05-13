@@ -15,16 +15,16 @@ import AboutHero from "@/components/AboutHero";
 import Image from "next/image";
 import { TrainingPrograms } from "./TrainingPrograms";
 import { Tilt } from "./Tilt";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import FeedbackSection from "./FeedbackSection";
 import dynamic from "next/dynamic";
 
 const GamesCarousel = dynamic(() => import("@/components/GamesCarousel"), { ssr: false });
 const GameOverlay = dynamic(() => import("@/components/GameOverlay"), { ssr: false });
+const TravelledGlobe = dynamic(() => import("@/components/TravelledGlobe"), { ssr: false });
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
-import BusinessSolutionsSection from "./BusinessSolutionsSection";
 
 
 interface Stat {
@@ -125,6 +125,14 @@ interface Skill {
     icon: string | null;
 }
 
+interface TravelledPlace {
+    id: string;
+    cityName: string;
+    country: string;
+    lat: number;
+    lng: number;
+}
+
 interface MainContentProps {
     profile: Profile;
     stats: Stat[];
@@ -136,6 +144,7 @@ interface MainContentProps {
     skills?: Skill[];
     quizzes?: Quiz[];
     liveSessions?: LiveSession[];
+    travelledPlaces?: TravelledPlace[];
 }
 
 
@@ -149,7 +158,8 @@ export default function MainContent({
     partnerships: initialPartnerships = [],
     skills: initialSkills = [],
     quizzes: initialQuizzes = [],
-    liveSessions: initialLiveSessions = []
+    liveSessions: initialLiveSessions = [],
+    travelledPlaces = []
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -249,28 +259,29 @@ export default function MainContent({
 
             {/* Live Sessions Carousel */}
             {liveSessions.length > 0 && (
-                <LiveSessionsCarousel sessions={liveSessions} />
+                <Suspense fallback={null}>
+                    <LiveSessionsCarousel sessions={liveSessions} />
+                </Suspense>
             )}
 
 
 
-            {/* Business Solutions Section */}
-            <BusinessSolutionsSection />
-
             {/* Training Programs Section (Replaces Skill Carousel) */}
-            <TrainingPrograms
-                trainingStats={profile.trainingStats as any}
-                partnerships={partnerships as any}
-                skills={skills as any}
-            />
+            {profile && (
+                <TrainingPrograms
+                    trainingStats={profile.trainingStats as any}
+                    partnerships={partnerships as any}
+                    skills={skills as any}
+                />
+            )}
 
             {/* Experience Section */}
             {experiences.length > 0 && (
                 <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
 
                     <div className="flex flex-col items-center mb-4 text-center">
-                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-500/80">Professional Journey</span>
-                        <h4 className="text-xl font-black text-white uppercase tracking-tighter">Experience</h4>
+                        <span className="text-[10px] font-black uppercase tracking-[0.35em] text-orange-500">Professional Journey</span>
+                        <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter">Experience</h2>
                     </div>
 
                     <InfiniteCarousel
@@ -301,8 +312,8 @@ export default function MainContent({
                 <section className="py-6 md:py-8 relative overflow-hidden">
 
                     <div className="flex flex-col items-center mb-4 text-center">
-                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-amber-500/80">Academic Background</span>
-                        <h4 className="text-xl font-black text-white uppercase tracking-tighter">Education</h4>
+                        <span className="text-[10px] font-black uppercase tracking-[0.35em] text-orange-500">Academic Background</span>
+                        <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter">Education</h2>
                     </div>
 
                     <InfiniteCarousel
@@ -333,8 +344,8 @@ export default function MainContent({
                 <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
 
                     <div className="flex flex-col items-center mb-4 text-center">
-                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-teal-500/80">Community Impact</span>
-                        <h4 className="text-xl font-black text-white uppercase tracking-tighter">Volunteering</h4>
+                        <span className="text-[10px] font-black uppercase tracking-[0.35em] text-orange-500">Community Impact</span>
+                        <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter">Volunteering</h2>
                     </div>
 
                     <InfiniteCarousel
@@ -362,13 +373,15 @@ export default function MainContent({
 
             {/* About Section */}
             <section id="about" className="container mx-auto px-6 scroll-mt-20">
-                <AboutHero
-                    name={profile.name as any}
-                    about={profile.about as any}
-                    location={profile.location as any}
-                    imageUrl={profile.aboutImageUrl as any}
-                    experience={profile.stats?.find((s: Stat) => s.label === "Years Experience")?.value?.toString() || "3+"}
-                />
+                {profile && (
+                    <AboutHero
+                        name={profile.name as any}
+                        about={profile.about as any}
+                        location={profile.location as any}
+                        imageUrl={profile.aboutImageUrl as any}
+                        experience={profile.stats?.find((s: Stat) => s.label === "Years Experience")?.value?.toString() || "3+"}
+                    />
+                )}
 
                 {/* My Journey Section */}
                 <section id="journey" className="container mx-auto px-6 py-8 bg-black/20 rounded-[2.5rem] border border-white/5 my-4 overflow-hidden relative">
@@ -531,7 +544,7 @@ export default function MainContent({
 
                     <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center mb-8 gap-6 relative z-10">
                         <div className="text-center md:text-left">
-                            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Challenge Area</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.35em] text-orange-500">Challenge Area</span>
                             <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter">Interactive <span className="text-primary italic">Quizzes</span></h2>
                         </div>
 
@@ -541,7 +554,7 @@ export default function MainContent({
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="appearance-none bg-white/5 border border-white/10 rounded-2xl px-6 py-4 pr-12 font-black text-xs uppercase tracking-[0.3em] text-white hover:border-primary/50 focus:border-primary transition-all outline-none cursor-pointer min-w-[200px]"
+                                    className="appearance-none bg-white/5 border border-white/10 rounded-2xl px-6 py-4 pr-12 font-black text-xs uppercase tracking-[0.3em] text-white hover:border-primary/50 focus:border-primary transition-all outline-none cursor-pointer w-full sm:min-w-[200px]"
                                 >
                                     <option value="All" className="bg-[#0e0e0e]">All Categories</option>
                                     {Array.from(new Set(quizzes.map(q => q.category))).filter(Boolean).map(cat => (
@@ -581,7 +594,7 @@ export default function MainContent({
                                     // If <= 5 quizzes, render in a single row
                                     if (count <= 5) {
                                         return filteredQuizzes.map((quiz) => (
-                                            <div key={quiz.id} className="w-[350px] md:w-[450px]">
+                                            <div key={quiz.id} className="w-[280px] sm:w-[350px] md:w-[450px]">
                                                 <div
                                                     onClick={() => setActiveQuiz(quiz)}
                                                     className="group relative bg-[#0e0e0e] rounded-[2rem] overflow-hidden border border-white/10 hover:border-primary/50 transition-all cursor-pointer flex flex-col shadow-2xl hover:-translate-y-1 duration-300 h-full"
@@ -629,7 +642,7 @@ export default function MainContent({
                                     }
 
                                     return columns.map((col, colIdx) => (
-                                        <div key={colIdx} className="flex flex-col gap-6 w-[350px] md:w-[450px]">
+                                        <div key={colIdx} className="flex flex-col gap-6 w-[280px] sm:w-[350px] md:w-[450px]">
                                             {/* Top Quiz */}
                                             <div
                                                 onClick={() => setActiveQuiz(col.top)}
@@ -704,6 +717,41 @@ export default function MainContent({
 
             {/* Typing Test Section */}
             <TypingTestSection />
+
+            {/* Travelled Section */}
+            {travelledPlaces.length > 0 && (
+                <section id="travelled" className="py-10 md:py-16 bg-[#06060f] border-y border-white/5 overflow-hidden">
+                    <div className="container mx-auto px-6">
+                        <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-center">
+                            <div className="flex-1 max-w-sm">
+                                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-sky-500 mb-3">World</p>
+                                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-white leading-none mb-4">
+                                    Mapped.<br />Explored.<br /><span className="text-sky-500">Lived.</span>
+                                </h2>
+                                <p className="text-sm text-gray-400 leading-relaxed mb-6">
+                                    Every pin is a memory. {travelledPlaces.length} {travelledPlaces.length === 1 ? "city" : "cities"} visited across the globe — each one a story.
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    {travelledPlaces.slice(0, 8).map(p => (
+                                        <span key={p.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[11px] font-bold">
+                                            <MapPin size={9} />
+                                            {p.cityName}
+                                        </span>
+                                    ))}
+                                    {travelledPlaces.length > 8 && (
+                                        <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-gray-400 text-[11px] font-bold">
+                                            +{travelledPlaces.length - 8} more
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex-1 w-full max-w-lg rounded-2xl overflow-hidden border border-white/10" style={{ height: 420 }}>
+                                <TravelledGlobe places={travelledPlaces} />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             <FeedbackSection />
 

@@ -2,9 +2,12 @@ import { db } from "@/db";
 import { youtubeVideos } from "@/db/schema";
 import { count, desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const allVideos = await db.query.youtubeVideos.findMany({
             orderBy: [desc(youtubeVideos.displayOrder), desc(youtubeVideos.createdAt)],
         });
@@ -16,6 +19,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const body = await req.json();
         const { id, title, youtubeVideoId, thumbnailUrl, description, category, displayOrder, isActive } = body;
 
@@ -40,6 +45,8 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const authError = await validateAdminSession(req);
+        if (authError) return authError;
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
         if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });

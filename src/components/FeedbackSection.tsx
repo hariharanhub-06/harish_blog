@@ -51,8 +51,8 @@ export default function FeedbackSection() {
     }, []);
 
     const averageRating = feedbacks.length > 0
-        ? (feedbacks.reduce((acc, f) => acc + f.rating, 0) / feedbacks.length).toFixed(1)
-        : "5.0";
+        ? (feedbacks.reduce((acc, f) => acc + (Number(f.rating) || 0), 0) / feedbacks.length).toFixed(1)
+        : "N/A";
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -158,12 +158,14 @@ export default function FeedbackSection() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        onClick={() => setIsOpen(false)}
                         className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
                     >
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.9, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
                             className="bg-[#1a1a1a] border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl relative max-w-4xl w-full"
                         >
                             <button
