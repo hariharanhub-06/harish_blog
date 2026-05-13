@@ -1238,7 +1238,7 @@ export default function FinanceModule() {
                             <div className="bg-white dark:bg-[#1e1e1e] p-10 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full">
                                 <div className="flex justify-between items-center mb-8">
                                     <h3 className="text-xl font-black uppercase tracking-tight dark:text-white">Live Intent Preview</h3>
-                                    <div className="px-4 py-1.5 bg-gray-50 rounded-full text-[10px] font-black uppercase text-gray-400">
+                                    <div className="px-4 py-1.5 bg-gray-50 dark:bg-white/10 rounded-full text-[10px] font-black uppercase text-gray-400 dark:text-gray-300">
                                         {parsedEntries.length} Items Detected
                                     </div>
                                 </div>
@@ -1251,7 +1251,7 @@ export default function FinanceModule() {
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 exit={{ opacity: 0, x: 20 }}
-                                                className={`flex items-center justify-between p-4 rounded-2xl border ${entry.isValid ? 'bg-gray-50 border-gray-100' : 'bg-red-50 border-red-100'}`}
+                                                className={`flex items-center justify-between p-4 rounded-2xl border ${entry.isValid ? 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10' : 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20'}`}
                                             >
                                                 <div className="flex items-center gap-4">
                                                     <div className={`p-2.5 rounded-xl ${entry.type === 'income' ? 'bg-emerald-500 text-white' : entry.type === 'debt_pay' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'}`}>
