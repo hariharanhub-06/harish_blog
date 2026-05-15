@@ -10,55 +10,6 @@ export async function GET(req: Request) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const queries = [
-        // ── CREATE missing tables first (safe: IF NOT EXISTS) ──────────────────
-
-        `CREATE TABLE IF NOT EXISTS website_polls (
-            id TEXT PRIMARY KEY,
-            question TEXT NOT NULL,
-            options JSONB,
-            is_active BOOLEAN DEFAULT true,
-            background_url TEXT,
-            background_type TEXT DEFAULT 'image',
-            created_at TIMESTAMP DEFAULT NOW(),
-            updated_at TIMESTAMP DEFAULT NOW()
-        )`,
-
-        `CREATE TABLE IF NOT EXISTS poll_responses (
-            id TEXT PRIMARY KEY,
-            poll_id TEXT,
-            option_index INTEGER,
-            ip_hash TEXT,
-            platform TEXT,
-            created_at TIMESTAMP DEFAULT NOW()
-        )`,
-
-        `CREATE TABLE IF NOT EXISTS website_questions (
-            id TEXT PRIMARY KEY,
-            prompt TEXT NOT NULL,
-            is_active BOOLEAN DEFAULT true,
-            background_url TEXT,
-            background_type TEXT DEFAULT 'image',
-            created_at TIMESTAMP DEFAULT NOW(),
-            updated_at TIMESTAMP DEFAULT NOW()
-        )`,
-
-        `CREATE TABLE IF NOT EXISTS website_question_responses (
-            id TEXT PRIMARY KEY,
-            question_id TEXT,
-            user_name TEXT,
-            answer_text TEXT,
-            created_at TIMESTAMP DEFAULT NOW()
-        )`,
-
-        `CREATE TABLE IF NOT EXISTS social_game_sessions (
-            id TEXT PRIMARY KEY,
-            game_id TEXT NOT NULL,
-            title TEXT NOT NULL,
-            is_active BOOLEAN DEFAULT true,
-            play_count INTEGER DEFAULT 0,
-            created_at TIMESTAMP DEFAULT NOW()
-        )`,
-
         // ── profiles: original columns ──────────────────────────────────────────
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS featured_video_url TEXT`,
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS about_image_url TEXT`,
@@ -76,13 +27,6 @@ export async function GET(req: Request) {
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stats JSONB DEFAULT '[]'`,
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS training_stats JSONB DEFAULT '[]'`,
 
-        // ── profiles: social interaction section ────────────────────────────────
-        `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_social_section BOOLEAN DEFAULT false`,
-        `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS social_section_media_url TEXT`,
-        `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS social_section_media_type TEXT DEFAULT 'image'`,
-        `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS social_section_title TEXT DEFAULT 'Social Space'`,
-        `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS social_section_subtitle TEXT DEFAULT 'Join the conversation!'`,
-
         // ── profiles: section visibility toggles ────────────────────────────────
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_hero_section BOOLEAN DEFAULT true`,
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_stats_section BOOLEAN DEFAULT true`,
@@ -98,21 +42,6 @@ export async function GET(req: Request) {
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_games_section BOOLEAN DEFAULT true`,
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_live_sessions_section BOOLEAN DEFAULT true`,
 
-        // ── website_polls: ensure new columns exist ──────────────────────────────
-        `ALTER TABLE website_polls ADD COLUMN IF NOT EXISTS background_url TEXT`,
-        `ALTER TABLE website_polls ADD COLUMN IF NOT EXISTS background_type TEXT DEFAULT 'image'`,
-        `ALTER TABLE website_polls ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()`,
-
-        // ── website_questions: ensure new columns exist ──────────────────────────
-        `ALTER TABLE website_questions ADD COLUMN IF NOT EXISTS background_url TEXT`,
-        `ALTER TABLE website_questions ADD COLUMN IF NOT EXISTS background_type TEXT DEFAULT 'image'`,
-        `ALTER TABLE website_questions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()`,
-
-        // ── social_game_sessions: ensure play_count exists ───────────────────────
-        `ALTER TABLE social_game_sessions ADD COLUMN IF NOT EXISTS play_count INTEGER DEFAULT 0`,
-
-        // ── website_question_responses: add ip_hash for dedup ────────────────────
-        `ALTER TABLE website_question_responses ADD COLUMN IF NOT EXISTS ip_hash TEXT`,
     ];
 
     const results: { query: string; status: string }[] = [];

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users, Music, Eye, EyeOff, Share2, Image as ImageIcon, Video } from "lucide-react";
+import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users, Music, Eye, EyeOff, Image as ImageIcon, Video } from "lucide-react";
 import Image from "next/image";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import TimelineModule from "./TimelineModule";
@@ -158,10 +158,6 @@ export default function ProfileModule() {
                         <div>
                             <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Main Page <span className="text-primary italic">Configuration</span></h1>
                             <p className="text-secondary text-xs font-bold uppercase tracking-widest mt-1">Manage your branding, media, and social engagement settings.</p>
-                        </div>
-                        <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-100 dark:border-blue-800/50">
-                            <Share2 size={16} />
-                            <span className="text-[10px] font-black uppercase tracking-widest leading-none">Scroll down for Social Hub toggles</span>
                         </div>
                     </div>
                     {/* Images Section */}
@@ -364,86 +360,6 @@ export default function ProfileModule() {
                         </div>
                     </div>
 
-                    {/* Social Hub Settings */}
-                    <div className="space-y-6 pt-12 border-t border-gray-100 dark:border-gray-800">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3 ml-2">
-                                <div className="p-2 bg-pink-100 text-pink-600 rounded-lg">
-                                    <Share2 size={20} />
-                                </div>
-                                <h2 className="text-xl font-black text-gray-900 dark:text-white">Social Space Configuration</h2>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setProfile({ ...profile, showSocialSection: !profile.showSocialSection })}
-                                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${profile.showSocialSection
-                                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200"
-                                    : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                                    }`}
-                            >
-                                {profile.showSocialSection ? <><Eye size={16} /> Section Visible</> : <><EyeOff size={16} /> Section Hidden</>}
-                            </button>
-                        </div>
-
-                        <p className="text-secondary text-xs ml-2 max-w-2xl font-medium uppercase tracking-wider">
-                            Control the "Social Interaction Hub" on your homepage. When enabled, your visitors will see your active poll or question.
-                        </p>
-
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Section Title</label>
-                                <input
-                                    type="text"
-                                    value={profile.socialSectionTitle || ""}
-                                    placeholder="e.g. JOIN THE"
-                                    onChange={(e) => setProfile({ ...profile, socialSectionTitle: e.target.value })}
-                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-gray-900 dark:text-white"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Section Subtitle</label>
-                                <input
-                                    type="text"
-                                    value={profile.socialSectionSubtitle || ""}
-                                    placeholder="e.g. CONVERSATION"
-                                    onChange={(e) => setProfile({ ...profile, socialSectionSubtitle: e.target.value })}
-                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-gray-900 dark:text-white"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Background Media Type</label>
-                                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl">
-                                    {(['image', 'video'] as const).map(type => (
-                                        <button
-                                            key={type}
-                                            type="button"
-                                            onClick={() => setProfile({ ...profile, socialSectionMediaType: type })}
-                                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${(profile.socialSectionMediaType || 'image') === type
-                                                ? "bg-white dark:bg-gray-700 shadow-md text-primary"
-                                                : "text-gray-400"
-                                                }`}
-                                        >
-                                            {type === 'video' ? <Video size={14} /> : <ImageIcon size={14} />} {type}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Background Media URL</label>
-                                <input
-                                    type="text"
-                                    value={profile.socialSectionMediaUrl || ""}
-                                    placeholder="https://... (Direct link to image or MP4)"
-                                    onChange={(e) => setProfile({ ...profile, socialSectionMediaUrl: e.target.value })}
-                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-gray-900 dark:text-white"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
                     {/* Section Management (Visibility Toggles) */}
                     <div className="space-y-8 pt-12 border-t border-gray-100 dark:border-gray-800">
                         <div className="flex items-center space-x-3 ml-2">
@@ -461,7 +377,6 @@ export default function ProfileModule() {
                                 { key: 'showHeroSection', label: 'Hero / Introduction' },
                                 { key: 'showStatsSection', label: 'Quick Stats' },
                                 { key: 'showTrainingSection', label: 'Training & Services' },
-                                { key: 'showSocialSection', label: 'Social Hub' },
                                 { key: 'showExperienceSection', label: 'Experience' },
                                 { key: 'showEducationSection', label: 'Education' },
                                 { key: 'showVolunteeringSection', label: 'Volunteering' },

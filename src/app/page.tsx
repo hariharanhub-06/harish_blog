@@ -18,9 +18,6 @@ export default async function Home() {
   let partnerships: any[] = [];
   let quizzes: any[] = [];
   let liveSessions: any[] = [];
-  let socialPoll: any = null;
-  let socialQuestion: any = null;
-
   try {
     // Parallel fetch with failure isolation (Promise.allSettled)
     const results = await Promise.allSettled([
@@ -48,14 +45,6 @@ export default async function Home() {
         where: (s, { eq }) => eq(s.isPublished, true),
         orderBy: (s, { desc }) => [desc(s.startTime)]
       }),
-      db.query.websitePolls.findFirst({
-        where: (p, { eq }) => eq(p.isActive, true),
-        orderBy: (p, { desc }) => [desc(p.createdAt)]
-      }),
-      db.query.websiteQuestions.findFirst({
-        where: (q, { eq }) => eq(q.isActive, true),
-        orderBy: (q, { desc }) => [desc(q.createdAt)]
-      })
     ]);
 
     // Helper to safely extract data from settled promise
@@ -74,8 +63,6 @@ export default async function Home() {
     dbSkills = val(results[5], 'skills') || [];
     partnerships = val(results[6], 'partnerships') || [];
     liveSessions = val(results[7], 'liveSessions') || [];
-    socialPoll = val(results[8], 'socialPoll');
-    socialQuestion = val(results[9], 'socialQuestion');
 
     // Fetch Quizzes separately as it has relations that might fail if not pushed
     try {
@@ -235,8 +222,6 @@ export default async function Home() {
         partnerships={partnerships as any}
         quizzes={quizzes as any}
         liveSessions={liveSessions as any}
-        socialPoll={socialPoll}
-        socialQuestion={socialQuestion}
       />
     </div>
   );

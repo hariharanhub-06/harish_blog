@@ -25,8 +25,6 @@ import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
 import VisitorBadge from "./VisitorBadge";
-import SocialInteractionSection from "./SocialInteractionSection";
-
 
 interface Stat {
     icon: string;
@@ -80,12 +78,6 @@ interface Profile {
     audioUrl?: string | null;
     trainingStats?: Stat[];
     stats?: Stat[];
-    showSocialSection?: boolean;
-    socialSectionMediaUrl?: string;
-    socialSectionMediaType?: string;
-    socialSectionTitle?: string;
-    socialSectionSubtitle?: string;
-
     // Visibility toggles
     showHeroSection?: boolean;
     showStatsSection?: boolean;
@@ -148,8 +140,6 @@ interface MainContentProps {
     skills?: Skill[];
     quizzes?: Quiz[];
     liveSessions?: LiveSession[];
-    socialPoll?: any;
-    socialQuestion?: any;
 }
 
 
@@ -164,8 +154,6 @@ export default function MainContent({
     skills: initialSkills = [],
     quizzes: initialQuizzes = [],
     liveSessions: initialLiveSessions = [],
-    socialPoll,
-    socialQuestion
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -284,14 +272,6 @@ export default function MainContent({
                 />
             )}
 
-            {/* Social Interaction Section */}
-            {profile?.showSocialSection && (socialPoll || socialQuestion) && (
-                <SocialInteractionSection
-                    poll={socialPoll}
-                    question={socialQuestion}
-                    profile={profile}
-                />
-            )}
 
             {/* Experience Section */}
             {profile.showExperienceSection !== false && experiences.length > 0 && (

@@ -30,7 +30,6 @@ import {
     Video,
     Pin,
     Smartphone,
-    Share2,
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -49,9 +48,8 @@ import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
 import SettingsModule from "@/components/admin/SettingsModule";
 import KanbanModule from "@/components/admin/KanbanModule";
 import RoutinesModule from "@/components/admin/RoutinesModule";
-import SocialInteractionModule from "@/components/admin/SocialInteractionModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "settings" | "social-hub";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "settings";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -78,7 +76,6 @@ export default function AdminDashboard() {
         { id: "leaderboard", title: "Leaderboard", icon: Trophy, color: "bg-yellow-500", group: "Engagement" },
         { id: "forms", title: "Forms Manager", icon: FileText, color: "bg-blue-600", group: "Data" },
         { id: "sessions", title: "Live Sessions", icon: Video, color: "bg-red-500", group: "Learning" },
-        { id: "social-hub", title: "Social Hub", icon: Share2, color: "bg-pink-600", group: "Deployment" },
         { id: "game-assets", title: "Game Content", icon: Gamepad2, color: "bg-violet-500", group: "Deployment" },
         { id: "divider", title: "Business Operations", icon: Briefcase, color: "bg-gray-400", group: "Admin" },
         { id: "kanban", title: "Kanban Board", icon: Layout, color: "bg-teal-500", group: "Project" },
@@ -213,7 +210,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash and fetch notifications
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "kanban", "routines", "settings", "social-hub"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "kanban", "routines", "settings"];
         if (hash && validTabs.includes(hash)) setActiveTab(hash);
 
         const fetchAllCounts = async () => {
@@ -296,7 +293,6 @@ export default function AdminDashboard() {
             case "client-projects": return <ClientProjectsModule />;
             case "kanban": return <KanbanModule />;
             case "routines": return <RoutinesModule />;
-            case "social-hub": return <SocialInteractionModule />;
             case "settings": return <SettingsModule />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">
