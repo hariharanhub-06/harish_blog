@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence, sendPasswordResetEmail } from "firebase/auth";
+import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, sendPasswordResetEmail, signInWithCustomToken } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { Lock, Mail, AlertCircle, Layout, ArrowRight, Loader2, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Lock, Mail, AlertCircle, Layout, ArrowRight, Loader2, Eye, EyeOff, CheckCircle, Smartphone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
 // Hoist persistence setup to module level so it resolves before any user interaction
-const persistenceReady = setPersistence(auth, browserSessionPersistence).catch(console.error);
+const persistenceReady = setPersistence(auth, browserLocalPersistence).catch(console.error);
 
 export default function AdminLogin() {
     const [email, setEmail] = useState("");
@@ -49,10 +49,21 @@ export default function AdminLogin() {
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success) {
+                        // Store sessionId for dashboard components
+                        if (data.sessionId) {
+                            localStorage.setItem("admin_sessionId", data.sessionId);
+                        }
+
+                        // We redirect even without Firebase session because dashboard 
+                        // is now updated to allow database-only sessions
                         router.push("/admin/dashboard");
                     }
                 } else {
-                    localStorage.removeItem("admin_deviceToken");
+                    console.warn("Device token invalid or expired");
+                    // Don't auto-remove if it's just a network error
+                    if (res.status === 401) {
+                        localStorage.removeItem("admin_deviceToken");
+                    }
                 }
             } catch (err) {
                 console.error("Device token login failed", err);

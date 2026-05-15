@@ -29,6 +29,7 @@ import {
     User,
     Video,
     Pin,
+    Smartphone,
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -146,7 +147,13 @@ export default function AdminDashboard() {
                 const res = await fetch("/api/admin/sessions", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ id: sid, userEmail: user.email, deviceName, browser, os })
+                    body: JSON.stringify({
+                        id: sid,
+                        userEmail: user?.email || undefined,
+                        deviceName,
+                        browser,
+                        os
+                    })
                 });
 
                 if (res.ok) {
@@ -157,7 +164,7 @@ export default function AdminDashboard() {
                 } else if (res.status === 404) {
                     localStorage.removeItem('admin_sessionId');
                     setTimeout(trackSession, 1000);
-                } else if (res.status === 401) {
+                } else if (res.status === 401 && !localStorage.getItem("admin_deviceToken")) {
                     await logout();
                     router.push('/admin/login');
                 }
@@ -189,7 +196,7 @@ export default function AdminDashboard() {
         trackSession();
         const interval = setInterval(checkSession, 30000);
         return () => clearInterval(interval);
-    }, [user, loading, logout]);
+    }, [user, loading, logout, router]);
 
     // Register Service Worker for PWA push notifications
     useEffect(() => {
@@ -253,7 +260,9 @@ export default function AdminDashboard() {
         );
     }
 
-    if (!user) {
+    const hasDBSession = typeof window !== 'undefined' ? !!localStorage.getItem('admin_sessionId') : false;
+
+    if (!user && !hasDBSession) {
         router.push('/admin/login');
         return null;
     }
@@ -319,8 +328,8 @@ export default function AdminDashboard() {
                                     <button
                                         onClick={() => handleTabChange(item.id as Tab)}
                                         className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-bold text-sm transition-all group pr-10 ${activeTab === item.id
-                                                ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-sm"
-                                                : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary"
+                                            ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-sm"
+                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary"
                                             }`}
                                     >
                                         <item.icon size={17} className={`shrink-0 ${activeTab === item.id ? "text-primary" : "text-gray-400 dark:text-gray-500 group-hover:text-primary"} transition-colors`} />
@@ -336,8 +345,8 @@ export default function AdminDashboard() {
                                         onClick={(e) => { e.stopPropagation(); togglePin(item.id); }}
                                         title={isPinned ? "Unpin" : "Pin to top"}
                                         className={`absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-all ${isPinned
-                                                ? "opacity-100 text-primary"
-                                                : "opacity-0 group-hover/row:opacity-100 text-gray-400 hover:text-primary"
+                                            ? "opacity-100 text-primary"
+                                            : "opacity-0 group-hover/row:opacity-100 text-gray-400 hover:text-primary"
                                             }`}
                                     >
                                         <Pin size={12} className={isPinned ? "fill-primary" : ""} />
@@ -522,11 +531,11 @@ export default function AdminDashboard() {
 
                             <div className="flex items-center gap-3 pl-3 border-l border-gray-200 dark:border-gray-800">
                                 <div className="text-right hidden sm:block">
-                                    <div className="text-xs font-bold text-gray-900 dark:text-gray-100 leading-none mb-1">{user.email?.split('@')[0]}</div>
+                                    <div className="text-xs font-bold text-gray-900 dark:text-gray-100 leading-none mb-1">{user?.email?.split('@')[0] || 'Admin'}</div>
                                     <div className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider leading-none">Admin</div>
                                 </div>
                                 <div className="w-9 h-9 rounded-lg bg-indigo-600 shadow-lg shadow-indigo-600/20 flex items-center justify-center font-bold text-white text-sm border-2 border-white dark:border-gray-800">
-                                    {user.email?.charAt(0).toUpperCase()}
+                                    {user?.email?.charAt(0).toUpperCase() || <Smartphone size={16} />}
                                 </div>
                             </div>
                         </div>
