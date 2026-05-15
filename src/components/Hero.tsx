@@ -1,12 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mail, Instagram, MessageCircle, ArrowRight } from "lucide-react";
+import { Mail, Instagram, MessageCircle, ArrowRight, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { MagneticButton } from "./MagneticButton";
 import { Tilt } from "./Tilt";
 import { cn } from "@/lib/utils";
+import { useState, useRef, useEffect } from "react";
+import { Play } from "lucide-react";
 
 interface HeroProps {
     profile: {
@@ -20,12 +22,11 @@ interface HeroProps {
     className?: string;
 }
 
-import { useState, useRef } from "react";
-import { Play, Pause } from "lucide-react";
-
 export default function Hero({ profile, experiences, className }: HeroProps) {
     const [isPlaying, setIsPlaying] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
 
     const toggleAudio = () => {
         if (!audioRef.current) return;
@@ -36,24 +37,46 @@ export default function Hero({ profile, experiences, className }: HeroProps) {
         }
         setIsPlaying(!isPlaying);
     };
+
+    const toggleMute = () => {
+        if (videoRef.current) {
+            videoRef.current.muted = !videoRef.current.muted;
+            setIsMuted(videoRef.current.muted);
+        }
+    };
+
     const socialLinks = [
         { icon: MessageCircle, href: "https://wa.me/919042387152", color: "hover:bg-green-500" },
         { icon: Instagram, href: "https://instagram.com/_mr_vibrant", color: "hover:bg-pink-500" },
         { icon: Mail, href: "mailto:hariharanjeyaramamoorthy@gmail.com", color: "hover:bg-orange-600" },
     ];
 
+    const isVideoBackground = profile.heroImageUrl?.match(/\.(mp4|webm|ogg)$/i) || profile.heroImageUrl?.includes("video");
+
     return (
         <section className={cn("relative min-h-[90vh] lg:min-h-[85vh] flex items-center justify-center overflow-hidden bg-[#0e0e0e] pt-20 md:pt-28", className)}>
-            {/* Hero Background Image */}
+            {/* Hero Background Media */}
             {profile.heroImageUrl && (
                 <div className="absolute inset-0 z-0">
-                    <Image
-                        src={profile.heroImageUrl}
-                        alt="Hero background"
-                        fill
-                        className="object-cover opacity-30"
-                        priority
-                    />
+                    {isVideoBackground ? (
+                        <video
+                            ref={videoRef}
+                            src={profile.heroImageUrl}
+                            autoPlay
+                            loop
+                            muted={isMuted}
+                            playsInline
+                            className="w-full h-full object-cover opacity-40 transition-opacity duration-1000"
+                        />
+                    ) : (
+                        <Image
+                            src={profile.heroImageUrl}
+                            alt="Hero background"
+                            fill
+                            className="object-cover opacity-30"
+                            priority
+                        />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-b from-[#0e0e0e]/80 via-[#0e0e0e]/60 to-[#0e0e0e]" />
                 </div>
             )}
@@ -69,6 +92,23 @@ export default function Hero({ profile, experiences, className }: HeroProps) {
                     {(profile.name || "").split(" ").slice(0, 1).join(" ")}
                 </motion.h2>
             </div>
+
+            {/* Media Controls Corner */}
+            {isVideoBackground && (
+                <div className="absolute top-28 right-6 md:right-12 z-30 flex flex-col gap-4">
+                    <motion.button
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        onClick={toggleMute}
+                        className="p-4 md:p-5 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all shadow-2xl group flex items-center gap-3"
+                    >
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden md:block">
+                            {isMuted ? "Unmute Background" : "Mute Background"}
+                        </span>
+                        {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} className="text-orange-500 animate-pulse" />}
+                    </motion.button>
+                </div>
+            )}
 
             <div className="container mx-auto px-4 relative z-10 w-full max-w-[1400px]">
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">

@@ -214,7 +214,7 @@ export default function ProfileModule() {
                                     <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleImageUpload(e, 'hero')} />
                                 </label>
                             </div>
-                            <p className="text-secondary text-sm font-bold uppercase tracking-widest text-center">Hero Background Picture</p>
+                            <p className="text-secondary text-sm font-bold uppercase tracking-widest text-center">Hero Background Media (Image/Video)</p>
                         </div>
 
                         {/* About Image Section */}
