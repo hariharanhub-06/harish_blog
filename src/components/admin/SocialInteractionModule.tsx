@@ -82,6 +82,7 @@ export default function SocialInteractionModule() {
     });
 
     const [shareOpenId, setShareOpenId] = useState<string | null>(null);
+    const [generatingStory, setGeneratingStory] = useState(false);
 
     const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
 
@@ -89,6 +90,153 @@ export default function SocialInteractionModule() {
         navigator.clipboard.writeText(`https://hariharanhub.com/social/${pollId}${param}`);
         toast.success("Link copied!");
         setShareOpenId(null);
+    };
+
+    const drawRoundRect = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number, fill = true) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+        if (fill) ctx.fill(); else ctx.stroke();
+    };
+
+    const wrapText = (ctx: CanvasRenderingContext2D, text: string, cx: number, y: number, maxW: number, lineH: number) => {
+        const words = text.split(" ");
+        let line = "";
+        let currentY = y;
+        for (const word of words) {
+            const test = line ? line + " " + word : word;
+            if (ctx.measureText(test).width > maxW && line) {
+                ctx.fillText(line, cx, currentY);
+                line = word;
+                currentY += lineH;
+            } else {
+                line = test;
+            }
+        }
+        ctx.fillText(line, cx, currentY);
+    };
+
+    const generateStoryImage = async (poll: Poll) => {
+        setGeneratingStory(true);
+        try {
+            const canvas = document.createElement("canvas");
+            canvas.width = 1080;
+            canvas.height = 1920;
+            const ctx = canvas.getContext("2d")!;
+
+            // Background gradient
+            const grad = ctx.createLinearGradient(0, 0, 0, 1920);
+            grad.addColorStop(0, "#0f0c29");
+            grad.addColorStop(0.5, "#302b63");
+            grad.addColorStop(1, "#24243e");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 1080, 1920);
+
+            // Glow
+            const glow = ctx.createRadialGradient(540, 500, 0, 540, 500, 600);
+            glow.addColorStop(0, "rgba(99,102,241,0.25)");
+            glow.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, 1080, 1920);
+
+            // "VOTE NOW" badge
+            ctx.fillStyle = "#6366f1";
+            drawRoundRect(ctx, 390, 220, 300, 68, 34);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 30px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("VOTE NOW", 540, 263);
+
+            // Question
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 76px Arial";
+            ctx.textAlign = "center";
+            wrapText(ctx, `"${poll.question}"`, 540, 420, 900, 92);
+
+            // Options
+            const optionStartY = poll.options.length <= 2 ? 900 : 820;
+            poll.options.forEach((opt, i) => {
+                const y = optionStartY + i * 190;
+                ctx.fillStyle = "rgba(255,255,255,0.08)";
+                drawRoundRect(ctx, 90, y, 900, 120, 60);
+                ctx.strokeStyle = "rgba(255,255,255,0.25)";
+                ctx.lineWidth = 2;
+                drawRoundRect(ctx, 90, y, 900, 120, 60, false);
+                ctx.fillStyle = "#6366f1";
+                drawRoundRect(ctx, 110, y + 20, 80, 80, 40);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 38px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText(String(i + 1), 150, y + 72);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 42px Arial";
+                ctx.textAlign = "left";
+                const label = opt.text.length > 22 ? opt.text.substring(0, 22) + "…" : opt.text;
+                ctx.fillText(label.toUpperCase(), 220, y + 74);
+            });
+
+            // Instagram-style link sticker
+            const stickerY = 1700;
+            ctx.fillStyle = "rgba(255,255,255,0.92)";
+            drawRoundRect(ctx, 200, stickerY, 680, 96, 48);
+            // chain-link icon area
+            ctx.fillStyle = "#111";
+            ctx.font = "bold 28px Arial";
+            ctx.textAlign = "left";
+            ctx.fillText("🔗", 232, stickerY + 58);
+            ctx.fillStyle = "#111";
+            ctx.font = "bold 28px Arial";
+            ctx.textAlign = "left";
+            ctx.fillText("hariharanhub.com/social/...", 278, stickerY + 58);
+            // "VOTE HERE" arrow badge
+            ctx.fillStyle = "#6366f1";
+            drawRoundRect(ctx, 200, stickerY - 64, 680, 52, 26);
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 26px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("TAP TO VOTE  →", 540, stickerY - 30);
+
+            // Branding
+            ctx.fillStyle = "rgba(255,255,255,0.25)";
+            ctx.font = "26px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("hariharanhub.com", 540, 1870);
+
+            const instagramLink = `https://hariharanhub.com/social/${poll.id}?from=instagram`;
+
+            canvas.toBlob(async (blob) => {
+                if (!blob) { setGeneratingStory(false); return; }
+                const file = new File([blob], `poll-story.png`, { type: "image/png" });
+
+                // Always copy the Instagram link to clipboard
+                try { await navigator.clipboard.writeText(instagramLink); } catch { /* clipboard may be unavailable */ }
+
+                if ((navigator as any).canShare?.({ files: [file] })) {
+                    try {
+                        await (navigator as any).share({ files: [file], title: poll.question });
+                        toast.success("Instagram link also copied to clipboard — paste it as the link sticker!");
+                    } catch { /* user cancelled */ }
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url; a.download = "poll-story.png"; a.click();
+                    URL.revokeObjectURL(url);
+                    toast.success("Story image downloaded + Instagram link copied! Add the link as a sticker in Instagram.");
+                }
+                setGeneratingStory(false);
+            }, "image/png");
+        } catch {
+            toast.error("Story generation failed");
+            setGeneratingStory(false);
+        }
     };
 
     useEffect(() => {
@@ -333,22 +481,36 @@ export default function SocialInteractionModule() {
 
                             {/* Share panel */}
                             {shareOpenId === poll.id && (
-                                <div className="mt-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 space-y-1">
+                                <div className="mt-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 space-y-2">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Share Poll</p>
-                                    {[
-                                        { label: "Copy link", icon: "🔗", param: "" },
-                                        { label: "Instagram story link", icon: "📸", param: "?from=instagram" },
-                                        { label: "Facebook link", icon: "📘", param: "?from=facebook" },
-                                    ].map(({ label, icon, param }) => (
-                                        <button
-                                            key={label}
-                                            onClick={() => copyShareLink(poll.id, param)}
-                                            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all text-left"
-                                        >
-                                            <span className="text-base">{icon}</span>
-                                            <span className="text-[11px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">{label}</span>
-                                        </button>
-                                    ))}
+
+                                    {/* Story generator — primary action */}
+                                    <button
+                                        onClick={() => generateStoryImage(poll)}
+                                        disabled={generatingStory}
+                                        className="w-full flex items-center justify-center gap-2 py-4 px-4 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[11px] font-black uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-60 shadow-lg shadow-pink-500/20"
+                                    >
+                                        {generatingStory ? <Loader2 size={16} className="animate-spin" /> : <span>📸</span>}
+                                        {generatingStory ? "Generating…" : "Create Instagram Story + Copy Link"}
+                                    </button>
+
+                                    <div className="border-t border-gray-200 dark:border-gray-700 my-2 pt-2">
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Or copy link only</p>
+                                        {[
+                                            { label: "Generic link", icon: "🔗", param: "" },
+                                            { label: "Instagram link", icon: "📸", param: "?from=instagram" },
+                                            { label: "Facebook link", icon: "📘", param: "?from=facebook" },
+                                        ].map(({ label, icon, param }) => (
+                                            <button
+                                                key={label}
+                                                onClick={() => copyShareLink(poll.id, param)}
+                                                className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all text-left"
+                                            >
+                                                <span className="text-sm">{icon}</span>
+                                                <span className="text-[11px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">{label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
