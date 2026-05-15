@@ -7,6 +7,7 @@ import AnalyticsTracker from "@/components/AnalyticsTracker";
 import { BackgroundBlobs } from "@/components/BackgroundBlobs";
 import dynamic from "next/dynamic";
 import Script from "next/script";
+import { Toaster } from "react-hot-toast";
 
 const AIChat = dynamic(() => import("@/components/AIChat"), { ssr: false });
 
@@ -18,6 +19,14 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     return (
         <>
+            <Toaster
+                position="top-center"
+                toastOptions={{
+                    style: { borderRadius: "14px", fontWeight: 700, fontSize: "13px" },
+                    success: { duration: 3000 },
+                    error: { duration: 5000 },
+                }}
+            />
             {!isAdmin && !isScheduler && <AnalyticsTracker />}
             {!isAdmin && (
                 <Script
