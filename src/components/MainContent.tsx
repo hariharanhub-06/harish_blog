@@ -21,7 +21,6 @@ import dynamic from "next/dynamic";
 
 const GamesCarousel = dynamic(() => import("@/components/GamesCarousel"), { ssr: false });
 const GameOverlay = dynamic(() => import("@/components/GameOverlay"), { ssr: false });
-const TravelledGlobe = dynamic(() => import("@/components/TravelledGlobe"), { ssr: false });
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
@@ -125,14 +124,6 @@ interface Skill {
     icon: string | null;
 }
 
-interface TravelledPlace {
-    id: string;
-    cityName: string;
-    country: string;
-    lat: number;
-    lng: number;
-}
-
 interface MainContentProps {
     profile: Profile;
     stats: Stat[];
@@ -144,7 +135,6 @@ interface MainContentProps {
     skills?: Skill[];
     quizzes?: Quiz[];
     liveSessions?: LiveSession[];
-    travelledPlaces?: TravelledPlace[];
 }
 
 
@@ -159,7 +149,6 @@ export default function MainContent({
     skills: initialSkills = [],
     quizzes: initialQuizzes = [],
     liveSessions: initialLiveSessions = [],
-    travelledPlaces = []
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -717,41 +706,6 @@ export default function MainContent({
 
             {/* Typing Test Section */}
             <TypingTestSection />
-
-            {/* Travelled Section */}
-            {travelledPlaces.length > 0 && (
-                <section id="travelled" className="py-10 md:py-16 bg-[#06060f] border-y border-white/5 overflow-hidden">
-                    <div className="container mx-auto px-6">
-                        <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-center">
-                            <div className="flex-1 max-w-sm">
-                                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-sky-500 mb-3">World</p>
-                                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-white leading-none mb-4">
-                                    Mapped.<br />Explored.<br /><span className="text-sky-500">Lived.</span>
-                                </h2>
-                                <p className="text-sm text-gray-400 leading-relaxed mb-6">
-                                    Every pin is a memory. {travelledPlaces.length} {travelledPlaces.length === 1 ? "city" : "cities"} visited across the globe — each one a story.
-                                </p>
-                                <div className="flex flex-wrap gap-2">
-                                    {travelledPlaces.slice(0, 8).map(p => (
-                                        <span key={p.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[11px] font-bold">
-                                            <MapPin size={9} />
-                                            {p.cityName}
-                                        </span>
-                                    ))}
-                                    {travelledPlaces.length > 8 && (
-                                        <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-gray-400 text-[11px] font-bold">
-                                            +{travelledPlaces.length - 8} more
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="flex-1 w-full max-w-lg rounded-2xl overflow-hidden border border-white/10" style={{ height: 420 }}>
-                                <TravelledGlobe places={travelledPlaces} />
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            )}
 
             <FeedbackSection />
 

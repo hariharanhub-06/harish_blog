@@ -49,9 +49,8 @@ import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
 import SettingsModule from "@/components/admin/SettingsModule";
 import KanbanModule from "@/components/admin/KanbanModule";
 import RoutinesModule from "@/components/admin/RoutinesModule";
-import TravelledModule from "@/components/admin/TravelledModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "settings" | "travelled";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "settings";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();

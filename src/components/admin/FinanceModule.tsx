@@ -769,12 +769,12 @@ export default function FinanceModule() {
                                         return (
                                             <div
                                                 key={day.day}
-                                                className={`aspect-square rounded-2xl border flex flex-col items-center justify-center p-1 transition-all hover:scale-105 cursor-pointer ${isPositive ? 'bg-emerald-50 border-emerald-100 shadow-sm shadow-emerald-50' :
-                                                    isNegative ? 'bg-red-50 border-red-100 shadow-sm shadow-red-50' :
-                                                        'bg-gray-50/50 border-gray-100'
+                                                className={`aspect-square rounded-2xl border flex flex-col items-center justify-center p-1 transition-all hover:scale-105 cursor-pointer ${isPositive ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20' :
+                                                    isNegative ? 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20' :
+                                                        'bg-gray-50/50 dark:bg-white/5 border-gray-100 dark:border-white/10'
                                                     }`}
                                             >
-                                                <span className={`text-sm font-black ${isPositive ? 'text-emerald-700' : isNegative ? 'text-red-700' : 'text-gray-900'}`}>{day.day}</span>
+                                                <span className={`text-sm font-black ${isPositive ? 'text-emerald-700 dark:text-emerald-400' : isNegative ? 'text-red-700 dark:text-red-400' : 'text-gray-900 dark:text-gray-400'}`}>{day.day}</span>
                                                 {magnitude > 0 && (
                                                     <span className={`text-[8px] font-black uppercase opacity-70 ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
                                                         ₹{magnitude >= 1000 ? `${Math.round(magnitude / 1000)}k` : Math.round(magnitude)}
@@ -971,9 +971,9 @@ export default function FinanceModule() {
                                 </h3>
                                 <div className="space-y-4">
                                     {transactions.slice(0, 8).map(tx => (
-                                        <div key={tx.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-2xl transition-all group">
+                                        <div key={tx.id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl transition-all group">
                                             <div className="flex items-center gap-3">
-                                                <div className={`p-2 rounded-xl ${tx.type === 'income' ? 'bg-emerald-50 text-emerald-600' : tx.type === 'debt_pay' ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'}`}>
+                                                <div className={`p-2 rounded-xl ${tx.type === 'income' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600' : tx.type === 'debt_pay' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600' : 'bg-red-50 dark:bg-red-500/10 text-red-600'}`}>
                                                     {tx.type === 'income' ? <TrendingUp size={14} /> : tx.type === 'debt_pay' ? <CreditCard size={14} /> : <TrendingDown size={14} />}
                                                 </div>
                                                 <div>
@@ -981,7 +981,7 @@ export default function FinanceModule() {
                                                     <p className="text-[10px] font-bold text-gray-400 uppercase">{tx.category}</p>
                                                 </div>
                                             </div>
-                                            <p className={`text-xs font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-gray-900'}`}>
+                                            <p className={`text-xs font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-gray-900 dark:text-white'}`}>
                                                 {tx.type === 'income' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
                                             </p>
                                         </div>
@@ -1404,16 +1404,16 @@ export default function FinanceModule() {
                                                         )}
                                                     </td>
                                                     <td className="py-6">
-                                                        <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${tx.type === 'income' ? 'bg-emerald-50 text-emerald-600' :
-                                                            tx.type === 'debt_pay' ? 'bg-blue-50 text-blue-600' :
-                                                                'bg-red-50 text-red-600'
+                                                        <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${tx.type === 'income' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600' :
+                                                            tx.type === 'debt_pay' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600' :
+                                                                'bg-red-50 dark:bg-red-500/10 text-red-600'
                                                             }`}>
                                                             {tx.type}
                                                         </span>
                                                     </td>
                                                     <td className="py-6 text-right pr-4">
                                                         <div className="flex items-center justify-end gap-3">
-                                                            <span className={`text-sm font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-gray-900'}`}>
+                                                            <span className={`text-sm font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-gray-900 dark:text-white'}`}>
                                                                 {tx.type === 'income' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
                                                             </span>
                                                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
