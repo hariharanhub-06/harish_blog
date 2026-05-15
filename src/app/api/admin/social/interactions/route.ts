@@ -31,7 +31,14 @@ export async function GET(req: Request) {
                 const base = typeof opt === 'string' ? { text: opt } : opt;
                 return { ...base, count: counts[i] || 0 };
             });
-            return { ...poll, options, totalVotes: poll.responses?.length || 0 };
+
+            const platformBreakdown: Record<string, number> = {};
+            (poll.responses ?? []).forEach(r => {
+                const p = r.platform || "direct";
+                platformBreakdown[p] = (platformBreakdown[p] || 0) + 1;
+            });
+
+            return { ...poll, options, totalVotes: poll.responses?.length || 0, platformBreakdown };
         });
     } catch (err: any) {
         warnings.push("Polls unavailable — run repair-db: " + err.message);

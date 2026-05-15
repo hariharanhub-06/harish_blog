@@ -25,9 +25,10 @@ interface SocialInteractionSectionProps {
         socialSectionMediaUrl?: string;
         socialSectionMediaType?: string;
     };
+    platform?: string;
 }
 
-export default function SocialInteractionSection({ poll, question, profile }: SocialInteractionSectionProps) {
+export default function SocialInteractionSection({ poll, question, profile, platform }: SocialInteractionSectionProps) {
     const [voted, setVoted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [answer, setAnswer] = useState("");
@@ -60,7 +61,7 @@ export default function SocialInteractionSection({ poll, question, profile }: So
                     type: "poll",
                     id: poll!.id,
                     optionIndex,
-                    platform: "website"
+                    platform: platform ?? "website"
                 })
             });
 
@@ -94,7 +95,7 @@ export default function SocialInteractionSection({ poll, question, profile }: So
                     id: question!.id,
                     answerText: answer,
                     userName: "Guest",
-                    platform: "website"
+                    platform: platform ?? "website"
                 })
             });
 

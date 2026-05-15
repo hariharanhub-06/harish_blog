@@ -32,6 +32,7 @@ interface Poll {
     backgroundUrl: string;
     backgroundType: "image" | "video";
     totalVotes: number;
+    platformBreakdown?: Record<string, number>;
     createdAt: string;
 }
 
@@ -80,7 +81,15 @@ export default function SocialInteractionModule() {
         title: ""
     });
 
+    const [shareOpenId, setShareOpenId] = useState<string | null>(null);
+
     const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+
+    const copyShareLink = (pollId: string, param: string) => {
+        navigator.clipboard.writeText(`https://hariharanhub.com/social/${pollId}${param}`);
+        toast.success("Link copied!");
+        setShareOpenId(null);
+    };
 
     useEffect(() => {
         fetchInteractions();
@@ -267,9 +276,18 @@ export default function SocialInteractionModule() {
                                 >
                                     {poll.isActive ? 'Live' : 'Paused'}
                                 </button>
-                                <button onClick={() => handleDelete(poll.id, 'poll')} className="p-2 text-gray-300 hover:text-red-500 transition-colors">
-                                    <Trash2 size={18} />
-                                </button>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => setShareOpenId(shareOpenId === poll.id ? null : poll.id)}
+                                        className="p-2 text-gray-300 hover:text-primary transition-colors"
+                                        title="Share poll"
+                                    >
+                                        <Share2 size={18} />
+                                    </button>
+                                    <button onClick={() => handleDelete(poll.id, 'poll')} className="p-2 text-gray-300 hover:text-red-500 transition-colors">
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                             </div>
                             <h3 className="text-xl font-black leading-tight mb-6 tracking-tight">{poll.question}</h3>
                             <div className="space-y-3 flex-1">
@@ -294,6 +312,45 @@ export default function SocialInteractionModule() {
                                 <span>{poll.totalVotes} Contributions</span>
                                 <span>{new Date(poll.createdAt).toLocaleDateString()}</span>
                             </div>
+
+                            {/* Platform breakdown */}
+                            {poll.platformBreakdown && Object.keys(poll.platformBreakdown).length > 0 && (
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    {Object.entries(poll.platformBreakdown)
+                                        .filter(([, count]) => count > 0)
+                                        .map(([plat, count]) => (
+                                            <span key={plat} className={`text-[10px] font-black px-2.5 py-1 rounded-full ${
+                                                plat === 'instagram' ? 'bg-pink-100 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400' :
+                                                plat === 'facebook' ? 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400' :
+                                                'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400'
+                                            }`}>
+                                                {plat === 'instagram' ? '📸' : plat === 'facebook' ? '📘' : '🌐'} {count}
+                                            </span>
+                                        ))
+                                    }
+                                </div>
+                            )}
+
+                            {/* Share panel */}
+                            {shareOpenId === poll.id && (
+                                <div className="mt-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 space-y-1">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Share Poll</p>
+                                    {[
+                                        { label: "Copy link", icon: "🔗", param: "" },
+                                        { label: "Instagram story link", icon: "📸", param: "?from=instagram" },
+                                        { label: "Facebook link", icon: "📘", param: "?from=facebook" },
+                                    ].map(({ label, icon, param }) => (
+                                        <button
+                                            key={label}
+                                            onClick={() => copyShareLink(poll.id, param)}
+                                            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all text-left"
+                                        >
+                                            <span className="text-base">{icon}</span>
+                                            <span className="text-[11px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">{label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     ))}
 

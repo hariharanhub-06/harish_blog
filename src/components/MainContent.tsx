@@ -327,7 +327,7 @@ export default function MainContent({
 
             {/* Education Section */}
             {profile.showEducationSection !== false && educations.length > 0 && (
-                <section className="py-6 md:py-8 relative overflow-hidden">
+                <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
 
                     <div className="flex flex-col items-center mb-4 text-center">
                         <span className="text-[10px] font-black uppercase tracking-[0.35em] text-orange-500">Academic Background</span>
