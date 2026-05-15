@@ -97,6 +97,11 @@ export default function SocialInteractionModule() {
                 setPolls(data.polls || []);
                 setQuestions(data.questions || []);
                 setGames(data.games || []);
+                if (data.warnings?.length) {
+                    toast.error("Some data unavailable. Run repair-db from Settings.");
+                }
+            } else {
+                toast.error("Failed to load interactions. Run repair-db from Settings.");
             }
         } catch (error) {
             toast.error("Failed to fetch interactions");
@@ -132,10 +137,12 @@ export default function SocialInteractionModule() {
                 toast.success(`${activeTab} launched!`);
                 setIsCreating(false);
                 fetchInteractions();
-                // Reset states
                 setNewPoll({ question: "", options: ["", ""], backgroundUrl: "", backgroundType: "image" });
                 setNewQuestion({ prompt: "", backgroundUrl: "", backgroundType: "image" });
                 setNewGame({ gameId: "memory", title: "" });
+            } else {
+                const err = await res.json().catch(() => ({}));
+                toast.error(err.error || `Failed to create ${activeTab}. Run repair-db from Settings.`);
             }
         } catch (error) {
             toast.error("Launch failed");

@@ -70,13 +70,50 @@ export async function POST(req: Request) {
         const data = await req.json();
         const existing = await db.query.profiles.findFirst();
 
+        const fields = {
+            name: data.name,
+            headline: data.headline,
+            bio: data.bio,
+            about: data.about,
+            email: data.email,
+            location: data.location,
+            avatarUrl: data.avatarUrl,
+            heroImageUrl: data.heroImageUrl,
+            aboutImageUrl: data.aboutImageUrl,
+            audioUrl: data.audioUrl,
+            featuredVideoUrl: data.featuredVideoUrl,
+            businessSolutionVideoUrl: data.businessSolutionVideoUrl,
+            businessSolutionVideoConfig: data.businessSolutionVideoConfig,
+            socialLinks: data.socialLinks,
+            stats: data.stats,
+            trainingStats: data.trainingStats,
+            showSocialSection: data.showSocialSection,
+            socialSectionMediaUrl: data.socialSectionMediaUrl,
+            socialSectionMediaType: data.socialSectionMediaType,
+            socialSectionTitle: data.socialSectionTitle,
+            socialSectionSubtitle: data.socialSectionSubtitle,
+            showHeroSection: data.showHeroSection,
+            showStatsSection: data.showStatsSection,
+            showTrainingSection: data.showTrainingSection,
+            showExperienceSection: data.showExperienceSection,
+            showEducationSection: data.showEducationSection,
+            showVolunteeringSection: data.showVolunteeringSection,
+            showAboutSection: data.showAboutSection,
+            showProjectsSection: data.showProjectsSection,
+            showQuizzesSection: data.showQuizzesSection,
+            showTypingTestSection: data.showTypingTestSection,
+            showFeedbackSection: data.showFeedbackSection,
+            showGamesSection: data.showGamesSection,
+            showLiveSessionsSection: data.showLiveSessionsSection,
+        };
+
         if (existing) {
             await db.update(profiles).set({
-                ...data,
+                ...fields,
                 updatedAt: new Date(),
             }).where(eq(profiles.id, existing.id));
         } else {
-            await db.insert(profiles).values(data);
+            await db.insert(profiles).values(fields);
         }
 
         revalidatePath("/");
