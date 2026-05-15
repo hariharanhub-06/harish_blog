@@ -26,9 +26,10 @@ interface SocialInteractionSectionProps {
         socialSectionMediaType?: string;
     };
     platform?: string;
+    standalone?: boolean;
 }
 
-export default function SocialInteractionSection({ poll, question, profile, platform }: SocialInteractionSectionProps) {
+export default function SocialInteractionSection({ poll, question, profile, platform, standalone }: SocialInteractionSectionProps) {
     const [voted, setVoted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [answer, setAnswer] = useState("");
@@ -69,11 +70,13 @@ export default function SocialInteractionSection({ poll, question, profile, plat
                 setVoted(true);
                 localStorage.setItem(`voted_${poll!.id}`, "true");
                 toast.success("Vote recorded!");
+                if (standalone) setTimeout(() => window.history.back(), 1500);
             } else {
                 const data = await res.json();
                 if (data.error === "Already voted") {
                     setVoted(true);
                     localStorage.setItem(`voted_${poll!.id}`, "true");
+                    if (standalone) setTimeout(() => window.history.back(), 1200);
                 }
             }
         } catch (error) {
@@ -115,6 +118,91 @@ export default function SocialInteractionSection({ poll, question, profile, plat
     const mediaUrl = poll?.backgroundUrl || question?.backgroundUrl || profile.socialSectionMediaUrl;
     const mediaType = poll?.backgroundType || question?.backgroundType || profile.socialSectionMediaType || "image";
 
+    // ── Standalone poll card (used on /social/[pollId]) ──────────────────────
+    if (standalone) {
+        return (
+            <div className="w-full max-w-sm mx-auto">
+                <div className="bg-[#1a1a1a] backdrop-blur-2xl p-8 rounded-[3rem] border border-white/10 shadow-2xl">
+                    <AnimatePresence mode="wait">
+                        {!submitted ? (
+                            <motion.div
+                                key="question"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 1.05 }}
+                                className="space-y-6"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/30 shrink-0">
+                                        <Share2 size={20} />
+                                    </div>
+                                    <h3 className="text-xl font-black text-white leading-tight uppercase tracking-tighter">
+                                        {poll?.question || question?.prompt || "Vote Now"}
+                                    </h3>
+                                </div>
+
+                                {type === 'poll' ? (
+                                    <div className="space-y-3">
+                                        {poll?.options.map((opt, i) => {
+                                            const text = typeof opt === 'string' ? opt : (opt as any).text;
+                                            return (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => handleVote(i)}
+                                                    disabled={submitting}
+                                                    className="w-full group relative h-14 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/50 rounded-2xl transition-all duration-300 flex items-center px-5"
+                                                >
+                                                    <span className="text-base font-black text-white group-hover:text-primary transition-colors">{text}</span>
+                                                    <ArrowRight className="ml-auto text-white/20 group-hover:text-primary group-hover:translate-x-1 transition-all" size={18} />
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <textarea
+                                            value={answer}
+                                            onChange={e => setAnswer(e.target.value)}
+                                            placeholder="Type your answer..."
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-base font-bold text-white placeholder:text-white/20 focus:ring-2 focus:ring-primary/20 outline-none min-h-[120px] transition-all"
+                                        />
+                                        <button
+                                            onClick={handleAnswerSubmit}
+                                            disabled={submitting || !answer.trim()}
+                                            className="w-full py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-primary/25 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                        >
+                                            {submitting ? "Sending..." : "Send"} <ArrowRight size={16} />
+                                        </button>
+                                    </div>
+                                )}
+
+                                <p className="text-center text-[10px] font-black uppercase tracking-widest text-white/30">
+                                    {submitting ? "Recording…" : "Tap to vote"}
+                                </p>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="success"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="py-10 flex flex-col items-center justify-center text-center space-y-4"
+                            >
+                                <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 border border-emerald-500/30">
+                                    <CheckCircle2 size={32} className="animate-in zoom-in duration-500" />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase">Thank You!</h3>
+                                    <p className="text-gray-400 font-bold mt-1 text-sm">Going back…</p>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </div>
+        );
+    }
+
+    // ── Full homepage section ────────────────────────────────────────────────
     return (
         <section className="relative w-full min-h-[600px] flex items-center justify-center overflow-hidden py-20 px-6">
             {/* Ambient Background Media */}
@@ -132,7 +220,6 @@ export default function SocialInteractionSection({ poll, question, profile, plat
                         style={{ backgroundImage: `url(${mediaUrl || 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop'})` }}
                     />
                 )}
-                {/* Neon Overlays */}
                 <div className="absolute inset-0 bg-gradient-to-b from-[#0e0e0e] via-transparent to-[#0e0e0e]" />
                 <div className="absolute inset-0 bg-primary/5 mix-blend-overlay" />
             </div>
@@ -184,7 +271,6 @@ export default function SocialInteractionSection({ poll, question, profile, plat
                         whileInView={{ opacity: 1, y: 0 }}
                         className="relative"
                     >
-                        {/* Glow effect */}
                         <div className="absolute -inset-4 bg-primary/20 blur-[60px] rounded-full -z-10 animate-pulse" />
 
                         <div className="bg-[#1a1a1a]/80 backdrop-blur-2xl p-8 md:p-10 rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden">

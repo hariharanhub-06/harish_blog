@@ -36,6 +36,7 @@ export default async function PublicPollPage({ params, searchParams }: Props) {
                 poll={poll as any}
                 profile={profile as any}
                 platform={platform}
+                standalone={true}
             />
             <p className="mt-6 text-white/30 text-xs tracking-[0.3em] uppercase">hariharanhub.com</p>
         </main>
