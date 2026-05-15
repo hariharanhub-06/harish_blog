@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
 
-type Phase = null | "choosing" | "took" | "broke";
+type Phase = null | "took" | "broke";
 
 const CONFETTI_COLORS = [
     "#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff",
@@ -95,10 +94,6 @@ export default function HeartReaction({ onVoted }: { onVoted?: (action: "take" |
     useEffect(() => { onVotedRef.current = onVoted; }, [onVoted]);
 
     useEffect(() => {
-        if (localStorage.getItem("heart_vote")) setVoted(true);
-    }, []);
-
-    useEffect(() => {
         return () => { if (timerRef.current) clearTimeout(timerRef.current); };
     }, []);
 
@@ -114,6 +109,7 @@ export default function HeartReaction({ onVoted }: { onVoted?: (action: "take" |
         if (voted) return;
 
         pendingAction.current = action;
+        setVoted(true);
 
         if (action === "take") {
             const particles: Particle[] = Array.from({ length: 100 }, (_, i) => ({
@@ -131,59 +127,91 @@ export default function HeartReaction({ onVoted }: { onVoted?: (action: "take" |
             setPhase("broke");
         }
 
-        setVoted(true);
-        localStorage.setItem("heart_vote", action);
-
         if (timerRef.current) clearTimeout(timerRef.current);
         timerRef.current = setTimeout(dismiss, 4500);
 
-        try {
-            await fetch("/api/heart", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action }),
-            });
-        } catch { }
+        // Only write to DB on first-ever vote
+        if (!localStorage.getItem("heart_vote")) {
+            localStorage.setItem("heart_vote", action);
+            try {
+                await fetch("/api/heart", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action }),
+                });
+            } catch { }
+        } else {
+            localStorage.setItem("heart_vote", action);
+        }
     };
 
     return (
         <>
-            {/* ── Inline trigger ── */}
-            <div className="flex items-center justify-center mt-2 mb-6">
+            {/* ── Top bread content ── */}
+            <div className="flex flex-col items-center py-10 gap-5">
                 {!voted ? (
-                    <motion.button
-                        onClick={() => setPhase("choosing")}
-                        whileHover={{ scale: 1.04 }}
-                        whileTap={{ scale: 0.96 }}
-                        className="flex items-center gap-2.5 px-5 py-2.5 bg-white/5 border border-white/10 rounded-2xl hover:border-orange-500/30 hover:bg-white/[0.07] transition-all"
-                    >
+                    <>
                         <motion.span
-                            className="text-xl select-none"
+                            className="text-6xl md:text-7xl select-none"
                             animate={{
                                 scale: [1, 1.18, 1, 1.1, 1],
-                                filter: ["drop-shadow(0 0 4px #ff6b6b44)", "drop-shadow(0 0 14px #ff6b6b88)", "drop-shadow(0 0 4px #ff6b6b44)"],
+                                filter: [
+                                    "drop-shadow(0 0 8px #ff6b6b44)",
+                                    "drop-shadow(0 0 28px #ff6b6b99)",
+                                    "drop-shadow(0 0 8px #ff6b6b44)",
+                                ],
                             }}
                             transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 0.9 }}
                         >
                             ❤️
                         </motion.span>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
-                            React to unlock feedback →
-                        </span>
-                    </motion.button>
+
+                        <div className="text-center">
+                            <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter">
+                                What do you think?
+                            </h3>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/25 mt-1">
+                                React to unlock the feedback below
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <motion.button
+                                onClick={() => handleAction("take")}
+                                whileHover={{ scale: 1.07 }}
+                                whileTap={{ scale: 0.93 }}
+                                className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-orange-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-red-500/25 flex items-center gap-1.5"
+                            >
+                                ❤️ Take It
+                            </motion.button>
+                            <span className="text-white/20 font-black text-xs">or</span>
+                            <motion.button
+                                onClick={() => handleAction("break")}
+                                whileHover={{ scale: 1.07 }}
+                                whileTap={{ scale: 0.93 }}
+                                className="px-6 py-2.5 bg-white/5 border border-white/10 text-white/60 font-black text-[10px] uppercase tracking-[0.2em] rounded-xl hover:border-white/20 hover:text-white/80 transition-all flex items-center gap-1.5"
+                            >
+                                💔 Break It
+                            </motion.button>
+                        </div>
+                    </>
                 ) : (
-                    <div className="flex items-center gap-2">
-                        <span className="text-xl select-none">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center gap-2.5 py-4"
+                    >
+                        <span className="text-2xl select-none">
                             {localStorage.getItem("heart_vote") === "take" ? "❤️" : "💔"}
                         </span>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
                             {localStorage.getItem("heart_vote") === "take" ? "Thank you! ✨" : "Fair enough 💙"}
                         </span>
-                    </div>
+                    </motion.div>
                 )}
             </div>
 
-            {/* ── Full-screen overlay ── */}
+            {/* ── Full-screen animation overlay ── */}
             <AnimatePresence>
                 {phase && (
                     <motion.div
@@ -193,10 +221,8 @@ export default function HeartReaction({ onVoted }: { onVoted?: (action: "take" |
                         transition={{ duration: 0.3 }}
                         className="fixed inset-0 z-[300] flex items-center justify-center bg-black/85 backdrop-blur-xl"
                         onClick={() => {
-                            if (phase === "took" || phase === "broke") {
-                                if (timerRef.current) clearTimeout(timerRef.current);
-                                dismiss();
-                            }
+                            if (timerRef.current) clearTimeout(timerRef.current);
+                            dismiss();
                         }}
                     >
                         {/* Particle layer */}
@@ -219,115 +245,64 @@ export default function HeartReaction({ onVoted }: { onVoted?: (action: "take" |
                             className="relative flex flex-col items-center text-center px-8 py-10 max-w-xs w-full mx-4"
                             onClick={e => e.stopPropagation()}
                         >
-                            {phase === "choosing" ? (
-                                <>
-                                    {/* X to cancel without voting */}
-                                    <button
-                                        onClick={() => setPhase(null)}
-                                        className="absolute top-0 right-0 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/30 hover:text-white/60 transition-all"
-                                    >
-                                        <X size={14} />
-                                    </button>
-
+                            {/* Heart graphic */}
+                            <div className="mb-6 w-28 h-28 md:w-36 md:h-36 flex items-center justify-center">
+                                {phase === "took" ? (
                                     <motion.span
-                                        className="text-8xl md:text-9xl select-none mb-6"
+                                        className="text-8xl md:text-9xl select-none"
                                         animate={{
-                                            scale: [1, 1.15, 1, 1.08, 1],
-                                            filter: ["drop-shadow(0 0 10px #ff6b6b44)", "drop-shadow(0 0 40px #ff6b6b88)", "drop-shadow(0 0 10px #ff6b6b44)"],
+                                            scale: [1, 1.5, 1.25, 1.35, 1.2],
+                                            filter: ["drop-shadow(0 0 10px #ff6b6b88)", "drop-shadow(0 0 50px #ff6b6b)", "drop-shadow(0 0 25px #ff6b6baa)"],
                                         }}
-                                        transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 0.7 }}
+                                        transition={{ duration: 0.65, ease: "easeOut" }}
                                     >
                                         ❤️
                                     </motion.span>
-
-                                    <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter mb-2">
-                                        What do you think?
-                                    </h3>
-                                    <p className="text-white/30 text-[10px] font-black uppercase tracking-widest mb-8">
-                                        React to unlock the feedback form
-                                    </p>
-
-                                    <div className="flex gap-3 w-full">
-                                        <motion.button
-                                            onClick={() => handleAction("take")}
-                                            whileHover={{ scale: 1.07 }}
-                                            whileTap={{ scale: 0.93 }}
-                                            className="flex-1 px-5 py-3 bg-gradient-to-r from-red-500 to-orange-500 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-red-500/25 flex items-center justify-center gap-1.5"
-                                        >
-                                            ❤️ Take It
-                                        </motion.button>
-                                        <motion.button
-                                            onClick={() => handleAction("break")}
-                                            whileHover={{ scale: 1.07 }}
-                                            whileTap={{ scale: 0.93 }}
-                                            className="flex-1 px-5 py-3 bg-white/5 border border-white/10 text-white/60 font-black text-[10px] uppercase tracking-[0.2em] rounded-xl hover:border-white/20 hover:text-white/80 transition-all flex items-center justify-center gap-1.5"
-                                        >
-                                            💔 Break It
-                                        </motion.button>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    {/* Heart graphic */}
-                                    <div className="mb-6 w-28 h-28 md:w-36 md:h-36 flex items-center justify-center">
-                                        {phase === "took" ? (
-                                            <motion.span
-                                                className="text-8xl md:text-9xl select-none"
-                                                animate={{
-                                                    scale: [1, 1.5, 1.25, 1.35, 1.2],
-                                                    filter: ["drop-shadow(0 0 10px #ff6b6b88)", "drop-shadow(0 0 50px #ff6b6b)", "drop-shadow(0 0 25px #ff6b6baa)"],
-                                                }}
-                                                transition={{ duration: 0.65, ease: "easeOut" }}
-                                            >
-                                                ❤️
-                                            </motion.span>
-                                        ) : (
-                                            <motion.div
-                                                className="w-full h-full"
-                                                initial={{ scale: 1, rotate: 0 }}
-                                                animate={{ scale: [1, 0.88, 0.94], rotate: [0, -7, 7, -4, 0] }}
-                                                transition={{ duration: 0.5 }}
-                                            >
-                                                <BrokenHeartSVG animate={true} />
-                                            </motion.div>
-                                        )}
-                                    </div>
-
-                                    {/* Message */}
+                                ) : (
                                     <motion.div
-                                        initial={{ opacity: 0, y: 12 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.35 }}
+                                        className="w-full h-full"
+                                        initial={{ scale: 1, rotate: 0 }}
+                                        animate={{ scale: [1, 0.88, 0.94], rotate: [0, -7, 7, -4, 0] }}
+                                        transition={{ duration: 0.5 }}
                                     >
-                                        {phase === "took" ? (
-                                            <>
-                                                <motion.h3
-                                                    className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter mb-3"
-                                                    animate={{ y: [0, -5, 0, -3, 0] }}
-                                                    transition={{ repeat: 2, duration: 0.45, delay: 0.5 }}
-                                                >
-                                                    You Made My Day! ✨
-                                                </motion.h3>
-                                                <p className="text-orange-400 text-sm font-bold leading-relaxed">
-                                                    This means everything. Now share your thoughts! 🙏
-                                                </p>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter mb-3">
-                                                    Ouch! That stung 💙
-                                                </h3>
-                                                <p className="text-blue-400 text-sm font-bold leading-relaxed">
-                                                    But you&apos;re still here — tell me what to improve! 😉
-                                                </p>
-                                            </>
-                                        )}
-                                        <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-white/20">
-                                            Tap anywhere to continue
-                                        </p>
+                                        <BrokenHeartSVG animate={true} />
                                     </motion.div>
-                                </>
-                            )}
+                                )}
+                            </div>
+
+                            {/* Message */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.35 }}
+                            >
+                                {phase === "took" ? (
+                                    <>
+                                        <motion.h3
+                                            className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter mb-3"
+                                            animate={{ y: [0, -5, 0, -3, 0] }}
+                                            transition={{ repeat: 2, duration: 0.45, delay: 0.5 }}
+                                        >
+                                            You Made My Day! ✨
+                                        </motion.h3>
+                                        <p className="text-orange-400 text-sm font-bold leading-relaxed">
+                                            This means everything. Now share your thoughts below! 🙏
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter mb-3">
+                                            Ouch! That stung 💙
+                                        </h3>
+                                        <p className="text-blue-400 text-sm font-bold leading-relaxed">
+                                            But you&apos;re still here — tell me what to improve! 😉
+                                        </p>
+                                    </>
+                                )}
+                                <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-white/20">
+                                    Tap anywhere to continue
+                                </p>
+                            </motion.div>
                         </motion.div>
                     </motion.div>
                 )}
