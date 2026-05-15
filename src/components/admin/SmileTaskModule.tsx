@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Plus, Trash2, Edit2, Eye, EyeOff, Sparkles,
-    BarChart2, RefreshCw, Share2, Loader2, X, ChevronLeft,
+    BarChart2, RefreshCw, Share2, Loader2, X, ChevronLeft, Download,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -68,6 +68,69 @@ const DEFAULT_RARE = [
     "This is the rare one 🌙 You're the kind of person stories are written about. Someone's already writing yours.",
 ].join("\n");
 
+function wrapText(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number,
+    lineHeight: number
+) {
+    const words = text.split(" ");
+    let line = "";
+    let currentY = y;
+    for (const word of words) {
+        const testLine = line + word + " ";
+        if (ctx.measureText(testLine).width > maxWidth && line !== "") {
+            ctx.fillText(line.trim(), x, currentY);
+            line = word + " ";
+            currentY += lineHeight;
+        } else {
+            line = testLine;
+        }
+    }
+    ctx.fillText(line.trim(), x, currentY);
+}
+
+function buildPoster(task: SmileTask, line: string): string {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1920;
+    const ctx = canvas.getContext("2d")!;
+    const [c1, c2] = (task.posterBgGradient || "#1a1a2e,#16213e").split(",");
+    const grad = ctx.createLinearGradient(0, 0, 0, 1920);
+    grad.addColorStop(0, c1.trim());
+    grad.addColorStop(1, c2.trim());
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1080, 1920);
+    ctx.globalAlpha = 0.06;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath(); ctx.arc(200, 300, 320, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(900, 1600, 280, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.font = "500 50px Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Someone sent you this 😊", 540, 260);
+    ctx.strokeStyle = "rgba(255,255,255,0.15)";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(120, 300); ctx.lineTo(960, 300); ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 72px Arial, sans-serif";
+    ctx.textAlign = "center";
+    wrapText(ctx, `"${line}"`, 540, 860, 880, 96);
+    ctx.strokeStyle = "rgba(255,255,255,0.15)";
+    ctx.beginPath(); ctx.moveTo(120, 1550); ctx.lineTo(960, 1550); ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.font = "500 46px Arial, sans-serif";
+    ctx.fillText("Tap to get yours 👇", 540, 1620);
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    ctx.font = "400 38px Arial, sans-serif";
+    const shareUrl = `${window.location.origin}${task.link || "/smile"}`;
+    ctx.fillText(shareUrl, 540, 1700);
+    return canvas.toDataURL("image/png");
+}
+
 const emptyForm = {
     title: "",
     status: "pause",
@@ -87,6 +150,14 @@ export default function SmileTaskModule() {
     const [form, setForm] = useState({ ...emptyForm });
     const [saving, setSaving] = useState(false);
     const [togglingId, setTogglingId] = useState<string | null>(null);
+    const [posterPreview, setPosterPreview] = useState<{ task: SmileTask; line: string; url: string } | null>(null);
+
+    function generatePoster(task: SmileTask) {
+        const pool = task.lines?.length ? task.lines : DEFAULT_LINES.split("\n").filter(Boolean);
+        const line = pool[Math.floor(Math.random() * pool.length)];
+        const url = buildPoster(task, line);
+        setPosterPreview({ task, line, url });
+    }
 
     const sid = () => typeof window !== "undefined" ? (localStorage.getItem("admin_sessionId") || "") : "";
 
@@ -489,6 +560,13 @@ export default function SmileTaskModule() {
                                     {/* Actions */}
                                     <div className="flex items-center gap-2 flex-shrink-0">
                                         <button
+                                            onClick={() => generatePoster(task)}
+                                            className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-500 transition-all"
+                                            title="Generate Story Poster"
+                                        >
+                                            <Sparkles size={16} />
+                                        </button>
+                                        <button
                                             onClick={() => toggleStatus(task)}
                                             disabled={togglingId === task.id}
                                             className={`p-2.5 rounded-xl transition-all ${task.status === "live"
@@ -530,6 +608,83 @@ export default function SmileTaskModule() {
                     })}
                 </div>
             )}
+
+            {/* ── Poster preview overlay ──────────────────────────────────── */}
+            <AnimatePresence>
+                {posterPreview && (
+                    <motion.div
+                        className="fixed inset-0 z-[300] flex items-center justify-center p-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <div
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                            onClick={() => setPosterPreview(null)}
+                        />
+                        <motion.div
+                            className="relative bg-[#0f0f1a] rounded-3xl p-6 w-full max-w-xs shadow-2xl"
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                        >
+                            <button
+                                onClick={() => setPosterPreview(null)}
+                                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/60 hover:text-white transition-all"
+                            >
+                                <X size={16} />
+                            </button>
+                            <h3 className="text-white font-black text-base mb-1">Story Poster</h3>
+                            <p className="text-white/40 text-xs mb-4 line-clamp-2">"{posterPreview.line}"</p>
+
+                            <div className="w-full aspect-[9/16] rounded-xl overflow-hidden border border-white/10 mb-4">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={posterPreview.url} alt="Story poster" className="w-full h-full object-cover" />
+                            </div>
+
+                            <div className="flex gap-2 mb-2">
+                                <button
+                                    onClick={() => {
+                                        const a = document.createElement("a");
+                                        a.href = posterPreview.url;
+                                        a.download = "smile-story.png";
+                                        a.click();
+                                    }}
+                                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/10 hover:bg-white/15 text-white text-xs font-bold rounded-2xl transition-all"
+                                >
+                                    <Download size={14} /> Download
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        const { url, line, task } = posterPreview;
+                                        try {
+                                            const blob = await (await fetch(url)).blob();
+                                            const file = new File([blob], "smile-story.png", { type: "image/png" });
+                                            if (navigator.share && navigator.canShare?.({ files: [file] })) {
+                                                await navigator.share({ files: [file], title: task.title });
+                                                return;
+                                            }
+                                        } catch {}
+                                        const a = document.createElement("a");
+                                        a.href = url;
+                                        a.download = "smile-story.png";
+                                        a.click();
+                                    }}
+                                    className="flex-[1.4] flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-xs font-black rounded-2xl"
+                                >
+                                    <Share2 size={14} /> Share to Story
+                                </button>
+                            </div>
+                            <button
+                                onClick={() => generatePoster(posterPreview.task)}
+                                className="w-full flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white/10 text-white/50 text-xs font-bold rounded-xl transition-all"
+                            >
+                                <RefreshCw size={12} /> New random line
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

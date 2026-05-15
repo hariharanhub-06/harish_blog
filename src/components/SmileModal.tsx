@@ -356,16 +356,25 @@ export default function SmileModal({ task, onClose, autoStart = false }: Props) 
                         {/* ── COUNTDOWN ─────────────────────────────────────── */}
                         {step === "countdown" && (
                             <motion.div
-                                key={`count-${count}`}
+                                key="countdown"
                                 className="flex flex-col items-center gap-4"
-                                initial={{ scale: 1.6, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.4, opacity: 0 }}
-                                transition={{ type: "spring", damping: 14 }}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.2 }}
                             >
-                                <span className="text-8xl font-black bg-gradient-to-br from-rose-400 to-pink-600 bg-clip-text text-transparent select-none">
-                                    {count}
-                                </span>
+                                <AnimatePresence mode="popLayout">
+                                    <motion.span
+                                        key={`n-${count}`}
+                                        className="text-8xl font-black bg-gradient-to-br from-rose-400 to-pink-600 bg-clip-text text-transparent select-none block"
+                                        initial={{ scale: 1.6, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        exit={{ scale: 0.4, opacity: 0 }}
+                                        transition={{ duration: 0.15, ease: "easeOut" }}
+                                    >
+                                        {count}
+                                    </motion.span>
+                                </AnimatePresence>
                                 <p className="text-white/40 text-xs uppercase tracking-widest">smile incoming</p>
                             </motion.div>
                         )}
