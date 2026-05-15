@@ -6,6 +6,7 @@ import {
     Plus, Trash2, Edit2, Eye, EyeOff, Sparkles,
     BarChart2, RefreshCw, Share2, Loader2, X, ChevronLeft,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 interface SmileTask {
     id: string;
@@ -93,8 +94,17 @@ export default function SmileTaskModule() {
         setLoading(true);
         try {
             const res = await fetch("/api/admin/smile", { headers: { "X-Session-Id": sid() } });
-            if (res.ok) setTasks(await res.json());
-        } catch { }
+            if (res.ok) {
+                setTasks(await res.json());
+            } else {
+                const err = await res.json().catch(() => ({}));
+                if (res.status === 500 && err?.error?.includes?.("does not exist")) {
+                    toast.error("Tables missing — run Repair DB first (Admin → DevTools)");
+                }
+            }
+        } catch (e) {
+            toast.error("Failed to load tasks. Check your connection.");
+        }
         setLoading(false);
     }
 
@@ -137,44 +147,63 @@ export default function SmileTaskModule() {
             shareText: form.shareText,
         };
         try {
-            if (editingTask) {
-                await fetch("/api/admin/smile", {
+            const res = editingTask
+                ? await fetch("/api/admin/smile", {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json", "X-Session-Id": sid() },
                     body: JSON.stringify({ id: editingTask.id, ...payload }),
-                });
-            } else {
-                await fetch("/api/admin/smile", {
+                })
+                : await fetch("/api/admin/smile", {
                     method: "POST",
                     headers: { "Content-Type": "application/json", "X-Session-Id": sid() },
                     body: JSON.stringify(payload),
                 });
+
+            if (res.ok) {
+                toast.success(editingTask ? "Task updated!" : "Smile task created!");
+                setView("list");
+                fetchTasks();
+            } else {
+                const err = await res.json().catch(() => ({}));
+                const msg = err?.error || `Server error ${res.status}`;
+                if (msg.includes("does not exist") || res.status === 500) {
+                    toast.error("DB tables missing — go to Admin → Settings → Run Repair DB");
+                } else {
+                    toast.error(`Save failed: ${msg}`);
+                }
             }
-            setView("list");
-            fetchTasks();
-        } catch { }
+        } catch (e) {
+            toast.error("Network error — could not save task.");
+        }
         setSaving(false);
     }
 
     async function toggleStatus(task: SmileTask) {
         setTogglingId(task.id);
         const newStatus = task.status === "live" ? "pause" : "live";
-        await fetch("/api/admin/smile", {
+        const res = await fetch("/api/admin/smile", {
             method: "PATCH",
             headers: { "Content-Type": "application/json", "X-Session-Id": sid() },
             body: JSON.stringify({ id: task.id, status: newStatus }),
         });
+        if (res.ok) {
+            toast.success(newStatus === "live" ? "Task is now LIVE 🟢" : "Task paused");
+        } else {
+            toast.error("Failed to update status");
+        }
         await fetchTasks();
         setTogglingId(null);
     }
 
     async function deleteTask(id: string) {
         if (!confirm("Delete this smile task and all its analytics?")) return;
-        await fetch("/api/admin/smile", {
+        const res = await fetch("/api/admin/smile", {
             method: "DELETE",
             headers: { "Content-Type": "application/json", "X-Session-Id": sid() },
             body: JSON.stringify({ id }),
         });
+        if (res.ok) toast.success("Task deleted");
+        else toast.error("Delete failed");
         fetchTasks();
     }
 
@@ -405,10 +434,29 @@ export default function SmileTaskModule() {
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                     <div className="text-5xl mb-4">😊</div>
                     <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">No smile tasks yet</h3>
-                    <p className="text-gray-400 text-sm mb-6">Create your first viral smile experience</p>
-                    <button onClick={openNew} className="flex items-center gap-2 px-6 py-3 bg-rose-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest">
-                        <Plus size={14} /> Create First Task
-                    </button>
+                    <p className="text-gray-400 text-sm mb-4">Create your first viral smile experience</p>
+                    <p className="text-amber-500 text-xs mb-6 font-bold">
+                        ⚠️ First time? Run Repair DB below to create required tables.
+                    </p>
+                    <div className="flex gap-3 flex-wrap justify-center">
+                        <button onClick={openNew} className="flex items-center gap-2 px-6 py-3 bg-rose-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest">
+                            <Plus size={14} /> Create First Task
+                        </button>
+                        <button
+                            onClick={async () => {
+                                const sid = localStorage.getItem("admin_sessionId") || "";
+                                const t = toast.loading("Running DB repair…");
+                                const res = await fetch("/api/repair-db", { headers: { "X-Session-Id": sid } });
+                                const data = await res.json().catch(() => ({}));
+                                toast.dismiss(t);
+                                if (data.success) { toast.success("DB repaired! Try saving now."); fetchTasks(); }
+                                else toast.error("Repair failed: " + (data.message || "unknown error"));
+                            }}
+                            className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest"
+                        >
+                            🔧 Run Repair DB
+                        </button>
+                    </div>
                 </div>
             ) : (
                 <div className="grid gap-4">
