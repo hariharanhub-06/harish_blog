@@ -537,14 +537,14 @@ export default function SmileTaskModule() {
                         return (
                             <motion.div
                                 key={task.id}
-                                className="bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 rounded-3xl p-6 shadow-sm"
+                                className="bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 rounded-3xl p-4 sm:p-6 shadow-sm"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                             >
-                                <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-start justify-between gap-2 sm:gap-4">
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-3 flex-wrap mb-3">
-                                            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${task.status === "live"
+                                        <div className="flex items-center gap-2 flex-wrap mb-2">
+                                            <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${task.status === "live"
                                                 ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
                                                 : "bg-gray-100 dark:bg-gray-800 text-gray-500"}`}>
                                                 {task.status === "live" ? "🟢 Live" : "⏸ Paused"}
@@ -553,49 +553,49 @@ export default function SmileTaskModule() {
                                                 {task.lines?.length || 0} lines · {task.rareLines?.length || 0} rare
                                             </span>
                                         </div>
-                                        <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1 truncate">{task.title}</h3>
+                                        <h3 className="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-1 truncate">{task.title}</h3>
                                         <p className="text-gray-400 text-xs font-medium">{task.link}</p>
                                     </div>
 
-                                    {/* Actions */}
-                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                    {/* Actions — 2×2 grid on mobile, single row on desktop */}
+                                    <div className="grid grid-cols-2 sm:flex sm:flex-row items-center gap-1.5 sm:gap-2 flex-shrink-0">
                                         <button
                                             onClick={() => generatePoster(task)}
-                                            className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-500 transition-all"
+                                            className="p-2 sm:p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-500 transition-all flex items-center justify-center"
                                             title="Generate Story Poster"
                                         >
-                                            <Sparkles size={16} />
+                                            <Sparkles size={15} />
                                         </button>
                                         <button
                                             onClick={() => toggleStatus(task)}
                                             disabled={togglingId === task.id}
-                                            className={`p-2.5 rounded-xl transition-all ${task.status === "live"
+                                            className={`p-2 sm:p-2.5 rounded-xl transition-all flex items-center justify-center ${task.status === "live"
                                                 ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 hover:bg-emerald-100"
                                                 : "bg-gray-100 dark:bg-gray-800 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"}`}
                                             title={task.status === "live" ? "Pause" : "Go Live"}
                                         >
                                             {togglingId === task.id
-                                                ? <Loader2 size={16} className="animate-spin" />
-                                                : task.status === "live" ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                ? <Loader2 size={15} className="animate-spin" />
+                                                : task.status === "live" ? <EyeOff size={15} /> : <Eye size={15} />}
                                         </button>
                                         <button
                                             onClick={() => openEdit(task)}
-                                            className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:text-blue-600 transition-all"
+                                            className="p-2 sm:p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:text-blue-600 transition-all flex items-center justify-center"
                                         >
-                                            <Edit2 size={16} />
+                                            <Edit2 size={15} />
                                         </button>
                                         <button
                                             onClick={() => deleteTask(task.id)}
-                                            className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-500 transition-all"
+                                            className="p-2 sm:p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-500 transition-all flex items-center justify-center"
                                         >
-                                            <Trash2 size={16} />
+                                            <Trash2 size={15} />
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* Analytics pills */}
                                 {s && (
-                                    <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-50 dark:border-gray-800/50">
+                                    <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-3 pt-3 sm:mt-4 sm:pt-4 border-t border-gray-50 dark:border-gray-800/50">
                                         <StatPill icon="👁" label="Opens" value={s.opens} color="blue" />
                                         <StatPill icon="🎲" label="Reveals" value={s.reveals} color="purple" />
                                         <StatPill icon="🔀" label="Retries" value={s.retries} color="indigo" />
