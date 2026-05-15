@@ -24,6 +24,7 @@ export default function FeedbackSection() {
     const [submitted, setSubmitted] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [heartVoted, setHeartVoted] = useState(false);
+    const [feedbackGiven, setFeedbackGiven] = useState(false);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -51,6 +52,7 @@ export default function FeedbackSection() {
     useEffect(() => {
         fetchFeedbacks();
         if (localStorage.getItem("heart_vote")) setHeartVoted(true);
+        if (localStorage.getItem("feedback_given")) setFeedbackGiven(true);
     }, []);
 
     const averageRating = feedbacks.length > 0
@@ -68,9 +70,10 @@ export default function FeedbackSection() {
             });
             if (res.ok) {
                 setSubmitted(true);
+                setFeedbackGiven(true);
+                localStorage.setItem("feedback_given", "true");
                 setFormData({ name: "", role: "Student", organization: "", rating: 5, content: "" });
 
-                // Auto close after 3 seconds
                 setTimeout(() => {
                     setIsOpen(false);
                     setSubmitted(false);
@@ -85,6 +88,9 @@ export default function FeedbackSection() {
 
     return (
         <section id="feedback" className="container mx-auto px-6 py-12 md:py-16 scroll-mt-20">
+            {/* Heart Reaction — above section header */}
+            <HeartReaction onVoted={() => setHeartVoted(true)} />
+
             <div className="flex flex-col items-center mb-8 md:mb-12 text-center">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-600 mb-4">Testimonials</span>
                 <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-6">
@@ -101,19 +107,22 @@ export default function FeedbackSection() {
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-widest border-l border-white/10 pl-4">{feedbacks.length} Reviews</span>
                     </div>
 
-                    <button
-                        onClick={() => heartVoted && setIsOpen(true)}
-                        disabled={!heartVoted}
-                        title={!heartVoted ? "React to the heart first ↑" : undefined}
-                        className={`px-8 py-4 bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center gap-3 group ${heartVoted ? "shadow-xl shadow-orange-600/20 hover:scale-105 active:scale-95" : "opacity-30 cursor-not-allowed"}`}
-                    >
-                        Give Feedback <MessageSquare size={16} className="group-hover:rotate-12 transition-transform" />
-                    </button>
+                    {feedbackGiven ? (
+                        <div className="px-8 py-4 bg-white/5 border border-white/10 text-white/40 font-black text-xs uppercase tracking-[0.2em] rounded-2xl flex items-center gap-3">
+                            ✓ Feedback Given
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => heartVoted && setIsOpen(true)}
+                            disabled={!heartVoted}
+                            title={!heartVoted ? "React to the heart above first" : undefined}
+                            className={`px-8 py-4 bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center gap-3 group ${heartVoted ? "shadow-xl shadow-orange-600/20 hover:scale-105 active:scale-95" : "opacity-30 cursor-not-allowed"}`}
+                        >
+                            Give Feedback <MessageSquare size={16} className="group-hover:rotate-12 transition-transform" />
+                        </button>
+                    )}
                 </div>
             </div>
-
-            {/* Heart Reaction */}
-            <HeartReaction onVoted={() => setHeartVoted(true)} />
 
             {/* Testimonials Carousel */}
             {feedbacks.length > 0 ? (
