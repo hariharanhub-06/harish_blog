@@ -130,19 +130,14 @@ export default function HeartReaction({ onVoted }: { onVoted?: (action: "take" |
         if (timerRef.current) clearTimeout(timerRef.current);
         timerRef.current = setTimeout(dismiss, 4500);
 
-        // Only write to DB on first-ever vote
-        if (!localStorage.getItem("heart_vote")) {
-            localStorage.setItem("heart_vote", action);
-            try {
-                await fetch("/api/heart", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action }),
-                });
-            } catch { }
-        } else {
-            localStorage.setItem("heart_vote", action);
-        }
+        localStorage.setItem("heart_vote", action);
+        try {
+            await fetch("/api/heart", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action }),
+            });
+        } catch { }
     };
 
     return (
