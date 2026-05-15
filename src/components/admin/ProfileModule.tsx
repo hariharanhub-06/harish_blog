@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users, Music } from "lucide-react";
+import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users, Music, Eye, EyeOff, Share2, Image as ImageIcon, Video } from "lucide-react";
 import Image from "next/image";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import TimelineModule from "./TimelineModule";
@@ -62,37 +62,6 @@ export default function ProfileModule() {
             console.error("Error fetching profile:", error);
             setProfile({ error: "Network error or request timed out." });
         }
-    };
-
-    // Helper to compress image before setting as Base64
-    const compressImage = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (event) => {
-                const img = document.createElement("img");
-                img.src = event.target?.result as string;
-                img.onload = () => {
-                    const canvas = document.createElement("canvas");
-                    const MAX_WIDTH = 1200; // Reasonable max width for web
-                    const scaleSize = MAX_WIDTH / img.width;
-                    const width = scaleSize < 1 ? MAX_WIDTH : img.width;
-                    const height = scaleSize < 1 ? img.height * scaleSize : img.height;
-
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    const ctx = canvas.getContext("2d");
-                    ctx?.drawImage(img, 0, 0, width, height);
-
-                    // Compress to JPEG with 0.7 quality
-                    const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-                    resolve(dataUrl);
-                };
-                img.onerror = (err) => reject(err);
-            };
-            reader.onerror = (err) => reject(err);
-        });
     };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero' | 'about' | 'audio') => {
@@ -377,6 +346,86 @@ export default function ProfileModule() {
                         </div>
                     </div>
 
+                    {/* Social Hub Settings */}
+                    <div className="space-y-6 pt-12 border-t border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3 ml-2">
+                                <div className="p-2 bg-pink-100 text-pink-600 rounded-lg">
+                                    <Share2 size={20} />
+                                </div>
+                                <h2 className="text-xl font-black text-gray-900 dark:text-white">Social Space Configuration</h2>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setProfile({ ...profile, showSocialSection: !profile.showSocialSection })}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${profile.showSocialSection
+                                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200"
+                                        : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                                    }`}
+                            >
+                                {profile.showSocialSection ? <><Eye size={16} /> Section Visible</> : <><EyeOff size={16} /> Section Hidden</>}
+                            </button>
+                        </div>
+
+                        <p className="text-secondary text-xs ml-2 max-w-2xl font-medium uppercase tracking-wider">
+                            Control the "Social Interaction Hub" on your homepage. When enabled, your visitors will see your active poll or question.
+                        </p>
+
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Section Title</label>
+                                <input
+                                    type="text"
+                                    value={profile.socialSectionTitle || ""}
+                                    placeholder="e.g. JOIN THE"
+                                    onChange={(e) => setProfile({ ...profile, socialSectionTitle: e.target.value })}
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-gray-900 dark:text-white"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Section Subtitle</label>
+                                <input
+                                    type="text"
+                                    value={profile.socialSectionSubtitle || ""}
+                                    placeholder="e.g. CONVERSATION"
+                                    onChange={(e) => setProfile({ ...profile, socialSectionSubtitle: e.target.value })}
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-gray-900 dark:text-white"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Background Media Type</label>
+                                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl">
+                                    {(['image', 'video'] as const).map(type => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => setProfile({ ...profile, socialSectionMediaType: type })}
+                                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${(profile.socialSectionMediaType || 'image') === type
+                                                    ? "bg-white dark:bg-gray-700 shadow-md text-primary"
+                                                    : "text-gray-400"
+                                                }`}
+                                        >
+                                            {type === 'video' ? <Video size={14} /> : <ImageIcon size={14} />} {type}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Background Media URL</label>
+                                <input
+                                    type="text"
+                                    value={profile.socialSectionMediaUrl || ""}
+                                    placeholder="https://... (Direct link to image or MP4)"
+                                    onChange={(e) => setProfile({ ...profile, socialSectionMediaUrl: e.target.value })}
+                                    className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-gray-900 dark:text-white"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Quick Stats Section */}
                     <div className="space-y-6 pt-12 border-t border-gray-100 dark:border-gray-800">
                         <h2 className="text-xl font-black text-gray-900 dark:text-white ml-2">Quick Stats (Home Page)</h2>
@@ -394,7 +443,7 @@ export default function ProfileModule() {
                                                     newStats[index].label = e.target.value;
                                                     setProfile({ ...profile, stats: newStats });
                                                 }}
-                                                className="w-full bg-white dark:bg-[#2a2a2a] border-0 rounded-xl p-3 text-sm font-bold text-gray-900 dark:text-white"
+                                                className="w-full bg-white dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-xl p-3 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary transition-all"
                                             />
                                         </div>
                                         <div className="space-y-1">
@@ -407,7 +456,7 @@ export default function ProfileModule() {
                                                     newStats[index].value = e.target.value;
                                                     setProfile({ ...profile, stats: newStats });
                                                 }}
-                                                className="w-full bg-white dark:bg-[#2a2a2a] border-0 rounded-xl p-3 text-sm font-bold text-gray-900 dark:text-white"
+                                                className="w-full bg-white dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-xl p-3 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary transition-all"
                                             />
                                         </div>
                                     </div>
@@ -418,6 +467,7 @@ export default function ProfileModule() {
 
                     <button
                         disabled={saving || uploading}
+                        type="submit"
                         className="w-full bg-primary text-white py-6 rounded-[2rem] font-black text-xl flex items-center justify-center space-x-3 shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all disabled:opacity-50"
                     >
                         {saving ? <Loader2 className="animate-spin" /> : <Save size={24} />}
@@ -431,5 +481,5 @@ export default function ProfileModule() {
                 <TimelineModule />
             </div>
         </div>
-    )
+    );
 }

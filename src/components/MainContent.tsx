@@ -25,6 +25,7 @@ import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
 import VisitorBadge from "./VisitorBadge";
+import SocialInteractionSection from "./SocialInteractionSection";
 
 
 interface Stat {
@@ -79,6 +80,11 @@ interface Profile {
     audioUrl?: string | null;
     trainingStats?: Stat[];
     stats?: Stat[];
+    showSocialSection?: boolean;
+    socialSectionMediaUrl?: string;
+    socialSectionMediaType?: string;
+    socialSectionTitle?: string;
+    socialSectionSubtitle?: string;
 }
 
 interface Partnership {
@@ -127,6 +133,8 @@ interface MainContentProps {
     skills?: Skill[];
     quizzes?: Quiz[];
     liveSessions?: LiveSession[];
+    socialPoll?: any;
+    socialQuestion?: any;
 }
 
 
@@ -141,6 +149,8 @@ export default function MainContent({
     skills: initialSkills = [],
     quizzes: initialQuizzes = [],
     liveSessions: initialLiveSessions = [],
+    socialPoll,
+    socialQuestion
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -254,6 +264,15 @@ export default function MainContent({
                     trainingStats={profile.trainingStats as any}
                     partnerships={partnerships as any}
                     skills={skills as any}
+                />
+            )}
+
+            {/* Social Interaction Section */}
+            {profile?.showSocialSection && (socialPoll || socialQuestion) && (
+                <SocialInteractionSection
+                    poll={socialPoll}
+                    question={socialQuestion}
+                    profile={profile}
                 />
             )}
 

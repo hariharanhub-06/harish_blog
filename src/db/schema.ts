@@ -22,6 +22,14 @@ export const profiles = pgTable("profiles", {
     y: 0,
     mixBlendMode: "screen"
   })),
+
+  // Social Interaction Section Controls
+  showSocialSection: boolean("show_social_section").default(false),
+  socialSectionMediaUrl: text("social_section_media_url"),
+  socialSectionMediaType: text("social_section_media_type").default("image"), // 'image' | 'video'
+  socialSectionTitle: text("social_section_title").default("Social Space"),
+  socialSectionSubtitle: text("social_section_subtitle").default("Join the conversation!"),
+
   socialLinks: jsonb("social_links").$default(() => ({
     linkedin: "",
     github: "",
@@ -1173,4 +1181,73 @@ export const agileDeploymentLogs = pgTable("agile_deployment_logs", {
   featuresShipped: jsonb("features_shipped"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const websitePolls = pgTable("website_polls", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  question: text("question").notNull(),
+  options: jsonb("options").notNull(), // Array of { text: string }
+  isActive: boolean("is_active").default(true),
+  backgroundUrl: text("background_url"),
+  backgroundType: text("background_type").default("image"), // 'image' | 'video'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const pollResponses = pgTable("poll_responses", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  pollId: text("poll_id").notNull(),
+  optionIndex: integer("option_index").notNull(),
+  ipHash: text("ip_hash"), // To prevent basic duplicate voting
+  platform: text("platform").default("direct"), // 'instagram' | 'facebook' | 'direct'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const websitePollRelations = relations(websitePolls, ({ many }) => ({
+  responses: many(pollResponses),
+}));
+
+export const pollResponseRelations = relations(pollResponses, ({ one }) => ({
+  poll: one(websitePolls, {
+    fields: [pollResponses.pollId],
+    references: [websitePolls.id],
+  }),
+}));
+
+export const websiteQuestions = pgTable("website_questions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  prompt: text("prompt").notNull(),
+  isActive: boolean("is_active").default(true),
+  backgroundUrl: text("background_url"),
+  backgroundType: text("background_type").default("image"), // 'image' | 'video'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const websiteQuestionResponses = pgTable("website_question_responses", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  questionId: text("question_id").notNull(),
+  userName: text("user_name"),
+  answerText: text("answer_text").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const socialGameSessions = pgTable("social_game_sessions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  gameId: text("game_id").notNull(), // 'memory' | 'puzzle'
+  title: text("title").notNull(),
+  isActive: boolean("is_active").default(true),
+  playCount: integer("play_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const websiteQuestionRelations = relations(websiteQuestions, ({ many }) => ({
+  responses: many(websiteQuestionResponses),
+}));
+
+export const websiteQuestionResponseRelations = relations(websiteQuestionResponses, ({ one }) => ({
+  question: one(websiteQuestions, {
+    fields: [websiteQuestionResponses.questionId],
+    references: [websiteQuestions.id],
+  }),
+}));
 
