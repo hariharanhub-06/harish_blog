@@ -29,7 +29,6 @@ import {
     User,
     Video,
     Pin,
-    Globe2
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -37,7 +36,6 @@ import TimelineModule from "@/components/admin/TimelineModule";
 import MessagesModule from "@/components/admin/MessagesModule";
 import OverviewModule from "@/components/admin/OverviewModule";
 import TrainingAcademyModule from "@/components/admin/TrainingAcademyModule";
-import YouTubeModule from "@/components/admin/YouTubeModule";
 import QuizModule from "@/components/admin/QuizModule";
 import FeedbackModule from "@/components/admin/FeedbackModule";
 import FinanceModule from "@/components/admin/FinanceModule";
@@ -69,7 +67,6 @@ export default function AdminDashboard() {
     const menuItems = useMemo(() => [
         { id: "overview", title: "Command Center", icon: Home, color: "bg-blue-500", group: "Main" },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500", group: "Personal" },
-        { id: "travelled", title: "Travelled", icon: Globe2, color: "bg-sky-500", group: "Personal" },
         { id: "training-academy", title: "Training Academy", icon: GraduationCap, color: "bg-orange-500", group: "Learning" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500", group: "Professional" },
         { id: "feedbacks", title: "Testimonials", icon: HeartHandshake, color: "bg-pink-500", group: "Communication" },
@@ -288,7 +285,6 @@ export default function AdminDashboard() {
             case "kanban": return <KanbanModule />;
             case "routines": return <RoutinesModule />;
             case "settings": return <SettingsModule />;
-            case "travelled": return <TravelledModule />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">
                     <OverviewModule onTabChange={handleTabChange} />

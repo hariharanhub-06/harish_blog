@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users, Music, Video } from "lucide-react";
+import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users, Music } from "lucide-react";
 import Image from "next/image";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import TimelineModule from "./TimelineModule";
@@ -95,23 +95,21 @@ export default function ProfileModule() {
         });
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero' | 'about' | 'audio' | 'video' | 'business_video') => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'hero' | 'about' | 'audio') => {
         if (!e.target.files?.[0]) return;
         setUploading(true);
 
         try {
             const file = e.target.files[0];
-            // Check file size (limit to 10MB for images, 100MB for video/audio)
-            const isMedia = ['audio', 'video', 'business_video'].includes(type);
-            const limit = isMedia ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+            const isAudio = type === 'audio';
+            const limit = isAudio ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
 
             if (file.size > limit) {
-                alert(`File is too large. Please select a ${isMedia ? 'file under 100MB' : 'image under 10MB'}.`);
+                alert(`File is too large. Please select a ${isAudio ? 'file under 100MB' : 'image under 10MB'}.`);
                 setUploading(false);
                 return;
             }
 
-            // Upload to ImageKit CDN with AVIF optimization
             const imagekitUrl = await uploadToImageKit(file, 'profile');
 
             if (type === 'avatar') {
@@ -122,14 +120,6 @@ export default function ProfileModule() {
                 setProfile({ ...profile, aboutImageUrl: imagekitUrl });
             } else if (type === 'audio') {
                 setProfile({ ...profile, audioUrl: imagekitUrl });
-            } else if (type === 'video') {
-                setProfile({ ...profile, featuredVideoUrl: imagekitUrl });
-            } else if (type === 'business_video') {
-                setProfile({
-                    ...profile,
-                    businessSolutionVideoUrl: imagekitUrl,
-                    businessSolutionVideoConfig: profile.businessSolutionVideoConfig || { scale: 1, x: 0, y: 0, mixBlendMode: 'screen' }
-                });
             }
         } catch (error) {
             console.error("Image upload failed", error);
@@ -292,232 +282,6 @@ export default function ProfileModule() {
                             )}
                         </div>
 
-                        {/* Video Section */}
-                        <div className="flex flex-col items-center space-y-6 md:col-span-2 lg:col-span-3 pt-6 border-t border-gray-50 dark:border-gray-800">
-                            <div className="w-full max-w-xl space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-red-100 text-red-600 rounded-xl">
-                                        <Presentation size={24} />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wide">Featured Blog Video</span>
-                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Only one video will be displayed on the blog</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">YouTube Video ID</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Paste YouTube ID or Link"
-                                            value={profile.featuredVideoUrl || ""}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                                                const match = val.match(regExp);
-                                                const id = (match && match[2].length === 11) ? match[2] : val;
-                                                setProfile({ ...profile, featuredVideoUrl: id });
-                                            }}
-                                            className="w-full bg-white dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-xl p-4 text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary transition-all"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Or Upload File</label>
-                                        <label className="flex items-center justify-center gap-2 w-full h-[54px] bg-white dark:bg-[#2a2a2a] border border-gray-100 dark:border-gray-700 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm text-xs font-black uppercase tracking-widest text-gray-600 dark:text-white">
-                                            {uploading ? <Loader2 size={16} className="animate-spin" /> : "Select Video File"}
-                                            <input type="file" className="hidden" accept="video/*" onChange={(e) => handleImageUpload(e, 'video')} />
-                                        </label>
-                                    </div>
-                                </div>
-
-                                {profile.featuredVideoUrl && (
-                                    <div className="mt-4 p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-gray-800">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Preview</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => setProfile({ ...profile, featuredVideoUrl: null })}
-                                                className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline"
-                                            >
-                                                Remove
-                                            </button>
-                                        </div>
-                                        {(() => {
-                                            const val = profile.featuredVideoUrl;
-                                            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                                            const match = val.match(regExp);
-                                            const id = (match && match[2].length === 11) ? match[2] : val;
-
-                                            if (id.length === 11) {
-                                                return (
-                                                    <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
-                                                        <iframe
-                                                            width="100%"
-                                                            height="100%"
-                                                            src={`https://www.youtube.com/embed/${id}`}
-                                                            title="YouTube video player"
-                                                            frameBorder="0"
-                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                            allowFullScreen
-                                                        ></iframe>
-                                                    </div>
-                                                );
-                                            }
-                                            return <video controls src={val} className="w-full rounded-xl shadow-lg" />;
-                                        })()}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Business Solutions Video Section */}
-                        <div className="flex flex-col items-center space-y-6 md:col-span-2 lg:col-span-3 pt-6 border-t border-gray-50 dark:border-gray-800">
-                            <div className="w-full max-w-xl space-y-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-orange-100 text-orange-600 rounded-xl">
-                                        <Video size={24} />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wide">Business Solutions Animation</span>
-                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Custom video for the Home Page Tech Section</p>
-                                    </div>
-                                </div>
-
-                                <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs font-black uppercase tracking-widest text-gray-400">Upload Media</span>
-                                        <label className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-700 rounded-2xl cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-all shadow-sm text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-white">
-                                            {uploading ? <Loader2 size={16} className="animate-spin" /> : "Select Video"}
-                                            <input type="file" className="hidden" accept="video/*" onChange={(e) => handleImageUpload(e, 'business_video')} />
-                                        </label>
-                                    </div>
-
-                                    {profile.businessSolutionVideoUrl && (
-                                        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                                            {/* Advanced Crop & Adjust Controls */}
-                                            <div className="grid grid-cols-2 gap-6 bg-white dark:bg-[#2a2a2a] p-6 rounded-3xl border border-gray-100/50 dark:border-gray-700">
-                                                <div className="space-y-2">
-                                                    <div className="flex justify-between">
-                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Scale / Zoom</label>
-                                                        <span className="text-[10px] font-black text-primary">{profile.businessSolutionVideoConfig?.scale || 1}x</span>
-                                                    </div>
-                                                    <input
-                                                        type="range"
-                                                        min="1"
-                                                        max="3"
-                                                        step="0.1"
-                                                        value={profile.businessSolutionVideoConfig?.scale || 1}
-                                                        onChange={(e) => setProfile({
-                                                            ...profile,
-                                                            businessSolutionVideoConfig: {
-                                                                ...profile.businessSolutionVideoConfig,
-                                                                scale: parseFloat(e.target.value)
-                                                            }
-                                                        })}
-                                                        className="w-full h-1.5 bg-gray-100 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-2">Styling Filter</label>
-                                                    <select
-                                                        value={profile.businessSolutionVideoConfig?.mixBlendMode || "screen"}
-                                                        onChange={(e) => setProfile({
-                                                            ...profile,
-                                                            businessSolutionVideoConfig: {
-                                                                ...profile.businessSolutionVideoConfig,
-                                                                mixBlendMode: e.target.value
-                                                            }
-                                                        })}
-                                                        className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white focus:ring-2 focus:ring-primary"
-                                                    >
-                                                        <option value="normal">Normal / Clean</option>
-                                                        <option value="screen">Screen (Lighten)</option>
-                                                        <option value="overlay">Overlay (Punchy)</option>
-                                                        <option value="multiply">Multiply (Darken)</option>
-                                                    </select>
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <div className="flex justify-between">
-                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Horizontal Adjust (X)</label>
-                                                        <span className="text-[10px] font-black text-primary">{profile.businessSolutionVideoConfig?.x || 0}%</span>
-                                                    </div>
-                                                    <input
-                                                        type="range"
-                                                        min="-50"
-                                                        max="50"
-                                                        step="1"
-                                                        value={profile.businessSolutionVideoConfig?.x || 0}
-                                                        onChange={(e) => setProfile({
-                                                            ...profile,
-                                                            businessSolutionVideoConfig: {
-                                                                ...profile.businessSolutionVideoConfig,
-                                                                x: parseInt(e.target.value)
-                                                            }
-                                                        })}
-                                                        className="w-full h-1.5 bg-gray-100 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <div className="flex justify-between">
-                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Vertical Adjust (Y)</label>
-                                                        <span className="text-[10px] font-black text-primary">{profile.businessSolutionVideoConfig?.y || 0}%</span>
-                                                    </div>
-                                                    <input
-                                                        type="range"
-                                                        min="-50"
-                                                        max="50"
-                                                        step="1"
-                                                        value={profile.businessSolutionVideoConfig?.y || 0}
-                                                        onChange={(e) => setProfile({
-                                                            ...profile,
-                                                            businessSolutionVideoConfig: {
-                                                                ...profile.businessSolutionVideoConfig,
-                                                                y: parseInt(e.target.value)
-                                                            }
-                                                        })}
-                                                        className="w-full h-1.5 bg-gray-100 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {/* Preview Window */}
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between items-center px-2">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Live Crop Preview</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setProfile({ ...profile, businessSolutionVideoUrl: null })}
-                                                        className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline"
-                                                    >
-                                                        Remove Video
-                                                    </button>
-                                                </div>
-                                                <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl bg-gray-900">
-                                                    <video
-                                                        key={profile.businessSolutionVideoUrl}
-                                                        src={profile.businessSolutionVideoUrl}
-                                                        autoPlay
-                                                        loop
-                                                        muted
-                                                        playsInline
-                                                        controls
-                                                        style={{
-                                                            transform: `scale(${profile.businessSolutionVideoConfig?.scale || 1}) translate(${profile.businessSolutionVideoConfig?.x || 0}%, ${profile.businessSolutionVideoConfig?.y || 0}%)`,
-                                                            transition: 'transform 0.2s ease-out'
-                                                        }}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Form Fields */}

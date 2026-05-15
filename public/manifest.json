@@ -1,12 +1,12 @@
 {
-    "name": "Hariharanhub Admin",
-    "short_name": "Admin HQ",
-    "description": "Secure Administration Portal",
+    "name": "Hariharan Jeyaramamoorthy",
+    "short_name": "Hari Haran",
+    "description": "Business Consultant & Software Developer based in Coimbatore",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
     "orientation": "portrait",
-    "background_color": "#1e1e1e",
+    "background_color": "#ffffff",
     "theme_color": "#3b71ca",
     "icons": [
         {
@@ -23,4 +23,3 @@
         }
     ]
 }
-
