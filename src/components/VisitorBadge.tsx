@@ -112,19 +112,19 @@ export default function VisitorBadge() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -16, scale: 0.93 }}
                     transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                    className="fixed top-4 right-3 sm:top-5 sm:right-5 z-50 w-[min(300px,calc(100vw-1.5rem))]"
+                    className="fixed top-4 right-3 sm:top-5 sm:right-5 z-50 w-[min(190px,calc(100vw-1.5rem))] sm:w-[min(300px,calc(100vw-2.5rem))]"
                 >
                     <div className="relative bg-[#141414]/96 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
                         {/* Top colour line */}
                         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
 
                         {/* ── Compact header (always visible) ── */}
-                        <div className="flex items-center gap-2.5 px-4 py-3">
+                        <div className="flex items-center gap-2 px-3 py-2.5 sm:gap-2.5 sm:px-4 sm:py-3">
                             {/* Flag */}
                             <motion.span
                                 animate={{ scale: [1, 1.15, 1] }}
                                 transition={{ repeat: 2, duration: 0.45, delay: 0.6 }}
-                                className="text-xl leading-none shrink-0"
+                                className="text-base sm:text-xl leading-none shrink-0"
                             >
                                 {data.flag}
                             </motion.span>
@@ -134,7 +134,7 @@ export default function VisitorBadge() {
                                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-500 block leading-none mb-0.5">
                                     {data.isNewVisitor ? "Hello There!" : "Welcome Back!"}
                                 </span>
-                                <p className="text-white font-black text-[13px] leading-tight truncate">
+                                <p className="text-white font-black text-[11px] sm:text-[13px] leading-tight truncate">
                                     {data.isNewVisitor
                                         ? <>You&apos;re visitor <span className="text-orange-400">#{data.visitorNumber.toLocaleString()}</span> from {data.country}</>
                                         : <>Visit <span className="text-orange-400">#{data.visitCount}</span> from {data.country}</>
