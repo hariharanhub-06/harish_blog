@@ -5,7 +5,7 @@ import {
     ArrowRight, Code, Briefcase, Award, User,
     MapPin, Calendar, Mail, Phone, Send,
     CheckCircle2, Star, Github, ExternalLink,
-    GraduationCap, Linkedin, HeartHandshake, Play, Sparkles,
+    GraduationCap, Linkedin, HeartHandshake, Sparkles,
     MessageSquare, Gamepad2, Users, Clock, Target
 } from "lucide-react";
 import { InfiniteCarousel } from "./InfiniteCarousel";
@@ -24,6 +24,7 @@ const GameOverlay = dynamic(() => import("@/components/GameOverlay"), { ssr: fal
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
+import VisitorBadge from "./VisitorBadge";
 
 
 interface Stat {
@@ -68,14 +69,6 @@ interface Volunteering {
     logo?: string;
 }
 
-interface Video {
-    id: string;
-    youtubeVideoId: string;
-    title: string;
-    description?: string;
-    category?: string;
-}
-
 interface Profile {
     name: string | null;
     avatarUrl?: string | null;
@@ -84,7 +77,6 @@ interface Profile {
     location: string | null;
     aboutImageUrl?: string | null;
     audioUrl?: string | null;
-    featuredVideoUrl?: string | null;
     trainingStats?: Stat[];
     stats?: Stat[];
 }
@@ -204,6 +196,7 @@ export default function MainContent({
 
     return (
         <div className="flex flex-col gap-4 pb-4 overflow-x-hidden">
+            <VisitorBadge />
             {/* Stats Section */}
             <section className="container mx-auto px-6 py-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -372,82 +365,6 @@ export default function MainContent({
                     />
                 )}
 
-                {/* My Journey Section */}
-                <section id="journey" className="container mx-auto px-6 py-8 bg-black/20 rounded-[2.5rem] border border-white/5 my-4 overflow-hidden relative">
-                    <div className="flex flex-col items-center mb-6">
-                        <h2 className="text-[10vw] md:text-[8vw] font-black text-outline absolute opacity-10 pointer-events-none select-none uppercase tracking-tighter -mt-10 md:-mt-12">JOURNEY</h2>
-                        <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter text-center relative z-10">
-                            My <span className="text-orange-600">Journey</span>
-                        </h2>
-                        <div className="w-16 md:w-24 h-1.5 md:h-2 bg-orange-600 mt-2 md:mt-4 rounded-full" />
-                        <p className="text-gray-400 text-[8px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em] mt-3 md:mt-4 opacity-50 px-4 text-center">From Born to Now: The History of Hariharan</p>
-                    </div>
-
-                    <div className="max-w-5xl mx-auto">
-                        <CardWrapper index={0}>
-                            <div className="group relative bg-[#1a1a1a] rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/40 transition-all duration-500">
-                                <div className="aspect-video w-full relative bg-zinc-900 flex items-center justify-center">
-                                    {profile.featuredVideoUrl ? (
-                                        <>
-                                            {(() => {
-                                                const val = profile.featuredVideoUrl;
-                                                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                                                const match = val.match(regExp);
-                                                const id = (match && match[2].length === 11) ? match[2] : val;
-
-                                                if (id.length === 11) {
-                                                    return (
-                                                        <iframe
-                                                            width="100%"
-                                                            height="100%"
-                                                            src={`https://www.youtube.com/embed/${id}?autoplay=0&rel=0&modestbranding=1`}
-                                                            title="The Journey of Hariharan"
-                                                            frameBorder="0"
-                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                            allowFullScreen
-                                                            className="absolute inset-0 w-full h-full"
-                                                        ></iframe>
-                                                    );
-                                                }
-                                                return (
-                                                    <video
-                                                        src={val}
-                                                        controls
-                                                        className="absolute inset-0 w-full h-full object-contain"
-                                                        poster={profile.aboutImageUrl || undefined}
-                                                    />
-                                                );
-                                            })()}
-                                        </>
-                                    ) : (
-                                        <div className="flex flex-col items-center space-y-4">
-                                            <Play size={48} className="text-white/20" />
-                                            <p className="text-white/20 font-black tracking-widest text-xs uppercase">Journey coming soon...</p>
-                                        </div>
-                                    )}
-                                </div>
-                                {/* Desktop Overlay */}
-                                <div className="hidden md:block p-8 bg-gradient-to-t from-black/90 via-black/40 to-transparent absolute bottom-0 left-0 right-0 pointer-events-none group-hover:opacity-100 transition-opacity">
-                                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
-                                        My Life Story
-                                    </h3>
-                                    <p className="text-orange-500 text-xs font-black uppercase tracking-widest mt-2">
-                                        A Narrative of Innovation & Passion
-                                    </p>
-                                </div>
-                            </div>
-                            {/* Mobile Caption */}
-                            <div className="md:hidden p-6 bg-[#1a1a1a] border-t border-white/5 text-center">
-                                <h3 className="text-xl font-black text-white uppercase tracking-tighter">
-                                    My Life Story
-                                </h3>
-                                <p className="text-orange-500 text-[10px] font-black uppercase tracking-widest mt-1">
-                                    A Narrative of Innovation & Passion
-                                </p>
-                            </div>
-                        </CardWrapper>
-                    </div>
-                </section>
             </section>
 
             {/* Projects/Portfolio Section */}

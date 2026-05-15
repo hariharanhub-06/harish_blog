@@ -15,26 +15,36 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://hariharanhub.com'),
-  title: "Hari Haran | Business Consultant & Developer in Coimbatore",
-  description: "Expert Business Consultant and Web Developer based in Coimbatore. Specializing in software solutions, startup strategy, and digital transformation.",
+  title: "Hariharan Jeyaramamoorthy | Business Consultant & Developer – Coimbatore",
+  description: "Hariharan Jeyaramamoorthy (Hari Haran J), Business Consultant and Software Developer based in Coimbatore, Tamil Nadu. Expert in digital solutions, startup strategy, web development, and financial consulting.",
   keywords: [
+    "Hariharan Jeyaramamoorthy",
+    "Hariharan Coimbatore",
+    "Hariharan J",
+    "Hari Coimbatore",
+    "Hariharan",
+    "Hari Haran J Coimbatore",
     "Hari Haran Jeyaramamoorthy",
     "Hari Haran Blog",
     "Business Consultant Coimbatore",
     "Web Developer Coimbatore",
+    "Software Developer Coimbatore",
+    "Startup Consultant Tamil Nadu",
     "Software Engineer India",
-    "Startup Consultant",
+    "Freelance Developer Coimbatore",
     "HM Snacks",
     "HM Tech",
     "Haripicks",
-    "Freelance Developer Coimbatore",
     "Next.js Developer"
   ],
+  alternates: {
+    canonical: "https://hariharanhub.com",
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Admin Portal",
+    title: "Hariharan Jeyaramamoorthy",
   },
   icons: {
     icon: [
@@ -45,20 +55,26 @@ export const metadata: Metadata = {
     apple: "/hari-favicon.png",
   },
   openGraph: {
-    title: "Hari Haran's Blog | Developer & Consultant",
-    description: "Read my latest thoughts on Technology, Business, and Software Development.",
+    title: "Hariharan Jeyaramamoorthy | Business Consultant & Developer – Coimbatore",
+    description: "Hariharan Jeyaramamoorthy (Hari Haran J) — Business Consultant, Software Developer, and Entrepreneur based in Coimbatore, Tamil Nadu.",
     url: 'https://hariharanhub.com',
-    siteName: 'Hari Haran Jeyaramamoorthy',
-    locale: 'en_US',
+    siteName: 'Hariharan Jeyaramamoorthy',
+    locale: 'en_IN',
     type: 'website',
     images: [
       {
-        url: '/hari-favicon.png',
+        url: '/hari_photo.png',
         width: 800,
         height: 800,
-        alt: 'Hari Haran Jeyaramamoorthy',
+        alt: 'Hariharan Jeyaramamoorthy',
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hariharan Jeyaramamoorthy | Business Consultant & Developer",
+    description: "Hariharan Jeyaramamoorthy (Hari Haran J) — Business Consultant and Software Developer based in Coimbatore, Tamil Nadu.",
+    images: ['/hari_photo.png'],
   },
   other: {
     "google-adsense-account": "ca-pub-8379879880114790"
@@ -78,29 +94,52 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        {/* rel="me" links tell Google that these social profiles belong to hariharanhub.com */}
+        <link rel="me" href="https://www.linkedin.com/in/hari-haran-jeyaramamoorthy/" />
+        <link rel="me" href="https://www.instagram.com/_mr_vibrant/" />
+        <link rel="me" href="https://www.facebook.com/profile.php?id=61573749598737" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Person",
-              "name": "Hari Haran Jeyaramamoorthy",
-              "url": "https://hariharanhub.com",
-              "jobTitle": "Business Consultant & Software Developer",
-              "address": {
-                "@type": "PostalAddress",
-                "addressLocality": "Coimbatore",
-                "addressRegion": "Tamil Nadu",
-                "addressCountry": "IN"
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Person",
+                "name": "Hariharan Jeyaramamoorthy",
+                "alternateName": ["Hari Haran J", "Hariharan J", "Hari Haran Jeyaramamoorthy", "Hariharan Coimbatore"],
+                "url": "https://hariharanhub.com",
+                "image": "https://hariharanhub.com/hari_photo.png",
+                "jobTitle": "Business Consultant & Software Developer",
+                "email": "support@powerconnect.ai",
+                "address": {
+                  "@type": "PostalAddress",
+                  "addressLocality": "Coimbatore",
+                  "addressRegion": "Tamil Nadu",
+                  "addressCountry": "IN"
+                },
+                "knowsAbout": ["Web Development", "Business Consulting", "E-commerce", "Startup Strategy", "Software Engineering", "Financial Consulting"],
+                "sameAs": [
+                  "https://www.linkedin.com/in/hari-haran-jeyaramamoorthy/",
+                  "https://github.com/startup-digi-3119",
+                  "https://www.instagram.com/_mr_vibrant/",
+                  "https://www.facebook.com/profile.php?id=61573749598737"
+                ]
               },
-              "worksFor": [],
-              "knowsAbout": ["Web Development", "Business Consulting", "E-commerce", "Startup Strategy", "Software Engineering"],
-              "sameAs": [
-                "https://linkedin.com/in/hari-haran-j",
-                "https://github.com/startup-digi-3119",
-                "https://instagram.com/_mr_vibrant"
-              ]
-            })
+              {
+                "@context": "https://schema.org",
+                "@type": "LocalBusiness",
+                "name": "Hariharan Jeyaramamoorthy – Business Consulting",
+                "url": "https://hariharanhub.com",
+                "image": "https://hariharanhub.com/hari_photo.png",
+                "address": {
+                  "@type": "PostalAddress",
+                  "addressLocality": "Coimbatore",
+                  "addressRegion": "Tamil Nadu",
+                  "addressCountry": "IN"
+                },
+                "priceRange": "₹₹"
+              }
+            ])
           }}
         />
       </head>

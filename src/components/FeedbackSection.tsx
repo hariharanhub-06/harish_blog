@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Star, MessageSquare, User, Building, Send, Loader2, Quote, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { InfiniteCarousel } from "./InfiniteCarousel";
+import HeartReaction from "./HeartReaction";
 
 interface Feedback {
     id: string;
@@ -106,6 +107,9 @@ export default function FeedbackSection() {
                     </button>
                 </div>
             </div>
+
+            {/* Heart Reaction */}
+            <HeartReaction />
 
             {/* Testimonials Carousel */}
             {feedbacks.length > 0 ? (

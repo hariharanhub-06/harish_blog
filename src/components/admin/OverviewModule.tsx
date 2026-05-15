@@ -14,7 +14,10 @@ import {
     Zap,
     MessageCircle,
     ChevronRight,
-    MousePointer2
+    MousePointer2,
+    Heart,
+    Clock,
+    Users
 } from "lucide-react";
 import {
     XAxis,
@@ -36,9 +39,18 @@ const COLORS = {
     growth: "#ef4444"     // Red
 };
 
+function formatTime(seconds: number): string {
+    if (!seconds || seconds < 5) return "—";
+    if (seconds < 60) return `${seconds}s`;
+    const mins = Math.floor(seconds / 60);
+    return `${mins} min${mins !== 1 ? "s" : ""}`;
+}
+
 export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: any) => void }) {
     const [analytics, setAnalytics] = useState<any[]>([]);
     const [recentMessages, setRecentMessages] = useState<any[]>([]);
+    const [visitorStats, setVisitorStats] = useState({ totalVisitors: 0, avgTimeSeconds: 0, today: 0 });
+    const [heartStats, setHeartStats] = useState({ take: 0, break: 0, total: 0 });
 
     const [dateRange, setDateRange] = useState({
         start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -59,9 +71,11 @@ export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: an
 
     const fetchData = async () => {
         try {
-            const [analyticsRes, messagesRes] = await Promise.all([
+            const [analyticsRes, messagesRes, visitorRes, heartRes] = await Promise.all([
                 fetch(`/api/analytics?start=${dateRange.start}&end=${dateRange.end}`),
-                fetch("/api/admin/messages", { headers: { "X-Session-Id": sessionId } })
+                fetch("/api/admin/messages", { headers: { "X-Session-Id": sessionId } }),
+                fetch("/api/admin/visitors", { headers: { "X-Session-Id": sessionId } }),
+                fetch("/api/admin/heart", { headers: { "X-Session-Id": sessionId } }),
             ]);
 
             if (analyticsRes.ok) {
@@ -81,6 +95,20 @@ export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: an
                     setRecentMessages(data.slice(0, 5));
                     setStats(prev => ({ ...prev, unreadMessages: data.filter((m: any) => m.status === 'New').length }));
                 }
+            }
+
+            if (visitorRes.ok) {
+                const data = await visitorRes.json();
+                setVisitorStats({
+                    totalVisitors: data.stats?.total || 0,
+                    avgTimeSeconds: data.stats?.avgTimeSeconds || 0,
+                    today: data.stats?.today || 0,
+                });
+            }
+
+            if (heartRes.ok) {
+                const data = await heartRes.json();
+                setHeartStats({ take: data.take || 0, break: data.break || 0, total: data.total || 0 });
             }
         } catch (err) {
             console.error("Failed to fetch dashboard data", err);
@@ -168,6 +196,69 @@ export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: an
                     data={analytics}
                     dataKey="visitors" // Placeholder
                 />
+            </div>
+
+            {/* Visitor & Heart Reaction Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Total Site Visitors */}
+                <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="p-2.5 rounded-xl bg-sky-50 dark:bg-sky-500/10 text-sky-500">
+                            <Users size={20} />
+                        </div>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 dark:bg-white/5 px-2 py-1 rounded-lg">All Time</span>
+                    </div>
+                    <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tight mb-1">{visitorStats.totalVisitors.toLocaleString()}</p>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Unique Visitors</p>
+                    <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800 flex justify-between text-[10px] font-bold text-gray-500">
+                        <span>Today: <span className="text-sky-500 font-black">{visitorStats.today}</span></span>
+                        <span>Avg time: <span className="text-sky-500 font-black">{formatTime(visitorStats.avgTimeSeconds)}</span></span>
+                    </div>
+                </div>
+
+                {/* Avg Time on Site */}
+                <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-500">
+                            <Clock size={20} />
+                        </div>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 dark:bg-white/5 px-2 py-1 rounded-lg">Avg Session</span>
+                    </div>
+                    <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tight mb-1">{formatTime(visitorStats.avgTimeSeconds)}</p>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Average Time Spent</p>
+                    <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800">
+                        <p className="text-[10px] text-gray-500 font-bold">Across all {visitorStats.totalVisitors.toLocaleString()} visitors</p>
+                    </div>
+                </div>
+
+                {/* Heart Reactions */}
+                <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500">
+                            <Heart size={20} />
+                        </div>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 dark:bg-white/5 px-2 py-1 rounded-lg">{heartStats.total} Votes</span>
+                    </div>
+                    <div className="flex items-end gap-4 mb-1">
+                        <div>
+                            <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">❤️ {heartStats.take}</p>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Took It</p>
+                        </div>
+                        <div className="pb-0.5 text-gray-300 dark:text-gray-700 font-black">vs</div>
+                        <div>
+                            <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">💔 {heartStats.break}</p>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Broke It</p>
+                        </div>
+                    </div>
+                    {heartStats.total > 0 && (
+                        <div className="mt-4 h-1.5 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-red-500 to-orange-500 rounded-full transition-all duration-700"
+                                style={{ width: `${Math.round((heartStats.take / heartStats.total) * 100)}%` }}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Main Charts & Table section */}

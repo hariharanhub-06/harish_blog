@@ -1044,3 +1044,21 @@ export const travelledPlaces = pgTable('travelledPlaces', {
   createdAt: timestamp('createdAt').defaultNow(),
 });
 
+export const visitorSessions = pgTable("visitor_sessions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  visitorNumber: integer("visitor_number").notNull(),
+  ipHash: text("ip_hash"),
+  country: text("country"),
+  countryCode: text("country_code"),
+  firstVisit: timestamp("first_visit").defaultNow(),
+  lastVisit: timestamp("last_visit").defaultNow(),
+  totalTimeSeconds: integer("total_time_seconds").default(0),
+  visitCount: integer("visit_count").default(1),
+});
+
+export const heartReactions = pgTable("heart_reactions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  action: text("action").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
