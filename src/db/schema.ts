@@ -1056,9 +1056,121 @@ export const visitorSessions = pgTable("visitor_sessions", {
   visitCount: integer("visit_count").default(1),
 });
 
+
 export const heartReactions = pgTable("heart_reactions", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   action: text("action").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// --- RESTORED TABLES (Data Recovery) ---
+
+export const stories = pgTable("stories", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text("title").notNull(),
+  description: text("description"),
+  thumbnailUrl: text("thumbnail_url"),
+  youtubePlaylistId: text("youtube_playlist_id"),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const storyEpisodes = pgTable("story_episodes", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  storyId: text("story_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  youtubeVideoId: text("youtube_video_id").notNull(),
+  thumbnailUrl: text("thumbnail_url"),
+  duration: text("duration"),
+  episodeNumber: integer("episode_number").default(1),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const agileProjects = pgTable("agile_projects", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  key: text("key").notNull().unique(),
+  description: text("description"),
+  lead: text("lead"),
+  avatarUrl: text("avatar_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const agileSprints = pgTable("agile_sprints", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  projectId: text("project_id").notNull(),
+  name: text("name").notNull(),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  goal: text("goal"),
+  status: text("status").notNull().default("planned"), // planned, active, closed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const agileEpics = pgTable("agile_epics", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  projectId: text("project_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  color: text("color").default("#0052CC"),
+  status: text("status").default("To Do"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const agileIssues = pgTable("agile_issues", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  projectId: text("project_id").notNull(),
+  epicId: text("epic_id"),
+  sprintId: text("sprint_id"),
+  parentId: text("parent_id"), // for subtasks
+  title: text("title").notNull(),
+  description: text("description"),
+  type: text("type").notNull().default("story"), // story, bug, task, subtask
+  priority: text("priority").notNull().default("Medium"), // Lowest, Low, Medium, High, Highest
+  status: text("status").notNull().default("To Do"),
+  storyPoints: integer("story_points").default(0),
+  assignee: text("assignee"),
+  position: real("position").notNull().default(0), // For drag-and-drop ordering
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const agileMeetings = pgTable("agile_meetings", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  projectId: text("project_id").notNull(),
+  sprintId: text("sprint_id"),
+  type: text("type").notNull(), // Daily Standup, Sprint Planning, Retro, Grooming
+  date: timestamp("date").defaultNow(),
+  content: jsonb("content"), // Agenda, notes, action items
+  mood: integer("mood").default(5), // 1-10 team mood
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const agileWorkflows = pgTable("agile_workflows", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  projectId: text("project_id").notNull(),
+  name: text("name").notNull().default("Standard Workflow"),
+  statusOrder: jsonb("status_order").notNull(), // Array of status names in order
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const agileDeploymentLogs = pgTable("agile_deployment_logs", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  projectId: text("project_id").notNull(),
+  version: text("version").notNull(),
+  deploymentDate: timestamp("deployment_date").defaultNow(),
+  summary: text("summary"),
+  bugsFixed: jsonb("bugs_fixed"),
+  featuresShipped: jsonb("features_shipped"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
