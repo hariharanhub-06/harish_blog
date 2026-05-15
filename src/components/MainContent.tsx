@@ -21,6 +21,7 @@ import dynamic from "next/dynamic";
 
 const GamesCarousel = dynamic(() => import("@/components/GamesCarousel"), { ssr: false });
 const GameOverlay = dynamic(() => import("@/components/GameOverlay"), { ssr: false });
+const SmileFloatingButton = dynamic(() => import("@/components/SmileFloatingButton"), { ssr: false });
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
@@ -140,6 +141,7 @@ interface MainContentProps {
     skills?: Skill[];
     quizzes?: Quiz[];
     liveSessions?: LiveSession[];
+    smileTask?: any;
 }
 
 
@@ -154,6 +156,7 @@ export default function MainContent({
     skills: initialSkills = [],
     quizzes: initialQuizzes = [],
     liveSessions: initialLiveSessions = [],
+    smileTask,
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -688,6 +691,8 @@ export default function MainContent({
                     />
                 )
             }
+
+            {smileTask && <SmileFloatingButton task={smileTask} />}
 
         </div >
     );

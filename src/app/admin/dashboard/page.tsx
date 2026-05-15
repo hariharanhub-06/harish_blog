@@ -30,6 +30,7 @@ import {
     Video,
     Pin,
     Smartphone,
+    Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -48,8 +49,9 @@ import ClientProjectsModule from "@/components/admin/ClientProjectsModule";
 import SettingsModule from "@/components/admin/SettingsModule";
 import KanbanModule from "@/components/admin/KanbanModule";
 import RoutinesModule from "@/components/admin/RoutinesModule";
+import SmileTaskModule from "@/components/admin/SmileTaskModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "settings";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -82,6 +84,7 @@ export default function AdminDashboard() {
         { id: "client-projects", title: "Client Projects", icon: Briefcase, color: "bg-blue-700", group: "Professional" },
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadMessages, group: "Communication" },
         { id: "routines", title: "Routine Checklist", icon: CheckSquare, color: "bg-indigo-600", group: "Admin" },
+        { id: "smile-tasks", title: "Smile Tasks", icon: Sparkles, color: "bg-rose-500", group: "Engagement" },
         { id: "settings", title: "Settings", icon: Settings, color: "bg-gray-600", group: "Admin" },
     ], [unreadMessages]);
 
@@ -210,7 +213,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash and fetch notifications
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "kanban", "routines", "settings"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "kanban", "routines", "smile-tasks", "settings"];
         if (hash && validTabs.includes(hash)) setActiveTab(hash);
 
         const fetchAllCounts = async () => {
@@ -293,6 +296,7 @@ export default function AdminDashboard() {
             case "client-projects": return <ClientProjectsModule />;
             case "kanban": return <KanbanModule />;
             case "routines": return <RoutinesModule />;
+            case "smile-tasks": return <SmileTaskModule />;
             case "settings": return <SettingsModule />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">
@@ -390,7 +394,7 @@ export default function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 lg:ml-[260px] w-full overflow-x-clip min-h-screen relative flex flex-col">
+            <main className="flex-1 lg:ml-[260px] w-full overflow-x-clip overflow-y-auto min-h-screen relative flex flex-col">
                 <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 h-14 md:h-20 lg:h-28 transition-colors duration-300">
                     <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 h-full flex justify-between items-center gap-2">
                         <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">

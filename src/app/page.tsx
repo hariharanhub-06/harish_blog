@@ -18,6 +18,7 @@ export default async function Home() {
   let partnerships: any[] = [];
   let quizzes: any[] = [];
   let liveSessions: any[] = [];
+  let smileTask: any = null;
   try {
     // Parallel fetch with failure isolation (Promise.allSettled)
     const results = await Promise.allSettled([
@@ -45,6 +46,9 @@ export default async function Home() {
         where: (s, { eq }) => eq(s.isPublished, true),
         orderBy: (s, { desc }) => [desc(s.startTime)]
       }),
+      db.query.smileTasks.findFirst({
+        where: (t, { eq }) => eq(t.status, "live"),
+      }),
     ]);
 
     // Helper to safely extract data from settled promise
@@ -63,6 +67,7 @@ export default async function Home() {
     dbSkills = val(results[5], 'skills') || [];
     partnerships = val(results[6], 'partnerships') || [];
     liveSessions = val(results[7], 'liveSessions') || [];
+    smileTask = val(results[8], 'smileTask');
 
     // Fetch Quizzes separately as it has relations that might fail if not pushed
     try {
@@ -222,6 +227,7 @@ export default async function Home() {
         partnerships={partnerships as any}
         quizzes={quizzes as any}
         liveSessions={liveSessions as any}
+        smileTask={smileTask}
       />
     </div>
   );

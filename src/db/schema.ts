@@ -1190,4 +1190,26 @@ export const agileDeploymentLogs = pgTable("agile_deployment_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// ── Smile Task System ─────────────────────────────────────────────────────────
 
+export const smileTasks = pgTable("smile_tasks", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text("title").notNull(),
+  status: text("status").default("pause"), // "live" | "pause"
+  link: text("link").default("/smile"),
+  lines: jsonb("lines").$type<string[]>().notNull(),
+  rareLines: jsonb("rare_lines").$type<string[]>(),
+  rareChance: integer("rare_chance").default(10),
+  posterBgGradient: text("poster_bg_gradient").default("#1a1a2e,#16213e"),
+  shareText: text("share_text").default("This made me smile 😄 Try yours →"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const smileAnalytics = pgTable("smile_analytics", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  taskId: text("task_id").notNull(),
+  event: text("event").notNull(), // "open"|"reveal"|"share_download"|"share_web"|"retry"|"rare"
+  ipHash: text("ip_hash"),
+  createdAt: timestamp("created_at").defaultNow(),
+});

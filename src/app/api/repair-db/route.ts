@@ -42,6 +42,28 @@ export async function GET(req: Request) {
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_games_section BOOLEAN DEFAULT true`,
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_live_sessions_section BOOLEAN DEFAULT true`,
 
+        // ── smile task system ────────────────────────────────────────────────────
+        `CREATE TABLE IF NOT EXISTS smile_tasks (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            status TEXT DEFAULT 'pause',
+            link TEXT DEFAULT '/smile',
+            lines JSONB NOT NULL DEFAULT '[]',
+            rare_lines JSONB DEFAULT '[]',
+            rare_chance INTEGER DEFAULT 10,
+            poster_bg_gradient TEXT DEFAULT '#1a1a2e,#16213e',
+            share_text TEXT DEFAULT 'This made me smile 😄 Try yours →',
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW()
+        )`,
+
+        `CREATE TABLE IF NOT EXISTS smile_analytics (
+            id TEXT PRIMARY KEY,
+            task_id TEXT NOT NULL,
+            event TEXT NOT NULL,
+            ip_hash TEXT,
+            created_at TIMESTAMP DEFAULT NOW()
+        )`,
     ];
 
     const results: { query: string; status: string }[] = [];
