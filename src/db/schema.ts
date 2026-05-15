@@ -30,6 +30,21 @@ export const profiles = pgTable("profiles", {
   socialSectionTitle: text("social_section_title").default("Social Space"),
   socialSectionSubtitle: text("social_section_subtitle").default("Join the conversation!"),
 
+  // High-level Section Visibility Toggles
+  showHeroSection: boolean("show_hero_section").default(true),
+  showStatsSection: boolean("show_stats_section").default(true),
+  showTrainingSection: boolean("show_training_section").default(true),
+  showExperienceSection: boolean("show_experience_section").default(true),
+  showEducationSection: boolean("show_education_section").default(true),
+  showVolunteeringSection: boolean("show_volunteering_section").default(true),
+  showAboutSection: boolean("show_about_section").default(true),
+  showProjectsSection: boolean("show_projects_section").default(true),
+  showQuizzesSection: boolean("show_quizzes_section").default(true),
+  showTypingTestSection: boolean("show_typing_test_section").default(true),
+  showFeedbackSection: boolean("show_feedback_section").default(true),
+  showGamesSection: boolean("show_games_section").default(true),
+  showLiveSessionsSection: boolean("show_live_sessions_section").default(true),
+
   socialLinks: jsonb("social_links").$default(() => ({
     linkedin: "",
     github: "",

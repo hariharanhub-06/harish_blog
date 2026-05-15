@@ -444,6 +444,53 @@ export default function ProfileModule() {
                         </div>
                     </div>
 
+                    {/* Section Management (Visibility Toggles) */}
+                    <div className="space-y-8 pt-12 border-t border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center space-x-3 ml-2">
+                            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                                <Eye size={20} />
+                            </div>
+                            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Section Visibility</h2>
+                        </div>
+                        <p className="text-secondary text-[10px] font-black uppercase tracking-widest ml-2 max-w-2xl leading-relaxed">
+                            Control which parts of your homepage are visible to visitors. Toggle them off to hide sections while you're still working on them or to keep your page clean.
+                        </p>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-2">
+                            {[
+                                { key: 'showHeroSection', label: 'Hero / Introduction' },
+                                { key: 'showStatsSection', label: 'Quick Stats' },
+                                { key: 'showTrainingSection', label: 'Training & Services' },
+                                { key: 'showSocialSection', label: 'Social Hub' },
+                                { key: 'showExperienceSection', label: 'Experience' },
+                                { key: 'showEducationSection', label: 'Education' },
+                                { key: 'showVolunteeringSection', label: 'Volunteering' },
+                                { key: 'showAboutSection', label: 'About Me' },
+                                { key: 'showProjectsSection', label: 'Projects' },
+                                { key: 'showQuizzesSection', label: 'Interactive Quizzes' },
+                                { key: 'showTypingTestSection', label: 'Typing Test' },
+                                { key: 'showFeedbackSection', label: 'Client Feedback' },
+                                { key: 'showGamesSection', label: 'Arcade Hub' },
+                                { key: 'showLiveSessionsSection', label: 'Live Sessions' },
+                            ].map((section) => (
+                                <button
+                                    key={section.key}
+                                    type="button"
+                                    onClick={() => setProfile({ ...profile, [section.key]: !profile[section.key as keyof any] })}
+                                    className={`flex flex-col items-start gap-3 p-5 rounded-2xl border-2 transition-all text-left ${profile[section.key as keyof any] !== false
+                                        ? "bg-blue-50/50 border-blue-500/20 text-blue-900 shadow-sm"
+                                        : "bg-gray-50 border-gray-100 text-gray-400 opacity-60 hover:opacity-100"
+                                        }`}
+                                >
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${profile[section.key as keyof any] !== false ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-400"}`}>
+                                        {profile[section.key as keyof any] !== false ? <Eye size={16} /> : <EyeOff size={16} />}
+                                    </div>
+                                    <span className="text-[10px] font-black uppercase tracking-widest leading-tight">{section.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     {/* Quick Stats Section */}
                     <div className="space-y-6 pt-12 border-t border-gray-100 dark:border-gray-800">
                         <h2 className="text-xl font-black text-gray-900 dark:text-white ml-2">Quick Stats (Home Page)</h2>

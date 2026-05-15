@@ -208,19 +208,21 @@ export default async function Home() {
   return (
     <div className="flex flex-col gap-0 bg-[#0e0e0e] relative">
       <MatrixBackground />
-      <section id="home">
-        <Hero
-          profile={{
-            name: profile.name,
-            headline: profile.headline,
-            avatarUrl: profile.avatarUrl,
-            heroImageUrl: profile.heroImageUrl,
-            audioUrl: profile.audioUrl
-          } as any}
-          experiences={experiences}
-          className=""
-        />
-      </section>
+      {profile.showHeroSection !== false && (
+        <section id="home">
+          <Hero
+            profile={{
+              name: profile.name,
+              headline: profile.headline,
+              avatarUrl: profile.avatarUrl,
+              heroImageUrl: profile.heroImageUrl,
+              audioUrl: profile.audioUrl
+            } as any}
+            experiences={experiences}
+            className=""
+          />
+        </section>
+      )}
 
       <MainContent
         profile={profile as any}

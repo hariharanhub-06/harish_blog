@@ -20,19 +20,25 @@ export async function GET(req: Request) {
         // Enrich polls with option counts
         const polls = pollsData.map(poll => {
             const counts: Record<number, number> = {};
-            poll.responses.forEach(r => {
-                counts[r.optionIndex] = (counts[r.optionIndex] || 0) + 1;
-            });
+            if (poll.responses) {
+                poll.responses.forEach(r => {
+                    counts[r.optionIndex] = (counts[r.optionIndex] || 0) + 1;
+                });
+            }
 
-            const options = (poll.options as any[]).map((opt, i) => ({
-                ...opt,
-                count: counts[i] || 0
-            }));
+            const rawOptions = Array.isArray(poll.options) ? poll.options : [];
+            const options = rawOptions.map((opt: any, i: number) => {
+                const base = typeof opt === 'string' ? { text: opt } : opt;
+                return {
+                    ...base,
+                    count: counts[i] || 0
+                };
+            });
 
             return {
                 ...poll,
                 options,
-                totalVotes: poll.responses.length
+                totalVotes: poll.responses?.length || 0
             };
         });
 

@@ -85,6 +85,21 @@ interface Profile {
     socialSectionMediaType?: string;
     socialSectionTitle?: string;
     socialSectionSubtitle?: string;
+
+    // Visibility toggles
+    showHeroSection?: boolean;
+    showStatsSection?: boolean;
+    showTrainingSection?: boolean;
+    showExperienceSection?: boolean;
+    showEducationSection?: boolean;
+    showVolunteeringSection?: boolean;
+    showAboutSection?: boolean;
+    showProjectsSection?: boolean;
+    showQuizzesSection?: boolean;
+    showTypingTestSection?: boolean;
+    showFeedbackSection?: boolean;
+    showGamesSection?: boolean;
+    showLiveSessionsSection?: boolean;
 }
 
 interface Partnership {
@@ -208,49 +223,51 @@ export default function MainContent({
         <div className="flex flex-col gap-4 pb-4 overflow-x-hidden">
             <VisitorBadge />
             {/* Stats Section */}
-            <section className="container mx-auto px-6 py-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    {loading ? (
-                        [...Array(4)].map((_, i) => (
-                            <div key={i} className="p-6 bg-white/5 rounded-3xl border border-white/10 shadow-sm animate-pulse h-32 flex flex-col justify-end">
-                                <div className="w-10 h-10 bg-white/10 rounded-2xl mb-4"></div>
-                                <div className="h-6 bg-white/10 rounded-md w-1/2 mb-1"></div>
-                                <div className="h-3 bg-white/5 rounded-md w-1/3"></div>
-                            </div>
-                        ))
-                    ) : (
-                        stats.map((stat: Stat, i: number) => {
-                            const Icon = iconMap[stat.icon] || User;
-                            const colors = [
-                                { color: "text-blue-400", bg: "bg-blue-500/10" },
-                                { color: "text-orange-500", bg: "bg-orange-500/10" },
-                                { color: "text-purple-400", bg: "bg-purple-500/10" },
-                                { color: "text-pink-400", bg: "bg-pink-500/10" },
-                            ];
-                            const color = colors[i % colors.length];
+            {profile.showStatsSection !== false && (
+                <section className="container mx-auto px-6 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        {loading ? (
+                            [...Array(4)].map((_, i) => (
+                                <div key={i} className="p-6 bg-white/5 rounded-3xl border border-white/10 shadow-sm animate-pulse h-32 flex flex-col justify-end">
+                                    <div className="w-10 h-10 bg-white/10 rounded-2xl mb-4"></div>
+                                    <div className="h-6 bg-white/10 rounded-md w-1/2 mb-1"></div>
+                                    <div className="h-3 bg-white/5 rounded-md w-1/3"></div>
+                                </div>
+                            ))
+                        ) : (
+                            stats.map((stat: Stat, i: number) => {
+                                const Icon = iconMap[stat.icon] || User;
+                                const colors = [
+                                    { color: "text-blue-400", bg: "bg-blue-500/10" },
+                                    { color: "text-orange-500", bg: "bg-orange-500/10" },
+                                    { color: "text-purple-400", bg: "bg-purple-500/10" },
+                                    { color: "text-pink-400", bg: "bg-pink-500/10" },
+                                ];
+                                const color = colors[i % colors.length];
 
-                            return (
-                                <CardWrapper key={i} index={i}>
-                                    <div className="group p-6 bg-white/5 rounded-3xl border border-white/10 shadow-sm hover:shadow-2xl hover:border-white/20 transition-all duration-500 overflow-hidden relative h-full flex flex-col items-center text-center justify-center">
-                                        <span className="absolute -bottom-4 -right-2 text-8xl font-black text-white/5 group-hover:text-white/10 transition-colors -z-10">
-                                            {String(stat.value).replace('+', '')}
-                                        </span>
+                                return (
+                                    <CardWrapper key={i} index={i}>
+                                        <div className="group p-6 bg-white/5 rounded-3xl border border-white/10 shadow-sm hover:shadow-2xl hover:border-white/20 transition-all duration-500 overflow-hidden relative h-full flex flex-col items-center text-center justify-center">
+                                            <span className="absolute -bottom-4 -right-2 text-8xl font-black text-white/5 group-hover:text-white/10 transition-colors -z-10">
+                                                {String(stat.value).replace('+', '')}
+                                            </span>
 
-                                        <div className={`${color.bg} ${color.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform`}>
-                                            <Icon size={24} />
+                                            <div className={`${color.bg} ${color.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform`}>
+                                                <Icon size={24} />
+                                            </div>
+                                            <h3 className="text-3xl font-black text-white mb-1 tracking-tighter">{stat.value}</h3>
+                                            <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest leading-none">{stat.label}</p>
                                         </div>
-                                        <h3 className="text-3xl font-black text-white mb-1 tracking-tighter">{stat.value}</h3>
-                                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest leading-none">{stat.label}</p>
-                                    </div>
-                                </CardWrapper>
-                            );
-                        })
-                    )}
-                </div>
-            </section>
+                                    </CardWrapper>
+                                );
+                            })
+                        )}
+                    </div>
+                </section>
+            )}
 
             {/* Live Sessions Carousel */}
-            {liveSessions.length > 0 && (
+            {profile.showLiveSessionsSection !== false && liveSessions.length > 0 && (
                 <Suspense fallback={null}>
                     <LiveSessionsCarousel sessions={liveSessions} />
                 </Suspense>
@@ -259,7 +276,7 @@ export default function MainContent({
 
 
             {/* Training Programs Section (Replaces Skill Carousel) */}
-            {profile && (
+            {profile.showTrainingSection !== false && profile && (
                 <TrainingPrograms
                     trainingStats={profile.trainingStats as any}
                     partnerships={partnerships as any}
@@ -277,7 +294,7 @@ export default function MainContent({
             )}
 
             {/* Experience Section */}
-            {experiences.length > 0 && (
+            {profile.showExperienceSection !== false && experiences.length > 0 && (
                 <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
 
                     <div className="flex flex-col items-center mb-4 text-center">
@@ -309,7 +326,7 @@ export default function MainContent({
             )}
 
             {/* Education Section */}
-            {educations.length > 0 && (
+            {profile.showEducationSection !== false && educations.length > 0 && (
                 <section className="py-6 md:py-8 relative overflow-hidden">
 
                     <div className="flex flex-col items-center mb-4 text-center">
@@ -341,7 +358,7 @@ export default function MainContent({
             )}
 
             {/* Volunteering Section */}
-            {volunteerings.length > 0 && (
+            {profile.showVolunteeringSection !== false && volunteerings.length > 0 && (
                 <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
 
                     <div className="flex flex-col items-center mb-4 text-center">
@@ -373,98 +390,102 @@ export default function MainContent({
             )}
 
             {/* About Section */}
-            <section id="about" className="container mx-auto px-6 scroll-mt-20">
-                {profile && (
-                    <AboutHero
-                        name={profile.name as any}
-                        about={profile.about as any}
-                        location={profile.location as any}
-                        imageUrl={profile.aboutImageUrl as any}
-                        experience={profile.stats?.find((s: Stat) => s.label === "Years Experience")?.value?.toString() || "3+"}
-                    />
-                )}
+            {profile.showAboutSection !== false && (
+                <section id="about" className="container mx-auto px-6 scroll-mt-20">
+                    {profile && (
+                        <AboutHero
+                            name={profile.name as any}
+                            about={profile.about as any}
+                            location={profile.location as any}
+                            imageUrl={profile.aboutImageUrl as any}
+                            experience={profile.stats?.find((s: Stat) => s.label === "Years Experience")?.value?.toString() || "3+"}
+                        />
+                    )}
 
-            </section>
+                </section>
+            )}
 
             {/* Projects/Portfolio Section */}
-            <section id="portfolio" className="container mx-auto px-6 scroll-mt-20 py-8">
-                <div className="flex flex-col items-center mb-6">
-                    <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter">Featured <span className="text-orange-600">Projects</span></h2>
-                    <div className="w-12 h-1 bg-orange-600 mt-2 rounded-full"></div>
-                    <p className="mt-4 text-gray-400 text-base max-w-xl text-center font-bold">
-                        Building digital products that combine stunning design with robust business logic.
-                    </p>
-                </div>
-
-                {loading ? (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {[...Array(3)].map((_, i) => (
-                            <div key={i} className="bg-white/5 rounded-3xl overflow-hidden border border-white/10 h-80 animate-pulse">
-                                <div className="h-56 bg-white/10"></div>
-                                <div className="p-5 flex flex-col gap-2">
-                                    <div className="w-1/2 h-4 bg-white/10 rounded"></div>
-                                    <div className="w-full h-8 bg-white/5 rounded"></div>
-                                </div>
-                            </div>
-                        ))}
+            {profile.showProjectsSection !== false && (
+                <section id="portfolio" className="container mx-auto px-6 scroll-mt-20 py-8">
+                    <div className="flex flex-col items-center mb-6">
+                        <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter">Featured <span className="text-orange-600">Projects</span></h2>
+                        <div className="w-12 h-1 bg-orange-600 mt-2 rounded-full"></div>
+                        <p className="mt-4 text-gray-400 text-base max-w-xl text-center font-bold">
+                            Building digital products that combine stunning design with robust business logic.
+                        </p>
                     </div>
-                ) : (
-                    <InfiniteCarousel
-                        items={projects.map((project, i) => (
-                            <div key={project.id} className="w-[85vw] md:w-[450px] h-full">
-                                <CardWrapper index={i}>
-                                    <Tilt options={{ max: 10, speed: 400, glare: false }} className="h-full">
-                                        <div
-                                            className="group flex flex-col h-full bg-[#1a1a1a] rounded-3xl overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/30 transition-all duration-500 cursor-pointer"
-                                            onClick={() => setSelectedItem({ data: project, type: "project" })}
-                                        >
-                                            <div className="relative h-64 overflow-hidden shrink-0">
-                                                {project.thumbnail ? (
-                                                    <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100" />
-                                                ) : (
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
-                                                        <span className="text-white font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
-                                                    </div>
-                                                )}
-                                                <div className="absolute top-4 right-4 flex gap-2">
-                                                    {project.featured && (
-                                                        <span className="bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">Featured</span>
+
+                    {loading ? (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {[...Array(3)].map((_, i) => (
+                                <div key={i} className="bg-white/5 rounded-3xl overflow-hidden border border-white/10 h-80 animate-pulse">
+                                    <div className="h-56 bg-white/10"></div>
+                                    <div className="p-5 flex flex-col gap-2">
+                                        <div className="w-1/2 h-4 bg-white/10 rounded"></div>
+                                        <div className="w-full h-8 bg-white/5 rounded"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <InfiniteCarousel
+                            items={projects.map((project, i) => (
+                                <div key={project.id} className="w-[85vw] md:w-[450px] h-full">
+                                    <CardWrapper index={i}>
+                                        <Tilt options={{ max: 10, speed: 400, glare: false }} className="h-full">
+                                            <div
+                                                className="group flex flex-col h-full bg-[#1a1a1a] rounded-3xl overflow-hidden border border-white/5 shadow-2xl hover:border-orange-600/30 transition-all duration-500 cursor-pointer"
+                                                onClick={() => setSelectedItem({ data: project, type: "project" })}
+                                            >
+                                                <div className="relative h-64 overflow-hidden shrink-0">
+                                                    {project.thumbnail ? (
+                                                        <Image src={project.thumbnail} alt={project.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100" />
+                                                    ) : (
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
+                                                            <span className="text-white font-black text-4xl opacity-20 uppercase tracking-widest">{project.title.charAt(0)}</span>
+                                                        </div>
                                                     )}
-                                                </div>
-                                            </div>
-
-                                            <div className="p-6 flex flex-col flex-grow text-left">
-                                                <div className="flex flex-wrap gap-2 mb-4">
-                                                    {project.technologies?.slice(0, 3).map((tech: string) => (
-                                                        <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/10 px-3 py-1.5 rounded-md">{tech}</span>
-                                                    ))}
+                                                    <div className="absolute top-4 right-4 flex gap-2">
+                                                        {project.featured && (
+                                                            <span className="bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">Featured</span>
+                                                        )}
+                                                    </div>
                                                 </div>
 
-                                                <h3 className="text-2xl font-black text-white mb-2 group-hover:text-orange-500 transition-colors leading-tight">{project.title}</h3>
-                                                <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2 font-bold">{project.description}</p>
+                                                <div className="p-6 flex flex-col flex-grow text-left">
+                                                    <div className="flex flex-wrap gap-2 mb-4">
+                                                        {project.technologies?.slice(0, 3).map((tech: string) => (
+                                                            <span key={tech} className="text-[10px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/10 px-3 py-1.5 rounded-md">{tech}</span>
+                                                        ))}
+                                                    </div>
 
-                                                <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
-                                                    <span className="text-orange-600 font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
-                                                        View Case Study <ArrowRight size={16} />
-                                                    </span>
-                                                    <div className="flex gap-4">
-                                                        <ExternalLink size={18} className="text-gray-600 hover:text-white transition-colors" />
-                                                        <Github size={18} className="text-gray-600 hover:text-white transition-colors" />
+                                                    <h3 className="text-2xl font-black text-white mb-2 group-hover:text-orange-500 transition-colors leading-tight">{project.title}</h3>
+                                                    <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2 font-bold">{project.description}</p>
+
+                                                    <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
+                                                        <span className="text-orange-600 font-black text-xs uppercase tracking-widest group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
+                                                            View Case Study <ArrowRight size={16} />
+                                                        </span>
+                                                        <div className="flex gap-4">
+                                                            <ExternalLink size={18} className="text-gray-600 hover:text-white transition-colors" />
+                                                            <Github size={18} className="text-gray-600 hover:text-white transition-colors" />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </Tilt>
-                                </CardWrapper>
-                            </div>
-                        ))}
-                    />
-                )}
-            </section>
+                                        </Tilt>
+                                    </CardWrapper>
+                                </div>
+                            ))}
+                        />
+                    )}
+                </section>
+            )}
 
             {/* Feedback Section */}
             {/* Quiz Section */}
-            {quizzes.length > 0 && (
+            {profile.showQuizzesSection !== false && quizzes.length > 0 && (
                 <section id="quiz" className="py-8 md:py-12 bg-gradient-to-b from-transparent to-primary/5 relative overflow-hidden">
 
                     <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center mb-8 gap-6 relative z-10">
@@ -504,7 +525,7 @@ export default function MainContent({
                     {quizzes.length > 0 && (
                         <section className="w-full relative z-20 overflow-hidden">
                             <div className="container mx-auto px-6 mb-8">
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Slide to explore</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.35em] text-primary">Slide to explore</span>
                                 <h4 className="text-2xl font-black text-white uppercase tracking-tighter mt-1">Available <span className="text-blue-500">Challenges</span></h4>
                             </div>
 
@@ -641,12 +662,12 @@ export default function MainContent({
             )}
 
             {/* Typing Test Section */}
-            <TypingTestSection />
+            {profile.showTypingTestSection !== false && <TypingTestSection />}
 
-            <FeedbackSection />
+            {profile.showFeedbackSection !== false && <FeedbackSection />}
 
             {/* Games Section */}
-            <GamesCarousel onPlayGame={setActiveGameId} />
+            {profile.showGamesSection !== false && <GamesCarousel onPlayGame={setActiveGameId} />}
 
 
             {

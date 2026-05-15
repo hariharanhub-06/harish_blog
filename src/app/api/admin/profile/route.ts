@@ -33,7 +33,22 @@ const DEFAULT_PROFILE = {
     socialSectionTitle: "JOIN THE",
     socialSectionSubtitle: "CONVERSATION",
     socialSectionMediaType: "image",
-    socialSectionMediaUrl: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop"
+    socialSectionMediaUrl: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop",
+
+    // Default visibility for all sections
+    showHeroSection: true,
+    showStatsSection: true,
+    showTrainingSection: true,
+    showExperienceSection: true,
+    showEducationSection: true,
+    showVolunteeringSection: true,
+    showAboutSection: true,
+    showProjectsSection: true,
+    showQuizzesSection: true,
+    showTypingTestSection: true,
+    showFeedbackSection: true,
+    showGamesSection: true,
+    showLiveSessionsSection: true
 };
 
 export async function GET(req: Request) {
