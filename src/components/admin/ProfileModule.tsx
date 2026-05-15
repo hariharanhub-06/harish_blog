@@ -71,10 +71,13 @@ export default function ProfileModule() {
         try {
             const file = e.target.files[0];
             const isAudio = type === 'audio';
-            const limit = isAudio ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+            const isHero = type === 'hero';
+            const isVideo = file.type.startsWith('video/');
+            const limit = (isAudio || (isHero && isVideo)) ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
 
             if (file.size > limit) {
-                alert(`File is too large. Please select a ${isAudio ? 'file under 100MB' : 'image under 10MB'}.`);
+                const message = isAudio ? 'audio under 100MB' : (isHero && isVideo) ? 'video under 100MB' : 'image under 10MB';
+                alert(`File is too large. Please select a ${message}.`);
                 setUploading(false);
                 return;
             }
@@ -150,6 +153,17 @@ export default function ProfileModule() {
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-white dark:bg-[#1e1e1e] rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-800 p-8 md:p-12">
                 <form onSubmit={handleSave} className="space-y-12">
+                    {/* Header with quick tip */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-8">
+                        <div>
+                            <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Main Page <span className="text-primary italic">Configuration</span></h1>
+                            <p className="text-secondary text-xs font-bold uppercase tracking-widest mt-1">Manage your branding, media, and social engagement settings.</p>
+                        </div>
+                        <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-100 dark:border-blue-800/50">
+                            <Share2 size={16} />
+                            <span className="text-[10px] font-black uppercase tracking-widest leading-none">Scroll down for Social Hub toggles</span>
+                        </div>
+                    </div>
                     {/* Images Section */}
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {/* Avatar Section */}
@@ -181,9 +195,13 @@ export default function ProfileModule() {
                             <div className="relative group w-full">
                                 <div className="aspect-video w-full rounded-[2.5rem] overflow-hidden border-8 border-gray-50 dark:border-gray-800 shadow-inner bg-gray-100 dark:bg-white/10 flex items-center justify-center relative">
                                     {profile.heroImageUrl ? (
-                                        <Image src={profile.heroImageUrl} alt="Hero" fill className="object-cover" />
+                                        profile.heroImageUrl.includes('.mp4') || profile.heroImageUrl.includes('.webm') ? (
+                                            <video src={profile.heroImageUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                                        ) : (
+                                            <Image src={profile.heroImageUrl} alt="Hero" fill className="object-cover" />
+                                        )
                                     ) : (
-                                        <div className="text-gray-300 font-black text-xl uppercase tracking-tighter opacity-20">No Hero Image</div>
+                                        <div className="text-gray-300 font-black text-xl uppercase tracking-tighter opacity-20">No Hero Media</div>
                                     )}
                                     {uploading && (
                                         <div className="absolute inset-0 bg-primary/60 backdrop-blur-sm flex flex-col items-center justify-center text-white">
@@ -192,8 +210,8 @@ export default function ProfileModule() {
                                     )}
                                 </div>
                                 <label className="absolute bottom-4 right-4 bg-accent text-white p-4 rounded-2xl cursor-pointer hover:bg-amber-600 transition-all shadow-xl hover:scale-110 active:scale-95 border-4 border-white">
-                                    <Camera size={20} />
-                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'hero')} />
+                                    <Video size={20} />
+                                    <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleImageUpload(e, 'hero')} />
                                 </label>
                             </div>
                             <p className="text-secondary text-sm font-bold uppercase tracking-widest text-center">Hero Background Picture</p>
@@ -359,8 +377,8 @@ export default function ProfileModule() {
                                 type="button"
                                 onClick={() => setProfile({ ...profile, showSocialSection: !profile.showSocialSection })}
                                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${profile.showSocialSection
-                                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200"
-                                        : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200"
+                                    : "bg-gray-100 text-gray-400 hover:bg-gray-200"
                                     }`}
                             >
                                 {profile.showSocialSection ? <><Eye size={16} /> Section Visible</> : <><EyeOff size={16} /> Section Hidden</>}
@@ -404,8 +422,8 @@ export default function ProfileModule() {
                                             type="button"
                                             onClick={() => setProfile({ ...profile, socialSectionMediaType: type })}
                                             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${(profile.socialSectionMediaType || 'image') === type
-                                                    ? "bg-white dark:bg-gray-700 shadow-md text-primary"
-                                                    : "text-gray-400"
+                                                ? "bg-white dark:bg-gray-700 shadow-md text-primary"
+                                                : "text-gray-400"
                                                 }`}
                                         >
                                             {type === 'video' ? <Video size={14} /> : <ImageIcon size={14} />} {type}

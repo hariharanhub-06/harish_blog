@@ -68,12 +68,12 @@ export default function SocialInteractionModule() {
         question: "",
         options: ["", ""],
         backgroundUrl: "",
-        backgroundType: "image" as const
+        backgroundType: "image" as "image" | "video"
     });
     const [newQuestion, setNewQuestion] = useState({
         prompt: "",
         backgroundUrl: "",
-        backgroundType: "image" as const
+        backgroundType: "image" as "image" | "video"
     });
     const [newGame, setNewGame] = useState({
         gameId: "memory",
@@ -112,7 +112,13 @@ export default function SocialInteractionModule() {
 
         setSubmitting(true);
         try {
-            const payload = activeTab === 'poll' ? { type: 'poll', data: newPoll } :
+            const payload = activeTab === 'poll' ? {
+                type: 'poll',
+                data: {
+                    ...newPoll,
+                    options: newPoll.options.map(text => ({ text }))
+                }
+            } :
                 activeTab === 'question' ? { type: 'question', data: newQuestion } :
                     { type: 'game', data: newGame };
 
@@ -464,8 +470,8 @@ export default function SocialInteractionModule() {
                                                             else setNewQuestion({ ...newQuestion, backgroundType: type });
                                                         }}
                                                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[8px] font-black uppercase transition-all ${(activeTab === 'poll' ? newPoll.backgroundType : newQuestion.backgroundType) === type
-                                                                ? "bg-white dark:bg-gray-700 shadow-sm text-primary"
-                                                                : "text-gray-400"
+                                                            ? "bg-white dark:bg-gray-700 shadow-sm text-primary"
+                                                            : "text-gray-400"
                                                             }`}
                                                     >
                                                         {type === 'video' ? <Video size={12} /> : <ImageIcon size={12} />} {type}

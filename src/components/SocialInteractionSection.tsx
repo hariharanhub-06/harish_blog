@@ -208,17 +208,20 @@ export default function SocialInteractionSection({ poll, question, profile }: So
 
                                         {type === 'poll' ? (
                                             <div className="space-y-4">
-                                                {poll?.options.map((opt, i) => (
-                                                    <button
-                                                        key={i}
-                                                        onClick={() => handleVote(i)}
-                                                        disabled={submitting}
-                                                        className="w-full group relative h-16 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/50 rounded-2xl transition-all duration-300 flex items-center px-6"
-                                                    >
-                                                        <span className="text-lg font-black text-white group-hover:text-primary transition-colors">{opt.text}</span>
-                                                        <ArrowRight className="ml-auto text-white/20 group-hover:text-primary group-hover:translate-x-2 transition-all" size={20} />
-                                                    </button>
-                                                ))}
+                                                {poll?.options.map((opt, i) => {
+                                                    const text = typeof opt === 'string' ? opt : (opt as any).text;
+                                                    return (
+                                                        <button
+                                                            key={i}
+                                                            onClick={() => handleVote(i)}
+                                                            disabled={submitting}
+                                                            className="w-full group relative h-16 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-primary/50 rounded-2xl transition-all duration-300 flex items-center px-6"
+                                                        >
+                                                            <span className="text-lg font-black text-white group-hover:text-primary transition-colors">{text}</span>
+                                                            <ArrowRight className="ml-auto text-white/20 group-hover:text-primary group-hover:translate-x-2 transition-all" size={20} />
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
                                         ) : (
                                             <div className="space-y-4">
