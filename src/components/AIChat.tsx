@@ -263,7 +263,7 @@ export default function ContactForm() {
                     mobile: formData.mobile,
                     message: formData.message,
                     subject: "Contact Form Submission",
-                    category: pathname === "/services" ? "Web Business" : pathname === "/financial-logistics" ? "Finance Logics" : "Blog",
+                    category: "Blog",
                     serviceType: formData.serviceType
                 }),
             });
@@ -405,54 +405,7 @@ export default function ContactForm() {
                                         />
                                     </div>
 
-                                    {/* Service Dropdown for Web Business */}
-                                    {pathname === "/services" && (
-                                        <div>
-                                            <label className="block text-xs text-white/60 mb-1.5 font-medium">
-                                                Service Interested In <span className="text-orange-500">*</span>
-                                            </label>
-                                            <select
-                                                name="serviceType"
-                                                value={formData.serviceType}
-                                                onChange={handleChange as any}
-                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-orange-600 focus:ring-1 focus:ring-orange-600/50 outline-none transition-all appearance-none"
-                                                required
-                                            >
-                                                <option value="" className="bg-black text-white/50">Select Service</option>
-                                                <option value="Web Development" className="bg-black">Web Development</option>
-                                                <option value="CRM Development" className="bg-black">CRM Development</option>
-                                                <option value="Lead Management Software" className="bg-black">Lead Management Software</option>
-                                                <option value="Sales Automation" className="bg-black">Sales Automation</option>
-                                            </select>
-                                        </div>
-                                    )}
-
-                                    {/* Service Dropdown for Finance Logics */}
-                                    {pathname === "/financial-logistics" && (
-                                        <div>
-                                            <label className="block text-xs text-white/60 mb-1.5 font-medium">
-                                                Loan/Service Type <span className="text-orange-500">*</span>
-                                            </label>
-                                            <select
-                                                name="serviceType"
-                                                value={formData.serviceType}
-                                                onChange={handleChange as any}
-                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-orange-600 focus:ring-1 focus:ring-orange-600/50 outline-none transition-all appearance-none"
-                                                required
-                                            >
-                                                <option value="" className="bg-black text-white/50">Select Loan Type</option>
-                                                <option value="Personal Loan" className="bg-black">Personal Loan</option>
-                                                <option value="Unsecured Loan" className="bg-black">Unsecured Loan</option>
-                                                <option value="Business Loan" className="bg-black">Business Loan</option>
-                                                <option value="Loan Against Property(LAP)" className="bg-black">Loan Against Property (LAP)</option>
-                                                <option value="Two Wheeler Loan" className="bg-black">Two Wheeler Loan</option>
-                                                <option value="Four Wheeler Loan" className="bg-black">Four Wheeler Loan</option>
-                                                <option value="Instant/Quick Loan" className="bg-black">Instant/Quick Loan</option>
-                                            </select>
-                                        </div>
-                                    )}
-
-                                    {/* Message Field (Optional for Business/Finance if needed, but keeping it) */}
+                                    {/* Message Field */}
                                     <div>
                                         <label className="block text-xs text-white/60 mb-1.5 font-medium">
                                             Message

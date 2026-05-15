@@ -8,6 +8,9 @@ import { Lock, Mail, AlertCircle, Layout, ArrowRight, Loader2, Eye, EyeOff, Chec
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
+// Hoist persistence setup to module level so it resolves before any user interaction
+const persistenceReady = setPersistence(auth, browserSessionPersistence).catch(console.error);
+
 export default function AdminLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -18,11 +21,6 @@ export default function AdminLogin() {
     const [forgotLoading, setForgotLoading] = useState(false);
     const router = useRouter();
     const emailInputRef = useRef<HTMLInputElement>(null);
-
-    // Configure Firebase persistence once on mount (prevents first-click timeout)
-    useEffect(() => {
-        setPersistence(auth, browserSessionPersistence).catch(console.error);
-    }, []);
 
     // System theme sync
     useEffect(() => {
@@ -72,6 +70,7 @@ export default function AdminLogin() {
         setError("");
         setSuccessMessage("");
         try {
+            await persistenceReady;
             await signInWithEmailAndPassword(auth, email, password);
             router.push("/admin/dashboard");
         } catch (err: any) {

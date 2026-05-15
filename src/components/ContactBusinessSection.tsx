@@ -144,8 +144,8 @@ export default function ContactBusinessSection({ category = "Business Digital So
                                 <Link href="/" className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2">
                                     <Home size={14} /> Back to Home
                                 </Link>
-                                <Link href={category === "Financial Logistics" ? "/financial-logistics" : "/services"} className="w-full sm:w-auto px-8 py-4 bg-orange-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2">
-                                    View Other Services <ArrowRight size={14} />
+                                <Link href="/#contact" className="w-full sm:w-auto px-8 py-4 bg-orange-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2">
+                                    Get In Touch <ArrowRight size={14} />
                                 </Link>
                             </div>
                         </div>

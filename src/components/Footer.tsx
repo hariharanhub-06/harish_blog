@@ -42,8 +42,6 @@ export default function Footer() {
                 </div>
 
                 <div className="border-t border-gray-50 pt-4 flex flex-col md:flex-row items-center justify-center gap-4 text-center text-[10px] font-black uppercase tracking-widest text-secondary/60">
-                    <Link href="/payment-policy" className="hover:text-primary transition-colors">Payment & Service Policy</Link>
-                    <span className="hidden md:block text-gray-200">|</span>
                     <p>© {new Date().getFullYear()} Hari Haran Jeyaramamoorthy. All rights reserved.</p>
                 </div>
             </div>
