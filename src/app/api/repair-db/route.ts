@@ -110,6 +110,9 @@ export async function GET(req: Request) {
 
         // ── social_game_sessions: ensure play_count exists ───────────────────────
         `ALTER TABLE social_game_sessions ADD COLUMN IF NOT EXISTS play_count INTEGER DEFAULT 0`,
+
+        // ── website_question_responses: add ip_hash for dedup ────────────────────
+        `ALTER TABLE website_question_responses ADD COLUMN IF NOT EXISTS ip_hash TEXT`,
     ];
 
     const results: { query: string; status: string }[] = [];

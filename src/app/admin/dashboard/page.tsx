@@ -309,7 +309,7 @@ export default function AdminDashboard() {
     return (
         <div className="flex h-[100dvh] bg-[#f8f9fa] dark:bg-[#121212] overflow-hidden selection:bg-primary/10 font-sans text-gray-900 dark:text-gray-100 transition-colors duration-300">
             {/* Sidebar */}
-            <aside className="w-[260px] bg-white dark:bg-[#1e1e1e] border-r border-gray-200 dark:border-gray-800 hidden lg:flex flex-col fixed inset-y-0 z-50 transition-colors duration-300 shadow-sm">
+            <aside className="w-[260px] bg-white dark:bg-[#1e1e1e] border-r border-gray-200 dark:border-gray-800 hidden lg:flex flex-col fixed inset-y-0 z-50 transition-colors duration-300 shadow-sm" aria-label="Admin sidebar">
                 <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                     <Link href="/" className="group flex items-center gap-3">
                         <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-all text-white">
@@ -394,11 +394,11 @@ export default function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 lg:ml-[260px] w-full overflow-x-hidden min-h-screen relative flex flex-col">
-                <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 h-28 transition-colors duration-300">
-                    <div className="max-w-7xl mx-auto px-6 md:px-8 h-full flex justify-between items-center">
-                        <div className="flex items-center gap-4 flex-1">
-                            <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+            <main className="flex-1 lg:ml-[260px] w-full overflow-x-clip min-h-screen relative flex flex-col">
+                <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 h-14 md:h-20 lg:h-28 transition-colors duration-300">
+                    <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 h-full flex justify-between items-center gap-2">
+                        <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
+                            <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shrink-0">
                                 <Menu size={20} />
                             </button>
 
@@ -445,29 +445,29 @@ export default function AdminDashboard() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            {/* Theme Switcher */}
-                            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1.5 border border-gray-200 dark:border-gray-700 items-center">
+                        <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                            {/* Theme Switcher — compact on mobile */}
+                            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 md:p-1.5 border border-gray-200 dark:border-gray-700 items-center">
                                 <button
                                     onClick={() => setTheme("light")}
                                     title="Light Mode"
-                                    className={`p-2 rounded-lg transition-all ${theme === "light" ? "bg-white dark:bg-gray-600 shadow-md text-primary" : "text-gray-400 hover:text-gray-600"}`}
+                                    className={`p-1.5 md:p-2 rounded-lg transition-all ${theme === "light" ? "bg-white dark:bg-gray-600 shadow-md text-primary" : "text-gray-400 hover:text-gray-600"}`}
                                 >
-                                    <Sun size={15} strokeWidth={2.5} />
+                                    <Sun size={14} strokeWidth={2.5} />
                                 </button>
                                 <button
                                     onClick={() => setTheme("dark")}
                                     title="Dark Mode"
-                                    className={`p-2 rounded-lg transition-all ${theme === "dark" ? "bg-white dark:bg-gray-600 shadow-md text-primary" : "text-gray-400 hover:text-gray-600"}`}
+                                    className={`p-1.5 md:p-2 rounded-lg transition-all ${theme === "dark" ? "bg-white dark:bg-gray-600 shadow-md text-primary" : "text-gray-400 hover:text-gray-600"}`}
                                 >
-                                    <Moon size={15} strokeWidth={2.5} />
+                                    <Moon size={14} strokeWidth={2.5} />
                                 </button>
                                 <button
                                     onClick={() => setTheme("system")}
                                     title="System Mode"
-                                    className={`p-2 rounded-lg transition-all ${theme === "system" ? "bg-white dark:bg-gray-600 shadow-md text-primary" : "text-gray-400 hover:text-gray-600"}`}
+                                    className={`hidden sm:block p-1.5 md:p-2 rounded-lg transition-all ${theme === "system" ? "bg-white dark:bg-gray-600 shadow-md text-primary" : "text-gray-400 hover:text-gray-600"}`}
                                 >
-                                    <Monitor size={15} strokeWidth={2.5} />
+                                    <Monitor size={14} strokeWidth={2.5} />
                                 </button>
                             </div>
 
@@ -475,9 +475,9 @@ export default function AdminDashboard() {
                             <div className="relative">
                                 <button
                                     onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                                    className={`p-2.5 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all relative group ${unreadCount > 0 ? 'bg-primary/5 border-primary/20' : ''}`}
+                                    className={`p-2 md:p-2.5 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all relative group ${unreadCount > 0 ? 'bg-primary/5 border-primary/20' : ''}`}
                                 >
-                                    <ShieldAlert size={20} className={unreadCount > 0 ? 'text-primary' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary'} />
+                                    <ShieldAlert size={18} className={unreadCount > 0 ? 'text-primary' : 'text-gray-500 dark:text-gray-400 group-hover:text-primary'} />
                                     {unreadCount > 0 && (
                                         <span className="absolute -top-1 -right-1 flex h-4 w-4">
                                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -491,7 +491,7 @@ export default function AdminDashboard() {
                                 {isNotificationsOpen && (
                                     <>
                                         <div className="fixed inset-0 z-40" onClick={() => setIsNotificationsOpen(false)} />
-                                        <div className="absolute top-full right-0 mt-3 w-[380px] bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-800 rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="absolute top-full right-0 mt-3 w-[calc(100vw-1.5rem)] max-w-[380px] sm:w-[380px] bg-white dark:bg-[#252525] border border-gray-200 dark:border-gray-800 rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                                             <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
                                                 <span className="font-black text-xs uppercase tracking-widest text-gray-900 dark:text-white">Recent Enquiries</span>
                                                 <span className="text-[10px] font-black bg-primary text-white px-2.5 py-1 rounded-full uppercase tracking-tighter shadow-lg shadow-primary/20">{unreadCount} Pending</span>
@@ -533,12 +533,12 @@ export default function AdminDashboard() {
                                 )}
                             </div>
 
-                            <div className="flex items-center gap-3 pl-3 border-l border-gray-200 dark:border-gray-800">
-                                <div className="text-right hidden sm:block">
-                                    <div className="text-xs font-bold text-gray-900 dark:text-gray-100 leading-none mb-1">{user?.email?.split('@')[0] || 'Admin'}</div>
+                            <div className="flex items-center gap-2 md:gap-3 pl-2 md:pl-3 border-l border-gray-200 dark:border-gray-800">
+                                <div className="text-right hidden md:block">
+                                    <div className="text-xs font-bold text-gray-900 dark:text-gray-100 leading-none mb-1 max-w-[100px] truncate">{user?.email?.split('@')[0] || 'Admin'}</div>
                                     <div className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider leading-none">Admin</div>
                                 </div>
-                                <div className="w-9 h-9 rounded-lg bg-indigo-600 shadow-lg shadow-indigo-600/20 flex items-center justify-center font-bold text-white text-sm border-2 border-white dark:border-gray-800">
+                                <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-indigo-600 shadow-lg shadow-indigo-600/20 flex items-center justify-center font-bold text-white text-sm border-2 border-white dark:border-gray-800 shrink-0">
                                     {user?.email?.charAt(0).toUpperCase() || <Smartphone size={16} />}
                                 </div>
                             </div>
@@ -546,22 +546,22 @@ export default function AdminDashboard() {
                     </div>
                 </header>
 
-                <div className="px-6 md:px-8 py-8 md:py-10 max-w-7xl mx-auto w-full flex-1">
+                <div className="px-3 sm:px-6 md:px-8 py-4 md:py-8 lg:py-10 max-w-7xl mx-auto w-full flex-1">
                     {/* Header Breadcrumb */}
-                    <div className="mb-8 flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight capitalize">
-                                {activeTab.replace('-', ' ')}
+                    <div className="mb-5 md:mb-8 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                            <h1 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white tracking-tight capitalize truncate">
+                                {activeTab.replace(/-/g, ' ')}
                             </h1>
                             <div className="flex items-center gap-2 mt-1 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
-                                <span>Platform</span>
-                                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
-                                <span className="text-primary italic">/ {activeTab.replace('-', ' ')}</span>
+                                <span className="hidden sm:inline">Platform</span>
+                                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700 hidden sm:block" />
+                                <span className="text-primary italic truncate">/ {activeTab.replace(/-/g, ' ')}</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <button onClick={() => window.open('/', '_blank')} className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2">
-                                <ExternalLink size={14} /> Visit Website
+                        <div className="flex items-center gap-3 shrink-0">
+                            <button onClick={() => window.open('/', '_blank')} className="px-3 md:px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-2">
+                                <ExternalLink size={14} /> <span className="hidden sm:inline">Visit</span> Site
                             </button>
                         </div>
                     </div>
@@ -574,14 +574,19 @@ export default function AdminDashboard() {
             {isMobileMenuOpen && (
                 <div className="fixed inset-0 z-[100] lg:hidden">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-                    <aside className="absolute inset-y-0 left-0 w-72 bg-white dark:bg-[#1e1e1e] shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
-                        <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                            <Link href="/" className="text-xl font-bold tracking-tight">Admin Manager</Link>
+                    <aside className="absolute inset-y-0 left-0 w-[280px] max-w-[85vw] bg-white dark:bg-[#1e1e1e] shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
+                        <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 text-white">
+                                    <Layout size={16} strokeWidth={2.5} />
+                                </div>
+                                <span className="text-base font-bold tracking-tight">Hariharanhub</span>
+                            </div>
                             <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
                                 <X size={20} />
                             </button>
                         </div>
-                        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto pb-4">
                             {menuItems.map((item) => (
                                 item.id !== "divider" && (
                                     <button
@@ -589,15 +594,29 @@ export default function AdminDashboard() {
                                         onClick={() => handleTabChange(item.id as Tab)}
                                         className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === item.id
                                             ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                            : "text-gray-600 dark:text-gray-400"
+                                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary"
                                             }`}
                                     >
-                                        <item.icon size={18} />
-                                        <span>{item.title}</span>
+                                        <item.icon size={18} className="shrink-0" />
+                                        <span className="truncate">{item.title}</span>
+                                        {item.badge && item.badge > 0 && (
+                                            <span className="ml-auto bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">
+                                                {item.badge}
+                                            </span>
+                                        )}
                                     </button>
                                 )
                             ))}
                         </nav>
+                        <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+                            <button
+                                onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-bold text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+                            >
+                                <LogOut size={18} className="shrink-0" />
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
                     </aside>
                 </div>
             )}

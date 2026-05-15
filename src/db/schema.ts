@@ -1243,6 +1243,7 @@ export const websiteQuestionResponses = pgTable("website_question_responses", {
   questionId: text("question_id").notNull(),
   userName: text("user_name"),
   answerText: text("answer_text").notNull(),
+  ipHash: text("ip_hash"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

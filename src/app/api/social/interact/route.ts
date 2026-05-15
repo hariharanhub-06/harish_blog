@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { websitePolls, pollResponses, websiteQuestions, websiteQuestionResponses } from "@/db/schema";
+import { pollResponses, websiteQuestionResponses } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
@@ -9,12 +9,18 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { type, id, optionIndex, answerText, userName, platform } = body;
 
-        // Get IP for basic duplicate protection
-        const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+        if (!type || !id) {
+            return NextResponse.json({ error: "Missing type or id" }, { status: 400 });
+        }
+
+        const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "127.0.0.1";
         const ipHash = crypto.createHash("sha256").update(ip).digest("hex");
 
         if (type === 'poll') {
-            // Check if already voted (basic check)
+            if (optionIndex === undefined || optionIndex === null) {
+                return NextResponse.json({ error: "Missing optionIndex" }, { status: 400 });
+            }
+
             const existing = await db.select()
                 .from(pollResponses)
                 .where(and(eq(pollResponses.pollId, id), eq(pollResponses.ipHash, ipHash)))
@@ -26,7 +32,7 @@ export async function POST(req: Request) {
 
             await db.insert(pollResponses).values({
                 pollId: id,
-                optionIndex,
+                optionIndex: Number(optionIndex),
                 ipHash,
                 platform: platform || 'direct'
             });
@@ -35,10 +41,25 @@ export async function POST(req: Request) {
         }
 
         if (type === 'question') {
+            if (!answerText?.trim()) {
+                return NextResponse.json({ error: "Answer text required" }, { status: 400 });
+            }
+
+            // Rate-limit: one answer per IP per question
+            const existing = await db.select()
+                .from(websiteQuestionResponses)
+                .where(and(eq(websiteQuestionResponses.questionId, id), eq(websiteQuestionResponses.ipHash, ipHash)))
+                .limit(1);
+
+            if (existing.length > 0) {
+                return NextResponse.json({ error: "Already answered" }, { status: 400 });
+            }
+
             await db.insert(websiteQuestionResponses).values({
                 questionId: id,
-                userName: userName || "Anonymous",
-                answerText
+                userName: (userName || "Anonymous").substring(0, 50),
+                answerText: answerText.trim().substring(0, 1000),
+                ipHash
             });
 
             return NextResponse.json({ success: true });
@@ -46,7 +67,6 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ error: "Invalid interaction type" }, { status: 400 });
     } catch (error) {
-        console.error("Interaction failed", error);
         return NextResponse.json({ error: "Operation failed" }, { status: 500 });
     }
 }

@@ -326,20 +326,25 @@ export default function RoutinesModule() {
 
             {view === "grid" ? (
                 <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden transition-colors">
-                    <div className="overflow-x-auto scrollbar-hide">
+                    {/* Scroll hint for mobile */}
+                    <div className="flex items-center gap-1.5 px-4 py-2 bg-[#3b71ca]/5 border-b border-[#3b71ca]/10 md:hidden">
+                        <ChevronRight size={12} className="text-[#3b71ca]" />
+                        <span className="text-[10px] font-black text-[#3b71ca] uppercase tracking-widest">Swipe right to see all days</span>
+                    </div>
+                    <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: "touch" }}>
                         <table className="w-full border-collapse">
                             <thead>
                                 <tr className="bg-[#3b71ca] dark:bg-[#3b71ca]/90">
-                                    <th className="sticky left-0 bg-[#3b71ca] dark:bg-[#3b71ca] z-20 px-8 py-6 text-left border-b border-white/10 min-w-[300px]">
+                                    <th className="sticky left-0 bg-[#3b71ca] dark:bg-[#3b71ca] z-20 px-3 md:px-8 py-4 md:py-6 text-left border-b border-white/10 min-w-[140px] md:min-w-[260px]">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-white/70">Habit Checklist</span>
                                     </th>
                                     {days.map((day) => (
-                                        <th key={day.toISOString()} className={`px-4 py-6 border-b border-white/10 min-w-[80px] ${isSameDay(day, new Date()) ? "bg-white/10" : ""}`}>
+                                        <th key={day.toISOString()} className={`px-2 md:px-4 py-4 md:py-6 border-b border-white/10 min-w-[52px] md:min-w-[72px] ${isSameDay(day, new Date()) ? "bg-white/10" : ""}`}>
                                             <div className="flex flex-col items-center">
-                                                <span className={`text-[9px] font-black uppercase ${isSameDay(day, new Date()) ? "text-white" : "text-white/40"}`}>
+                                                <span className={`text-[8px] md:text-[9px] font-black uppercase ${isSameDay(day, new Date()) ? "text-white" : "text-white/40"}`}>
                                                     {format(day, "EEE")}
                                                 </span>
-                                                <span className={`text-lg font-black ${isSameDay(day, new Date()) ? "text-white scale-110" : "text-white"}`}>
+                                                <span className={`text-base md:text-lg font-black ${isSameDay(day, new Date()) ? "text-white scale-110" : "text-white"}`}>
                                                     {format(day, "d")}
                                                 </span>
                                             </div>
@@ -350,31 +355,29 @@ export default function RoutinesModule() {
                             <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                                 {routines.map((routine, ridx) => (
                                     <tr key={routine.id} className="group hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-all duration-200">
-                                        <td className="sticky left-0 bg-white dark:bg-[#1e1e1e] z-20 px-8 py-5 border-r border-gray-50 dark:border-gray-800 group-hover:shadow-[5px_0_15px_-5px_rgba(0,0,0,0.05)] transition-all">
-                                            <div className="flex items-center justify-between">
-                                                <div className="space-y-1 text-left">
-                                                    <h4 className="text-[13px] font-black text-gray-900 dark:text-white group-hover:text-[#3b71ca] transition-colors">{routine.title}</h4>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black text-white uppercase tracking-wider ${['bg-[#3b71ca]', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-cyan-500'][ridx % 5]
-                                                            }`}>
+                                        <td className="sticky left-0 bg-white dark:bg-[#1e1e1e] z-20 px-3 md:px-8 py-4 md:py-5 border-r border-gray-50 dark:border-gray-800 shadow-[2px_0_8px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_8px_-2px_rgba(0,0,0,0.3)] transition-all min-w-[140px] md:min-w-[260px]">
+                                            <div className="flex items-center justify-between gap-1">
+                                                <div className="space-y-1 text-left min-w-0">
+                                                    <h4 className="text-[12px] md:text-[13px] font-black text-gray-900 dark:text-white group-hover:text-[#3b71ca] transition-colors truncate max-w-[110px] md:max-w-[200px]">{routine.title}</h4>
+                                                    <div className="flex items-center gap-1 md:gap-2 flex-wrap">
+                                                        <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-black text-white uppercase tracking-wide ${['bg-[#3b71ca]', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-cyan-500'][ridx % 5]}`}>
                                                             {routine.category}
                                                         </span>
-                                                        <div className="h-1 w-1 rounded-full bg-gray-200 dark:bg-gray-700" />
-                                                        <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 capitalize">{routine.schedule?.type}</span>
+                                                        <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 capitalize hidden sm:inline">{routine.schedule?.type}</span>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all ml-4">
+                                                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all shrink-0">
                                                     <button
                                                         onClick={() => setShowEditModal(routine)}
                                                         className="p-1.5 hover:bg-[#3b71ca]/10 text-gray-400 hover:text-[#3b71ca] rounded-lg transition-all"
                                                     >
-                                                        <Edit2 size={13} />
+                                                        <Edit2 size={12} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(routine.id)}
                                                         className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-gray-400 hover:text-rose-500 rounded-lg transition-all"
                                                     >
-                                                        <Trash2 size={13} />
+                                                        <Trash2 size={12} />
                                                     </button>
                                                 </div>
                                             </div>
@@ -385,18 +388,18 @@ export default function RoutinesModule() {
                                             const isDone = (logs || []).find(l => l.routineId === routine.id && l.date === dateStr)?.isCompleted;
 
                                             return (
-                                                <td key={day.toISOString()} className={`px-4 py-5 text-center transition-all ${isSameDay(day, new Date()) ? "bg-[#3b71ca]/5" : ""}`}>
+                                                <td key={day.toISOString()} className={`px-1 md:px-4 py-3 md:py-5 text-center transition-all ${isSameDay(day, new Date()) ? "bg-[#3b71ca]/5" : ""}`}>
                                                     {due ? (
                                                         <button
                                                             onClick={() => toggleComplete(routine.id, day)}
-                                                            className={`mx-auto w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 transform shadow-sm ${isDone
+                                                            className={`mx-auto w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all duration-300 transform shadow-sm touch-manipulation ${isDone
                                                                 ? `${['bg-[#3b71ca]', 'bg-emerald-500', 'bg-amber-400', 'bg-rose-500', 'bg-cyan-500'][ridx % 5]} text-white shadow-md scale-105`
-                                                                : "bg-white dark:bg-gray-800 text-gray-200 dark:text-gray-700 border-2 border-gray-50 dark:border-gray-800 hover:border-[#3b71ca] dark:hover:border-[#3b71ca] hover:text-[#3b71ca] hover:scale-105"}`}
+                                                                : "bg-white dark:bg-gray-800 text-gray-200 dark:text-gray-700 border-2 border-gray-100 dark:border-gray-700 hover:border-[#3b71ca] dark:hover:border-[#3b71ca] hover:text-[#3b71ca] active:scale-95"}`}
                                                         >
-                                                            {isDone ? <CheckCircle2 size={20} strokeWidth={2.5} /> : <Circle size={18} strokeWidth={2.5} />}
+                                                            {isDone ? <CheckCircle2 size={16} strokeWidth={2.5} /> : <Circle size={14} strokeWidth={2.5} />}
                                                         </button>
                                                     ) : (
-                                                        <div className="mx-auto w-10 h-10 rounded-xl bg-gray-50/50 dark:bg-gray-800/10 border border-dotted border-gray-200 dark:border-gray-800 flex items-center justify-center opacity-30 select-none">
+                                                        <div className="mx-auto w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gray-50/50 dark:bg-gray-800/10 border border-dotted border-gray-200 dark:border-gray-800 flex items-center justify-center opacity-30 select-none">
                                                             <div className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-700" />
                                                         </div>
                                                     )}
@@ -452,9 +455,9 @@ export default function RoutinesModule() {
 
             {/* Combined Modal for Add/Edit */}
             {(showAddModal || showEditModal) && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setShowAddModal(false); setShowEditModal(null); }} />
-                    <div className="bg-white dark:bg-[#1e1e1e] w-full max-w-lg rounded-2xl p-10 shadow-2xl relative animate-in zoom-in-95 duration-300 transition-colors">
+                    <div className="bg-white dark:bg-[#1e1e1e] w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-5 sm:p-8 shadow-2xl relative animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 transition-colors max-h-[90dvh] overflow-y-auto">
                         <button
                             onClick={() => { setShowAddModal(false); setShowEditModal(null); }}
                             className="absolute top-6 right-6 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-400 hover:text-gray-900 dark:hover:text-white"
@@ -462,9 +465,9 @@ export default function RoutinesModule() {
                             <X size={18} />
                         </button>
 
-                        <div className="flex items-center gap-4 mb-8">
+                        <div className="flex items-center gap-4 mb-6">
                             <div className="p-3 bg-[#3b71ca] rounded-xl shadow-lg shadow-[#3b71ca]/20">
-                                <Settings2 className="w-6 h-6 text-white" />
+                                <Settings2 className="w-5 h-5 text-white" />
                             </div>
                             <div>
                                 <h3 className="text-xl font-black text-gray-900 dark:text-white">{showAddModal ? "New Routine" : "Edit Routine"}</h3>
