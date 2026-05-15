@@ -23,6 +23,7 @@ export default function FeedbackSection() {
     const [formLoading, setFormLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [heartVoted, setHeartVoted] = useState(false);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -49,6 +50,7 @@ export default function FeedbackSection() {
 
     useEffect(() => {
         fetchFeedbacks();
+        if (localStorage.getItem("heart_vote")) setHeartVoted(true);
     }, []);
 
     const averageRating = feedbacks.length > 0
@@ -100,8 +102,10 @@ export default function FeedbackSection() {
                     </div>
 
                     <button
-                        onClick={() => setIsOpen(true)}
-                        className="px-8 py-4 bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-orange-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group"
+                        onClick={() => heartVoted && setIsOpen(true)}
+                        disabled={!heartVoted}
+                        title={!heartVoted ? "React to the heart first ↑" : undefined}
+                        className={`px-8 py-4 bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center gap-3 group ${heartVoted ? "shadow-xl shadow-orange-600/20 hover:scale-105 active:scale-95" : "opacity-30 cursor-not-allowed"}`}
                     >
                         Give Feedback <MessageSquare size={16} className="group-hover:rotate-12 transition-transform" />
                     </button>
@@ -109,7 +113,7 @@ export default function FeedbackSection() {
             </div>
 
             {/* Heart Reaction */}
-            <HeartReaction />
+            <HeartReaction onVoted={() => setHeartVoted(true)} />
 
             {/* Testimonials Carousel */}
             {feedbacks.length > 0 ? (

@@ -84,13 +84,23 @@ export async function POST(req: NextRequest) {
             // Check if returning visitor by stored session ID
             if (visitorId) {
                 const [existing] = await sql`
-                    SELECT id, visitor_number, visit_count, total_time_seconds
+                    SELECT id, visitor_number, visit_count, total_time_seconds, last_visit
                     FROM visitor_sessions WHERE id = ${visitorId}
                 `;
                 if (existing) {
+                    // Only increment visit_count if last visit was more than 30 minutes ago
+                    // (prevents every page reload from counting as a new visit)
+                    const lastVisit = new Date(existing.last_visit);
+                    const minutesSinceLast = (Date.now() - lastVisit.getTime()) / 60000;
+                    const isNewSession = minutesSinceLast > 30;
+
                     await sql`
                         UPDATE visitor_sessions
-                        SET visit_count = visit_count + 1, last_visit = NOW(), country_code = ${countryCode}, country = ${country}
+                        SET
+                            visit_count = CASE WHEN ${isNewSession} THEN visit_count + 1 ELSE visit_count END,
+                            last_visit = NOW(),
+                            country_code = ${countryCode},
+                            country = ${country}
                         WHERE id = ${visitorId}
                     `;
                     const [{ avg_seconds }] = await sql`
@@ -104,7 +114,7 @@ export async function POST(req: NextRequest) {
                         countryCode,
                         flag: countryCodeToEmoji(countryCode),
                         isNewVisitor: false,
-                        visitCount: existing.visit_count + 1,
+                        visitCount: isNewSession ? existing.visit_count + 1 : existing.visit_count,
                         totalTimeSeconds: existing.total_time_seconds || 0,
                         avgTimeSeconds: avg_seconds || 0,
                     });
