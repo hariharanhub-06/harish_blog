@@ -24,6 +24,7 @@ export default function FeedbackSection() {
     const [submitted, setSubmitted] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [revealed, setRevealed] = useState(false);
+    const [votedAction, setVotedAction] = useState<"take" | "break" | null>(null);
     const [feedbackGiven, setFeedbackGiven] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -85,106 +86,117 @@ export default function FeedbackSection() {
     };
 
     return (
-        <section id="feedback" className="scroll-mt-20">
+        <section id="feedback" className="scroll-mt-20 relative">
 
-            {/* ── TOP BREAD: Heart Reaction ── */}
-            <div className="container mx-auto px-6 pt-12 pb-0">
-                <HeartReaction onVoted={() => setRevealed(true)} />
-            </div>
+            {/* ── Feedback content — always rendered, revealed after heart vote ── */}
+            <div className={`container mx-auto px-6 py-12 md:py-16 transition-all duration-500 ${!revealed ? "pointer-events-none select-none" : ""}`}>
 
-            {/* ── BOTTOM BREAD: Feedback Section ── */}
-            <div className="relative">
+                {/* Post-vote indicator (only after revealed) */}
+                {revealed && votedAction && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center justify-center gap-2 mb-6"
+                    >
+                        <span className="text-xl">{votedAction === "take" ? "❤️" : "💔"}</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">
+                            {votedAction === "take" ? "Thank you! ✨" : "Fair enough 💙"}
+                        </span>
+                    </motion.div>
+                )}
 
-                {/* Blur gate overlay — covers bottom bread until heart reacted */}
-                <AnimatePresence>
-                    {!revealed && (
-                        <motion.div
-                            initial={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
-                            className="absolute inset-0 z-20 backdrop-blur-md bg-black/60 cursor-not-allowed"
-                        />
-                    )}
-                </AnimatePresence>
-
-                <div className={`container mx-auto px-6 py-12 md:py-16 transition-all duration-500 ${!revealed ? "pointer-events-none select-none" : ""}`}>
-
-                    <div className="flex flex-col items-center mb-8 md:mb-12 text-center">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-600 mb-4">Testimonials</span>
-                        <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-6">
-                            Minds <span className="text-orange-600">Empowered</span>
-                        </h2>
-                        <div className="flex flex-col md:flex-row items-center gap-6">
-                            <div className="flex items-center gap-4 bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
-                                <div className="flex text-orange-500">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} size={18} fill={i < Math.round(Number(averageRating)) ? "currentColor" : "none"} />
-                                    ))}
-                                </div>
-                                <span className="text-xl font-black text-white">{averageRating} / 5.0</span>
-                                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest border-l border-white/10 pl-4">{feedbacks.length} Reviews</span>
+                <div className="flex flex-col items-center mb-8 md:mb-12 text-center">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-600 mb-4">Testimonials</span>
+                    <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-6">
+                        Minds <span className="text-orange-600">Empowered</span>
+                    </h2>
+                    <div className="flex flex-col md:flex-row items-center gap-6">
+                        <div className="flex items-center gap-4 bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
+                            <div className="flex text-orange-500">
+                                {[...Array(5)].map((_, i) => (
+                                    <Star key={i} size={18} fill={i < Math.round(Number(averageRating)) ? "currentColor" : "none"} />
+                                ))}
                             </div>
-
-                            {feedbackGiven ? (
-                                <div className="px-8 py-4 bg-white/5 border border-white/10 text-white/40 font-black text-xs uppercase tracking-[0.2em] rounded-2xl flex items-center gap-3">
-                                    ✓ Feedback Given
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={() => setIsOpen(true)}
-                                    className="px-8 py-4 bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-orange-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group"
-                                >
-                                    Give Feedback <MessageSquare size={16} className="group-hover:rotate-12 transition-transform" />
-                                </button>
-                            )}
+                            <span className="text-xl font-black text-white">{averageRating} / 5.0</span>
+                            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest border-l border-white/10 pl-4">{feedbacks.length} Reviews</span>
                         </div>
+
+                        {feedbackGiven ? (
+                            <div className="px-8 py-4 bg-white/5 border border-white/10 text-white/40 font-black text-xs uppercase tracking-[0.2em] rounded-2xl flex items-center gap-3">
+                                ✓ Feedback Given
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => setIsOpen(true)}
+                                className="px-8 py-4 bg-orange-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-orange-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 group"
+                            >
+                                Give Feedback <MessageSquare size={16} className="group-hover:rotate-12 transition-transform" />
+                            </button>
+                        )}
                     </div>
+                </div>
 
-                    {/* Testimonials Carousel */}
-                    {feedbacks.length > 0 ? (
-                        <div className="py-12 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
-                            <div className="absolute top-0 left-0 h-full w-8 md:w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
-                            <div className="absolute top-0 right-0 h-full w-8 md:w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
-                            <InfiniteCarousel
-                                speed={20}
-                                items={feedbacks.map((f) => (
-                                    <div key={f.id} className="w-[85vw] md:w-[400px] p-8 bg-black/40 border border-white/10 rounded-[2.5rem] flex flex-col h-[500px] relative group hover:border-orange-600/30 transition-all duration-500 overflow-hidden">
-                                        <Quote className="absolute top-6 right-8 text-white/5 group-hover:text-orange-600/10 transition-colors" size={64} />
+                {/* Testimonials Carousel */}
+                {feedbacks.length > 0 ? (
+                    <div className="py-12 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                        <div className="absolute top-0 left-0 h-full w-8 md:w-20 bg-gradient-to-r from-[#0e0e0e] to-transparent z-10" />
+                        <div className="absolute top-0 right-0 h-full w-8 md:w-20 bg-gradient-to-l from-[#0e0e0e] to-transparent z-10" />
+                        <InfiniteCarousel
+                            speed={20}
+                            items={feedbacks.map((f) => (
+                                <div key={f.id} className="w-[85vw] md:w-[400px] p-8 bg-black/40 border border-white/10 rounded-[2.5rem] flex flex-col h-[500px] relative group hover:border-orange-600/30 transition-all duration-500 overflow-hidden">
+                                    <Quote className="absolute top-6 right-8 text-white/5 group-hover:text-orange-600/10 transition-colors" size={64} />
 
-                                        <div className="flex text-orange-500 mb-6">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star key={i} size={14} fill={i < f.rating ? "currentColor" : "none"} />
-                                            ))}
+                                    <div className="flex text-orange-500 mb-6">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} size={14} fill={i < f.rating ? "currentColor" : "none"} />
+                                        ))}
+                                    </div>
+
+                                    <div className="flex-1 overflow-y-auto scrollbar-hide mb-8 pr-2">
+                                        <p className="text-white/80 text-sm font-bold leading-relaxed italic whitespace-normal text-left">
+                                            &ldquo;{f.content}&rdquo;
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-4 pt-6 border-t border-white/5">
+                                        <div className="w-12 h-12 rounded-2xl bg-orange-600/20 flex items-center justify-center text-orange-600">
+                                            <User size={24} />
                                         </div>
-
-                                        <div className="flex-1 overflow-y-auto scrollbar-hide mb-8 pr-2">
-                                            <p className="text-white/80 text-sm font-bold leading-relaxed italic whitespace-normal text-left">
-                                                &ldquo;{f.content}&rdquo;
+                                        <div className="text-left">
+                                            <h4 className="text-sm font-black text-white uppercase tracking-tight">{f.name}</h4>
+                                            <p className="text-[10px] font-bold text-orange-500/80 uppercase tracking-widest mt-1">
+                                                {f.role} • {f.organization}
                                             </p>
                                         </div>
-
-                                        <div className="flex items-center gap-4 pt-6 border-t border-white/5">
-                                            <div className="w-12 h-12 rounded-2xl bg-orange-600/20 flex items-center justify-center text-orange-600">
-                                                <User size={24} />
-                                            </div>
-                                            <div className="text-left">
-                                                <h4 className="text-sm font-black text-white uppercase tracking-tight">{f.name}</h4>
-                                                <p className="text-[10px] font-bold text-orange-500/80 uppercase tracking-widest mt-1">
-                                                    {f.role} • {f.organization}
-                                                </p>
-                                            </div>
-                                        </div>
                                     </div>
-                                ))}
-                            />
-                        </div>
-                    ) : !loading && (
-                        <div className="text-center py-20 text-gray-500 font-bold uppercase tracking-widest opacity-50">
-                            No testimonials yet. Be the first to share your experience!
-                        </div>
-                    )}
-                </div>
+                                </div>
+                            ))}
+                        />
+                    </div>
+                ) : !loading && (
+                    <div className="text-center py-20 text-gray-500 font-bold uppercase tracking-widest opacity-50">
+                        No testimonials yet. Be the first to share your experience!
+                    </div>
+                )}
             </div>
+
+            {/* ── Blur gate with heart centered on top of it ── */}
+            <AnimatePresence>
+                {!revealed && (
+                    <motion.div
+                        initial={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="absolute inset-0 z-10 backdrop-blur-md bg-black/70 flex items-center justify-center"
+                    >
+                        <HeartReaction onVoted={(action) => {
+                            setVotedAction(action);
+                            setRevealed(true);
+                        }} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* ── Feedback Submission Modal ── */}
             <AnimatePresence>
