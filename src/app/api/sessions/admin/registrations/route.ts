@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { sessionRegistrations } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     try {
         const { searchParams } = new URL(req.url);
         const sessionId = searchParams.get("sessionId");
@@ -27,6 +30,8 @@ export async function GET(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     try {
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");

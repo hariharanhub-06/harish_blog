@@ -152,7 +152,7 @@ export default function TimelineModule() {
                     <button
                         onClick={() => {
                             setActiveTab("experience");
-                            setEditing({ role: "", company: "", logo: "", duration: "", description: "", order: 0, isCurrent: false });
+                            setEditing({ role: "", company: "", logo: "", duration: "", description: "", displayOrder: 0, isCurrent: false });
                         }}
                         className="flex items-center space-x-2 bg-primary text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
                     >
@@ -224,7 +224,7 @@ export default function TimelineModule() {
                     <button
                         onClick={() => {
                             setActiveTab("education");
-                            setEditing({ degree: "", institution: "", logo: "", period: "", details: "", order: 0 });
+                            setEditing({ degree: "", institution: "", logo: "", period: "", details: "", displayOrder: 0 });
                         }}
                         className="flex items-center space-x-2 bg-accent text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
                     >
@@ -289,7 +289,7 @@ export default function TimelineModule() {
                     <button
                         onClick={() => {
                             setActiveTab("volunteering");
-                            setEditing({ role: "", organization: "", logo: "", duration: "", description: "", order: 0 });
+                            setEditing({ role: "", organization: "", logo: "", duration: "", description: "", displayOrder: 0 });
                         }}
                         className="flex items-center space-x-2 bg-teal-600 text-white font-black px-6 py-3 rounded-2xl hover:shadow-xl transition-all"
                     >

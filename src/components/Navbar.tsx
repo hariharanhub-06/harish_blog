@@ -71,7 +71,7 @@ export default function Navbar() {
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 py-4 md:py-6`}
         >
-            <div className={`container mx-auto max-w-4xl h-12 rounded-2xl flex justify-between items-center transition-all duration-500 border ${scrolled
+            <div className={`container mx-auto max-w-7xl h-12 rounded-2xl flex justify-between items-center transition-all duration-500 border ${scrolled
                 ? (isDarkTheme ? "bg-black/80 backdrop-blur-md border-white/10 px-6 shadow-2xl" : "bg-white/95 backdrop-blur-md border-gray-100 px-6 shadow-xl")
                 : (isDarkTheme ? "bg-white/5 backdrop-blur-sm border-white/10 px-5" : "bg-white/80 backdrop-blur-sm border-gray-100 px-5 shadow-sm")
                 }`}>
@@ -190,7 +190,7 @@ export default function Navbar() {
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: "auto", opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
-                                            className="grid grid-cols-1 gap-1 pl-12 pr-4 pb-4"
+                                            className="grid grid-cols-1 gap-1 pl-6 pr-4 pb-4"
                                         >
                                             {link.items?.map((item) => (
                                                 <Link

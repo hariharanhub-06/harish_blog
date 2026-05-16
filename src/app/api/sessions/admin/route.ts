@@ -2,10 +2,13 @@ import { db } from "@/db";
 import { liveSessions, sessionRegistrations } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     try {
         const sessions = await db.query.liveSessions.findMany({
             orderBy: [desc(liveSessions.startTime)],
@@ -22,6 +25,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     try {
         const body = await req.json();
         const { title, description, price, startTime, duration, meetingLink, posterUrl } = body;
@@ -50,6 +55,8 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     try {
         const body = await req.json();
         const { id, status, isPublished, title, description, price, startTime, duration, meetingLink, posterUrl } = body;
@@ -82,6 +89,8 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     try {
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");

@@ -94,9 +94,9 @@ export default function ProfileModule() {
             } else if (type === 'audio') {
                 setProfile({ ...profile, audioUrl: imagekitUrl });
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Image upload failed", error);
-            alert("Failed to upload image. Please try again.");
+            alert(`Upload failed: ${error?.message || "Unknown error. Check that IMAGEKIT_PRIVATE_KEY and NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY are set in Vercel."}`);
         } finally {
             setUploading(false);
         }
@@ -112,6 +112,7 @@ export default function ProfileModule() {
                 body: JSON.stringify(profile),
             });
             if (res.ok) {
+                await fetchProfile();
                 alert("Profile updated successfully!");
             } else {
                 const errorData = await res.json().catch(() => ({}));
@@ -192,7 +193,7 @@ export default function ProfileModule() {
                             <div className="relative group w-full">
                                 <div className="aspect-video w-full rounded-[2.5rem] overflow-hidden border-8 border-gray-50 dark:border-gray-800 shadow-inner bg-gray-100 dark:bg-white/10 flex items-center justify-center relative">
                                     {profile.heroImageUrl ? (
-                                        profile.heroImageUrl.includes('.mp4') || profile.heroImageUrl.includes('.webm') ? (
+                                        /\.(mp4|webm|mov|ogg)(\?|$)/i.test(profile.heroImageUrl) ? (
                                             <video src={profile.heroImageUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
                                         ) : (
                                             <Image src={profile.heroImageUrl} alt="Hero" fill className="object-cover" />
@@ -296,7 +297,7 @@ export default function ProfileModule() {
                             rows={3}
                             value={profile.headline}
                             onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
-                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold"
+                            className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-gray-900 dark:text-white"
                         />
                     </div>
 
@@ -306,7 +307,7 @@ export default function ProfileModule() {
                             rows={6}
                             value={profile.about}
                             onChange={(e) => setProfile({ ...profile, about: e.target.value })}
-                            className="w-full bg-gray-50 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold"
+                            className="w-full bg-gray-50 dark:bg-white/5 border-0 rounded-2xl p-5 focus:ring-2 focus:ring-primary transition-all font-bold text-gray-900 dark:text-white"
                         />
                     </div>
 

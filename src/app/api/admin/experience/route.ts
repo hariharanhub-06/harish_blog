@@ -12,6 +12,7 @@ export async function GET(req: Request) {
         company: experience.company,
         role: experience.role,
         duration: experience.duration,
+        description: experience.description,
         displayOrder: experience.displayOrder,
         logo: experience.logo,
         isCurrent: experience.isCurrent,

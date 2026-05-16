@@ -2,8 +2,11 @@ import { db } from "@/db";
 import { liveSessions } from "@/db/schema";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
+import { validateAdminSession } from "@/lib/adminAuth";
 
 export async function POST(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     try {
         const { sessionId, status } = await req.json();
 

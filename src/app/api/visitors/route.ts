@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import crypto from "crypto";
+import { sendAdminPushNotification } from "@/lib/webpush";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -136,6 +137,12 @@ export async function POST(req: NextRequest) {
                 SELECT COALESCE(AVG(total_time_seconds), 0)::INTEGER as avg_seconds
                 FROM visitor_sessions WHERE total_time_seconds > 10
             `;
+            sendAdminPushNotification(
+                `🌍 New Visitor #${new_num}`,
+                `First-time visitor from ${country} ${countryCodeToEmoji(countryCode)}`,
+                `/admin/dashboard#analytics`
+            ).catch(() => {});
+
             return NextResponse.json({
                 visitorId: newId,
                 visitorNumber: new_num,

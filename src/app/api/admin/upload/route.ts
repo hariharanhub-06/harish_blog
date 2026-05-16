@@ -9,13 +9,24 @@ export async function POST(req: Request) {
         if (authError) return authError;
         const formData = await req.formData();
         const file = formData.get("file") as File;
-        const path = formData.get("path") as string || "uploads";
+        const rawPath = (formData.get("path") as string || "uploads").replace(/\.\./g, "").replace(/^\/+/, "");
+        const path = rawPath || "uploads";
 
         console.log("Upload request received:", { fileName: file?.name, fileSize: file?.size, path });
 
         if (!file) {
             console.error("Upload failed: No file provided");
             return NextResponse.json({ error: "No file provided" }, { status: 400 });
+        }
+
+        const ALLOWED_MIME = ["image/jpeg","image/png","image/webp","image/gif","image/svg+xml","video/mp4","video/webm","audio/mpeg","audio/mp3","audio/wav"];
+        if (!ALLOWED_MIME.includes(file.type)) {
+            return NextResponse.json({ error: `File type '${file.type}' is not allowed.` }, { status: 400 });
+        }
+
+        const MAX_SIZE = 100 * 1024 * 1024; // 100MB
+        if (file.size > MAX_SIZE) {
+            return NextResponse.json({ error: "File too large. Maximum 100MB allowed." }, { status: 400 });
         }
 
         // Check if storage is initialized with a bucket

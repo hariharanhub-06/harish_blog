@@ -221,7 +221,7 @@ export default function MainContent({
             {/* Stats Section */}
             {profile.showStatsSection !== false && (
                 <section id="stats" className="container mx-auto px-4 sm:px-6 py-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
                         {loading ? (
                             [...Array(4)].map((_, i) => (
                                 <div key={i} className="p-6 bg-white/5 rounded-3xl border border-white/10 shadow-sm animate-pulse h-32 flex flex-col justify-end">
@@ -299,7 +299,7 @@ export default function MainContent({
 
                     <InfiniteCarousel
                         items={experiences.map((exp: any) => (
-                            <div key={exp.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-5 py-5 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[82vw] sm:w-[60vw] md:w-[44vw] lg:w-[34vw] h-full min-h-[110px] justify-start text-left">
+                            <div key={exp.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-5 py-5 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[82vw] sm:w-[60vw] md:w-[44vw] lg:w-[34vw] xl:max-w-[600px] h-full min-h-[110px] justify-start text-left">
                                 {exp.logo ? (
                                     <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1 shadow-sm">
                                         <Image src={exp.logo} alt={exp.company} fill className="object-contain" />
@@ -331,7 +331,7 @@ export default function MainContent({
 
                     <InfiniteCarousel
                         items={educations.map((edu: Education) => (
-                            <div key={edu.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-5 py-5 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[82vw] sm:w-[60vw] md:w-[44vw] lg:w-[34vw] h-full min-h-[110px] justify-start text-left">
+                            <div key={edu.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-5 py-5 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[82vw] sm:w-[60vw] md:w-[44vw] lg:w-[34vw] xl:max-w-[600px] h-full min-h-[110px] justify-start text-left">
                                 {edu.logo ? (
                                     <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1 shadow-sm">
                                         <Image src={edu.logo} alt={edu.institution} fill className="object-contain" />
@@ -363,7 +363,7 @@ export default function MainContent({
 
                     <InfiniteCarousel
                         items={volunteerings.map((vol: Volunteering) => (
-                            <div key={vol.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-5 py-5 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[82vw] sm:w-[60vw] md:w-[44vw] lg:w-[34vw] h-full min-h-[110px] justify-start text-left">
+                            <div key={vol.id} className="flex flex-col md:flex-row items-center md:items-start gap-4 px-5 py-5 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors w-[82vw] sm:w-[60vw] md:w-[44vw] lg:w-[34vw] xl:max-w-[600px] h-full min-h-[110px] justify-start text-left">
                                 {vol.logo ? (
                                     <div className="relative w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-white p-1 shadow-sm">
                                         <Image src={vol.logo} alt={vol.organization} fill className="object-contain" />

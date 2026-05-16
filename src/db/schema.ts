@@ -37,6 +37,7 @@ export const profiles = pgTable("profiles", {
   showFeedbackSection: boolean("show_feedback_section").default(true),
   showGamesSection: boolean("show_games_section").default(true),
   showLiveSessionsSection: boolean("show_live_sessions_section").default(true),
+  showKnowAboutYouSection: boolean("show_know_about_you_section").default(true),
 
   clickEffect: text("click_effect").default("none"),
 

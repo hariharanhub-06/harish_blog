@@ -83,7 +83,7 @@ export default function Hero({ profile, experiences, className }: HeroProps) {
             )}
 
             {/* Large Background Outline Text */}
-            <div className="absolute inset-0 flex items-center justify-start pointer-events-none select-none overflow-hidden z-0 pl-[5%] opacity-5">
+            <div className="absolute inset-0 flex items-center justify-start pointer-events-none select-none overflow-hidden z-0 pl-[5%] pr-[5%] opacity-5">
                 <motion.h2
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}

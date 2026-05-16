@@ -1,12 +1,12 @@
-
 import { db } from "@/db";
 import { feedbacks } from "@/db/schema";
 import { NextResponse } from "next/server";
+import { sendAdminPushNotification } from "@/lib/webpush";
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { name, role, organization, rating, content, isAdmin } = body;
+        const { name, role, organization, rating, content } = body;
 
         if (!name || !role || !organization || !rating || !content) {
             return NextResponse.json({ error: "All fields are required" }, { status: 400 });
@@ -23,8 +23,15 @@ export async function POST(req: Request) {
             organization,
             rating: parsedRating,
             content,
-            status: isAdmin ? "Approved" : "New", // Admin submissions are auto-approved
+            status: "New",
         }).returning();
+
+        const stars = "⭐".repeat(Math.min(parsedRating, 5));
+        sendAdminPushNotification(
+            `${stars} New Feedback`,
+            `${name} (${role} @ ${organization}) left ${parsedRating}/5 stars`,
+            `/admin/dashboard#feedback`
+        ).catch(() => {});
 
         return NextResponse.json(newFeedback);
     } catch (error: any) {

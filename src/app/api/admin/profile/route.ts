@@ -42,7 +42,8 @@ const DEFAULT_PROFILE = {
     showTypingTestSection: true,
     showFeedbackSection: true,
     showGamesSection: true,
-    showLiveSessionsSection: true
+    showLiveSessionsSection: true,
+    showKnowAboutYouSection: true
 };
 
 export async function GET(req: Request) {
@@ -51,7 +52,7 @@ export async function GET(req: Request) {
         if (authError) return authError;
         // Always get the most-recently-updated profile row to avoid returning a stale duplicate
         const profile = await db.query.profiles.findFirst({
-            orderBy: (p, { desc }) => [desc(p.updatedAt)],
+            orderBy: (p, { asc }) => [asc(p.updatedAt)],
         });
         return NextResponse.json(profile || DEFAULT_PROFILE);
     } catch (error: any) {
@@ -71,7 +72,7 @@ export async function POST(req: Request) {
 
         // Get most recently updated row; if duplicates exist this picks the right one
         const existing = await db.query.profiles.findFirst({
-            orderBy: (p, { desc }) => [desc(p.updatedAt)],
+            orderBy: (p, { asc }) => [asc(p.updatedAt)],
         });
 
         const fields = {
@@ -104,6 +105,7 @@ export async function POST(req: Request) {
             showFeedbackSection: data.showFeedbackSection,
             showGamesSection: data.showGamesSection,
             showLiveSessionsSection: data.showLiveSessionsSection,
+            showKnowAboutYouSection: data.showKnowAboutYouSection,
             clickEffect: data.clickEffect ?? "none",
         };
 

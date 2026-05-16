@@ -23,7 +23,7 @@ export default async function Home() {
     // Parallel fetch with failure isolation (Promise.allSettled)
     const results = await Promise.allSettled([
       db.query.profiles.findFirst({
-        orderBy: (p, { desc }) => [desc(p.updatedAt)],
+        orderBy: (p, { asc }) => [asc(p.updatedAt)],
       }),
       db.query.projects.findMany({
         orderBy: (projects, { desc }) => [desc(projects.featured), desc(projects.displayOrder), desc(projects.createdAt)]

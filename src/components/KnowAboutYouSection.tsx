@@ -156,6 +156,7 @@ export default function KnowAboutYouSection({ smileTask, smileTasks = [] }: Prop
         : smileTask ? [smileTask] : [];
 
     const [visitorData, setVisitorData] = useState<VisitorData | null>(null);
+    const [visitorError, setVisitorError] = useState(false);
     const [copied, setCopied] = useState<string | null>(null);
     const [origin, setOrigin] = useState("");
     const [posterUrl, setPosterUrl] = useState<string | null>(null);
@@ -171,9 +172,9 @@ export default function KnowAboutYouSection({ smileTask, smileTasks = [] }: Prop
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "register", visitorId: storedId }),
         })
-            .then((r) => (r.ok ? r.json() : null))
+            .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
             .then((data) => { if (data) setVisitorData(data); })
-            .catch(() => {});
+            .catch(() => setVisitorError(true));
     }, []);
 
     const copyLink = (url: string, key: string) => {
@@ -266,6 +267,11 @@ export default function KnowAboutYouSection({ smileTask, smileTasks = [] }: Prop
                                 </button>
                             </div>
                         </motion.div>
+                    ) : visitorError ? (
+                        <div className="flex flex-col gap-2 p-6 bg-white/5 rounded-3xl border border-red-500/20">
+                            <p className="text-xs font-black uppercase tracking-widest text-red-400">Could not load visitor data</p>
+                            <p className="text-[10px] text-white/40">Please refresh the page to try again.</p>
+                        </div>
                     ) : (
                         <div className="flex flex-col gap-3 p-6 bg-white/5 rounded-3xl border border-white/10 animate-pulse">
                             <div className="h-3 bg-white/10 rounded w-1/2 mb-2" />

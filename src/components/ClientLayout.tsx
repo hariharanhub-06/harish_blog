@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
-import { BackgroundBlobs } from "@/components/BackgroundBlobs";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import { Toaster } from "react-hot-toast";
