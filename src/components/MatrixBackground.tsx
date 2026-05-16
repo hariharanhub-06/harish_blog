@@ -2,23 +2,57 @@
 
 import { useEffect, useRef } from "react";
 
-interface AuroraCurtain {
-    color: string;
-    baseYFraction: number;   // 0–1 fraction of canvas height
-    ampFraction: number;     // amplitude as fraction of canvas height
-    frequency: number;       // waves across the screen
-    speed: number;           // phase change per second (radians)
-    phaseOffset: number;     // initial phase offset
-    alpha: number;           // max fill opacity
+// Particle-based fire simulation
+// Each particle rises from the bottom, shifts slightly, dims as it ages.
+// Canvas sits fixed behind all content at very low opacity so text stays crisp.
+
+interface Particle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;      // 0–1, starts at 1 and decays
+    decay: number;     // life lost per frame
+    size: number;
 }
 
-const CURTAINS: AuroraCurtain[] = [
-    { color: "#00ff88", baseYFraction: 0.14, ampFraction: 0.08, frequency: 2.8, speed:  0.40, phaseOffset: 0.0,  alpha: 0.16 },
-    { color: "#00e5cc", baseYFraction: 0.21, ampFraction: 0.07, frequency: 2.1, speed:  0.55, phaseOffset: 1.2,  alpha: 0.14 },
-    { color: "#7b2fff", baseYFraction: 0.17, ampFraction: 0.10, frequency: 3.4, speed: -0.35, phaseOffset: 2.4,  alpha: 0.13 },
-    { color: "#ff6bd6", baseYFraction: 0.27, ampFraction: 0.06, frequency: 1.8, speed:  0.70, phaseOffset: 0.8,  alpha: 0.11 },
-    { color: "#00ccff", baseYFraction: 0.11, ampFraction: 0.09, frequency: 2.5, speed: -0.50, phaseOffset: 3.6,  alpha: 0.12 },
-];
+const PARTICLE_COUNT = 220;
+const SPAWN_BAND = 0.55; // particles spawn across middle 55% of width
+
+function spawnParticle(W: number, H: number): Particle {
+    return {
+        x: W * (0.5 - SPAWN_BAND / 2) + Math.random() * W * SPAWN_BAND,
+        y: H + Math.random() * 40,
+        vx: (Math.random() - 0.5) * 1.6,
+        vy: -(1.8 + Math.random() * 3.2),
+        life: 1,
+        decay: 0.008 + Math.random() * 0.012,
+        size: 6 + Math.random() * 18,
+    };
+}
+
+// Map life (0–1) to fire colour: white-yellow → orange → red → transparent
+function fireColor(life: number, alpha: number): string {
+    if (life > 0.75) {
+        // White-yellow core
+        const t = (life - 0.75) / 0.25;
+        const r = 255;
+        const g = Math.round(200 + t * 55);
+        const b = Math.round(t * 120);
+        return `rgba(${r},${g},${b},${alpha})`;
+    } else if (life > 0.45) {
+        // Orange
+        const t = (life - 0.45) / 0.30;
+        return `rgba(255,${Math.round(80 + t * 120)},0,${alpha})`;
+    } else if (life > 0.15) {
+        // Deep red
+        const t = (life - 0.15) / 0.30;
+        return `rgba(${Math.round(160 + t * 95)},${Math.round(t * 40)},0,${alpha})`;
+    } else {
+        // Dark red → fade out
+        return `rgba(100,0,0,${alpha * (life / 0.15)})`;
+    }
+}
 
 export function MatrixBackground() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,60 +63,69 @@ export function MatrixBackground() {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
+        let W = 0, H = 0;
         let rafId: number;
 
         const resize = () => {
-            canvas.width  = window.innerWidth;
-            canvas.height = window.innerHeight;
+            W = canvas.width  = window.innerWidth;
+            H = canvas.height = window.innerHeight;
         };
         resize();
         window.addEventListener("resize", resize);
 
-        const draw = (ts: number) => {
-            const t = ts / 1000; // seconds
-            const W = canvas.width;
-            const H = canvas.height;
+        // Initialise particles spread across their lifecycle
+        const particles: Particle[] = Array.from({ length: PARTICLE_COUNT }, () => {
+            const p = spawnParticle(W, H);
+            p.life = Math.random();          // start at random life stage
+            p.y = H - (1 - p.life) * H * 0.7;
+            return p;
+        });
 
-            ctx.clearRect(0, 0, W, H);
+        function draw() {
+            // Fade trail — very dark semi-transparent wipe so fire has a trailing glow
+            ctx!.fillStyle = "rgba(10,5,0,0.18)";
+            ctx!.fillRect(0, 0, W, H);
 
-            for (const curtain of CURTAINS) {
-                const baseY = curtain.baseYFraction * H;
-                const amp   = curtain.ampFraction   * H;
-                const phase = t * curtain.speed + curtain.phaseOffset;
-                const stripBottom = baseY + amp + H * 0.12; // gradient fades out here
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
 
-                // Build the wave path across full width
-                ctx.beginPath();
-                for (let px = 0; px <= W; px += 4) {
-                    const angle = (px / W) * Math.PI * 2 * curtain.frequency + phase;
-                    const y = baseY + Math.sin(angle) * amp;
-                    if (px === 0) ctx.moveTo(px, y);
-                    else          ctx.lineTo(px, y);
+                // Turbulence: gentle horizontal drift
+                p.vx += (Math.random() - 0.5) * 0.25;
+                p.vx *= 0.96;
+
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= p.decay;
+
+                // Respawn dead particles at the bottom
+                if (p.life <= 0) {
+                    particles[i] = spawnParticle(W, H);
+                    continue;
                 }
-                // Close the strip downward
-                ctx.lineTo(W, stripBottom);
-                ctx.lineTo(0, stripBottom);
-                ctx.closePath();
 
-                // Vertical gradient: color → transparent
-                const grad = ctx.createLinearGradient(0, baseY - amp, 0, stripBottom);
-                grad.addColorStop(0,   hexWithAlpha(curtain.color, curtain.alpha * 0.4));
-                grad.addColorStop(0.3, hexWithAlpha(curtain.color, curtain.alpha));
-                grad.addColorStop(1,   hexWithAlpha(curtain.color, 0));
+                // Shrink as particle ages
+                const currentSize = p.size * p.life;
+                const alpha = Math.min(p.life * 0.55, 0.45);
 
-                // Soft glow
-                ctx.shadowBlur  = 50;
-                ctx.shadowColor = curtain.color;
+                // Outer glow
+                const grad = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, currentSize * 2.5);
+                grad.addColorStop(0, fireColor(p.life, alpha));
+                grad.addColorStop(1, fireColor(p.life, 0));
 
-                ctx.fillStyle   = grad;
-                ctx.globalAlpha = 1;
-                ctx.fill();
+                ctx!.beginPath();
+                ctx!.arc(p.x, p.y, currentSize * 2.5, 0, Math.PI * 2);
+                ctx!.fillStyle = grad;
+                ctx!.fill();
 
-                ctx.shadowBlur  = 0;
+                // Bright core
+                ctx!.beginPath();
+                ctx!.arc(p.x, p.y, currentSize * 0.6, 0, Math.PI * 2);
+                ctx!.fillStyle = fireColor(p.life, alpha * 1.4);
+                ctx!.fill();
             }
 
             rafId = requestAnimationFrame(draw);
-        };
+        }
 
         rafId = requestAnimationFrame(draw);
 
@@ -96,13 +139,7 @@ export function MatrixBackground() {
         <canvas
             ref={canvasRef}
             className="fixed inset-0 pointer-events-none z-0"
+            style={{ mixBlendMode: "screen" }}
         />
     );
-}
-
-function hexWithAlpha(hex: string, alpha: number): string {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r},${g},${b},${alpha})`;
 }
