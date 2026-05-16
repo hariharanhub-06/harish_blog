@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -530,85 +530,85 @@ export default function SmileTaskModule() {
                     </div>
                 </div>
             ) : (
-                <div className="grid gap-4">
-                    {tasks.map(task => {
-                        const s = task.stats;
-                        const totalShares = (s?.sharesDownload || 0) + (s?.sharesWeb || 0);
-                        return (
-                            <motion.div
-                                key={task.id}
-                                className="bg-white dark:bg-[#1e1e1e] border border-gray-100 dark:border-gray-800 rounded-3xl p-4 sm:p-6 shadow-sm"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                            >
-                                <div className="flex items-start justify-between gap-2 sm:gap-4">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 flex-wrap mb-2">
-                                            <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${task.status === "live"
-                                                ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
-                                                : "bg-gray-100 dark:bg-gray-800 text-gray-500"}`}>
-                                                {task.status === "live" ? "🟢 Live" : "⏸ Paused"}
-                                            </span>
-                                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                                                {task.lines?.length || 0} lines · {task.rareLines?.length || 0} rare
-                                            </span>
-                                        </div>
-                                        <h3 className="text-base sm:text-lg font-black text-gray-900 dark:text-white mb-1 truncate">{task.title}</h3>
-                                        <p className="text-gray-400 text-xs font-medium">{task.link}</p>
-                                    </div>
-
-                                    {/* Actions — 2×2 grid on mobile, single row on desktop */}
-                                    <div className="grid grid-cols-2 sm:flex sm:flex-row items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                                        <button
-                                            onClick={() => generatePoster(task)}
-                                            className="p-2 sm:p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-500 transition-all flex items-center justify-center"
-                                            title="Generate Story Poster"
-                                        >
-                                            <Sparkles size={15} />
-                                        </button>
-                                        <button
-                                            onClick={() => toggleStatus(task)}
-                                            disabled={togglingId === task.id}
-                                            className={`p-2 sm:p-2.5 rounded-xl transition-all flex items-center justify-center ${task.status === "live"
-                                                ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 hover:bg-emerald-100"
-                                                : "bg-gray-100 dark:bg-gray-800 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"}`}
-                                            title={task.status === "live" ? "Pause" : "Go Live"}
-                                        >
-                                            {togglingId === task.id
-                                                ? <Loader2 size={15} className="animate-spin" />
-                                                : task.status === "live" ? <EyeOff size={15} /> : <Eye size={15} />}
-                                        </button>
-                                        <button
-                                            onClick={() => openEdit(task)}
-                                            className="p-2 sm:p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:text-blue-600 transition-all flex items-center justify-center"
-                                        >
-                                            <Edit2 size={15} />
-                                        </button>
-                                        <button
-                                            onClick={() => deleteTask(task.id)}
-                                            className="p-2 sm:p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-500 transition-all flex items-center justify-center"
-                                        >
-                                            <Trash2 size={15} />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Analytics pills */}
-                                {s && (
-                                    <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-3 pt-3 sm:mt-4 sm:pt-4 border-t border-gray-50 dark:border-gray-800/50">
-                                        <StatPill icon="👁" label="Opens" value={s.opens} color="blue" />
-                                        <StatPill icon="🎲" label="Reveals" value={s.reveals} color="purple" />
-                                        <StatPill icon="🔀" label="Retries" value={s.retries} color="indigo" />
-                                        <StatPill icon="📤" label="Shares" value={totalShares} color="rose" />
-                                        <StatPill icon="👀" label="Rare" value={s.rareUnlocks} color="amber" />
-                                    </div>
-                                )}
-                            </motion.div>
-                        );
-                    })}
+                <div className="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+                {/* Header — desktop */}
+                <div className="hidden sm:flex items-center px-4 py-2.5 bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-gray-800 gap-3">
+                  <span className="w-20 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</span>
+                  <span className="flex-1 text-[10px] font-black uppercase tracking-widest text-gray-400">Title</span>
+                  <span className="w-12 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">👁</span>
+                  <span className="w-12 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">🎲</span>
+                  <span className="w-12 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">📤</span>
+                  <span className="w-12 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">👀</span>
+                  <span className="w-36 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">Actions</span>
                 </div>
-            )}
 
+                {tasks.map((task, i) => {
+                  const s = task.stats;
+                  const totalShares = (s?.sharesDownload || 0) + (s?.sharesWeb || 0);
+                  const isLive = task.status === "live";
+                  return (
+                    <div
+                      key={task.id}
+                      className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-4 py-3.5 transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.03] ${i < tasks.length - 1 ? "border-b border-gray-100 dark:border-gray-800" : ""}`}
+                    >
+                      {/* Status badge */}
+                      <div className="sm:w-20 flex-shrink-0">
+                        <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${isLive
+                          ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-500"}`}>
+                          {isLive ? "🟢 Live" : "⏸ Paused"}
+                        </span>
+                      </div>
+
+                      {/* Title + meta */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-black text-gray-900 dark:text-white truncate">{task.title}</p>
+                        <p className="text-[10px] text-gray-400 font-medium">{task.link} · {task.lines?.length || 0}L · {task.rareLines?.length || 0}R</p>
+                      </div>
+
+                      {/* Stats — desktop */}
+                      <div className="hidden sm:flex items-center">
+                        <span className="w-12 text-center text-xs font-bold text-blue-500">{s?.opens ?? 0}</span>
+                        <span className="w-12 text-center text-xs font-bold text-purple-500">{s?.reveals ?? 0}</span>
+                        <span className="w-12 text-center text-xs font-bold text-rose-500">{totalShares}</span>
+                        <span className="w-12 text-center text-xs font-bold text-amber-500">{s?.rareUnlocks ?? 0}</span>
+                      </div>
+
+                      {/* Stats — mobile */}
+                      <div className="flex sm:hidden gap-3 flex-wrap text-[10px] font-bold">
+                        <span className="text-blue-500">👁 {s?.opens ?? 0}</span>
+                        <span className="text-purple-500">🎲 {s?.reveals ?? 0}</span>
+                        <span className="text-rose-500">📤 {totalShares}</span>
+                        <span className="text-amber-500">👀 {s?.rareUnlocks ?? 0}</span>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 sm:w-36 sm:justify-center flex-shrink-0">
+                        <button onClick={() => generatePoster(task)} title="Story Poster"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-500 transition-all">
+                          <Sparkles size={14} />
+                        </button>
+                        <button onClick={() => toggleStatus(task)} disabled={togglingId === task.id}
+                          title={isLive ? "Pause" : "Go Live"}
+                          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${isLive
+                            ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 hover:bg-emerald-100"
+                            : "bg-gray-100 dark:bg-gray-800 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"}`}>
+                          {togglingId === task.id ? <Loader2 size={14} className="animate-spin" /> : isLive ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                        <button onClick={() => openEdit(task)} title="Edit"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:text-blue-600 transition-all">
+                          <Edit2 size={14} />
+                        </button>
+                        <button onClick={() => deleteTask(task.id)} title="Delete"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-500 transition-all">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             {/* ── Poster preview overlay ──────────────────────────────────── */}
             <AnimatePresence>
                 {posterPreview && (
