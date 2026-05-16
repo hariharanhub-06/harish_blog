@@ -45,8 +45,9 @@ export default async function Home() {
         where: (s, { eq }) => eq(s.isPublished, true),
         orderBy: (s, { desc }) => [desc(s.startTime)]
       }),
-      db.query.smileTasks.findFirst({
+      db.query.smileTasks.findMany({
         where: (t, { eq }) => eq(t.status, "live"),
+        orderBy: (t, { desc }) => [desc(t.updatedAt)],
       }),
     ]);
 
@@ -66,7 +67,8 @@ export default async function Home() {
     dbSkills = val(results[5], 'skills') || [];
     partnerships = val(results[6], 'partnerships') || [];
     liveSessions = val(results[7], 'liveSessions') || [];
-    smileTask = val(results[8], 'smileTask');
+    const smileTasks = val(results[8], 'smileTasks') as any[] || [];
+    smileTask = smileTasks[0] || null;
 
     // Fetch Quizzes separately as it has relations that might fail if not pushed
     try {

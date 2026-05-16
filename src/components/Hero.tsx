@@ -73,6 +73,7 @@ export default function Hero({ profile, experiences, className }: HeroProps) {
                             src={profile.heroImageUrl}
                             alt="Hero background"
                             fill
+                            unoptimized
                             className="object-cover opacity-30"
                             priority
                         />

@@ -59,11 +59,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "title and lines are required" }, { status: 400 });
         }
 
-        // Ensure only one task can be "live" at a time
-        if (status === "live") {
-            await db.update(smileTasks).set({ status: "pause" }).where(eq(smileTasks.status, "live"));
-        }
-
         const [task] = await db.insert(smileTasks).values({
             title,
             status: status || "pause",
@@ -90,11 +85,6 @@ export async function PATCH(req: Request) {
         const data = await req.json();
         const { id, ...updates } = data;
         if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
-
-        // Ensure only one "live" task
-        if (updates.status === "live") {
-            await db.update(smileTasks).set({ status: "pause" }).where(eq(smileTasks.status, "live"));
-        }
 
         const [task] = await db.update(smileTasks)
             .set({ ...updates, updatedAt: new Date() })

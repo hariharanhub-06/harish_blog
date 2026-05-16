@@ -441,8 +441,8 @@ export default function SmileTaskModule() {
                         <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-800/30 rounded-2xl p-4 space-y-2">
                             <p className="text-blue-700 dark:text-blue-300 text-xs font-black uppercase tracking-widest">How it works</p>
                             <ul className="text-blue-600/80 dark:text-blue-400/80 text-xs space-y-1 font-medium">
-                                <li>• Set status to <strong>Live</strong> → floating button appears on homepage</li>
-                                <li>• Only <strong>one task</strong> can be live at a time</li>
+                                <li>• Set status to <strong>Live</strong> → task appears in "Know About You" section</li>
+                                <li>• Multiple tasks can be live at the same time</li>
                                 <li>• Users get a random line from your list</li>
                                 <li>• They share a poster with your site link</li>
                                 <li>• New visitors land on <code className="bg-blue-100 dark:bg-blue-900/40 px-1 rounded">{form.link}</code></li>
