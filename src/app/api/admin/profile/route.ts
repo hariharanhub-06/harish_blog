@@ -94,6 +94,7 @@ export async function POST(req: Request) {
             showFeedbackSection: data.showFeedbackSection,
             showGamesSection: data.showGamesSection,
             showLiveSessionsSection: data.showLiveSessionsSection,
+            clickEffect: data.clickEffect ?? "none",
         };
 
         if (existing) {

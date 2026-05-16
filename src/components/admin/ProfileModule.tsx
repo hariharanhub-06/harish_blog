@@ -460,6 +460,45 @@ export default function ProfileModule() {
               </div>
                     </div>
 
+                    {/* Click Effects */}
+                    <div className="space-y-5 pt-12 border-t border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center space-x-3 ml-2">
+                            <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                                <Eye size={20} />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Click Effects</h2>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">Animation that plays when visitors click anywhere on the homepage</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {[
+                                { value: "none",    label: "Off",            desc: "No animation",              icon: "✕" },
+                                { value: "emoji",   label: "Emoji Pop",      desc: "Random emoji floats up",    icon: "🌟" },
+                                { value: "sparkle", label: "Sparkle Trail",  desc: "Stars burst from cursor",   icon: "✨" },
+                                { value: "ripple",  label: "Fluid Ripple",   desc: "Water ripple rings",        icon: "💧" },
+                            ].map((opt) => {
+                                const selected = (profile.clickEffect ?? "none") === opt.value;
+                                return (
+                                    <button
+                                        key={opt.value}
+                                        type="button"
+                                        onClick={() => setProfile({ ...profile, clickEffect: opt.value })}
+                                        className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all text-center ${selected
+                                            ? "bg-blue-50 dark:bg-blue-950/30 border-blue-500 shadow-sm"
+                                            : "bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600"}`}
+                                    >
+                                        <span className="text-2xl">{opt.icon}</span>
+                                        <span className={`text-xs font-black uppercase tracking-widest ${selected ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-300"}`}>{opt.label}</span>
+                                        <span className="text-[9px] text-gray-400 leading-tight">{opt.desc}</span>
+                                        {selected && <span className="text-[9px] font-black text-blue-500 uppercase tracking-wider">✓ Active</span>}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
                     {/* Quick Stats Section */}
                     <div className="space-y-6 pt-12 border-t border-gray-100 dark:border-gray-800">
                         <h2 className="text-xl font-black text-gray-900 dark:text-white ml-2">Quick Stats (Home Page)</h2>

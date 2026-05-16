@@ -38,6 +38,8 @@ export const profiles = pgTable("profiles", {
   showGamesSection: boolean("show_games_section").default(true),
   showLiveSessionsSection: boolean("show_live_sessions_section").default(true),
 
+  clickEffect: text("click_effect").default("none"),
+
   socialLinks: jsonb("social_links").$default(() => ({
     linkedin: "",
     github: "",

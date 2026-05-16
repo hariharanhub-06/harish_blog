@@ -41,6 +41,7 @@ export async function GET(req: Request) {
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_feedback_section BOOLEAN DEFAULT true`,
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_games_section BOOLEAN DEFAULT true`,
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_live_sessions_section BOOLEAN DEFAULT true`,
+        `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS click_effect TEXT DEFAULT 'none'`,
 
         // ── smile task system ────────────────────────────────────────────────────
         `CREATE TABLE IF NOT EXISTS smile_tasks (

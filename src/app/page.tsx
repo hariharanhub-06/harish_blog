@@ -226,6 +226,7 @@ export default async function Home() {
         quizzes={quizzes as any}
         liveSessions={liveSessions as any}
         smileTask={smileTask}
+        clickEffect={(profile as any).clickEffect || "none"}
       />
     </div>
   );

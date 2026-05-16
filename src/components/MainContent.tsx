@@ -25,6 +25,7 @@ import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
 import KnowAboutYouSection from "./KnowAboutYouSection";
+const ClickEffect = dynamic(() => import("./ClickEffect"), { ssr: false });
 
 interface Stat {
     icon: string;
@@ -93,6 +94,7 @@ interface Profile {
     showGamesSection?: boolean;
     showLiveSessionsSection?: boolean;
     showKnowAboutYouSection?: boolean;
+    clickEffect?: string;
 }
 
 interface Partnership {
@@ -142,6 +144,7 @@ interface MainContentProps {
     quizzes?: Quiz[];
     liveSessions?: LiveSession[];
     smileTask?: any;
+    clickEffect?: string;
 }
 
 
@@ -157,6 +160,7 @@ export default function MainContent({
     quizzes: initialQuizzes = [],
     liveSessions: initialLiveSessions = [],
     smileTask,
+    clickEffect = "none",
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -698,6 +702,7 @@ export default function MainContent({
                 )
             }
 
+            <ClickEffect style={clickEffect as any} />
 
         </div >
     );
