@@ -214,7 +214,7 @@ export default function MainContent({
         <div className="flex flex-col gap-4 pb-4 overflow-x-hidden">
             {/* Stats Section */}
             {profile.showStatsSection !== false && (
-                <section className="container mx-auto px-4 sm:px-6 py-4">
+                <section id="stats" className="container mx-auto px-4 sm:px-6 py-4">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                         {loading ? (
                             [...Array(4)].map((_, i) => (
@@ -263,26 +263,28 @@ export default function MainContent({
 
             {/* Live Sessions Carousel */}
             {profile.showLiveSessionsSection !== false && liveSessions.length > 0 && (
-                <Suspense fallback={null}>
-                    <LiveSessionsCarousel sessions={liveSessions} />
-                </Suspense>
+                <section id="live-sessions">
+                    <Suspense fallback={null}>
+                        <LiveSessionsCarousel sessions={liveSessions} />
+                    </Suspense>
+                </section>
             )}
-
-
 
             {/* Training Programs Section (Replaces Skill Carousel) */}
             {profile.showTrainingSection !== false && profile && (
-                <TrainingPrograms
-                    trainingStats={profile.trainingStats as any}
-                    partnerships={partnerships as any}
-                    skills={skills as any}
-                />
+                <section id="training">
+                    <TrainingPrograms
+                        trainingStats={profile.trainingStats as any}
+                        partnerships={partnerships as any}
+                        skills={skills as any}
+                    />
+                </section>
             )}
 
 
             {/* Experience Section */}
             {profile.showExperienceSection !== false && experiences.length > 0 && (
-                <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                <section id="experience" className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
 
                     <div className="flex flex-col items-center mb-4 text-center">
                         <span className="text-[10px] font-black uppercase tracking-[0.35em] text-orange-500">Professional Journey</span>
@@ -314,7 +316,7 @@ export default function MainContent({
 
             {/* Education Section */}
             {profile.showEducationSection !== false && educations.length > 0 && (
-                <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                <section id="education" className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
 
                     <div className="flex flex-col items-center mb-4 text-center">
                         <span className="text-[10px] font-black uppercase tracking-[0.35em] text-orange-500">Academic Background</span>
@@ -346,7 +348,7 @@ export default function MainContent({
 
             {/* Volunteering Section */}
             {profile.showVolunteeringSection !== false && volunteerings.length > 0 && (
-                <section className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
+                <section id="volunteering" className="py-6 md:py-8 bg-white/5 border-y border-white/5 relative overflow-hidden backdrop-blur-sm">
 
                     <div className="flex flex-col items-center mb-4 text-center">
                         <span className="text-[10px] font-black uppercase tracking-[0.35em] text-orange-500">Community Impact</span>
@@ -649,12 +651,12 @@ export default function MainContent({
             )}
 
             {/* Typing Test Section */}
-            {profile.showTypingTestSection !== false && <TypingTestSection />}
+            {profile.showTypingTestSection !== false && <section id="typing-test"><TypingTestSection /></section>}
 
-            {profile.showFeedbackSection !== false && <FeedbackSection />}
+            {profile.showFeedbackSection !== false && <section id="feedback"><FeedbackSection /></section>}
 
             {/* Games Section */}
-            {profile.showGamesSection !== false && <GamesCarousel onPlayGame={setActiveGameId} />}
+            {profile.showGamesSection !== false && <section id="games"><GamesCarousel onPlayGame={setActiveGameId} /></section>}
 
 
             {

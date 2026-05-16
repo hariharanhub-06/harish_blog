@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users, Music, Eye, EyeOff, Image as ImageIcon, Video } from "lucide-react";
+import { Camera, Save, Loader2, User, GraduationCap, Presentation, Users, Music, Eye, EyeOff, Image as ImageIcon, Video, Link, Check } from "lucide-react";
 import Image from "next/image";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import TimelineModule from "./TimelineModule";
@@ -10,6 +10,7 @@ export default function ProfileModule() {
     const [profile, setProfile] = useState<any>(null);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [copiedAnchor, setCopiedAnchor] = useState<string | null>(null);
 
     const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
 
@@ -372,37 +373,86 @@ export default function ProfileModule() {
                             Control which parts of your homepage are visible to visitors. Toggle them off to hide sections while you're still working on them or to keep your page clean.
                         </p>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-2">
+                        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+                            {/* Table header */}
+                            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-0 bg-gray-50 dark:bg-white/5 px-5 py-3 border-b border-gray-100 dark:border-gray-800">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Section</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 text-center w-20">Status</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 text-center w-24">Visibility</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 text-center w-16">Share</span>
+                            </div>
+
                             {[
-                                { key: 'showHeroSection', label: 'Hero / Introduction' },
-                                { key: 'showStatsSection', label: 'Quick Stats' },
-                                { key: 'showTrainingSection', label: 'Training & Services' },
-                                { key: 'showExperienceSection', label: 'Experience' },
-                                { key: 'showEducationSection', label: 'Education' },
-                                { key: 'showVolunteeringSection', label: 'Volunteering' },
-                                { key: 'showAboutSection', label: 'About Me' },
-                                { key: 'showProjectsSection', label: 'Projects' },
-                                { key: 'showQuizzesSection', label: 'Interactive Quizzes' },
-                                { key: 'showTypingTestSection', label: 'Typing Test' },
-                                { key: 'showFeedbackSection', label: 'Client Feedback' },
-                                { key: 'showGamesSection', label: 'Arcade Hub' },
-                                { key: 'showLiveSessionsSection', label: 'Live Sessions' },
-                            ].map((section) => (
-                                <button
-                                    key={section.key}
-                                    type="button"
-                                    onClick={() => setProfile({ ...profile, [section.key]: !profile[section.key as keyof any] })}
-                                    className={`flex flex-col items-start gap-3 p-5 rounded-2xl border-2 transition-all text-left ${profile[section.key as keyof any] !== false
-                                        ? "bg-blue-50/50 border-blue-500/20 text-blue-900 shadow-sm"
-                                        : "bg-gray-50 border-gray-100 text-gray-400 opacity-60 hover:opacity-100"
-                                        }`}
-                                >
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${profile[section.key as keyof any] !== false ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-400"}`}>
-                                        {profile[section.key as keyof any] !== false ? <Eye size={16} /> : <EyeOff size={16} />}
+                                { key: 'showHeroSection', label: 'Hero / Introduction', anchor: 'home' },
+                                { key: 'showStatsSection', label: 'Quick Stats', anchor: 'stats' },
+                                { key: 'showKnowAboutYouSection', label: 'Know About You', anchor: 'know-about-you' },
+                                { key: 'showLiveSessionsSection', label: 'Live Sessions', anchor: 'live-sessions' },
+                                { key: 'showTrainingSection', label: 'Training & Services', anchor: 'training' },
+                                { key: 'showExperienceSection', label: 'Experience', anchor: 'experience' },
+                                { key: 'showEducationSection', label: 'Education', anchor: 'education' },
+                                { key: 'showVolunteeringSection', label: 'Volunteering', anchor: 'volunteering' },
+                                { key: 'showAboutSection', label: 'About Me', anchor: 'about' },
+                                { key: 'showProjectsSection', label: 'Projects', anchor: 'portfolio' },
+                                { key: 'showQuizzesSection', label: 'Interactive Quizzes', anchor: 'quiz' },
+                                { key: 'showTypingTestSection', label: 'Typing Test', anchor: 'typing-test' },
+                                { key: 'showFeedbackSection', label: 'Client Feedback', anchor: 'feedback' },
+                                { key: 'showGamesSection', label: 'Arcade Hub', anchor: 'games' },
+                            ].map((section, i, arr) => {
+                                const isVisible = profile[section.key as keyof any] !== false;
+                                const shareUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/# ${section.anchor}`.replace("# ", "#");
+                                return (
+                                    <div
+                                        key={section.key}
+                                        className={`grid grid-cols-[1fr_auto_auto_auto] items-center gap-0 px-5 py-3.5 transition-colors hover:bg-gray-50/50 dark:hover:bg-white/3 ${i < arr.length - 1 ? "border-b border-gray-100 dark:border-gray-800" : ""}`}
+                                    >
+                                        {/* Section name */}
+                                        <span className="text-sm font-bold text-gray-800 dark:text-white">{section.label}</span>
+
+                                        {/* Status badge */}
+                                        <div className="w-20 flex justify-center">
+                                            <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${isVisible ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400" : "bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-500"}`}>
+                                                {isVisible ? "Visible" : "Hidden"}
+                                            </span>
+                                        </div>
+
+                                        {/* Enable / Disable icons */}
+                                        <div className="w-24 flex items-center justify-center gap-1">
+                                            <button
+                                                type="button"
+                                                title="Enable section"
+                                                onClick={() => setProfile({ ...profile, [section.key]: true })}
+                                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isVisible ? "bg-blue-500 text-white shadow-sm shadow-blue-500/30" : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:bg-blue-100 dark:hover:bg-blue-500/10 hover:text-blue-500"}`}
+                                            >
+                                                <Eye size={14} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                title="Disable section"
+                                                onClick={() => setProfile({ ...profile, [section.key]: false })}
+                                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${!isVisible ? "bg-gray-400 dark:bg-gray-600 text-white shadow-sm" : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-600"}`}
+                                            >
+                                                <EyeOff size={14} />
+                                            </button>
+                                        </div>
+
+                                        {/* Share / copy link icon */}
+                                        <div className="w-16 flex justify-center">
+                                            <button
+                                                type="button"
+                                                title="Copy section link"
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(shareUrl).catch(() => {});
+                                                    setCopiedAnchor(section.anchor);
+                                                    setTimeout(() => setCopiedAnchor(null), 2000);
+                                                }}
+                                                className="w-8 h-8 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-white/5 text-gray-400 hover:bg-orange-100 dark:hover:bg-orange-500/10 hover:text-orange-500 transition-all"
+                                            >
+                                                {copiedAnchor === section.anchor ? <Check size={14} className="text-green-500" /> : <Link size={14} />}
+                                            </button>
+                                        </div>
                                     </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest leading-tight">{section.label}</span>
-                                </button>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 
