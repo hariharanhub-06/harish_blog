@@ -25,6 +25,7 @@ const SmileFloatingButton = dynamic(() => import("@/components/SmileFloatingButt
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
+import KnowAboutYouSection from "./KnowAboutYouSection";
 import VisitorBadge from "./VisitorBadge";
 
 interface Stat {
@@ -93,6 +94,7 @@ interface Profile {
     showFeedbackSection?: boolean;
     showGamesSection?: boolean;
     showLiveSessionsSection?: boolean;
+    showKnowAboutYouSection?: boolean;
 }
 
 interface Partnership {
@@ -255,6 +257,11 @@ export default function MainContent({
                         )}
                     </div>
                 </section>
+            )}
+
+            {/* Know About You Section */}
+            {profile.showKnowAboutYouSection !== false && (
+                <KnowAboutYouSection smileTask={smileTask} />
             )}
 
             {/* Live Sessions Carousel */}
