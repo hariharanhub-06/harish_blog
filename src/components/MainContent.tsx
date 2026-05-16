@@ -144,6 +144,7 @@ interface MainContentProps {
     quizzes?: Quiz[];
     liveSessions?: LiveSession[];
     smileTask?: any;
+    liveSmileTasks?: any[];
     clickEffect?: string;
 }
 
@@ -160,6 +161,7 @@ export default function MainContent({
     quizzes: initialQuizzes = [],
     liveSessions: initialLiveSessions = [],
     smileTask,
+    liveSmileTasks = [],
     clickEffect = "none",
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
@@ -262,7 +264,7 @@ export default function MainContent({
 
             {/* Know About You Section */}
             {profile.showKnowAboutYouSection !== false && (
-                <KnowAboutYouSection smileTask={smileTask} />
+                <KnowAboutYouSection smileTask={smileTask} smileTasks={liveSmileTasks} />
             )}
 
             {/* Live Sessions Carousel */}

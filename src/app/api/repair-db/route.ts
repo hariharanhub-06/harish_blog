@@ -43,6 +43,9 @@ export async function GET(req: Request) {
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_live_sessions_section BOOLEAN DEFAULT true`,
         `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS click_effect TEXT DEFAULT 'none'`,
 
+        // ── profiles: deduplicate rows (keep only the most-recently-updated) ─────
+        `DELETE FROM profiles WHERE id NOT IN (SELECT id FROM profiles ORDER BY updated_at DESC NULLS LAST LIMIT 1)`,
+
         // ── smile task system ────────────────────────────────────────────────────
         `CREATE TABLE IF NOT EXISTS smile_tasks (
             id TEXT PRIMARY KEY,

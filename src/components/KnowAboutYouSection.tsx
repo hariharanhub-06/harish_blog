@@ -32,6 +32,7 @@ interface SmileTask {
 
 interface Props {
     smileTask?: SmileTask | null;
+    smileTasks?: SmileTask[];
 }
 
 function generateVisitorPoster(data: VisitorData, origin: string): string {
@@ -148,13 +149,18 @@ function generateVisitorPoster(data: VisitorData, origin: string): string {
     return canvas.toDataURL("image/png");
 }
 
-export default function KnowAboutYouSection({ smileTask }: Props) {
+export default function KnowAboutYouSection({ smileTask, smileTasks = [] }: Props) {
+    // Merge: prefer the full array, fall back to single task
+    const liveTasks: SmileTask[] = smileTasks.length > 0
+        ? smileTasks
+        : smileTask ? [smileTask] : [];
+
     const [visitorData, setVisitorData] = useState<VisitorData | null>(null);
     const [copied, setCopied] = useState<string | null>(null);
     const [origin, setOrigin] = useState("");
     const [posterUrl, setPosterUrl] = useState<string | null>(null);
     const [showPoster, setShowPoster] = useState(false);
-    const [smileOpen, setSmileOpen] = useState(false);
+    const [activeSmileTask, setActiveSmileTask] = useState<SmileTask | null>(null);
     const [posterCopied, setPosterCopied] = useState(false);
 
     useEffect(() => {
@@ -204,9 +210,6 @@ export default function KnowAboutYouSection({ smileTask }: Props) {
         a.click();
     };
 
-    const smileUrl = smileTask ? `${origin}${smileTask.link}` : "";
-    const isLiveTask = smileTask && smileTask.status === "live";
-
     return (
         <>
             <section id="know-about-you" className="container mx-auto px-4 sm:px-6 py-8">
@@ -219,7 +222,7 @@ export default function KnowAboutYouSection({ smileTask }: Props) {
                     </h2>
                 </div>
 
-                <div className={`grid gap-4 max-w-2xl mx-auto ${isLiveTask ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 max-w-sm"}`}>
+                <div className={`grid gap-4 max-w-3xl mx-auto ${liveTasks.length > 0 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 max-w-sm"}`}>
 
                     {/* Visitor Card */}
                     {visitorData ? (
@@ -271,47 +274,52 @@ export default function KnowAboutYouSection({ smileTask }: Props) {
                         </div>
                     )}
 
-                    {/* Smile Task Card */}
-                    {isLiveTask && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 16 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, delay: 0.1 }}
-                            className="flex flex-col gap-3 p-6 bg-white/5 rounded-3xl border border-white/10 hover:border-rose-500/30 transition-colors"
-                        >
-                            <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/20">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
-                                        Live Now
-                                    </span>
+                    {/* Smile Task Cards — one per live task */}
+                    {liveTasks.map((task, idx) => {
+                        const taskUrl = `${origin}${task.link}`;
+                        const copyKey = `smile-${task.id}`;
+                        return (
+                            <motion.div
+                                key={task.id}
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, delay: 0.1 + idx * 0.08 }}
+                                className="flex flex-col gap-3 p-6 bg-white/5 rounded-3xl border border-white/10 hover:border-rose-500/30 transition-colors"
+                            >
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/20">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+                                            Live Now
+                                        </span>
+                                    </div>
+                                    <div className="flex items-start gap-2">
+                                        <Smile size={20} className="text-rose-400 shrink-0 mt-0.5" />
+                                        <h3 className="text-lg font-black text-white tracking-tight leading-snug">
+                                            {task.title}
+                                        </h3>
+                                    </div>
                                 </div>
-                                <div className="flex items-start gap-2">
-                                    <Smile size={20} className="text-rose-400 shrink-0 mt-0.5" />
-                                    <h3 className="text-lg font-black text-white tracking-tight leading-snug">
-                                        {smileTask.title}
-                                    </h3>
-                                </div>
-                            </div>
 
-                            <div className="flex items-center gap-2 mt-1">
-                                <button
-                                    onClick={() => setSmileOpen(true)}
-                                    className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-white/60 hover:text-rose-300 transition-colors px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/20"
-                                >
-                                    <Smile size={11} />
-                                    Open
-                                </button>
-                                <button
-                                    onClick={() => copyLink(smileUrl, "smile")}
-                                    className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-white/60 hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10"
-                                >
-                                    {copied === "smile" ? <Check size={11} className="text-green-400" /> : <Copy size={11} />}
-                                    {copied === "smile" ? "Copied!" : "Copy Link"}
-                                </button>
-                            </div>
-                        </motion.div>
-                    )}
+                                <div className="flex items-center gap-2 mt-1">
+                                    <button
+                                        onClick={() => setActiveSmileTask(task)}
+                                        className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-white/60 hover:text-rose-300 transition-colors px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/20"
+                                    >
+                                        <Smile size={11} />
+                                        Open
+                                    </button>
+                                    <button
+                                        onClick={() => copyLink(taskUrl, copyKey)}
+                                        className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-white/60 hover:text-white transition-colors px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10"
+                                    >
+                                        {copied === copyKey ? <Check size={11} className="text-green-400" /> : <Copy size={11} />}
+                                        {copied === copyKey ? "Copied!" : "Copy Link"}
+                                    </button>
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </section>
 
@@ -394,8 +402,8 @@ export default function KnowAboutYouSection({ smileTask }: Props) {
 
             {/* Smile Modal Overlay */}
             <AnimatePresence>
-                {smileOpen && smileTask && (
-                    <SmileModal task={smileTask} onClose={() => setSmileOpen(false)} />
+                {activeSmileTask && (
+                    <SmileModal task={activeSmileTask} onClose={() => setActiveSmileTask(null)} />
                 )}
             </AnimatePresence>
         </>

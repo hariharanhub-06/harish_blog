@@ -49,7 +49,10 @@ export async function GET(req: Request) {
     try {
         const authError = await validateAdminSession(req);
         if (authError) return authError;
-        const profile = await db.query.profiles.findFirst();
+        // Always get the most-recently-updated profile row to avoid returning a stale duplicate
+        const profile = await db.query.profiles.findFirst({
+            orderBy: (p, { desc }) => [desc(p.updatedAt)],
+        });
         return NextResponse.json(profile || DEFAULT_PROFILE);
     } catch (error: any) {
         console.error("GET Profile failed:", error);
@@ -66,7 +69,10 @@ export async function POST(req: Request) {
         // Auto-add any new columns that may not exist yet
         await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS click_effect TEXT DEFAULT 'none'`).catch(() => {});
 
-        const existing = await db.query.profiles.findFirst();
+        // Get most recently updated row; if duplicates exist this picks the right one
+        const existing = await db.query.profiles.findFirst({
+            orderBy: (p, { desc }) => [desc(p.updatedAt)],
+        });
 
         const fields = {
             name: data.name,

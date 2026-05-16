@@ -18,10 +18,13 @@ export default async function Home() {
   let quizzes: any[] = [];
   let liveSessions: any[] = [];
   let smileTask: any = null;
+  let liveSmileTasks: any[] = [];
   try {
     // Parallel fetch with failure isolation (Promise.allSettled)
     const results = await Promise.allSettled([
-      db.query.profiles.findFirst(),
+      db.query.profiles.findFirst({
+        orderBy: (p, { desc }) => [desc(p.updatedAt)],
+      }),
       db.query.projects.findMany({
         orderBy: (projects, { desc }) => [desc(projects.featured), desc(projects.displayOrder), desc(projects.createdAt)]
       }),
@@ -67,8 +70,8 @@ export default async function Home() {
     dbSkills = val(results[5], 'skills') || [];
     partnerships = val(results[6], 'partnerships') || [];
     liveSessions = val(results[7], 'liveSessions') || [];
-    const smileTasks = val(results[8], 'smileTasks') as any[] || [];
-    smileTask = smileTasks[0] || null;
+    liveSmileTasks = (val(results[8], 'smileTasks') as any[]) || [];
+    smileTask = liveSmileTasks[0] || null;
 
     // Fetch Quizzes separately as it has relations that might fail if not pushed
     try {
@@ -228,6 +231,7 @@ export default async function Home() {
         quizzes={quizzes as any}
         liveSessions={liveSessions as any}
         smileTask={smileTask}
+        liveSmileTasks={liveSmileTasks}
         clickEffect={(profile as any).clickEffect || "none"}
       />
     </div>
