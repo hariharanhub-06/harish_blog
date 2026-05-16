@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { profiles } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { validateAdminSession } from "@/lib/adminAuth";
@@ -62,6 +62,10 @@ export async function POST(req: Request) {
         const authError = await validateAdminSession(req);
         if (authError) return authError;
         const data = await req.json();
+
+        // Auto-add any new columns that may not exist yet
+        await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS click_effect TEXT DEFAULT 'none'`).catch(() => {});
+
         const existing = await db.query.profiles.findFirst();
 
         const fields = {
