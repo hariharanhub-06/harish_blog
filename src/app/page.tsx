@@ -1,6 +1,5 @@
 import Hero from "@/components/Hero";
 import MainContent from "@/components/MainContent";
-import { MatrixBackground } from "@/components/MatrixBackground";
 import { db } from "@/db";
 
 // Enable Incremental Static Regeneration (ISR)
@@ -199,7 +198,6 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col gap-0 bg-[#0e0e0e] relative">
-      <MatrixBackground />
       {profile.showHeroSection !== false && (
         <section id="home">
           <Hero
