@@ -24,6 +24,7 @@ interface SessionCreateEditModalProps {
 export default function SessionCreateEditModal({ session, onClose, onSave }: SessionCreateEditModalProps) {
     const isEdit = !!session;
     const [loading, setLoading] = useState(false);
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -82,7 +83,7 @@ export default function SessionCreateEditModal({ session, onClose, onSave }: Ses
         try {
             const res = await fetch("/api/sessions/admin", {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify(payload),
             });
 

@@ -56,6 +56,7 @@ export default function LiveSessionsModule() {
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
 
     // Modal State
     const [editingSession, setEditingSession] = useState<Session | null>(null);
@@ -73,7 +74,7 @@ export default function LiveSessionsModule() {
 
     const fetchSessions = async () => {
         try {
-            const res = await fetch("/api/sessions/admin");
+            const res = await fetch("/api/sessions/admin", { headers: { "X-Session-Id": sessionId } });
             console.log("[LiveSessionsModule] Fetch status:", res.status);
             if (res.ok) {
                 const data = await res.json();
@@ -95,6 +96,7 @@ export default function LiveSessionsModule() {
         try {
             const res = await fetch(`/api/sessions/admin?id=${id}`, {
                 method: "DELETE",
+                headers: { "X-Session-Id": sessionId },
             });
             if (res.ok) fetchSessions();
         } catch (error) {
@@ -105,7 +107,7 @@ export default function LiveSessionsModule() {
     const fetchRegistrations = async (sessionId: string) => {
         setLoadingRegistrations(true);
         try {
-            const res = await fetch(`/api/sessions/admin/registrations?sessionId=${sessionId}`);
+            const res = await fetch(`/api/sessions/admin/registrations?sessionId=${sessionId}`, { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
                 const data = await res.json();
                 setRegistrations(data);
@@ -130,7 +132,7 @@ export default function LiveSessionsModule() {
         try {
             const res = await fetch("/api/sessions/admin/resend-emails", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({ sessionId: viewingRegistrations.id })
             });
             const data = await res.json();
@@ -149,7 +151,7 @@ export default function LiveSessionsModule() {
         try {
             const res = await fetch("/api/sessions/admin/resend-emails", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
                 body: JSON.stringify({
                     sessionId: viewingRegistrations.id,
                     registrationId: reg.id
@@ -168,7 +170,8 @@ export default function LiveSessionsModule() {
         if (!window.confirm("Delete this registration?")) return;
         try {
             const res = await fetch(`/api/sessions/admin/registrations?id=${regId}`, {
-                method: "DELETE"
+                method: "DELETE",
+                headers: { "X-Session-Id": sessionId },
             });
             if (res.ok && viewingRegistrations) {
                 fetchRegistrations(viewingRegistrations.id);
@@ -319,7 +322,7 @@ export default function LiveSessionsModule() {
                                         try {
                                             const res = await fetch('/api/sessions/status', {
                                                 method: 'POST',
-                                                headers: { 'Content-Type': 'application/json' },
+                                                headers: { 'Content-Type': 'application/json', 'X-Session-Id': sessionId },
                                                 body: JSON.stringify({ sessionId: session.id, status: 'completed' })
                                             });
                                             if (res.ok) fetchSessions();
@@ -336,7 +339,7 @@ export default function LiveSessionsModule() {
                                             // 1. Activate session
                                             const res = await fetch('/api/sessions/status', {
                                                 method: 'POST',
-                                                headers: { 'Content-Type': 'application/json' },
+                                                headers: { 'Content-Type': 'application/json', 'X-Session-Id': sessionId },
                                                 body: JSON.stringify({ sessionId: session.id, status: 'active' })
                                             });
 

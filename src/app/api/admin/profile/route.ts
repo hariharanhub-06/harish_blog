@@ -69,6 +69,7 @@ export async function POST(req: Request) {
 
         // Auto-add any new columns that may not exist yet
         await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS click_effect TEXT DEFAULT 'none'`).catch(() => {});
+        await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_know_about_you_section BOOLEAN DEFAULT true`).catch(() => {});
 
         // Get most recently updated row; if duplicates exist this picks the right one
         const existing = await db.query.profiles.findFirst({
