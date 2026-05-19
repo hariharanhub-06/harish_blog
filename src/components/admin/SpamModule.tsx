@@ -168,22 +168,28 @@ export default function SpamModule() {
         </div>
       </div>
 
-      {/* Stats cards */}
-      {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {[
-            { icon: Users, label: "Total Entries", value: stats.totalRegistrations, color: "text-blue-400" },
-            { icon: CheckCircle2, label: "Completed (Step 2)", value: stats.completedBothSteps, color: "text-green-400" },
-            { icon: ChevronRight, label: "Step 1 Only", value: stats.step1Only, color: "text-yellow-400" },
-            { icon: MousePointerClick, label: "Link Clicks", value: stats.totalLinkClicks, color: "text-purple-400" },
-            { icon: Trophy, label: "Winners", value: stats.winners, color: "text-amber-400" },
-          ].map(({ icon: Icon, label, value, color }) => (
-            <div key={label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
-              <Icon className={`w-5 h-5 ${color} mb-2`} />
-              <p className="text-white text-2xl font-black">{value}</p>
-              <p className="text-white/50 text-xs">{label}</p>
-            </div>
-          ))}
+      {/* Stats cards — always visible */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {[
+          { icon: Users, label: "Total Entries", value: stats?.totalRegistrations ?? 0, color: "text-blue-400" },
+          { icon: CheckCircle2, label: "Completed (Step 2)", value: stats?.completedBothSteps ?? 0, color: "text-green-400" },
+          { icon: ChevronRight, label: "Step 1 Only", value: stats?.step1Only ?? 0, color: "text-yellow-400" },
+          { icon: MousePointerClick, label: "Link Clicks", value: stats?.totalLinkClicks ?? 0, color: "text-purple-400" },
+          { icon: Trophy, label: "Winners", value: stats?.winners ?? 0, color: "text-amber-400" },
+        ].map(({ icon: Icon, label, value, color }) => (
+          <div key={label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+            <Icon className={`w-5 h-5 ${color} mb-2`} />
+            <p className="text-white text-2xl font-black">{value}</p>
+            <p className="text-white/50 text-xs">{label}</p>
+          </div>
+        ))}
+      </div>
+      {!stats && (
+        <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
+          <span className="text-yellow-400 text-sm">⚠️ Stats failed to load. DB tables may not exist yet.</span>
+          <a href="/api/repair-db" target="_blank" className="ml-auto text-xs bg-yellow-500/20 border border-yellow-400/30 text-yellow-300 px-3 py-1.5 rounded-lg hover:bg-yellow-500/30 transition-all">
+            Run Repair DB →
+          </a>
         </div>
       )}
 
