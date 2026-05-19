@@ -149,7 +149,7 @@ export default function SpamModule() {
         </div>
         <div className="flex items-center gap-3">
           <a
-            href="/lucky-draw"
+            href={process.env.NEXT_PUBLIC_LUCKY_DRAW_URL || "#"}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/20 border border-purple-400/30 text-purple-300 text-sm hover:bg-purple-500/30 transition-all"
