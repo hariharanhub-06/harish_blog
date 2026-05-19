@@ -187,9 +187,18 @@ export default function SpamModule() {
       {!stats && (
         <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-4 py-3">
           <span className="text-yellow-400 text-sm">⚠️ Stats failed to load. DB tables may not exist yet.</span>
-          <a href="/api/repair-db" target="_blank" className="ml-auto text-xs bg-yellow-500/20 border border-yellow-400/30 text-yellow-300 px-3 py-1.5 rounded-lg hover:bg-yellow-500/30 transition-all">
+          <button
+            className="ml-auto text-xs bg-yellow-500/20 border border-yellow-400/30 text-yellow-300 px-3 py-1.5 rounded-lg hover:bg-yellow-500/30 transition-all"
+            onClick={async () => {
+              try {
+                const res = await fetch("/api/repair-db", { headers });
+                if (res.ok) { toast.success("DB repaired! Refreshing..."); load(); }
+                else toast.error("Repair failed");
+              } catch { toast.error("Repair failed"); }
+            }}
+          >
             Run Repair DB →
-          </a>
+          </button>
         </div>
       )}
 
