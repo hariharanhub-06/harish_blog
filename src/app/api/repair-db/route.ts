@@ -69,6 +69,34 @@ export async function GET(req: Request) {
             ip_hash TEXT,
             created_at TIMESTAMP DEFAULT NOW()
         )`,
+
+        // ── lucky draw campaign ──────────────────────────────────────────────────
+        `CREATE TABLE IF NOT EXISTS lucky_draw_entries (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            mobile TEXT NOT NULL,
+            selfie_url TEXT NOT NULL,
+            favorite_number INTEGER,
+            unique_lucky_number TEXT,
+            referral_code TEXT NOT NULL,
+            referred_by TEXT,
+            language TEXT DEFAULT 'en',
+            step INTEGER DEFAULT 1,
+            is_winner BOOLEAN DEFAULT false,
+            privacy_consent BOOLEAN DEFAULT true,
+            created_at TIMESTAMP DEFAULT NOW(),
+            UNIQUE(mobile),
+            UNIQUE(unique_lucky_number),
+            UNIQUE(referral_code)
+        )`,
+
+        `CREATE TABLE IF NOT EXISTS lucky_draw_clicks (
+            id TEXT PRIMARY KEY,
+            referral_code TEXT NOT NULL,
+            ip_address TEXT,
+            user_agent TEXT,
+            clicked_at TIMESTAMP DEFAULT NOW()
+        )`,
     ];
 
     const results: { query: string; status: string }[] = [];

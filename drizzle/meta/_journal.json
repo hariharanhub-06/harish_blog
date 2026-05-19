@@ -78,6 +78,13 @@
       "when": 1772109143374,
       "tag": "0010_round_scourge",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1779151034408,
+      "tag": "0011_optimal_stepford_cuckoos",
+      "breakpoints": true
     }
   ]
 }

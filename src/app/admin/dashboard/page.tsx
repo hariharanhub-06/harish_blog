@@ -50,8 +50,9 @@ import SettingsModule from "@/components/admin/SettingsModule";
 import KanbanModule from "@/components/admin/KanbanModule";
 import RoutinesModule from "@/components/admin/RoutinesModule";
 import SmileTaskModule from "@/components/admin/SmileTaskModule";
+import SpamModule from "@/components/admin/SpamModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "spam";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -85,6 +86,7 @@ export default function AdminDashboard() {
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadMessages, group: "Communication" },
         { id: "routines", title: "Routine Checklist", icon: CheckSquare, color: "bg-indigo-600", group: "Admin" },
         { id: "smile-tasks", title: "Smile Tasks", icon: Sparkles, color: "bg-rose-500", group: "Engagement" },
+        { id: "spam", title: "Lucky Draw", icon: Trophy, color: "bg-yellow-600", group: "Campaigns" },
         { id: "settings", title: "Settings", icon: Settings, color: "bg-gray-600", group: "Admin" },
     ], [unreadMessages]);
 
@@ -297,6 +299,7 @@ export default function AdminDashboard() {
             case "kanban": return <KanbanModule />;
             case "routines": return <RoutinesModule />;
             case "smile-tasks": return <SmileTaskModule />;
+            case "spam": return <SpamModule />;
             case "settings": return <SettingsModule />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">

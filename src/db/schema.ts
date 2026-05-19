@@ -1216,3 +1216,29 @@ export const smileAnalytics = pgTable("smile_analytics", {
   ipHash: text("ip_hash"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// ── Lucky Draw Campaign ────────────────────────────────────────────────────────
+
+export const luckyDrawEntries = pgTable("lucky_draw_entries", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  mobile: text("mobile").notNull().unique(),
+  selfieUrl: text("selfie_url").notNull(),
+  favoriteNumber: integer("favorite_number"),
+  uniqueLuckyNumber: text("unique_lucky_number").unique(),
+  referralCode: text("referral_code").notNull().unique(),
+  referredBy: text("referred_by"),
+  language: text("language").default("en"),
+  step: integer("step").default(1),
+  isWinner: boolean("is_winner").default(false),
+  privacyConsent: boolean("privacy_consent").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const luckyDrawClicks = pgTable("lucky_draw_clicks", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  referralCode: text("referral_code").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  clickedAt: timestamp("clicked_at").defaultNow(),
+});
