@@ -4,20 +4,15 @@ import { db } from "@/db";
 import { adminPushTokens } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BBdu_WKn36wvuhOQ36YvzA6AvfUNi5evqdAHLfPeRbh_TcabjnzQjyPAqXxx21z_hY4x3dtp4I2ck_USjjGYqhk';
-const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY!;
-
-if (!vapidPrivateKey) {
-    console.error('[webpush] VAPID_PRIVATE_KEY env var is not set');
-}
-
-webpush.setVapidDetails(
-    'mailto:admin@hariharanhub.com',
-    vapidPublicKey,
-    vapidPrivateKey
-);
-
 export async function sendAdminPushNotification(title: string, message: string, url: string = '/admin/dashboard') {
+    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BBdu_WKn36wvuhOQ36YvzA6AvfUNi5evqdAHLfPeRbh_TcabjnzQjyPAqXxx21z_hY4x3dtp4I2ck_USjjGYqhk';
+    const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+    if (!vapidPrivateKey) {
+        console.error('[webpush] VAPID_PRIVATE_KEY not set, skipping push notifications');
+        return;
+    }
+    webpush.setVapidDetails('mailto:admin@hariharanhub.com', vapidPublicKey, vapidPrivateKey);
+
     try {
         const subscriptions = await db.select().from(adminPushTokens);
 
