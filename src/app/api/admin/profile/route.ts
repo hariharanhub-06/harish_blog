@@ -50,14 +50,13 @@ export async function GET(req: Request) {
     try {
         const authError = await validateAdminSession(req);
         if (authError) return authError;
-        // Always get the most-recently-updated profile row to avoid returning a stale duplicate
         const profile = await db.query.profiles.findFirst({
-            orderBy: (p, { asc }) => [asc(p.updatedAt)],
+            orderBy: (p, { desc }) => [desc(p.updatedAt)],
         });
         return NextResponse.json(profile || DEFAULT_PROFILE);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("GET Profile failed:", error);
-        return NextResponse.json(DEFAULT_PROFILE); // Return defaults instead of error for UI stability
+        return NextResponse.json(DEFAULT_PROFILE);
     }
 }
 
@@ -71,9 +70,8 @@ export async function POST(req: Request) {
         await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS click_effect TEXT DEFAULT 'none'`).catch(() => {});
         await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_know_about_you_section BOOLEAN DEFAULT true`).catch(() => {});
 
-        // Get most recently updated row; if duplicates exist this picks the right one
         const existing = await db.query.profiles.findFirst({
-            orderBy: (p, { asc }) => [asc(p.updatedAt)],
+            orderBy: (p, { desc }) => [desc(p.updatedAt)],
         });
 
         const fields = {
@@ -121,11 +119,8 @@ export async function POST(req: Request) {
 
         revalidatePath("/");
         return NextResponse.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("POST Profile failed:", error);
-        return NextResponse.json({
-            error: "Database save failed.",
-            details: error.message
-        }, { status: 500 });
+        return NextResponse.json({ error: "Database save failed." }, { status: 500 });
     }
 }

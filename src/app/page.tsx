@@ -2,9 +2,7 @@ import Hero from "@/components/Hero";
 import MainContent from "@/components/MainContent";
 import { db } from "@/db";
 
-// Enable Incremental Static Regeneration (ISR)
-// Revalidate every 0 seconds to ensure fresh data during debugging
-export const dynamic = "force-dynamic";
+export const revalidate = 60; // ISR: refresh every 60 seconds
 
 export default async function Home() {
   // Fetch all data with safe fallbacks
@@ -23,7 +21,7 @@ export default async function Home() {
     // Parallel fetch with failure isolation (Promise.allSettled)
     const results = await Promise.allSettled([
       db.query.profiles.findFirst({
-        orderBy: (p, { asc }) => [asc(p.updatedAt)],
+        orderBy: (p, { desc }) => [desc(p.updatedAt)],
       }),
       db.query.projects.findMany({
         orderBy: (projects, { desc }) => [desc(projects.featured), desc(projects.displayOrder), desc(projects.createdAt)]

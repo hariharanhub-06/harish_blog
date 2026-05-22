@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { validateAdminSession } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
+    const authError = await validateAdminSession(req);
+    if (authError) return authError;
     try {
         const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
         if (!privateKey) {
@@ -21,8 +24,8 @@ export async function GET() {
             expire,
             signature
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("ImageKit Auth Error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Failed to generate auth token" }, { status: 500 });
     }
 }

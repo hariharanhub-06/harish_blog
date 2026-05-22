@@ -63,13 +63,13 @@ export default function OverviewModule({ onTabChange }: { onTabChange?: (tab: an
         unreadMessages: 0
     });
 
-    const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
-
     useEffect(() => {
         fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dateRange]);
 
     const fetchData = async () => {
+        const sessionId = localStorage.getItem("admin_sessionId") || "";
         try {
             const [analyticsRes, messagesRes, visitorRes, heartRes] = await Promise.all([
                 fetch(`/api/analytics?start=${dateRange.start}&end=${dateRange.end}`),

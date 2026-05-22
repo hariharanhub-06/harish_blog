@@ -6,6 +6,22 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-XSS-Protection", value: "1; mode=block" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
+  {
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://vercel.live",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https: http:",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "connect-src 'self' https: wss:",
+      "media-src 'self' https: blob:",
+      "frame-src 'self' https://meet.jit.si https://*.jitsi.net https://jitsi.meeting.study",
+      "worker-src 'self' blob:",
+      "object-src 'none'",
+    ].join("; "),
+  },
 ];
 
 const nextConfig: NextConfig = {
@@ -16,6 +32,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },

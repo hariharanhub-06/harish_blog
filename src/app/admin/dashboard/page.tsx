@@ -31,6 +31,8 @@ import {
     Pin,
     Smartphone,
     Sparkles,
+    Globe,
+    Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -51,8 +53,17 @@ import KanbanModule from "@/components/admin/KanbanModule";
 import RoutinesModule from "@/components/admin/RoutinesModule";
 import SmileTaskModule from "@/components/admin/SmileTaskModule";
 import SpamModule from "@/components/admin/SpamModule";
+import ProjectsModule from "@/components/admin/ProjectsModule";
+import SkillsModule from "@/components/admin/SkillsModule";
+import PartnershipsModule from "@/components/admin/PartnershipsModule";
+import YouTubeModule from "@/components/admin/YouTubeModule";
+import AIAssistantModule from "@/components/admin/AIAssistantModule";
+import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
+import TravelledModule from "@/components/admin/TravelledModule";
+import FinanceLeadModule from "@/components/admin/FinanceLeadModule";
+import SchedulerDocumentsModule from "@/components/admin/SchedulerDocumentsModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "spam";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "spam" | "projects" | "skills" | "partnerships" | "youtube" | "ai-assistant" | "meetings" | "travelled" | "finance-leads" | "scheduler-docs";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -88,6 +99,15 @@ export default function AdminDashboard() {
         { id: "smile-tasks", title: "Smile Tasks", icon: Sparkles, color: "bg-rose-500", group: "Engagement" },
         { id: "spam", title: "Lucky Draw", icon: Trophy, color: "bg-yellow-600", group: "Campaigns" },
         { id: "settings", title: "Settings", icon: Settings, color: "bg-gray-600", group: "Admin" },
+        { id: "projects", title: "Projects", icon: Briefcase, color: "bg-sky-500", group: "Personal" },
+        { id: "skills", title: "Skills", icon: Sparkles, color: "bg-green-500", group: "Personal" },
+        { id: "partnerships", title: "Partnerships", icon: HeartHandshake, color: "bg-rose-600", group: "Business" },
+        { id: "youtube", title: "YouTube Videos", icon: Video, color: "bg-red-600", group: "Content" },
+        { id: "ai-assistant", title: "AI Assistant Config", icon: Sparkles, color: "bg-violet-600", group: "Config" },
+        { id: "meetings", title: "Meetings", icon: Calendar, color: "bg-cyan-600", group: "Business" },
+        { id: "travelled", title: "Travelled Places", icon: Globe, color: "bg-teal-600", group: "Personal" },
+        { id: "finance-leads", title: "Finance Leads", icon: Wallet, color: "bg-lime-600", group: "Business" },
+        { id: "scheduler-docs", title: "Scheduler Docs", icon: FileText, color: "bg-orange-600", group: "Admin" },
     ], [unreadMessages]);
 
     // Theme Management
@@ -215,7 +235,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash and fetch notifications
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "kanban", "routines", "smile-tasks", "settings"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "kanban", "routines", "smile-tasks", "settings", "spam", "projects", "skills", "partnerships", "youtube", "ai-assistant", "meetings", "travelled", "finance-leads", "scheduler-docs"];
         if (hash && validTabs.includes(hash)) setActiveTab(hash);
 
         const fetchAllCounts = async () => {
@@ -301,6 +321,15 @@ export default function AdminDashboard() {
             case "smile-tasks": return <SmileTaskModule />;
             case "spam": return <SpamModule />;
             case "settings": return <SettingsModule />;
+            case "projects": return <ProjectsModule />;
+            case "skills": return <SkillsModule />;
+            case "partnerships": return <PartnershipsModule />;
+            case "youtube": return <YouTubeModule />;
+            case "ai-assistant": return <AIAssistantModule />;
+            case "meetings": return <AdminMeetingsModule />;
+            case "travelled": return <TravelledModule />;
+            case "finance-leads": return <FinanceLeadModule />;
+            case "scheduler-docs": return <SchedulerDocumentsModule />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">
                     <OverviewModule onTabChange={handleTabChange} />

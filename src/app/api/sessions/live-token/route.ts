@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
         const token = client.generateUserToken({ user_id: userId, validity_in_seconds: 3600 });
 
-        return NextResponse.json({ token, apiKey });
+        return NextResponse.json({ token, apiKey: process.env.NEXT_PUBLIC_STREAM_API_KEY || apiKey });
     } catch (error) {
         console.error("Stream token generation failed:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

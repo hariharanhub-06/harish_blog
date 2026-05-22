@@ -29,8 +29,9 @@ export async function GET() {
             break: stats?.break_count || 0,
             total: stats?.total || 0,
         });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        console.error("Heart route error:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
 
@@ -44,7 +45,8 @@ export async function POST(req: Request) {
         const id = crypto.randomUUID();
         await sql`INSERT INTO heart_reactions (id, action) VALUES (${id}, ${action})`;
         return NextResponse.json({ ok: true });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        console.error("Heart route error:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

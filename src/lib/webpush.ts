@@ -4,10 +4,12 @@ import { db } from "@/db";
 import { adminPushTokens } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-// Hardcoded for convenience for this specific project.
-// In a large production project, this goes to .env
-const vapidPublicKey = 'BBdu_WKn36wvuhOQ36YvzA6AvfUNi5evqdAHLfPeRbh_TcabjnzQjyPAqXxx21z_hY4x3dtp4I2ck_USjjGYqhk';
-const vapidPrivateKey = 'fbDEC-wHYaP-pOlC-Yw8LD5nYQ6uiDuQYA5dzJSXAro';
+const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BBdu_WKn36wvuhOQ36YvzA6AvfUNi5evqdAHLfPeRbh_TcabjnzQjyPAqXxx21z_hY4x3dtp4I2ck_USjjGYqhk';
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY!;
+
+if (!vapidPrivateKey) {
+    console.error('[webpush] VAPID_PRIVATE_KEY env var is not set');
+}
 
 webpush.setVapidDetails(
     'mailto:admin@hariharanhub.com',

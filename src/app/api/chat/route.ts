@@ -13,7 +13,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid message format" }, { status: 400 });
         }
 
-        const apiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+        const apiKey = process.env.GROQ_API_KEY;
         const geminiKey = process.env.GOOGLE_GEMINI_API_KEY;
         const dbUrl = process.env.DATABASE_URL;
 

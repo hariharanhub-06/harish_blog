@@ -9,8 +9,10 @@ export async function POST(req: Request) {
         if (authError) return authError;
         const formData = await req.formData();
         const file = formData.get("file") as File;
-        const rawPath = (formData.get("path") as string || "uploads").replace(/\.\./g, "").replace(/^\/+/, "");
-        const path = rawPath || "uploads";
+        const ALLOWED_PATH_PREFIXES = ["uploads", "profile", "projects", "gallery", "assets", "sessions", "partners", "misc"];
+        const requestedPath = (formData.get("path") as string || "").trim().replace(/^\/+/, "");
+        const pathPrefix = requestedPath.split("/")[0];
+        const path = ALLOWED_PATH_PREFIXES.includes(pathPrefix) ? requestedPath : "uploads";
 
         console.log("Upload request received:", { fileName: file?.name, fileSize: file?.size, path });
 
@@ -52,15 +54,8 @@ export async function POST(req: Request) {
         console.log("Upload successful. URL:", url);
 
         return NextResponse.json({ url });
-    } catch (error: any) {
-        console.error("CRITICAL UPLOAD FAILURE:", {
-            message: error.message,
-            stack: error.stack,
-            code: error.code
-        });
-        return NextResponse.json({
-            error: error.message || "Internal Upload Error",
-            debug: "Check server logs for full stack trace."
-        }, { status: 500 });
+    } catch (error: unknown) {
+        console.error("CRITICAL UPLOAD FAILURE:", error);
+        return NextResponse.json({ error: "Upload failed. Check server logs." }, { status: 500 });
     }
 }

@@ -20,8 +20,10 @@ export async function uploadToImageKit(
     folder: string = 'uploads'
 ): Promise<string> {
     try {
-        // Get ImageKit authentication signature
-        const authResponse = await fetch('/api/imagekit-auth');
+        const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
+        const authResponse = await fetch('/api/imagekit-auth', {
+            headers: { "X-Session-Id": sessionId },
+        });
         if (!authResponse.ok) {
             throw new Error('Failed to get ImageKit auth');
         }

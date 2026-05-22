@@ -54,7 +54,7 @@ export async function POST(req: Request) {
             if (debt) {
                 await db.update(financeDebts)
                     .set({
-                        remainingAmount: debt.remainingAmount - parseFloat(data.amount),
+                        remainingAmount: (debt.remainingAmount ?? 0) - parseFloat(data.amount),
                         updatedAt: new Date(),
                     })
                     .where(eq(financeDebts.id, data.debtId));
@@ -78,12 +78,9 @@ export async function POST(req: Request) {
         }
 
         return NextResponse.json(transaction);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Failed to create transaction", error);
-        return NextResponse.json({
-            error: "Failed to create transaction",
-            details: error.message || "Unknown error"
-        }, { status: 500 });
+        return NextResponse.json({ error: "Failed to create transaction" }, { status: 500 });
     }
 }
 
