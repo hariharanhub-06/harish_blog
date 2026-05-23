@@ -176,109 +176,81 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                 const ikp = imagekit?.projects?.find((x: any) => x.label === label);
                 const rp  = render?.projects?.find((x: any) => x.label === label);
 
-                const neonPeriod = np?.consumption?.periods?.[0];
-                const ikStats    = ikp?.stats;
+                const ikStats  = ikp?.stats;
+                const neonUsage = np?.usage;
 
-                // Vercel: count READY deploys
-                const readyCount = (vp?.recentDeployments ?? []).filter((d: any) => d.readyState === "READY").length;
+                // Last deploy: how long ago
+                const lastDeploy = vp?.usage?.lastDeployAt
+                    ? (() => {
+                        const mins = Math.round((Date.now() - vp.usage.lastDeployAt) / 60000);
+                        if (mins < 60) return `${mins}m ago`;
+                        if (mins < 1440) return `${Math.round(mins / 60)}h ago`;
+                        return `${Math.round(mins / 1440)}d ago`;
+                    })()
+                    : null;
 
                 return (
                     <ProjectSection key={label} label={label}>
 
-                        {/* Vercel */}
+                        {/* ── Vercel: builds this month ── */}
                         {!vp || !vp.configured ? (
                             <NotConfiguredCard keyName={`VERCEL_API_TOKEN_${label.replace(/-/g,"").toUpperCase()}`} />
-                        ) : vp.usage?.bandwidth ? (
-                            <UsageCard
-                                icon={<Zap size={16} />}
-                                name="Vercel"
-                                subtitle="Bandwidth"
-                                value={fmt(vp.usage.bandwidth.used ?? 0)}
-                                limitLabel={`of ${fmt(vp.limits.bandwidth)} free`}
-                                pct={(vp.usage.bandwidth.used / vp.limits.bandwidth) * 100}
-                            />
                         ) : (
                             <UsageCard
                                 icon={<Zap size={16} />}
                                 name="Vercel"
-                                subtitle="Deployments"
-                                value={`${vp.projects?.length ?? 0} projects`}
-                                limitLabel={`${readyCount} READY`}
-                                noBar
+                                subtitle="Builds this month"
+                                value={`${vp.usage?.monthlyBuilds ?? 0}`}
+                                limitLabel={lastDeploy ? `last deploy ${lastDeploy}` : `${vp.projects?.length ?? 0} projects`}
+                                pct={((vp.usage?.monthlyBuilds ?? 0) / vp.limits.monthlyDeployLimit) * 100}
                             />
                         )}
 
-                        {/* Neon — Compute */}
+                        {/* ── Neon: compute hours ── */}
                         {!np || !np.configured ? (
                             <NotConfiguredCard keyName={`NEON_API_KEY_${label.replace(/-/g,"").toUpperCase()}`} />
-                        ) : neonPeriod?.active_time_seconds != null ? (
+                        ) : neonUsage ? (
                             <UsageCard
                                 icon={<Database size={16} />}
                                 name="Neon DB"
-                                subtitle="Compute hours"
-                                value={`${(neonPeriod.active_time_seconds / 3600).toFixed(1)} hrs`}
+                                subtitle="Compute (monthly)"
+                                value={`${(neonUsage.cpuUsedSec / 3600).toFixed(1)} hrs`}
                                 limitLabel={`of ${np.limits.computeHours} hrs free`}
-                                pct={(neonPeriod.active_time_seconds / 3600 / np.limits.computeHours) * 100}
+                                pct={(neonUsage.cpuUsedSec / 3600 / np.limits.computeHours) * 100}
                             />
                         ) : (
+                            <UsageCard icon={<Database size={16} />} name="Neon DB" subtitle="Storage" value={`${np.projects?.length ?? 0} projects`} limitLabel="View console" noBar />
+                        )}
+
+                        {/* ── Neon: storage ── */}
+                        {neonUsage?.storageBytes != null && (
                             <UsageCard
                                 icon={<Database size={16} />}
                                 name="Neon DB"
-                                subtitle="Postgres storage"
-                                value={`${np.projects?.length ?? 0} project${(np.projects?.length ?? 0) !== 1 ? "s" : ""}`}
-                                limitLabel="View Neon console"
-                                noBar
+                                subtitle="DB storage"
+                                value={fmt(neonUsage.storageBytes)}
+                                limitLabel={`of ${fmt(neonUsage.storageLimitBytes)} free`}
+                                pct={(neonUsage.storageBytes / neonUsage.storageLimitBytes) * 100}
                             />
                         )}
 
-                        {/* Neon — Storage (only if we have period data) */}
-                        {neonPeriod?.data_storage_bytes_hour != null && (
-                            <UsageCard
-                                icon={<Database size={16} />}
-                                name="Neon DB"
-                                subtitle="Storage"
-                                value={fmt(neonPeriod.data_storage_bytes_hour)}
-                                limitLabel={`of ${fmt(np.limits.storageBytes)} free`}
-                                pct={(neonPeriod.data_storage_bytes_hour / np.limits.storageBytes) * 100}
-                            />
-                        )}
-
-                        {/* ImageKit — Bandwidth */}
+                        {/* ── ImageKit: storage ── */}
                         {!ikp || !ikp.configured ? (
                             <NotConfiguredCard keyName={`IMAGEKIT_PRIVATE_KEY_${label.replace(/-/g,"").toUpperCase()}`} />
-                        ) : ikStats?.bandwidth != null ? (
-                            <UsageCard
-                                icon={<Image size={16} />}
-                                name="ImageKit"
-                                subtitle="Media bandwidth"
-                                value={fmt(ikStats.bandwidth)}
-                                limitLabel={`of ${fmt(ikp.limits.bandwidthBytes)} free`}
-                                pct={(ikStats.bandwidth / ikp.limits.bandwidthBytes) * 100}
-                            />
-                        ) : (
-                            <UsageCard
-                                icon={<Image size={16} />}
-                                name="ImageKit"
-                                subtitle="Media storage"
-                                value="Connected"
-                                limitLabel="View dashboard"
-                                noBar
-                            />
-                        )}
-
-                        {/* ImageKit — Storage */}
-                        {ikStats?.storageUsed != null && (
+                        ) : ikStats?.storageUsed != null ? (
                             <UsageCard
                                 icon={<Image size={16} />}
                                 name="ImageKit"
                                 subtitle="File storage"
                                 value={fmt(ikStats.storageUsed)}
-                                limitLabel={`of ${fmt(ikp.limits.storageBytes)} free`}
+                                limitLabel={`of ${fmt(ikp.limits.storageBytes)} free · ${ikStats.fileCount} files`}
                                 pct={(ikStats.storageUsed / ikp.limits.storageBytes) * 100}
                             />
+                        ) : (
+                            <UsageCard icon={<Image size={16} />} name="ImageKit" subtitle="Media storage" value="Connected" limitLabel="View dashboard" noBar />
                         )}
 
-                        {/* Render */}
+                        {/* ── Render (D-Driver only) ── */}
                         {RENDER_USERS.has(label) && (
                             !rp || !rp.configured ? (
                                 <NotConfiguredCard keyName="RENDER_API_KEY_DDRIVER" />
@@ -405,83 +377,81 @@ function SecurityTab({ sessionId }: { sessionId: string }) {
 // ─── Data Tab ─────────────────────────────────────────────────────────────────
 
 const PORTALS = [
-    { name: "StartUP Admin",     subtitle: "StartUP Men's Wear — Admin Portal",  url: "https://www.startupmenswear.in/admin", color: "bg-blue-600", icon: <Layers size={16} /> },
-    { name: "D-Driver DEV SA",   subtitle: "D-Driver — Super Admin Portal",       url: "https://d-driver.vercel.app/login",    color: "bg-sky-600",  icon: <Terminal size={16} /> },
+    { name: "StartUP Admin",   subtitle: "StartUP Men's Wear",   url: "https://www.startupmenswear.in/admin", color: "bg-blue-600", icon: <Layers size={18} /> },
+    { name: "D-Driver DEV SA", subtitle: "D-Driver Super Admin", url: "https://d-driver.vercel.app/login",    color: "bg-sky-600",  icon: <Terminal size={18} /> },
 ];
 
 function DataTab() {
-    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-    const [blocked,  setBlocked]  = useState<Record<string, boolean>>({});
-
-    const toggle = (name: string) =>
-        setExpanded(p => ({ ...p, [name]: !p[name] }));
+    const [selected, setSelected] = useState<string | null>(null);
+    const portal = PORTALS.find(p => p.name === selected);
 
     return (
-        <div className="space-y-3">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-                Click a portal to expand — browse and manage without leaving this dashboard.
-            </p>
-            {PORTALS.map(portal => {
-                const isOpen    = expanded[portal.name] ?? false;
-                const isBlocked = blocked[portal.name]  ?? false;
-                return (
-                    <div key={portal.name}
-                        className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="flex gap-4" style={{ minHeight: "680px" }}>
 
-                        {/* ── Clickable header ── */}
-                        <button
-                            onClick={() => toggle(portal.name)}
-                            className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 dark:hover:bg-[#252525] transition-colors">
-                            <div className="flex items-center gap-3">
-                                <div className={`w-9 h-9 rounded-xl ${portal.color} flex items-center justify-center text-white shrink-0`}>
-                                    {portal.icon}
-                                </div>
-                                <div className="text-left">
-                                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{portal.name}</p>
-                                    <p className="text-[11px] text-gray-400 mt-0.5">{portal.subtitle}</p>
-                                </div>
+            {/* ── Left: portal sub-modules ── */}
+            <div className="w-56 shrink-0 space-y-2 pt-1">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-500 px-1 mb-3">Portals</p>
+                {PORTALS.map(p => {
+                    const active = selected === p.name;
+                    return (
+                        <button key={p.name} onClick={() => setSelected(p.name)}
+                            className={`w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left transition-all ${
+                                active
+                                    ? "bg-[#1e293b] ring-1 ring-blue-500/40 shadow-lg shadow-blue-900/20"
+                                    : "hover:bg-gray-100 dark:hover:bg-[#1e293b]/60"
+                            }`}>
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-white ${p.color}`}>
+                                {p.icon}
                             </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                                <a href={portal.url} target="_blank" rel="noopener noreferrer"
-                                    onClick={e => e.stopPropagation()}
-                                    className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition-colors px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-950/30">
-                                    Open <ExternalLink size={11} />
-                                </a>
-                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ${
-                                    isOpen ? "bg-gray-200 dark:bg-gray-700" : "bg-gray-100 dark:bg-gray-800"}`}>
-                                    <ChevronDown size={15} className={`text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                                </div>
+                            <div className="min-w-0">
+                                <p className={`font-semibold text-sm leading-tight ${active ? "text-white" : "text-gray-800 dark:text-slate-200"}`}>{p.name}</p>
+                                <p className="text-[11px] text-gray-400 mt-0.5 truncate">{p.subtitle}</p>
                             </div>
+                            {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />}
                         </button>
+                    );
+                })}
+            </div>
 
-                        {/* ── Collapsible iframe panel ── */}
-                        {isOpen && (
-                            <div className="border-t border-gray-100 dark:border-gray-800">
-                                {isBlocked ? (
-                                    <div className="h-[640px] flex flex-col items-center justify-center gap-3 text-center px-6">
-                                        <WifiOff size={24} className="text-gray-300 dark:text-gray-600" />
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Cannot embed this page</p>
-                                        <p className="text-xs text-gray-400 max-w-xs">The page is blocking cross-origin embedding. Use the Open button to access it directly.</p>
-                                        <a href={portal.url} target="_blank" rel="noopener noreferrer"
-                                            className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors">
-                                            Open in new tab <ExternalLink size={12} />
-                                        </a>
-                                    </div>
-                                ) : (
-                                    <iframe
-                                        src={portal.url}
-                                        className="w-full border-0"
-                                        style={{ height: "700px" }}
-                                        title={portal.name}
-                                        sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
-                                        onError={() => setBlocked(p => ({ ...p, [portal.name]: true }))}
-                                    />
-                                )}
+            {/* ── Right: full iframe panel ── */}
+            <div className="flex-1 bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+                {portal ? (
+                    <>
+                        {/* Header bar */}
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 shrink-0">
+                            <div className="flex items-center gap-2.5">
+                                <div className={`w-7 h-7 rounded-lg ${portal.color} flex items-center justify-center text-white`}>{portal.icon}</div>
+                                <div>
+                                    <p className="font-semibold text-sm text-gray-900 dark:text-white leading-tight">{portal.name}</p>
+                                    <p className="text-[11px] text-gray-400">{portal.subtitle}</p>
+                                </div>
                             </div>
-                        )}
+                            <a href={portal.url} target="_blank" rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition-colors">
+                                Open in new tab <ExternalLink size={11} />
+                            </a>
+                        </div>
+                        {/* Full-height iframe */}
+                        <iframe
+                            src={portal.url}
+                            className="flex-1 w-full border-0"
+                            style={{ minHeight: "620px" }}
+                            title={portal.name}
+                            sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
+                        />
+                    </>
+                ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center px-8">
+                        <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-[#1e293b] flex items-center justify-center">
+                            <Globe size={24} className="text-gray-300 dark:text-slate-600" />
+                        </div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Select a portal on the left</p>
+                        <p className="text-xs text-gray-400 dark:text-slate-600 max-w-xs">
+                            Click StartUP Admin or D-Driver DEV SA to open the full admin page here.
+                        </p>
                     </div>
-                );
-            })}
+                )}
+            </div>
         </div>
     );
 }
