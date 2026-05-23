@@ -386,7 +386,7 @@ function DataTab({ initialSelected }: { initialSelected?: string }) {
     const portal = PORTALS.find(p => p.name === selected);
 
     return (
-        <div className="flex gap-4" style={{ height: "calc(100vh - 210px)" }}>
+        <div className="flex gap-4" style={{ height: "calc(100vh - 430px)", minHeight: "500px" }}>
 
             {/* ── Left: portal sub-modules ── */}
             <div className="w-52 shrink-0 flex flex-col gap-2 pt-1">
@@ -408,7 +408,6 @@ function DataTab({ initialSelected }: { initialSelected?: string }) {
                                 </div>
                                 {active && <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />}
                             </button>
-                            {/* Open in new tab — shown when active */}
                             {active && (
                                 <a href={p.url} target="_blank" rel="noopener noreferrer"
                                     className="flex items-center gap-1.5 px-3 pb-3 text-[11px] text-blue-400 hover:text-blue-300 transition-colors">
@@ -420,18 +419,18 @@ function DataTab({ initialSelected }: { initialSelected?: string }) {
                 })}
             </div>
 
-            {/* ── Right: iframe fills entire panel ── */}
-            <div className="flex-1 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+            {/* ── Right: iframe fills entire panel via absolute positioning ── */}
+            <div className="flex-1 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden relative">
                 {portal ? (
                     <iframe
                         key={portal.url}
                         src={portal.url}
-                        className="w-full h-full border-0 block"
                         title={portal.name}
                         sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
+                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none", display: "block" }}
                     />
                 ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-center px-8 bg-white dark:bg-[#1e1e1e]">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-8 bg-white dark:bg-[#1e1e1e]">
                         <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-[#1e293b] flex items-center justify-center">
                             <Globe size={24} className="text-gray-300 dark:text-slate-600" />
                         </div>
