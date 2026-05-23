@@ -101,15 +101,6 @@ export default function AdminDashboard() {
         { id: "smile-tasks", title: "Smile Tasks", icon: Sparkles, color: "bg-rose-500", group: "Engagement" },
         { id: "spam", title: "Lucky Draw", icon: Trophy, color: "bg-yellow-600", group: "Campaigns" },
         { id: "settings", title: "Settings", icon: Settings, color: "bg-gray-600", group: "Admin" },
-        { id: "projects", title: "Projects", icon: Briefcase, color: "bg-sky-500", group: "Personal" },
-        { id: "skills", title: "Skills", icon: Sparkles, color: "bg-green-500", group: "Personal" },
-        { id: "partnerships", title: "Partnerships", icon: HeartHandshake, color: "bg-rose-600", group: "Business" },
-        { id: "youtube", title: "YouTube Videos", icon: Video, color: "bg-red-600", group: "Content" },
-        { id: "ai-assistant", title: "AI Assistant Config", icon: Sparkles, color: "bg-violet-600", group: "Config" },
-        { id: "meetings", title: "Meetings", icon: Calendar, color: "bg-cyan-600", group: "Business" },
-        { id: "travelled", title: "Travelled Places", icon: Globe, color: "bg-teal-600", group: "Personal" },
-        { id: "finance-leads", title: "Finance Leads", icon: Wallet, color: "bg-lime-600", group: "Business" },
-        { id: "scheduler-docs", title: "Scheduler Docs", icon: FileText, color: "bg-orange-600", group: "Admin" },
     ], [unreadMessages]);
 
     // Theme Management
