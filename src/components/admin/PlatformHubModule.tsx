@@ -381,8 +381,8 @@ const PORTALS = [
     { name: "D-Driver DEV SA", subtitle: "D-Driver Super Admin", url: "https://d-driver.vercel.app/login",    color: "bg-sky-600",  icon: <Terminal size={18} /> },
 ];
 
-function DataTab() {
-    const [selected, setSelected] = useState<string | null>(null);
+function DataTab({ initialSelected }: { initialSelected?: string }) {
+    const [selected, setSelected] = useState<string | null>(initialSelected ?? null);
     const portal = PORTALS.find(p => p.name === selected);
 
     return (
@@ -464,8 +464,8 @@ const SUB_TABS: { id: SubTab; label: string; icon: React.ReactNode }[] = [
     { id: "data",     label: "Data",     icon: <Globe size={14} /> },
 ];
 
-export default function PlatformHubModule() {
-    const [activeSubTab, setActiveSubTab] = useState<SubTab>("usages");
+export default function PlatformHubModule({ initialPortal }: { initialPortal?: string } = {}) {
+    const [activeSubTab, setActiveSubTab] = useState<SubTab>(initialPortal ? "data" : "usages");
     const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") ?? "" : "";
 
     return (
@@ -496,7 +496,7 @@ export default function PlatformHubModule() {
 
             {activeSubTab === "usages"   && <UsagesTab sessionId={sessionId} />}
             {activeSubTab === "security" && <SecurityTab sessionId={sessionId} />}
-            {activeSubTab === "data"     && <DataTab />}
+            {activeSubTab === "data"     && <DataTab initialSelected={initialPortal} />}
         </div>
     );
 }

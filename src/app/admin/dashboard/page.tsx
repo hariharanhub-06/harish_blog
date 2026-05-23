@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import {
     Layout,
+    Layers,
     MessageSquare,
     LogOut,
     ExternalLink,
@@ -33,6 +34,7 @@ import {
     Sparkles,
     Globe,
     Calendar,
+    Terminal,
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -64,7 +66,7 @@ import FinanceLeadModule from "@/components/admin/FinanceLeadModule";
 import SchedulerDocumentsModule from "@/components/admin/SchedulerDocumentsModule";
 import PlatformHubModule from "@/components/admin/PlatformHubModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "spam" | "projects" | "skills" | "partnerships" | "youtube" | "ai-assistant" | "meetings" | "travelled" | "finance-leads" | "scheduler-docs" | "platform-hub";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "spam" | "projects" | "skills" | "partnerships" | "youtube" | "ai-assistant" | "meetings" | "travelled" | "finance-leads" | "scheduler-docs" | "platform-hub" | "startup-admin" | "ddriver-sa";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -82,7 +84,9 @@ export default function AdminDashboard() {
     // Sidebar Menu Configuration
     const menuItems = useMemo(() => [
         { id: "overview", title: "Command Center", icon: Home, color: "bg-blue-500", group: "Main" },
-        { id: "platform-hub", title: "Platform Hub", icon: Globe, color: "bg-purple-600", group: "Main" },
+        { id: "platform-hub",  title: "Platform Hub",    icon: Globe,    color: "bg-purple-600", group: "Main" },
+        { id: "startup-admin", title: "StartUP Admin",   icon: Layers,   color: "bg-blue-600",   group: "Main", subItem: true },
+        { id: "ddriver-sa",    title: "D-Driver DEV SA", icon: Terminal, color: "bg-sky-600",    group: "Main", subItem: true },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500", group: "Personal" },
         { id: "training-academy", title: "Training Academy", icon: GraduationCap, color: "bg-orange-500", group: "Learning" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500", group: "Professional" },
@@ -323,7 +327,9 @@ export default function AdminDashboard() {
             case "travelled": return <TravelledModule />;
             case "finance-leads": return <FinanceLeadModule />;
             case "scheduler-docs": return <SchedulerDocumentsModule />;
-            case "platform-hub": return <PlatformHubModule />;
+            case "platform-hub":  return <PlatformHubModule />;
+            case "startup-admin": return <PlatformHubModule initialPortal="StartUP Admin" />;
+            case "ddriver-sa":    return <PlatformHubModule initialPortal="D-Driver DEV SA" />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">
                     <OverviewModule onTabChange={handleTabChange} />
@@ -353,16 +359,40 @@ export default function AdminDashboard() {
 
                         const renderItem = (item: typeof nonDivider[0]) => {
                             const isPinned = pinnedItems.includes(item.id);
+                            const isActive = activeTab === item.id;
+
+                            // Sub-item (indented portal shortcut under Platform Hub)
+                            if ((item as any).subItem) {
+                                return (
+                                    <div key={item.id} className="pl-4">
+                                        <div className="relative ml-3 border-l-2 border-gray-200 dark:border-gray-700 pl-3">
+                                            <button
+                                                onClick={() => handleTabChange(item.id as Tab)}
+                                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${isActive
+                                                    ? "bg-primary/10 text-primary dark:bg-primary/20"
+                                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary"
+                                                    }`}
+                                            >
+                                                <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${item.color} text-white`}>
+                                                    <item.icon size={11} />
+                                                </div>
+                                                <span className="flex-1 text-left leading-tight">{item.title}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            }
+
                             return (
                                 <div key={item.id} className="relative group/row">
                                     <button
                                         onClick={() => handleTabChange(item.id as Tab)}
-                                        className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-bold text-sm transition-all group pr-10 ${activeTab === item.id
+                                        className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg font-bold text-sm transition-all group pr-10 ${isActive
                                             ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-sm"
                                             : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary dark:hover:text-primary"
                                             }`}
                                     >
-                                        <item.icon size={17} className={`shrink-0 ${activeTab === item.id ? "text-primary" : "text-gray-400 dark:text-gray-500 group-hover:text-primary"} transition-colors`} />
+                                        <item.icon size={17} className={`shrink-0 ${isActive ? "text-primary" : "text-gray-400 dark:text-gray-500 group-hover:text-primary"} transition-colors`} />
                                         <span className="flex-1 text-left">{item.title}</span>
                                         {item.badge && item.badge > 0 && (
                                             <span className="bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">
