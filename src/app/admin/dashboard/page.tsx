@@ -74,7 +74,10 @@ export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState<Tab>(() => {
         if (typeof window !== "undefined") {
             const saved = localStorage.getItem("admin-active-tab") as Tab | null;
-            if (saved) return saved;
+            // Portal tabs open full external iframes — don't auto-restore on refresh
+            const portalTabs: Tab[] = ["startup-admin", "ddriver-sa"];
+            if (saved && !portalTabs.includes(saved)) return saved;
+            if (saved && portalTabs.includes(saved)) return "platform-hub";
         }
         return "overview";
     });
