@@ -71,7 +71,13 @@ type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline"
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<Tab>("overview");
+    const [activeTab, setActiveTab] = useState<Tab>(() => {
+        if (typeof window !== "undefined") {
+            const saved = localStorage.getItem("admin-active-tab") as Tab | null;
+            if (saved) return saved;
+        }
+        return "overview";
+    });
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [unreadMessages, setUnreadMessages] = useState(0);
@@ -262,6 +268,7 @@ export default function AdminDashboard() {
 
     const handleTabChange = (tab: Tab) => {
         setActiveTab(tab);
+        localStorage.setItem("admin-active-tab", tab);
         window.location.hash = tab;
         setIsMobileMenuOpen(false);
         setSearchQuery("");
