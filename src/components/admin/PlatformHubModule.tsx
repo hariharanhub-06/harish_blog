@@ -20,7 +20,7 @@ function fmt(bytes: number) {
 // ─── Usage Card (matches D-Driver Platform Expenses style) ───────────────────
 
 function UsageCard({
-    icon, name, subtitle, value, limitLabel, pct, noBar,
+    icon, name, subtitle, value, limitLabel, pct, noBar, href,
 }: {
     icon: React.ReactNode;
     name: string;
@@ -29,21 +29,23 @@ function UsageCard({
     limitLabel?: string;
     pct?: number;
     noBar?: boolean;
+    href?: string;
 }) {
     const barColor =
         (pct ?? 0) >= 80 ? "bg-red-500" :
         (pct ?? 0) >= 60 ? "bg-amber-400" : "bg-emerald-500";
 
-    return (
-        <div className="bg-[#0f172a] rounded-2xl p-5 space-y-4 min-w-0">
+    const inner = (
+        <div className={`bg-[#0f172a] rounded-2xl p-5 space-y-4 min-w-0 transition-all duration-200 ${href ? "hover:bg-[#1a2744] hover:ring-1 hover:ring-slate-600 cursor-pointer" : ""}`}>
             <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#1e293b] flex items-center justify-center shrink-0 text-slate-300">
                     {icon}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                     <p className="font-semibold text-white text-sm leading-tight">{name}</p>
                     <p className="text-xs text-slate-400 mt-0.5 leading-tight">{subtitle}</p>
                 </div>
+                {href && <ExternalLink size={12} className="text-slate-600 shrink-0 mt-0.5" />}
             </div>
 
             <div>
@@ -64,6 +66,11 @@ function UsageCard({
             )}
         </div>
     );
+
+    if (href) {
+        return <a href={href} target="_blank" rel="noopener noreferrer" className="block">{inner}</a>;
+    }
+    return inner;
 }
 
 function NotConfiguredCard({ keyName }: { keyName: string }) {
@@ -203,6 +210,7 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                                 value={`${vp.usage?.monthlyBuilds ?? 0}`}
                                 limitLabel={lastDeploy ? `last deploy ${lastDeploy}` : `${vp.projects?.length ?? 0} projects`}
                                 pct={((vp.usage?.monthlyBuilds ?? 0) / vp.limits.monthlyDeployLimit) * 100}
+                                href="https://vercel.com/dashboard"
                             />
                         )}
 
@@ -217,9 +225,10 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                                 value={`${(neonUsage.cpuUsedSec / 3600).toFixed(1)} hrs`}
                                 limitLabel={`of ${np.limits.computeHours} hrs free`}
                                 pct={(neonUsage.cpuUsedSec / 3600 / np.limits.computeHours) * 100}
+                                href="https://console.neon.tech"
                             />
                         ) : (
-                            <UsageCard icon={<Database size={16} />} name="Neon DB" subtitle="Storage" value={`${np.projects?.length ?? 0} projects`} limitLabel="View console" noBar />
+                            <UsageCard icon={<Database size={16} />} name="Neon DB" subtitle="Storage" value={`${np.projects?.length ?? 0} projects`} limitLabel="View console" noBar href="https://console.neon.tech" />
                         )}
 
                         {/* ── Neon: storage ── */}
@@ -231,6 +240,7 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                                 value={fmt(neonUsage.storageBytes)}
                                 limitLabel={`of ${fmt(neonUsage.storageLimitBytes)} free`}
                                 pct={(neonUsage.storageBytes / neonUsage.storageLimitBytes) * 100}
+                                href="https://console.neon.tech"
                             />
                         )}
 
@@ -245,9 +255,10 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                                 value={fmt(ikStats.storageUsed)}
                                 limitLabel={`of ${fmt(ikp.limits.storageBytes)} free · ${ikStats.fileCount} files`}
                                 pct={(ikStats.storageUsed / ikp.limits.storageBytes) * 100}
+                                href="https://imagekit.io/dashboard"
                             />
                         ) : (
-                            <UsageCard icon={<Image size={16} />} name="ImageKit" subtitle="Media storage" value="Connected" limitLabel="View dashboard" noBar />
+                            <UsageCard icon={<Image size={16} />} name="ImageKit" subtitle="Media storage" value="Connected" limitLabel="View dashboard" noBar href="https://imagekit.io/dashboard" />
                         )}
 
                         {/* ── Render (D-Driver only) ── */}
@@ -265,6 +276,7 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                                     }
                                     limitLabel={(rp.services[0]?.service ?? rp.services[0])?.name ?? "Web service"}
                                     noBar
+                                    href="https://dashboard.render.com"
                                 />
                             )
                         )}
