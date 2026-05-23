@@ -386,62 +386,52 @@ function DataTab({ initialSelected }: { initialSelected?: string }) {
     const portal = PORTALS.find(p => p.name === selected);
 
     return (
-        <div className="flex gap-4" style={{ minHeight: "680px" }}>
+        <div className="flex gap-4" style={{ height: "calc(100vh - 210px)" }}>
 
             {/* ── Left: portal sub-modules ── */}
-            <div className="w-56 shrink-0 space-y-2 pt-1">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-500 px-1 mb-3">Portals</p>
+            <div className="w-52 shrink-0 flex flex-col gap-2 pt-1">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-500 px-1 mb-1">Portals</p>
                 {PORTALS.map(p => {
                     const active = selected === p.name;
                     return (
-                        <button key={p.name} onClick={() => setSelected(p.name)}
-                            className={`w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left transition-all ${
-                                active
-                                    ? "bg-[#1e293b] ring-1 ring-blue-500/40 shadow-lg shadow-blue-900/20"
-                                    : "hover:bg-gray-100 dark:hover:bg-[#1e293b]/60"
-                            }`}>
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-white ${p.color}`}>
-                                {p.icon}
-                            </div>
-                            <div className="min-w-0">
-                                <p className={`font-semibold text-sm leading-tight ${active ? "text-white" : "text-gray-800 dark:text-slate-200"}`}>{p.name}</p>
-                                <p className="text-[11px] text-gray-400 mt-0.5 truncate">{p.subtitle}</p>
-                            </div>
-                            {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />}
-                        </button>
+                        <div key={p.name} className={`rounded-xl overflow-hidden transition-all ${
+                            active ? "bg-[#1e293b] ring-1 ring-blue-500/40 shadow-lg shadow-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-[#1e293b]/60"
+                        }`}>
+                            <button onClick={() => setSelected(p.name)}
+                                className="w-full flex items-center gap-3 px-3 py-3.5 text-left">
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-white ${p.color}`}>
+                                    {p.icon}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className={`font-semibold text-sm leading-tight ${active ? "text-white" : "text-gray-800 dark:text-slate-200"}`}>{p.name}</p>
+                                    <p className="text-[11px] text-gray-400 mt-0.5 truncate">{p.subtitle}</p>
+                                </div>
+                                {active && <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />}
+                            </button>
+                            {/* Open in new tab — shown when active */}
+                            {active && (
+                                <a href={p.url} target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center gap-1.5 px-3 pb-3 text-[11px] text-blue-400 hover:text-blue-300 transition-colors">
+                                    <ExternalLink size={10} /> Open in new tab
+                                </a>
+                            )}
+                        </div>
                     );
                 })}
             </div>
 
-            {/* ── Right: full iframe panel ── */}
-            <div className="flex-1 bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
+            {/* ── Right: iframe fills entire panel ── */}
+            <div className="flex-1 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
                 {portal ? (
-                    <>
-                        {/* Header bar */}
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800 shrink-0">
-                            <div className="flex items-center gap-2.5">
-                                <div className={`w-7 h-7 rounded-lg ${portal.color} flex items-center justify-center text-white`}>{portal.icon}</div>
-                                <div>
-                                    <p className="font-semibold text-sm text-gray-900 dark:text-white leading-tight">{portal.name}</p>
-                                    <p className="text-[11px] text-gray-400">{portal.subtitle}</p>
-                                </div>
-                            </div>
-                            <a href={portal.url} target="_blank" rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition-colors">
-                                Open in new tab <ExternalLink size={11} />
-                            </a>
-                        </div>
-                        {/* Full-height iframe */}
-                        <iframe
-                            src={portal.url}
-                            className="flex-1 w-full border-0"
-                            style={{ minHeight: "620px" }}
-                            title={portal.name}
-                            sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
-                        />
-                    </>
+                    <iframe
+                        key={portal.url}
+                        src={portal.url}
+                        className="w-full h-full border-0 block"
+                        title={portal.name}
+                        sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
+                    />
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center px-8">
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-center px-8 bg-white dark:bg-[#1e1e1e]">
                         <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-[#1e293b] flex items-center justify-center">
                             <Globe size={24} className="text-gray-300 dark:text-slate-600" />
                         </div>
