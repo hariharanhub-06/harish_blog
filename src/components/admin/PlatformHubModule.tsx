@@ -403,7 +403,7 @@ function SecurityTab({ sessionId }: { sessionId: string }) {
 
 const PORTAL_URLS: Record<string, string> = {
     "StartUP Admin":   "https://www.startupmenswear.in/admin",
-    "D-Driver DEV SA": "https://d-driver.vercel.app/login",
+    "D-Driver DEV SA": "https://d-driver.vercel.app/super-admin/dashboard",
 };
 
 function PortalView({ portalName }: { portalName: string }) {
