@@ -62,8 +62,9 @@ import AdminMeetingsModule from "@/components/admin/AdminMeetingsModule";
 import TravelledModule from "@/components/admin/TravelledModule";
 import FinanceLeadModule from "@/components/admin/FinanceLeadModule";
 import SchedulerDocumentsModule from "@/components/admin/SchedulerDocumentsModule";
+import PlatformHubModule from "@/components/admin/PlatformHubModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "spam" | "projects" | "skills" | "partnerships" | "youtube" | "ai-assistant" | "meetings" | "travelled" | "finance-leads" | "scheduler-docs";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "spam" | "projects" | "skills" | "partnerships" | "youtube" | "ai-assistant" | "meetings" | "travelled" | "finance-leads" | "scheduler-docs" | "platform-hub";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -81,6 +82,7 @@ export default function AdminDashboard() {
     // Sidebar Menu Configuration
     const menuItems = useMemo(() => [
         { id: "overview", title: "Command Center", icon: Home, color: "bg-blue-500", group: "Main" },
+        { id: "platform-hub", title: "Platform Hub", icon: Globe, color: "bg-purple-600", group: "Main" },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500", group: "Personal" },
         { id: "training-academy", title: "Training Academy", icon: GraduationCap, color: "bg-orange-500", group: "Learning" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500", group: "Professional" },
@@ -330,6 +332,7 @@ export default function AdminDashboard() {
             case "travelled": return <TravelledModule />;
             case "finance-leads": return <FinanceLeadModule />;
             case "scheduler-docs": return <SchedulerDocumentsModule />;
+            case "platform-hub": return <PlatformHubModule />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">
                     <OverviewModule onTabChange={handleTabChange} />
