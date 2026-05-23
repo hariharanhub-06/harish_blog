@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import {
-    Activity, AlertTriangle, CheckCircle2, Clock, Database,
+    Activity, AlertTriangle, CheckCircle2, ChevronDown, Clock, Database,
     ExternalLink, Globe, Image, Layers, Loader2, Monitor,
     RefreshCw, Server, Shield, ShieldAlert, ShieldCheck,
     Terminal, TrendingUp, Wifi, WifiOff, XCircle, Zap,
@@ -405,40 +405,83 @@ function SecurityTab({ sessionId }: { sessionId: string }) {
 // ─── Data Tab ─────────────────────────────────────────────────────────────────
 
 const PORTALS = [
-    { name: "StartUP Men's Wear", subtitle: "Admin Portal",       url: "https://www.startupmenswear.in/admin", color: "bg-blue-600", icon: <Layers size={16} /> },
-    { name: "D-Driver",           subtitle: "Super Admin Portal", url: "https://d-driver.vercel.app/login",    color: "bg-sky-600",  icon: <Terminal size={16} /> },
+    { name: "StartUP Admin",     subtitle: "StartUP Men's Wear — Admin Portal",  url: "https://www.startupmenswear.in/admin", color: "bg-blue-600", icon: <Layers size={16} /> },
+    { name: "D-Driver DEV SA",   subtitle: "D-Driver — Super Admin Portal",       url: "https://d-driver.vercel.app/login",    color: "bg-sky-600",  icon: <Terminal size={16} /> },
 ];
 
 function DataTab() {
-    const [blocked, setBlocked] = useState<Record<string, boolean>>({});
+    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+    const [blocked,  setBlocked]  = useState<Record<string, boolean>>({});
+
+    const toggle = (name: string) =>
+        setExpanded(p => ({ ...p, [name]: !p[name] }));
+
     return (
-        <div className="space-y-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Direct access — already authenticated here, no extra login needed</p>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {PORTALS.map(portal => (
-                    <div key={portal.name} className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+        <div className="space-y-3">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+                Click a portal to expand — browse and manage without leaving this dashboard.
+            </p>
+            {PORTALS.map(portal => {
+                const isOpen    = expanded[portal.name] ?? false;
+                const isBlocked = blocked[portal.name]  ?? false;
+                return (
+                    <div key={portal.name}
+                        className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+
+                        {/* ── Clickable header ── */}
+                        <button
+                            onClick={() => toggle(portal.name)}
+                            className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 dark:hover:bg-[#252525] transition-colors">
                             <div className="flex items-center gap-3">
-                                <div className={`w-7 h-7 rounded-lg ${portal.color} flex items-center justify-center text-white`}>{portal.icon}</div>
-                                <div><p className="font-semibold text-sm">{portal.name}</p><p className="text-[11px] text-gray-400">{portal.subtitle}</p></div>
+                                <div className={`w-9 h-9 rounded-xl ${portal.color} flex items-center justify-center text-white shrink-0`}>
+                                    {portal.icon}
+                                </div>
+                                <div className="text-left">
+                                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{portal.name}</p>
+                                    <p className="text-[11px] text-gray-400 mt-0.5">{portal.subtitle}</p>
+                                </div>
                             </div>
-                            <a href={portal.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition-colors">Open <ExternalLink size={11} /></a>
-                        </div>
-                        {blocked[portal.name] ? (
-                            <div className="h-[520px] flex flex-col items-center justify-center gap-3 text-center px-6">
-                                <WifiOff size={24} className="text-gray-300 dark:text-gray-600" />
-                                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Cannot embed this page</p>
-                                <p className="text-xs text-gray-400 max-w-xs">CSP header hasn&apos;t deployed yet for {portal.name}. Try again after that deploy finishes.</p>
-                                <a href={portal.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors">Open in new tab <ExternalLink size={12} /></a>
+                            <div className="flex items-center gap-3 shrink-0">
+                                <a href={portal.url} target="_blank" rel="noopener noreferrer"
+                                    onClick={e => e.stopPropagation()}
+                                    className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition-colors px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-950/30">
+                                    Open <ExternalLink size={11} />
+                                </a>
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                                    isOpen ? "bg-gray-200 dark:bg-gray-700" : "bg-gray-100 dark:bg-gray-800"}`}>
+                                    <ChevronDown size={15} className={`text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                                </div>
                             </div>
-                        ) : (
-                            <iframe src={portal.url} className="w-full h-[520px] border-0" title={`${portal.name} Login`}
-                                sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
-                                onError={() => setBlocked(p => ({ ...p, [portal.name]: true }))} />
+                        </button>
+
+                        {/* ── Collapsible iframe panel ── */}
+                        {isOpen && (
+                            <div className="border-t border-gray-100 dark:border-gray-800">
+                                {isBlocked ? (
+                                    <div className="h-[640px] flex flex-col items-center justify-center gap-3 text-center px-6">
+                                        <WifiOff size={24} className="text-gray-300 dark:text-gray-600" />
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Cannot embed this page</p>
+                                        <p className="text-xs text-gray-400 max-w-xs">The page is blocking cross-origin embedding. Use the Open button to access it directly.</p>
+                                        <a href={portal.url} target="_blank" rel="noopener noreferrer"
+                                            className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors">
+                                            Open in new tab <ExternalLink size={12} />
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <iframe
+                                        src={portal.url}
+                                        className="w-full border-0"
+                                        style={{ height: "700px" }}
+                                        title={portal.name}
+                                        sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
+                                        onError={() => setBlocked(p => ({ ...p, [portal.name]: true }))}
+                                    />
+                                )}
+                            </div>
                         )}
                     </div>
-                ))}
-            </div>
+                );
+            })}
         </div>
     );
 }
