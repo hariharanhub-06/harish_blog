@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
     Activity, AlertTriangle, CheckCircle2, ChevronDown, Clock, Database,
     ExternalLink, Globe, Image, Layers, Loader2, Monitor,
@@ -244,32 +244,53 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                             />
                         )}
 
-                        {/* ── ImageKit: storage (one card per account) ── */}
+                        {/* ── ImageKit: storage + bandwidth (one pair per account) ── */}
                         {!ikp || !ikp.configured ? (
                             <NotConfiguredCard keyName={`IMAGEKIT_PRIVATE_KEY_${label.replace(/-/g,"").toUpperCase()}`} />
                         ) : ikp.breakdown ? (
                             ikp.breakdown.map((acc: any) => (
-                                <UsageCard
-                                    key={acc.account}
-                                    icon={<Image size={16} />}
-                                    name="ImageKit"
-                                    subtitle={acc.account}
-                                    value={fmt(acc.storageUsed)}
-                                    limitLabel={`of ${fmt(ikp.limits.storageBytes)} free · ${acc.fileCount} files`}
-                                    pct={(acc.storageUsed / ikp.limits.storageBytes) * 100}
-                                    href="https://imagekit.io/dashboard"
-                                />
+                                <React.Fragment key={acc.account}>
+                                    <UsageCard
+                                        icon={<Image size={16} />}
+                                        name="ImageKit Storage"
+                                        subtitle={acc.account}
+                                        value={fmt(acc.storageUsed)}
+                                        limitLabel={`of ${fmt(ikp.limits.storageBytes)} free · ${acc.fileCount} files`}
+                                        pct={(acc.storageUsed / ikp.limits.storageBytes) * 100}
+                                        href="https://imagekit.io/dashboard"
+                                    />
+                                    <UsageCard
+                                        icon={<Image size={16} />}
+                                        name="ImageKit Bandwidth"
+                                        subtitle={`${acc.account} · this month`}
+                                        value={fmt(acc.bandwidthUsed)}
+                                        limitLabel={`of ${fmt(ikp.limits.bandwidthBytes)} free/month`}
+                                        pct={(acc.bandwidthUsed / ikp.limits.bandwidthBytes) * 100}
+                                        href="https://imagekit.io/dashboard"
+                                    />
+                                </React.Fragment>
                             ))
                         ) : ikStats?.storageUsed != null ? (
-                            <UsageCard
-                                icon={<Image size={16} />}
-                                name="ImageKit"
-                                subtitle="File storage"
-                                value={fmt(ikStats.storageUsed)}
-                                limitLabel={`of ${fmt(ikp.limits.storageBytes)} free · ${ikStats.fileCount} files`}
-                                pct={(ikStats.storageUsed / ikp.limits.storageBytes) * 100}
-                                href="https://imagekit.io/dashboard"
-                            />
+                            <React.Fragment>
+                                <UsageCard
+                                    icon={<Image size={16} />}
+                                    name="ImageKit Storage"
+                                    subtitle="File storage"
+                                    value={fmt(ikStats.storageUsed)}
+                                    limitLabel={`of ${fmt(ikp.limits.storageBytes)} free · ${ikStats.fileCount} files`}
+                                    pct={(ikStats.storageUsed / ikp.limits.storageBytes) * 100}
+                                    href="https://imagekit.io/dashboard"
+                                />
+                                <UsageCard
+                                    icon={<Image size={16} />}
+                                    name="ImageKit Bandwidth"
+                                    subtitle="This month"
+                                    value={fmt(ikStats.bandwidthUsed ?? 0)}
+                                    limitLabel={`of ${fmt(ikp.limits.bandwidthBytes)} free/month`}
+                                    pct={((ikStats.bandwidthUsed ?? 0) / ikp.limits.bandwidthBytes) * 100}
+                                    href="https://imagekit.io/dashboard"
+                                />
+                            </React.Fragment>
                         ) : (
                             <UsageCard icon={<Image size={16} />} name="ImageKit" subtitle="Media storage" value="Connected" limitLabel="View dashboard" noBar href="https://imagekit.io/dashboard" />
                         )}
