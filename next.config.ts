@@ -17,7 +17,7 @@ const securityHeaders = [
       "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https: wss:",
       "media-src 'self' https: blob:",
-      "frame-src 'self' https://meet.jit.si https://*.jitsi.net https://jitsi.meeting.study",
+      "frame-src 'self' https://meet.jit.si https://*.jitsi.net https://jitsi.meeting.study https://www.startupmenswear.in https://d-driver.vercel.app",
       "worker-src 'self' blob:",
       "object-src 'none'",
     ].join("; "),
