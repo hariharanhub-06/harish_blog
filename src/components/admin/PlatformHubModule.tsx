@@ -244,9 +244,22 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                             />
                         )}
 
-                        {/* ── ImageKit: storage ── */}
+                        {/* ── ImageKit: storage (one card per account) ── */}
                         {!ikp || !ikp.configured ? (
                             <NotConfiguredCard keyName={`IMAGEKIT_PRIVATE_KEY_${label.replace(/-/g,"").toUpperCase()}`} />
+                        ) : ikp.breakdown ? (
+                            ikp.breakdown.map((acc: any) => (
+                                <UsageCard
+                                    key={acc.account}
+                                    icon={<Image size={16} />}
+                                    name="ImageKit"
+                                    subtitle={acc.account}
+                                    value={fmt(acc.storageUsed)}
+                                    limitLabel={`of ${fmt(ikp.limits.storageBytes)} free · ${acc.fileCount} files`}
+                                    pct={(acc.storageUsed / ikp.limits.storageBytes) * 100}
+                                    href="https://imagekit.io/dashboard"
+                                />
+                            ))
                         ) : ikStats?.storageUsed != null ? (
                             <UsageCard
                                 icon={<Image size={16} />}

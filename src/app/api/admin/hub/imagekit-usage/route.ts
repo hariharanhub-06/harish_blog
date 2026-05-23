@@ -23,19 +23,32 @@ async function fetchImageKitData(privateKey: string): Promise<{ storageUsed: num
     }
 }
 
-async function fetchImageKitProject(keys: string[], projectLabel: string) {
-    const validKeys = keys.filter(k => k);
-    if (validKeys.length === 0) return { label: projectLabel, configured: false };
-    const results = await Promise.all(validKeys.map(k => fetchImageKitData(k)));
-    const successful = results.filter((r): r is NonNullable<typeof r> => r !== null);
+async function fetchImageKitProject(
+    keys: { key: string; account: string }[],
+    projectLabel: string,
+) {
+    const valid = keys.filter(k => k.key);
+    if (valid.length === 0) return { label: projectLabel, configured: false };
+
+    const results = await Promise.all(valid.map(k => fetchImageKitData(k.key).then(r => ({ account: k.account, data: r }))));
+    const successful = results.filter(r => r.data !== null) as { account: string; data: NonNullable<ReturnType<typeof fetchImageKitData> extends Promise<infer T> ? T : never> }[];
+
     if (successful.length === 0) return { label: projectLabel, configured: true, error: "API call failed" };
+
+    const breakdown = successful.map(r => ({
+        account:     r.account,
+        storageUsed: r.data!.storageUsed,
+        fileCount:   r.data!.fileCount,
+    }));
+
     return {
         label: projectLabel,
         configured: true,
         stats: {
-            storageUsed: successful.reduce((s, r) => s + r.storageUsed, 0),
-            fileCount:   successful.reduce((s, r) => s + r.fileCount, 0),
+            storageUsed: breakdown.reduce((s, r) => s + r.storageUsed, 0),
+            fileCount:   breakdown.reduce((s, r) => s + r.fileCount, 0),
         },
+        breakdown: breakdown.length > 1 ? breakdown : undefined,
         limits: FREE_LIMITS,
     };
 }
@@ -46,9 +59,12 @@ export async function GET(req: Request) {
         if (authError) return authError;
 
         const results = await Promise.all([
-            fetchImageKitProject([process.env.IMAGEKIT_PRIVATE_KEY         ?? ""], "Harishblog"),
-            fetchImageKitProject([process.env.IMAGEKIT_PRIVATE_KEY_STARTUP  ?? "", process.env.IMAGEKIT_PRIVATE_KEY_STARTUP_2 ?? ""], "StartUP"),
-            fetchImageKitProject([process.env.IMAGEKIT_PRIVATE_KEY_DDRIVER  ?? ""], "D-Driver"),
+            fetchImageKitProject([{ key: process.env.IMAGEKIT_PRIVATE_KEY ?? "", account: "Harishblog" }], "Harishblog"),
+            fetchImageKitProject([
+                { key: process.env.IMAGEKIT_PRIVATE_KEY_STARTUP  ?? "", account: "Primary (lzmpwlx08)" },
+                { key: process.env.IMAGEKIT_PRIVATE_KEY_STARTUP_2 ?? "", account: "Secondary (6k5vfwl1j)" },
+            ], "StartUP"),
+            fetchImageKitProject([{ key: process.env.IMAGEKIT_PRIVATE_KEY_DDRIVER ?? "", account: "D-Driver" }], "D-Driver"),
         ]);
 
         return NextResponse.json({ projects: results, timestamp: new Date().toISOString() });
