@@ -435,7 +435,7 @@ function PortalView({ portalName }: { portalName: string }) {
             key={url}
             src={url}
             title={portalName}
-            sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
+            sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation allow-modals"
             style={{
                 position: "fixed",
                 top: 0,
