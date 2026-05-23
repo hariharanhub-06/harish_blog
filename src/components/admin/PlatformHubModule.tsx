@@ -8,7 +8,7 @@ import {
     Terminal, TrendingUp, Wifi, WifiOff, XCircle, Zap,
 } from "lucide-react";
 
-type SubTab = "usages" | "security" | "data";
+type SubTab = "usages" | "security";
 
 function fmt(bytes: number) {
     if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(2)} GB`;
@@ -374,73 +374,26 @@ function SecurityTab({ sessionId }: { sessionId: string }) {
     );
 }
 
-// ─── Data Tab ─────────────────────────────────────────────────────────────────
+// ─── Portal View (direct iframe for sidebar shortcuts) ───────────────────────
 
-const PORTALS = [
-    { name: "StartUP Admin",   subtitle: "StartUP Men's Wear",   url: "https://www.startupmenswear.in/admin", color: "bg-blue-600", icon: <Layers size={18} /> },
-    { name: "D-Driver DEV SA", subtitle: "D-Driver Super Admin", url: "https://d-driver.vercel.app/login",    color: "bg-sky-600",  icon: <Terminal size={18} /> },
-];
+const PORTAL_URLS: Record<string, string> = {
+    "StartUP Admin":   "https://www.startupmenswear.in/admin",
+    "D-Driver DEV SA": "https://d-driver.vercel.app/login",
+};
 
-function DataTab({ initialSelected }: { initialSelected?: string }) {
-    const [selected, setSelected] = useState<string | null>(initialSelected ?? null);
-    const portal = PORTALS.find(p => p.name === selected);
-
+function PortalView({ portalName }: { portalName: string }) {
+    const url = PORTAL_URLS[portalName];
+    if (!url) return null;
     return (
-        <div className="flex gap-4" style={{ height: "calc(100vh - 430px)", minHeight: "500px" }}>
-
-            {/* ── Left: portal sub-modules ── */}
-            <div className="w-52 shrink-0 flex flex-col gap-2 pt-1">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-500 px-1 mb-1">Portals</p>
-                {PORTALS.map(p => {
-                    const active = selected === p.name;
-                    return (
-                        <div key={p.name} className={`rounded-xl overflow-hidden transition-all ${
-                            active ? "bg-[#1e293b] ring-1 ring-blue-500/40 shadow-lg shadow-blue-900/20" : "hover:bg-gray-100 dark:hover:bg-[#1e293b]/60"
-                        }`}>
-                            <button onClick={() => setSelected(p.name)}
-                                className="w-full flex items-center gap-3 px-3 py-3.5 text-left">
-                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-white ${p.color}`}>
-                                    {p.icon}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className={`font-semibold text-sm leading-tight ${active ? "text-white" : "text-gray-800 dark:text-slate-200"}`}>{p.name}</p>
-                                    <p className="text-[11px] text-gray-400 mt-0.5 truncate">{p.subtitle}</p>
-                                </div>
-                                {active && <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />}
-                            </button>
-                            {active && (
-                                <a href={p.url} target="_blank" rel="noopener noreferrer"
-                                    className="flex items-center gap-1.5 px-3 pb-3 text-[11px] text-blue-400 hover:text-blue-300 transition-colors">
-                                    <ExternalLink size={10} /> Open in new tab
-                                </a>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* ── Right: iframe fills entire panel via absolute positioning ── */}
-            <div className="flex-1 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden relative">
-                {portal ? (
-                    <iframe
-                        key={portal.url}
-                        src={portal.url}
-                        title={portal.name}
-                        sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
-                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none", display: "block" }}
-                    />
-                ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-8 bg-white dark:bg-[#1e1e1e]">
-                        <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-[#1e293b] flex items-center justify-center">
-                            <Globe size={24} className="text-gray-300 dark:text-slate-600" />
-                        </div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Select a portal on the left</p>
-                        <p className="text-xs text-gray-400 dark:text-slate-600 max-w-xs">
-                            Click StartUP Admin or D-Driver DEV SA to open the full admin page here.
-                        </p>
-                    </div>
-                )}
-            </div>
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden relative"
+             style={{ height: "calc(100vh - 290px)", minHeight: "500px" }}>
+            <iframe
+                key={url}
+                src={url}
+                title={portalName}
+                sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none", display: "block" }}
+            />
         </div>
     );
 }
@@ -450,19 +403,22 @@ function DataTab({ initialSelected }: { initialSelected?: string }) {
 const SUB_TABS: { id: SubTab; label: string; icon: React.ReactNode }[] = [
     { id: "usages",   label: "Usages",   icon: <TrendingUp size={14} /> },
     { id: "security", label: "Security", icon: <ShieldAlert size={14} /> },
-    { id: "data",     label: "Data",     icon: <Globe size={14} /> },
 ];
 
 export default function PlatformHubModule({ initialPortal }: { initialPortal?: string } = {}) {
-    const [activeSubTab, setActiveSubTab] = useState<SubTab>(initialPortal ? "data" : "usages");
+    const [activeSubTab, setActiveSubTab] = useState<SubTab>("usages");
     const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") ?? "" : "";
+
+    if (initialPortal) {
+        return <PortalView portalName={initialPortal} />;
+    }
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-xl font-bold flex items-center gap-2"><Globe size={20} className="text-purple-600" /> Platform Hub</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Unified analytics — usage, security &amp; portal access across all three projects</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Unified analytics — usage &amp; security across all three projects</p>
                 </div>
                 <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-gray-400">
                     <Wifi size={11} className="text-emerald-500" />
@@ -485,7 +441,6 @@ export default function PlatformHubModule({ initialPortal }: { initialPortal?: s
 
             {activeSubTab === "usages"   && <UsagesTab sessionId={sessionId} />}
             {activeSubTab === "security" && <SecurityTab sessionId={sessionId} />}
-            {activeSubTab === "data"     && <DataTab initialSelected={initialPortal} />}
         </div>
     );
 }

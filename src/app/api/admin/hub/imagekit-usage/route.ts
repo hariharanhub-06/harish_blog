@@ -6,28 +6,38 @@ const FREE_LIMITS = {
     bandwidthBytes: 20 * 1024 * 1024 * 1024, // 20 GB/month
 };
 
-async function fetchImageKitData(privateKey: string, projectLabel: string) {
-    if (!privateKey) return { label: projectLabel, configured: false };
+async function fetchImageKitData(privateKey: string): Promise<{ storageUsed: number; fileCount: number } | null> {
+    if (!privateKey) return null;
     const credentials = Buffer.from(`${privateKey.trim()}:`).toString("base64");
     const headers = { Authorization: `Basic ${credentials}` };
     try {
-        // Fetch up to 1000 files and sum their sizes for storage usage
         const res = await fetch("https://api.imagekit.io/v1/files?limit=1000&skip=0", { headers });
-        if (!res.ok) return { label: projectLabel, configured: true, error: `ImageKit API ${res.status}` };
-
+        if (!res.ok) return null;
         const files: any[] = await res.json();
-        const storageUsed = files.reduce((sum, f) => sum + (f.size ?? 0), 0);
-        const fileCount   = files.length;
-
         return {
-            label: projectLabel,
-            configured: true,
-            stats: { storageUsed, fileCount },
-            limits: FREE_LIMITS,
+            storageUsed: files.reduce((sum, f) => sum + (f.size ?? 0), 0),
+            fileCount:   files.length,
         };
     } catch {
-        return { label: projectLabel, configured: true, error: "API call failed" };
+        return null;
     }
+}
+
+async function fetchImageKitProject(keys: string[], projectLabel: string) {
+    const validKeys = keys.filter(k => k);
+    if (validKeys.length === 0) return { label: projectLabel, configured: false };
+    const results = await Promise.all(validKeys.map(k => fetchImageKitData(k)));
+    const successful = results.filter((r): r is NonNullable<typeof r> => r !== null);
+    if (successful.length === 0) return { label: projectLabel, configured: true, error: "API call failed" };
+    return {
+        label: projectLabel,
+        configured: true,
+        stats: {
+            storageUsed: successful.reduce((s, r) => s + r.storageUsed, 0),
+            fileCount:   successful.reduce((s, r) => s + r.fileCount, 0),
+        },
+        limits: FREE_LIMITS,
+    };
 }
 
 export async function GET(req: Request) {
@@ -36,9 +46,9 @@ export async function GET(req: Request) {
         if (authError) return authError;
 
         const results = await Promise.all([
-            fetchImageKitData(process.env.IMAGEKIT_PRIVATE_KEY         ?? "", "Harishblog"),
-            fetchImageKitData(process.env.IMAGEKIT_PRIVATE_KEY_STARTUP  ?? "", "StartUP"),
-            fetchImageKitData(process.env.IMAGEKIT_PRIVATE_KEY_DDRIVER  ?? "", "D-Driver"),
+            fetchImageKitProject([process.env.IMAGEKIT_PRIVATE_KEY         ?? ""], "Harishblog"),
+            fetchImageKitProject([process.env.IMAGEKIT_PRIVATE_KEY_STARTUP  ?? "", process.env.IMAGEKIT_PRIVATE_KEY_STARTUP_2 ?? ""], "StartUP"),
+            fetchImageKitProject([process.env.IMAGEKIT_PRIVATE_KEY_DDRIVER  ?? ""], "D-Driver"),
         ]);
 
         return NextResponse.json({ projects: results, timestamp: new Date().toISOString() });

@@ -327,9 +327,9 @@ export default function AdminDashboard() {
             case "travelled": return <TravelledModule />;
             case "finance-leads": return <FinanceLeadModule />;
             case "scheduler-docs": return <SchedulerDocumentsModule />;
-            case "platform-hub":  return <PlatformHubModule />;
-            case "startup-admin": return <PlatformHubModule initialPortal="StartUP Admin" />;
-            case "ddriver-sa":    return <PlatformHubModule initialPortal="D-Driver DEV SA" />;
+            case "platform-hub":  return <PlatformHubModule key="platform-hub" />;
+            case "startup-admin": return <PlatformHubModule key="startup-admin" initialPortal="StartUP Admin" />;
+            case "ddriver-sa":    return <PlatformHubModule key="ddriver-sa" initialPortal="D-Driver DEV SA" />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">
                     <OverviewModule onTabChange={handleTabChange} />
