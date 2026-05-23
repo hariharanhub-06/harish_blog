@@ -385,16 +385,23 @@ function PortalView({ portalName }: { portalName: string }) {
     const url = PORTAL_URLS[portalName];
     if (!url) return null;
     return (
-        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden relative"
-             style={{ height: "calc(100vh - 290px)", minHeight: "500px" }}>
-            <iframe
-                key={url}
-                src={url}
-                title={portalName}
-                sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none", display: "block" }}
-            />
-        </div>
+        <iframe
+            key={url}
+            src={url}
+            title={portalName}
+            sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
+            style={{
+                position: "fixed",
+                top: 0,
+                left: 260,
+                right: 0,
+                bottom: 0,
+                width: "calc(100vw - 260px)",
+                height: "100vh",
+                border: "none",
+                zIndex: 45,
+            }}
+        />
     );
 }
 
