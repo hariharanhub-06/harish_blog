@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { exercises } from "@/db/schema";
-import { eq, ilike, and, sql } from "drizzle-orm";
+import { eq, ilike, and, sql, inArray } from "drizzle-orm";
 import { validateAdminSession } from "@/lib/adminAuth";
 import { randomUUID } from "crypto";
 
@@ -51,10 +51,16 @@ const CATEGORY_FALLBACK: Record<string, string> = {
   olympic_weightlifting: "back",
 };
 
+// Equipment lists used for home/gym filtering
+const HOME_EQUIPMENT = ["body only", "bands", "dumbbell", "medicine ball", "foam roll"];
+const GYM_EQUIPMENT = ["barbell", "cable", "machine", "e-z curl bar", "kettlebell", "smith machine"];
+
 function resolveBodyPart(item: any): string | null {
+  // Cardio/plyometrics category always wins — their primaryMuscles are leg muscles, not "cardio"
+  const cat = (item.category || "").toLowerCase();
+  if (cat === "cardio" || cat === "plyometrics") return "cardio";
   const muscle = ((item.primaryMuscles || [])[0] || "").toLowerCase();
   if (muscle && MUSCLE_TO_BODY_PART[muscle]) return MUSCLE_TO_BODY_PART[muscle];
-  const cat = (item.category || "").toLowerCase();
   return CATEGORY_FALLBACK[cat] || null;
 }
 
@@ -66,6 +72,7 @@ export async function GET(req: Request) {
   const source = searchParams.get("source");
   const bodyPart = searchParams.get("bodyPart");
   const q = searchParams.get("q");
+  const location = searchParams.get("location"); // "home" | "gym" | null = all
 
   if (source === "exercisedb") {
     try {
@@ -128,6 +135,8 @@ export async function GET(req: Request) {
       const conditions: any[] = [eq(exercises.isActive, true)];
       if (bodyPart && bodyPart !== "all")
         conditions.push(eq(exercises.bodyPart, bodyPart));
+      if (location === "home") conditions.push(inArray(exercises.equipment, HOME_EQUIPMENT));
+      else if (location === "gym") conditions.push(inArray(exercises.equipment, GYM_EQUIPMENT));
       const rows = await db
         .select()
         .from(exercises)
@@ -157,6 +166,8 @@ export async function GET(req: Request) {
     if (bodyPart && bodyPart !== "all")
       conditions.push(eq(exercises.bodyPart, bodyPart));
     if (q) conditions.push(ilike(exercises.name, `%${q}%`));
+    if (location === "home") conditions.push(inArray(exercises.equipment, HOME_EQUIPMENT));
+    else if (location === "gym") conditions.push(inArray(exercises.equipment, GYM_EQUIPMENT));
 
     const rows = await db
       .select()

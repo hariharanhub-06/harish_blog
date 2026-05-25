@@ -261,6 +261,7 @@ export default function WorkoutModule() {
   // ── Library state
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [libBodyPart, setLibBodyPart] = useState("all");
+  const [libLocation, setLibLocation] = useState<"all" | "home" | "gym">("all");
   const [libSearch, setLibSearch] = useState("");
   const [loadingLib, setLoadingLib] = useState(false);
   const [fetchingApi, setFetchingApi] = useState(false);
@@ -280,6 +281,7 @@ export default function WorkoutModule() {
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [pickerSearch, setPickerSearch] = useState("");
   const [pickerBodyPart, setPickerBodyPart] = useState("all");
+  const [pickerLocation, setPickerLocation] = useState<"all" | "home" | "gym">("all");
   const [pickerExercises, setPickerExercises] = useState<Exercise[]>([]);
   const [loadingPicker, setLoadingPicker] = useState(false);
   const [editingPE, setEditingPE] = useState<PlanExercise | null>(null);
@@ -309,12 +311,13 @@ export default function WorkoutModule() {
 
   // ── Library fetch ──────────────────────────────────────────────────────────
 
-  const fetchExercises = useCallback(async (bp: string, search: string) => {
+  const fetchExercises = useCallback(async (bp: string, search: string, loc: string) => {
     setLoadingLib(true);
     try {
       const params = new URLSearchParams();
       if (bp !== "all") params.set("bodyPart", bp);
       if (search) params.set("q", search);
+      if (loc !== "all") params.set("location", loc);
       const res = await fetch(`/api/admin/workout/exercises?${params}`, { headers });
       const data = await res.json();
       setExercises(data.exercises || []);
@@ -324,21 +327,20 @@ export default function WorkoutModule() {
   }, [sessionId]);
 
   useEffect(() => {
-    const t = setTimeout(() => fetchExercises(libBodyPart, libSearch), 300);
+    const t = setTimeout(() => fetchExercises(libBodyPart, libSearch, libLocation), 300);
     return () => clearTimeout(t);
-  }, [libBodyPart, libSearch, fetchExercises]);
+  }, [libBodyPart, libSearch, libLocation, fetchExercises]);
 
   const fetchFromExerciseDB = async () => {
     setFetchingApi(true);
     setFetchError(null);
     try {
-      const params = new URLSearchParams({ source: "exercisedb", bodyPart: libBodyPart });
-      const res = await fetch(`/api/admin/workout/exercises?${params}`, { headers });
+      const res = await fetch(`/api/admin/workout/exercises?source=exercisedb`, { headers });
       const data = await res.json();
       if (!res.ok) {
         setFetchError(data.error || `Error ${res.status}`);
-      } else if (data.exercises) {
-        setExercises(data.exercises);
+      } else {
+        await fetchExercises(libBodyPart, libSearch, libLocation);
       }
     } catch (e: unknown) {
       setFetchError(e instanceof Error ? e.message : "Network error");
@@ -382,6 +384,7 @@ export default function WorkoutModule() {
         const params = new URLSearchParams();
         if (pickerBodyPart !== "all") params.set("bodyPart", pickerBodyPart);
         if (pickerSearch) params.set("q", pickerSearch);
+        if (pickerLocation !== "all") params.set("location", pickerLocation);
         const res = await fetch(`/api/admin/workout/exercises?${params}`, { headers });
         const data = await res.json();
         setPickerExercises(data.exercises || []);
@@ -391,7 +394,7 @@ export default function WorkoutModule() {
     };
     const t = setTimeout(fetch_, 300);
     return () => clearTimeout(t);
-  }, [showExercisePicker, pickerSearch, pickerBodyPart, sessionId]);
+  }, [showExercisePicker, pickerSearch, pickerBodyPart, pickerLocation, sessionId]);
 
   // ── Plan CRUD ──────────────────────────────────────────────────────────────
 
@@ -652,6 +655,25 @@ export default function WorkoutModule() {
                 Failed to load: {fetchError}
               </div>
             )}
+
+            {/* Home / Gym section toggle */}
+            <div className="flex gap-2 mb-4 p-1 bg-white/5 rounded-2xl">
+              {[
+                { id: "all", label: "All" },
+                { id: "home", label: "🏠 Home Workout" },
+                { id: "gym", label: "🏋️ Gym Workout" },
+              ].map((loc) => (
+                <button
+                  key={loc.id}
+                  onClick={() => setLibLocation(loc.id as "all" | "home" | "gym")}
+                  className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    libLocation === loc.id ? "bg-green-600 text-white shadow-lg shadow-green-900/30" : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  {loc.label}
+                </button>
+              ))}
+            </div>
 
             {/* Body part tabs */}
             <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
@@ -1135,6 +1157,24 @@ export default function WorkoutModule() {
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
                 <input value={pickerSearch} onChange={(e) => setPickerSearch(e.target.value)} placeholder="Search..." className="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-4 py-2 text-sm focus:outline-none focus:border-green-500" />
+              </div>
+              {/* Home / Gym toggle */}
+              <div className="flex gap-1 p-0.5 bg-white/5 rounded-xl">
+                {[
+                  { id: "all", label: "All" },
+                  { id: "home", label: "🏠 Home" },
+                  { id: "gym", label: "🏋️ Gym" },
+                ].map((loc) => (
+                  <button
+                    key={loc.id}
+                    onClick={() => setPickerLocation(loc.id as "all" | "home" | "gym")}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      pickerLocation === loc.id ? "bg-green-600 text-white" : "text-white/50 hover:text-white"
+                    }`}
+                  >
+                    {loc.label}
+                  </button>
+                ))}
               </div>
               <div className="flex gap-1.5 overflow-x-auto pb-1">
                 {BODY_PARTS.map((bp) => (
