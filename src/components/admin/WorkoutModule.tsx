@@ -176,6 +176,47 @@ function FlipbookImage({ gifUrl, secondaryMuscles, name, className }: { gifUrl: 
   );
 }
 
+// ── IndexedDB helpers for local audio storage (no server upload, no size limit) ─
+
+const IDB_NAME = "workout_music";
+const IDB_STORE = "tracks";
+
+function idbOpen(): Promise<IDBDatabase> {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE, { keyPath: "name" });
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+async function idbSave(name: string, file: File) {
+  const db = await idbOpen();
+  return new Promise<void>((res, rej) => {
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    tx.objectStore(IDB_STORE).put({ name, file });
+    tx.oncomplete = () => { db.close(); res(); };
+    tx.onerror = () => { db.close(); rej(tx.error); };
+  });
+}
+async function idbLoad(name: string): Promise<File | null> {
+  const db = await idbOpen();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const req = tx.objectStore(IDB_STORE).get(name);
+    req.onsuccess = () => { db.close(); res(req.result?.file ?? null); };
+    req.onerror = () => { db.close(); rej(req.error); };
+  });
+}
+async function idbDelete(name: string) {
+  const db = await idbOpen();
+  return new Promise<void>((res, rej) => {
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    tx.objectStore(IDB_STORE).delete(name);
+    tx.oncomplete = () => { db.close(); res(); };
+    tx.onerror = () => { db.close(); rej(tx.error); };
+  });
+}
+
 // ── Sortable Plan Exercise Row ─────────────────────────────────────────────────
 
 function SortablePlanExercise({
@@ -309,9 +350,7 @@ export default function WorkoutModule() {
   // ── Music state
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [playlist, setPlaylist] = useState<{ name: string; url: string }[]>(() => {
-    try { return JSON.parse(localStorage.getItem("workout_playlist") || "[]"); } catch { return []; }
-  });
+  const [playlist, setPlaylist] = useState<{ name: string; url: string }[]>([]);
   const [currentTrack, setCurrentTrack] = useState(0);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -567,27 +606,33 @@ export default function WorkoutModule() {
     });
   }, []);
 
+  // Load persisted tracks from IndexedDB on mount
+  useEffect(() => {
+    const names: string[] = (() => { try { return JSON.parse(localStorage.getItem("workout_playlist") || "[]"); } catch { return []; } })();
+    if (names.length === 0) return;
+    (async () => {
+      const loaded = await Promise.all(names.map(async (name: string) => {
+        const file = await idbLoad(name).catch(() => null);
+        return file ? { name, url: URL.createObjectURL(file) } : null;
+      }));
+      const valid = loaded.filter(Boolean) as { name: string; url: string }[];
+      if (valid.length > 0) setPlaylist(valid);
+    })();
+  }, []);
+
   const uploadTrack = async (files: FileList) => {
     setUploadingTrack(true);
     const added: { name: string; url: string }[] = [];
     for (const file of Array.from(files)) {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("path", "assets");
       try {
-        const res = await fetch("/api/admin/upload", {
-          method: "POST",
-          headers: { "X-Session-Id": sessionId },
-          body: form,
-        });
-        const data = await res.json();
-        if (data.url) added.push({ name: file.name, url: data.url });
+        await idbSave(file.name, file);
+        added.push({ name: file.name, url: URL.createObjectURL(file) });
       } catch { /* silent */ }
     }
     if (added.length > 0) {
       setPlaylist((prev) => {
         const next = [...prev, ...added];
-        localStorage.setItem("workout_playlist", JSON.stringify(next));
+        localStorage.setItem("workout_playlist", JSON.stringify(next.map((t) => t.name)));
         return next;
       });
     }
@@ -596,8 +641,11 @@ export default function WorkoutModule() {
 
   const removeTrack = (idx: number) => {
     setPlaylist((prev) => {
+      const track = prev[idx];
+      URL.revokeObjectURL(track.url);
+      idbDelete(track.name).catch(() => {});
       const next = prev.filter((_, i) => i !== idx);
-      localStorage.setItem("workout_playlist", JSON.stringify(next));
+      localStorage.setItem("workout_playlist", JSON.stringify(next.map((t) => t.name)));
       return next;
     });
   };
@@ -1470,7 +1518,7 @@ export default function WorkoutModule() {
                 {uploadingTrack ? (
                   <><Loader2 size={16} className="animate-spin" /> Uploading…</>
                 ) : (
-                  <><Upload size={16} /> Upload Songs (MP3 / WAV)</>
+                  <><Upload size={16} /> Add Songs from Device (MP3 / WAV)</>
                 )}
                 <input
                   type="file"
