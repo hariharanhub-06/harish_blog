@@ -1148,21 +1148,17 @@ export default function WorkoutModule() {
               {loadingPicker ? (
                 <div className="flex justify-center py-8"><Loader2 size={20} className="animate-spin text-green-400" /></div>
               ) : (
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-3">
                   {pickerExercises.map((ex) => (
-                    <button key={ex.id} onClick={() => addExerciseToPlan(ex)} className="flex items-center gap-3 w-full bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-3 text-left transition-colors">
-                      {ex.gifUrl ? (
-                        <img src={ex.gifUrl} alt={ex.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" loading="lazy" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                          <Dumbbell size={18} className="text-white/30" />
+                    <button key={ex.id} onClick={() => addExerciseToPlan(ex)} className="bg-[#111] hover:border-green-500/60 border border-white/10 rounded-2xl overflow-hidden text-left transition-colors group">
+                      <FlipbookImage gifUrl={ex.gifUrl} secondaryMuscles={ex.secondaryMuscles} name={ex.name} className="w-full h-32" />
+                      <div className="p-2.5">
+                        <p className="text-white text-xs font-medium leading-tight line-clamp-2 mb-1">{ex.name}</p>
+                        <p className="text-white/40 text-[10px] truncate">{ex.target}{ex.equipment ? ` · ${ex.equipment}` : ""}</p>
+                        <div className="mt-2 flex items-center gap-1 text-green-400 text-[10px] font-medium">
+                          <Plus size={11} /> Add to plan
                         </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium truncate">{ex.name}</p>
-                        <p className="text-white/40 text-xs">{ex.target} · {ex.equipment}</p>
                       </div>
-                      <Plus size={16} className="text-green-400 flex-shrink-0" />
                     </button>
                   ))}
                   {pickerExercises.length === 0 && !loadingPicker && (

@@ -79,21 +79,9 @@ export async function GET(req: Request) {
 
       if (!Array.isArray(data)) throw new Error("Invalid data format");
 
-      // Filter by bodyPart if specified
-      const filtered =
-        bodyPart && bodyPart !== "all"
-          ? data.filter((item) => {
-              const cat = (item.category || "").toLowerCase();
-              const mapped = CATEGORY_TO_BODY_PART[cat] || cat;
-              return (
-                mapped === bodyPart ||
-                cat === bodyPart ||
-                (item.primaryMuscles || []).some((m: string) =>
-                  m.toLowerCase().includes(bodyPart)
-                )
-              );
-            })
-          : data;
+      // Always upsert all exercises so every body-part tab is populated after one click.
+      // The DB query below handles the tab filter on the way out.
+      const filtered = data;
 
       const toInsert = filtered.map((item) => ({
         id: randomUUID(),
