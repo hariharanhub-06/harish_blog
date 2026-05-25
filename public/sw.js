@@ -1,6 +1,6 @@
-const CACHE_NAME = 'hariharanhub-v1';
+const CACHE_NAME = 'hariharanhub-v2';
 const OFFLINE_ASSETS = [
-    '/',
+    // Static images only — never cache HTML pages, they reference versioned JS chunks
     '/hari-favicon.png',
     '/hari_photo.png',
     '/hh-gold-logo.png',
@@ -34,17 +34,26 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
     const url = new URL(event.request.url);
 
-    // Only cache GET requests for same-origin or static assets
     if (event.request.method !== 'GET') return;
     if (url.origin !== self.location.origin && !url.hostname.includes('ik.imagekit.io')) return;
-    // Skip API calls and admin routes
     if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/admin')) return;
 
+    // HTML navigation: always fetch from network, never from cache.
+    // Falls back to cached '/' only when truly offline.
+    if (event.request.destination === 'document') {
+        event.respondWith(
+            fetch(event.request).catch(function() {
+                return caches.match('/');
+            })
+        );
+        return;
+    }
+
+    // Static assets (images, fonts, styles): cache-first
     event.respondWith(
         caches.match(event.request).then(function(cached) {
             if (cached) return cached;
             return fetch(event.request).then(function(response) {
-                // Cache successful image/font/static responses
                 if (response.ok && (
                     event.request.destination === 'image' ||
                     event.request.destination === 'font' ||
@@ -57,10 +66,7 @@ self.addEventListener('fetch', function(event) {
                 }
                 return response;
             }).catch(function() {
-                // Return cached home page for navigation requests when offline
-                if (event.request.destination === 'document') {
-                    return caches.match('/');
-                }
+                return caches.match('/');
             });
         })
     );
