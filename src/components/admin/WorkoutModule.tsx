@@ -566,6 +566,7 @@ export default function WorkoutModule() {
   }, [secondsLeft, phase, currentIndex, activeExercises]);
 
   const skipRest = () => {
+    if (typeof window !== "undefined") window.speechSynthesis?.cancel();
     const next = currentIndex + 1;
     setCurrentIndex(next);
     setPhase("exercise");
@@ -665,6 +666,7 @@ export default function WorkoutModule() {
       audioRef.current = null;
       setIsPlaying(false);
       if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null; }
+      if (typeof window !== "undefined") window.speechSynthesis?.cancel();
     };
   }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
 
