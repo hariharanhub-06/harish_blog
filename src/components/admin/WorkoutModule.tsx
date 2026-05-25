@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   DndContext,
   closestCenter,
@@ -38,6 +38,12 @@ import {
   RefreshCw,
   Loader2,
   Download,
+  Music,
+  Pause,
+  SkipBack,
+  Volume2,
+  VolumeX,
+  Upload,
 } from "lucide-react";
 import {
   AreaChart,
@@ -300,6 +306,18 @@ export default function WorkoutModule() {
   const [logRange, setLogRange] = useState("30");
   const [loadingLogs, setLoadingLogs] = useState(false);
 
+  // ── Music state
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [playlist, setPlaylist] = useState<{ name: string; url: string }[]>(() => {
+    try { return JSON.parse(localStorage.getItem("workout_playlist") || "[]"); } catch { return []; }
+  });
+  const [currentTrack, setCurrentTrack] = useState(0);
+  const [musicEnabled, setMusicEnabled] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [uploadingTrack, setUploadingTrack] = useState(false);
+  const [showMusicPanel, setShowMusicPanel] = useState(false);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -513,6 +531,132 @@ export default function WorkoutModule() {
     setCurrentIndex(next);
     setPhase("exercise");
     setSecondsLeft(activeExercises[next].durationSeconds);
+  };
+
+  // ── Music helpers ──────────────────────────────────────────────────────────
+
+  const fadeMusic = useCallback((targetVol: number, ms = 600) => {
+    if (!audioRef.current) return;
+    if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+    const audio = audioRef.current;
+    const startVol = audio.volume;
+    const steps = 20;
+    const stepVal = (targetVol - startVol) / steps;
+    let i = 0;
+    fadeTimerRef.current = setInterval(() => {
+      i++;
+      audio.volume = Math.max(0, Math.min(1, startVol + stepVal * i));
+      if (i >= steps) {
+        if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+        fadeTimerRef.current = null;
+      }
+    }, ms / steps);
+  }, []);
+
+  const speakCountdown = useCallback(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    ["3", "2", "1"].forEach((n, i) => {
+      setTimeout(() => {
+        const u = new SpeechSynthesisUtterance(n);
+        u.rate = 0.85;
+        u.pitch = 1.1;
+        u.volume = 1;
+        window.speechSynthesis.speak(u);
+      }, i * 1000);
+    });
+  }, []);
+
+  const uploadTrack = async (files: FileList) => {
+    setUploadingTrack(true);
+    const added: { name: string; url: string }[] = [];
+    for (const file of Array.from(files)) {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("path", "assets");
+      try {
+        const res = await fetch("/api/admin/upload", {
+          method: "POST",
+          headers: { "X-Session-Id": sessionId },
+          body: form,
+        });
+        const data = await res.json();
+        if (data.url) added.push({ name: file.name, url: data.url });
+      } catch { /* silent */ }
+    }
+    if (added.length > 0) {
+      setPlaylist((prev) => {
+        const next = [...prev, ...added];
+        localStorage.setItem("workout_playlist", JSON.stringify(next));
+        return next;
+      });
+    }
+    setUploadingTrack(false);
+  };
+
+  const removeTrack = (idx: number) => {
+    setPlaylist((prev) => {
+      const next = prev.filter((_, i) => i !== idx);
+      localStorage.setItem("workout_playlist", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  // ── Audio effects ──────────────────────────────────────────────────────────
+
+  // Start / stop music with the active view
+  useEffect(() => {
+    if (view !== "active" || !musicEnabled || playlist.length === 0) return;
+    const audio = new Audio(playlist[0].url);
+    audio.volume = 1;
+    audio.onended = () => setCurrentTrack((t) => (t + 1) % playlist.length);
+    audioRef.current = audio;
+    audio.play().then(() => setIsPlaying(true)).catch(() => {});
+    return () => {
+      audio.pause();
+      audioRef.current = null;
+      setIsPlaying(false);
+      if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null; }
+    };
+  }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Advance track
+  useEffect(() => {
+    if (view !== "active" || !audioRef.current || playlist.length === 0) return;
+    audioRef.current.src = playlist[currentTrack % playlist.length].url;
+    audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+  }, [currentTrack]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fade + voice countdown at last 3 seconds
+  useEffect(() => {
+    if (secondsLeft !== 3 || phase === "done") return;
+    fadeMusic(0.12, 600);
+    speakCountdown();
+  }, [secondsLeft, phase, fadeMusic, speakCountdown]);
+
+  // Restore volume after phase/exercise changes (wait for countdown to finish)
+  useEffect(() => {
+    if (view !== "active" || phase === "done") return;
+    const t = setTimeout(() => fadeMusic(1.0, 600), 3200);
+    return () => clearTimeout(t);
+  }, [phase, currentIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fade out when workout is done
+  useEffect(() => {
+    if (phase !== "done") return;
+    fadeMusic(0, 1500);
+    setTimeout(() => { audioRef.current?.pause(); setIsPlaying(false); }, 1600);
+    if (typeof window !== "undefined") window.speechSynthesis?.cancel();
+  }, [phase, fadeMusic]);
+
+  const togglePlayPause = () => {
+    if (!audioRef.current) return;
+    if (audioRef.current.paused) {
+      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    } else {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
   };
 
   const saveLog = async () => {
@@ -787,13 +931,27 @@ export default function WorkoutModule() {
                         );
                       })()}
                     </div>
-                    <button
-                      onClick={() => startWorkout(selectedPlan, planExercises)}
-                      disabled={planExercises.length === 0}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-500 disabled:opacity-40 rounded-xl font-medium transition-colors"
-                    >
-                      <Play size={16} /> Start Workout
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setShowMusicPanel(true)}
+                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl font-medium transition-colors border ${
+                          playlist.length > 0 && musicEnabled
+                            ? "bg-purple-600/20 border-purple-500/40 text-purple-300 hover:bg-purple-600/30"
+                            : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white"
+                        }`}
+                        title="Workout Music"
+                      >
+                        <Music size={16} />
+                        {playlist.length > 0 && <span className="text-xs">{playlist.length}</span>}
+                      </button>
+                      <button
+                        onClick={() => startWorkout(selectedPlan, planExercises)}
+                        disabled={planExercises.length === 0}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-500 disabled:opacity-40 rounded-xl font-medium transition-colors"
+                      >
+                        <Play size={16} /> Start Workout
+                      </button>
+                    </div>
                   </div>
 
                   {loadingPlan ? (
@@ -842,7 +1000,12 @@ export default function WorkoutModule() {
                     <p className="text-sm font-medium text-white">{activePlan?.name}</p>
                     <p className="text-xs text-white/40">Exercise {currentIndex + 1} of {activeExercises.length}</p>
                   </div>
-                  <div className="w-8" />
+                  <button
+                    onClick={() => setShowMusicPanel(true)}
+                    className={`p-2 rounded-xl transition-colors ${playlist.length > 0 && musicEnabled ? "text-purple-400 hover:text-purple-300" : "text-white/30 hover:text-white"}`}
+                  >
+                    <Music size={20} />
+                  </button>
                 </div>
 
                 {/* Progress bar */}
@@ -901,6 +1064,31 @@ export default function WorkoutModule() {
                   )}
                 </div>
               </>
+            )}
+
+            {/* Mini music player */}
+            {phase !== "done" && playlist.length > 0 && musicEnabled && (
+              <div className="flex items-center gap-3 px-5 py-2.5 bg-black/60 border-t border-white/10">
+                <Music size={14} className="text-purple-400 flex-shrink-0" />
+                <p className="flex-1 text-xs text-white/50 truncate">
+                  {playlist[currentTrack % playlist.length]?.name ?? ""}
+                </p>
+                <button
+                  onClick={() => setCurrentTrack((t) => (t - 1 + playlist.length) % playlist.length)}
+                  className="text-white/40 hover:text-white"
+                >
+                  <SkipBack size={15} />
+                </button>
+                <button onClick={togglePlayPause} className="text-white/70 hover:text-white">
+                  {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                </button>
+                <button
+                  onClick={() => setCurrentTrack((t) => (t + 1) % playlist.length)}
+                  className="text-white/40 hover:text-white"
+                >
+                  <SkipForward size={15} />
+                </button>
+              </div>
             )}
 
             {/* Done screen */}
@@ -1242,6 +1430,85 @@ export default function WorkoutModule() {
                   )}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Music Panel */}
+      {showMusicPanel && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex justify-end">
+          <div className="bg-[#1a1a1a] w-full max-w-sm h-full flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Music size={18} className="text-purple-400" />
+                <h3 className="text-base font-bold text-white">Workout Music</h3>
+              </div>
+              <button onClick={() => setShowMusicPanel(false)} className="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-sm font-medium transition-colors">
+                Done
+              </button>
+            </div>
+
+            {/* Enable toggle */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                {musicEnabled ? <Volume2 size={16} className="text-purple-400" /> : <VolumeX size={16} className="text-white/30" />}
+                <span className="text-sm text-white">Music enabled</span>
+              </div>
+              <button
+                onClick={() => setMusicEnabled((v) => !v)}
+                className={`w-11 h-6 rounded-full transition-colors relative ${musicEnabled ? "bg-purple-600" : "bg-white/10"}`}
+              >
+                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${musicEnabled ? "left-6" : "left-1"}`} />
+              </button>
+            </div>
+
+            {/* Upload */}
+            <div className="px-5 py-4 border-b border-white/10">
+              <label className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-dashed cursor-pointer transition-colors ${uploadingTrack ? "border-white/10 text-white/30" : "border-purple-500/40 text-purple-400 hover:bg-purple-500/10"}`}>
+                {uploadingTrack ? (
+                  <><Loader2 size={16} className="animate-spin" /> Uploading…</>
+                ) : (
+                  <><Upload size={16} /> Upload Songs (MP3 / WAV)</>
+                )}
+                <input
+                  type="file"
+                  accept="audio/*"
+                  multiple
+                  className="hidden"
+                  disabled={uploadingTrack}
+                  onChange={(e) => e.target.files && uploadTrack(e.target.files)}
+                />
+              </label>
+            </div>
+
+            {/* Playlist */}
+            <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2">
+              {playlist.length === 0 ? (
+                <div className="text-center py-10 text-white/30">
+                  <Music size={32} className="mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">No songs yet. Upload MP3 or WAV files.</p>
+                </div>
+              ) : (
+                playlist.map((track, i) => (
+                  <div key={i} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-colors ${i === currentTrack % playlist.length && isPlaying ? "bg-purple-600/15 border-purple-500/30" : "bg-white/5 border-white/10"}`}>
+                    <Music size={14} className={i === currentTrack % playlist.length && isPlaying ? "text-purple-400" : "text-white/30"} />
+                    <p className="flex-1 text-sm text-white truncate">{track.name.replace(/\.[^/.]+$/, "")}</p>
+                    <button onClick={() => removeTrack(i)} className="text-white/20 hover:text-red-400 transition-colors flex-shrink-0">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Info footer */}
+            <div className="px-5 py-4 border-t border-white/10 bg-purple-500/5">
+              <p className="text-xs text-white/30 text-center leading-relaxed">
+                Music fades at the last 3 seconds of each set.<br/>
+                A voice counts down "3 · 2 · 1" before each transition.
+              </p>
             </div>
           </div>
         </div>
