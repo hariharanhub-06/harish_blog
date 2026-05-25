@@ -275,6 +275,7 @@ export default function WorkoutModule() {
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
   const [planExercises, setPlanExercises] = useState<PlanExercise[]>([]);
   const [loadingPlan, setLoadingPlan] = useState(false);
+  const [justAddedIds, setJustAddedIds] = useState<Set<string>>(new Set());
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [planForm, setPlanForm] = useState({ name: "", description: "", goal: "strength", difficulty: "intermediate" });
   const [editingPlan, setEditingPlan] = useState<WorkoutPlan | null>(null);
@@ -436,7 +437,10 @@ export default function WorkoutModule() {
       body: JSON.stringify({ exerciseId: exercise.id }),
     });
     fetchPlanExercises(selectedPlan.id);
-    setShowExercisePicker(false);
+    // Keep picker open so user can add multiple exercises in one go.
+    // Flash the card green briefly to confirm the add.
+    setJustAddedIds((prev) => new Set([...prev, exercise.id]));
+    setTimeout(() => setJustAddedIds((prev) => { const n = new Set(prev); n.delete(exercise.id); return n; }), 1500);
   };
 
   const updatePlanExercise = async () => {
@@ -804,7 +808,7 @@ export default function WorkoutModule() {
                         </SortableContext>
                       </DndContext>
                       <button
-                        onClick={() => { setPickerSearch(""); setPickerBodyPart("all"); setShowExercisePicker(true); }}
+                        onClick={() => { setPickerSearch(""); setPickerBodyPart("all"); setPickerLocation("all"); setJustAddedIds(new Set()); setShowExercisePicker(true); }}
                         className="flex items-center gap-2 w-full px-4 py-3 border border-dashed border-white/20 rounded-xl text-white/40 hover:text-white hover:border-white/40 transition-colors"
                       >
                         <Plus size={16} /> Add Exercise
@@ -1148,9 +1152,17 @@ export default function WorkoutModule() {
         <div className="fixed inset-0 bg-black/70 z-50 flex justify-end">
           <div className="bg-[#1a1a1a] w-full max-w-md h-full flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-              <h3 className="text-base font-bold text-white">Add Exercise</h3>
-              <button onClick={() => setShowExercisePicker(false)} className="text-white/40 hover:text-white">
-                <X size={20} />
+              <div>
+                <h3 className="text-base font-bold text-white">Add Exercise</h3>
+                {planExercises.length > 0 && (
+                  <p className="text-green-400 text-xs mt-0.5">{planExercises.length} exercise{planExercises.length !== 1 ? "s" : ""} in plan</p>
+                )}
+              </div>
+              <button
+                onClick={() => setShowExercisePicker(false)}
+                className="px-4 py-1.5 bg-green-600 hover:bg-green-500 rounded-xl text-sm font-medium transition-colors"
+              >
+                Done
               </button>
             </div>
             <div className="px-4 py-3 border-b border-white/10 space-y-2">
@@ -1189,18 +1201,35 @@ export default function WorkoutModule() {
                 <div className="flex justify-center py-8"><Loader2 size={20} className="animate-spin text-green-400" /></div>
               ) : (
                 <div className="grid grid-cols-2 gap-3">
-                  {pickerExercises.map((ex) => (
-                    <button key={ex.id} onClick={() => addExerciseToPlan(ex)} className="bg-[#111] hover:border-green-500/60 border border-white/10 rounded-2xl overflow-hidden text-left transition-colors group">
-                      <FlipbookImage gifUrl={ex.gifUrl} secondaryMuscles={ex.secondaryMuscles} name={ex.name} className="w-full h-32" />
-                      <div className="p-2.5">
-                        <p className="text-white text-xs font-medium leading-tight line-clamp-2 mb-1">{ex.name}</p>
-                        <p className="text-white/40 text-[10px] truncate">{ex.target}{ex.equipment ? ` · ${ex.equipment}` : ""}</p>
-                        <div className="mt-2 flex items-center gap-1 text-green-400 text-[10px] font-medium">
-                          <Plus size={11} /> Add to plan
+                  {pickerExercises.map((ex) => {
+                    const alreadyIn = planExercises.some((pe) => pe.exerciseId === ex.id);
+                    const justAdded = justAddedIds.has(ex.id);
+                    return (
+                      <button
+                        key={ex.id}
+                        onClick={() => addExerciseToPlan(ex)}
+                        className={`relative bg-[#111] border rounded-2xl overflow-hidden text-left transition-all group ${
+                          justAdded ? "border-green-500 shadow-lg shadow-green-900/30" : "border-white/10 hover:border-green-500/60"
+                        }`}
+                      >
+                        <FlipbookImage gifUrl={ex.gifUrl} secondaryMuscles={ex.secondaryMuscles} name={ex.name} className="w-full h-32" />
+                        {justAdded && (
+                          <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center pointer-events-none">
+                            <div className="bg-green-500 rounded-full p-2">
+                              <Check size={18} className="text-white" />
+                            </div>
+                          </div>
+                        )}
+                        <div className="p-2.5">
+                          <p className="text-white text-xs font-medium leading-tight line-clamp-2 mb-1">{ex.name}</p>
+                          <p className="text-white/40 text-[10px] truncate">{ex.target}{ex.equipment ? ` · ${ex.equipment}` : ""}</p>
+                          <div className={`mt-2 flex items-center gap-1 text-[10px] font-medium transition-colors ${alreadyIn ? "text-green-400" : "text-white/30 group-hover:text-green-400"}`}>
+                            {alreadyIn ? <><Check size={11} /> In plan</> : <><Plus size={11} /> Add to plan</>}
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                   {pickerExercises.length === 0 && !loadingPicker && (
                     <p className="text-white/30 text-sm text-center py-6">No exercises found</p>
                   )}
