@@ -87,6 +87,7 @@ interface PlanExercise {
     target: string | null;
     equipment: string | null;
     gifUrl: string | null;
+    secondaryMuscles: string[] | null;
   };
 }
 
@@ -192,13 +193,7 @@ function SortablePlanExercise({
       <button {...attributes} {...listeners} className="text-white/30 hover:text-white/60 cursor-grab active:cursor-grabbing">
         <GripVertical size={16} />
       </button>
-      {pe.exercise.gifUrl ? (
-        <img src={pe.exercise.gifUrl} alt={pe.exercise.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" loading="lazy" />
-      ) : (
-        <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-          <Dumbbell size={20} className="text-white/30" />
-        </div>
-      )}
+      <FlipbookImage gifUrl={pe.exercise.gifUrl} secondaryMuscles={pe.exercise.secondaryMuscles} name={pe.exercise.name} className="w-14 h-14 rounded-xl flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-white text-sm font-medium truncate">{pe.exercise.name}</p>
         <p className="text-white/40 text-xs">{pe.exercise.target} · {pe.exercise.equipment}</p>
@@ -779,6 +774,18 @@ export default function WorkoutModule() {
                     <div>
                       <h2 className="text-xl font-semibold text-white">{selectedPlan.name}</h2>
                       {selectedPlan.goal && <p className="text-white/40 text-sm capitalize">{selectedPlan.goal} · {selectedPlan.difficulty}</p>}
+                      {planExercises.length > 0 && (() => {
+                        const totalSec = planExercises.reduce((s, pe) => s + pe.durationSeconds + pe.restSeconds, 0);
+                        const h = Math.floor(totalSec / 3600);
+                        const m = Math.floor((totalSec % 3600) / 60);
+                        const s = totalSec % 60;
+                        const label = h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${s > 0 ? `${s}s` : ""}`.trim() : `${s}s`;
+                        return (
+                          <p className="text-green-400 text-xs mt-1 font-medium">
+                            {planExercises.length} exercise{planExercises.length !== 1 ? "s" : ""} · {label} total
+                          </p>
+                        );
+                      })()}
                     </div>
                     <button
                       onClick={() => startWorkout(selectedPlan, planExercises)}
@@ -851,7 +858,7 @@ export default function WorkoutModule() {
                   <div className={`w-full rounded-2xl overflow-hidden transition-opacity duration-300 ${phase === "rest" ? "opacity-40" : "opacity-100"}`}>
                     <FlipbookImage
                       gifUrl={currentEx.exercise.gifUrl}
-                      secondaryMuscles={null}
+                      secondaryMuscles={currentEx.exercise.secondaryMuscles}
                       name={currentEx.exercise.name}
                       className="w-full h-72"
                     />
