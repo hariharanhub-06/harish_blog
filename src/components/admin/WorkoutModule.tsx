@@ -540,6 +540,18 @@ export default function WorkoutModule() {
     setView("active");
   };
 
+  const stopWorkout = () => {
+    if (typeof window !== "undefined") window.speechSynthesis?.cancel();
+    if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null; }
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    setIsPlaying(false);
+    setPhase("done");
+    setSecondsLeft(0);
+    setActiveExercises([]);
+    setActivePlan(null);
+    setView("plans");
+  };
+
   // Countdown tick
   useEffect(() => {
     if (phase === "done" || secondsLeft <= 0) return;
@@ -713,26 +725,38 @@ export default function WorkoutModule() {
   const saveLog = async () => {
     if (!activePlan || !workoutStartTime) return;
     setSavingLog(true);
-    const totalSeconds = Math.round((Date.now() - workoutStartTime) / 1000);
-    await fetch("/api/admin/workout/logs", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        planId: activePlan.id,
-        planName: activePlan.name,
-        date: new Date().toISOString().split("T")[0],
-        durationMinutes: Math.round(totalSeconds / 60),
-        totalSeconds,
-        feeling: logFeeling,
-        exercisesCompleted: activeExercises.length,
-        notes: logNotes || null,
-      }),
-    });
-    setSavingLog(false);
-    setLogFeeling("good");
-    setLogNotes("");
-    setView("progress");
-    fetchLogs(logRange);
+    try {
+      const totalSeconds = Math.round((Date.now() - workoutStartTime) / 1000);
+      const res = await fetch("/api/admin/workout/logs", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          planId: activePlan.id,
+          planName: activePlan.name,
+          date: new Date().toISOString().split("T")[0],
+          durationMinutes: Math.round(totalSeconds / 60),
+          totalSeconds,
+          feeling: logFeeling,
+          exercisesCompleted: activeExercises.length,
+          notes: logNotes || null,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert("Failed to save workout: " + (err.error || res.status));
+        return;
+      }
+      setLogFeeling("good");
+      setLogNotes("");
+      setActiveExercises([]);
+      setActivePlan(null);
+      setView("progress");
+      fetchLogs(logRange);
+    } catch (e) {
+      alert("Network error saving workout. Please try again.");
+    } finally {
+      setSavingLog(false);
+    }
   };
 
   // ── Progress ───────────────────────────────────────────────────────────────
@@ -743,10 +767,13 @@ export default function WorkoutModule() {
       const end = new Date().toISOString().split("T")[0];
       const start = new Date(Date.now() - parseInt(range) * 86400000).toISOString().split("T")[0];
       const res = await fetch(`/api/admin/workout/logs?start=${start}&end=${end}`, { headers });
+      if (!res.ok) { console.error("[fetchLogs] API error", res.status); return; }
       const data = await res.json();
       setLogs(data.logs || []);
       setLogStats(data.stats || {});
-    } catch { /* silent */ } finally {
+    } catch (e) {
+      console.error("[fetchLogs]", e);
+    } finally {
       setLoadingLogs(false);
     }
   }, [sessionId]);
@@ -1044,7 +1071,7 @@ export default function WorkoutModule() {
               <>
                 {/* Top bar */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                  <button onClick={() => { if (confirm("Stop workout?")) setView("plans"); }} className="text-white/40 hover:text-white">
+                  <button onClick={() => { if (confirm("Stop workout?")) stopWorkout(); }} className="text-white/40 hover:text-white">
                     <X size={20} />
                   </button>
                   <div className="text-center">
