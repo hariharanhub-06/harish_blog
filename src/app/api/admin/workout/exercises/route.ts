@@ -13,21 +13,50 @@ const FREE_EXERCISE_DB_URL =
 const IMG_BASE =
   "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises";
 
-const CATEGORY_TO_BODY_PART: Record<string, string> = {
+// free-exercise-db uses primaryMuscles (e.g. "chest", "biceps", "lats") as the real body-part source.
+// category is the workout TYPE ("Strength", "Cardio", etc.) — not useful for filtering.
+const MUSCLE_TO_BODY_PART: Record<string, string> = {
   chest: "chest",
-  back: "back",
+  pectorals: "chest",
+  lats: "back",
+  "middle back": "back",
+  "lower back": "back",
+  traps: "back",
+  rhomboids: "back",
   shoulders: "shoulders",
-  arms: "upper arms",
-  legs: "upper legs",
+  delts: "shoulders",
+  biceps: "upper arms",
+  triceps: "upper arms",
+  forearms: "lower arms",
+  abdominals: "waist",
+  obliques: "waist",
+  quadriceps: "upper legs",
+  hamstrings: "upper legs",
+  glutes: "upper legs",
+  abductors: "upper legs",
+  adductors: "upper legs",
+  "hip flexors": "upper legs",
   calves: "lower legs",
-  abs: "waist",
+  neck: "neck",
   cardio: "cardio",
-  olympic_weightlifting: "back",
-  powerlifting: "upper legs",
-  stretching: "waist",
-  plyometrics: "cardio",
-  strongman: "back",
 };
+
+const CATEGORY_FALLBACK: Record<string, string> = {
+  cardio: "cardio",
+  plyometrics: "cardio",
+  stretching: "waist",
+  powerlifting: "upper legs",
+  strongman: "back",
+  "olympic weightlifting": "back",
+  olympic_weightlifting: "back",
+};
+
+function resolveBodyPart(item: any): string | null {
+  const muscle = ((item.primaryMuscles || [])[0] || "").toLowerCase();
+  if (muscle && MUSCLE_TO_BODY_PART[muscle]) return MUSCLE_TO_BODY_PART[muscle];
+  const cat = (item.category || "").toLowerCase();
+  return CATEGORY_FALLBACK[cat] || null;
+}
 
 export async function GET(req: Request) {
   const authError = await validateAdminSession(req);
@@ -70,13 +99,9 @@ export async function GET(req: Request) {
         id: randomUUID(),
         externalId: String(item.id || item.name).replace(/\s+/g, "_"),
         name: String(item.name || ""),
-        bodyPart:
-          CATEGORY_TO_BODY_PART[(item.category || "").toLowerCase()] ||
-          (item.category || "").toLowerCase() ||
-          null,
+        bodyPart: resolveBodyPart(item),
         target: (item.primaryMuscles || [])[0] || null,
         equipment: item.equipment || null,
-        // gif_url: start frame image. secondaryMuscles stores end frame for flipbook
         gifUrl:
           item.images && item.images.length > 0
             ? `${IMG_BASE}/${item.images[0]}`
@@ -101,6 +126,8 @@ export async function GET(req: Request) {
           .onConflictDoUpdate({
             target: exercises.externalId,
             set: {
+              bodyPart: sql`excluded.body_part`,
+              target: sql`excluded.target`,
               gifUrl: sql`excluded.gif_url`,
               secondaryMuscles: sql`excluded.secondary_muscles`,
               instructions: sql`excluded.instructions`,

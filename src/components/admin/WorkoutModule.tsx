@@ -127,17 +127,16 @@ const FEELING_OPTIONS = [
   { value: "tired", emoji: "😓", label: "Tired" },
 ];
 
-// ── Flipbook image (animates between 2 frames to simulate motion) ─────────────
+// ── Flipbook image (CSS-only crossfade between start/end frames) ──────────────
+
+const FLIPBOOK_STYLE = `
+  @keyframes wbf1{0%,35%{opacity:1}50%{opacity:0}85%{opacity:0}100%{opacity:1}}
+  @keyframes wbf2{0%,35%{opacity:0}50%{opacity:1}85%{opacity:1}100%{opacity:0}}
+`;
 
 function FlipbookImage({ gifUrl, secondaryMuscles, name, className }: { gifUrl: string | null; secondaryMuscles: string[] | null; name: string; className?: string }) {
-  const [frame, setFrame] = useState(0);
-  const frame2 = secondaryMuscles && secondaryMuscles[0]?.startsWith("http") ? secondaryMuscles[0] : null;
-
-  useEffect(() => {
-    if (!frame2 || !gifUrl) return;
-    const t = setInterval(() => setFrame((f) => (f === 0 ? 1 : 0)), 800);
-    return () => clearInterval(t);
-  }, [gifUrl, frame2]);
+  const frame2 = secondaryMuscles?.[0]?.startsWith("http") ? secondaryMuscles[0] : null;
+  const animated = !!(gifUrl && frame2);
 
   if (!gifUrl) {
     return (
@@ -149,9 +148,22 @@ function FlipbookImage({ gifUrl, secondaryMuscles, name, className }: { gifUrl: 
 
   return (
     <div className={`relative overflow-hidden bg-[#111] ${className}`}>
-      <img src={gifUrl} alt={name} loading="lazy" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${frame === 0 ? "opacity-100" : "opacity-0"}`} />
+      {animated && <style>{FLIPBOOK_STYLE}</style>}
+      <img
+        src={gifUrl}
+        alt={name}
+        loading="lazy"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={animated ? { animation: "wbf1 1.6s ease-in-out infinite" } : undefined}
+      />
       {frame2 && (
-        <img src={frame2} alt={name} loading="lazy" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${frame === 1 ? "opacity-100" : "opacity-0"}`} />
+        <img
+          src={frame2}
+          alt={name}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ animation: "wbf2 1.6s ease-in-out infinite" }}
+        />
       )}
     </div>
   );
