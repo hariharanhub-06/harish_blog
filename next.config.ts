@@ -43,6 +43,15 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
+        // HTML pages must never be cached — stale HTML references old JS chunk
+        // hashes that no longer exist after a new deployment, causing 404s.
+        // Static assets (/_next/static/*) keep their default immutable caching.
+        source: "/((?!_next/static|_next/image|favicon.ico).*)",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+        ],
+      },
+      {
         source: "/lucky-draw(.*)",
         headers: [
           ...securityHeaders,
