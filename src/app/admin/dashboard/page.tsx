@@ -35,6 +35,7 @@ import {
     Globe,
     Calendar,
     Terminal,
+    Dumbbell,
 } from "lucide-react";
 import Link from "next/link";
 import ProfileModule from "@/components/admin/ProfileModule";
@@ -65,8 +66,9 @@ import TravelledModule from "@/components/admin/TravelledModule";
 import FinanceLeadModule from "@/components/admin/FinanceLeadModule";
 import SchedulerDocumentsModule from "@/components/admin/SchedulerDocumentsModule";
 import PlatformHubModule from "@/components/admin/PlatformHubModule";
+import WorkoutModule from "@/components/admin/WorkoutModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "spam" | "projects" | "skills" | "partnerships" | "youtube" | "ai-assistant" | "meetings" | "travelled" | "finance-leads" | "scheduler-docs" | "platform-hub" | "startup-admin" | "ddriver-sa";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "spam" | "projects" | "skills" | "partnerships" | "youtube" | "ai-assistant" | "meetings" | "travelled" | "finance-leads" | "scheduler-docs" | "platform-hub" | "startup-admin" | "ddriver-sa" | "workout";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -97,6 +99,7 @@ export default function AdminDashboard() {
         { id: "startup-admin", title: "StartUP Admin",   icon: Layers,   color: "bg-blue-600",   group: "Main", subItem: true },
         { id: "ddriver-sa",    title: "D-Driver DEV SA", icon: Terminal, color: "bg-sky-600",    group: "Main", subItem: true },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500", group: "Personal" },
+        { id: "workout", title: "Workout Tracker", icon: Dumbbell, color: "bg-green-600", group: "Personal" },
         { id: "training-academy", title: "Training Academy", icon: GraduationCap, color: "bg-orange-500", group: "Learning" },
         { id: "timeline", title: "Timeline / Experience", icon: Briefcase, color: "bg-purple-500", group: "Professional" },
         { id: "feedbacks", title: "Testimonials", icon: HeartHandshake, color: "bg-pink-500", group: "Communication" },
@@ -241,7 +244,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash and fetch notifications
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "kanban", "routines", "smile-tasks", "settings", "spam", "projects", "skills", "partnerships", "youtube", "ai-assistant", "meetings", "travelled", "finance-leads", "scheduler-docs"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "kanban", "routines", "smile-tasks", "settings", "spam", "projects", "skills", "partnerships", "youtube", "ai-assistant", "meetings", "travelled", "finance-leads", "scheduler-docs", "workout"];
         if (hash && validTabs.includes(hash)) setActiveTab(hash);
 
         const fetchAllCounts = async () => {
@@ -340,6 +343,7 @@ export default function AdminDashboard() {
             case "platform-hub":  return <PlatformHubModule key="platform-hub" />;
             case "startup-admin": return <PlatformHubModule key="startup-admin" initialPortal="StartUP Admin" />;
             case "ddriver-sa":    return <PlatformHubModule key="ddriver-sa" initialPortal="D-Driver DEV SA" />;
+            case "workout": return <WorkoutModule />;
             default: return (
                 <div className="space-y-8 animate-in fade-in duration-700">
                     <OverviewModule onTabChange={handleTabChange} />

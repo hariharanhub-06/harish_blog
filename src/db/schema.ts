@@ -1242,3 +1242,73 @@ export const luckyDrawClicks = pgTable("lucky_draw_clicks", {
   userAgent: text("user_agent"),
   clickedAt: timestamp("clicked_at").defaultNow(),
 });
+
+// ── Workout Module ─────────────────────────────────────────────────────────────
+
+export const exercises = pgTable("exercises", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  externalId: text("external_id").unique(),
+  name: text("name").notNull(),
+  bodyPart: text("body_part"),
+  target: text("target"),
+  equipment: text("equipment"),
+  gifUrl: text("gif_url"),
+  secondaryMuscles: jsonb("secondary_muscles").$type<string[]>(),
+  instructions: jsonb("instructions").$type<string[]>(),
+  isCustom: boolean("is_custom").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const workoutPlans = pgTable("workout_plans", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  description: text("description"),
+  goal: text("goal"),
+  difficulty: text("difficulty").default("intermediate"),
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const workoutPlanExercises = pgTable("workout_plan_exercises", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  planId: text("plan_id").notNull().references(() => workoutPlans.id, { onDelete: "cascade" }),
+  exerciseId: text("exercise_id").notNull().references(() => exercises.id, { onDelete: "cascade" }),
+  durationSeconds: integer("duration_seconds").notNull().default(30),
+  restSeconds: integer("rest_seconds").notNull().default(15),
+  displayOrder: integer("display_order").default(0),
+});
+
+export const workoutLogs = pgTable("workout_logs", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  planId: text("plan_id").references(() => workoutPlans.id, { onDelete: "set null" }),
+  planName: text("plan_name"),
+  date: text("date").notNull(),
+  durationMinutes: integer("duration_minutes").default(0),
+  totalSeconds: integer("total_seconds").default(0),
+  feeling: text("feeling").default("good"),
+  exercisesCompleted: integer("exercises_completed").default(0),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const workoutPlanRelations = relations(workoutPlans, ({ many }) => ({
+  exercises: many(workoutPlanExercises),
+  logs: many(workoutLogs),
+}));
+
+export const workoutPlanExerciseRelations = relations(workoutPlanExercises, ({ one }) => ({
+  plan: one(workoutPlans, { fields: [workoutPlanExercises.planId], references: [workoutPlans.id] }),
+  exercise: one(exercises, { fields: [workoutPlanExercises.exerciseId], references: [exercises.id] }),
+}));
+
+export const exerciseRelations = relations(exercises, ({ many }) => ({
+  planExercises: many(workoutPlanExercises),
+}));
+
+export const workoutLogRelations = relations(workoutLogs, ({ one }) => ({
+  plan: one(workoutPlans, { fields: [workoutLogs.planId], references: [workoutPlans.id] }),
+}));
