@@ -141,9 +141,10 @@ const FLIPBOOK_STYLE = `
   @keyframes wbf2{0%,35%{opacity:0}50%{opacity:1}85%{opacity:1}100%{opacity:0}}
 `;
 
-function FlipbookImage({ gifUrl, secondaryMuscles, name, className }: { gifUrl: string | null; secondaryMuscles: string[] | null; name: string; className?: string }) {
+function FlipbookImage({ gifUrl, secondaryMuscles, name, className, eager }: { gifUrl: string | null; secondaryMuscles: string[] | null; name: string; className?: string; eager?: boolean }) {
   const frame2 = secondaryMuscles?.[0]?.startsWith("http") ? secondaryMuscles[0] : null;
   const animated = !!(gifUrl && frame2);
+  const loadPriority = eager ? "eager" : "lazy";
 
   if (!gifUrl) {
     return (
@@ -159,7 +160,7 @@ function FlipbookImage({ gifUrl, secondaryMuscles, name, className }: { gifUrl: 
       <img
         src={gifUrl}
         alt={name}
-        loading="lazy"
+        loading={loadPriority}
         className="absolute inset-0 w-full h-full object-cover"
         style={animated ? { animation: "wbf1 1.6s ease-in-out infinite" } : undefined}
       />
@@ -167,7 +168,7 @@ function FlipbookImage({ gifUrl, secondaryMuscles, name, className }: { gifUrl: 
         <img
           src={frame2}
           alt={name}
-          loading="lazy"
+          loading={loadPriority}
           className="absolute inset-0 w-full h-full object-cover"
           style={{ animation: "wbf2 1.6s ease-in-out infinite" }}
         />
@@ -1074,6 +1075,7 @@ export default function WorkoutModule() {
                       secondaryMuscles={currentEx.exercise.secondaryMuscles}
                       name={currentEx.exercise.name}
                       className="w-full h-72"
+                      eager
                     />
                   </div>
 

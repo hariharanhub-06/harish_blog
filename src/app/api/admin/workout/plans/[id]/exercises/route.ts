@@ -24,6 +24,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         target: exercises.target,
         equipment: exercises.equipment,
         gifUrl: exercises.gifUrl,
+        secondaryMuscles: exercises.secondaryMuscles,
       },
     })
     .from(workoutPlanExercises)
