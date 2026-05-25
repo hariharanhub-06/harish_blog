@@ -630,7 +630,7 @@ export default function WorkoutModule() {
   // Fade + voice countdown at last 3 seconds
   useEffect(() => {
     if (secondsLeft !== 3 || phase === "done") return;
-    fadeMusic(0.12, 600);
+    fadeMusic(0.25, 400); // drop to 25% — audible but voice sits on top
     speakCountdown();
   }, [secondsLeft, phase, fadeMusic, speakCountdown]);
 
