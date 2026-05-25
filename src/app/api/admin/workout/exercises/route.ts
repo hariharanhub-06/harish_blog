@@ -1,8 +1,33 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { exercises } from "@/db/schema";
-import { eq, ilike, and, or, sql } from "drizzle-orm";
+import { eq, ilike, and, sql } from "drizzle-orm";
 import { validateAdminSession } from "@/lib/adminAuth";
+import { randomUUID } from "crypto";
+
+// free-exercise-db: 870+ exercises, completely free, no API key
+const FREE_EXERCISE_DB_URL =
+  "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json";
+
+// GitHub base for exercise images (two per exercise: 0.jpg = start, 1.jpg = end)
+const IMG_BASE =
+  "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises";
+
+const CATEGORY_TO_BODY_PART: Record<string, string> = {
+  chest: "chest",
+  back: "back",
+  shoulders: "shoulders",
+  arms: "upper arms",
+  legs: "upper legs",
+  calves: "lower legs",
+  abs: "waist",
+  cardio: "cardio",
+  olympic_weightlifting: "back",
+  powerlifting: "upper legs",
+  stretching: "waist",
+  plyometrics: "cardio",
+  strongman: "back",
+};
 
 export async function GET(req: Request) {
   const authError = await validateAdminSession(req);
@@ -14,55 +39,69 @@ export async function GET(req: Request) {
   const q = searchParams.get("q");
 
   if (source === "exercisedb") {
-    if (!bodyPart) {
-      return NextResponse.json({ error: "bodyPart required for exercisedb source" }, { status: 400 });
-    }
     try {
-      const apiUrl =
-        bodyPart === "all"
-          ? `https://exercisedb.io/api/v1/exercises?limit=50&offset=0`
-          : `https://exercisedb.io/api/v1/exercises/bodyPart/${encodeURIComponent(bodyPart)}?limit=50&offset=0`;
-
-      const res = await fetch(apiUrl, {
+      const res = await fetch(FREE_EXERCISE_DB_URL, {
         headers: { "User-Agent": "HarishBlog/1.0" },
-        next: { revalidate: 86400 },
       });
 
-      if (!res.ok) {
-        throw new Error(`ExerciseDB returned ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
 
       const data: any[] = await res.json();
 
-      if (!Array.isArray(data) || data.length === 0) {
-        return NextResponse.json({ exercises: [], cached: false, count: 0 });
-      }
+      if (!Array.isArray(data)) throw new Error("Invalid data format");
 
-      const mapped = data.map((item) => ({
-        id: undefined as any,
-        externalId: String(item.id),
+      // Filter by bodyPart if specified
+      const filtered =
+        bodyPart && bodyPart !== "all"
+          ? data.filter((item) => {
+              const cat = (item.category || "").toLowerCase();
+              const mapped = CATEGORY_TO_BODY_PART[cat] || cat;
+              return (
+                mapped === bodyPart ||
+                cat === bodyPart ||
+                (item.primaryMuscles || []).some((m: string) =>
+                  m.toLowerCase().includes(bodyPart)
+                )
+              );
+            })
+          : data;
+
+      const toInsert = filtered.map((item) => ({
+        id: randomUUID(),
+        externalId: String(item.id || item.name).replace(/\s+/g, "_"),
         name: String(item.name || ""),
-        bodyPart: String(item.bodyPart || ""),
-        target: String(item.target || ""),
-        equipment: String(item.equipment || ""),
-        gifUrl: String(item.gifUrl || ""),
-        secondaryMuscles: Array.isArray(item.secondaryMuscles) ? item.secondaryMuscles : [],
-        instructions: Array.isArray(item.instructions) ? item.instructions : [],
+        bodyPart:
+          CATEGORY_TO_BODY_PART[(item.category || "").toLowerCase()] ||
+          (item.category || "").toLowerCase() ||
+          null,
+        target: (item.primaryMuscles || [])[0] || null,
+        equipment: item.equipment || null,
+        // gif_url: start frame image. secondaryMuscles stores end frame for flipbook
+        gifUrl:
+          item.images && item.images.length > 0
+            ? `${IMG_BASE}/${item.images[0]}`
+            : null,
+        secondaryMuscles: item.images && item.images.length > 1
+          ? [`${IMG_BASE}/${item.images[1]}`, ...(item.secondaryMuscles || [])]
+          : item.secondaryMuscles || [],
+        instructions: Array.isArray(item.instructions)
+          ? item.instructions
+          : [],
         isCustom: false,
         isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }));
 
-      // Upsert all fetched exercises
-      for (const ex of mapped) {
-        const { id: _id, ...values } = ex;
+      // Bulk upsert
+      if (toInsert.length > 0) {
         await db
           .insert(exercises)
-          .values({ ...values, id: sql`gen_random_uuid()` } as any)
+          .values(toInsert)
           .onConflictDoUpdate({
             target: exercises.externalId,
             set: {
               gifUrl: sql`excluded.gif_url`,
-              name: sql`excluded.name`,
               secondaryMuscles: sql`excluded.secondary_muscles`,
               instructions: sql`excluded.instructions`,
               updatedAt: new Date(),
@@ -70,29 +109,51 @@ export async function GET(req: Request) {
           });
       }
 
-      // Return freshly cached results
-      const conditions = [eq(exercises.isActive, true)];
-      if (bodyPart !== "all") conditions.push(eq(exercises.bodyPart, bodyPart));
-      const rows = await db.select().from(exercises).where(and(...conditions));
-      return NextResponse.json({ exercises: rows, cached: true, count: rows.length });
+      // Return from DB
+      const conditions: any[] = [eq(exercises.isActive, true)];
+      if (bodyPart && bodyPart !== "all")
+        conditions.push(eq(exercises.bodyPart, bodyPart));
+      const rows = await db
+        .select()
+        .from(exercises)
+        .where(and(...conditions))
+        .orderBy(exercises.name);
+
+      return NextResponse.json({
+        exercises: rows,
+        cached: true,
+        count: rows.length,
+      });
     } catch (error: unknown) {
-      console.error("[workout/exercises] ExerciseDB fetch error:", error instanceof Error ? error.message : String(error));
-      return NextResponse.json({ error: "Failed to fetch from ExerciseDB" }, { status: 502 });
+      console.error(
+        "[workout/exercises] fetch error:",
+        error instanceof Error ? error.message : String(error)
+      );
+      return NextResponse.json(
+        { error: "Failed to fetch exercises: " + (error instanceof Error ? error.message : String(error)) },
+        { status: 502 }
+      );
     }
   }
 
   // Default: query from DB
-  const conditions: any[] = [eq(exercises.isActive, true)];
-  if (bodyPart && bodyPart !== "all") conditions.push(eq(exercises.bodyPart, bodyPart));
-  if (q) conditions.push(ilike(exercises.name, `%${q}%`));
+  try {
+    const conditions: any[] = [eq(exercises.isActive, true)];
+    if (bodyPart && bodyPart !== "all")
+      conditions.push(eq(exercises.bodyPart, bodyPart));
+    if (q) conditions.push(ilike(exercises.name, `%${q}%`));
 
-  const rows = await db
-    .select()
-    .from(exercises)
-    .where(and(...conditions))
-    .orderBy(exercises.name);
+    const rows = await db
+      .select()
+      .from(exercises)
+      .where(and(...conditions))
+      .orderBy(exercises.name);
 
-  return NextResponse.json({ exercises: rows, count: rows.length });
+    return NextResponse.json({ exercises: rows, count: rows.length });
+  } catch (error: unknown) {
+    console.error("[workout/exercises] DB error:", error instanceof Error ? error.message : String(error));
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
@@ -154,6 +215,9 @@ export async function DELETE(req: Request) {
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
-  await db.update(exercises).set({ isActive: false, updatedAt: new Date() }).where(eq(exercises.id, id));
+  await db
+    .update(exercises)
+    .set({ isActive: false, updatedAt: new Date() })
+    .where(eq(exercises.id, id));
   return NextResponse.json({ success: true });
 }

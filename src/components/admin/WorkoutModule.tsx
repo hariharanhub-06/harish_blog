@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -127,6 +127,36 @@ const FEELING_OPTIONS = [
   { value: "tired", emoji: "😓", label: "Tired" },
 ];
 
+// ── Flipbook image (animates between 2 frames to simulate motion) ─────────────
+
+function FlipbookImage({ gifUrl, secondaryMuscles, name, className }: { gifUrl: string | null; secondaryMuscles: string[] | null; name: string; className?: string }) {
+  const [frame, setFrame] = useState(0);
+  const frame2 = secondaryMuscles && secondaryMuscles[0]?.startsWith("http") ? secondaryMuscles[0] : null;
+
+  useEffect(() => {
+    if (!frame2 || !gifUrl) return;
+    const t = setInterval(() => setFrame((f) => (f === 0 ? 1 : 0)), 800);
+    return () => clearInterval(t);
+  }, [gifUrl, frame2]);
+
+  if (!gifUrl) {
+    return (
+      <div className={`flex items-center justify-center bg-[#111] ${className}`}>
+        <Dumbbell size={32} className="text-white/20" />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`relative overflow-hidden bg-[#111] ${className}`}>
+      <img src={gifUrl} alt={name} loading="lazy" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${frame === 0 ? "opacity-100" : "opacity-0"}`} />
+      {frame2 && (
+        <img src={frame2} alt={name} loading="lazy" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${frame === 1 ? "opacity-100" : "opacity-0"}`} />
+      )}
+    </div>
+  );
+}
+
 // ── Sortable Plan Exercise Row ─────────────────────────────────────────────────
 
 function SortablePlanExercise({
@@ -222,6 +252,7 @@ export default function WorkoutModule() {
   const [libSearch, setLibSearch] = useState("");
   const [loadingLib, setLoadingLib] = useState(false);
   const [fetchingApi, setFetchingApi] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [customForm, setCustomForm] = useState({ name: "", bodyPart: "", target: "", equipment: "", gifUrl: "", instructions: "" });
@@ -287,12 +318,19 @@ export default function WorkoutModule() {
 
   const fetchFromExerciseDB = async () => {
     setFetchingApi(true);
+    setFetchError(null);
     try {
       const params = new URLSearchParams({ source: "exercisedb", bodyPart: libBodyPart });
       const res = await fetch(`/api/admin/workout/exercises?${params}`, { headers });
       const data = await res.json();
-      if (data.exercises) setExercises(data.exercises);
-    } catch { /* silent */ } finally {
+      if (!res.ok) {
+        setFetchError(data.error || `Error ${res.status}`);
+      } else if (data.exercises) {
+        setExercises(data.exercises);
+      }
+    } catch (e: unknown) {
+      setFetchError(e instanceof Error ? e.message : "Network error");
+    } finally {
       setFetchingApi(false);
     }
   };
@@ -597,6 +635,12 @@ export default function WorkoutModule() {
               </button>
             </div>
 
+            {fetchError && (
+              <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+                Failed to load: {fetchError}
+              </div>
+            )}
+
             {/* Body part tabs */}
             <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
               {BODY_PARTS.map((bp) => (
@@ -629,15 +673,7 @@ export default function WorkoutModule() {
                     onClick={() => setSelectedExercise(ex)}
                     className="bg-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden hover:border-green-500/50 transition-colors text-left group"
                   >
-                    <div className="w-full h-40 bg-[#111] overflow-hidden">
-                      {ex.gifUrl ? (
-                        <img src={ex.gifUrl} alt={ex.name} loading="lazy" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Dumbbell size={32} className="text-white/20" />
-                        </div>
-                      )}
-                    </div>
+                    <FlipbookImage gifUrl={ex.gifUrl} secondaryMuscles={ex.secondaryMuscles} name={ex.name} className="w-full h-40" />
                     <div className="p-3">
                       <p className="text-white text-xs font-medium leading-tight line-clamp-2 mb-2">{ex.name}</p>
                       <div className="flex gap-1 flex-wrap">
@@ -775,18 +811,12 @@ export default function WorkoutModule() {
                 {/* GIF */}
                 <div className="flex-1 flex flex-col items-center px-6 py-6 gap-6 max-w-lg mx-auto w-full">
                   <div className={`w-full rounded-2xl overflow-hidden transition-opacity duration-300 ${phase === "rest" ? "opacity-40" : "opacity-100"}`}>
-                    {currentEx.exercise.gifUrl ? (
-                      <img
-                        src={currentEx.exercise.gifUrl}
-                        alt={currentEx.exercise.name}
-                        loading="eager"
-                        className="w-full max-h-72 object-contain bg-[#111]"
-                      />
-                    ) : (
-                      <div className="w-full h-64 bg-[#111] flex items-center justify-center">
-                        <Dumbbell size={48} className="text-white/20" />
-                      </div>
-                    )}
+                    <FlipbookImage
+                      gifUrl={currentEx.exercise.gifUrl}
+                      secondaryMuscles={null}
+                      name={currentEx.exercise.name}
+                      className="w-full h-72"
+                    />
                   </div>
 
                   <div className="text-center">
@@ -975,9 +1005,7 @@ export default function WorkoutModule() {
       {selectedExercise && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setSelectedExercise(null)}>
           <div className="bg-[#1a1a1a] rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            {selectedExercise.gifUrl && (
-              <img src={selectedExercise.gifUrl} alt={selectedExercise.name} className="w-full max-h-64 object-contain bg-[#111] rounded-t-2xl" loading="eager" />
-            )}
+            <FlipbookImage gifUrl={selectedExercise.gifUrl} secondaryMuscles={selectedExercise.secondaryMuscles} name={selectedExercise.name} className="w-full h-64 rounded-t-2xl" />
             <div className="p-5">
               <div className="flex items-start justify-between mb-3">
                 <h3 className="text-lg font-bold text-white">{selectedExercise.name}</h3>
