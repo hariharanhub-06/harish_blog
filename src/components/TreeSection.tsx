@@ -76,25 +76,28 @@ export default function TreeSection() {
             className="relative w-full overflow-hidden select-none"
             style={{ minHeight: "100vh" }}
         >
-            {/* ── Warm atmospheric sky ──────────────────────── */}
+            {/* ── Dark cosmic sky ───────────────────────────── */}
             <div className="absolute inset-0" style={{
-                background: "linear-gradient(180deg, #f3eaff 0%, #f8e4f5 18%, #fdeae6 40%, #fff4ec 65%, #fdf0e6 85%, #f8ece2 100%)",
+                background: "linear-gradient(180deg, #101828 0%, #1a3050 18%, #1e4068 35%, #193560 55%, #0e1f38 78%, #060d18 100%)",
             }} />
-            {/* Central warm amber glow */}
+            {/* Purple nebula left */}
             <div className="absolute inset-0 pointer-events-none" style={{
-                background: "radial-gradient(ellipse 65% 60% at 50% 50%, rgba(255,200,100,0.40) 0%, rgba(255,150,80,0.20) 35%, transparent 68%)",
+                background: "radial-gradient(ellipse 52% 65% at 15% 50%, rgba(130,40,170,0.50) 0%, rgba(130,40,170,0.15) 40%, transparent 70%)",
             }} />
-            {/* Rose nebula left */}
+            {/* Warm glow center */}
             <div className="absolute inset-0 pointer-events-none" style={{
-                background: "radial-gradient(ellipse 50% 55% at 18% 45%, rgba(220,100,160,0.18) 0%, transparent 62%)",
+                background: "radial-gradient(ellipse 40% 35% at 35% 65%, rgba(200,100,80,0.22) 0%, transparent 65%)",
             }} />
-            {/* Lavender nebula right */}
+            {/* Cyan nebula right */}
             <div className="absolute inset-0 pointer-events-none" style={{
-                background: "radial-gradient(ellipse 50% 55% at 82% 40%, rgba(150,80,220,0.15) 0%, transparent 62%)",
+                background: "radial-gradient(ellipse 48% 55% at 87% 38%, rgba(20,150,190,0.45) 0%, rgba(20,150,190,0.12) 45%, transparent 70%)",
             }} />
 
-            {/* ── Mist clouds ───────────────────────────────── */}
-            <WarmClouds />
+            {/* ── Stars ─────────────────────────────────────── */}
+            <Stars />
+
+            {/* ── Clouds ────────────────────────────────────── */}
+            <Clouds />
 
             {/* ── Floating air motes ────────────────────────── */}
             <AirParticles />
@@ -107,19 +110,14 @@ export default function TreeSection() {
 
                 {/* Heading — top */}
                 <div className="flex flex-col items-center pt-8 pb-1 pointer-events-none z-10">
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{
-                        color: "#5b2d82",
-                        textShadow: "0 2px 20px rgba(200,100,160,0.32), 0 0 50px rgba(255,160,60,0.16)"
+                    <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight" style={{
+                        textShadow: "0 2px 24px rgba(251,191,36,0.55), 0 0 60px rgba(251,191,36,0.2)"
                     }}>
                         🌳 Hari&apos;s Letter Tree
                     </h2>
-                    <p className="text-sm mt-1" style={{ color: "rgba(80,40,70,0.60)" }}>
-                        Leave your words. They stay here forever.
-                    </p>
+                    <p className="text-white/55 text-sm mt-1">Leave your words. They stay here forever.</p>
                     {letters.length > 0 && (
-                        <p className="text-xs mt-1" style={{ color: "rgba(80,40,70,0.38)" }}>
-                            🍃 {letters.length} letter{letters.length !== 1 ? "s" : ""} on this tree
-                        </p>
+                        <p className="text-white/30 text-xs mt-1">🍃 {letters.length} letter{letters.length !== 1 ? "s" : ""} on this tree</p>
                     )}
                 </div>
 
@@ -159,6 +157,13 @@ export default function TreeSection() {
                             if (letter.posX == null || letter.posY == null) return null;
                             const swayDur = SWAY_DURATIONS[i % SWAY_DURATIONS.length];
                             const isMatch = searchQuery ? matchingIds.has(letter.id) : true;
+                            // Three pink shades for variety
+                            const pinkShades = [
+                                { face: "linear-gradient(145deg,#ffe0eb 0%,#ffb3cc 55%,#ff8fab 100%)", edge: "#c24060", fold: "#e0708a" },
+                                { face: "linear-gradient(145deg,#ffd6e8 0%,#ff99bb 55%,#ff6b9d 100%)", edge: "#b03565", fold: "#d4607a" },
+                                { face: "linear-gradient(145deg,#ffe8f0 0%,#ffc2d4 55%,#ff9ab8 100%)", edge: "#cc4c72", fold: "#e87898" },
+                            ];
+                            const s = pinkShades[i % pinkShades.length];
                             return (
                                 <div
                                     key={letter.id}
@@ -173,27 +178,41 @@ export default function TreeSection() {
                                     }}
                                     onClick={() => setOpenLetter(letter)}
                                 >
-                                    <div className="mx-auto" style={{ width: 1, height: 18, background: "rgba(100,50,20,0.50)" }} />
+                                    {/* Hanging string */}
+                                    <div className="mx-auto" style={{ width: 1.5, height: 18, background: "rgba(100,50,20,0.45)" }} />
+
+                                    {/* 3D pink letter card */}
                                     <div
-                                        className="relative"
                                         style={{
-                                            width: 46, height: 58,
-                                            background: letter.color || "#fef3c7",
-                                            borderRadius: 3,
-                                            boxShadow: isMatch
-                                                ? "0 4px 18px rgba(0,0,0,0.20), 0 0 0 2px rgba(200,100,160,0.45)"
-                                                : "0 2px 8px rgba(0,0,0,0.12)",
-                                            animationName: "treeSway",
+                                            position: "relative",
+                                            width: 44, height: 56,
+                                            animationName: "cardSway",
                                             animationDuration: `${swayDur}s`,
                                             animationTimingFunction: "ease-in-out",
                                             animationIterationCount: "infinite",
-                                            clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)",
+                                            filter: isMatch ? "drop-shadow(0 0 7px rgba(255,80,130,0.65))" : undefined,
                                         }}
                                     >
-                                        <div style={{ position: "absolute", top: 0, right: 0, width: 10, height: 10, background: "rgba(0,0,0,0.10)", clipPath: "polygon(100% 0, 100% 100%, 0 0)" }} />
-                                        <div className="absolute inset-x-2 top-4 space-y-1.5">
-                                            {[...Array(4)].map((_, j) => (
-                                                <div key={j} style={{ height: 2, background: "rgba(0,0,0,0.12)", borderRadius: 1, width: j === 3 ? "55%" : "100%" }} />
+                                        {/* Depth / thickness layer */}
+                                        <div style={{
+                                            position: "absolute", inset: 0,
+                                            background: s.edge,
+                                            borderRadius: 4,
+                                            transform: "translateX(3px) translateY(3px)",
+                                        }} />
+                                        {/* Face */}
+                                        <div style={{
+                                            position: "absolute", inset: 0,
+                                            background: s.face,
+                                            borderRadius: 4,
+                                            boxShadow: "0 5px 16px rgba(160,50,90,0.32), inset 0 1px 0 rgba(255,255,255,0.70), inset -1px -1px 0 rgba(180,60,100,0.12)",
+                                            overflow: "hidden",
+                                        }}>
+                                            {/* Fold corner */}
+                                            <div style={{ position: "absolute", top: 0, right: 0, width: 11, height: 11, background: s.fold, clipPath: "polygon(100% 0,100% 100%,0 0)", borderRadius: "0 4px 0 0" }} />
+                                            {/* Writing lines */}
+                                            {[...Array(3)].map((_, j) => (
+                                                <div key={j} style={{ position: "absolute", left: 7, right: 7, top: 16 + j * 11, height: 1.5, background: "rgba(180,60,100,0.18)", borderRadius: 1 }} />
                                             ))}
                                         </div>
                                     </div>
@@ -206,8 +225,7 @@ export default function TreeSection() {
                 {/* Buttons — bottom row */}
                 <div className="flex items-center gap-3 pb-6 z-20">
                     <button
-                        className="p-2.5 rounded-full transition hover:scale-110"
-                        style={{ background: "rgba(100,40,80,0.12)", color: "#7c3069" }}
+                        className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-sm hover:scale-110"
                         onClick={() => setShowSearch((v) => !v)}
                         title="Search letters"
                     >
@@ -216,8 +234,8 @@ export default function TreeSection() {
                     <button
                         className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white shadow-lg transition"
                         style={{
-                            background: "linear-gradient(135deg, #7c3aed, #c026d3)",
-                            boxShadow: "0 4px 24px rgba(124,58,237,0.42), 0 0 0 1px rgba(255,255,255,0.12)"
+                            background: "linear-gradient(135deg, #1a5c3a, #2d9d6e)",
+                            boxShadow: "0 4px 24px rgba(45,157,110,0.5), 0 0 0 1px rgba(255,255,255,0.1)"
                         }}
                         onClick={() => { setShowForm(true); setSubmitted(false); }}
                     >
@@ -235,26 +253,21 @@ export default function TreeSection() {
                         className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-80"
                     >
                         <div className="relative">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(80,40,70,0.55)" }} />
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" />
                             <input
                                 autoFocus type="text" placeholder="Search letters..."
                                 value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-9 pr-9 py-2.5 rounded-full text-sm outline-none"
-                                style={{
-                                    background: "rgba(255,255,255,0.80)",
-                                    backdropFilter: "blur(12px)",
-                                    color: "#4a2060",
-                                    boxShadow: "0 2px 20px rgba(180,100,160,0.20)",
-                                }}
+                                className="w-full pl-9 pr-9 py-2.5 rounded-full text-sm text-white placeholder-white/40 outline-none"
+                                style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(12px)" }}
                             />
                             {searchQuery && (
-                                <button className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(80,40,70,0.50)" }} onClick={() => setSearchQuery("")}>
+                                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white" onClick={() => setSearchQuery("")}>
                                     <X size={14} />
                                 </button>
                             )}
                         </div>
                         {searchQuery && (
-                            <p className="text-center text-xs mt-2" style={{ color: "rgba(80,40,70,0.45)" }}>
+                            <p className="text-center text-white/40 text-xs mt-2">
                                 {filteredLetters.length} match{filteredLetters.length !== 1 ? "es" : ""}
                             </p>
                         )}
@@ -360,6 +373,10 @@ export default function TreeSection() {
                     0%, 100% { transform: translate(-50%, -100%) rotate(-3deg); }
                     50%       { transform: translate(-50%, -100%) rotate(3deg); }
                 }
+                @keyframes cardSway {
+                    0%, 100% { transform: rotate(-3deg); }
+                    50%       { transform: rotate(3deg); }
+                }
                 @keyframes airFloat {
                     0%   { transform: translate(0px, 0px) scale(1); opacity: 0; }
                     15%  { opacity: 0.88; }
@@ -379,30 +396,54 @@ export default function TreeSection() {
     );
 }
 
-/* ─── Warm misty clouds ─────────────────────────── */
-function WarmClouds() {
+/* ─── Stars ─────────────────────────────────────── */
+function Stars() {
+    const COLORS = ["#ffffff","#a78bfa","#60a5fa","#fb923c","#f472b6","#ffffff","#ffffff","#34d399","#fbbf24"];
+    const stars = Array.from({ length: 130 }, (_, i) => ({
+        id: i,
+        x: ((Math.sin(i * 137.508) + 1) / 2) * 100,
+        y: ((Math.cos(i * 97.3) + 1) / 2) * 85,
+        size: i % 12 === 0 ? 3.5 : i % 5 === 0 ? 2.5 : 1.5,
+        op: ((i * 13) % 60) / 100 + 0.25,
+        color: COLORS[i % COLORS.length],
+        twinkle: i % 4 === 0,
+        burst: i % 18 === 0,
+    }));
+    return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {stars.map((s) => (
+                <div key={s.id} className="absolute rounded-full" style={{
+                    left: `${s.x}%`, top: `${s.y}%`,
+                    width: s.size, height: s.size,
+                    background: s.color, opacity: s.op,
+                    boxShadow: s.burst ? `0 0 ${s.size*6}px ${s.size*3}px ${s.color}` : s.size > 2 ? `0 0 ${s.size*3}px ${s.color}` : undefined,
+                    animation: s.twinkle ? `twinkle ${2.5 + (s.id % 30) * 0.1}s ease-in-out infinite` : undefined,
+                    ["--op" as string]: s.op,
+                }} />
+            ))}
+        </div>
+    );
+}
+
+/* ─── Clouds ─────────────────────────────────────── */
+function Clouds() {
     const clouds = [
-        { x: 0,  y: 55, w: 26, h: 7,   op: 0.22 },
-        { x: 8,  y: 60, w: 15, h: 5,   op: 0.15 },
-        { x: 68, y: 52, w: 28, h: 8,   op: 0.20 },
-        { x: 75, y: 58, w: 18, h: 5.5, op: 0.14 },
-        { x: 48, y: 70, w: 14, h: 4,   op: 0.11 },
-        { x: 22, y: 66, w: 10, h: 3.5, op: 0.09 },
+        { x: 2,  y: 58, w: 28, h: 8,  op: 0.18 },
+        { x: 8,  y: 62, w: 18, h: 6,  op: 0.13 },
+        { x: 68, y: 55, w: 30, h: 9,  op: 0.20 },
+        { x: 72, y: 60, w: 20, h: 7,  op: 0.14 },
+        { x: 55, y: 72, w: 16, h: 5,  op: 0.10 },
+        { x: 20, y: 68, w: 12, h: 4,  op: 0.09 },
     ];
     return (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
             {clouds.map((c, i) => (
-                <div
-                    key={i}
-                    className="absolute rounded-full"
-                    style={{
-                        left: `${c.x}%`, top: `${c.y}%`,
-                        width: `${c.w}%`, height: `${c.h}%`,
-                        background: "radial-gradient(ellipse, rgba(245,225,240,0.95) 0%, rgba(255,235,220,0.55) 50%, transparent 100%)",
-                        opacity: c.op,
-                        filter: "blur(18px)",
-                    }}
-                />
+                <div key={i} className="absolute rounded-full" style={{
+                    left: `${c.x}%`, top: `${c.y}%`,
+                    width: `${c.w}%`, height: `${c.h}%`,
+                    background: "radial-gradient(ellipse, rgba(220,235,255,0.9) 0%, rgba(200,220,250,0.4) 50%, transparent 100%)",
+                    opacity: c.op, filter: "blur(18px)",
+                }} />
             ))}
         </div>
     );

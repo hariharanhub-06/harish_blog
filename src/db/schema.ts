@@ -36,6 +36,7 @@ export const profiles = pgTable("profiles", {
   showTypingTestSection: boolean("show_typing_test_section").default(true),
   showFeedbackSection: boolean("show_feedback_section").default(true),
   showGamesSection: boolean("show_games_section").default(true),
+  showTreeSection: boolean("show_tree_section").default(true),
   showLiveSessionsSection: boolean("show_live_sessions_section").default(true),
   showKnowAboutYouSection: boolean("show_know_about_you_section").default(true),
 

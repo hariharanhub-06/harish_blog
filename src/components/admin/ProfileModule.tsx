@@ -397,6 +397,7 @@ export default function ProfileModule() {
                   { key: 'showQuizzesSection',       label: 'Interactive Quizzes',  anchor: 'quiz' },
                   { key: 'showTypingTestSection',    label: 'Typing Test',          anchor: 'typing-test' },
                   { key: 'showFeedbackSection',      label: 'Client Feedback',      anchor: 'feedback' },
+                  { key: 'showTreeSection',          label: 'Letter Tree',          anchor: 'tree' },
                   { key: 'showGamesSection',         label: 'Arcade Hub',           anchor: 'games' },
                 ].map((section, i, arr) => {
                   const isVisible = profile[section.key] !== false;
