@@ -94,7 +94,6 @@ interface Profile {
     showGamesSection?: boolean;
     showLiveSessionsSection?: boolean;
     showKnowAboutYouSection?: boolean;
-    showTreeSection?: boolean;
     clickEffect?: string;
 }
 
@@ -672,7 +671,7 @@ export default function MainContent({
             {profile.showFeedbackSection !== false && <section id="feedback"><FeedbackSection /></section>}
 
             {/* Message Tree Teaser */}
-            {profile.showTreeSection !== false && treeMessages.length > 0 && (
+            {treeMessages.length > 0 && (
                 <section id="tree-teaser" className="py-12 px-4">
                     <div className="max-w-4xl mx-auto">
                         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
