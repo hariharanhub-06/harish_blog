@@ -1,6 +1,8 @@
 import Hero from "@/components/Hero";
 import MainContent from "@/components/MainContent";
 import { db } from "@/db";
+import { eq } from "drizzle-orm";
+import { treeMessages } from "@/db/schema";
 
 export const revalidate = 60; // ISR: refresh every 60 seconds
 
@@ -17,6 +19,7 @@ export default async function Home() {
   let liveSessions: any[] = [];
   let smileTask: any = null;
   let liveSmileTasks: any[] = [];
+  let treeLetters: any[] = [];
   try {
     // Parallel fetch with failure isolation (Promise.allSettled)
     const results = await Promise.allSettled([
@@ -86,6 +89,22 @@ export default async function Home() {
       });
     } catch (e) {
       console.error("Quiz query failed:", e);
+    }
+
+    // Fetch latest approved tree letters for homepage teaser
+    try {
+      treeLetters = await db
+        .select({
+          id: treeMessages.id,
+          message: treeMessages.message,
+          color: treeMessages.color,
+          createdAt: treeMessages.createdAt,
+        })
+        .from(treeMessages)
+        .where(eq(treeMessages.status, "approved"))
+        .limit(3);
+    } catch (e) {
+      console.error("Tree letters query failed:", e);
     }
   } catch (error) {
     console.error("Database query failed:", error);
@@ -231,6 +250,7 @@ export default async function Home() {
         smileTask={smileTask}
         liveSmileTasks={liveSmileTasks}
         clickEffect={(profile as any).clickEffect || "none"}
+        treeMessages={treeLetters as any}
       />
     </div>
   );

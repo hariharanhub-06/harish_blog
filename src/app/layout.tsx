@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Inter, Poppins, Caveat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
@@ -12,6 +12,7 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
   variable: "--font-poppins"
 });
+const caveat = Caveat({ subsets: ["latin"], variable: "--font-caveat", weight: ["400", "600", "700"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://hariharanhub.com'),
@@ -143,7 +144,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${poppins.variable} font-sans antialiased text-text`}>
+      <body className={`${inter.variable} ${poppins.variable} ${caveat.variable} font-sans antialiased text-text`}>
         <AuthProvider>
           <ClientLayout>
             {children}

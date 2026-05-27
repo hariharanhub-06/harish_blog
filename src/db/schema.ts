@@ -38,6 +38,7 @@ export const profiles = pgTable("profiles", {
   showGamesSection: boolean("show_games_section").default(true),
   showLiveSessionsSection: boolean("show_live_sessions_section").default(true),
   showKnowAboutYouSection: boolean("show_know_about_you_section").default(true),
+  showTreeSection: boolean("show_tree_section").default(true),
 
   clickEffect: text("click_effect").default("none"),
 
@@ -1312,3 +1313,16 @@ export const exerciseRelations = relations(exercises, ({ many }) => ({
 export const workoutLogRelations = relations(workoutLogs, ({ one }) => ({
   plan: one(workoutPlans, { fields: [workoutLogs.planId], references: [workoutPlans.id] }),
 }));
+
+export const treeMessages = pgTable("tree_messages", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  senderName: text("sender_name").notNull(),
+  message: text("message").notNull(),
+  source: text("source").default("direct"),
+  sourceRef: text("source_ref"),
+  posX: real("pos_x"),
+  posY: real("pos_y"),
+  color: text("color"),
+  status: text("status").default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+});

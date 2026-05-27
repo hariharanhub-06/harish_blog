@@ -94,6 +94,7 @@ interface Profile {
     showGamesSection?: boolean;
     showLiveSessionsSection?: boolean;
     showKnowAboutYouSection?: boolean;
+    showTreeSection?: boolean;
     clickEffect?: string;
 }
 
@@ -132,6 +133,13 @@ interface Skill {
     icon: string | null;
 }
 
+interface TreeLetter {
+    id: string;
+    message: string;
+    color: string | null;
+    createdAt: string;
+}
+
 interface MainContentProps {
     profile: Profile;
     stats: Stat[];
@@ -146,6 +154,7 @@ interface MainContentProps {
     smileTask?: any;
     liveSmileTasks?: any[];
     clickEffect?: string;
+    treeMessages?: TreeLetter[];
 }
 
 
@@ -163,6 +172,7 @@ export default function MainContent({
     smileTask,
     liveSmileTasks = [],
     clickEffect = "none",
+    treeMessages = [],
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -660,6 +670,71 @@ export default function MainContent({
             {profile.showTypingTestSection !== false && <section id="typing-test"><TypingTestSection /></section>}
 
             {profile.showFeedbackSection !== false && <section id="feedback"><FeedbackSection /></section>}
+
+            {/* Message Tree Teaser */}
+            {profile.showTreeSection !== false && treeMessages.length > 0 && (
+                <section id="tree-teaser" className="py-12 px-4">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+                            <div>
+                                <h2 className="text-2xl font-bold text-text flex items-center gap-2">
+                                    🌳 Words from visitors
+                                </h2>
+                                <p className="text-sm text-text/50 mt-0.5">Letters left on Hari&apos;s tree</p>
+                            </div>
+                            <a
+                                href="/tree"
+                                className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+                            >
+                                Read all letters →
+                            </a>
+                        </div>
+                        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                            {treeMessages.slice(0, 3).map((letter) => (
+                                <a
+                                    key={letter.id}
+                                    href="/tree"
+                                    className="flex-shrink-0 w-56 rounded-xl p-4 relative overflow-hidden hover:scale-105 transition-transform"
+                                    style={{ background: letter.color || "#fef3c7", minHeight: 140 }}
+                                >
+                                    <div
+                                        className="absolute top-0 right-0 w-6 h-6"
+                                        style={{
+                                            background: "rgba(0,0,0,0.1)",
+                                            clipPath: "polygon(100% 0, 100% 100%, 0 0)",
+                                        }}
+                                    />
+                                    <p
+                                        className="text-gray-700 text-sm leading-relaxed line-clamp-4"
+                                        style={{ fontFamily: "var(--font-caveat)", fontSize: 16 }}
+                                    >
+                                        {letter.message}
+                                    </p>
+                                    <p
+                                        className="text-gray-400 text-xs mt-3"
+                                        style={{ fontFamily: "var(--font-caveat)" }}
+                                    >
+                                        {new Date(letter.createdAt).toLocaleDateString("en-IN", {
+                                            month: "short",
+                                            year: "numeric",
+                                        })}
+                                    </p>
+                                </a>
+                            ))}
+                            <a
+                                href="/tree"
+                                className="flex-shrink-0 w-40 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-primary hover:text-primary transition-colors"
+                                style={{ minHeight: 140 }}
+                            >
+                                <span className="text-3xl">🌿</span>
+                                <span className="text-xs font-medium text-center px-2">
+                                    Write your letter
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Games Section */}
             {profile.showGamesSection !== false && <section id="games"><GamesCarousel onPlayGame={setActiveGameId} /></section>}

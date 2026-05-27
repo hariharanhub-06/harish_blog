@@ -809,7 +809,7 @@ export default function WorkoutModule() {
     });
     setShowCustomModal(false);
     setCustomForm({ name: "", bodyPart: "", target: "", equipment: "", gifUrl: "", instructions: "" });
-    fetchExercises(libBodyPart, libSearch);
+    fetchExercises(libBodyPart, libSearch, "db");
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
