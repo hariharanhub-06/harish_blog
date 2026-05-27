@@ -51,7 +51,15 @@ export async function GET(req: Request) {
 
         const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-        // 1. Basic Stats
+        // 1a. All-time stats (for balance cards — never filtered by date)
+        const allTimeStats = await db.select({
+            type: financeTransactions.type,
+            total: sql<number>`sum(${financeTransactions.amount})`,
+        })
+            .from(financeTransactions)
+            .groupBy(financeTransactions.type);
+
+        // 1b. Period stats (for charts/category breakdown only)
         const stats = await db.select({
             type: financeTransactions.type,
             total: sql<number>`sum(${financeTransactions.amount})`,
@@ -141,6 +149,7 @@ export async function GET(req: Request) {
 
         return NextResponse.json({
             summary: stats,
+            allTimeSummary: allTimeStats,
             debtBalance: debts[0]?.total || 0,
             loanBalance: loans[0]?.total || 0,
             categories,

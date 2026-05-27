@@ -581,16 +581,19 @@ export default function FinanceModule() {
 
     if (loading && !stats) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary" /></div>;
 
-    const summaryData = stats?.summary || [];
-    const totalIncome = summaryData.find((s: any) => s.type === "income")?.total || 0;
-    const totalExpense = summaryData.find((s: any) => s.type === "expense")?.total || 0;
-    const debtPayments = summaryData.find((s: any) => s.type === "debt_pay")?.total || 0;
-    // Debt payments are also expenses
+    // All-time figures for balance cards — never filtered by the period selector
+    const allTimeData = stats?.allTimeSummary || [];
+    const totalIncome = allTimeData.find((s: any) => s.type === "income")?.total || 0;
+    const totalExpense = allTimeData.find((s: any) => s.type === "expense")?.total || 0;
+    const debtPayments = allTimeData.find((s: any) => s.type === "debt_pay")?.total || 0;
     const totalExpenseWithDebt = totalExpense + debtPayments;
     const totalBalance = totalIncome - totalExpenseWithDebt;
     const debtBalance = stats?.debtBalance || 0;
     const loanBalance = stats?.loanBalance || 0;
     const savingsRate = totalIncome > 0 ? (((totalIncome - totalExpenseWithDebt) / totalIncome) * 100).toFixed(1) : "0";
+
+    // Period-filtered data (used for charts and category breakdown only)
+    const summaryData = stats?.summary || [];
 
     return (
         <div className="space-y-8 pb-20 animate-in fade-in slide-in-from-bottom-2 duration-500">
