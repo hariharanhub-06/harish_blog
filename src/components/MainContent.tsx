@@ -21,6 +21,7 @@ import dynamic from "next/dynamic";
 
 const GamesCarousel = dynamic(() => import("@/components/GamesCarousel"), { ssr: false });
 const GameOverlay = dynamic(() => import("@/components/GameOverlay"), { ssr: false });
+const TreeSection = dynamic(() => import("@/components/TreeSection"), { ssr: false });
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
@@ -132,13 +133,6 @@ interface Skill {
     icon: string | null;
 }
 
-interface TreeLetter {
-    id: string;
-    message: string;
-    color: string | null;
-    createdAt: string;
-}
-
 interface MainContentProps {
     profile: Profile;
     stats: Stat[];
@@ -153,7 +147,6 @@ interface MainContentProps {
     smileTask?: any;
     liveSmileTasks?: any[];
     clickEffect?: string;
-    treeMessages?: TreeLetter[];
 }
 
 
@@ -171,7 +164,6 @@ export default function MainContent({
     smileTask,
     liveSmileTasks = [],
     clickEffect = "none",
-    treeMessages = [],
 }: MainContentProps) {
     const [profile, setProfile] = useState(initialProfile);
     const [stats, setStats] = useState(initialStats || []);
@@ -670,78 +662,8 @@ export default function MainContent({
 
             {profile.showFeedbackSection !== false && <section id="feedback"><FeedbackSection /></section>}
 
-            {/* Message Tree Teaser — always visible */}
-            <section id="tree-teaser" className="py-14 px-4" style={{
-                background: "linear-gradient(180deg, transparent 0%, rgba(10,14,26,0.6) 30%, rgba(10,14,26,0.85) 60%, transparent 100%)"
-            }}>
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-                        <div>
-                            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                                🌳 Words from visitors
-                            </h2>
-                            <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>Letters left on Hari&apos;s tree</p>
-                        </div>
-                        <a
-                            href="/tree"
-                            className="text-sm font-semibold px-4 py-2 rounded-full transition"
-                            style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}
-                        >
-                            Visit the tree →
-                        </a>
-                    </div>
-                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                        {treeMessages.slice(0, 3).map((letter) => (
-                            <a
-                                key={letter.id}
-                                href="/tree"
-                                className="flex-shrink-0 w-56 rounded-xl p-4 relative overflow-hidden hover:scale-105 transition-transform"
-                                style={{ background: letter.color || "#fef3c7", minHeight: 140 }}
-                            >
-                                <div
-                                    className="absolute top-0 right-0 w-6 h-6"
-                                    style={{
-                                        background: "rgba(0,0,0,0.1)",
-                                        clipPath: "polygon(100% 0, 100% 100%, 0 0)",
-                                    }}
-                                />
-                                <p
-                                    className="text-gray-700 text-sm leading-relaxed line-clamp-4"
-                                    style={{ fontFamily: "var(--font-caveat)", fontSize: 16 }}
-                                >
-                                    {letter.message}
-                                </p>
-                                <p
-                                    className="text-gray-400 text-xs mt-3"
-                                    style={{ fontFamily: "var(--font-caveat)" }}
-                                >
-                                    {new Date(letter.createdAt).toLocaleDateString("en-IN", {
-                                        month: "short",
-                                        year: "numeric",
-                                    })}
-                                </p>
-                            </a>
-                        ))}
-                        {/* Always-visible CTA card */}
-                        <a
-                            href="/tree"
-                            className="flex-shrink-0 w-52 rounded-xl flex flex-col items-center justify-center gap-3 hover:scale-105 transition-transform"
-                            style={{
-                                minHeight: 140,
-                                background: "linear-gradient(135deg, rgba(13,74,58,0.6), rgba(15,84,64,0.4))",
-                                border: "1.5px dashed rgba(251,191,36,0.4)",
-                            }}
-                        >
-                            <span className="text-4xl">✉️</span>
-                            <div className="text-center px-3">
-                                <p className="text-sm font-semibold" style={{ color: "#fbbf24" }}>Write your letter</p>
-                                <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>Your words stay forever</p>
-                            </div>
-                        </a>
-                        </div>
-                    </div>
-                </section>
-            )}
+            {/* Message Tree — full section embedded in main page */}
+            <TreeSection />
 
             {/* Games Section */}
             {profile.showGamesSection !== false && <section id="games"><GamesCarousel onPlayGame={setActiveGameId} /></section>}
