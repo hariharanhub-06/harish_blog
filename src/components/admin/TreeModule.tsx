@@ -135,20 +135,31 @@ export default function TreeModule() {
         direct: all.filter((l) => l.source === "direct").length,
     };
 
-    // Poster generation
+    // Poster generation — loads QR code image first, then draws both sizes
     const generatePosters = () => {
         setGeneratingPoster(true);
-        setTimeout(() => {
+        const qr = new window.Image();
+        qr.crossOrigin = "anonymous";
+        qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent("https://hariharanhub.com/tree?ref=instagram")}&bgcolor=0a0e1a&color=fbbf24&qzone=2`;
+        qr.onload = () => {
             try {
-                setPosterUrl(drawPoster(1080, 1080));
-                setPosterStoryUrl(drawPoster(1080, 1920));
+                setPosterUrl(drawPoster(1080, 1080, qr));
+                setPosterStoryUrl(drawPoster(1080, 1920, qr));
             } finally {
                 setGeneratingPoster(false);
             }
-        }, 50);
+        };
+        qr.onerror = () => {
+            try {
+                setPosterUrl(drawPoster(1080, 1080, null));
+                setPosterStoryUrl(drawPoster(1080, 1920, null));
+            } finally {
+                setGeneratingPoster(false);
+            }
+        };
     };
 
-    function drawPoster(w: number, h: number): string {
+    function drawPoster(w: number, h: number, qrImg: HTMLImageElement | null): string {
         const canvas = document.createElement("canvas");
         canvas.width = w;
         canvas.height = h;
@@ -379,35 +390,74 @@ export default function TreeModule() {
         ctx.bezierCurveTo(w * 0.6, baseY - h * 0.025, w * 0.8, baseY - h * 0.015, w, baseY + h * 0.02);
         ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
 
-        // ── Text ─────────────────────────────────────────────────────────
-        const textY = h > w ? h * 0.72 : h * 0.68;
+        // ── Text + QR ────────────────────────────────────────────────────
+        const isStory = h > w;
+        const textY = isStory ? h * 0.70 : h * 0.67;
 
-        // Title glow
-        ctx.shadowColor = "rgba(251,191,36,0.6)"; ctx.shadowBlur = 30;
+        // Title — with golden glow
+        ctx.shadowColor = "rgba(251,191,36,0.7)"; ctx.shadowBlur = 36;
         ctx.fillStyle = "#ffffff";
-        ctx.font = `bold ${w * 0.068}px Georgia, serif`;
+        ctx.font = `bold ${w * 0.072}px Georgia, serif`;
         ctx.textAlign = "center";
-        ctx.fillText("Leave your letter 🌳", w / 2, textY);
+        ctx.fillText("Write your letter ✉️", w / 2, textY);
         ctx.shadowBlur = 0;
 
-        // Subtitle
-        ctx.globalAlpha = 0.8;
-        ctx.fillStyle = "#e2e8f0";
-        ctx.font = `${w * 0.034}px Georgia, serif`;
-        ctx.fillText("Your words will live on Hari's tree forever", w / 2, textY + w * 0.06);
+        // Subtitle line 1
+        ctx.globalAlpha = 0.88;
+        ctx.fillStyle = "#fde68a";
+        ctx.font = `italic ${w * 0.036}px Georgia, serif`;
+        ctx.fillText("Leave a piece of yourself on Hari's tree.", w / 2, textY + w * 0.062);
         ctx.globalAlpha = 1;
 
-        // Divider line
-        ctx.strokeStyle = "rgba(251,191,36,0.3)"; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(w * 0.3, textY + w * 0.09); ctx.lineTo(w * 0.7, textY + w * 0.09); ctx.stroke();
-
-        // URL + hint
-        ctx.fillStyle = "rgba(255,255,255,0.55)";
+        // Subtitle line 2
+        ctx.globalAlpha = 0.65;
+        ctx.fillStyle = "#e2e8f0";
         ctx.font = `${w * 0.030}px Arial, sans-serif`;
-        ctx.fillText("hariharanhub.com/tree", w / 2, h * 0.93);
+        ctx.fillText("Your words will live here forever — anonymously.", w / 2, textY + w * 0.105);
+        ctx.globalAlpha = 1;
+
+        // Divider
+        ctx.strokeStyle = "rgba(251,191,36,0.35)"; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(w * 0.28, textY + w * 0.135); ctx.lineTo(w * 0.72, textY + w * 0.135); ctx.stroke();
+
+        // QR code block
+        const qrSize = w * 0.18;
+        const qrX = w / 2 - qrSize / 2;
+        const qrY = textY + w * 0.15;
+
+        if (qrImg) {
+            // QR background pill
+            ctx.fillStyle = "rgba(10,14,26,0.85)";
+            ctx.beginPath();
+            ctx.roundRect(qrX - w * 0.02, qrY - w * 0.015, qrSize + w * 0.04, qrSize + w * 0.085, w * 0.02);
+            ctx.fill();
+            // Golden border
+            ctx.strokeStyle = "rgba(251,191,36,0.45)"; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(qrX - w * 0.02, qrY - w * 0.015, qrSize + w * 0.04, qrSize + w * 0.085, w * 0.02);
+            ctx.stroke();
+            // QR image
+            ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+            // "Scan to write" label
+            ctx.fillStyle = "#fbbf24";
+            ctx.font = `bold ${w * 0.026}px Arial, sans-serif`;
+            ctx.textAlign = "center";
+            ctx.fillText("📱 Scan to write your letter", w / 2, qrY + qrSize + w * 0.052);
+        } else {
+            // Fallback: just URL text
+            ctx.fillStyle = "#fbbf24";
+            ctx.font = `bold ${w * 0.036}px Arial, sans-serif`;
+            ctx.textAlign = "center";
+            ctx.fillText("hariharanhub.com/tree", w / 2, qrY + qrSize * 0.5);
+        }
+
+        // Bottom URL
+        ctx.globalAlpha = 0.45;
         ctx.fillStyle = "#ffffff";
-        ctx.font = `bold ${w * 0.024}px Arial, sans-serif`;
-        ctx.fillText("Scan or visit the link above ↑", w / 2, h * 0.965);
+        ctx.font = `${w * 0.024}px Arial, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText("hariharanhub.com/tree", w / 2, h * 0.975);
+        ctx.globalAlpha = 1;
 
         return canvas.toDataURL("image/png");
     }
