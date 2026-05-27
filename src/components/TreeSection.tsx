@@ -46,14 +46,16 @@ export default function TreeSection() {
         if (!senderName.trim() || !message.trim()) return;
         setSubmitting(true);
         try {
-            await fetch("/api/tree", {
+            const res = await fetch("/api/tree", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ senderName, message, ref }),
             });
-            setSubmitted(true);
-            setSenderName("");
-            setMessage("");
+            if (res.ok) {
+                setSubmitted(true);
+                setSenderName("");
+                setMessage("");
+            }
         } finally {
             setSubmitting(false);
         }
@@ -100,88 +102,11 @@ export default function TreeSection() {
             {/* ── Diagonal light rays ───────────────────────── */}
             <LightRays />
 
-            {/* ── Tree + Letters ───────────────────────────── */}
-            <div className="relative w-full" style={{ minHeight: "100vh" }}>
-                {/* Tree container */}
-                <div
-                    className="absolute bottom-0 left-1/2 -translate-x-1/2"
-                    style={{ width: "min(600px, 92vw)", zIndex: 2 }}
-                >
-                    {/* Warm glow halo — the core "inner light" from trunk */}
-                    <div
-                        className="absolute pointer-events-none"
-                        style={{
-                            left: "18%", right: "18%",
-                            top: "36%", bottom: "4%",
-                            background: "radial-gradient(ellipse at 50% 30%, rgba(255,220,80,0.70) 0%, rgba(255,160,60,0.42) 22%, rgba(255,100,30,0.16) 52%, transparent 75%)",
-                            filter: "blur(30px)",
-                            zIndex: 0,
-                            animation: "glowPulse 4s ease-in-out infinite",
-                        }}
-                    />
+            {/* ── Tree + Letters + Controls ─────────────────── */}
+            <div className="relative w-full flex flex-col items-center" style={{ height: "100vh" }}>
 
-                    {/* The magical tree PNG */}
-                    <img
-                        src="/magical-tree.png"
-                        alt="Magical letter tree"
-                        className="relative w-full h-auto select-none"
-                        style={{
-                            zIndex: 1,
-                            filter: "drop-shadow(0 12px 50px rgba(255,160,60,0.40)) drop-shadow(0 0 90px rgba(200,100,40,0.20))",
-                        }}
-                        draggable={false}
-                    />
-
-                    {/* Letters on branches */}
-                    {letters.map((letter, i) => {
-                        if (letter.posX == null || letter.posY == null) return null;
-                        const swayDur = SWAY_DURATIONS[i % SWAY_DURATIONS.length];
-                        const isMatch = searchQuery ? matchingIds.has(letter.id) : true;
-                        return (
-                            <div
-                                key={letter.id}
-                                className="absolute cursor-pointer"
-                                style={{
-                                    left: `${letter.posX}%`,
-                                    top: `${letter.posY}%`,
-                                    transform: "translate(-50%, -100%)",
-                                    opacity: searchQuery ? (isMatch ? 1 : 0.12) : 1,
-                                    transition: "opacity 0.3s",
-                                    zIndex: isMatch ? 10 : 5,
-                                }}
-                                onClick={() => setOpenLetter(letter)}
-                            >
-                                <div className="mx-auto" style={{ width: 1, height: 18, background: "rgba(100,50,20,0.50)" }} />
-                                <div
-                                    className="relative"
-                                    style={{
-                                        width: 46, height: 58,
-                                        background: letter.color || "#fef3c7",
-                                        borderRadius: 3,
-                                        boxShadow: isMatch
-                                            ? "0 4px 18px rgba(0,0,0,0.20), 0 0 0 2px rgba(200,100,160,0.45)"
-                                            : "0 2px 8px rgba(0,0,0,0.12)",
-                                        animationName: "treeSway",
-                                        animationDuration: `${swayDur}s`,
-                                        animationTimingFunction: "ease-in-out",
-                                        animationIterationCount: "infinite",
-                                        clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)",
-                                    }}
-                                >
-                                    <div style={{ position: "absolute", top: 0, right: 0, width: 10, height: 10, background: "rgba(0,0,0,0.10)", clipPath: "polygon(100% 0, 100% 100%, 0 0)" }} />
-                                    <div className="absolute inset-x-2 top-4 space-y-1.5">
-                                        {[...Array(4)].map((_, j) => (
-                                            <div key={j} style={{ height: 2, background: "rgba(0,0,0,0.12)", borderRadius: 1, width: j === 3 ? "55%" : "100%" }} />
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Section heading */}
-                <div className="absolute top-8 left-0 right-0 flex flex-col items-center pointer-events-none z-10">
+                {/* Heading — top */}
+                <div className="flex flex-col items-center pt-8 pb-1 pointer-events-none z-10">
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{
                         color: "#5b2d82",
                         textShadow: "0 2px 20px rgba(200,100,160,0.32), 0 0 50px rgba(255,160,60,0.16)"
@@ -192,34 +117,114 @@ export default function TreeSection() {
                         Leave your words. They stay here forever.
                     </p>
                     {letters.length > 0 && (
-                        <p className="text-xs mt-1.5" style={{ color: "rgba(80,40,70,0.38)" }}>
+                        <p className="text-xs mt-1" style={{ color: "rgba(80,40,70,0.38)" }}>
                             🍃 {letters.length} letter{letters.length !== 1 ? "s" : ""} on this tree
                         </p>
                     )}
                 </div>
 
-                {/* Search button */}
-                <button
-                    className="absolute bottom-20 left-1/2 -translate-x-1/2 translate-x-12 p-2.5 rounded-full transition z-20 hover:scale-110"
-                    style={{ background: "rgba(100,40,80,0.12)", color: "#7c3069" }}
-                    onClick={() => setShowSearch((v) => !v)}
-                    title="Search letters"
-                >
-                    <Search size={18} />
-                </button>
+                {/* Tree — fills remaining space, anchored to bottom */}
+                <div className="flex-1 flex items-end justify-center w-full overflow-hidden">
+                    <div
+                        className="relative flex-shrink-0"
+                        style={{ width: "min(560px, 88vw)" }}
+                    >
+                        {/* Warm glow halo */}
+                        <div
+                            className="absolute pointer-events-none"
+                            style={{
+                                left: "18%", right: "18%",
+                                top: "36%", bottom: "4%",
+                                background: "radial-gradient(ellipse at 50% 30%, rgba(255,220,80,0.70) 0%, rgba(255,160,60,0.42) 22%, rgba(255,100,30,0.16) 52%, transparent 75%)",
+                                filter: "blur(30px)",
+                                zIndex: 0,
+                                animation: "glowPulse 4s ease-in-out infinite",
+                            }}
+                        />
 
-                {/* Write button */}
-                <button
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white shadow-lg transition z-20"
-                    style={{
-                        background: "linear-gradient(135deg, #7c3aed, #c026d3)",
-                        boxShadow: "0 4px 24px rgba(124,58,237,0.42), 0 0 0 1px rgba(255,255,255,0.12)"
-                    }}
-                    onClick={() => { setShowForm(true); setSubmitted(false); }}
-                >
-                    <PenLine size={16} />
-                    Write a Letter
-                </button>
+                        {/* The magical tree PNG */}
+                        <img
+                            src="/magical-tree.png"
+                            alt="Magical letter tree"
+                            className="relative w-full h-auto select-none"
+                            style={{
+                                zIndex: 1,
+                                filter: "drop-shadow(0 12px 50px rgba(255,160,60,0.40)) drop-shadow(0 0 90px rgba(200,100,40,0.20))",
+                            }}
+                            draggable={false}
+                        />
+
+                        {/* Letters on branches */}
+                        {letters.map((letter, i) => {
+                            if (letter.posX == null || letter.posY == null) return null;
+                            const swayDur = SWAY_DURATIONS[i % SWAY_DURATIONS.length];
+                            const isMatch = searchQuery ? matchingIds.has(letter.id) : true;
+                            return (
+                                <div
+                                    key={letter.id}
+                                    className="absolute cursor-pointer"
+                                    style={{
+                                        left: `${letter.posX}%`,
+                                        top: `${letter.posY}%`,
+                                        transform: "translate(-50%, -100%)",
+                                        opacity: searchQuery ? (isMatch ? 1 : 0.12) : 1,
+                                        transition: "opacity 0.3s",
+                                        zIndex: isMatch ? 10 : 5,
+                                    }}
+                                    onClick={() => setOpenLetter(letter)}
+                                >
+                                    <div className="mx-auto" style={{ width: 1, height: 18, background: "rgba(100,50,20,0.50)" }} />
+                                    <div
+                                        className="relative"
+                                        style={{
+                                            width: 46, height: 58,
+                                            background: letter.color || "#fef3c7",
+                                            borderRadius: 3,
+                                            boxShadow: isMatch
+                                                ? "0 4px 18px rgba(0,0,0,0.20), 0 0 0 2px rgba(200,100,160,0.45)"
+                                                : "0 2px 8px rgba(0,0,0,0.12)",
+                                            animationName: "treeSway",
+                                            animationDuration: `${swayDur}s`,
+                                            animationTimingFunction: "ease-in-out",
+                                            animationIterationCount: "infinite",
+                                            clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)",
+                                        }}
+                                    >
+                                        <div style={{ position: "absolute", top: 0, right: 0, width: 10, height: 10, background: "rgba(0,0,0,0.10)", clipPath: "polygon(100% 0, 100% 100%, 0 0)" }} />
+                                        <div className="absolute inset-x-2 top-4 space-y-1.5">
+                                            {[...Array(4)].map((_, j) => (
+                                                <div key={j} style={{ height: 2, background: "rgba(0,0,0,0.12)", borderRadius: 1, width: j === 3 ? "55%" : "100%" }} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Buttons — bottom row */}
+                <div className="flex items-center gap-3 pb-6 z-20">
+                    <button
+                        className="p-2.5 rounded-full transition hover:scale-110"
+                        style={{ background: "rgba(100,40,80,0.12)", color: "#7c3069" }}
+                        onClick={() => setShowSearch((v) => !v)}
+                        title="Search letters"
+                    >
+                        <Search size={18} />
+                    </button>
+                    <button
+                        className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white shadow-lg transition"
+                        style={{
+                            background: "linear-gradient(135deg, #7c3aed, #c026d3)",
+                            boxShadow: "0 4px 24px rgba(124,58,237,0.42), 0 0 0 1px rgba(255,255,255,0.12)"
+                        }}
+                        onClick={() => { setShowForm(true); setSubmitted(false); }}
+                    >
+                        <PenLine size={16} />
+                        Write a Letter
+                    </button>
+                </div>
             </div>
 
             {/* Search panel */}
