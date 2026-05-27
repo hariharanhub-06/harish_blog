@@ -73,9 +73,20 @@ export default function TreePage() {
         <div
             className="relative min-h-screen overflow-hidden select-none"
             style={{
-                background: "radial-gradient(ellipse at 50% 0%, #0d2137 0%, #0a1628 60%)",
+                background: "linear-gradient(180deg, #050a14 0%, #080f20 20%, #0c1630 40%, #0a1228 70%, #050810 100%)",
             }}
         >
+            {/* Nebula layers */}
+            <div className="absolute inset-0 pointer-events-none" style={{
+                background: "radial-gradient(ellipse 70% 50% at 30% 40%, rgba(88,28,135,0.18) 0%, transparent 70%)",
+            }} />
+            <div className="absolute inset-0 pointer-events-none" style={{
+                background: "radial-gradient(ellipse 60% 40% at 75% 30%, rgba(14,116,144,0.15) 0%, transparent 70%)",
+            }} />
+            <div className="absolute inset-0 pointer-events-none" style={{
+                background: "radial-gradient(ellipse 50% 35% at 50% 10%, rgba(147,51,234,0.1) 0%, transparent 60%)",
+            }} />
+
             {/* Stars */}
             <Stars />
 
@@ -406,12 +417,15 @@ export default function TreePage() {
 }
 
 function Stars() {
-    const stars = Array.from({ length: 90 }, (_, i) => ({
+    const COLORS = ["#ffffff", "#a78bfa", "#60a5fa", "#fbbf24", "#f472b6", "#ffffff", "#ffffff", "#34d399"];
+    const stars = Array.from({ length: 120 }, (_, i) => ({
         id: i,
         x: Math.sin(i * 137.5) * 50 + 50,
-        y: Math.cos(i * 97.3) * 40 + 40,
-        size: ((i * 7) % 3) + 1,
-        opacity: ((i * 13) % 60) / 100 + 0.2,
+        y: Math.cos(i * 97.3) * 45 + 45,
+        size: i % 15 === 0 ? 3 : i % 7 === 0 ? 2.5 : ((i * 7) % 3) + 1,
+        opacity: ((i * 13) % 60) / 100 + 0.25,
+        color: COLORS[i % COLORS.length],
+        glow: i % 8 === 0,
     }));
 
     return (
@@ -419,13 +433,15 @@ function Stars() {
             {stars.map((s) => (
                 <div
                     key={s.id}
-                    className="absolute rounded-full bg-white"
+                    className="absolute rounded-full"
                     style={{
                         left: `${s.x}%`,
                         top: `${s.y}%`,
                         width: s.size,
                         height: s.size,
                         opacity: s.opacity,
+                        background: s.color,
+                        boxShadow: s.glow ? `0 0 ${s.size * 4}px ${s.size * 2}px ${s.color}` : undefined,
                     }}
                 />
             ))}
@@ -436,77 +452,181 @@ function Stars() {
 function TreeSVG() {
     return (
         <svg
-            viewBox="0 0 400 600"
+            viewBox="0 0 400 640"
             className="absolute left-1/2 -translate-x-1/2 bottom-0"
-            style={{ width: "min(400px, 90vw)", height: "auto" }}
+            style={{ width: "min(420px, 95vw)", height: "auto" }}
             aria-hidden
         >
-            {/* Ground / roots */}
-            <ellipse cx="200" cy="590" rx="80" ry="12" fill="#0d1f0e" opacity="0.6" />
+            <defs>
+                {/* Core golden glow behind trunk */}
+                <radialGradient id="coreGlow" cx="50%" cy="55%" r="45%">
+                    <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.85" />
+                    <stop offset="25%" stopColor="#f59e0b" stopOpacity="0.55" />
+                    <stop offset="55%" stopColor="#d97706" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#92400e" stopOpacity="0" />
+                </radialGradient>
+                {/* Outer ambient light */}
+                <radialGradient id="ambientGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#fde68a" stopOpacity="0.3" />
+                    <stop offset="60%" stopColor="#fbbf24" stopOpacity="0.08" />
+                    <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+                </radialGradient>
+                {/* Glow filter for branches */}
+                <filter id="branchGlow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+                {/* Strong glow filter for trunk center */}
+                <filter id="trunkGlow" x="-50%" y="-20%" width="200%" height="140%">
+                    <feGaussianBlur stdDeviation="6" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+                {/* Leaf sparkle filter */}
+                <filter id="leafGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="2" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
 
-            {/* Trunk */}
+            {/* Ambient outer glow */}
+            <ellipse cx="200" cy="370" rx="220" ry="260" fill="url(#ambientGlow)" />
+
+            {/* Core golden glow at trunk-canopy junction */}
+            <ellipse cx="200" cy="340" rx="160" ry="200" fill="url(#coreGlow)" />
+
+            {/* Ground shadow */}
+            <ellipse cx="200" cy="632" rx="100" ry="10" fill="#0a0e1a" opacity="0.7" />
+
+            {/* Roots */}
+            <path d="M 180 620 C 160 610, 130 608, 100 615" stroke="#1a120a" strokeWidth="14" fill="none" strokeLinecap="round" />
+            <path d="M 178 628 C 155 622, 120 625, 90 635" stroke="#1a120a" strokeWidth="10" fill="none" strokeLinecap="round" />
+            <path d="M 190 630 C 175 628, 150 630, 130 640" stroke="#1a120a" strokeWidth="8" fill="none" strokeLinecap="round" />
+            <path d="M 220 620 C 240 610, 268 608, 298 615" stroke="#1a120a" strokeWidth="14" fill="none" strokeLinecap="round" />
+            <path d="M 222 628 C 245 622, 278 625, 308 635" stroke="#1a120a" strokeWidth="10" fill="none" strokeLinecap="round" />
+            <path d="M 210 630 C 228 628, 252 630, 272 640" stroke="#1a120a" strokeWidth="8" fill="none" strokeLinecap="round" />
+            <path d="M 200 630 C 200 628, 200 632, 198 640" stroke="#1a120a" strokeWidth="12" fill="none" strokeLinecap="round" />
+
+            {/* Root highlights (warm glow) */}
+            <path d="M 180 620 C 160 610, 130 608, 100 615" stroke="#3d2006" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.6" />
+            <path d="M 220 620 C 240 610, 268 608, 298 615" stroke="#3d2006" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.6" />
+
+            {/* Trunk — dark outer */}
             <path
-                d="M 185 590 C 183 520, 180 480, 182 440 C 184 400, 188 370, 190 340 C 192 310, 195 290, 200 270"
-                stroke="#1c3a1e"
-                strokeWidth="28"
+                d="M 178 630 C 172 560, 168 500, 170 455 C 172 415, 178 385, 182 355 C 186 325, 192 305, 196 280"
+                stroke="#160e06"
+                strokeWidth="38"
                 fill="none"
                 strokeLinecap="round"
             />
             <path
-                d="M 215 590 C 217 520, 220 480, 218 440 C 216 400, 212 370, 210 340 C 208 310, 205 290, 200 270"
-                stroke="#1c3a1e"
-                strokeWidth="22"
+                d="M 222 630 C 228 560, 232 500, 230 455 C 228 415, 222 385, 218 355 C 214 325, 208 305, 204 280"
+                stroke="#160e06"
+                strokeWidth="30"
                 fill="none"
                 strokeLinecap="round"
+            />
+
+            {/* Trunk — warm glowing center */}
+            <path
+                d="M 188 600 C 184 540, 182 490, 184 450 C 186 415, 190 385, 193 355 C 196 325, 198 305, 200 280"
+                stroke="#7c3700"
+                strokeWidth="18"
+                fill="none"
+                strokeLinecap="round"
+                filter="url(#trunkGlow)"
+                opacity="0.85"
+            />
+            <path
+                d="M 212 600 C 216 540, 218 490, 216 450 C 214 415, 210 385, 207 355 C 204 325, 202 305, 200 280"
+                stroke="#7c3700"
+                strokeWidth="14"
+                fill="none"
+                strokeLinecap="round"
+                filter="url(#trunkGlow)"
+                opacity="0.85"
+            />
+            {/* Inner bright highlight */}
+            <path
+                d="M 196 560 C 194 510, 193 470, 195 440 C 197 410, 199 390, 200 370"
+                stroke="#fbbf24"
+                strokeWidth="4"
+                fill="none"
+                strokeLinecap="round"
+                opacity="0.35"
             />
 
             {/* Main branches */}
-            {/* Left main */}
-            <path d="M 195 400 C 170 370, 130 340, 90 310" stroke="#1c4532" strokeWidth="16" fill="none" strokeLinecap="round" />
-            {/* Right main */}
-            <path d="M 205 380 C 230 355, 265 330, 300 305" stroke="#1c4532" strokeWidth="16" fill="none" strokeLinecap="round" />
-            {/* Left upper */}
-            <path d="M 197 330 C 165 295, 120 270, 80 240" stroke="#1c4532" strokeWidth="12" fill="none" strokeLinecap="round" />
-            {/* Right upper */}
-            <path d="M 203 320 C 235 290, 280 265, 310 235" stroke="#1c4532" strokeWidth="12" fill="none" strokeLinecap="round" />
-            {/* Center up */}
-            <path d="M 200 270 C 195 230, 192 190, 195 155" stroke="#1c4532" strokeWidth="12" fill="none" strokeLinecap="round" />
+            <path d="M 192 420 C 165 392, 125 365, 82 338" stroke="#1e1008" strokeWidth="18" fill="none" strokeLinecap="round" />
+            <path d="M 208 400 C 235 372, 272 348, 312 325" stroke="#1e1008" strokeWidth="18" fill="none" strokeLinecap="round" />
+            <path d="M 195 355 C 160 318, 115 292, 72 262" stroke="#1e1008" strokeWidth="14" fill="none" strokeLinecap="round" />
+            <path d="M 205 340 C 240 308, 285 282, 320 252" stroke="#1e1008" strokeWidth="14" fill="none" strokeLinecap="round" />
+            <path d="M 200 280 C 195 238, 191 198, 193 162" stroke="#1e1008" strokeWidth="14" fill="none" strokeLinecap="round" />
+
+            {/* Branch warm highlights */}
+            <path d="M 192 420 C 165 392, 125 365, 82 338" stroke="#7c3700" strokeWidth="7" fill="none" strokeLinecap="round" opacity="0.5" filter="url(#branchGlow)" />
+            <path d="M 208 400 C 235 372, 272 348, 312 325" stroke="#7c3700" strokeWidth="7" fill="none" strokeLinecap="round" opacity="0.5" filter="url(#branchGlow)" />
+            <path d="M 195 355 C 160 318, 115 292, 72 262" stroke="#7c3700" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.4" filter="url(#branchGlow)" />
+            <path d="M 205 340 C 240 308, 285 282, 320 252" stroke="#7c3700" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.4" filter="url(#branchGlow)" />
+            <path d="M 200 280 C 195 238, 191 198, 193 162" stroke="#7c3700" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.4" filter="url(#branchGlow)" />
 
             {/* Secondary branches */}
-            <path d="M 90 310 C 65 290, 40 270, 25 250" stroke="#1c4532" strokeWidth="8" fill="none" strokeLinecap="round" />
-            <path d="M 90 310 C 80 280, 75 255, 78 230" stroke="#1c4532" strokeWidth="7" fill="none" strokeLinecap="round" />
-            <path d="M 130 340 C 115 315, 105 290, 100 260" stroke="#1c4532" strokeWidth="8" fill="none" strokeLinecap="round" />
-            <path d="M 300 305 C 320 280, 335 255, 345 230" stroke="#1c4532" strokeWidth="8" fill="none" strokeLinecap="round" />
-            <path d="M 265 330 C 275 300, 275 270, 265 245" stroke="#1c4532" strokeWidth="7" fill="none" strokeLinecap="round" />
-            <path d="M 80 240 C 60 215, 45 195, 38 170" stroke="#1c4532" strokeWidth="7" fill="none" strokeLinecap="round" />
-            <path d="M 80 240 C 95 215, 100 190, 95 165" stroke="#1c4532" strokeWidth="6" fill="none" strokeLinecap="round" />
-            <path d="M 310 235 C 325 210, 330 185, 320 160" stroke="#1c4532" strokeWidth="7" fill="none" strokeLinecap="round" />
-            <path d="M 195 155 C 180 125, 165 100, 155 72" stroke="#1c4532" strokeWidth="8" fill="none" strokeLinecap="round" />
-            <path d="M 195 155 C 210 120, 225 95, 235 65" stroke="#1c4532" strokeWidth="7" fill="none" strokeLinecap="round" />
-            <path d="M 195 155 C 175 130, 155 115, 140 95" stroke="#1c4532" strokeWidth="6" fill="none" strokeLinecap="round" />
+            <path d="M 82 338 C 58 315, 36 290, 22 265" stroke="#1e1008" strokeWidth="9" fill="none" strokeLinecap="round" />
+            <path d="M 82 338 C 72 305, 68 278, 72 250" stroke="#1e1008" strokeWidth="8" fill="none" strokeLinecap="round" />
+            <path d="M 125 365 C 108 338, 98 310, 94 280" stroke="#1e1008" strokeWidth="9" fill="none" strokeLinecap="round" />
+            <path d="M 312 325 C 332 298, 348 272, 356 248" stroke="#1e1008" strokeWidth="9" fill="none" strokeLinecap="round" />
+            <path d="M 272 348 C 283 315, 284 285, 274 258" stroke="#1e1008" strokeWidth="8" fill="none" strokeLinecap="round" />
+            <path d="M 72 262 C 52 235, 36 210, 28 182" stroke="#1e1008" strokeWidth="8" fill="none" strokeLinecap="round" />
+            <path d="M 72 262 C 88 235, 94 208, 89 180" stroke="#1e1008" strokeWidth="7" fill="none" strokeLinecap="round" />
+            <path d="M 320 252 C 335 225, 340 198, 330 172" stroke="#1e1008" strokeWidth="8" fill="none" strokeLinecap="round" />
+            <path d="M 193 162 C 178 130, 162 105, 152 76" stroke="#1e1008" strokeWidth="9" fill="none" strokeLinecap="round" />
+            <path d="M 193 162 C 208 126, 224 100, 234 70" stroke="#1e1008" strokeWidth="8" fill="none" strokeLinecap="round" />
+            <path d="M 193 162 C 172 138, 152 118, 136 96" stroke="#1e1008" strokeWidth="7" fill="none" strokeLinecap="round" />
 
-            {/* Foliage clusters */}
-            <circle cx="200" cy="120" r="55" fill="#1a5c2a" opacity="0.85" />
-            <circle cx="160" cy="140" r="38" fill="#1e6b31" opacity="0.8" />
-            <circle cx="240" cy="135" r="40" fill="#1a5c2a" opacity="0.8" />
-            <circle cx="200" cy="90" r="42" fill="#236b2e" opacity="0.85" />
-            <circle cx="85" cy="220" r="35" fill="#1a5c2a" opacity="0.75" />
-            <circle cx="65" cy="200" r="28" fill="#1e6b31" opacity="0.75" />
-            <circle cx="100" cy="200" r="30" fill="#1a5c2a" opacity="0.7" />
-            <circle cx="315" cy="210" r="35" fill="#1a5c2a" opacity="0.75" />
-            <circle cx="340" cy="195" r="26" fill="#1e6b31" opacity="0.72" />
-            <circle cx="290" cy="200" r="30" fill="#1a5c2a" opacity="0.7" />
-            <circle cx="130" cy="310" r="30" fill="#1e6b31" opacity="0.7" />
-            <circle cx="275" cy="295" r="30" fill="#1e6b31" opacity="0.7" />
-            <circle cx="155" cy="90" r="28" fill="#1a5c2a" opacity="0.78" />
-            <circle cx="245" cy="85" r="28" fill="#1a5c2a" opacity="0.78" />
-            <circle cx="40" cy="165" r="22" fill="#1e6b31" opacity="0.7" />
-            <circle cx="98" cy="158" r="22" fill="#1e6b31" opacity="0.7" />
-            <circle cx="322" cy="155" r="22" fill="#1e6b31" opacity="0.7" />
+            {/* Foliage — deep teal/blue-green */}
+            <circle cx="200" cy="118" r="58" fill="#0d4a3a" opacity="0.92" />
+            <circle cx="158" cy="138" r="42" fill="#0f5440" opacity="0.88" />
+            <circle cx="243" cy="132" r="44" fill="#0d4a3a" opacity="0.88" />
+            <circle cx="200" cy="88" r="46" fill="#115c44" opacity="0.92" />
+            <circle cx="83" cy="228" r="38" fill="#0d4a3a" opacity="0.82" />
+            <circle cx="60" cy="208" r="30" fill="#0f5440" opacity="0.8" />
+            <circle cx="102" cy="208" r="33" fill="#0d4a3a" opacity="0.78" />
+            <circle cx="318" cy="218" r="38" fill="#0d4a3a" opacity="0.82" />
+            <circle cx="344" cy="202" r="28" fill="#0f5440" opacity="0.78" />
+            <circle cx="292" cy="208" r="32" fill="#0d4a3a" opacity="0.78" />
+            <circle cx="132" cy="318" r="32" fill="#0f5440" opacity="0.75" />
+            <circle cx="278" cy="302" r="32" fill="#0f5440" opacity="0.75" />
+            <circle cx="154" cy="88" r="30" fill="#0d4a3a" opacity="0.84" />
+            <circle cx="247" cy="84" r="30" fill="#0d4a3a" opacity="0.84" />
+            <circle cx="38" cy="172" r="24" fill="#0f5440" opacity="0.76" />
+            <circle cx="96" cy="165" r="24" fill="#0f5440" opacity="0.76" />
+            <circle cx="326" cy="162" r="24" fill="#0f5440" opacity="0.76" />
 
-            {/* Highlight glints */}
-            <circle cx="180" cy="100" r="18" fill="#236b2e" opacity="0.5" />
-            <circle cx="220" cy="108" r="14" fill="#2d8a3e" opacity="0.3" />
+            {/* Foliage glow highlights — teal/cyan shimmer */}
+            <circle cx="185" cy="100" r="22" fill="#14b8a6" opacity="0.18" filter="url(#leafGlow)" />
+            <circle cx="218" cy="108" r="18" fill="#06b6d4" opacity="0.15" filter="url(#leafGlow)" />
+            <circle cx="162" cy="126" r="14" fill="#14b8a6" opacity="0.18" filter="url(#leafGlow)" />
+            <circle cx="238" cy="120" r="16" fill="#06b6d4" opacity="0.15" filter="url(#leafGlow)" />
+            <circle cx="80" cy="216" r="12" fill="#14b8a6" opacity="0.18" filter="url(#leafGlow)" />
+            <circle cx="318" cy="208" r="12" fill="#06b6d4" opacity="0.15" filter="url(#leafGlow)" />
+
+            {/* Firefly / sparkle dots */}
+            {[
+                [170, 200, "#fbbf24"], [228, 192, "#fde68a"], [145, 255, "#fbbf24"],
+                [260, 242, "#fde68a"], [200, 158, "#fb923c"], [110, 300, "#fbbf24"],
+                [295, 288, "#fde68a"], [62, 248, "#fbbf24"], [340, 235, "#fde68a"],
+                [180, 72, "#fb923c"], [222, 68, "#fbbf24"],
+            ].map(([sx, sy, sc], idx) => (
+                <circle key={idx} cx={sx as number} cy={sy as number} r="3.5" fill={sc as string} opacity="0.85" filter="url(#branchGlow)" />
+            ))}
         </svg>
     );
 }

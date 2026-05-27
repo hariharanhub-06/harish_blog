@@ -153,116 +153,261 @@ export default function TreeModule() {
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext("2d")!;
+        const rng = (seed: number) => (((seed * 1664525 + 1013904223) >>> 0) / 4294967296);
 
-        // Background gradient
-        const grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, "#0a1628");
-        grad.addColorStop(1, "#1a3a4a");
-        ctx.fillStyle = grad;
+        // ── Background: deep cosmic sky ──────────────────────────────────
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+        skyGrad.addColorStop(0,    "#050a14");
+        skyGrad.addColorStop(0.25, "#080f22");
+        skyGrad.addColorStop(0.55, "#0c1530");
+        skyGrad.addColorStop(0.80, "#090f1e");
+        skyGrad.addColorStop(1,    "#04070f");
+        ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, w, h);
 
-        // Stars
-        const rng = (seed: number) => ((seed * 1664525 + 1013904223) & 0xffffffff) / 0xffffffff;
-        for (let i = 0; i < 80; i++) {
+        // Nebula — purple left
+        const neb1 = ctx.createRadialGradient(w * 0.25, h * 0.35, 0, w * 0.25, h * 0.35, w * 0.5);
+        neb1.addColorStop(0, "rgba(88,28,135,0.28)");
+        neb1.addColorStop(1, "rgba(88,28,135,0)");
+        ctx.fillStyle = neb1;
+        ctx.fillRect(0, 0, w, h);
+
+        // Nebula — teal right
+        const neb2 = ctx.createRadialGradient(w * 0.78, h * 0.28, 0, w * 0.78, h * 0.28, w * 0.45);
+        neb2.addColorStop(0, "rgba(14,116,144,0.22)");
+        neb2.addColorStop(1, "rgba(14,116,144,0)");
+        ctx.fillStyle = neb2;
+        ctx.fillRect(0, 0, w, h);
+
+        // Nebula — pink top center
+        const neb3 = ctx.createRadialGradient(w * 0.5, h * 0.1, 0, w * 0.5, h * 0.1, w * 0.4);
+        neb3.addColorStop(0, "rgba(147,51,234,0.18)");
+        neb3.addColorStop(1, "rgba(147,51,234,0)");
+        ctx.fillStyle = neb3;
+        ctx.fillRect(0, 0, w, h);
+
+        // ── Stars ────────────────────────────────────────────────────────
+        const STAR_COLORS = ["#ffffff","#a78bfa","#60a5fa","#fbbf24","#f472b6","#ffffff","#ffffff","#34d399"];
+        for (let i = 0; i < 180; i++) {
             const sx = rng(i * 3 + 1) * w;
-            const sy = rng(i * 3 + 2) * h * 0.6;
-            const sr = rng(i * 3 + 3) * 2 + 0.5;
-            ctx.globalAlpha = rng(i * 5 + 7) * 0.6 + 0.2;
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.arc(sx, sy, sr, 0, Math.PI * 2);
-            ctx.fill();
+            const sy = rng(i * 3 + 2) * h * 0.65;
+            const sr = rng(i * 3 + 3) * 2.5 + 0.5;
+            const col = STAR_COLORS[i % STAR_COLORS.length];
+            ctx.globalAlpha = rng(i * 5 + 7) * 0.55 + 0.25;
+            if (i % 8 === 0) {
+                // glowing bright star
+                const sg = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 5);
+                sg.addColorStop(0, col);
+                sg.addColorStop(1, "transparent");
+                ctx.fillStyle = sg;
+                ctx.beginPath(); ctx.arc(sx, sy, sr * 5, 0, Math.PI * 2); ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+            ctx.fillStyle = col;
+            ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
         }
         ctx.globalAlpha = 1;
 
-        // Tree silhouette (simplified canvas bezier)
+        // ── Tree ─────────────────────────────────────────────────────────
         const cx = w / 2;
-        const baseY = h * 0.88;
-        ctx.fillStyle = "#1c4532";
-        ctx.strokeStyle = "#1c4532";
+        const baseY = h * 0.92;
+        const trunkH = h * 0.42;   // trunk tip relative to baseY
+        const trunkTop = baseY - trunkH;
 
-        // Trunk
-        ctx.beginPath();
-        ctx.moveTo(cx - 28, baseY);
-        ctx.bezierCurveTo(cx - 24, baseY - 120, cx - 20, baseY - 200, cx - 5, baseY - 300);
-        ctx.bezierCurveTo(cx + 5, baseY - 300, cx + 24, baseY - 200, cx + 28, baseY);
-        ctx.closePath();
-        ctx.fill();
+        // Golden inner glow behind trunk
+        const glowR = w * 0.34;
+        const glow = ctx.createRadialGradient(cx, trunkTop + trunkH * 0.3, 0, cx, trunkTop + trunkH * 0.3, glowR);
+        glow.addColorStop(0,    "rgba(251,191,36,0.85)");
+        glow.addColorStop(0.18, "rgba(245,158,11,0.55)");
+        glow.addColorStop(0.45, "rgba(217,119,6,0.25)");
+        glow.addColorStop(0.75, "rgba(146,64,14,0.1)");
+        glow.addColorStop(1,    "rgba(146,64,14,0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.ellipse(cx, trunkTop + trunkH * 0.35, glowR, glowR * 1.15, 0, 0, Math.PI * 2); ctx.fill();
 
-        // Foliage
-        const foliage = [
-            [cx, baseY - 420, 130],
-            [cx - 80, baseY - 370, 85],
-            [cx + 80, baseY - 370, 85],
-            [cx - 30, baseY - 480, 80],
-            [cx + 30, baseY - 475, 75],
-            [cx, baseY - 530, 70],
-        ] as [number, number, number][];
-
-        for (const [fx, fy, fr] of foliage) {
-            ctx.beginPath();
-            ctx.arc(fx, fy, fr, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        // Letter cards on tree
-        const cardPositions = [
-            [cx - 60, baseY - 430],
-            [cx + 55, baseY - 410],
-            [cx - 90, baseY - 360],
-            [cx + 85, baseY - 350],
-            [cx, baseY - 510],
-            [cx + 30, baseY - 470],
+        // Roots
+        ctx.lineCap = "round";
+        const roots = [
+            { dx: -40, dy: 12, ex: -110, ey: 8 },
+            { dx: -30, dy: 18, ex: -90,  ey: 28 },
+            { dx: -20, dy: 22, ex: -65,  ey: 38 },
+            { dx: 40,  dy: 12, ex: 110,  ey: 8 },
+            { dx: 30,  dy: 18, ex: 90,   ey: 28 },
+            { dx: 20,  dy: 22, ex: 65,   ey: 38 },
         ];
-        const cardColors = ["#fef3c7", "#fce7f3", "#e0f2fe", "#dcfce7", "#ffe4e6", "#f3e8ff"];
-
-        for (let i = 0; i < cardPositions.length; i++) {
-            const [px, py] = cardPositions[i];
-            const cw = 48, ch = 58;
-            // String
-            ctx.globalAlpha = 0.3;
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 1.5;
+        for (const r of roots) {
+            ctx.strokeStyle = "#120a04";
+            ctx.lineWidth = w * 0.014;
             ctx.beginPath();
-            ctx.moveTo(px, py - 20);
-            ctx.lineTo(px, py - 6);
+            ctx.moveTo(cx + r.dx, baseY + r.dy);
+            ctx.quadraticCurveTo(cx + r.ex * 0.6, baseY + r.ey * 0.5, cx + r.ex, baseY + r.ey);
+            ctx.stroke();
+            ctx.strokeStyle = "#4a2008";
+            ctx.lineWidth = w * 0.005;
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(cx + r.dx, baseY + r.dy);
+            ctx.quadraticCurveTo(cx + r.ex * 0.6, baseY + r.ey * 0.5, cx + r.ex, baseY + r.ey);
             ctx.stroke();
             ctx.globalAlpha = 1;
-            // Card
-            ctx.fillStyle = cardColors[i % cardColors.length];
+        }
+
+        // Trunk outer dark
+        const drawTrunkSide = (offX: number, sw: number, col: string) => {
+            ctx.strokeStyle = col; ctx.lineWidth = sw;
             ctx.beginPath();
-            ctx.roundRect(px - cw / 2, py, cw, ch, 3);
-            ctx.fill();
-            // Lines on card
-            ctx.fillStyle = "rgba(0,0,0,0.15)";
+            ctx.moveTo(cx + offX, baseY);
+            ctx.bezierCurveTo(cx + offX - 4, baseY - trunkH * 0.4, cx + offX - 6, baseY - trunkH * 0.7, cx, trunkTop);
+            ctx.stroke();
+        };
+        drawTrunkSide(-w * 0.036, w * 0.062, "#0e0804");
+        drawTrunkSide( w * 0.036, w * 0.050, "#0e0804");
+        // Warm inner highlight
+        ctx.strokeStyle = "#7c3700"; ctx.lineWidth = w * 0.022; ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(cx - 4, baseY - trunkH * 0.1);
+        ctx.bezierCurveTo(cx - 3, baseY - trunkH * 0.4, cx - 2, baseY - trunkH * 0.65, cx, trunkTop + trunkH * 0.05);
+        ctx.stroke();
+        ctx.globalAlpha = 0.3;
+        ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = w * 0.006;
+        ctx.beginPath();
+        ctx.moveTo(cx - 2, baseY - trunkH * 0.15);
+        ctx.bezierCurveTo(cx - 1, baseY - trunkH * 0.45, cx, baseY - trunkH * 0.68, cx, trunkTop + trunkH * 0.1);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        // Branches
+        const branches = [
+            { sx: cx - 8,  sy: trunkTop + trunkH * 0.35, ex: cx - w * 0.21, ey: trunkTop + trunkH * 0.18, sw: 0.025 },
+            { sx: cx + 8,  sy: trunkTop + trunkH * 0.28, ex: cx + w * 0.22, ey: trunkTop + trunkH * 0.12, sw: 0.025 },
+            { sx: cx - 5,  sy: trunkTop + trunkH * 0.18, ex: cx - w * 0.16, ey: trunkTop - trunkH * 0.02, sw: 0.020 },
+            { sx: cx + 5,  sy: trunkTop + trunkH * 0.14, ex: cx + w * 0.18, ey: trunkTop - trunkH * 0.04, sw: 0.020 },
+            { sx: cx,      sy: trunkTop + trunkH * 0.10, ex: cx - w * 0.01, ey: trunkTop - trunkH * 0.18, sw: 0.018 },
+            { sx: cx - w * 0.21, sy: trunkTop + trunkH * 0.18, ex: cx - w * 0.31, ey: trunkTop - trunkH * 0.05, sw: 0.014 },
+            { sx: cx + w * 0.22, sy: trunkTop + trunkH * 0.12, ex: cx + w * 0.32, ey: trunkTop - trunkH * 0.06, sw: 0.014 },
+            { sx: cx - w * 0.16, sy: trunkTop - trunkH * 0.02, ex: cx - w * 0.24, ey: trunkTop - trunkH * 0.22, sw: 0.011 },
+            { sx: cx + w * 0.18, sy: trunkTop - trunkH * 0.04, ex: cx + w * 0.26, ey: trunkTop - trunkH * 0.24, sw: 0.011 },
+        ];
+        for (const b of branches) {
+            const mx = (b.sx + b.ex) / 2 + (b.ex - b.sx) * 0.1;
+            const my = (b.sy + b.ey) / 2 - Math.abs(b.ex - b.sx) * 0.15;
+            ctx.strokeStyle = "#100806"; ctx.lineWidth = w * b.sw;
+            ctx.beginPath(); ctx.moveTo(b.sx, b.sy); ctx.quadraticCurveTo(mx, my, b.ex, b.ey); ctx.stroke();
+            // warm glow on branch
+            ctx.strokeStyle = "#7c3700"; ctx.lineWidth = w * b.sw * 0.35; ctx.globalAlpha = 0.45;
+            ctx.beginPath(); ctx.moveTo(b.sx, b.sy); ctx.quadraticCurveTo(mx, my, b.ex, b.ey); ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        // Foliage canopy
+        const foliage = [
+            [cx,          trunkTop - trunkH * 0.28, w * 0.165],
+            [cx - w * 0.1, trunkTop - trunkH * 0.15, w * 0.115],
+            [cx + w * 0.1, trunkTop - trunkH * 0.12, w * 0.12],
+            [cx,          trunkTop - trunkH * 0.42, w * 0.125],
+            [cx - w * 0.08,trunkTop - trunkH * 0.48, w * 0.090],
+            [cx + w * 0.08,trunkTop - trunkH * 0.46, w * 0.090],
+            [cx - w * 0.19,trunkTop + trunkH * 0.05, w * 0.095],
+            [cx + w * 0.20,trunkTop + trunkH * 0.00, w * 0.095],
+            [cx - w * 0.27,trunkTop - trunkH * 0.08, w * 0.072],
+            [cx + w * 0.28,trunkTop - trunkH * 0.10, w * 0.072],
+        ] as [number, number, number][];
+        for (const [fx, fy, fr] of foliage) {
+            ctx.fillStyle = "#0d4a3a"; ctx.globalAlpha = 0.92;
+            ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = "#0f5440"; ctx.globalAlpha = 0.6;
+            ctx.beginPath(); ctx.arc(fx - fr * 0.15, fy - fr * 0.1, fr * 0.7, 0, Math.PI * 2); ctx.fill();
+            // teal shimmer
+            ctx.fillStyle = "#14b8a6"; ctx.globalAlpha = 0.12;
+            ctx.beginPath(); ctx.arc(fx - fr * 0.2, fy - fr * 0.2, fr * 0.45, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        // Firefly sparkles on tree
+        const sparkles = [
+            [cx - w * 0.08, trunkTop - trunkH * 0.12], [cx + w * 0.07, trunkTop - trunkH * 0.08],
+            [cx - w * 0.14, trunkTop + trunkH * 0.1],  [cx + w * 0.15, trunkTop + trunkH * 0.08],
+            [cx,            trunkTop - trunkH * 0.38],  [cx - w * 0.05, trunkTop - trunkH * 0.22],
+            [cx + w * 0.06, trunkTop - trunkH * 0.26],  [cx - w * 0.2,  trunkTop - trunkH * 0.02],
+            [cx + w * 0.21, trunkTop - trunkH * 0.04],
+        ] as [number, number][];
+        const spkColors = ["#fbbf24","#fde68a","#fb923c","#fbbf24","#fde68a"];
+        for (let i = 0; i < sparkles.length; i++) {
+            const [spx, spy] = sparkles[i];
+            const sc = spkColors[i % spkColors.length];
+            const sg = ctx.createRadialGradient(spx, spy, 0, spx, spy, w * 0.025);
+            sg.addColorStop(0, sc); sg.addColorStop(1, "transparent");
+            ctx.fillStyle = sg; ctx.globalAlpha = 0.7;
+            ctx.beginPath(); ctx.arc(spx, spy, w * 0.025, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = sc; ctx.globalAlpha = 1;
+            ctx.beginPath(); ctx.arc(spx, spy, w * 0.007, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Letter cards on branches
+        const cardPos = [
+            [cx - w * 0.12, trunkTop - trunkH * 0.12],
+            [cx + w * 0.10, trunkTop - trunkH * 0.09],
+            [cx - w * 0.20, trunkTop + trunkH * 0.07],
+            [cx + w * 0.19, trunkTop + trunkH * 0.06],
+            [cx,            trunkTop - trunkH * 0.40],
+            [cx + w * 0.06, trunkTop - trunkH * 0.28],
+        ] as [number, number][];
+        const cardColors = ["#fef3c7","#fce7f3","#e0f2fe","#dcfce7","#ffe4e6","#f3e8ff"];
+        const cw = w * 0.055, ch = w * 0.065;
+        for (let i = 0; i < cardPos.length; i++) {
+            const [px, py] = cardPos[i];
+            ctx.globalAlpha = 0.28; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(px, py - ch * 0.4); ctx.lineTo(px, py); ctx.stroke();
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = cardColors[i % cardColors.length];
+            ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 10;
+            ctx.beginPath(); ctx.roundRect(px - cw / 2, py, cw, ch, 3); ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "rgba(0,0,0,0.12)";
             for (let row = 0; row < 3; row++) {
-                ctx.fillRect(px - cw / 2 + 6, py + 14 + row * 10, cw - 12, 3);
+                ctx.fillRect(px - cw / 2 + cw * 0.12, py + ch * 0.22 + row * ch * 0.22, cw * 0.76, ch * 0.07);
             }
         }
 
-        const midY = h / 2;
+        // Ground mound
+        const groundGrad = ctx.createLinearGradient(0, baseY, 0, h);
+        groundGrad.addColorStop(0, "#0a0d16"); groundGrad.addColorStop(1, "#040609");
+        ctx.fillStyle = groundGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, baseY + h * 0.02);
+        ctx.bezierCurveTo(w * 0.2, baseY - h * 0.015, w * 0.4, baseY - h * 0.025, w / 2, baseY - h * 0.022);
+        ctx.bezierCurveTo(w * 0.6, baseY - h * 0.025, w * 0.8, baseY - h * 0.015, w, baseY + h * 0.02);
+        ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
 
-        // Title
+        // ── Text ─────────────────────────────────────────────────────────
+        const textY = h > w ? h * 0.72 : h * 0.68;
+
+        // Title glow
+        ctx.shadowColor = "rgba(251,191,36,0.6)"; ctx.shadowBlur = 30;
         ctx.fillStyle = "#ffffff";
-        ctx.font = `bold ${w * 0.065}px Arial, sans-serif`;
+        ctx.font = `bold ${w * 0.068}px Georgia, serif`;
         ctx.textAlign = "center";
-        ctx.fillText("Leave your letter 🌳", w / 2, midY + h * 0.07);
+        ctx.fillText("Leave your letter 🌳", w / 2, textY);
+        ctx.shadowBlur = 0;
 
         // Subtitle
-        ctx.globalAlpha = 0.75;
-        ctx.font = `${w * 0.035}px Arial, sans-serif`;
-        ctx.fillText("Your words will live on Hari's tree forever", w / 2, midY + h * 0.115);
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = `${w * 0.034}px Georgia, serif`;
+        ctx.fillText("Your words will live on Hari's tree forever", w / 2, textY + w * 0.06);
         ctx.globalAlpha = 1;
 
-        // URL
-        ctx.fillStyle = "rgba(255,255,255,0.5)";
-        ctx.font = `${w * 0.028}px Arial, sans-serif`;
-        ctx.fillText("hariharanhub.com/tree", w / 2, h * 0.93);
+        // Divider line
+        ctx.strokeStyle = "rgba(251,191,36,0.3)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(w * 0.3, textY + w * 0.09); ctx.lineTo(w * 0.7, textY + w * 0.09); ctx.stroke();
 
-        // QR code (img from qrserver — drawn async, skip for now; add URL placeholder)
+        // URL + hint
+        ctx.fillStyle = "rgba(255,255,255,0.55)";
+        ctx.font = `${w * 0.030}px Arial, sans-serif`;
+        ctx.fillText("hariharanhub.com/tree", w / 2, h * 0.93);
         ctx.fillStyle = "#ffffff";
-        ctx.font = `bold ${w * 0.022}px Arial, sans-serif`;
-        ctx.fillText("Scan or visit the link above ↑", w / 2, h * 0.96);
+        ctx.font = `bold ${w * 0.024}px Arial, sans-serif`;
+        ctx.fillText("Scan or visit the link above ↑", w / 2, h * 0.965);
 
         return canvas.toDataURL("image/png");
     }
