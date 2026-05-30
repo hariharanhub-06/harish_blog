@@ -8,15 +8,16 @@ const FREE_LIMITS = {
     monthlyDeployLimit: 6000,
 };
 
-// Paginate through ALL deployments in the date range using Vercel's pagination cursor
-async function fetchDeploymentsInRange(token: string, sinceMs: number, untilMs: number) {
+// Paginate through ALL deployments in the date range, filtered by projectId if provided
+async function fetchDeploymentsInRange(token: string, sinceMs: number, untilMs: number, projectId?: string | null) {
     const headers = { Authorization: `Bearer ${token}` };
     const all: any[] = [];
     let currentUntil = untilMs;
-    const MAX_PAGES = 15; // safety cap (15 × 100 = 1500 max deployments)
+    const MAX_PAGES = 15;
+    const projFilter = projectId ? `&projectId=${encodeURIComponent(projectId)}` : "";
 
     for (let page = 0; page < MAX_PAGES; page++) {
-        const url = `https://api.vercel.com/v6/deployments?limit=100&state=READY&since=${sinceMs}&until=${currentUntil}`;
+        const url = `https://api.vercel.com/v6/deployments?limit=100&state=READY&since=${sinceMs}&until=${currentUntil}${projFilter}`;
         let data: any;
         try {
             const res = await fetch(url, { headers });
@@ -62,12 +63,13 @@ async function fetchVercelData(
     const dayEnd   = endDate   ?? new Date(rangeTo).toISOString().slice(0, 10);
 
     try {
-        const [projectsRes, deps] = await Promise.all([
-            fetch("https://api.vercel.com/v9/projects?limit=20", { headers }),
-            fetchDeploymentsInRange(token, rangeFrom, rangeTo),
-        ]);
-
+        // Fetch projects first to get the project ID for filtering deployments
+        const projectsRes = await fetch("https://api.vercel.com/v9/projects?limit=20", { headers });
         const projects: any[] = projectsRes.ok ? (await projectsRes.json()).projects ?? [] : [];
+        // Use first project's ID so we only count this account's own deployments
+        const projectId = projects[0]?.id ?? null;
+
+        const deps = await fetchDeploymentsInRange(token, rangeFrom, rangeTo, projectId);
 
         // Group deployments by LOCAL date string provided from client
         // Use UTC-adjusted date for each deployment (close enough; within-day accuracy)

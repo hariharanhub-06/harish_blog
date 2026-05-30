@@ -413,27 +413,25 @@ function NeonChart({ data, color }: { data: any; color: string }) {
 }
 
 function ImageKitChart({ data, color }: { data: any; color: string }) {
-    const [metric, setMetric] = useState<"bandwidth" | "storage">("bandwidth");
     const limits = data.limits ?? { storageBytes: 20 * 1024 * 1024 * 1024, bandwidthBytes: 20 * 1024 * 1024 * 1024 };
     const stats  = data.stats;
-    const daily: { date: string; bandwidthUsed: number; storageUsed: number }[] = data.weekly ?? data.daily ?? [];
+    const weekly: { date: string; bandwidthUsed: number; storageUsed: number }[] = data.weekly ?? data.daily ?? [];
 
-    if (!stats && !daily.length) return <p className="text-slate-500 text-sm text-center py-10">No usage data available</p>;
+    if (!stats && !weekly.length) return <p className="text-slate-500 text-sm text-center py-10">No usage data available</p>;
 
-    const totalBw  = stats?.bandwidthUsed ?? 0;
-    const totalSt  = stats?.storageUsed   ?? 0;
-    const fileCount = stats?.fileCount    ?? 0;
-    const bwPct    = (totalBw / limits.bandwidthBytes) * 100;
-    const stPct    = (totalSt / limits.storageBytes)   * 100;
-    const barColor = (pct: number) => pct >= 80 ? "#ef4444" : pct >= 60 ? "#f59e0b" : color;
+    const totalBw   = stats?.bandwidthUsed ?? 0;
+    const totalSt   = stats?.storageUsed   ?? 0;
+    const fileCount = stats?.fileCount     ?? 0;
+    const bwPct     = (totalBw / limits.bandwidthBytes) * 100;
+    const stPct     = (totalSt / limits.storageBytes)   * 100;
+    const barColor  = (pct: number) => pct >= 80 ? "#ef4444" : pct >= 60 ? "#f59e0b" : color;
 
-    const chartData = daily.map(d => ({
+    // Only bandwidth makes sense as a time-series — storage is cumulative and doesn't change by period
+    const chartData = weekly.map(d => ({
         ...d,
-        label: new Date(d.date + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
-        value: metric === "bandwidth" ? d.bandwidthUsed : d.storageUsed,
+        label: d.date, // already formatted as "1 May" from the backend
+        value: d.bandwidthUsed,
     }));
-
-    const gradId = `ikGrad_${metric}`;
 
     return (
         <div className="space-y-5">
@@ -444,18 +442,10 @@ function ImageKitChart({ data, color }: { data: any; color: string }) {
                 <StatPill label="Files"     value={`${fileCount}`} color={color} />
             </div>
 
-            {/* Metric toggle */}
+            {/* Chart label */}
             <div className="flex items-center gap-2">
-                {(["bandwidth", "storage"] as const).map(m => (
-                    <button key={m} onClick={() => setMetric(m)}
-                        className={`px-3 py-1 rounded-lg text-xs font-medium transition capitalize ${
-                            metric === m ? "text-white" : "text-slate-400 bg-[#1e293b] hover:text-slate-200"
-                        }`}
-                        style={metric === m ? { background: color } : undefined}>
-                        {m}
-                    </button>
-                ))}
-                <span className="text-slate-500 text-xs ml-1">per day</span>
+                <span className="px-3 py-1 rounded-lg text-xs font-medium text-white" style={{ background: color }}>Bandwidth</span>
+                <span className="text-slate-500 text-xs">consumed per week</span>
             </div>
 
             {/* Area chart — date on X, metric on Y */}

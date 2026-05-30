@@ -59,7 +59,8 @@ function buildWeeklyIntervals(startDate: string, endDate: string): { start: stri
         const e = chunkEnd.toISOString().slice(0, 10);
         intervals.push({
             start: s, end: e,
-            label: new Date(s + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+            // Label shows END date of the interval so the last point reads "30 May" not "26 May"
+            label: new Date(e + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
         });
         cur.setUTCDate(cur.getUTCDate() + chunkDays);
     }
