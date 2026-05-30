@@ -202,7 +202,7 @@ function ServiceChartModal({
                 const json = await res.json();
                 setData(json.projects?.find((p: any) => p.label === modal.project) ?? json);
             } else if (modal.service === "imagekit") {
-                const url = `/api/admin/hub/imagekit-usage?project=${encodeURIComponent(modal.project)}&startDate=${range.startDate}&endDate=${range.endDate}&daily=true`;
+                const url = `/api/admin/hub/imagekit-usage?project=${encodeURIComponent(modal.project)}&startDate=${range.startDate}&endDate=${range.endDate}&weekly=true`;
                 const res = await fetch(url, { headers: h });
                 setData(await res.json());
             } else if (modal.service === "render") {
@@ -416,7 +416,7 @@ function ImageKitChart({ data, color }: { data: any; color: string }) {
     const [metric, setMetric] = useState<"bandwidth" | "storage">("bandwidth");
     const limits = data.limits ?? { storageBytes: 20 * 1024 * 1024 * 1024, bandwidthBytes: 20 * 1024 * 1024 * 1024 };
     const stats  = data.stats;
-    const daily: { date: string; bandwidthUsed: number; storageUsed: number }[] = data.daily ?? [];
+    const daily: { date: string; bandwidthUsed: number; storageUsed: number }[] = data.weekly ?? data.daily ?? [];
 
     if (!stats && !daily.length) return <p className="text-slate-500 text-sm text-center py-10">No usage data available</p>;
 
