@@ -5,20 +5,51 @@ import {
     Activity, AlertTriangle, CheckCircle2, Clock, Database,
     ExternalLink, Globe, Image, Loader2, Monitor,
     RefreshCw, Server, Shield, ShieldAlert, ShieldCheck,
-    TrendingUp, Wifi, XCircle, Zap,
+    TrendingUp, Wifi, XCircle, Zap, Calendar,
 } from "lucide-react";
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-    ResponsiveContainer, Cell,
+    AreaChart, Area, BarChart, Bar, XAxis, YAxis,
+    CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
 
 type SubTab = "usages" | "security";
+type Period = "this_month" | "prev_month" | "custom";
 
 function fmt(bytes: number) {
     if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(2)} GB`;
     if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
     if (bytes >= 1e3) return `${(bytes / 1e3).toFixed(0)} KB`;
     return `${bytes} B`;
+}
+
+function getPeriodRange(period: Period, customStart: string, customEnd: string) {
+    const now = new Date();
+    if (period === "this_month") {
+        const from = new Date(now.getFullYear(), now.getMonth(), 1);
+        return {
+            from: from.getTime(), to: now.getTime(),
+            startDate: from.toISOString().slice(0, 10),
+            endDate:   now.toISOString().slice(0, 10),
+            label: "This Month",
+        };
+    }
+    if (period === "prev_month") {
+        const from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const to   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        return {
+            from: from.getTime(), to: to.getTime(),
+            startDate: from.toISOString().slice(0, 10),
+            endDate:   to.toISOString().slice(0, 10),
+            label: "Previous Month",
+        };
+    }
+    const from = new Date(customStart + "T00:00:00");
+    const to   = new Date(customEnd   + "T23:59:59");
+    return {
+        from: from.getTime(), to: to.getTime(),
+        startDate: customStart, endDate: customEnd,
+        label: `${customStart} → ${customEnd}`,
+    };
 }
 
 // ─── Usage Card ───────────────────────────────────────────────────────────────
@@ -42,7 +73,9 @@ function UsageCard({
     return (
         <div
             onClick={onClick}
-            className={`bg-[#0f172a] rounded-2xl p-5 space-y-4 min-w-0 transition-all duration-200 ${onClick ? "hover:bg-[#1a2744] hover:ring-1 hover:ring-slate-600 cursor-pointer" : ""}`}
+            className={`bg-[#0f172a] rounded-2xl p-5 space-y-4 min-w-0 transition-all duration-200 ${
+                onClick ? "hover:bg-[#1a2744] hover:ring-1 hover:ring-slate-600 cursor-pointer group" : ""
+            }`}
         >
             <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#1e293b] flex items-center justify-center shrink-0 text-slate-300">
@@ -53,19 +86,15 @@ function UsageCard({
                     <p className="text-xs text-slate-400 mt-0.5 leading-tight">{subtitle}</p>
                 </div>
                 {onClick && (
-                    <svg className="w-3 h-3 text-slate-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
+                    <span className="text-[10px] text-slate-600 group-hover:text-slate-400 transition mt-0.5 font-medium tracking-wide">
+                        VIEW
+                    </span>
                 )}
             </div>
-
             <div>
                 <p className="text-3xl font-bold text-white leading-none">{value}</p>
-                {limitLabel && (
-                    <p className="text-sm text-slate-400 mt-1">{limitLabel}</p>
-                )}
+                {limitLabel && <p className="text-sm text-slate-400 mt-1">{limitLabel}</p>}
             </div>
-
             {!noBar && pct != null && (
                 <div className="space-y-1.5">
                     <div className="h-1.5 bg-[#1e293b] rounded-full overflow-hidden">
@@ -93,17 +122,6 @@ function NotConfiguredCard({ keyName }: { keyName: string }) {
     );
 }
 
-function NotUsedCard() {
-    return (
-        <div className="bg-[#0f172a] rounded-2xl p-5 flex items-center gap-3 min-w-0 opacity-40">
-            <div className="w-10 h-10 rounded-xl bg-[#1e293b] flex items-center justify-center">
-                <Server size={16} className="text-slate-500" />
-            </div>
-            <p className="text-sm text-slate-500 italic">Not used</p>
-        </div>
-    );
-}
-
 function ProjectSection({ label, children }: { label: string; children: React.ReactNode }) {
     const colors: Record<string, string> = {
         Harishblog: "text-indigo-400 border-indigo-800",
@@ -125,7 +143,12 @@ function ProjectSection({ label, children }: { label: string; children: React.Re
 
 // ─── Service Chart Modal ──────────────────────────────────────────────────────
 
-type ModalState = { service: "vercel" | "neon" | "imagekit" | "render"; metric: string };
+type ModalState = {
+    service: "vercel" | "neon" | "imagekit" | "render";
+    project: string;
+    // initial data from parent (tiles), modal refetches per period
+    parentData: any;
+};
 
 const SERVICE_COLORS: Record<string, string> = {
     vercel:   "#6366f1",
@@ -133,211 +156,375 @@ const SERVICE_COLORS: Record<string, string> = {
     imagekit: "#f59e0b",
     render:   "#10b981",
 };
-
 const SERVICE_NAMES: Record<string, string> = {
-    vercel:   "Vercel",
-    neon:     "Neon DB",
-    imagekit: "ImageKit",
-    render:   "Render",
+    vercel: "Vercel", neon: "Neon DB", imagekit: "ImageKit", render: "Render",
 };
-
-const METRIC_OPTIONS: Record<string, { value: string; label: string }[]> = {
-    vercel:   [{ value: "builds",    label: "Builds this month" }],
-    neon:     [{ value: "compute",   label: "Compute hours" }, { value: "storage", label: "DB storage" }],
-    imagekit: [{ value: "storage",   label: "Storage used" }, { value: "bandwidth", label: "Bandwidth used" }, { value: "files", label: "File count" }],
-    render:   [{ value: "status",    label: "Service status" }],
-};
-
-const PROJECTS = ["Harishblog", "StartUP", "D-Driver"] as const;
-
-function buildChartData(
-    modal: ModalState,
-    vercel: any, neon: any, imagekit: any, render: any
-) {
-    return PROJECTS.map(label => {
-        let value = 0, pct = 0, displayValue = "—";
-
-        if (modal.service === "vercel") {
-            const vp = vercel?.projects?.find((x: any) => x.label === label);
-            if (vp?.configured && modal.metric === "builds") {
-                value = vp.usage?.monthlyBuilds ?? 0;
-                pct   = (value / (vp.limits?.monthlyDeployLimit ?? 6000)) * 100;
-                displayValue = `${value}`;
-            }
-        } else if (modal.service === "neon") {
-            const np = neon?.projects?.find((x: any) => x.label === label);
-            if (np?.configured && np.usage) {
-                if (modal.metric === "compute") {
-                    value = parseFloat((np.usage.cpuUsedSec / 3600).toFixed(2));
-                    pct   = (value / (np.limits?.computeHours ?? 191)) * 100;
-                    displayValue = `${value} hrs`;
-                } else if (modal.metric === "storage") {
-                    value = np.usage.storageBytes ?? 0;
-                    pct   = (value / (np.usage.storageLimitBytes ?? 536870912)) * 100;
-                    displayValue = fmt(value);
-                }
-            }
-        } else if (modal.service === "imagekit") {
-            const ikp = imagekit?.projects?.find((x: any) => x.label === label);
-            if (ikp?.configured) {
-                const stats = ikp.stats ?? ikp.breakdown?.[0];
-                if (modal.metric === "storage" && stats) {
-                    value = stats.storageUsed ?? 0;
-                    pct   = (value / (ikp.limits?.storageBytes ?? 21474836480)) * 100;
-                    displayValue = fmt(value);
-                } else if (modal.metric === "bandwidth" && stats) {
-                    value = stats.bandwidthUsed ?? 0;
-                    pct   = (value / (ikp.limits?.bandwidthBytes ?? 21474836480)) * 100;
-                    displayValue = fmt(value);
-                } else if (modal.metric === "files" && stats) {
-                    value = stats.fileCount ?? 0;
-                    displayValue = `${value} files`;
-                }
-            }
-        }
-
-        return { label, value, pct: Math.min(pct, 100), displayValue };
-    });
-}
 
 function ServiceChartModal({
-    modal, onClose, onMetricChange, vercel, neon, imagekit, render,
+    modal, onClose, sessionId,
 }: {
     modal: ModalState;
     onClose: () => void;
-    onMetricChange: (m: string) => void;
-    vercel: any; neon: any; imagekit: any; render: any;
+    sessionId: string;
 }) {
-    const color   = SERVICE_COLORS[modal.service];
-    const options = METRIC_OPTIONS[modal.service] ?? [];
-    const data    = buildChartData(modal, vercel, neon, imagekit, render);
+    const today = new Date().toISOString().slice(0, 10);
+    const firstOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
 
-    const barFill = (pct: number) =>
-        pct >= 80 ? "#ef4444" : pct >= 60 ? "#f59e0b" : color;
+    const [period, setPeriod]           = useState<Period>("this_month");
+    const [customStart, setCustomStart] = useState(firstOfMonth);
+    const [customEnd,   setCustomEnd]   = useState(today);
+    const [data, setData]               = useState<any>(null);
+    const [loading, setLoading]         = useState(true);
+
+    const color = SERVICE_COLORS[modal.service];
+
+    const fetchData = useCallback(async () => {
+        if (period === "custom" && (!customStart || !customEnd || customStart > customEnd)) return;
+        setLoading(true);
+        const range = getPeriodRange(period, customStart, customEnd);
+        const h = { "X-Session-Id": sessionId };
+
+        try {
+            if (modal.service === "vercel") {
+                const url = `/api/admin/hub/vercel-usage?project=${encodeURIComponent(modal.project)}&from=${range.from}&to=${range.to}`;
+                const res = await fetch(url, { headers: h });
+                setData(await res.json());
+            } else if (modal.service === "neon") {
+                // Neon returns monthly aggregates — period filter shows same snapshot
+                const url = `/api/admin/hub/neon-usage?project=${encodeURIComponent(modal.project)}`;
+                const res = await fetch(url, { headers: h });
+                const json = await res.json();
+                setData(json.projects?.find((p: any) => p.label === modal.project) ?? json);
+            } else if (modal.service === "imagekit") {
+                const url = `/api/admin/hub/imagekit-usage?project=${encodeURIComponent(modal.project)}&startDate=${range.startDate}&endDate=${range.endDate}`;
+                const res = await fetch(url, { headers: h });
+                setData(await res.json());
+            } else if (modal.service === "render") {
+                const url = `/api/admin/hub/render-usage`;
+                const res = await fetch(url, { headers: h });
+                const json = await res.json();
+                setData(json.projects?.find((p: any) => p.label === modal.project) ?? json);
+            }
+        } catch {
+            setData(null);
+        } finally {
+            setLoading(false);
+        }
+    }, [modal.service, modal.project, period, customStart, customEnd, sessionId]);
+
+    useEffect(() => { fetchData(); }, [fetchData]);
 
     const ServiceIcon = () => {
-        const iconProps = { size: 18, style: { color } };
-        if (modal.service === "vercel")   return <Zap {...iconProps} />;
-        if (modal.service === "neon")     return <Database {...iconProps} />;
-        if (modal.service === "imagekit") return <Image {...iconProps} />;
-        return <Server {...iconProps} />;
+        const props = { size: 18, style: { color } };
+        if (modal.service === "vercel")   return <Zap {...props} />;
+        if (modal.service === "neon")     return <Database {...props} />;
+        if (modal.service === "imagekit") return <Image {...props} />;
+        return <Server {...props} />;
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
             <div
-                className="relative bg-[#0f172a] rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-slate-700/50"
+                className="relative bg-[#0f172a] rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-slate-700/50 max-h-[90vh] overflow-y-auto"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-start justify-between mb-5 gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${color}22` }}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${color}22` }}>
                             <ServiceIcon />
                         </div>
                         <div>
-                            <h3 className="text-white font-bold">{SERVICE_NAMES[modal.service]}</h3>
-                            <p className="text-slate-400 text-xs">All-project comparison</p>
+                            <h3 className="text-white font-bold">{SERVICE_NAMES[modal.service]} — {modal.project}</h3>
+                            <p className="text-slate-400 text-xs">Usage details</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        {options.length > 1 && (
-                            <select
-                                value={modal.metric}
-                                onChange={e => onMetricChange(e.target.value)}
-                                className="bg-[#1e293b] text-slate-300 text-sm border border-slate-600 rounded-lg px-3 py-1.5 outline-none cursor-pointer"
-                            >
-                                {options.map(opt => (
-                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                ))}
-                            </select>
-                        )}
-                        <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition">
-                            <XCircle size={20} />
-                        </button>
-                    </div>
+                    <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition shrink-0 mt-0.5">
+                        <XCircle size={20} />
+                    </button>
                 </div>
 
-                {/* Render: status pills (no chart) */}
-                {modal.service === "render" ? (
-                    <div className="grid grid-cols-3 gap-3 mb-2">
-                        {PROJECTS.map(label => {
-                            const rp = render?.projects?.find((x: any) => x.label === label);
-                            const svc = rp?.services?.[0]?.service ?? rp?.services?.[0];
-                            const active = svc?.suspended === "not_suspended";
-                            return (
-                                <div key={label} className="bg-[#1e293b] rounded-xl p-4 text-center space-y-2">
-                                    <p className="text-slate-300 text-sm font-medium">{label}</p>
-                                    {!rp?.configured
-                                        ? <span className="text-xs text-slate-500">Not configured</span>
-                                        : <span className={`text-sm font-bold ${active ? "text-emerald-400" : "text-amber-400"}`}>{active ? "Active" : "Suspended"}</span>
-                                    }
-                                    {svc?.name && <p className="text-xs text-slate-500 truncate">{svc.name}</p>}
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <>
-                        {/* Bar chart */}
-                        <div className="h-[220px] mb-5">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={data} margin={{ top: 4, right: 8, left: -10, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                                    <XAxis dataKey="label" tick={{ fill: "#94a3b8", fontSize: 12 }} axisLine={false} tickLine={false} />
-                                    <YAxis
-                                        tick={{ fill: "#64748b", fontSize: 11 }}
-                                        axisLine={false} tickLine={false}
-                                        tickFormatter={v => {
-                                            if (modal.metric === "storage" || modal.metric === "bandwidth") return fmt(v);
-                                            if (modal.metric === "compute") return `${v}h`;
-                                            return `${v}`;
-                                        }}
-                                        width={52}
-                                    />
-                                    <Tooltip
-                                        contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#f1f5f9", fontSize: 13 }}
-                                        formatter={(val: any, _: any, props: any) => [
-                                            props.payload?.displayValue ?? val,
-                                            options.find(o => o.value === modal.metric)?.label ?? "",
-                                        ]}
-                                        labelStyle={{ color: "#94a3b8", marginBottom: 4 }}
-                                        cursor={{ fill: "rgba(255,255,255,0.04)" }}
-                                    />
-                                    <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={72}>
-                                        {data.map((entry, i) => (
-                                            <Cell key={i} fill={barFill(entry.pct)} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
+                {/* Period filter */}
+                <div className="flex flex-wrap items-center gap-2 mb-5 pb-5 border-b border-slate-800">
+                    <Calendar size={14} className="text-slate-500" />
+                    {(["this_month", "prev_month", "custom"] as Period[]).map(p => (
+                        <button
+                            key={p}
+                            onClick={() => setPeriod(p)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                                period === p
+                                    ? "text-white"
+                                    : "text-slate-400 bg-[#1e293b] hover:text-slate-200"
+                            }`}
+                            style={period === p ? { background: color } : undefined}
+                        >
+                            {p === "this_month" ? "This Month" : p === "prev_month" ? "Previous Month" : "Custom Range"}
+                        </button>
+                    ))}
+                    {period === "custom" && (
+                        <div className="flex items-center gap-2 ml-1">
+                            <input
+                                type="date" value={customStart}
+                                onChange={e => setCustomStart(e.target.value)}
+                                className="bg-[#1e293b] text-slate-300 text-xs border border-slate-600 rounded-lg px-2 py-1.5 outline-none"
+                            />
+                            <span className="text-slate-500 text-xs">→</span>
+                            <input
+                                type="date" value={customEnd}
+                                onChange={e => setCustomEnd(e.target.value)}
+                                className="bg-[#1e293b] text-slate-300 text-xs border border-slate-600 rounded-lg px-2 py-1.5 outline-none"
+                            />
                         </div>
+                    )}
+                </div>
 
-                        {/* Per-project usage bars */}
-                        <div className="space-y-3 border-t border-slate-800 pt-4">
-                            {data.map(entry => (
-                                <div key={entry.label} className="space-y-1.5">
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-slate-300 font-medium">{entry.label}</span>
-                                        <span className="text-slate-400 text-xs">
-                                            {entry.displayValue}
-                                            {entry.pct > 0 && (
-                                                <> · <span className={entry.pct >= 80 ? "text-red-400" : entry.pct >= 60 ? "text-amber-400" : "text-emerald-400"}>{Math.round(entry.pct)}%</span></>
-                                            )}
-                                        </span>
-                                    </div>
-                                    <div className="h-1.5 bg-[#1e293b] rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full rounded-full transition-all duration-700"
-                                            style={{ width: `${entry.pct}%`, background: barFill(entry.pct) }}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </>
+                {/* Chart content */}
+                {loading ? (
+                    <div className="flex items-center justify-center py-16 gap-2 text-slate-400 text-sm">
+                        <Loader2 size={16} className="animate-spin" /> Loading…
+                    </div>
+                ) : !data ? (
+                    <p className="text-center py-12 text-slate-500 text-sm">Failed to load data</p>
+                ) : modal.service === "vercel" ? (
+                    <VercelChart data={data} color={color} />
+                ) : modal.service === "neon" ? (
+                    <NeonChart data={data} color={color} />
+                ) : modal.service === "imagekit" ? (
+                    <ImageKitChart data={data} color={color} />
+                ) : (
+                    <RenderStatus data={data} />
                 )}
+            </div>
+        </div>
+    );
+}
+
+// ── Per-service chart components ──────────────────────────────────────────────
+
+function VercelChart({ data, color }: { data: any; color: string }) {
+    const daily: { date: string; builds: number }[] = data.daily ?? [];
+    const total    = data.usage?.monthlyBuilds ?? 0;
+    const limit    = data.limits?.monthlyDeployLimit ?? 6000;
+    const pct      = (total / limit) * 100;
+    const barColor = pct >= 80 ? "#ef4444" : pct >= 60 ? "#f59e0b" : color;
+
+    // Shorten date labels to "D MMM"
+    const chartData = daily.map(d => ({
+        ...d,
+        label: new Date(d.date + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+    }));
+
+    return (
+        <div className="space-y-5">
+            <div className="grid grid-cols-2 gap-3">
+                <StatPill label="Total builds" value={`${total}`} color={color} />
+                <StatPill label="% of limit" value={`${Math.round(pct)}%`} color={barColor} />
+            </div>
+            <div>
+                <p className="text-slate-400 text-xs mb-3 font-medium uppercase tracking-wide">Daily builds</p>
+                <div className="h-[200px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="vGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor={color} stopOpacity={0.4} />
+                                    <stop offset="95%" stopColor={color} stopOpacity={0.02} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                            <XAxis dataKey="label" tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false}
+                                interval={Math.max(0, Math.floor(chartData.length / 8) - 1)} />
+                            <YAxis tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                            <Tooltip
+                                contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#f1f5f9", fontSize: 12 }}
+                                formatter={(v: any) => [`${v} build${v !== 1 ? "s" : ""}`, ""]}
+                                labelStyle={{ color: "#94a3b8" }}
+                                cursor={{ stroke: color, strokeWidth: 1, strokeOpacity: 0.3 }}
+                            />
+                            <Area type="monotone" dataKey="builds" stroke={color} strokeWidth={2} fill="url(#vGrad)" dot={false} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+            <UsageBar label="Builds vs limit" used={total} limit={limit} displayUsed={`${total}`} displayLimit={`${limit}`} color={barColor} />
+        </div>
+    );
+}
+
+function NeonChart({ data, color }: { data: any; color: string }) {
+    const usage  = data.usage;
+    const limits = data.limits ?? { computeHours: 191.9, storageBytes: 512 * 1024 * 1024 };
+
+    if (!usage) return <p className="text-slate-500 text-sm text-center py-10">No usage data available</p>;
+
+    const computeHrs  = parseFloat((usage.cpuUsedSec / 3600).toFixed(2));
+    const computePct  = (computeHrs / limits.computeHours) * 100;
+    const storagePct  = (usage.storageBytes / (usage.storageLimitBytes ?? limits.storageBytes)) * 100;
+
+    const chartData = [
+        { metric: "Compute", used: computeHrs, limit: limits.computeHours, pct: computePct, display: `${computeHrs}h / ${limits.computeHours}h` },
+        { metric: "Storage",  used: storagePct, limit: 100, pct: storagePct, display: `${fmt(usage.storageBytes)} / ${fmt(usage.storageLimitBytes ?? limits.storageBytes)}` },
+    ];
+
+    return (
+        <div className="space-y-5">
+            <div className="grid grid-cols-2 gap-3">
+                <StatPill label="Compute" value={`${computeHrs} hrs`} color={computePct >= 80 ? "#ef4444" : color} />
+                <StatPill label="Storage" value={fmt(usage.storageBytes)} color={storagePct >= 80 ? "#ef4444" : color} />
+            </div>
+            <div>
+                <p className="text-slate-400 text-xs mb-3 font-medium uppercase tracking-wide">Usage vs free tier limit</p>
+                <div className="h-[180px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                            <XAxis dataKey="metric" tick={{ fill: "#94a3b8", fontSize: 12 }} axisLine={false} tickLine={false} />
+                            <YAxis tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false}
+                                tickFormatter={v => `${Math.round(v)}%`} domain={[0, 100]} />
+                            <Tooltip
+                                contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#f1f5f9", fontSize: 12 }}
+                                formatter={(_: any, __: any, props: any) => [props.payload?.display ?? "", "Usage"]}
+                                labelStyle={{ color: "#94a3b8" }}
+                                cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                            />
+                            <Bar dataKey="pct" radius={[6, 6, 0, 0]} maxBarSize={80}>
+                                {chartData.map((e, i) => <Cell key={i} fill={e.pct >= 80 ? "#ef4444" : e.pct >= 60 ? "#f59e0b" : color} />)}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+            <div className="space-y-3 border-t border-slate-800 pt-4">
+                <UsageBar label="Compute hours" used={computeHrs} limit={limits.computeHours} displayUsed={`${computeHrs}h`} displayLimit={`${limits.computeHours}h`} color={computePct >= 80 ? "#ef4444" : color} />
+                <UsageBar label="DB storage" used={usage.storageBytes} limit={usage.storageLimitBytes ?? limits.storageBytes} displayUsed={fmt(usage.storageBytes)} displayLimit={fmt(usage.storageLimitBytes ?? limits.storageBytes)} color={storagePct >= 80 ? "#ef4444" : color} />
+            </div>
+            {usage.quotaResetAt && (
+                <p className="text-xs text-slate-600">Quota resets: {new Date(usage.quotaResetAt).toLocaleDateString()}</p>
+            )}
+        </div>
+    );
+}
+
+function ImageKitChart({ data, color }: { data: any; color: string }) {
+    const limits  = data.limits ?? { storageBytes: 20 * 1024 * 1024 * 1024, bandwidthBytes: 20 * 1024 * 1024 * 1024 };
+    const stats   = data.stats;
+    const breakdown: any[] = data.breakdown ?? [];
+
+    if (!stats && !breakdown.length) return <p className="text-slate-500 text-sm text-center py-10">No usage data available</p>;
+
+    const storageUsed   = stats?.storageUsed   ?? breakdown.reduce((s: number, r: any) => s + (r.storageUsed ?? 0), 0);
+    const bandwidthUsed = stats?.bandwidthUsed ?? breakdown.reduce((s: number, r: any) => s + (r.bandwidthUsed ?? 0), 0);
+    const fileCount     = stats?.fileCount     ?? breakdown.reduce((s: number, r: any) => s + (r.fileCount ?? 0), 0);
+    const storagePct    = (storageUsed   / limits.storageBytes)   * 100;
+    const bandwidthPct  = (bandwidthUsed / limits.bandwidthBytes) * 100;
+
+    const chartData = [
+        { metric: "Storage",   pct: storagePct,   display: `${fmt(storageUsed)} / ${fmt(limits.storageBytes)}`,     used: storageUsed,   limit: limits.storageBytes },
+        { metric: "Bandwidth", pct: bandwidthPct,  display: `${fmt(bandwidthUsed)} / ${fmt(limits.bandwidthBytes)}`, used: bandwidthUsed, limit: limits.bandwidthBytes },
+    ];
+
+    return (
+        <div className="space-y-5">
+            <div className="grid grid-cols-3 gap-3">
+                <StatPill label="Storage" value={fmt(storageUsed)} color={storagePct >= 80 ? "#ef4444" : color} />
+                <StatPill label="Bandwidth" value={fmt(bandwidthUsed)} color={bandwidthPct >= 80 ? "#ef4444" : color} />
+                <StatPill label="Files" value={`${fileCount}`} color={color} />
+            </div>
+            <div>
+                <p className="text-slate-400 text-xs mb-3 font-medium uppercase tracking-wide">Storage & bandwidth vs free limit</p>
+                <div className="h-[180px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                            <XAxis dataKey="metric" tick={{ fill: "#94a3b8", fontSize: 12 }} axisLine={false} tickLine={false} />
+                            <YAxis tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false}
+                                tickFormatter={v => `${Math.round(v)}%`} domain={[0, 100]} />
+                            <Tooltip
+                                contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#f1f5f9", fontSize: 12 }}
+                                formatter={(_: any, __: any, props: any) => [props.payload?.display ?? "", "Used"]}
+                                labelStyle={{ color: "#94a3b8" }}
+                                cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                            />
+                            <Bar dataKey="pct" radius={[6, 6, 0, 0]} maxBarSize={100}>
+                                {chartData.map((e, i) => <Cell key={i} fill={e.pct >= 80 ? "#ef4444" : e.pct >= 60 ? "#f59e0b" : color} />)}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+            <div className="space-y-3 border-t border-slate-800 pt-4">
+                <UsageBar label="Storage used" used={storageUsed} limit={limits.storageBytes} displayUsed={fmt(storageUsed)} displayLimit={fmt(limits.storageBytes)} color={storagePct >= 80 ? "#ef4444" : color} />
+                <UsageBar label="Bandwidth used" used={bandwidthUsed} limit={limits.bandwidthBytes} displayUsed={fmt(bandwidthUsed)} displayLimit={fmt(limits.bandwidthBytes)} color={bandwidthPct >= 80 ? "#ef4444" : color} />
+            </div>
+            {data.period && (
+                <p className="text-xs text-slate-600">Period: {data.period.startDate} → {data.period.endDate}</p>
+            )}
+            {breakdown.length > 1 && (
+                <div className="space-y-2 border-t border-slate-800 pt-4">
+                    <p className="text-slate-400 text-xs font-medium uppercase tracking-wide">Breakdown by account</p>
+                    {breakdown.map((acc: any) => (
+                        <div key={acc.account} className="flex items-center justify-between text-xs">
+                            <span className="text-slate-300">{acc.account}</span>
+                            <span className="text-slate-500">{fmt(acc.storageUsed)} storage · {fmt(acc.bandwidthUsed)} bw · {acc.fileCount} files</span>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function RenderStatus({ data }: { data: any }) {
+    const services: any[] = data.services ?? [];
+    if (!data.configured) return <p className="text-slate-500 text-sm text-center py-10">Not configured</p>;
+    return (
+        <div className="space-y-3">
+            {services.length === 0
+                ? <p className="text-slate-500 text-sm text-center py-8">No services found</p>
+                : services.map((svc: any, i: number) => {
+                    const s = svc.service ?? svc;
+                    const active = s.suspended === "not_suspended";
+                    return (
+                        <div key={i} className="bg-[#1e293b] rounded-xl p-4 flex items-center justify-between">
+                            <div>
+                                <p className="text-white text-sm font-medium">{s.name ?? "Service"}</p>
+                                <p className="text-slate-500 text-xs mt-0.5">{s.serviceDetails?.env ?? s.type ?? "Web Service"}</p>
+                            </div>
+                            <span className={`text-sm font-bold px-3 py-1 rounded-full ${active ? "bg-emerald-900/30 text-emerald-400" : "bg-amber-900/30 text-amber-400"}`}>
+                                {active ? "Active" : "Suspended"}
+                            </span>
+                        </div>
+                    );
+                })
+            }
+        </div>
+    );
+}
+
+// ── Shared small components ───────────────────────────────────────────────────
+
+function StatPill({ label, value, color }: { label: string; value: string; color: string }) {
+    return (
+        <div className="bg-[#1e293b] rounded-xl p-3 space-y-1">
+            <p className="text-slate-500 text-[10px] uppercase tracking-wide">{label}</p>
+            <p className="text-white font-bold text-lg leading-none" style={{ color }}>{value}</p>
+        </div>
+    );
+}
+
+function UsageBar({ label, used, limit, displayUsed, displayLimit, color }: {
+    label: string; used: number; limit: number; displayUsed: string; displayLimit: string; color: string;
+}) {
+    const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
+    return (
+        <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-300">{label}</span>
+                <span className="text-slate-400">{displayUsed} / {displayLimit} · <span style={{ color }}>{Math.round(pct)}%</span></span>
+            </div>
+            <div className="h-1.5 bg-[#0f172a] rounded-full overflow-hidden">
+                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: color }} />
             </div>
         </div>
     );
@@ -386,15 +573,13 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
     return (
         <>
             <div className="space-y-8">
-                {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-white">
-                            <TrendingUp size={18} className="text-purple-500" />
-                            Platform Usage
+                            <TrendingUp size={18} className="text-purple-500" /> Platform Usage
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
-                            Click any tile to see a full project comparison chart
+                            Click any tile to see its chart with period filter
                         </p>
                     </div>
                     <button onClick={fetchAll}
@@ -403,148 +588,126 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                     </button>
                 </div>
 
-                {/* One section per project */}
                 {(["Harishblog", "StartUP", "D-Driver"] as const).map(label => {
                     const vp  = vercel?.projects?.find((x: any) => x.label === label);
                     const np  = neon?.projects?.find((x: any) => x.label === label);
                     const ikp = imagekit?.projects?.find((x: any) => x.label === label);
                     const rp  = render?.projects?.find((x: any) => x.label === label);
-
-                    const ikStats   = ikp?.stats;
                     const neonUsage = np?.usage;
+                    const ikStats   = ikp?.stats;
 
                     const lastDeploy = vp?.usage?.lastDeployAt
                         ? (() => {
-                            const mins = Math.round((Date.now() - vp.usage.lastDeployAt) / 60000);
-                            if (mins < 60) return `${mins}m ago`;
-                            if (mins < 1440) return `${Math.round(mins / 60)}h ago`;
-                            return `${Math.round(mins / 1440)}d ago`;
-                        })()
-                        : null;
+                            const m = Math.round((Date.now() - vp.usage.lastDeployAt) / 60000);
+                            if (m < 60) return `${m}m ago`;
+                            if (m < 1440) return `${Math.round(m / 60)}h ago`;
+                            return `${Math.round(m / 1440)}d ago`;
+                        })() : null;
 
                     return (
                         <ProjectSection key={label} label={label}>
 
-                            {/* ── Vercel ── */}
+                            {/* Vercel */}
                             {!vp || !vp.configured ? (
                                 <NotConfiguredCard keyName={`VERCEL_API_TOKEN_${label.replace(/-/g,"").toUpperCase()}`} />
                             ) : (
                                 <UsageCard
-                                    icon={<Zap size={16} />}
-                                    name="Vercel"
-                                    subtitle="Builds this month"
+                                    icon={<Zap size={16} />} name="Vercel" subtitle="Builds this month"
                                     value={`${vp.usage?.monthlyBuilds ?? 0}`}
                                     limitLabel={lastDeploy ? `last deploy ${lastDeploy}` : `${vp.projects?.length ?? 0} projects`}
                                     pct={((vp.usage?.monthlyBuilds ?? 0) / vp.limits.monthlyDeployLimit) * 100}
-                                    onClick={() => setModal({ service: "vercel", metric: "builds" })}
+                                    onClick={() => setModal({ service: "vercel", project: label, parentData: vp })}
                                 />
                             )}
 
-                            {/* ── Neon: compute ── */}
+                            {/* Neon compute */}
                             {!np || !np.configured ? (
                                 <NotConfiguredCard keyName={`NEON_API_KEY_${label.replace(/-/g,"").toUpperCase()}`} />
                             ) : neonUsage ? (
                                 <UsageCard
-                                    icon={<Database size={16} />}
-                                    name="Neon DB"
-                                    subtitle="Compute (monthly)"
+                                    icon={<Database size={16} />} name="Neon DB" subtitle="Compute (monthly)"
                                     value={`${(neonUsage.cpuUsedSec / 3600).toFixed(1)} hrs`}
                                     limitLabel={`of ${np.limits.computeHours} hrs free`}
                                     pct={(neonUsage.cpuUsedSec / 3600 / np.limits.computeHours) * 100}
-                                    onClick={() => setModal({ service: "neon", metric: "compute" })}
+                                    onClick={() => setModal({ service: "neon", project: label, parentData: np })}
                                 />
                             ) : (
-                                <UsageCard
-                                    icon={<Database size={16} />} name="Neon DB" subtitle="Storage"
-                                    value={`${np.projects?.length ?? 0} projects`} limitLabel="View usage"
-                                    noBar onClick={() => setModal({ service: "neon", metric: "compute" })}
+                                <UsageCard icon={<Database size={16} />} name="Neon DB" subtitle="Storage"
+                                    value={`${np.projects?.length ?? 0} projects`} limitLabel="View usage" noBar
+                                    onClick={() => setModal({ service: "neon", project: label, parentData: np })}
                                 />
                             )}
 
-                            {/* ── Neon: storage ── */}
+                            {/* Neon storage */}
                             {neonUsage?.storageBytes != null && (
                                 <UsageCard
-                                    icon={<Database size={16} />}
-                                    name="Neon DB"
-                                    subtitle="DB storage"
+                                    icon={<Database size={16} />} name="Neon DB" subtitle="DB storage"
                                     value={fmt(neonUsage.storageBytes)}
                                     limitLabel={`of ${fmt(neonUsage.storageLimitBytes)} free`}
                                     pct={(neonUsage.storageBytes / neonUsage.storageLimitBytes) * 100}
-                                    onClick={() => setModal({ service: "neon", metric: "storage" })}
+                                    onClick={() => setModal({ service: "neon", project: label, parentData: np })}
                                 />
                             )}
 
-                            {/* ── ImageKit ── */}
+                            {/* ImageKit */}
                             {!ikp || !ikp.configured ? (
                                 <NotConfiguredCard keyName={`IMAGEKIT_PRIVATE_KEY_${label.replace(/-/g,"").toUpperCase()}`} />
                             ) : ikp.breakdown ? (
                                 ikp.breakdown.map((acc: any) => (
                                     <React.Fragment key={acc.account}>
                                         <UsageCard
-                                            icon={<Image size={16} />}
-                                            name="ImageKit Storage"
-                                            subtitle={acc.account}
+                                            icon={<Image size={16} />} name="ImageKit Storage" subtitle={acc.account}
                                             value={fmt(acc.storageUsed)}
                                             limitLabel={`of ${fmt(ikp.limits.storageBytes)} free · ${acc.fileCount} files`}
                                             pct={(acc.storageUsed / ikp.limits.storageBytes) * 100}
-                                            onClick={() => setModal({ service: "imagekit", metric: "storage" })}
+                                            onClick={() => setModal({ service: "imagekit", project: label, parentData: ikp })}
                                         />
                                         <UsageCard
-                                            icon={<Image size={16} />}
-                                            name="ImageKit Bandwidth"
-                                            subtitle={`${acc.account} · this month`}
+                                            icon={<Image size={16} />} name="ImageKit Bandwidth" subtitle={`${acc.account} · this month`}
                                             value={fmt(acc.bandwidthUsed)}
                                             limitLabel={`of ${fmt(ikp.limits.bandwidthBytes)} free/month`}
                                             pct={(acc.bandwidthUsed / ikp.limits.bandwidthBytes) * 100}
-                                            onClick={() => setModal({ service: "imagekit", metric: "bandwidth" })}
+                                            onClick={() => setModal({ service: "imagekit", project: label, parentData: ikp })}
                                         />
                                     </React.Fragment>
                                 ))
                             ) : ikStats?.storageUsed != null ? (
                                 <React.Fragment>
                                     <UsageCard
-                                        icon={<Image size={16} />}
-                                        name="ImageKit Storage"
-                                        subtitle="File storage"
+                                        icon={<Image size={16} />} name="ImageKit Storage" subtitle="File storage"
                                         value={fmt(ikStats.storageUsed)}
                                         limitLabel={`of ${fmt(ikp.limits.storageBytes)} free · ${ikStats.fileCount} files`}
                                         pct={(ikStats.storageUsed / ikp.limits.storageBytes) * 100}
-                                        onClick={() => setModal({ service: "imagekit", metric: "storage" })}
+                                        onClick={() => setModal({ service: "imagekit", project: label, parentData: ikp })}
                                     />
                                     <UsageCard
-                                        icon={<Image size={16} />}
-                                        name="ImageKit Bandwidth"
-                                        subtitle="This month"
+                                        icon={<Image size={16} />} name="ImageKit Bandwidth" subtitle="This month"
                                         value={fmt(ikStats.bandwidthUsed ?? 0)}
                                         limitLabel={`of ${fmt(ikp.limits.bandwidthBytes)} free/month`}
                                         pct={((ikStats.bandwidthUsed ?? 0) / ikp.limits.bandwidthBytes) * 100}
-                                        onClick={() => setModal({ service: "imagekit", metric: "bandwidth" })}
+                                        onClick={() => setModal({ service: "imagekit", project: label, parentData: ikp })}
                                     />
                                 </React.Fragment>
                             ) : (
-                                <UsageCard
-                                    icon={<Image size={16} />} name="ImageKit" subtitle="Media storage"
+                                <UsageCard icon={<Image size={16} />} name="ImageKit" subtitle="Media storage"
                                     value="Connected" limitLabel="View usage" noBar
-                                    onClick={() => setModal({ service: "imagekit", metric: "storage" })}
+                                    onClick={() => setModal({ service: "imagekit", project: label, parentData: ikp })}
                                 />
                             )}
 
-                            {/* ── Render (D-Driver only) ── */}
+                            {/* Render */}
                             {RENDER_USERS.has(label) && (
                                 !rp || !rp.configured ? (
                                     <NotConfiguredCard keyName="RENDER_API_KEY_DDRIVER" />
                                 ) : (
                                     <UsageCard
-                                        icon={<Server size={16} />}
-                                        name="Render"
-                                        subtitle="Backend service"
+                                        icon={<Server size={16} />} name="Render" subtitle="Backend service"
                                         value={(rp.services ?? []).length > 0
                                             ? ((rp.services[0].service ?? rp.services[0]).suspended === "not_suspended" ? "Active" : "Suspended")
-                                            : "—"
-                                        }
+                                            : "—"}
                                         limitLabel={(rp.services[0]?.service ?? rp.services[0])?.name ?? "Web service"}
                                         noBar
-                                        onClick={() => setModal({ service: "render", metric: "status" })}
+                                        onClick={() => setModal({ service: "render", project: label, parentData: rp })}
                                     />
                                 )
                             )}
@@ -554,13 +717,11 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                 })}
             </div>
 
-            {/* Chart modal */}
             {modal && (
                 <ServiceChartModal
                     modal={modal}
                     onClose={() => setModal(null)}
-                    onMetricChange={m => setModal(prev => prev ? { ...prev, metric: m } : null)}
-                    vercel={vercel} neon={neon} imagekit={imagekit} render={render}
+                    sessionId={sessionId}
                 />
             )}
         </>
@@ -596,9 +757,9 @@ function SecurityTab({ sessionId }: { sessionId: string }) {
         return <div className="flex items-center gap-2 text-sm text-gray-400 py-12 justify-center"><Loader2 size={16} className="animate-spin" /> Checking all three sites…</div>;
     }
 
-    const sites: any[]  = data?.sites ?? [];
-    const sessions      = data?.sessions ?? {};
-    const allHeaders    = Object.keys(HEADER_LABELS);
+    const sites: any[] = data?.sites ?? [];
+    const sessions     = data?.sessions ?? {};
+    const allHeaders   = Object.keys(HEADER_LABELS);
 
     return (
         <div className="space-y-6">
@@ -608,7 +769,6 @@ function SecurityTab({ sessionId }: { sessionId: string }) {
                     <RefreshCw size={11} /> {lastRefresh.toLocaleTimeString()}
                 </button>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {sites.map(site => (
                     <div key={site.name} className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
@@ -639,7 +799,6 @@ function SecurityTab({ sessionId }: { sessionId: string }) {
                     </div>
                 ))}
             </div>
-
             <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
                 <div className="flex items-center gap-2">
                     <ShieldCheck size={16} className="text-blue-500" />
@@ -676,10 +835,7 @@ function PortalView({ portalName }: { portalName: string }) {
     const url = PORTAL_URLS[portalName];
     if (!url) return null;
     return (
-        <iframe
-            key={url}
-            src={url}
-            title={portalName}
+        <iframe key={url} src={url} title={portalName}
             sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation allow-modals"
             style={{ position: "fixed", top: 0, left: 260, right: 0, bottom: 0, width: "calc(100vw - 260px)", height: "100vh", border: "none", zIndex: 45 }}
         />
@@ -711,7 +867,6 @@ export default function PlatformHubModule({ initialPortal }: { initialPortal?: s
                     hariharanhub.com · startupmenswear.in · d-driver.vercel.app
                 </div>
             </div>
-
             <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800/50 rounded-xl w-fit">
                 {SUB_TABS.map(tab => (
                     <button key={tab.id} onClick={() => setActiveSubTab(tab.id)}
@@ -724,7 +879,6 @@ export default function PlatformHubModule({ initialPortal }: { initialPortal?: s
                     </button>
                 ))}
             </div>
-
             {activeSubTab === "usages"   && <UsagesTab sessionId={sessionId} />}
             {activeSubTab === "security" && <SecurityTab sessionId={sessionId} />}
         </div>
