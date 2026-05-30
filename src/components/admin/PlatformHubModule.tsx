@@ -22,24 +22,30 @@ function fmt(bytes: number) {
     return `${bytes} B`;
 }
 
+function localDateStr(d: Date) {
+    // Build YYYY-MM-DD from LOCAL time components — avoids UTC shift (e.g. IST → Apr 30 instead of May 1)
+    const p = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 function getPeriodRange(period: Period, customStart: string, customEnd: string) {
     const now = new Date();
     if (period === "this_month") {
-        const from = new Date(now.getFullYear(), now.getMonth(), 1);
+        const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0); // LOCAL midnight May 1
         return {
             from: from.getTime(), to: now.getTime(),
-            startDate: from.toISOString().slice(0, 10),
-            endDate:   now.toISOString().slice(0, 10),
+            startDate: localDateStr(from), // "2026-05-01"
+            endDate:   localDateStr(now),  // "2026-05-30"
             label: "This Month",
         };
     }
     if (period === "prev_month") {
-        const from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        const to   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        const from = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0);
+        const to   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
         return {
             from: from.getTime(), to: to.getTime(),
-            startDate: from.toISOString().slice(0, 10),
-            endDate:   to.toISOString().slice(0, 10),
+            startDate: localDateStr(from),
+            endDate:   localDateStr(to),
             label: "Previous Month",
         };
     }
@@ -186,7 +192,7 @@ function ServiceChartModal({
 
         try {
             if (modal.service === "vercel") {
-                const url = `/api/admin/hub/vercel-usage?project=${encodeURIComponent(modal.project)}&from=${range.from}&to=${range.to}`;
+                const url = `/api/admin/hub/vercel-usage?project=${encodeURIComponent(modal.project)}&from=${range.from}&to=${range.to}&startDate=${range.startDate}&endDate=${range.endDate}`;
                 const res = await fetch(url, { headers: h });
                 setData(await res.json());
             } else if (modal.service === "neon") {

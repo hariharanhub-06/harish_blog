@@ -14,24 +14,28 @@ function currentMonthRange() {
     return { startDate: `${y}-${m}-01`, endDate: `${y}-${m}-${String(lastDay).padStart(2, "0")}` };
 }
 
-// Fetch ImageKit usage for a single date range (one API call)
+// Fetch ImageKit usage for a single date range
 async function fetchOnePeriod(
     privateKey: string,
     startDate: string,
     endDate: string,
+    includeFiles = false,
 ): Promise<{ storageUsed: number; bandwidthUsed: number; fileCount: number } | null> {
     if (!privateKey) return null;
     const credentials = Buffer.from(`${privateKey.trim()}:`).toString("base64");
     const headers = { Authorization: `Basic ${credentials}` };
     try {
-        const [filesRes, usageRes] = await Promise.all([
-            fetch("https://api.imagekit.io/v1/files?limit=1000&skip=0", { headers }),
+        const requests: Promise<Response>[] = [
             fetch(`https://api.imagekit.io/v1/accounts/usage?startDate=${startDate}&endDate=${endDate}`, { headers }),
-        ]);
-        const files: any[] = filesRes.ok ? await filesRes.json() : [];
+        ];
+        if (includeFiles) {
+            requests.push(fetch("https://api.imagekit.io/v1/files?limit=1000&skip=0", { headers }));
+        }
+        const [usageRes, filesRes] = await Promise.all(requests);
         const usage: any    = usageRes.ok ? await usageRes.json() : {};
+        const files: any[]  = filesRes?.ok ? await filesRes.json() : [];
         return {
-            storageUsed:   usage.mediaLibraryStorageBytes ?? files.reduce((s: number, f: any) => s + (f.size ?? 0), 0),
+            storageUsed:   usage.mediaLibraryStorageBytes ?? (includeFiles ? files.reduce((s: number, f: any) => s + (f.size ?? 0), 0) : 0),
             bandwidthUsed: usage.bandwidthBytes ?? 0,
             fileCount:     files.length,
         };
@@ -40,17 +44,26 @@ async function fetchOnePeriod(
     }
 }
 
-// Build day-by-day array for a date range (max 60 days)
-function buildDayList(startDate: string, endDate: string): string[] {
-    const days: string[] = [];
-    const cur = new Date(startDate + "T00:00:00Z");
-    const end = new Date(endDate   + "T00:00:00Z");
-    const max = new Date(cur.getTime() + 60 * 86400000);
-    while (cur <= end && cur <= max) {
-        days.push(cur.toISOString().slice(0, 10));
-        cur.setUTCDate(cur.getUTCDate() + 1);
+// Split date range into ~weekly intervals (max 6 chunks)
+function buildWeeklyIntervals(startDate: string, endDate: string): { start: string; end: string; label: string }[] {
+    const start = new Date(startDate + "T00:00:00Z");
+    const end   = new Date(endDate   + "T00:00:00Z");
+    const totalDays = Math.ceil((end.getTime() - start.getTime()) / 86400000) + 1;
+    const chunkDays = Math.max(1, Math.ceil(totalDays / 6)); // at most 6 chunks
+
+    const intervals: { start: string; end: string; label: string }[] = [];
+    const cur = new Date(start);
+    while (cur <= end) {
+        const chunkEnd = new Date(Math.min(cur.getTime() + (chunkDays - 1) * 86400000, end.getTime()));
+        const s = cur.toISOString().slice(0, 10);
+        const e = chunkEnd.toISOString().slice(0, 10);
+        intervals.push({
+            start: s, end: e,
+            label: new Date(s + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+        });
+        cur.setUTCDate(cur.getUTCDate() + chunkDays);
     }
-    return days;
+    return intervals;
 }
 
 async function fetchImageKitProject(
@@ -58,48 +71,24 @@ async function fetchImageKitProject(
     projectLabel: string,
     startDate?: string,
     endDate?: string,
-    daily?: boolean,
+    weekly?: boolean,
 ) {
     const range  = startDate && endDate ? { startDate, endDate } : currentMonthRange();
     const valid  = keys.filter(k => k.key);
     if (valid.length === 0) return { label: projectLabel, configured: false };
 
-    if (daily) {
-        // Fetch each day separately in parallel for time-series chart
-        const days = buildDayList(range.startDate, range.endDate);
+    if (weekly) {
+        const intervals = buildWeeklyIntervals(range.startDate, range.endDate);
 
-        // Aggregate across accounts for each day
-        const dailyResults = await Promise.allSettled(
-            days.map(async (day) => {
-                const dayResults = await Promise.allSettled(
-                    valid.map(k => fetchOnePeriod(k.key, day, day))
-                );
-                const totals = dayResults.reduce(
-                    (acc, r) => {
-                        if (r.status === "fulfilled" && r.value) {
-                            acc.bandwidthUsed += r.value.bandwidthUsed;
-                            // storage is the same across a day; take max
-                            acc.storageUsed = Math.max(acc.storageUsed, r.value.storageUsed);
-                        }
-                        return acc;
-                    },
-                    { bandwidthUsed: 0, storageUsed: 0 }
-                );
-                return { date: day, ...totals };
-            })
+        // Fetch totals for the full period first (with file count)
+        const totalsRaw = await Promise.allSettled(
+            valid.map(k => fetchOnePeriod(k.key, range.startDate, range.endDate, true))
         );
-
-        const dailyData = dailyResults.map((r, i) =>
-            r.status === "fulfilled" ? r.value : { date: days[i], bandwidthUsed: 0, storageUsed: 0 }
-        );
-
-        // Also fetch totals for the whole period for stat pills
-        const totalsResults = await Promise.allSettled(valid.map(k => fetchOnePeriod(k.key, range.startDate, range.endDate)));
-        const totals = totalsResults.reduce(
+        const totals = totalsRaw.reduce(
             (acc, r) => {
                 if (r.status === "fulfilled" && r.value) {
                     acc.bandwidthUsed += r.value.bandwidthUsed;
-                    acc.storageUsed    = Math.max(acc.storageUsed, r.value.storageUsed);
+                    acc.storageUsed   += r.value.storageUsed; // SUM across accounts
                     acc.fileCount     += r.value.fileCount;
                 }
                 return acc;
@@ -107,34 +96,59 @@ async function fetchImageKitProject(
             { bandwidthUsed: 0, storageUsed: 0, fileCount: 0 }
         );
 
+        // Fetch each weekly interval per account (in parallel)
+        const weeklyRaw = await Promise.allSettled(
+            intervals.map(async (iv) => {
+                const perAccount = await Promise.allSettled(
+                    valid.map(k => fetchOnePeriod(k.key, iv.start, iv.end))
+                );
+                const agg = perAccount.reduce(
+                    (acc, r) => {
+                        if (r.status === "fulfilled" && r.value) {
+                            acc.bandwidthUsed += r.value.bandwidthUsed;
+                            acc.storageUsed   += r.value.storageUsed;
+                        }
+                        return acc;
+                    },
+                    { bandwidthUsed: 0, storageUsed: 0 }
+                );
+                return { date: iv.label, ...agg };
+            })
+        );
+
+        const weeklyData = weeklyRaw.map((r, i) =>
+            r.status === "fulfilled" ? r.value : { date: intervals[i].label, bandwidthUsed: 0, storageUsed: 0 }
+        );
+
         return {
             label: projectLabel,
             configured: true,
-            daily: dailyData,
+            weekly: weeklyData,
             stats: totals,
             limits: FREE_LIMITS,
             period: range,
         };
     }
 
-    // Non-daily: aggregate totals for the full range
-    const results = await Promise.allSettled(valid.map(k => fetchOnePeriod(k.key, range.startDate, range.endDate)));
-    const successful = results
+    // Non-weekly: aggregate totals for the full range only
+    const results = await Promise.allSettled(
+        valid.map(k => fetchOnePeriod(k.key, range.startDate, range.endDate, true))
+    );
+    const breakdown = results
         .map((r, i) => ({ account: valid[i].account, data: r.status === "fulfilled" ? r.value : null }))
         .filter(r => r.data !== null) as { account: string; data: { storageUsed: number; bandwidthUsed: number; fileCount: number } }[];
 
-    if (successful.length === 0) return { label: projectLabel, configured: true, error: "API call failed" };
+    if (breakdown.length === 0) return { label: projectLabel, configured: true, error: "API call failed" };
 
-    const breakdown = successful.map(r => ({ account: r.account, ...r.data }));
     return {
         label: projectLabel,
         configured: true,
         stats: {
-            storageUsed:   breakdown.reduce((s, r) => s + r.storageUsed, 0),
-            bandwidthUsed: breakdown.reduce((s, r) => s + r.bandwidthUsed, 0),
-            fileCount:     breakdown.reduce((s, r) => s + r.fileCount, 0),
+            storageUsed:   breakdown.reduce((s, r) => s + r.data.storageUsed, 0),   // SUM
+            bandwidthUsed: breakdown.reduce((s, r) => s + r.data.bandwidthUsed, 0), // SUM
+            fileCount:     breakdown.reduce((s, r) => s + r.data.fileCount, 0),
         },
-        breakdown: breakdown.length > 1 ? breakdown : undefined,
+        breakdown: breakdown.length > 1 ? breakdown.map(r => ({ account: r.account, ...r.data })) : undefined,
         limits: FREE_LIMITS,
         period: range,
     };
@@ -149,7 +163,7 @@ export async function GET(req: Request) {
         const projectParam = searchParams.get("project");
         const startDate    = searchParams.get("startDate") ?? undefined;
         const endDate      = searchParams.get("endDate")   ?? undefined;
-        const daily        = searchParams.get("daily") === "true";
+        const weekly       = searchParams.get("weekly") === "true";
 
         const projectMap: Record<string, { key: string; account: string }[]> = {
             "Harishblog": [{ key: process.env.IMAGEKIT_PRIVATE_KEY ?? "", account: "Harishblog" }],
@@ -162,7 +176,7 @@ export async function GET(req: Request) {
 
         if (projectParam && projectMap[projectParam]) {
             return NextResponse.json(
-                await fetchImageKitProject(projectMap[projectParam], projectParam, startDate, endDate, daily)
+                await fetchImageKitProject(projectMap[projectParam], projectParam, startDate, endDate, weekly)
             );
         }
 
