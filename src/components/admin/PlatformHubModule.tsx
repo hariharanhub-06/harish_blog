@@ -196,7 +196,7 @@ function ServiceChartModal({
                 const json = await res.json();
                 setData(json.projects?.find((p: any) => p.label === modal.project) ?? json);
             } else if (modal.service === "imagekit") {
-                const url = `/api/admin/hub/imagekit-usage?project=${encodeURIComponent(modal.project)}&startDate=${range.startDate}&endDate=${range.endDate}`;
+                const url = `/api/admin/hub/imagekit-usage?project=${encodeURIComponent(modal.project)}&startDate=${range.startDate}&endDate=${range.endDate}&daily=true`;
                 const res = await fetch(url, { headers: h });
                 setData(await res.json());
             } else if (modal.service === "render") {
@@ -407,70 +407,82 @@ function NeonChart({ data, color }: { data: any; color: string }) {
 }
 
 function ImageKitChart({ data, color }: { data: any; color: string }) {
-    const limits  = data.limits ?? { storageBytes: 20 * 1024 * 1024 * 1024, bandwidthBytes: 20 * 1024 * 1024 * 1024 };
-    const stats   = data.stats;
-    const breakdown: any[] = data.breakdown ?? [];
+    const [metric, setMetric] = useState<"bandwidth" | "storage">("bandwidth");
+    const limits = data.limits ?? { storageBytes: 20 * 1024 * 1024 * 1024, bandwidthBytes: 20 * 1024 * 1024 * 1024 };
+    const stats  = data.stats;
+    const daily: { date: string; bandwidthUsed: number; storageUsed: number }[] = data.daily ?? [];
 
-    if (!stats && !breakdown.length) return <p className="text-slate-500 text-sm text-center py-10">No usage data available</p>;
+    if (!stats && !daily.length) return <p className="text-slate-500 text-sm text-center py-10">No usage data available</p>;
 
-    const storageUsed   = stats?.storageUsed   ?? breakdown.reduce((s: number, r: any) => s + (r.storageUsed ?? 0), 0);
-    const bandwidthUsed = stats?.bandwidthUsed ?? breakdown.reduce((s: number, r: any) => s + (r.bandwidthUsed ?? 0), 0);
-    const fileCount     = stats?.fileCount     ?? breakdown.reduce((s: number, r: any) => s + (r.fileCount ?? 0), 0);
-    const storagePct    = (storageUsed   / limits.storageBytes)   * 100;
-    const bandwidthPct  = (bandwidthUsed / limits.bandwidthBytes) * 100;
+    const totalBw  = stats?.bandwidthUsed ?? 0;
+    const totalSt  = stats?.storageUsed   ?? 0;
+    const fileCount = stats?.fileCount    ?? 0;
+    const bwPct    = (totalBw / limits.bandwidthBytes) * 100;
+    const stPct    = (totalSt / limits.storageBytes)   * 100;
+    const barColor = (pct: number) => pct >= 80 ? "#ef4444" : pct >= 60 ? "#f59e0b" : color;
 
-    const chartData = [
-        { metric: "Storage",   pct: storagePct,   display: `${fmt(storageUsed)} / ${fmt(limits.storageBytes)}`,     used: storageUsed,   limit: limits.storageBytes },
-        { metric: "Bandwidth", pct: bandwidthPct,  display: `${fmt(bandwidthUsed)} / ${fmt(limits.bandwidthBytes)}`, used: bandwidthUsed, limit: limits.bandwidthBytes },
-    ];
+    const chartData = daily.map(d => ({
+        ...d,
+        label: new Date(d.date + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+        value: metric === "bandwidth" ? d.bandwidthUsed : d.storageUsed,
+    }));
+
+    const gradId = `ikGrad_${metric}`;
 
     return (
         <div className="space-y-5">
+            {/* Stat pills */}
             <div className="grid grid-cols-3 gap-3">
-                <StatPill label="Storage" value={fmt(storageUsed)} color={storagePct >= 80 ? "#ef4444" : color} />
-                <StatPill label="Bandwidth" value={fmt(bandwidthUsed)} color={bandwidthPct >= 80 ? "#ef4444" : color} />
-                <StatPill label="Files" value={`${fileCount}`} color={color} />
+                <StatPill label="Bandwidth" value={fmt(totalBw)} color={barColor(bwPct)} />
+                <StatPill label="Storage"   value={fmt(totalSt)} color={barColor(stPct)} />
+                <StatPill label="Files"     value={`${fileCount}`} color={color} />
             </div>
-            <div>
-                <p className="text-slate-400 text-xs mb-3 font-medium uppercase tracking-wide">Storage & bandwidth vs free limit</p>
-                <div className="h-[180px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                            <XAxis dataKey="metric" tick={{ fill: "#94a3b8", fontSize: 12 }} axisLine={false} tickLine={false} />
-                            <YAxis tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false}
-                                tickFormatter={v => `${Math.round(v)}%`} domain={[0, 100]} />
-                            <Tooltip
-                                contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#f1f5f9", fontSize: 12 }}
-                                formatter={(_: any, __: any, props: any) => [props.payload?.display ?? "", "Used"]}
-                                labelStyle={{ color: "#94a3b8" }}
-                                cursor={{ fill: "rgba(255,255,255,0.03)" }}
-                            />
-                            <Bar dataKey="pct" radius={[6, 6, 0, 0]} maxBarSize={100}>
-                                {chartData.map((e, i) => <Cell key={i} fill={e.pct >= 80 ? "#ef4444" : e.pct >= 60 ? "#f59e0b" : color} />)}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
+
+            {/* Metric toggle */}
+            <div className="flex items-center gap-2">
+                {(["bandwidth", "storage"] as const).map(m => (
+                    <button key={m} onClick={() => setMetric(m)}
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition capitalize ${
+                            metric === m ? "text-white" : "text-slate-400 bg-[#1e293b] hover:text-slate-200"
+                        }`}
+                        style={metric === m ? { background: color } : undefined}>
+                        {m}
+                    </button>
+                ))}
+                <span className="text-slate-500 text-xs ml-1">per day</span>
             </div>
+
+            {/* Area chart — date on X, metric on Y */}
+            <div className="h-[200px]">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+                        <defs>
+                            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%"  stopColor={color} stopOpacity={0.4} />
+                                <stop offset="95%" stopColor={color} stopOpacity={0.02} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                        <XAxis dataKey="label" tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false}
+                            interval={Math.max(0, Math.floor(chartData.length / 8) - 1)} />
+                        <YAxis tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false}
+                            tickFormatter={v => fmt(v)} width={56} />
+                        <Tooltip
+                            contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#f1f5f9", fontSize: 12 }}
+                            formatter={(v: any) => [fmt(v as number), metric === "bandwidth" ? "Bandwidth" : "Storage"]}
+                            labelStyle={{ color: "#94a3b8" }}
+                            cursor={{ stroke: color, strokeWidth: 1, strokeOpacity: 0.3 }}
+                        />
+                        <Area type="monotone" dataKey="value" stroke={color} strokeWidth={2} fill={`url(#${gradId})`} dot={false} />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
+
+            {/* Usage bars */}
             <div className="space-y-3 border-t border-slate-800 pt-4">
-                <UsageBar label="Storage used" used={storageUsed} limit={limits.storageBytes} displayUsed={fmt(storageUsed)} displayLimit={fmt(limits.storageBytes)} color={storagePct >= 80 ? "#ef4444" : color} />
-                <UsageBar label="Bandwidth used" used={bandwidthUsed} limit={limits.bandwidthBytes} displayUsed={fmt(bandwidthUsed)} displayLimit={fmt(limits.bandwidthBytes)} color={bandwidthPct >= 80 ? "#ef4444" : color} />
+                <UsageBar label="Bandwidth used" used={totalBw} limit={limits.bandwidthBytes} displayUsed={fmt(totalBw)} displayLimit={fmt(limits.bandwidthBytes)} color={barColor(bwPct)} />
+                <UsageBar label="Storage used"   used={totalSt} limit={limits.storageBytes}   displayUsed={fmt(totalSt)} displayLimit={fmt(limits.storageBytes)}   color={barColor(stPct)} />
             </div>
-            {data.period && (
-                <p className="text-xs text-slate-600">Period: {data.period.startDate} → {data.period.endDate}</p>
-            )}
-            {breakdown.length > 1 && (
-                <div className="space-y-2 border-t border-slate-800 pt-4">
-                    <p className="text-slate-400 text-xs font-medium uppercase tracking-wide">Breakdown by account</p>
-                    {breakdown.map((acc: any) => (
-                        <div key={acc.account} className="flex items-center justify-between text-xs">
-                            <span className="text-slate-300">{acc.account}</span>
-                            <span className="text-slate-500">{fmt(acc.storageUsed)} storage · {fmt(acc.bandwidthUsed)} bw · {acc.fileCount} files</span>
-                        </div>
-                    ))}
-                </div>
-            )}
         </div>
     );
 }

@@ -2,46 +2,50 @@ import { NextResponse } from "next/server";
 import { validateAdminSession } from "@/lib/adminAuth";
 
 const FREE_LIMITS = {
-    bandwidth:         100 * 1024 * 1024 * 1024,
-    buildMinutes:      6000,
-    edgeInvocations:   1_000_000,
+    bandwidth:          100 * 1024 * 1024 * 1024,
+    buildMinutes:       6000,
+    edgeInvocations:    1_000_000,
     monthlyDeployLimit: 6000,
 };
 
-async function fetchDeployments(token: string, from: number, to: number) {
+async function fetchDeploymentsInRange(token: string, sinceMs: number, untilMs: number) {
     const headers = { Authorization: `Bearer ${token}` };
+    // Vercel uses `since` (created after) and `until` (created before) — NOT `from`
     const res = await fetch(
-        `https://api.vercel.com/v6/deployments?limit=100&state=READY&from=${from}&until=${to}`,
+        `https://api.vercel.com/v6/deployments?limit=100&state=READY&since=${sinceMs}&until=${untilMs}`,
         { headers }
     );
     if (!res.ok) return [];
-    return (await res.json()).deployments ?? [];
+    const data = await res.json();
+    return (data.deployments ?? []).filter(
+        (d: any) => d.createdAt >= sinceMs && d.createdAt <= untilMs
+    );
 }
 
 async function fetchVercelData(token: string, projectLabel: string, from?: number, to?: number) {
     if (!token) return { label: projectLabel, configured: false };
     const headers = { Authorization: `Bearer ${token}` };
 
-    const rangeFrom = from ?? (() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d.getTime(); })();
-    const rangeTo   = to ?? Date.now();
+    const now   = new Date();
+    const rangeFrom = from ?? new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    const rangeTo   = to   ?? now.getTime();
 
     try {
-        const [projectsRes, allDeps] = await Promise.all([
+        const [projectsRes, deps] = await Promise.all([
             fetch("https://api.vercel.com/v9/projects?limit=20", { headers }),
-            fetchDeployments(token, rangeFrom, rangeTo),
+            fetchDeploymentsInRange(token, rangeFrom, rangeTo),
         ]);
 
         const projects: any[] = projectsRes.ok ? (await projectsRes.json()).projects ?? [] : [];
 
-        // Build daily breakdown
+        // Daily breakdown — group by date within range
         const byDay: Record<string, number> = {};
-        for (const d of allDeps) {
-            if (!d.createdAt || d.createdAt < rangeFrom || d.createdAt > rangeTo) continue;
+        for (const d of deps) {
             const day = new Date(d.createdAt).toISOString().slice(0, 10);
             byDay[day] = (byDay[day] ?? 0) + 1;
         }
 
-        // Fill all days in range with 0
+        // Fill every day in range (including 0-build days)
         const daily: { date: string; builds: number }[] = [];
         const cur = new Date(rangeFrom);
         const end = new Date(rangeTo);
@@ -51,14 +55,14 @@ async function fetchVercelData(token: string, projectLabel: string, from?: numbe
             cur.setDate(cur.getDate() + 1);
         }
 
-        const monthlyBuilds = allDeps.length;
-        const lastDeployAt  = allDeps[0]?.createdAt ?? null;
+        const monthlyBuilds = deps.length;
+        const lastDeployAt  = deps[0]?.createdAt ?? null;
 
         return {
             label: projectLabel,
             configured: true,
             projects,
-            usage: { monthlyBuilds, lastDeployAt, totalFetched: allDeps.length },
+            usage: { monthlyBuilds, lastDeployAt },
             daily,
             limits: FREE_LIMITS,
         };
@@ -77,19 +81,16 @@ export async function GET(req: Request) {
         const from = searchParams.get("from") ? parseInt(searchParams.get("from")!) : undefined;
         const to   = searchParams.get("to")   ? parseInt(searchParams.get("to")!)   : undefined;
 
-        // Single-project detailed request
         if (projectParam) {
             const tokenMap: Record<string, string> = {
                 "Harishblog": process.env.VERCEL_API_TOKEN_HARISHBLOG ?? "",
                 "StartUP":    process.env.VERCEL_API_TOKEN_STARTUP    ?? "",
                 "D-Driver":   process.env.VERCEL_API_TOKEN_DDRIVER    ?? "",
             };
-            const token = tokenMap[projectParam] ?? "";
-            const data  = await fetchVercelData(token, projectParam, from, to);
+            const data = await fetchVercelData(tokenMap[projectParam] ?? "", projectParam, from, to);
             return NextResponse.json(data);
         }
 
-        // All-projects summary (existing behaviour)
         const results = await Promise.all([
             fetchVercelData(process.env.VERCEL_API_TOKEN_HARISHBLOG ?? "", "Harishblog"),
             fetchVercelData(process.env.VERCEL_API_TOKEN_STARTUP    ?? "", "StartUP"),
