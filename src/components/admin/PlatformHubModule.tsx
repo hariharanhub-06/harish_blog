@@ -426,10 +426,11 @@ function ImageKitChart({ data, color }: { data: any; color: string }) {
     const stPct     = (totalSt / limits.storageBytes)   * 100;
     const barColor  = (pct: number) => pct >= 80 ? "#ef4444" : pct >= 60 ? "#f59e0b" : color;
 
-    // Only bandwidth makes sense as a time-series — storage is cumulative and doesn't change by period
+    const gradId = "ikBwGrad";
+
     const chartData = weekly.map(d => ({
         ...d,
-        label: d.date, // already formatted as "1 May" from the backend
+        label: d.date,
         value: d.bandwidthUsed,
     }));
 
@@ -465,7 +466,7 @@ function ImageKitChart({ data, color }: { data: any; color: string }) {
                             tickFormatter={v => fmt(v)} width={56} />
                         <Tooltip
                             contentStyle={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 8, color: "#f1f5f9", fontSize: 12 }}
-                            formatter={(v: any) => [fmt(v as number), metric === "bandwidth" ? "Bandwidth" : "Storage"]}
+                            formatter={(v: any) => [fmt(v as number), "Bandwidth"]}
                             labelStyle={{ color: "#94a3b8" }}
                             cursor={{ stroke: color, strokeWidth: 1, strokeOpacity: 0.3 }}
                         />
