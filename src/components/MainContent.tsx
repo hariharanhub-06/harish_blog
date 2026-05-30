@@ -21,7 +21,6 @@ import dynamic from "next/dynamic";
 
 const GamesCarousel = dynamic(() => import("@/components/GamesCarousel"), { ssr: false });
 const GameOverlay = dynamic(() => import("@/components/GameOverlay"), { ssr: false });
-const TreeSection = dynamic(() => import("@/components/TreeSection"), { ssr: false });
 import QuizGameOverlay from "@/components/QuizGameOverlay";
 import TypingTestSection from "@/components/TypingTestSection";
 import LiveSessionsCarousel from "./LiveSessionsCarousel";
@@ -661,9 +660,6 @@ export default function MainContent({
             {profile.showTypingTestSection !== false && <section id="typing-test"><TypingTestSection /></section>}
 
             {profile.showFeedbackSection !== false && <section id="feedback"><FeedbackSection /></section>}
-
-            {/* Message Tree — full section embedded in main page */}
-            <TreeSection />
 
             {/* Games Section */}
             {profile.showGamesSection !== false && <section id="games"><GamesCarousel onPlayGame={setActiveGameId} /></section>}
