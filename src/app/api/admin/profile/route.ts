@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { profiles } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { validateAdminSession } from "@/lib/adminAuth";
@@ -50,12 +50,22 @@ export async function GET(req: Request) {
     try {
         const authError = await validateAdminSession(req);
         if (authError) return authError;
-        const profile = await db.query.profiles.findFirst({
-            orderBy: (p, { desc }) => [desc(p.updatedAt)],
-        });
-        return NextResponse.json(profile || DEFAULT_PROFILE);
+
+        // Use direct select (more reliable than relational query builder on cold starts)
+        const rows = await db.select().from(profiles).orderBy(desc(profiles.updatedAt)).limit(1);
+        const profile = rows[0] ?? null;
+
+        if (profile) return NextResponse.json(profile);
+
+        // Only fall back to defaults if no profile row exists at all
+        return NextResponse.json(DEFAULT_PROFILE);
     } catch (error: unknown) {
         console.error("GET Profile failed:", error);
+        // Attempt a raw fallback query before giving up
+        try {
+            const rows = await db.select().from(profiles).limit(1);
+            if (rows[0]) return NextResponse.json(rows[0]);
+        } catch { /* ignore */ }
         return NextResponse.json(DEFAULT_PROFILE);
     }
 }
@@ -70,9 +80,8 @@ export async function POST(req: Request) {
         await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS click_effect TEXT DEFAULT 'none'`).catch(() => {});
         await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_know_about_you_section BOOLEAN DEFAULT true`).catch(() => {});
 
-        const existing = await db.query.profiles.findFirst({
-            orderBy: (p, { desc }) => [desc(p.updatedAt)],
-        });
+        const existingRows = await db.select().from(profiles).orderBy(desc(profiles.updatedAt)).limit(1);
+        const existing = existingRows[0] ?? null;
 
         const fields = {
             name: data.name,
@@ -105,6 +114,7 @@ export async function POST(req: Request) {
             showGamesSection: data.showGamesSection,
             showLiveSessionsSection: data.showLiveSessionsSection,
             showKnowAboutYouSection: data.showKnowAboutYouSection,
+            showTreeSection: data.showTreeSection ?? true,
             clickEffect: data.clickEffect ?? "none",
         };
 
