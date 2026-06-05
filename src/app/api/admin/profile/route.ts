@@ -51,21 +51,58 @@ export async function GET(req: Request) {
         const authError = await validateAdminSession(req);
         if (authError) return authError;
 
-        // Use direct select (more reliable than relational query builder on cold starts)
-        const rows = await db.select().from(profiles).orderBy(desc(profiles.updatedAt)).limit(1);
-        const profile = rows[0] ?? null;
+        // Ensure all new columns exist on the production DB (safe no-op if already present)
+        await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS click_effect TEXT DEFAULT 'none'`).catch(() => {});
+        await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_know_about_you_section BOOLEAN DEFAULT true`).catch(() => {});
+        await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_tree_section BOOLEAN DEFAULT true`).catch(() => {});
 
-        if (profile) return NextResponse.json(profile);
+        // Use SELECT * via raw SQL — resilient to any missing columns, returns whatever exists
+        const rows = await db.execute(sql`SELECT * FROM profiles ORDER BY updated_at DESC LIMIT 1`);
+        const raw = (rows as any).rows?.[0] ?? (Array.isArray(rows) ? rows[0] : null);
 
-        // Only fall back to defaults if no profile row exists at all
-        return NextResponse.json(DEFAULT_PROFILE);
+        if (!raw) return NextResponse.json(DEFAULT_PROFILE);
+
+        // Map snake_case DB columns → camelCase for the frontend
+        const profile = {
+            id:                          raw.id,
+            name:                        raw.name,
+            headline:                    raw.headline,
+            bio:                         raw.bio,
+            about:                       raw.about,
+            email:                       raw.email,
+            location:                    raw.location,
+            avatarUrl:                   raw.avatar_url,
+            heroImageUrl:                raw.hero_image_url,
+            aboutImageUrl:               raw.about_image_url,
+            audioUrl:                    raw.audio_url,
+            featuredVideoUrl:            raw.featured_video_url,
+            businessSolutionVideoUrl:    raw.business_solution_video_url,
+            businessSolutionVideoConfig: raw.business_solution_video_config,
+            socialLinks:                 raw.social_links,
+            stats:                       raw.stats,
+            trainingStats:               raw.training_stats,
+            updatedAt:                   raw.updated_at,
+            showHeroSection:             raw.show_hero_section ?? true,
+            showStatsSection:            raw.show_stats_section ?? true,
+            showTrainingSection:         raw.show_training_section ?? true,
+            showExperienceSection:       raw.show_experience_section ?? true,
+            showEducationSection:        raw.show_education_section ?? true,
+            showVolunteeringSection:     raw.show_volunteering_section ?? true,
+            showAboutSection:            raw.show_about_section ?? true,
+            showProjectsSection:         raw.show_projects_section ?? true,
+            showQuizzesSection:          raw.show_quizzes_section ?? true,
+            showTypingTestSection:       raw.show_typing_test_section ?? true,
+            showFeedbackSection:         raw.show_feedback_section ?? true,
+            showGamesSection:            raw.show_games_section ?? true,
+            showLiveSessionsSection:     raw.show_live_sessions_section ?? true,
+            showKnowAboutYouSection:     raw.show_know_about_you_section ?? true,
+            showTreeSection:             raw.show_tree_section ?? true,
+            clickEffect:                 raw.click_effect ?? "none",
+        };
+
+        return NextResponse.json(profile);
     } catch (error: unknown) {
         console.error("GET Profile failed:", error);
-        // Attempt a raw fallback query before giving up
-        try {
-            const rows = await db.select().from(profiles).limit(1);
-            if (rows[0]) return NextResponse.json(rows[0]);
-        } catch { /* ignore */ }
         return NextResponse.json(DEFAULT_PROFILE);
     }
 }
@@ -76,9 +113,10 @@ export async function POST(req: Request) {
         if (authError) return authError;
         const data = await req.json();
 
-        // Auto-add any new columns that may not exist yet
+        // Ensure all new columns exist on the production DB
         await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS click_effect TEXT DEFAULT 'none'`).catch(() => {});
         await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_know_about_you_section BOOLEAN DEFAULT true`).catch(() => {});
+        await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS show_tree_section BOOLEAN DEFAULT true`).catch(() => {});
 
         const existingRows = await db.select().from(profiles).orderBy(desc(profiles.updatedAt)).limit(1);
         const existing = existingRows[0] ?? null;
