@@ -2,7 +2,7 @@ import Hero from "@/components/Hero";
 import MainContent from "@/components/MainContent";
 import { db } from "@/db";
 
-export const revalidate = 60; // ISR: refresh every 60 seconds
+export const revalidate = 30; // ISR: refresh every 30 seconds
 
 export default async function Home() {
   // Fetch all data with safe fallbacks
