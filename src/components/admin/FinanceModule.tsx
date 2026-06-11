@@ -101,7 +101,7 @@ export default function FinanceModule() {
     const [analytics, setAnalytics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [dateRange, setDateRange] = useState("Last 30 Days");
+    const [dateRange, setDateRange] = useState("This Month");
     const [filterOpen, setFilterOpen] = useState(false);
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -1584,7 +1584,7 @@ export default function FinanceModule() {
                                             value={debtForm.name}
                                             onChange={(e) => setDebtForm({ ...debtForm, name: e.target.value })}
                                             placeholder="e.g. Bank Loan, Friend X"
-                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                            className="w-full px-6 py-4 bg-gray-50 dark:bg-white/10 dark:text-white dark:placeholder-gray-500 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
@@ -1602,7 +1602,7 @@ export default function FinanceModule() {
                                                     }
                                                 }}
                                                 placeholder="0.00"
-                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
+                                                className="w-full px-6 py-4 bg-gray-50 dark:bg-white/10 dark:text-white dark:placeholder-gray-500 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all font-mono"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -1613,7 +1613,7 @@ export default function FinanceModule() {
                                                 value={debtForm.interestRate}
                                                 onChange={(e) => setDebtForm({ ...debtForm, interestRate: e.target.value })}
                                                 placeholder="0"
-                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                                className="w-full px-6 py-4 bg-gray-50 dark:bg-white/10 dark:text-white dark:placeholder-gray-500 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
                                             />
                                         </div>
                                     </div>
@@ -1624,7 +1624,7 @@ export default function FinanceModule() {
                                             <select
                                                 value={debtForm.repaymentType}
                                                 onChange={(e) => setDebtForm({ ...debtForm, repaymentType: e.target.value as any })}
-                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                                className="w-full px-6 py-4 bg-gray-50 dark:bg-[#2a2a2a] dark:text-white border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
                                             >
                                                 <option value="single">Single Payment</option>
                                                 <option value="split">Split / EMI</option>
@@ -1637,7 +1637,7 @@ export default function FinanceModule() {
                                                 value={debtForm.timePeriod}
                                                 onChange={(e) => setDebtForm({ ...debtForm, timePeriod: e.target.value })}
                                                 placeholder="e.g. 1 Year"
-                                                className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                                className="w-full px-6 py-4 bg-gray-50 dark:bg-white/10 dark:text-white dark:placeholder-gray-500 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
                                             />
                                         </div>
                                     </div>
@@ -1648,7 +1648,7 @@ export default function FinanceModule() {
                                             type="date"
                                             value={debtForm.dueDate}
                                             onChange={(e) => setDebtForm({ ...debtForm, dueDate: e.target.value })}
-                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
+                                            className="w-full px-6 py-4 bg-gray-50 dark:bg-white/10 dark:text-white border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all"
                                         />
                                     </div>
 
@@ -1679,7 +1679,7 @@ export default function FinanceModule() {
                                             value={debtForm.notes}
                                             onChange={(e) => setDebtForm({ ...debtForm, notes: e.target.value })}
                                             placeholder="e.g. 5% Interest, Monthly EMI of 2000"
-                                            className="w-full px-6 py-4 bg-gray-50 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all h-24 resize-none"
+                                            className="w-full px-6 py-4 bg-gray-50 dark:bg-white/10 dark:text-white dark:placeholder-gray-500 border-0 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary/20 transition-all h-24 resize-none"
                                         />
                                     </div>
 
