@@ -21,7 +21,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const data = await req.json();
-        const { id, userEmail, deviceName, browser, os, ipAddress } = data;
+        const { id, userEmail, idToken, deviceName, browser, os, ipAddress } = data;
 
         if (id) {
             // Update existing session — verify the ID exists in DB (no header needed; the ID itself is the credential)
@@ -37,21 +37,61 @@ export async function POST(req: Request) {
             }
         }
 
-        // Create new session — only allow the configured admin email
-        const adminEmail = process.env.ADMIN_EMAIL;
-        if (!userEmail) {
-            console.error("[API/ADMIN/SESSIONS] userEmail is required for new sessions");
-            return NextResponse.json({ error: "userEmail is required" }, { status: 400 });
-        }
-        if (adminEmail && userEmail.toLowerCase() !== adminEmail.toLowerCase()) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        // Determine the caller's email — prefer Firebase token verification over client-supplied email
+        let resolvedEmail: string | undefined = userEmail;
+
+        if (idToken) {
+            const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+            if (apiKey) {
+                try {
+                    const verifyRes = await fetch(
+                        `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ idToken })
+                        }
+                    );
+                    if (!verifyRes.ok) {
+                        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+                    }
+                    const verifyData = await verifyRes.json();
+                    const tokenEmail: string | undefined = verifyData.users?.[0]?.email;
+                    if (!tokenEmail) {
+                        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+                    }
+                    // Token is valid — trust Firebase as the auth source, no ADMIN_EMAIL check needed
+                    resolvedEmail = tokenEmail;
+                } catch {
+                    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+                }
+            } else {
+                // No API key — fall through to email check below
+                const adminEmail = process.env.ADMIN_EMAIL;
+                if (!resolvedEmail) {
+                    return NextResponse.json({ error: "userEmail is required" }, { status: 400 });
+                }
+                if (adminEmail && resolvedEmail.trim().toLowerCase() !== adminEmail.trim().toLowerCase()) {
+                    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+                }
+            }
+        } else {
+            // No idToken — fall back to ADMIN_EMAIL guard
+            const adminEmail = process.env.ADMIN_EMAIL;
+            if (!resolvedEmail) {
+                console.error("[API/ADMIN/SESSIONS] userEmail is required for new sessions");
+                return NextResponse.json({ error: "userEmail is required" }, { status: 400 });
+            }
+            if (adminEmail && resolvedEmail.trim().toLowerCase() !== adminEmail.trim().toLowerCase()) {
+                return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            }
         }
 
         const newId = crypto.randomUUID();
 
         const result = await db.insert(adminSessions).values({
             id: newId,
-            userEmail,
+            userEmail: resolvedEmail,
             deviceName: deviceName || "Unknown Device",
             browser: browser || "Unknown Browser",
             os: os || "Unknown OS",

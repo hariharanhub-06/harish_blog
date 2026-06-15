@@ -181,12 +181,14 @@ export default function AdminDashboard() {
             const deviceName = os === "Windows" || os === "MacOS" || os === "Linux" ? "Desktop" : "Mobile Device";
 
             try {
+                const idToken = user ? await user.getIdToken() : undefined;
                 const res = await fetch("/api/admin/sessions", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         id: sid,
                         userEmail: user?.email || undefined,
+                        idToken,
                         deviceName,
                         browser,
                         os
