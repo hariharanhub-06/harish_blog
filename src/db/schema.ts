@@ -782,6 +782,14 @@ export const schedulerConfig = pgTable("scheduler_config", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Platform Hub: central kill switch per linked project ('startup' | 'ddriver').
+// When is_enabled is false, that project's entire live site shows an Access Denied (403) page.
+export const platformHubPortalToggles = pgTable("platform_hub_portal_toggles", {
+  pageKey: text("page_key").primaryKey(),
+  isEnabled: boolean("is_enabled").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const clientProjects = pgTable("client_projects", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   leadId: text("lead_id"),

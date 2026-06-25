@@ -840,6 +840,19 @@ const PORTAL_URLS: Record<string, string> = {
     "D-Driver DEV SA": "https://d-driver.vercel.app/super-admin/dashboard",
 };
 
+// Maps the portal display name to its stable toggle key (matches API PORTAL_KEYS).
+// A key being OFF deactivates the entire real site (customer + admin), not just this shortcut.
+const PORTAL_KEYS: Record<string, string> = {
+    "StartUP Admin":   "startup",
+    "D-Driver DEV SA": "ddriver",
+};
+
+// Rows shown in the Access Control card — each toggle disables the whole real website.
+const ACCESS_CONTROL_SITES: { key: string; label: string }[] = [
+    { key: "startup", label: "StartUP Menswear (entire site)" },
+    { key: "ddriver", label: "D-Driver (entire site)" },
+];
+
 function PortalView({ portalName }: { portalName: string }) {
     const url = PORTAL_URLS[portalName];
     if (!url) return null;
@@ -848,6 +861,24 @@ function PortalView({ portalName }: { portalName: string }) {
             sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation allow-modals"
             style={{ position: "fixed", top: 0, left: 260, right: 0, bottom: 0, width: "calc(100vw - 260px)", height: "100vh", border: "none", zIndex: 45 }}
         />
+    );
+}
+
+function PortalAccessDenied({ portalName }: { portalName: string }) {
+    return (
+        <div style={{ position: "fixed", top: 0, left: 260, right: 0, bottom: 0, zIndex: 45 }}
+            className="flex items-center justify-center bg-[#f8f9fa] dark:bg-[#121212] p-6">
+            <div className="max-w-md w-full text-center bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm p-10">
+                <div className="w-16 h-16 mx-auto rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
+                    <ShieldAlert size={32} className="text-red-500" />
+                </div>
+                <p className="mt-5 text-xs font-semibold tracking-widest text-red-500 uppercase">Error 403</p>
+                <h2 className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">Access Denied</h2>
+                <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="font-medium text-gray-700 dark:text-gray-300">{portalName}</span> has been disabled by the administrator and is currently unavailable.
+                </p>
+            </div>
+        </div>
     );
 }
 
@@ -862,7 +893,47 @@ export default function PlatformHubModule({ initialPortal }: { initialPortal?: s
     const [activeSubTab, setActiveSubTab] = useState<SubTab>("usages");
     const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") ?? "" : "";
 
-    if (initialPortal) return <PortalView portalName={initialPortal} />;
+    // Portal on/off toggles (shared server state). null = still loading.
+    const [toggles, setToggles] = useState<Record<string, boolean> | null>(null);
+    const [savingKey, setSavingKey] = useState<string | null>(null);
+
+    useEffect(() => {
+        let active = true;
+        fetch("/api/admin/hub/portal-toggles", { headers: { "X-Session-Id": sessionId } })
+            .then(res => (res.ok ? res.json() : { toggles: {} }))
+            .then(data => { if (active) setToggles(data.toggles || {}); })
+            .catch(() => { if (active) setToggles({}); });
+        return () => { active = false; };
+    }, [sessionId]);
+
+    const setPortalEnabled = async (pageKey: string, isEnabled: boolean) => {
+        setSavingKey(pageKey);
+        setToggles(prev => ({ ...(prev || {}), [pageKey]: isEnabled }));
+        try {
+            await fetch("/api/admin/hub/portal-toggles", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Session-Id": sessionId },
+                body: JSON.stringify({ pageKey, isEnabled }),
+            });
+        } finally {
+            setSavingKey(null);
+        }
+    };
+
+    if (initialPortal) {
+        const key = PORTAL_KEYS[initialPortal];
+        // Wait for toggle state before deciding; fail open if the key is unknown.
+        if (toggles === null) {
+            return (
+                <div style={{ position: "fixed", top: 0, left: 260, right: 0, bottom: 0, zIndex: 45 }}
+                    className="flex items-center justify-center bg-[#f8f9fa] dark:bg-[#121212]">
+                    <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+                </div>
+            );
+        }
+        if (key && toggles[key] === false) return <PortalAccessDenied portalName={initialPortal} />;
+        return <PortalView portalName={initialPortal} />;
+    }
 
     return (
         <div className="space-y-6">
@@ -890,6 +961,51 @@ export default function PlatformHubModule({ initialPortal }: { initialPortal?: s
             </div>
             {activeSubTab === "usages"   && <UsagesTab sessionId={sessionId} />}
             {activeSubTab === "security" && <SecurityTab sessionId={sessionId} />}
+
+            {/* ─── Access Control ─── */}
+            <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm">
+                <div className="flex items-center gap-2">
+                    <Shield size={16} className="text-purple-600" />
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">Access Control</h3>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Turn a project off to deactivate its entire live website (customer &amp; admin). While off, every page of the real site shows an Access Denied (403) screen for everyone. Changes apply within ~30s.
+                </p>
+                <div className="mt-4 space-y-2">
+                    {ACCESS_CONTROL_SITES.map(({ key, label }) => {
+                        const enabled = toggles ? toggles[key] !== false : true;
+                        const loading = toggles === null;
+                        return (
+                            <div key={key} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800">
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <Globe size={14} className="text-gray-400 shrink-0" />
+                                    <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{label}</span>
+                                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+                                        enabled
+                                            ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
+                                            : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+                                    }`}>
+                                        {enabled ? "Active" : "Disabled"}
+                                    </span>
+                                </div>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={enabled}
+                                    disabled={loading || savingKey === key}
+                                    onClick={() => setPortalEnabled(key, !enabled)}
+                                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
+                                        enabled ? "bg-emerald-500" : "bg-gray-300 dark:bg-gray-600"
+                                    }`}>
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                                        enabled ? "translate-x-6" : "translate-x-1"
+                                    }`} />
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
         </div>
     );
 }
