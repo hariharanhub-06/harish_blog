@@ -120,6 +120,7 @@ export async function GET(req: Request) {
                 "Harishblog": process.env.VERCEL_API_TOKEN_HARISHBLOG ?? "",
                 "StartUP":    process.env.VERCEL_API_TOKEN_STARTUP    ?? "",
                 "D-Driver":   process.env.VERCEL_API_TOKEN_DDRIVER    ?? "",
+                "Solar":      process.env.VERCEL_API_TOKEN_SOLAR      ?? "",
             };
             return NextResponse.json(
                 await fetchVercelData(tokenMap[projectParam] ?? "", projectParam, from, to, startDate, endDate)
@@ -130,6 +131,7 @@ export async function GET(req: Request) {
             fetchVercelData(process.env.VERCEL_API_TOKEN_HARISHBLOG ?? "", "Harishblog"),
             fetchVercelData(process.env.VERCEL_API_TOKEN_STARTUP    ?? "", "StartUP"),
             fetchVercelData(process.env.VERCEL_API_TOKEN_DDRIVER    ?? "", "D-Driver"),
+            fetchVercelData(process.env.VERCEL_API_TOKEN_SOLAR      ?? "", "Solar"),
         ]);
 
         return NextResponse.json({ projects: results, timestamp: new Date().toISOString() });

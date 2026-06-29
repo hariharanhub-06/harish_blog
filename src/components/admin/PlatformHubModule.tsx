@@ -133,6 +133,7 @@ function ProjectSection({ label, children }: { label: string; children: React.Re
         Harishblog: "text-indigo-400 border-indigo-800",
         StartUP:    "text-blue-400 border-blue-800",
         "D-Driver": "text-sky-400 border-sky-800",
+        Solar:      "text-amber-400 border-amber-800",
     };
     const c = colors[label] ?? "text-slate-400 border-slate-700";
     return (
@@ -413,7 +414,7 @@ function NeonChart({ data, color }: { data: any; color: string }) {
 }
 
 function ImageKitChart({ data, color }: { data: any; color: string }) {
-    const limits = data.limits ?? { storageBytes: 20 * 1024 * 1024 * 1024, bandwidthBytes: 20 * 1024 * 1024 * 1024 };
+    const limits = data.limits ?? { storageBytes: 3 * 1024 * 1024 * 1024, bandwidthBytes: 20 * 1024 * 1024 * 1024 };
     const stats  = data.stats;
     const weekly: { date: string; bandwidthUsed: number; storageUsed: number }[] = data.weekly ?? data.daily ?? [];
 
@@ -597,7 +598,7 @@ function UsagesTab({ sessionId }: { sessionId: string }) {
                     </button>
                 </div>
 
-                {(["Harishblog", "StartUP", "D-Driver"] as const).map(label => {
+                {(["Harishblog", "StartUP", "D-Driver", "Solar"] as const).map(label => {
                     const vp  = vercel?.projects?.find((x: any) => x.label === label);
                     const np  = neon?.projects?.find((x: any) => x.label === label);
                     const ikp = imagekit?.projects?.find((x: any) => x.label === label);
@@ -763,7 +764,7 @@ function SecurityTab({ sessionId }: { sessionId: string }) {
     useEffect(() => { fetchData(); }, [fetchData]);
 
     if (loading) {
-        return <div className="flex items-center gap-2 text-sm text-gray-400 py-12 justify-center"><Loader2 size={16} className="animate-spin" /> Checking all three sites…</div>;
+        return <div className="flex items-center gap-2 text-sm text-gray-400 py-12 justify-center"><Loader2 size={16} className="animate-spin" /> Checking all sites…</div>;
     }
 
     const sites: any[] = data?.sites ?? [];
@@ -773,12 +774,12 @@ function SecurityTab({ sessionId }: { sessionId: string }) {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Security health across all three production sites</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Security health across all production sites</p>
                 <button onClick={fetchData} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
                     <RefreshCw size={11} /> {lastRefresh.toLocaleTimeString()}
                 </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {sites.map(site => (
                     <div key={site.name} className="bg-white dark:bg-[#1e1e1e] rounded-2xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
                         <div className="flex items-center justify-between">
@@ -838,6 +839,7 @@ function SecurityTab({ sessionId }: { sessionId: string }) {
 const PORTAL_URLS: Record<string, string> = {
     "StartUP Admin":   "https://www.startupmenswear.in/admin",
     "D-Driver DEV SA": "https://d-driver.vercel.app/super-admin/dashboard",
+    "Solar Admin":     "https://www.sasthasolar.com/admin",
 };
 
 // Maps the portal display name to its stable toggle key (matches API PORTAL_KEYS).
@@ -845,12 +847,14 @@ const PORTAL_URLS: Record<string, string> = {
 const PORTAL_KEYS: Record<string, string> = {
     "StartUP Admin":   "startup",
     "D-Driver DEV SA": "ddriver",
+    "Solar Admin":     "solar",
 };
 
 // Rows shown in the Access Control card — each toggle disables the whole real website.
 const ACCESS_CONTROL_SITES: { key: string; label: string }[] = [
     { key: "startup", label: "StartUP Menswear (entire site)" },
     { key: "ddriver", label: "D-Driver (entire site)" },
+    { key: "solar",   label: "Sastha Solar (entire site)" },
 ];
 
 function PortalView({ portalName }: { portalName: string }) {
@@ -940,11 +944,11 @@ export default function PlatformHubModule({ initialPortal }: { initialPortal?: s
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-xl font-bold flex items-center gap-2"><Globe size={20} className="text-purple-600" /> Platform Hub</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Unified analytics — usage &amp; security across all three projects</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Unified analytics — usage &amp; security across all projects</p>
                 </div>
                 <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-gray-400">
                     <Wifi size={11} className="text-emerald-500" />
-                    hariharanhub.com · startupmenswear.in · d-driver.vercel.app
+                    hariharanhub.com · startupmenswear.in · d-driver.vercel.app · sasthasolar.com
                 </div>
             </div>
             <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800/50 rounded-xl w-fit">

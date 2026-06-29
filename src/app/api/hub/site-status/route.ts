@@ -8,7 +8,7 @@ import { neon } from "@neondatabase/serverless";
 
 export const dynamic = "force-dynamic";
 
-const SITE_KEYS = ["startup", "ddriver"] as const;
+const SITE_KEYS = ["startup", "ddriver", "solar"] as const;
 
 function corsHeaders() {
     return {

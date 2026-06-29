@@ -8,6 +8,7 @@ const SITES = [
     { name: "Harishblog", url: "https://hariharanhub.com" },
     { name: "StartUP Men's Wear", url: "https://www.startupmenswear.in" },
     { name: "D-Driver", url: "https://d-driver.vercel.app" },
+    { name: "Sastha Solar", url: "https://www.sasthasolar.com" },
 ];
 
 const SECURITY_HEADERS = [

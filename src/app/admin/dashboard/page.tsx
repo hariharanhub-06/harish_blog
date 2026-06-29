@@ -100,6 +100,7 @@ export default function AdminDashboard() {
         { id: "platform-hub",  title: "Platform Hub",    icon: Globe,    color: "bg-purple-600", group: "Main" },
         { id: "startup-admin", title: "StartUP Admin",   icon: Layers,   color: "bg-blue-600",   group: "Main", subItem: true },
         { id: "ddriver-sa",    title: "D-Driver DEV SA", icon: Terminal, color: "bg-sky-600",    group: "Main", subItem: true },
+        { id: "solar-admin",   title: "Solar Admin",     icon: Sun,      color: "bg-amber-500",  group: "Main", subItem: true },
         { id: "profile", title: "Profile Info", icon: User, color: "bg-indigo-500", group: "Personal" },
         { id: "workout", title: "Workout Tracker", icon: Dumbbell, color: "bg-green-600", group: "Personal" },
         { id: "tree", title: "Message Tree", icon: TreePine, color: "bg-emerald-700", group: "Content" },
@@ -348,6 +349,7 @@ export default function AdminDashboard() {
             case "platform-hub":  return <PlatformHubModule key="platform-hub" />;
             case "startup-admin": return <PlatformHubModule key="startup-admin" initialPortal="StartUP Admin" />;
             case "ddriver-sa":    return <PlatformHubModule key="ddriver-sa" initialPortal="D-Driver DEV SA" />;
+            case "solar-admin":   return <PlatformHubModule key="solar-admin" initialPortal="Solar Admin" />;
             case "workout": return <WorkoutModule />;
             case "tree": return <TreeModule />;
             default: return (

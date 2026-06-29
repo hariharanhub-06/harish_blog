@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { validateAdminSession } from "@/lib/adminAuth";
 
-const PORTAL_KEYS = ["startup", "ddriver"] as const;
+const PORTAL_KEYS = ["startup", "ddriver", "solar"] as const;
 
 async function ensureTable(sql: ReturnType<typeof neon>) {
     await sql(`

@@ -50,6 +50,7 @@ export async function GET(req: Request) {
             fetchNeonData(process.env.NEON_API_KEY_HARISHBLOG ?? "", "Harishblog", "harishblog"),
             fetchNeonData(process.env.NEON_API_KEY_STARTUP    ?? "", "StartUP"),
             fetchNeonData(process.env.NEON_API_KEY_DDRIVER    ?? "", "D-Driver",   "prabhu"),
+            fetchNeonData(process.env.NEON_API_KEY_SOLAR      ?? "", "Solar"),
         ]);
 
         return NextResponse.json({ projects: results, timestamp: new Date().toISOString() });

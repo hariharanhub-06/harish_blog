@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { validateAdminSession } from "@/lib/adminAuth";
 
 const FREE_LIMITS = {
-    storageBytes:   20 * 1024 * 1024 * 1024,
-    bandwidthBytes: 20 * 1024 * 1024 * 1024,
+    storageBytes:   3 * 1024 * 1024 * 1024,   // ImageKit free plan: 3 GB media (DAM) storage
+    bandwidthBytes: 20 * 1024 * 1024 * 1024,  // 20 GB/month bandwidth (resets monthly)
 };
 
 function currentMonthRange() {
@@ -173,6 +173,7 @@ export async function GET(req: Request) {
                 { key: process.env.IMAGEKIT_PRIVATE_KEY_STARTUP_2  ?? "", account: "Secondary" },
             ],
             "D-Driver": [{ key: process.env.IMAGEKIT_PRIVATE_KEY_DDRIVER ?? "", account: "D-Driver" }],
+            "Solar":    [{ key: process.env.IMAGEKIT_PRIVATE_KEY_SOLAR   ?? "", account: "Solar" }],
         };
 
         if (projectParam && projectMap[projectParam]) {
