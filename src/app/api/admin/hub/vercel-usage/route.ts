@@ -63,13 +63,15 @@ async function fetchVercelData(
     const dayEnd   = endDate   ?? new Date(rangeTo).toISOString().slice(0, 10);
 
     try {
-        // Fetch projects first to get the project ID for filtering deployments
+        // Fetch projects for the count tile / metadata only.
         const projectsRes = await fetch("https://api.vercel.com/v9/projects?limit=20", { headers });
         const projects: any[] = projectsRes.ok ? (await projectsRes.json()).projects ?? [] : [];
-        // Use first project's ID so we only count this account's own deployments
-        const projectId = projects[0]?.id ?? null;
 
-        const deps = await fetchDeploymentsInRange(token, rangeFrom, rangeTo, projectId);
+        // Count deployments across ALL projects in this token's scope, not just
+        // projects[0]. Filtering by the first project's id undercounted any
+        // account that has more than one Vercel project. The token is already
+        // scoped to a single account/team, so an unfiltered query is correct.
+        const deps = await fetchDeploymentsInRange(token, rangeFrom, rangeTo, null);
 
         // Group deployments by LOCAL date string provided from client
         // Use UTC-adjusted date for each deployment (close enough; within-day accuracy)
