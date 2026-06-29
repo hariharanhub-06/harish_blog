@@ -56,7 +56,6 @@ import SettingsModule from "@/components/admin/SettingsModule";
 import KanbanModule from "@/components/admin/KanbanModule";
 import RoutinesModule from "@/components/admin/RoutinesModule";
 import SmileTaskModule from "@/components/admin/SmileTaskModule";
-import SpamModule from "@/components/admin/SpamModule";
 import ProjectsModule from "@/components/admin/ProjectsModule";
 import SkillsModule from "@/components/admin/SkillsModule";
 import PartnershipsModule from "@/components/admin/PartnershipsModule";
@@ -70,7 +69,7 @@ import PlatformHubModule from "@/components/admin/PlatformHubModule";
 import WorkoutModule from "@/components/admin/WorkoutModule";
 import TreeModule from "@/components/admin/TreeModule";
 
-type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "spam" | "projects" | "skills" | "partnerships" | "youtube" | "ai-assistant" | "meetings" | "travelled" | "finance-leads" | "scheduler-docs" | "platform-hub" | "startup-admin" | "ddriver-sa" | "workout" | "tree";
+type Tab = "overview" | "profile" | "messages" | "training-academy" | "timeline" | "feedbacks" | "quiz-manager" | "finance-hub" | "leaderboard" | "forms" | "sessions" | "game-assets" | "client-projects" | "kanban" | "routines" | "smile-tasks" | "settings" | "projects" | "skills" | "partnerships" | "youtube" | "ai-assistant" | "meetings" | "travelled" | "finance-leads" | "scheduler-docs" | "platform-hub" | "startup-admin" | "ddriver-sa" | "workout" | "tree";
 
 export default function AdminDashboard() {
     const { user, loading, logout } = useAuth();
@@ -119,7 +118,6 @@ export default function AdminDashboard() {
         { id: "messages", title: "Messages", icon: MessageSquare, color: "bg-emerald-500", badge: unreadMessages, group: "Communication" },
         { id: "routines", title: "Routine Checklist", icon: CheckSquare, color: "bg-indigo-600", group: "Admin" },
         { id: "smile-tasks", title: "Smile Tasks", icon: Sparkles, color: "bg-rose-500", group: "Engagement" },
-        { id: "spam", title: "Lucky Draw", icon: Trophy, color: "bg-yellow-600", group: "Campaigns" },
         { id: "settings", title: "Settings", icon: Settings, color: "bg-gray-600", group: "Admin" },
     ], [unreadMessages]);
 
@@ -250,7 +248,7 @@ export default function AdminDashboard() {
     // Sync tab with URL hash and fetch notifications
     useEffect(() => {
         const hash = window.location.hash.replace('#', '') as Tab;
-        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "kanban", "routines", "smile-tasks", "settings", "spam", "projects", "skills", "partnerships", "youtube", "ai-assistant", "meetings", "travelled", "finance-leads", "scheduler-docs", "workout", "tree"];
+        const validTabs = ["overview", "profile", "messages", "training-academy", "timeline", "feedbacks", "quiz-manager", "finance-hub", "leaderboard", "forms", "sessions", "game-assets", "client-projects", "kanban", "routines", "smile-tasks", "settings", "projects", "skills", "partnerships", "youtube", "ai-assistant", "meetings", "travelled", "finance-leads", "scheduler-docs", "workout", "tree"];
         if (hash && validTabs.includes(hash)) setActiveTab(hash);
 
         const fetchAllCounts = async () => {
@@ -335,7 +333,6 @@ export default function AdminDashboard() {
             case "kanban": return <KanbanModule />;
             case "routines": return <RoutinesModule />;
             case "smile-tasks": return <SmileTaskModule />;
-            case "spam": return <SpamModule />;
             case "settings": return <SettingsModule />;
             case "projects": return <ProjectsModule />;
             case "skills": return <SkillsModule />;

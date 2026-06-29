@@ -51,21 +51,6 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
         ],
       },
-      {
-        source: "/lucky-draw(.*)",
-        headers: [
-          ...securityHeaders,
-          { key: "X-Robots-Tag", value: "noindex, nofollow" },
-          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate" },
-        ],
-      },
-      {
-        source: "/api/lucky-draw(.*)",
-        headers: [
-          { key: "Cache-Control", value: "no-store" },
-          { key: "X-Robots-Tag", value: "noindex" },
-        ],
-      },
     ];
   },
   images: {
