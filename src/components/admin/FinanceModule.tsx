@@ -212,8 +212,8 @@ export default function FinanceModule() {
 
             // Check "debt taken" / "new debt" / "borrowed" BEFORE the generic "debt" check
             // so a new-borrowing header isn't swallowed by the debt-payment branch.
-            if (lowerTrimmed.includes("debt taken:") || lowerTrimmed.includes("new debt:") || lowerTrimmed.includes("borrowed:")
-                || ((lowerTrimmed.includes("debt taken") || lowerTrimmed.includes("new debt") || lowerTrimmed.includes("borrow")) && !hasNumber)) {
+            if (lowerTrimmed.includes("debt taken:") || lowerTrimmed.includes("new debt:") || lowerTrimmed.includes("add debt:") || lowerTrimmed.includes("debt add:") || lowerTrimmed.includes("borrowed:")
+                || ((lowerTrimmed.includes("debt taken") || lowerTrimmed.includes("new debt") || lowerTrimmed.includes("add debt") || lowerTrimmed.includes("debt add") || lowerTrimmed.includes("borrow")) && !hasNumber)) {
                 currentType = "debt_take";
                 if (!hasNumber) return;
             } else if (lowerTrimmed.includes("debts paid:") || (lowerTrimmed.includes("debt") && !hasNumber)) {
@@ -243,7 +243,7 @@ export default function FinanceModule() {
                 const amount = parseFloat(match[2]);
 
                 // Strip common header words if they appear at the start of the category
-                const headers = ["income:", "income", "expense:", "expense", "debt taken:", "debt taken", "new debt:", "new debt", "borrowed:", "borrowed", "debt:", "debt pay:", "debts paid:", "debts:", "debt", "loan collect:", "loan:"];
+                const headers = ["income:", "income", "expense:", "expense", "debt taken:", "debt taken", "new debt:", "new debt", "add debt:", "add debt", "debt add:", "debt add", "borrowed:", "borrowed", "debt:", "debt pay:", "debts paid:", "debts:", "debt", "loan collect:", "loan:"];
                 for (const header of headers) {
                     if (item.toLowerCase().startsWith(header)) {
                         item = item.substring(header.length).trim();
@@ -1219,7 +1219,7 @@ export default function FinanceModule() {
                                     let currentContext: 'income' | 'expense' | 'debt_pay' | 'debt_take' = 'expense';
                                     for (let i = lines.length - 1; i >= 0; i--) {
                                         const l = lines[i].trim();
-                                        if (l.includes('debt taken:') || l.includes('new debt:') || l.includes('borrowed:')) {
+                                        if (l.includes('debt taken') || l.includes('new debt') || l.includes('add debt') || l.includes('debt add') || l.includes('borrow')) {
                                             currentContext = 'debt_take';
                                             break;
                                         }
@@ -1282,7 +1282,7 @@ export default function FinanceModule() {
                                     </h4>
                                     <ul className="text-[11px] font-bold text-gray-500 dark:text-gray-400 space-y-1">
                                         <li>• Use headers like "Debts Paid:", "Expense", "Income"</li>
-                                        <li>• "Debt Taken:" adds to pending — matches an existing name or creates a new debt</li>
+                                        <li>• "Debt Taken:" / "Add Debt:" adds to pending — matches an existing name or creates a new debt</li>
                                         <li>• Format: "Item Name - Amount" or "Item Name Amount"</li>
                                         <li>• Multiple entries per line are supported</li>
                                     </ul>
