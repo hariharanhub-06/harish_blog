@@ -47,7 +47,7 @@ interface Transaction {
     amount: number;
     description: string;
     category: string;
-    type: "expense" | "income" | "debt_pay";
+    type: "expense" | "income" | "debt_pay" | "debt_take";
     debtId?: string;
     date: string;
 }
@@ -79,7 +79,7 @@ interface Loan {
 }
 
 interface ParsedEntry {
-    type: "expense" | "income" | "debt_pay" | "loan_collect";
+    type: "expense" | "income" | "debt_pay" | "debt_take" | "loan_collect";
     item: string;
     amount: number;
     category: string;
@@ -116,6 +116,10 @@ export default function FinanceModule() {
     const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
     const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
     const [error, setError] = useState<string | null>(null);
+    // Per-debt Statement Modal States
+    const [statementDebt, setStatementDebt] = useState<Debt | null>(null);
+    const [statementTx, setStatementTx] = useState<Transaction[]>([]);
+    const [statementLoading, setStatementLoading] = useState(false);
     // Category Editing States
     const [editingTxId, setEditingTxId] = useState<string | null>(null);
     const [editingCategory, setEditingCategory] = useState("");
@@ -191,7 +195,7 @@ export default function FinanceModule() {
         if (!logInput.trim()) return [];
 
         const entries: ParsedEntry[] = [];
-        let currentType: "expense" | "income" | "debt_pay" | "loan_collect" = "expense";
+        let currentType: "expense" | "income" | "debt_pay" | "debt_take" | "loan_collect" = "expense";
 
         // Get existing categories for fuzzy matching
         const existingCategories = (stats?.categories || []).map((c: any) => c.category);
@@ -206,7 +210,13 @@ export default function FinanceModule() {
             const lowerTrimmed = trimmed.toLowerCase();
             const hasNumber = /\d/.test(trimmed);
 
-            if (lowerTrimmed.includes("debts paid:") || (lowerTrimmed.includes("debt") && !hasNumber)) {
+            // Check "debt taken" / "new debt" / "borrowed" BEFORE the generic "debt" check
+            // so a new-borrowing header isn't swallowed by the debt-payment branch.
+            if (lowerTrimmed.includes("debt taken:") || lowerTrimmed.includes("new debt:") || lowerTrimmed.includes("borrowed:")
+                || ((lowerTrimmed.includes("debt taken") || lowerTrimmed.includes("new debt") || lowerTrimmed.includes("borrow")) && !hasNumber)) {
+                currentType = "debt_take";
+                if (!hasNumber) return;
+            } else if (lowerTrimmed.includes("debts paid:") || (lowerTrimmed.includes("debt") && !hasNumber)) {
                 currentType = "debt_pay";
                 if (!hasNumber) return;
             }
@@ -233,7 +243,7 @@ export default function FinanceModule() {
                 const amount = parseFloat(match[2]);
 
                 // Strip common header words if they appear at the start of the category
-                const headers = ["income:", "income", "expense:", "expense", "debt:", "debt pay:", "debts paid:", "debts:", "debt", "loan collect:", "loan:"];
+                const headers = ["income:", "income", "expense:", "expense", "debt taken:", "debt taken", "new debt:", "new debt", "borrowed:", "borrowed", "debt:", "debt pay:", "debts paid:", "debts:", "debt", "loan collect:", "loan:"];
                 for (const header of headers) {
                     if (item.toLowerCase().startsWith(header)) {
                         item = item.substring(header.length).trim();
@@ -254,6 +264,16 @@ export default function FinanceModule() {
                             item.toLowerCase().includes(d.name.toLowerCase())
                         );
                         normalizedCategory = matchedDebt?.name || "Transfer";
+                        matchedDebtId = matchedDebt?.id;
+                    } else if (currentType === "debt_take") {
+                        // Match an existing debt to top it up; no match means a brand-new debt
+                        // will be created (using the typed name) on save.
+                        const matchedDebt = debts.find(d =>
+                            d.name.toLowerCase() === item.toLowerCase() ||
+                            d.name.toLowerCase().includes(item.toLowerCase()) ||
+                            item.toLowerCase().includes(d.name.toLowerCase())
+                        );
+                        normalizedCategory = matchedDebt?.name || item;
                         matchedDebtId = matchedDebt?.id;
                     } else if (currentType === "loan_collect") {
                         const matchedLoan = loans.find(l =>
@@ -482,6 +502,23 @@ export default function FinanceModule() {
         setDebtForm({ name: "", initialAmount: "", remainingAmount: "", notes: "", repaymentType: "single", dueDate: "", interestRate: "", timePeriod: "" });
         setError(null);
         setIsDebtModalOpen(true);
+    };
+
+    const openStatement = async (debt: Debt) => {
+        setStatementDebt(debt);
+        setStatementTx([]);
+        setStatementLoading(true);
+        try {
+            const res = await fetch(`/api/admin/finance/transactions?debtId=${debt.id}`, {
+                cache: "no-store",
+                headers: { "X-Session-Id": sessionId },
+            });
+            if (res.ok) setStatementTx(await res.json());
+        } catch (error) {
+            console.error("Failed to fetch debt statement", error);
+        } finally {
+            setStatementLoading(false);
+        }
     };
 
     const openEditDebt = (debt: Debt) => {
@@ -979,16 +1016,16 @@ export default function FinanceModule() {
                                     {transactions.slice(0, 8).map(tx => (
                                         <div key={tx.id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl transition-all group">
                                             <div className="flex items-center gap-3">
-                                                <div className={`p-2 rounded-xl ${tx.type === 'income' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600' : tx.type === 'debt_pay' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600' : 'bg-red-50 dark:bg-red-500/10 text-red-600'}`}>
-                                                    {tx.type === 'income' ? <TrendingUp size={14} /> : tx.type === 'debt_pay' ? <CreditCard size={14} /> : <TrendingDown size={14} />}
+                                                <div className={`p-2 rounded-xl ${tx.type === 'income' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600' : tx.type === 'debt_pay' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600' : tx.type === 'debt_take' ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600' : 'bg-red-50 dark:bg-red-500/10 text-red-600'}`}>
+                                                    {tx.type === 'income' ? <TrendingUp size={14} /> : tx.type === 'debt_pay' ? <CreditCard size={14} /> : tx.type === 'debt_take' ? <Plus size={14} /> : <TrendingDown size={14} />}
                                                 </div>
                                                 <div>
                                                     <p className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors">{tx.description}</p>
                                                     <p className="text-[10px] font-bold text-gray-400 uppercase">{tx.category}</p>
                                                 </div>
                                             </div>
-                                            <p className={`text-xs font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-gray-900 dark:text-white'}`}>
-                                                {tx.type === 'income' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
+                                            <p className={`text-xs font-black ${tx.type === 'income' ? 'text-emerald-600' : tx.type === 'debt_take' ? 'text-amber-600' : 'text-gray-900 dark:text-white'}`}>
+                                                {tx.type === 'income' ? '+' : tx.type === 'debt_take' ? '' : '-'} ₹{tx.amount.toLocaleString()}
                                             </p>
                                         </div>
                                     ))}
@@ -1048,9 +1085,14 @@ export default function FinanceModule() {
                                             const paid = debt.initialAmount - debt.remainingAmount;
                                             const progress = debt.initialAmount > 0 ? (paid / debt.initialAmount) * 100 : 0;
                                             return (
-                                                <div key={debt.id} className="space-y-3">
+                                                <div
+                                                    key={debt.id}
+                                                    onClick={() => openStatement(debt)}
+                                                    title="View statement"
+                                                    className="space-y-3 cursor-pointer group/payoff -m-3 p-3 rounded-2xl hover:bg-white dark:hover:bg-white/5 transition-all"
+                                                >
                                                     <div className="flex justify-between items-end">
-                                                        <span className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-white truncate pr-4">{debt.name}</span>
+                                                        <span className="text-xs font-black uppercase tracking-widest text-gray-900 dark:text-white truncate pr-4 group-hover/payoff:text-primary transition-colors">{debt.name}</span>
                                                         <span className="text-xs font-black text-gray-900 dark:text-white">{progress.toFixed(2)}%</span>
                                                     </div>
                                                     <div className="h-3 bg-white rounded-full overflow-hidden border border-gray-100">
@@ -1072,7 +1114,7 @@ export default function FinanceModule() {
 
                             <div className="space-y-4">
                                 {debts.map(debt => (
-                                    <div key={debt.id} className="bg-gray-50 dark:bg-white/5 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
+                                    <div key={debt.id} onClick={() => openStatement(debt)} title="View statement" className="bg-gray-50 dark:bg-white/5 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all group cursor-pointer">
                                         <div className="flex items-center gap-5 flex-1">
                                             <div className="p-3 bg-white dark:bg-[#2a2a2a] rounded-2xl shadow-sm group-hover:bg-primary group-hover:text-white transition-all">
                                                 <CreditCard size={20} />
@@ -1111,13 +1153,14 @@ export default function FinanceModule() {
                                             </div>
                                             <div className="flex gap-2">
                                                 <button
-                                                    onClick={() => openEditDebt(debt)}
+                                                    onClick={(e) => { e.stopPropagation(); openEditDebt(debt); }}
                                                     className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-primary transition-all border border-transparent hover:border-gray-100"
                                                 >
                                                     <ArrowRight size={16} />
                                                 </button>
                                                 <button
-                                                    onClick={async () => {
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
                                                         if (confirm(`Delete debt ${debt.name}?`)) {
                                                             await fetch(`/api/admin/finance/debts?id=${debt.id}`, { method: "DELETE", headers: { "X-Session-Id": sessionId } });
                                                             fetchData();
@@ -1173,9 +1216,13 @@ export default function FinanceModule() {
                                 {(() => {
                                     // Determine context based on the last header typed
                                     const lines = logInput.toLowerCase().split('\n');
-                                    let currentContext: 'income' | 'expense' | 'debt_pay' = 'expense';
+                                    let currentContext: 'income' | 'expense' | 'debt_pay' | 'debt_take' = 'expense';
                                     for (let i = lines.length - 1; i >= 0; i--) {
                                         const l = lines[i].trim();
+                                        if (l.includes('debt taken:') || l.includes('new debt:') || l.includes('borrowed:')) {
+                                            currentContext = 'debt_take';
+                                            break;
+                                        }
                                         if (l.includes('debts paid:') || l.includes('debt:')) {
                                             currentContext = 'debt_pay';
                                             break;
@@ -1190,7 +1237,7 @@ export default function FinanceModule() {
                                         }
                                     }
 
-                                    const suggestions = currentContext === 'debt_pay'
+                                    const suggestions = (currentContext === 'debt_pay' || currentContext === 'debt_take')
                                         ? debts.map(d => ({
                                             name: d.name,
                                             progress: d.initialAmount > 0 ? ((d.initialAmount - d.remainingAmount) / d.initialAmount) * 100 : 0
@@ -1208,6 +1255,7 @@ export default function FinanceModule() {
                                                         key={s.name}
                                                         onClick={() => setLogInput(prev => `${prev}${prev.endsWith('\n') || prev === '' ? '' : '\n'}${s.name} - `)}
                                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${currentContext === 'income' ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-100' :
+                                                            currentContext === 'debt_take' ? 'bg-amber-50 hover:bg-amber-100 text-amber-600 border-amber-100' :
                                                             currentContext === 'debt_pay' ? (
                                                                 s.progress >= 100 ? 'bg-emerald-500 text-white border-emerald-600 shadow-lg shadow-emerald-200/50' :
                                                                     s.progress >= 75 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
@@ -1234,6 +1282,7 @@ export default function FinanceModule() {
                                     </h4>
                                     <ul className="text-[11px] font-bold text-gray-500 dark:text-gray-400 space-y-1">
                                         <li>• Use headers like "Debts Paid:", "Expense", "Income"</li>
+                                        <li>• "Debt Taken:" adds to pending — matches an existing name or creates a new debt</li>
                                         <li>• Format: "Item Name - Amount" or "Item Name Amount"</li>
                                         <li>• Multiple entries per line are supported</li>
                                     </ul>
@@ -1260,13 +1309,17 @@ export default function FinanceModule() {
                                                 className={`flex items-center justify-between p-4 rounded-2xl border ${entry.isValid ? 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10' : 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20'}`}
                                             >
                                                 <div className="flex items-center gap-4">
-                                                    <div className={`p-2.5 rounded-xl ${entry.type === 'income' ? 'bg-emerald-500 text-white' : entry.type === 'debt_pay' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'}`}>
-                                                        {entry.type === 'income' ? <TrendingUp size={16} /> : entry.type === 'debt_pay' ? <CreditCard size={16} /> : <TrendingDown size={16} />}
+                                                    <div className={`p-2.5 rounded-xl ${entry.type === 'income' ? 'bg-emerald-500 text-white' : entry.type === 'debt_pay' ? 'bg-blue-500 text-white' : entry.type === 'debt_take' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'}`}>
+                                                        {entry.type === 'income' ? <TrendingUp size={16} /> : entry.type === 'debt_pay' ? <CreditCard size={16} /> : entry.type === 'debt_take' ? <Plus size={16} /> : <TrendingDown size={16} />}
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-sm font-black text-gray-900 dark:text-white">{entry.item}</span>
-                                                            {entry.debtId && <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[8px] font-black uppercase rounded">Linked: Debt</span>}
+                                                            {entry.type === 'debt_take'
+                                                                ? (entry.debtId
+                                                                    ? <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded">Top-up: {entry.category}</span>
+                                                                    : <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded">New Debt</span>)
+                                                                : entry.debtId && <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[8px] font-black uppercase rounded">Linked: Debt</span>}
                                                         </div>
                                                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{entry.category}</span>
                                                     </div>
@@ -1412,15 +1465,16 @@ export default function FinanceModule() {
                                                     <td className="py-6">
                                                         <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${tx.type === 'income' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600' :
                                                             tx.type === 'debt_pay' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600' :
-                                                                'bg-red-50 dark:bg-red-500/10 text-red-600'
+                                                                tx.type === 'debt_take' ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600' :
+                                                                    'bg-red-50 dark:bg-red-500/10 text-red-600'
                                                             }`}>
-                                                            {tx.type}
+                                                            {tx.type === 'debt_take' ? 'debt taken' : tx.type}
                                                         </span>
                                                     </td>
                                                     <td className="py-6 text-right pr-4">
                                                         <div className="flex items-center justify-end gap-3">
-                                                            <span className={`text-sm font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-gray-900 dark:text-white'}`}>
-                                                                {tx.type === 'income' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
+                                                            <span className={`text-sm font-black ${tx.type === 'income' ? 'text-emerald-600' : tx.type === 'debt_take' ? 'text-amber-600' : 'text-gray-900 dark:text-white'}`}>
+                                                                {tx.type === 'income' ? '+' : tx.type === 'debt_take' ? '' : '-'} ₹{tx.amount.toLocaleString()}
                                                             </span>
                                                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
                                                                 <button
@@ -1874,6 +1928,90 @@ export default function FinanceModule() {
                                         </button>
                                     </div>
                                 </form>
+                            </motion.div>
+                        </div >
+                    )
+                }
+                {
+                    statementDebt && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-12">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setStatementDebt(null)}
+                                className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="bg-white dark:bg-[#1e1e1e] w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="flex justify-between items-center mb-8">
+                                    <h3 className="text-2xl font-black tracking-tight dark:text-white flex items-center gap-3">
+                                        <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                            <History size={24} />
+                                        </div>
+                                        {statementDebt.name}
+                                    </h3>
+                                    <button
+                                        onClick={() => setStatementDebt(null)}
+                                        className="p-3 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-2xl transition-all"
+                                    >
+                                        <Plus className="rotate-45" size={20} />
+                                    </button>
+                                </div>
+
+                                {/* Summary strip */}
+                                <div className="grid grid-cols-3 gap-4 mb-8">
+                                    <div className="bg-amber-50 dark:bg-amber-500/10 rounded-2xl p-5">
+                                        <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1">Total Borrowed</p>
+                                        <p className="text-lg font-black text-amber-600">₹{statementDebt.initialAmount.toLocaleString()}</p>
+                                    </div>
+                                    <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl p-5">
+                                        <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Total Paid</p>
+                                        <p className="text-lg font-black text-emerald-600">₹{(statementDebt.initialAmount - statementDebt.remainingAmount).toLocaleString()}</p>
+                                    </div>
+                                    <div className="bg-primary/5 rounded-2xl p-5">
+                                        <p className="text-[9px] font-black text-primary uppercase tracking-widest mb-1">Remaining</p>
+                                        <p className="text-lg font-black text-primary">₹{statementDebt.remainingAmount.toLocaleString()}</p>
+                                    </div>
+                                </div>
+
+                                {/* Ledger */}
+                                {statementLoading ? (
+                                    <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" /></div>
+                                ) : statementTx.length === 0 ? (
+                                    <div className="h-[160px] flex items-center justify-center text-xs font-black text-gray-300 uppercase tracking-widest border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl">
+                                        No transactions for this debt yet
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {statementTx.map((tx) => {
+                                            const isBorrow = tx.type === "debt_take";
+                                            return (
+                                                <div key={tx.id} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`p-2.5 rounded-xl ${isBorrow ? 'bg-amber-500 text-white' : 'bg-blue-500 text-white'}`}>
+                                                            {isBorrow ? <Plus size={16} /> : <CreditCard size={16} />}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-black text-gray-900 dark:text-white">{tx.description}</p>
+                                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                                {isBorrow ? 'Borrowed' : 'Paid'} • {new Date(tx.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <p className={`text-sm font-black ${isBorrow ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                                        {isBorrow ? '+' : '−'} ₹{tx.amount.toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </motion.div>
                         </div >
                     )

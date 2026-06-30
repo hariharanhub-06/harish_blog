@@ -12,11 +12,13 @@ export async function GET(req: Request) {
         const startDate = searchParams.get("startDate");
         const endDate = searchParams.get("endDate");
         const category = searchParams.get("category");
+        const debtId = searchParams.get("debtId");
 
         const conditions = [];
         if (startDate) conditions.push(gte(financeTransactions.date, new Date(startDate)));
         if (endDate) conditions.push(lte(financeTransactions.date, new Date(endDate)));
         if (category && category !== "All") conditions.push(eq(financeTransactions.category, category));
+        if (debtId) conditions.push(eq(financeTransactions.debtId, debtId));
 
         const transactions = await db.select()
             .from(financeTransactions)
@@ -58,6 +60,36 @@ export async function POST(req: Request) {
                         updatedAt: new Date(),
                     })
                     .where(eq(financeDebts.id, data.debtId));
+            }
+        }
+
+        // If it's a debt taken on (new borrowing), increase the debt's pending amount.
+        // Match against an existing debt (top-up) or create a new debt profile.
+        if (data.type === "debt_take") {
+            const amount = parseFloat(data.amount);
+            if (data.debtId) {
+                const [debt] = await db.select().from(financeDebts).where(eq(financeDebts.id, data.debtId));
+                if (debt) {
+                    await db.update(financeDebts)
+                        .set({
+                            initialAmount: (debt.initialAmount ?? 0) + amount,
+                            remainingAmount: (debt.remainingAmount ?? 0) + amount,
+                            updatedAt: new Date(),
+                        })
+                        .where(eq(financeDebts.id, data.debtId));
+                }
+            } else {
+                const [newDebt] = await db.insert(financeDebts).values({
+                    name: data.description || data.category || "New Debt",
+                    initialAmount: amount,
+                    remainingAmount: amount,
+                }).returning();
+                // Link the transaction to the newly created debt for the audit trail
+                if (newDebt) {
+                    await db.update(financeTransactions)
+                        .set({ debtId: newDebt.id })
+                        .where(eq(financeTransactions.id, transaction.id));
+                }
             }
         }
 
@@ -138,6 +170,20 @@ export async function DELETE(req: Request) {
                 await db.update(financeDebts)
                     .set({
                         remainingAmount: debt.remainingAmount + transaction.amount,
+                        updatedAt: new Date(),
+                    })
+                    .where(eq(financeDebts.id, transaction.debtId));
+            }
+        }
+
+        // Rollback debt taken if deleting a debt_take transaction
+        if (transaction.type === "debt_take" && transaction.debtId) {
+            const [debt] = await db.select().from(financeDebts).where(eq(financeDebts.id, transaction.debtId));
+            if (debt) {
+                await db.update(financeDebts)
+                    .set({
+                        initialAmount: (debt.initialAmount ?? 0) - transaction.amount,
+                        remainingAmount: (debt.remainingAmount ?? 0) - transaction.amount,
                         updatedAt: new Date(),
                     })
                     .where(eq(financeDebts.id, transaction.debtId));
