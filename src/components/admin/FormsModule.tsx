@@ -717,7 +717,7 @@ export default function FormsModule() {
                                     role="button"
                                     tabIndex={0}
                                     onClick={() => { if (!bannerUploading) bannerInputRef.current?.click(); }}
-                                    className="block h-48 bg-gray-50 relative group overflow-hidden border-b border-gray-100 cursor-pointer"
+                                    className="block aspect-[16/9] sm:aspect-auto sm:h-48 bg-gray-50 relative group overflow-hidden border-b border-gray-100 cursor-pointer"
                                 >
                                     {activeForm.bannerUrl ? (
                                         <img

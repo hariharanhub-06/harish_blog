@@ -71,7 +71,7 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                     setForm(data);
                     const initialAnswers: Record<string, any> = {};
                     data.questions.forEach((q: FormQuestion) => {
-                        if (q.type === 'checkboxes') initialAnswers[q.id] = [];
+                        if (q.type === 'checkboxes' || q.type === 'file_upload') initialAnswers[q.id] = [];
                         else initialAnswers[q.id] = "";
                     });
                     setAnswers(initialAnswers);
@@ -242,9 +242,9 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
 
                 <form onSubmit={e => isNextSubmit ? handleSubmit(e) : e.preventDefault()} className="max-w-2xl mx-auto space-y-8 relative z-10 pt-12 pb-24 px-4 sm:px-0">
 
-                    <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] shadow-[0_32px_64px_rgb(0,0,0,0.1)] border border-white/50 overflow-hidden relative transition-all duration-500 hover:shadow-[0_40px_80px_rgb(0,0,0,0.15)]">
+                    <div className="bg-white/80 backdrop-blur-2xl rounded-[1.75rem] sm:rounded-[3rem] shadow-[0_32px_64px_rgb(0,0,0,0.1)] border border-white/50 overflow-hidden relative transition-all duration-500 hover:shadow-[0_40px_80px_rgb(0,0,0,0.15)]">
                         {form?.bannerUrl && (
-                            <div className="w-full h-48 sm:h-64 relative bg-gray-100 overflow-hidden">
+                            <div className="w-full aspect-[16/9] sm:aspect-[19/6] relative bg-gray-100 overflow-hidden">
                                 <img
                                     src={form.bannerUrl}
                                     alt="Banner"
@@ -394,55 +394,70 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                         </div>
                                     )}
 
-                                    {q.type === "file_upload" && (
-                                        <div className="space-y-6">
-                                            <label className={`border-4 border-dashed rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-20 flex flex-col items-center justify-center transition-all duration-500 group cursor-pointer relative overflow-hidden ${answers[q.id] ? 'bg-green-50/30 border-green-200/50' : 'bg-white/40 border-gray-100 hover:bg-white hover:border-gray-200 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)]'}`}>
-                                                {answers[q.id] ? (
-                                                    <div className="flex flex-col items-center animate-in fade-in zoom-in duration-500">
-                                                        <div className="w-24 h-24 rounded-full bg-green-500 flex items-center justify-center text-white mb-6 shadow-xl shadow-green-200 scale-110">
-                                                            <CheckCircle2 size={40} />
+                                    {q.type === "file_upload" && (() => {
+                                        // Normalise the answer to an array of URLs (supports multiple files).
+                                        const files: string[] = Array.isArray(answers[q.id])
+                                            ? answers[q.id]
+                                            : (answers[q.id] ? [answers[q.id]] : []);
+
+                                        const addFiles = async (fileList: FileList) => {
+                                            const tid = toast.loading(`Uploading ${fileList.length} file(s)...`, { id: `upload-${q.id}` });
+                                            try {
+                                                const { uploadToImageKit } = await import("@/lib/imagekit-upload");
+                                                const uploaded: string[] = [];
+                                                for (const f of Array.from(fileList)) {
+                                                    uploaded.push(await uploadToImageKit(f, 'responses'));
+                                                }
+                                                handleAnswerChange(q.id, [...files, ...uploaded]);
+                                                toast.success('Upload complete!', { id: tid });
+                                            } catch (error) {
+                                                toast.error('Upload failed', { id: tid });
+                                            }
+                                        };
+
+                                        const removeFile = (idx: number) =>
+                                            handleAnswerChange(q.id, files.filter((_, i) => i !== idx));
+
+                                        return (
+                                            <div className="space-y-6">
+                                                <label className={`border-4 border-dashed rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-16 flex flex-col items-center justify-center transition-all duration-500 group cursor-pointer relative overflow-hidden ${files.length ? 'bg-green-50/30 border-green-200/50' : 'bg-white/40 border-gray-100 hover:bg-white hover:border-gray-200 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)]'}`}>
+                                                    <div className="flex flex-col items-center text-center">
+                                                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[2rem] bg-gray-50 flex items-center justify-center text-gray-300 mb-6 transition-transform group-hover:scale-110 group-hover:bg-primary/5 group-hover:text-primary">
+                                                            <UploadCloud size={48} />
                                                         </div>
-                                                        <span className="font-black text-2xl text-gray-900 mb-2">Ready to submit!</span>
-                                                        <p className="text-gray-400 font-bold text-sm uppercase tracking-widest">Click again to replace</p>
-                                                        <button type="button" className="mt-8 px-6 py-2 bg-red-50 text-red-500 font-black rounded-xl text-xs hover:bg-red-100 transition-colors" onClick={(e) => { e.preventDefault(); handleAnswerChange(q.id, '') }}>Remove attachment</button>
+                                                        <span className="font-black text-2xl sm:text-3xl text-gray-900 mb-2">{files.length ? 'Add more files' : 'Add your files'}</span>
+                                                        <span className="text-gray-400 font-medium">Drag &amp; Drop or Click to browse — you can add multiple</span>
+                                                        <div className="mt-6 bg-white px-6 py-2 rounded-full shadow-sm border border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">You can attach as many files as you need</div>
                                                     </div>
-                                                ) : (
-                                                    <div className="flex flex-col items-center">
-                                                        <div className="w-24 h-24 rounded-[2rem] bg-gray-50 flex items-center justify-center text-gray-300 mb-8 transition-transform group-hover:scale-110 group-hover:bg-primary/5 group-hover:text-primary">
-                                                            <UploadCloud size={56} />
+                                                    <input type="file" multiple className="hidden"
+                                                        onChange={async (e) => {
+                                                            if (e.target.files && e.target.files.length) await addFiles(e.target.files);
+                                                            e.target.value = "";
+                                                        }}
+                                                    />
+                                                </label>
+
+                                                {files.length > 0 && (
+                                                    <>
+                                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                                            {files.map((url, idx) => (
+                                                                <div key={idx} className="relative rounded-2xl sm:rounded-3xl overflow-hidden border-4 border-white shadow-xl group/img aspect-square bg-gray-100">
+                                                                    <img src={url} className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110" alt={`Attachment ${idx + 1}`} />
+                                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                                                                    <span className="absolute bottom-2 left-3 text-white font-black text-xs drop-shadow-md flex items-center gap-1.5"><ImageIcon size={14} /> {idx + 1}</span>
+                                                                    <button type="button" onClick={(e) => { e.preventDefault(); removeFile(idx); }}
+                                                                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg transition-all sm:opacity-0 sm:group-hover/img:opacity-100">
+                                                                        <X size={16} />
+                                                                    </button>
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                        <span className="font-black text-3xl text-gray-900 mb-3">Add your file</span>
-                                                        <span className="text-gray-400 font-medium">Drag & Drop or Click to browse</span>
-                                                        <div className="mt-8 bg-white px-6 py-2 rounded-full shadow-sm border border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Supports images up to 5MB</div>
-                                                    </div>
+                                                        <p className="text-center text-[11px] font-black text-gray-400 uppercase tracking-widest">{files.length} file{files.length > 1 ? 's' : ''} attached</p>
+                                                    </>
                                                 )}
-                                                <input type="file" className="hidden"
-                                                    onChange={async (e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (!file) return;
-                                                        const tid = toast.loading('Uploading attachment...', { id: 'upload' });
-                                                        try {
-                                                            const { uploadToImageKit } = await import("@/lib/imagekit-upload");
-                                                            const url = await uploadToImageKit(file, 'responses');
-                                                            handleAnswerChange(q.id, url);
-                                                            toast.success('Upload complete!', { id: tid });
-                                                        } catch (error) {
-                                                            toast.error('Upload failed', { id: tid });
-                                                        }
-                                                    }}
-                                                />
-                                            </label>
-                                            {answers[q.id] && (
-                                                <div className="relative rounded-[3rem] overflow-hidden border-8 border-white shadow-2xl group/img">
-                                                    <img src={answers[q.id]} className="w-full aspect-[16/10] object-cover transition-transform duration-1000 group-hover/img:scale-110" alt="Preview" />
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                                                    <div className="absolute bottom-8 left-8 text-white font-black text-lg drop-shadow-md flex items-center gap-3">
-                                                        <ImageIcon size={24} /> Attachment Preview
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             </motion.div>
                         )
