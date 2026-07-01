@@ -290,16 +290,29 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                 <div className="mt-8">
                                     {(q.type === 'short_answer' || q.type === 'paragraph') && (
                                         <div className="relative group/input">
-                                            <input
-                                                type={q.type === 'short_answer' ? "text" : "textarea"}
-                                                className={`w-full ${q.type === 'short_answer' ? 'sm:w-4/5' : ''} border-b-4 border-gray-100 border-t-0 border-x-0 rounded-none bg-transparent px-2 py-2 sm:py-4 focus:ring-0 text-lg sm:text-2xl font-bold transition-all duration-300 placeholder:text-gray-200`}
-                                                placeholder="Write your answer here..."
-                                                style={{ outline: 'none' }}
-                                                value={answers[q.id] || ""}
-                                                onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                                                onFocus={(e) => e.target.style.borderColor = themeBg}
-                                                onBlur={(e) => e.target.style.borderColor = '#f3f4f6'}
-                                            />
+                                            {q.type === 'paragraph' ? (
+                                                <textarea
+                                                    rows={4}
+                                                    className="w-full border-b-4 border-gray-100 border-t-0 border-x-0 rounded-none bg-transparent px-2 py-2 sm:py-3 focus:ring-0 text-base sm:text-lg font-semibold leading-relaxed transition-all duration-300 placeholder:text-gray-200 resize-y min-h-[120px] break-words whitespace-pre-wrap"
+                                                    placeholder="Write your answer here..."
+                                                    style={{ outline: 'none' }}
+                                                    value={answers[q.id] || ""}
+                                                    onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                                                    onFocus={(e) => e.target.style.borderColor = themeBg}
+                                                    onBlur={(e) => e.target.style.borderColor = '#f3f4f6'}
+                                                />
+                                            ) : (
+                                                <input
+                                                    type="text"
+                                                    className="w-full sm:w-4/5 border-b-4 border-gray-100 border-t-0 border-x-0 rounded-none bg-transparent px-2 py-2 sm:py-4 focus:ring-0 text-base sm:text-xl font-bold transition-all duration-300 placeholder:text-gray-200"
+                                                    placeholder="Write your answer here..."
+                                                    style={{ outline: 'none' }}
+                                                    value={answers[q.id] || ""}
+                                                    onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                                                    onFocus={(e) => e.target.style.borderColor = themeBg}
+                                                    onBlur={(e) => e.target.style.borderColor = '#f3f4f6'}
+                                                />
+                                            )}
                                             <div className="absolute bottom-0 left-0 w-0 h-1 transition-all duration-500 group-focus-within/input:w-full" style={{ backgroundColor: themeBg }}></div>
                                         </div>
                                     )}
@@ -365,29 +378,42 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                         </div>
                                     )}
 
-                                    {q.type === "linear_scale" && (
-                                        <div className="flex flex-col items-center pt-6">
-                                            <div className="flex gap-4 sm:gap-6 justify-center w-full mb-8">
-                                                {Array.from({ length: (parseInt(q.options?.[1] || '5') - parseInt(q.options?.[0] || '1')) + 1 }).map((_, i) => {
-                                                    const val = String(parseInt(q.options?.[0] || '1') + i);
-                                                    const isSelected = answers[q.id] === val;
-                                                    return (
-                                                        <button key={val} type="button" onClick={() => handleAnswerChange(q.id, val)}
-                                                            className={`w-14 h-14 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center text-2xl font-black transition-all duration-500 shadow-sm ${isSelected ? 'text-white shadow-2xl scale-125 z-10' : 'bg-gray-50/50 text-gray-400 border border-white hover:bg-white hover:text-gray-600 hover:scale-105'}`}
-                                                            style={{ backgroundColor: isSelected ? themeBg : undefined }}
-                                                        >
-                                                            {val}
-                                                        </button>
-                                                    )
-                                                })}
+                                    {q.type === "linear_scale" && (() => {
+                                        const min = parseInt(q.options?.[0] || '1');
+                                        const max = parseInt(q.options?.[1] || '5');
+                                        const selected = answers[q.id] !== "" && answers[q.id] != null;
+                                        const val = selected ? parseInt(answers[q.id]) : min;
+                                        return (
+                                            <div className="flex flex-col items-center pt-6 w-full">
+                                                {/* Current value bubble */}
+                                                <div className="mb-6 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-black text-white shadow-lg transition-all duration-200"
+                                                    style={{ backgroundColor: selected ? themeBg : '#e5e7eb' }}>
+                                                    {selected ? val : '–'}
+                                                </div>
+                                                {/* Snappy slider: step=1 snaps to each point */}
+                                                <input
+                                                    type="range"
+                                                    min={min}
+                                                    max={max}
+                                                    step={1}
+                                                    value={val}
+                                                    onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                                                    className="w-full sm:w-3/4 h-3 cursor-pointer"
+                                                    style={{ accentColor: themeBg }}
+                                                />
+                                                {/* Tick marks + end labels */}
+                                                <div className="flex justify-between w-full sm:w-3/4 mt-3 px-1">
+                                                    {Array.from({ length: (max - min) + 1 }).map((_, i) => (
+                                                        <span key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: (min + i) <= val && selected ? themeBg : '#d1d5db' }} />
+                                                    ))}
+                                                </div>
+                                                <div className="flex justify-between w-full sm:w-3/4 mt-2 text-xs font-black text-gray-400 uppercase tracking-[0.2em]">
+                                                    <span>{min}</span>
+                                                    <span>{max}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex justify-between w-full sm:w-1/2 px-4 text-xs font-black text-gray-400 uppercase tracking-[0.2em] italic">
-                                                <span>{q.options?.[0] || '1'}</span>
-                                                <span className="h-px bg-gray-100 flex-1 mx-8 self-center" />
-                                                <span>{q.options?.[1] || '5'}</span>
-                                            </div>
-                                        </div>
-                                    )}
+                                        );
+                                    })()}
 
                                     {q.type === "file_upload" && (() => {
                                         // Normalise the answer to an array of URLs (supports multiple files).
