@@ -29,7 +29,7 @@ export default function PicturePuzzle() {
     useEffect(() => {
         const fetchAssets = async () => {
             try {
-                const res = await fetch("/api/admin/game-assets?gameId=puzzle");
+                const res = await fetch("/api/game-assets?gameId=puzzle");
                 if (res.ok) {
                     const data = await res.json();
                     if (data.length > 0) {

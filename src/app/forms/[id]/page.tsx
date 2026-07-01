@@ -63,7 +63,7 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
 
     const fetchForm = async () => {
         try {
-            const res = await fetch(`/api/admin/forms/${id}`);
+            const res = await fetch(`/api/forms/${id}`);
             if (res.ok) {
                 const data = await res.json();
                 if (!data.isPublished) setError("This form is not currently accepting responses.");
@@ -233,17 +233,7 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
     }
 
     return (
-        <div className="min-h-screen relative font-sans text-gray-900 selection:bg-primary/20 bg-black">
-            {/* YouTube Abstract Video Background */}
-            <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-                <div className="absolute inset-0 bg-black/60 z-10"></div>
-                <iframe
-                    src="https://www.youtube.com/embed/qC0vDKVPCrw?autoplay=1&mute=1&controls=0&loop=1&playlist=qC0vDKVPCrw&vq=hd1080&modestbranding=1&showinfo=0"
-                    className="absolute top-1/2 left-1/2 w-[150vw] h-[150vh] min-w-full min-h-full -translate-x-1/2 -translate-y-1/2 opacity-70"
-                    allow="autoplay; encrypted-media"
-                    style={{ filter: 'contrast(1.2) saturation(1.5)' }}
-                />
-            </div>
+        <div className="min-h-screen relative font-sans text-gray-900 selection:bg-primary/20 bg-gray-100">
             {/* Theming Overlay Wrapper */}
             <div className="min-h-screen selection:bg-primary/20 backdrop-blur-[100px] pb-20">
                 <div className="fixed top-0 left-0 w-full h-full opacity-40 transition-colors duration-[2s]" style={{ background: `radial-gradient(circle at 20% 30%, ${themeBg}33 0%, transparent 50%), radial-gradient(circle at 80% 70%, ${themeBg}22 0%, transparent 50%)` }}></div>

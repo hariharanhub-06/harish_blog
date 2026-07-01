@@ -39,7 +39,7 @@ export default function MemoryCard() {
     useEffect(() => {
         const fetchAssets = async () => {
             try {
-                const res = await fetch("/api/admin/game-assets?gameId=memory");
+                const res = await fetch("/api/game-assets?gameId=memory");
                 if (res.ok) {
                     const data = await res.json();
                     setAssets(data.map((a: any) => a.assetUrl));
@@ -52,21 +52,19 @@ export default function MemoryCard() {
     }, []);
 
     const initializeGame = useCallback(() => {
-        let cardBase: any[] = [];
+        // Use all uploaded images (up to totalPairs), then pad any remaining
+        // pairs with icons so partial uploads still show the user's pictures.
+        const imageCards = assets.slice(0, totalPairs).map((url, index) => ({
+            imageUrl: url,
+            color: COLORS[index % COLORS.length]
+        }));
 
-        if (assets.length >= totalPairs) {
-            // Use custom images
-            cardBase = assets.slice(0, totalPairs).map((url, index) => ({
-                imageUrl: url,
-                color: COLORS[index % COLORS.length]
-            }));
-        } else {
-            // Use icons fallback
-            cardBase = ICONS.slice(0, totalPairs).map((Icon, index) => ({
-                icon: Icon,
-                color: COLORS[index % COLORS.length]
-            }));
-        }
+        const iconCards = ICONS.slice(0, Math.max(0, totalPairs - imageCards.length)).map((Icon, index) => ({
+            icon: Icon,
+            color: COLORS[(imageCards.length + index) % COLORS.length]
+        }));
+
+        const cardBase: any[] = [...imageCards, ...iconCards];
 
         const doubled = [...cardBase, ...cardBase];
         const shuffled = doubled
