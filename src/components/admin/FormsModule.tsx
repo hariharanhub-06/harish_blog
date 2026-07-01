@@ -162,21 +162,18 @@ export default function FormsModule() {
         }
     };
 
-    const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+        // Clear the value so re-selecting the SAME file still fires onChange.
+        e.target.value = "";
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            setImageToCrop(reader.result as string);
-            setIsCropping(true);
-        };
-        reader.readAsDataURL(file);
-
-        // Allow re-selecting the SAME file next time: without clearing the value,
-        // the input's onChange won't fire again for an identical file path and
-        // the cropper would never open.
-        e.target.value = "";
+        // Upload the picked image directly (no crop step). This uses the same
+        // reliable ImageKit path as game-asset uploads. Framing can still be set
+        // with the top/center/bottom position buttons below the banner.
+        await handleFileUpload(file, (url) =>
+            setActiveForm((prev) => (prev ? { ...prev, bannerUrl: url } : prev))
+        );
     };
 
     const onCropComplete = async (croppedBlob: Blob) => {
