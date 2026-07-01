@@ -243,7 +243,7 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
 
                     <div className="bg-white/80 backdrop-blur-2xl rounded-[1.75rem] sm:rounded-[3rem] shadow-[0_32px_64px_rgb(0,0,0,0.1)] border border-white/50 overflow-hidden relative transition-all duration-500 hover:shadow-[0_40px_80px_rgb(0,0,0,0.15)]">
                         {form?.bannerUrl && (
-                            <div className="w-full aspect-[16/9] sm:aspect-[19/6] relative bg-gray-100 overflow-hidden">
+                            <div className="w-full aspect-[19/6] relative bg-gray-100 overflow-hidden">
                                 <img
                                     src={form.bannerUrl}
                                     alt="Banner"

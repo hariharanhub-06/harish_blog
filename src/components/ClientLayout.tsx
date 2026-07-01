@@ -15,6 +15,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const isAdmin = pathname?.startsWith("/admin");
     const isHomePage = pathname === "/";
     const isScheduler = pathname === "/scheduler";
+    const isForm = pathname?.startsWith("/forms");
 
     return (
         <>
@@ -41,7 +42,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 {children}
             </main>
             {!isAdmin && !isScheduler && <Footer />}
-            {!isAdmin && !isScheduler && <AIChat />}
+            {!isAdmin && !isScheduler && !isForm && <AIChat />}
         </>
     );
 }
