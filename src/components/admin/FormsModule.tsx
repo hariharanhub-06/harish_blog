@@ -56,6 +56,12 @@ export default function FormsModule() {
     const [isCropping, setIsCropping] = useState(false);
     const [isLinkCopied, setIsLinkCopied] = useState<string | null>(null);
 
+    // Banner upload: ref-triggered picker + inline status (no dependence on
+    // <label> behaviour or the toast layer being mounted).
+    const bannerInputRef = useRef<HTMLInputElement>(null);
+    const [bannerUploading, setBannerUploading] = useState(false);
+    const [bannerError, setBannerError] = useState("");
+
     const sessionId = typeof window !== "undefined" ? localStorage.getItem("admin_sessionId") || "" : "";
 
     useEffect(() => {
@@ -168,12 +174,22 @@ export default function FormsModule() {
         e.target.value = "";
         if (!file) return;
 
-        // Upload the picked image directly (no crop step). This uses the same
-        // reliable ImageKit path as game-asset uploads. Framing can still be set
-        // with the top/center/bottom position buttons below the banner.
-        await handleFileUpload(file, (url) =>
-            setActiveForm((prev) => (prev ? { ...prev, bannerUrl: url } : prev))
-        );
+        // Upload the picked image directly (no crop step). Inline status is shown
+        // in the banner area so the user gets feedback regardless of toasts.
+        setBannerError("");
+        setBannerUploading(true);
+        toast.loading("Uploading banner...", { id: "banner-upload" });
+        try {
+            const url = await uploadToImageKit(file, "forms");
+            setActiveForm((prev) => (prev ? { ...prev, bannerUrl: url } : prev));
+            toast.success("Banner uploaded!", { id: "banner-upload" });
+        } catch (err) {
+            console.error("Banner upload failed:", err);
+            setBannerError("Upload failed. Please try again.");
+            toast.error("Banner upload failed", { id: "banner-upload" });
+        } finally {
+            setBannerUploading(false);
+        }
     };
 
     const onCropComplete = async (croppedBlob: Blob) => {
@@ -695,7 +711,14 @@ export default function FormsModule() {
                         <div className="bg-white rounded-3xl shadow-sm border border-gray-100/60 overflow-hidden mb-6 relative group">
                             {/* Banner Field with FilePicker */}
                             <div className="relative group">
-                                <label className="block h-48 bg-gray-50 relative group overflow-hidden border-b border-gray-100 cursor-pointer">
+                                {/* Hidden input triggered explicitly via ref (reliable across browsers) */}
+                                <input ref={bannerInputRef} type="file" accept="image/*" className="hidden" onChange={handleBannerChange} />
+                                <div
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => { if (!bannerUploading) bannerInputRef.current?.click(); }}
+                                    className="block h-48 bg-gray-50 relative group overflow-hidden border-b border-gray-100 cursor-pointer"
+                                >
                                     {activeForm.bannerUrl ? (
                                         <img
                                             src={activeForm.bannerUrl}
@@ -707,6 +730,15 @@ export default function FormsModule() {
                                         <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                                             <div className="flex flex-col items-center gap-2"><UploadCloud className="text-gray-300" size={32} /><span className="font-bold text-sm">Click to upload custom Banner</span></div>
                                         </div>
+                                    )}
+                                    {bannerUploading && (
+                                        <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-3 text-white z-20">
+                                            <Loader2 className="w-8 h-8 animate-spin" />
+                                            <span className="font-bold text-sm uppercase tracking-widest">Uploading banner...</span>
+                                        </div>
+                                    )}
+                                    {bannerError && !bannerUploading && (
+                                        <div className="absolute inset-x-0 bottom-0 bg-red-500 text-white text-xs font-bold text-center py-2 z-20">{bannerError}</div>
                                     )}
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center p-4 gap-4">
                                         <span className="text-white font-bold tracking-widest uppercase text-xs border border-white/40 px-4 py-2 rounded-xl backdrop-blur-sm">Change Banner</span>
@@ -724,8 +756,7 @@ export default function FormsModule() {
                                             </button>
                                         )}
                                     </div>
-                                    <input type="file" accept="image/*" className="hidden" onClick={(e) => { (e.target as HTMLInputElement).value = ""; }} onChange={handleBannerChange} />
-                                </label>
+                                </div>
 
                                 {activeForm.bannerUrl && (
                                     <div className="absolute bottom-4 right-4 flex gap-2 bg-white/90 backdrop-blur-sm p-1.5 rounded-xl shadow-lg border border-white/50 opacity-0 group-hover:opacity-100 transition-opacity">
