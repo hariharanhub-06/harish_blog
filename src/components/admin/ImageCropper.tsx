@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Cropper from 'react-easy-crop';
 import { X, Check, ZoomIn, ZoomOut } from 'lucide-react';
 
@@ -67,15 +68,25 @@ export default function ImageCropper({ image, onCropComplete, onCancel, aspectRa
 
     const handleConfirm = async () => {
         try {
-            const croppedImage = await getCroppedImg(image, croppedAreaPixels);
+            // If the crop area hasn't been reported yet (user hit Apply immediately),
+            // fall back to the full natural image so we never silently no-op.
+            let area = croppedAreaPixels;
+            if (!area) {
+                const img = await createImage(image);
+                area = { x: 0, y: 0, width: img.naturalWidth, height: img.naturalHeight };
+            }
+            const croppedImage = await getCroppedImg(image, area);
             onCropComplete(croppedImage);
         } catch (e) {
             console.error(e);
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col">
+    // Render through a portal to <body> so the modal escapes any transformed /
+    // overflow / stacking-context ancestor in the admin dashboard. Without this
+    // the fixed overlay could be trapped inside a parent and never become visible.
+    const modal = (
+        <div className="fixed inset-0 z-[9999] bg-black/90 flex flex-col">
             <div className="flex justify-between items-center p-6 bg-black/50 backdrop-blur-md">
                 <div className="flex flex-col">
                     <h3 className="text-white font-black uppercase tracking-tighter text-xl">Adjust Thumbnail</h3>
@@ -128,4 +139,7 @@ export default function ImageCropper({ image, onCropComplete, onCancel, aspectRa
             </div>
         </div>
     );
+
+    if (typeof document === 'undefined') return modal;
+    return createPortal(modal, document.body);
 }
