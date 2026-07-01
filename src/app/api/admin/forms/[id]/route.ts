@@ -33,7 +33,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         const { id } = await params;
         const body = await req.json();
         const {
-            title, description, isPublished, bannerUrl, themeColor,
+            title, description, isPublished, bannerUrl, bannerPosition, themeColor,
             postSubmissionAction, postSubmissionData, automationEnabled,
             automationChannels, automationTemplate, customSuccessMessage,
             questions
@@ -41,7 +41,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
         await db.update(forms)
             .set({
-                title, description, isPublished, bannerUrl, themeColor,
+                title, description, isPublished, bannerUrl, bannerPosition, themeColor,
                 postSubmissionAction, postSubmissionData, automationEnabled,
                 automationChannels, automationTemplate, customSuccessMessage,
                 updatedAt: new Date()

@@ -29,10 +29,18 @@ export async function uploadToImageKit(
         }
         const authData = await authResponse.json();
 
+        // Derive a safe filename WITH an extension. Cropped banners arrive as a
+        // nameless Blob, so `file.name` is undefined — that produced a filename
+        // with no extension, which ImageKit stored without a recognized format
+        // and then failed to transform (broken image / "banner not uploaded").
+        const ext = (file.type && file.type.split('/')[1]) || 'jpg';
+        const baseName = (file as File).name || `image.${ext}`;
+        const uploadName = `${Date.now()}_${baseName}`;
+
         // Prepare form data for upload
         const formData = new FormData();
-        formData.append('file', file);
-        formData.append('fileName', `${Date.now()}_${file.name}`);
+        formData.append('file', file, uploadName);
+        formData.append('fileName', uploadName);
         formData.append('folder', folder);
         formData.append('signature', authData.signature);
         formData.append('expire', authData.expire.toString());
