@@ -46,6 +46,7 @@ export default function FormsModule() {
     const [activeForm, setActiveForm] = useState<Form | null>(null);
     const [builderQuestions, setBuilderQuestions] = useState<FormQuestion[]>([]);
     const [isPublished, setIsPublished] = useState(false);
+    const [respFormId, setRespFormId] = useState<string | null>(null);
 
     const [responses, setResponses] = useState<any[]>([]);
     const [selectedResponses, setSelectedResponses] = useState<Set<string>>(new Set());
@@ -94,6 +95,7 @@ export default function FormsModule() {
     const handleEditForm = async (id: string) => {
         setLoading(true);
         setView("builder");
+        try { localStorage.setItem("forms-nav", JSON.stringify({ view: "builder", formId: id })); } catch { }
         try {
             const res = await fetch(`/api/admin/forms/${id}`, { headers: { "X-Session-Id": sessionId } });
             if (res.ok) {
@@ -115,7 +117,9 @@ export default function FormsModule() {
     };
 
     const handleViewResponses = async (id: string) => {
-        setLoading(true); setView("responses");
+        setLoading(true); setView("responses"); setRespFormId(id);
+        // Persist so a refresh stays on this form's responses.
+        try { localStorage.setItem("forms-nav", JSON.stringify({ view: "responses", formId: id })); } catch { }
         try {
             const formRes = await fetch(`/api/admin/forms/${id}`, { headers: { "X-Session-Id": sessionId } });
             setBuilderQuestions((await formRes.json()).questions || []);
@@ -124,6 +128,30 @@ export default function FormsModule() {
         } catch (e) { setView("list"); }
         setLoading(false);
     };
+
+    // Deep-link from a notification + restore the responses view across refresh.
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        // 1) Notification deep-link (set right before switching to the forms tab)
+        const deepLink = localStorage.getItem("forms-open-responses");
+        if (deepLink) {
+            localStorage.removeItem("forms-open-responses");
+            handleViewResponses(deepLink);
+            return;
+        }
+        // 2) Restore the last responses view after a page refresh
+        try {
+            const saved = JSON.parse(localStorage.getItem("forms-nav") || "null");
+            if (saved?.view === "responses" && saved.formId) handleViewResponses(saved.formId);
+            else if (saved?.view === "builder" && saved.formId) handleEditForm(saved.formId);
+        } catch { }
+
+        // Live switch if a notification is clicked while this module is already mounted
+        const handler = (e: any) => { if (e?.detail) handleViewResponses(e.detail); };
+        window.addEventListener("forms-open-responses", handler);
+        return () => window.removeEventListener("forms-open-responses", handler);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleSaveForm = async (publishStatus?: boolean) => {
         if (!activeForm) return;
@@ -372,7 +400,7 @@ export default function FormsModule() {
                 <div className="flex justify-between items-center bg-white dark:bg-[#1e1e1e] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
                     <div>
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white">Responses ({responses.length})</h2>
-                        <button onClick={() => setView("list")} className="text-sm text-gray-400 hover:text-primary mt-1">&larr; Back to Forms List</button>
+                        <button onClick={() => { try { localStorage.removeItem("forms-nav"); } catch { } setRespFormId(null); setView("list"); }} className="text-sm text-gray-400 hover:text-primary mt-1">&larr; Back to Forms List</button>
                     </div>
                     <div className="flex gap-2">
                         <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mr-4 transition-colors">
@@ -628,7 +656,7 @@ export default function FormsModule() {
         return (
             <div className="space-y-6 animate-in fade-in max-w-4xl mx-auto pb-20">
                 <div className="flex items-center justify-between sticky top-0 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md pt-4 pb-4 z-40 border-b border-gray-100 dark:border-gray-800 mb-6 px-4 transition-colors">
-                    <button onClick={() => setView("list")} className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#3b71ca] transition-colors">&larr; Back to hub</button>
+                    <button onClick={() => { try { localStorage.removeItem("forms-nav"); } catch { } setView("list"); }} className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#3b71ca] transition-colors">&larr; Back to hub</button>
 
                     <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mx-auto transition-colors">
                         <button onClick={() => setView("builder")} className={`px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider transition ${view === 'builder' ? 'bg-white dark:bg-gray-700 shadow-sm text-[#3b71ca]' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'}`}>Questions</button>

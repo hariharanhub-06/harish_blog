@@ -8,6 +8,20 @@ export async function PATCH(req: Request) {
     try {
         const authError = await validateAdminSession(req);
         if (authError) return authError;
+
+        // Optional body { id, type } marks a SINGLE notification as seen.
+        // No body → mark everything as seen (existing behaviour).
+        let body: any = {};
+        try { body = await req.json(); } catch { /* no body */ }
+        const { id, type } = body || {};
+
+        if (id && type) {
+            if (type === "enquiry") await db.update(contactSubmissions).set({ status: "Seen" }).where(eq(contactSubmissions.id, id));
+            else if (type === "feedback") await db.update(feedbacks).set({ status: "Seen" }).where(eq(feedbacks.id, id));
+            else if (type === "form") await db.update(formResponses).set({ status: "Seen" }).where(eq(formResponses.id, id));
+            return NextResponse.json({ success: true });
+        }
+
         await Promise.all([
             db.update(contactSubmissions).set({ status: "Seen" }).where(eq(contactSubmissions.status, "New")),
             db.update(feedbacks).set({ status: "Seen" }).where(eq(feedbacks.status, "New")),
@@ -77,6 +91,7 @@ export async function GET(req: Request) {
         const responses = await db
             .select({
                 id: formResponses.id,
+                formId: formResponses.formId,
                 createdAt: formResponses.createdAt,
                 formTitle: forms.title
             })
@@ -90,6 +105,7 @@ export async function GET(req: Request) {
             notifications.push({
                 id: r.id,
                 type: "form",
+                formId: r.formId,
                 title: "New Form Submission",
                 message: `Response received for: ${r.formTitle}`,
                 date: r.createdAt,

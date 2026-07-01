@@ -316,6 +316,33 @@ export default function AdminDashboard() {
         } catch (err) { console.error("Failed to mark notifications as seen", err); }
     };
 
+    const handleNotificationClick = (item: any) => {
+        setIsNotificationsOpen(false);
+        setIsMobileMenuOpen(false);
+
+        // Mark just this notification as read (fire-and-forget).
+        try {
+            const sid = localStorage.getItem('admin_sessionId') || "";
+            fetch("/api/admin/notifications", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json", "X-Session-Id": sid },
+                body: JSON.stringify({ id: item.id, type: item.type }),
+            });
+        } catch (err) { console.error("Failed to mark notification read", err); }
+        setNotifications((prev) => prev.filter((n) => n.id !== item.id));
+        setUnreadCount((c) => Math.max(0, c - 1));
+
+        // Deep-link: form submissions open that form's responses directly.
+        if (item.type === "form" && item.formId) {
+            localStorage.setItem("forms-open-responses", item.formId);
+            // Also notify an already-mounted FormsModule to switch immediately.
+            window.dispatchEvent(new CustomEvent("forms-open-responses", { detail: item.formId }));
+            handleTabChange("forms");
+        } else if (item.actionTab) {
+            handleTabChange(item.actionTab);
+        }
+    };
+
     const renderContent = () => {
         switch (activeTab) {
             case "profile": return <ProfileModule />;
@@ -575,7 +602,7 @@ export default function AdminDashboard() {
                                                 {notifications.length > 0 ? (
                                                     <div className="space-y-1">
                                                         {notifications.map((item, idx) => (
-                                                            <button key={idx} onClick={() => { if (item.actionTab) handleTabChange(item.actionTab); setIsNotificationsOpen(false); setIsMobileMenuOpen(false); }} className="w-full p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl text-left flex gap-4 items-start group transition-all">
+                                                            <button key={idx} onClick={() => handleNotificationClick(item)} className="w-full p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl text-left flex gap-4 items-start group transition-all">
                                                                 <div className={`p-2.5 ${item.bg} ${item.color} rounded-xl group-hover:scale-110 transition-transform`}>
                                                                     {item.icon === "MessageSquare" && <MessageSquare size={18} />}
                                                                     {item.icon === "HeartHandshake" && <HeartHandshake size={18} />}
