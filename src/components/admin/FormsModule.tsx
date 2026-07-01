@@ -172,6 +172,11 @@ export default function FormsModule() {
             setIsCropping(true);
         };
         reader.readAsDataURL(file);
+
+        // Allow re-selecting the SAME file next time: without clearing the value,
+        // the input's onChange won't fire again for an identical file path and
+        // the cropper would never open.
+        e.target.value = "";
     };
 
     const onCropComplete = async (croppedBlob: Blob) => {
@@ -722,7 +727,7 @@ export default function FormsModule() {
                                             </button>
                                         )}
                                     </div>
-                                    <input type="file" accept="image/*" className="hidden" onChange={handleBannerChange} />
+                                    <input type="file" accept="image/*" className="hidden" onClick={(e) => { (e.target as HTMLInputElement).value = ""; }} onChange={handleBannerChange} />
                                 </label>
 
                                 {activeForm.bannerUrl && (
@@ -780,7 +785,7 @@ export default function FormsModule() {
                                                 ) : (
                                                     <label className="cursor-pointer inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-primary transition mt-2">
                                                         <ImageIcon size={16} /> Add Image Context
-                                                        <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, base64 => updateQuestion(idx, { imageUrl: base64 }))} />
+                                                        <input type="file" accept="image/*" className="hidden" onClick={(e) => { (e.target as HTMLInputElement).value = ""; }} onChange={e => handleFileUpload(e, base64 => updateQuestion(idx, { imageUrl: base64 }))} />
                                                     </label>
                                                 )}
                                             </div>
