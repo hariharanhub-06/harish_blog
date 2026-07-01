@@ -52,6 +52,7 @@ export default function FormsModule() {
     const [responsesView, setResponsesView] = useState<"table" | "analytics">("table");
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [detailResponse, setDetailResponse] = useState<any>(null);
     const [imageToCrop, setImageToCrop] = useState<string | null>(null);
     const [isCropping, setIsCropping] = useState(false);
     const [isLinkCopied, setIsLinkCopied] = useState<string | null>(null);
@@ -425,25 +426,43 @@ export default function FormsModule() {
                                             {builderQuestions.map((q, j) => {
                                                 const ans = r.answers?.find((a: any) => a.questionId === q.id);
                                                 const text = ans?.answerText || (ans?.answerChoices ? (typeof ans.answerChoices === 'string' ? JSON.parse(ans.answerChoices).join(", ") : ans.answerChoices.join(", ")) : "-");
-                                                const isImage = q.type === 'file_upload' && text?.startsWith('data:image');
+
+                                                // For file uploads, collect all URLs (supports multiple files).
+                                                let fileUrls: string[] = [];
+                                                if (q.type === 'file_upload') {
+                                                    let raw: string[] = [];
+                                                    if (ans?.answerChoices) {
+                                                        const arr = typeof ans.answerChoices === 'string' ? JSON.parse(ans.answerChoices) : ans.answerChoices;
+                                                        if (Array.isArray(arr)) raw = arr;
+                                                    } else if (ans?.answerText) {
+                                                        raw = ans.answerText.split(',').map((s: string) => s.trim());
+                                                    }
+                                                    fileUrls = raw.filter((u) => typeof u === 'string' && (u.includes('imagekit.io') || u.startsWith('http') || u.startsWith('data:image')));
+                                                }
 
                                                 return (
-                                                    <td key={j} className="p-4 text-sm text-gray-800 dark:text-gray-200 truncate max-w-[200px] font-medium" title={isImage || text?.includes('imagekit.io') ? "Click to view image" : text}>
-                                                        {isImage || text?.includes('imagekit.io') ? (
-                                                            <button onClick={() => { setPreviewImage(text); setIsPreviewOpen(true); }} className="relative group flex items-center gap-2">
+                                                    <td key={j} className="p-4 text-sm text-gray-800 dark:text-gray-200 truncate max-w-[200px] font-medium" title={fileUrls.length ? `${fileUrls.length} file(s) - click to view` : text}>
+                                                        {fileUrls.length ? (
+                                                            <button onClick={() => setDetailResponse(r)} className="relative group flex items-center gap-2">
                                                                 <div className="w-10 h-10 rounded-lg border border-gray-100 dark:border-gray-800 overflow-hidden shadow-md group-hover:scale-110 transition-transform bg-gray-50 dark:bg-white/5">
-                                                                    <img src={text} className="w-full h-full object-cover" />
+                                                                    <img src={fileUrls[0]} className="w-full h-full object-cover" />
                                                                 </div>
+                                                                {fileUrls.length > 1 && <span className="text-[10px] font-black text-gray-500 bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded-md">+{fileUrls.length - 1}</span>}
                                                                 <Eye size={14} className="text-gray-400 group-hover:text-primary transition" />
                                                             </button>
                                                         ) : (
-                                                            <span className="line-clamp-1">{text}</span>
+                                                            <button onClick={() => setDetailResponse(r)} className="text-left w-full">
+                                                                <span className="line-clamp-1 hover:text-primary transition">{text}</span>
+                                                            </button>
                                                         )}
                                                     </td>
                                                 );
                                             })}
                                             <td className="p-4 text-right">
                                                 <div className="flex justify-end gap-1">
+                                                    <button onClick={() => setDetailResponse(r)} className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-primary hover:bg-primary/10 rounded-lg transition" title="View full response">
+                                                        <Eye size={16} />
+                                                    </button>
                                                     <button onClick={() => handleSendManualNotification(r)} className="w-9 h-9 flex items-center justify-center text-primary hover:bg-primary/10 rounded-lg transition" title="Send Notification">
                                                         <MessageSquare size={16} />
                                                     </button>
@@ -515,6 +534,55 @@ export default function FormsModule() {
                         </div>
                     </div>
                 )}
+                {/* Full Response Detail Modal */}
+                {detailResponse && (
+                    <div className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setDetailResponse(null)}>
+                        <div className="bg-white dark:bg-[#1e1e1e] rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-gray-800" onClick={(e) => e.stopPropagation()}>
+                            <div className="sticky top-0 bg-white dark:bg-[#1e1e1e] px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center z-10">
+                                <div>
+                                    <h3 className="text-lg font-black text-gray-900 dark:text-white">Response Details</h3>
+                                    <p className="text-[11px] font-bold text-gray-400 mt-0.5">{new Date(detailResponse.createdAt).toLocaleString()}</p>
+                                </div>
+                                <button onClick={() => setDetailResponse(null)} className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition"><X size={20} /></button>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                {builderQuestions.filter(q => q.type !== 'section_header').map((q, i) => {
+                                    const ans = detailResponse.answers?.find((a: any) => a.questionId === q.id);
+                                    // Collect any uploaded file URLs (array of choices, or comma-joined text).
+                                    let urls: string[] = [];
+                                    if (ans?.answerChoices) {
+                                        const arr = typeof ans.answerChoices === 'string' ? JSON.parse(ans.answerChoices) : ans.answerChoices;
+                                        if (Array.isArray(arr)) urls = arr;
+                                    } else if (ans?.answerText) {
+                                        urls = ans.answerText.split(',').map((s: string) => s.trim());
+                                    }
+                                    const fileUrls = urls.filter((u) => typeof u === 'string' && (u.includes('imagekit.io') || u.startsWith('http') || u.startsWith('data:image')));
+                                    const isFileQ = q.type === 'file_upload' && fileUrls.length > 0;
+                                    const text = ans?.answerText || (ans?.answerChoices ? (typeof ans.answerChoices === 'string' ? JSON.parse(ans.answerChoices).join(", ") : ans.answerChoices.join(", ")) : "");
+
+                                    return (
+                                        <div key={i} className="border-b border-gray-50 dark:border-gray-800/50 pb-5 last:border-0">
+                                            <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2">{q.questionText}</p>
+                                            {isFileQ ? (
+                                                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                                                    {fileUrls.map((url, k) => (
+                                                        <button key={k} onClick={() => { setPreviewImage(url); setIsPreviewOpen(true); }} className="relative aspect-square rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm hover:scale-105 transition group/att bg-gray-50">
+                                                            <img src={url} className="w-full h-full object-cover" alt={`Attachment ${k + 1}`} />
+                                                            <div className="absolute inset-0 bg-black/0 group-hover/att:bg-black/30 flex items-center justify-center transition"><Eye size={18} className="text-white opacity-0 group-hover/att:opacity-100 transition" /></div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-gray-800 dark:text-gray-200 font-medium whitespace-pre-wrap break-words leading-relaxed">{text || <span className="text-gray-300 dark:text-gray-600 italic font-normal">No answer</span>}</p>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Image Preview Modal */}
                 <AnimatePresence>
                     {isPreviewOpen && previewImage && (
