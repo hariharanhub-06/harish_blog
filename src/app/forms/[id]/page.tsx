@@ -3,7 +3,6 @@
 import { useEffect, useState, use } from "react";
 import { Loader2, CheckCircle2, ChevronRight, ChevronLeft, UploadCloud, X, ImageIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import { motion, AnimatePresence } from "framer-motion";
 
 type QuestionType = "short_answer" | "paragraph" | "multiple_choice" | "checkboxes" | "dropdown" | "linear_scale" | "file_upload" | "section_header";
 
@@ -272,12 +271,8 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                 <div className="absolute -right-10 -bottom-10 w-32 h-32 rounded-full blur-3xl opacity-10" style={{ backgroundColor: themeBg }}></div>
                             </div>
                         ) : (
-                            <motion.div
+                            <div
                                 key={q.id || Math.random()}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.05, duration: 0.6 }}
                                 className="bg-white/80 backdrop-blur-2xl p-6 sm:p-12 rounded-[2rem] sm:rounded-[3.5rem] shadow-[0_24px_48px_rgba(0,0,0,0.04)] border border-white/50 hover:shadow-[0_32px_64px_rgba(0,0,0,0.08)] transition-all duration-500 relative group overflow-hidden active:scale-[0.99]"
                             >
                                 {q.required && <div className="absolute top-0 right-16 w-16 h-1.5 bg-red-500 rounded-b-xl border-t-0 shadow-[0_4px_12px_rgba(239,68,68,0.3)]"></div>}
@@ -459,7 +454,7 @@ export default function FormResponsePage({ params }: { params: Promise<{ id: str
                                         );
                                     })()}
                                 </div>
-                            </motion.div>
+                            </div>
                         )
                     ))}
 
